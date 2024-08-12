@@ -1,7 +1,7 @@
 'use client'
 import React from 'react';
 import {NextUIProvider} from "@nextui-org/react";
-// import {SessionProvider} from "next-auth/react";
+import {SessionProvider} from "next-auth/react";
 
 interface Props {
     children: React.ReactNode;
@@ -10,11 +10,11 @@ interface Props {
 
 function Providers({children, className}: Props) {
     return (
-        // <SessionProvider>
+        <SessionProvider>
             <NextUIProvider className={className}>
                 {children}
             </NextUIProvider>
-        // </SessionProvider>
+        </SessionProvider>
     );
 }
 
