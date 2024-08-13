@@ -1,5 +1,5 @@
 'use client'
-import React, {ReactNode, useEffect, useState} from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { NavbarItem } from "@nextui-org/react";
 import UserMenu from "@/components/dropdown/UserMenu";
 import SideBar from '@/components/sidebar/SideBar';
@@ -11,10 +11,25 @@ import { FiClock } from "react-icons/fi";
 import { LuBadgeCheck, LuChevronLeft, LuChevronRight, LuCoins, LuTicket } from "react-icons/lu";
 import Notification from "@/components/functions/notifications/Notification";
 import { cn, icon_size_sm } from "@/lib/utils";
-import {ScrollShadow} from "@nextui-org/scroll-shadow";
+import { ScrollShadow } from "@nextui-org/scroll-shadow";
 
 function RootLayout({ children }: { children: ReactNode }) {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(localStorage.getItem("isSidebarOpen") === "true");
+    // Use a function to lazily initialize the state
+    const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+        if (typeof window !== "undefined") {
+            // Check localStorage for the initial value if on the client side
+            return localStorage.getItem("isSidebarOpen") === "true";
+        }
+        return false; // Default value for server-side rendering
+    });
+
+    useEffect(() => {
+        // This effect runs only on the client side
+        const savedSidebarState = localStorage.getItem("isSidebarOpen");
+        if (savedSidebarState !== null) {
+            setIsSidebarOpen(savedSidebarState === "true");
+        }
+    }, []);
 
     const toggleSidebar = () => {
         const newSidebarState = !isSidebarOpen;
@@ -22,18 +37,11 @@ function RootLayout({ children }: { children: ReactNode }) {
         localStorage.setItem("isSidebarOpen", JSON.stringify(newSidebarState));
     };
 
-    // useEffect(() => {
-    //     const storedSidebarState = localStorage.getItem("isSidebarOpen");
-    //     if (storedSidebarState !== null) {
-    //         setIsSidebarOpen(JSON.parse(storedSidebarState));
-    //     }
-    // }, []);
-
     return (
         <main className="h-full w-full flex bg-[#FAFAFA]">
             {/* NavBar fixed at the top */}
             <NavBar className="fixed top-0 left-0 w-full z-20">
-                <NavContent/>
+                <NavContent />
             </NavBar>
 
             {/* SideBar fixed at the left */}
@@ -59,7 +67,7 @@ function RootLayout({ children }: { children: ReactNode }) {
                     )}
                     onClick={toggleSidebar}
                 >
-                    {isSidebarOpen ? <LuChevronLeft/> : <LuChevronRight/>}
+                    {isSidebarOpen ? <LuChevronLeft /> : <LuChevronRight />}
                 </div>
             </section>
 
@@ -74,8 +82,8 @@ function RootLayout({ children }: { children: ReactNode }) {
 const NavContent = () => {
     return (
         <NavbarItem className="flex gap-10 items-center justify-center mt-2">
-            <Notification/>
-            <UserMenu/>
+            <Notification />
+            <UserMenu />
         </NavbarItem>
     );
 };
