@@ -42,10 +42,10 @@ function DateComponent() {
     ), [date]);
 }
 
-export default function SideBar({ children }: { children: ReactNode }) {
+export default function SideBar({ children, className }: { children: ReactNode, className?: string }) {
     return (
         <aside
-            className="flex justify-between flex-col py-5  w-48 h-screen transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+            className={cn("flex justify-between flex-col py-5  w-48 h-screen transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700", className)}
         ><ScrollShadow hideScrollBar className="px-3 pb-4 bg-white dark:bg-gray-800">
             <ul className="space-y-2">
                 {children}
