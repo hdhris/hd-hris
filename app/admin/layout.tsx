@@ -8,10 +8,11 @@ import NavBar from "@/components/navbar/NavBar";
 import { PiUsersThree } from "react-icons/pi";
 import { RxDashboard } from "react-icons/rx";
 import { FiClock } from "react-icons/fi";
-import { LuBadgeCheck, LuChevronLeft, LuChevronRight, LuCoins, LuTicket } from "react-icons/lu";
+import {LuBadgeCheck, LuChevronLeft, LuChevronRight, LuCoins, LuPlane, LuTicket} from "react-icons/lu";
 import Notification from "@/components/functions/notifications/Notification";
 import { cn, icon_size_sm } from "@/lib/utils";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import {BiStats} from "react-icons/bi";
 
 function RootLayout({ children }: { children: ReactNode }) {
     // Use a function to lazily initialize the state
@@ -38,15 +39,16 @@ function RootLayout({ children }: { children: ReactNode }) {
     };
 
     return (
-        <main className="h-full w-full flex bg-[#FAFAFA]">
+        <main className="h-full w-full fixed top-0 left-0 flex bg-[#FAFAFA] ">
             {/* NavBar fixed at the top */}
             <NavBar className="fixed top-0 left-0 w-full z-20">
                 <NavContent />
             </NavBar>
 
             {/* SideBar fixed at the left */}
-            <section className="h-full sticky mt-12 top-12 left-0 flex z-10">
+            <section className="sticky mt-12 top-[calc(100% - 48px] left-0 flex z-10">
                 <SideBar
+                    onClockShow={isSidebarOpen}
                     className={cn(
                         "transition-width",
                         isSidebarOpen ? "w-52" : "w-16"
@@ -55,9 +57,10 @@ function RootLayout({ children }: { children: ReactNode }) {
                     <SideBarItem label="Dashboard" href="/admin/dashboard" icon={<RxDashboard />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Employees" href="/admin/employees" icon={<PiUsersThree />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Attendance & Time" href="/admin/attendance-time" icon={<FiClock />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Leaves" href="/admin/leaves" icon={<LuCoins />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Leaves Application" href="/admin/leaves" icon={<LuPlane />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Payroll" href="/admin/payroll" icon={<LuTicket />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Performance Appraisal" href="/admin/performance" icon={<LuBadgeCheck />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Reports" href="/admin/reports" icon={<BiStats />} showLabel={isSidebarOpen} />
                 </SideBar>
 
                 <div
@@ -71,9 +74,9 @@ function RootLayout({ children }: { children: ReactNode }) {
                 </div>
             </section>
 
-            <ScrollShadow className="flex-1 p-4 mt-16 mb-4 w-full overflow-y-auto min-w-[980px]">
-                {children}
-            </ScrollShadow>
+            {/*<ScrollShadow className="p-4 mt-16 mb-4 w-full min-w-[980px]">*/}
+            {/*    {children}*/}
+            {/*</ScrollShadow>*/}
 
         </main>
     );

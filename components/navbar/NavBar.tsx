@@ -26,15 +26,9 @@ function NavBar({children, className}: {children: ReactNode, className?: string}
                             <Logo/>
                         </NavbarBrand>
                     </NavbarContent>
-                    <NavbarContent justify="end" className="hidden sm:flex gap-8">
+                    <NavbarContent justify="end" className="gap-8">
                         {children}
                     </NavbarContent>
-                    <NavbarContent className="sm:hidden" justify="end">
-                        <NavbarMenuToggle aria-label={isMenuOpen ? "Close menu" : "Open menu"}/>
-                    </NavbarContent>
-                    <NavbarMenu>
-                        {children}
-                    </NavbarMenu>
                 </Navbar>
             </div>
         </div>

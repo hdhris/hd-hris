@@ -1,57 +1,74 @@
 'use client'
-import React, { ReactNode, useState, useEffect, useMemo } from "react";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import React, {ReactNode, useEffect, useMemo, useState} from "react";
+import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import Text from "@/components/common/typography/Text";
 import dayjs from "dayjs";
-import {LuCalendar, LuCalendarClock, LuTimer} from "react-icons/lu";
-import { cn, icon_size } from "@/lib/utils";
+import {LuCalendarClock} from "react-icons/lu";
+import {cn, icon_size} from "@/lib/utils";
 import {Divider} from "@nextui-org/divider";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat);
 
-function DateComponent() {
+interface Props {
+    onClockShow?: boolean
+}
+function DateComponent({onClockShow}: Props) {
     const [date, setDate] = useState<string[]>(["--", "--", "--", "--:--", "--", "--"]);
 
     useEffect(() => {
-        const updateDate = () => setDate(dayjs().format("DD MMM YYYY ddd h:mm A").split(" "));
+        const updateDate = () => setDate(dayjs().format(`DD MMM YYYY ddd ${onClockShow ? "hh:mm A" : "HH:mm" }`).split(" "));
         updateDate(); // Set initial date
         const interval = setInterval(updateDate, 1000); // Update every second
 
         return () => clearInterval(interval); // Cleanup interval on component unmount
-    }, []);
+    }, [date, onClockShow]);
     return useMemo(() => (
-        <div className='flex flex-col gap-3 p-2 mb-20 ml-2'>
-            <div className="flex flex-row gap-2 items-center">
-                <Text className="text-6xl font-semibold text-inactive-bar">{date[0]}</Text>
-                <div className="flex flex-col">
-                    <Text className="text-xl font-semibold text-inactive-bar">{date[1]}</Text>
-                    <Text className="text-lg font-semibold opacity-50 text-inactive-bar">{date[2]}</Text>
+        <>
+            {onClockShow ?
+                (<div className='flex flex-col gap-3 p-2 mb-20 ml-2'>
+                    <div className="flex flex-row gap-2 items-center">
+                        <Text className="text-6xl font-semibold text-inactive-bar">{date[0]}</Text>
+                        <div className="flex flex-col">
+                            <Text className="text-xl font-semibold text-inactive-bar">{date[1]}</Text>
+                            <Text className="text-lg font-semibold opacity-50 text-inactive-bar">{date[2]}</Text>
 
-                </div>
-            </div>
-            <Divider/>
-            <div className="flex gap-2 items-center">
-                <LuCalendarClock className={cn("text-inactive-bar", icon_size)} />
-                <Text className="text-inactive-bar">{date[3]}</Text>
-                <Divider orientation="vertical"/>
-                {/*<LuTimer className={cn("text-white", icon_size)} />*/}
-                <Text className="text-inactive-bar">{date[4] + " " + date[5]}</Text>
-            </div>
-        </div>
-    ), [date]);
+                        </div>
+                    </div>
+                    <Divider/>
+                    <div className="flex gap-2 items-center">
+                        <LuCalendarClock className={cn("text-inactive-bar", icon_size)}/>
+                        <Text className="text-inactive-bar">{date[3]}</Text>
+                        <Divider orientation="vertical"/>
+                        <Text className="text-inactive-bar">{date[4] + " " + date[5]}</Text>
+                    </div>
+                </div>) : (<div className='flex flex-col gap-3 p-2 mb-20'>
+                    <div className="flex flex-col gap-2 items-center">
+                        <Text className="font-semibold text-2xl">{date[4].split(':')[0]}</Text>
+                        <Text className="font-semibold text-2xl">{date[4].split(':')[1]}</Text>
+                    </div>
+                </div>)
+            }
+        </>
+
+    ), [date, onClockShow]);
 }
 
-export default function SideBar({ children, className }: { children: ReactNode, className?: string }) {
+
+export default function SideBar({children, className, onClockShow}: {
+    children: ReactNode,
+    className?: string,
+    onClockShow?: boolean
+}) {
     return (
         <aside
-            className={cn("flex justify-between flex-col py-5  w-48 h-screen transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700", className)}
+            className={cn("flex justify-between flex-col py-5 w-48 h-screen bg-white border-r border-gray-200", className)}
         ><ScrollShadow hideScrollBar className="px-3 pb-4 bg-white dark:bg-gray-800">
             <ul className="space-y-2">
                 {children}
             </ul>
         </ScrollShadow>
-            <DateComponent/>
+            <DateComponent onClockShow={onClockShow}/>
         </aside>
     );
 }

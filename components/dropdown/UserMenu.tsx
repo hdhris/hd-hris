@@ -16,6 +16,7 @@ import {Avatar} from "@nextui-org/avatar";
 import {icon_theme, text_icon} from "@/lib/utils";
 import Text from "@/components/common/typography/Text"
 import {LuShieldCheck} from "react-icons/lu";
+import {PiUserSwitch} from "react-icons/pi";
 
 function UserMenu() {
     return (
@@ -68,19 +69,9 @@ function UserMenu() {
                     </DropdownItem>
                     <DropdownItem key="preferences" startContent={<Sliders className={cn("", icon_theme)}/>}><Text className={text_icon}>Preferences</Text></DropdownItem>
                 </DropdownSection>
-                {/*<DropdownSection showDivider>*/}
-                {/*    <DropdownItem isReadOnly*/}
-                {/*                  className="cursor-default"*/}
-                {/*                  key="dark_mode"*/}
-                {/*                  startContent={<Moon className={cn("", icon_theme)}/>}*/}
-                {/*                  endContent={*/}
-                {/*                      <Switch*/}
-                {/*                          size="sm"*/}
-                {/*                          color="warning"*/}
-                {/*                      />*/}
-                {/*                  }*/}
-                {/*    >Dark Mode</DropdownItem>*/}
-                {/*</DropdownSection>*/}
+                <DropdownSection showDivider>
+                    <DropdownItem key="onEmployeeMode" startContent={<PiUserSwitch className={cn("", icon_theme)}/>}><Text className={text_icon}>Switch As Employee</Text></DropdownItem>
+                </DropdownSection>
                 <DropdownSection showDivider>
                     <DropdownItem key="security_and_privacy"
                                   startContent={<LuShieldCheck className={cn("", icon_theme)}/>}

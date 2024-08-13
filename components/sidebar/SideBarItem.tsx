@@ -9,7 +9,7 @@ interface SidebarItem {
     label: string;
     href: string;
     icon?: ReactNode;
-    showLabel: boolean;
+    showLabel?: boolean;
 }
 
 export default function SideBarItem({ label, href, icon, showLabel }: SidebarItem) {
