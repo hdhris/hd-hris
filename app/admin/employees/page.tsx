@@ -22,7 +22,7 @@ const Page = () => {
 
   // Define the breadcrumb paths based on the selected tab
   const breadcrumbPaths: Record<TabKeys, { title: string; link: string }[]> = {
-    empl  oyees: [{ title: "Employees", link: "#" }],
+    employees: [{ title: "Employees", link: "#" }],
     suspend: [
       { title: "Employees", link: "#" },
       { title: "Suspend", link: "#" },
