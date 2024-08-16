@@ -20,12 +20,13 @@ import {Avatar} from "@nextui-org/avatar";
 import {topDepartmentList, topEmployeeList} from "@/sampleData/admin/dashboard/TopEmployeeList";
 import BorderCard from "@/components/common/BorderCard";
 import {Button} from "@nextui-org/button";
+import AddEmployees from "@/components/admin/add/AddEmployees";
 
 
 const DashboardStats = () => {
     // const {data} = useDashboard()
     const data = {
-        emp: 500, salary: 2000000, leaves: 20, absences: 10
+        emp: 500, salary: 72, leaves: 20, absences: 10
     }
 
 
@@ -55,30 +56,34 @@ const DashboardStats = () => {
         icon: <PiUsersThree className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.emp!} formattingFn={(value) => compactNumber(value)}/>, // value: '500',
         title: "Employees",
-        status: "+",
+        status: "increased",
+        footer: <AddEmployees/>,
         percent: 3.6,
         chart: <AreaChart data={employeesStat} showTooltip={false}/>
-    }, {
-        icon: <TbCurrencyPeso className={cn("", icon_color, icon_size)}/>,
-        value: <CountUp start={0} end={data?.salary!} formattingFn={(value) => compactNumber(value)}/>, // value: '200000',
-        title: "Salary",
-        status: "-",
-        percent: 5,
-        chart: <AreaChart data={salaryStat} showTooltip={false}/>
     }, {
         icon: <FiLogOut className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.leaves!} formattingFn={(value) => compactNumber(value)}/>, // value: '20',
         title: "Leaves",
-        status: "-",
+        status: "decreased",
         percent: 10,
+        footer: <Text className="text-medium">Common: <span className="text-medium font-semibold">Sick Leave</span></Text>,
         chart: <AreaChart data={leavesStat} showTooltip={false}/>
     }, {
         icon: <LuCalendarX2 className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.absences!} formattingFn={(value) => compactNumber(value)}/>, // value: '10',
         title: "Absences",
-        status: "+",
+        status: "increased",
         percent: 3.6,
+        footer: "Late",
         chart: <AreaChart data={absencesStat} showTooltip={false}/>
+    }, {
+        icon: <TbCurrencyPeso className={cn("", icon_color, icon_size)}/>,
+        value: <CountUp start={0} end={data?.salary!} formattingFn={(value) => String(value + "%")}/>, // value: '200000',
+        title: "Salary Breakdown",
+        status: "decreased",
+        percent: 5,
+        footer: "₱152k/₱220k",
+        chart: <AreaChart data={salaryStat} showTooltip={false}/>
     }]
     return (<Stat data={dashboardData}/>)
 }

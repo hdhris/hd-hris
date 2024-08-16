@@ -69,9 +69,9 @@ function UserMenu() {
                     </DropdownItem>
                     <DropdownItem key="preferences" startContent={<Sliders className={cn("", icon_theme)}/>}><Text className={text_icon}>Preferences</Text></DropdownItem>
                 </DropdownSection>
-                <DropdownSection showDivider>
-                    <DropdownItem key="onEmployeeMode" startContent={<PiUserSwitch className={cn("", icon_theme)}/>}><Text className={text_icon}>Switch As Employee</Text></DropdownItem>
-                </DropdownSection>
+                {/*<DropdownSection showDivider>*/}
+                {/*    <DropdownItem key="onEmployeeMode" startContent={<PiUserSwitch className={cn("", icon_theme)}/>}><Text className={text_icon}>Switch As Employee</Text></DropdownItem>*/}
+                {/*</DropdownSection>*/}
                 <DropdownSection showDivider>
                     <DropdownItem key="security_and_privacy"
                                   startContent={<LuShieldCheck className={cn("", icon_theme)}/>}

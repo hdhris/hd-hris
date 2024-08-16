@@ -14,6 +14,9 @@ function Page() {
                 <Button radius='none' size='sm' color='primary' className={btnClass}
                         startContent={<LuArrowUpFromDot className={icon_size_sm}/>}>Audit</Button>
             </div>
+            <div className='grid grid-cols-4 gap-4 w-full'>
+                <DashboardStats/>
+            </div>
             <div className='grid grid-cols-4 gap-4 h-full w-full'>
                 <SalaryData/>
                 <div className="flex flex-col gap-4 w-full">
@@ -42,9 +45,7 @@ function Page() {
                     </BorderCard>
                 </div>
             </div>
-            <div className='grid grid-cols-4 gap-4 w-full'>
-                <DashboardStats/>
-            </div>
+
             <div className='grid grid-cols-5 gap-4 w-full h-1/2'>
                 <BorderCard className='space-y-4 w-full col-span-3'
                             heading="Leave Status Overview"

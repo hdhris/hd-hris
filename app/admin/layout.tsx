@@ -8,11 +8,20 @@ import NavBar from "@/components/navbar/NavBar";
 import { PiUsersThree } from "react-icons/pi";
 import { RxDashboard } from "react-icons/rx";
 import { FiClock } from "react-icons/fi";
-import {LuBadgeCheck, LuChevronLeft, LuChevronRight, LuCoins, LuPlane, LuTicket} from "react-icons/lu";
+import {
+    LuBadgeCheck,
+    LuChevronLeft,
+    LuChevronRight,
+    LuCoins, LuFileWarning, LuHeartHandshake,
+    LuPersonStanding,
+    LuPlane,
+    LuTicket
+} from "react-icons/lu";
 import Notification from "@/components/functions/notifications/Notification";
 import { cn, icon_size_sm } from "@/lib/utils";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import {BiStats} from "react-icons/bi";
+import AuditSignatories from "@/components/admin/dashboard/AuditSignatories";
 
 function RootLayout({ children }: { children: ReactNode }) {
     // Use a function to lazily initialize the state
@@ -59,7 +68,10 @@ function RootLayout({ children }: { children: ReactNode }) {
                     <SideBarItem label="Attendance & Time" href="/admin/attendance-time" icon={<FiClock />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Leaves Application" href="/admin/leaves" icon={<LuPlane />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Payroll" href="/admin/payroll" icon={<LuTicket />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Benefits" href="/admin/benefits" icon={<LuHeartHandshake />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Performance Appraisal" href="/admin/performance" icon={<LuBadgeCheck />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Privileges" href="/admin/privileges" icon={<LuPersonStanding />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Incident Report" href="/admin/incident-report" icon={<LuFileWarning />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Reports" href="/admin/reports" icon={<BiStats />} showLabel={isSidebarOpen} />
                 </SideBar>
 
@@ -74,9 +86,9 @@ function RootLayout({ children }: { children: ReactNode }) {
                 </div>
             </section>
 
-            {/*<ScrollShadow className="p-4 mt-16 mb-4 w-full min-w-[980px]">*/}
-            {/*    {children}*/}
-            {/*</ScrollShadow>*/}
+            <ScrollShadow className="p-4 mt-16 mb-4 w-full min-w-[980px]">
+                {children}
+            </ScrollShadow>
 
         </main>
     );
@@ -85,6 +97,7 @@ function RootLayout({ children }: { children: ReactNode }) {
 const NavContent = () => {
     return (
         <NavbarItem className="flex gap-10 items-center justify-center mt-2">
+            <AuditSignatories/>
             <Notification />
             <UserMenu />
         </NavbarItem>
