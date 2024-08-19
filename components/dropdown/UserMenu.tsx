@@ -8,7 +8,7 @@ import {
     DropdownMenu,
     DropdownSection,
     DropdownTrigger,
-    Skeleton,
+    Skeleton, useDisclosure,
     User
 } from "@nextui-org/react";
 import {Handshake, Lifebuoy, SignOut, Sliders, UserCircleGear} from "@phosphor-icons/react";
@@ -19,6 +19,7 @@ import {LuShieldCheck} from "react-icons/lu";
 import {PiUserSwitch} from "react-icons/pi";
 
 function UserMenu() {
+    const {isOpen, onOpen, onOpenChange} = useDisclosure();
     return (
         <Dropdown radius="sm" className="bg-white">
             <DropdownTrigger>
@@ -69,9 +70,6 @@ function UserMenu() {
                     </DropdownItem>
                     <DropdownItem key="preferences" startContent={<Sliders className={cn("", icon_theme)}/>}><Text className={text_icon}>Preferences</Text></DropdownItem>
                 </DropdownSection>
-                {/*<DropdownSection showDivider>*/}
-                {/*    <DropdownItem key="onEmployeeMode" startContent={<PiUserSwitch className={cn("", icon_theme)}/>}><Text className={text_icon}>Switch As Employee</Text></DropdownItem>*/}
-                {/*</DropdownSection>*/}
                 <DropdownSection showDivider>
                     <DropdownItem key="security_and_privacy"
                                   startContent={<LuShieldCheck className={cn("", icon_theme)}/>}

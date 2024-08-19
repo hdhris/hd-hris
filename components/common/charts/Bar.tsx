@@ -8,7 +8,7 @@ import {ThemeColors} from "@nextui-org/react";
 const ApexChart = dynamic(() => import("react-apexcharts"), {ssr: false});
 
 
-interface BarChartProps {
+export interface BarChartProps {
     color?: string,
     data: {
         x: string
