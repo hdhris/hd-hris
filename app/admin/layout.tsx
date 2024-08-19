@@ -1,10 +1,6 @@
 'use client'
 import React, { ReactNode, useEffect, useState } from 'react';
-import { NavbarItem } from "@nextui-org/react";
-import UserMenu from "@/components/dropdown/UserMenu";
-import SideBar from '@/components/sidebar/SideBar';
-import SideBarItem from '@/components/sidebar/SideBarItem';
-import NavBar from "@/components/navbar/NavBar";
+import {cn, NavbarItem} from "@nextui-org/react";
 import { PiUsersThree } from "react-icons/pi";
 import { RxDashboard } from "react-icons/rx";
 import { FiClock } from "react-icons/fi";
@@ -17,12 +13,14 @@ import {
     LuPlane,
     LuTicket
 } from "react-icons/lu";
-import Notification from "@/components/functions/notifications/Notification";
-import { cn, icon_size_sm } from "@/lib/utils";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import {BiStats} from "react-icons/bi";
+import SideBarItem from "@/components/sidebar/SideBarItem";
+import SideBar from "@/components/sidebar/SideBar";
+import NavBar from "@/components/navbar/NavBar";
 import AuditSignatories from "@/components/admin/dashboard/AuditSignatories";
-
+import UserMenu from "@/components/dropdown/UserMenu";
+import Notification from '@/components/functions/notifications/Notification'
 function RootLayout({ children }: { children: ReactNode }) {
     // Use a function to lazily initialize the state
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => {

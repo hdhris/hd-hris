@@ -1,12 +1,20 @@
-import React from 'react';
+
+import {redirect} from "next/navigation";
 import Login from "@/components/login/Login";
+import Link from "next/link";
+import {getServerSession} from "next-auth";
+import authOption from "@/app/auth/authOption";
 
-function Page() {
-    return (
-        <div className='h-screen flex items-center justify-center'>
-            <Login/>
-        </div>
-    );
+export default async function Home() {
+    const session = await getServerSession(authOption);
+    if(session){
+        if(session.user.role === 'admin'){
+            redirect('/admin/dashboard')
+        } else if(session.user.role === 'employee'){
+            redirect('/')
+        }
+    }
+    return (<main className="flex h-screen flex-col items-center">
+        <Login/>
+        </main>);
 }
-
-export default Page;
