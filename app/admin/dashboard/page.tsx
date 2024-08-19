@@ -9,11 +9,6 @@ import {LuArrowUpFromDot, LuMaximize} from "react-icons/lu";
 
 function Page() {
     return (<section className='grid grid-rows-[auto,1fr,auto, auto] gap-4 h-full'>
-            <div className='h-full w-full flex justify-end gap-2'>
-                <AddEmployees/>
-                <Button radius='none' size='sm' color='primary' className={btnClass}
-                        startContent={<LuArrowUpFromDot className={icon_size_sm}/>}>Audit</Button>
-            </div>
             <div className='grid grid-cols-4 gap-4 w-full'>
                 <DashboardStats/>
             </div>

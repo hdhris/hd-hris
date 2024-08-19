@@ -5,7 +5,7 @@ import {FiLogOut} from "react-icons/fi";
 import {LuCalendarX2} from "react-icons/lu";
 import {Stat, StatProps} from "@/components/statistics/Stat";
 import React, {useCallback, useEffect} from "react";
-import BarChart from "@/components/common/charts/Bar";
+import BarChart, {BarChartProps} from "@/components/common/charts/Bar";
 import RadialChart from "@/components/common/charts/Radial";
 import {compactNumber, getRandomInt, numberWithCommas} from "@/lib/utils/numberFormat";
 import CountUp from "react-countup";
@@ -30,11 +30,22 @@ const DashboardStats = () => {
     }
 
 
-    const employeesStat:AreaChartProps[] = [{
-        name: "",
-        value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
-        color: "#00C49F"
-    }]
+    const stat_data = {
+        emp_data: [
+            {name: "1", count: getRandomInt(1, 200)}, {
+                name: "2", count: getRandomInt(1, 200)
+            }, {name: "3", count: getRandomInt(1, 200)},
+            {name: "4", count: getRandomInt(1, 200)}, {
+                name: "5", count: getRandomInt(1, 200)
+            },{name: "1", count: getRandomInt(1, 200)}
+
+        ]
+    }
+    const employeesStat:BarChartProps = {
+        data: stat_data.emp_data.map(({name, count}) => ({
+            x: name.length > 10 ? `${name.substring(0, 7)}...` : name, y: count
+        }))
+    }
     const salaryStat:AreaChartProps[] = [{
         name: "",
         value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
@@ -59,7 +70,7 @@ const DashboardStats = () => {
         status: "increased",
         footer: <AddEmployees/>,
         percent: 3.6,
-        chart: <AreaChart data={employeesStat} showTooltip={false}/>
+        chart: <BarChart data={employeesStat.data}/>
     }, {
         icon: <FiLogOut className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.leaves!} formattingFn={(value) => compactNumber(value)}/>, // value: '20',
