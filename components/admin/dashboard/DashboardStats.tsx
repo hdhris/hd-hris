@@ -161,7 +161,6 @@ const SalaryData = () => {
 
 
     const handleBtnFocusThisSem = () => {
-        // router.push("/admin/salary/this-sem", undefined, { shallow: true })
         setBtnFocusThisSem(true);
         setBtnFocusLastSem(false);
     };
@@ -169,7 +168,7 @@ const SalaryData = () => {
     const handleBtnFocusLastSem = () => {
         setBtnFocusThisSem(false);
         setBtnFocusLastSem(true);
-        // router.push("/admin/salary/last-sem")
+
     };
     const cat = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
     const options: ApexOptions = {

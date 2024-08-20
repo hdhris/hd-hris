@@ -18,7 +18,7 @@ import {BiStats} from "react-icons/bi";
 import SideBarItem from "@/components/sidebar/SideBarItem";
 import SideBar from "@/components/sidebar/SideBar";
 import NavBar from "@/components/navbar/NavBar";
-import AuditSignatories from "@/components/admin/dashboard/AuditSignatories";
+// import AuditSignatories from "@/components/dashboard/AuditSignatories";
 import UserMenu from "@/components/dropdown/UserMenu";
 import Notification from '@/components/functions/notifications/Notification'
 function RootLayout({ children }: { children: ReactNode }) {
@@ -61,16 +61,16 @@ function RootLayout({ children }: { children: ReactNode }) {
                         isSidebarOpen ? "w-52" : "w-16"
                     )}
                 >
-                    <SideBarItem label="Dashboard" href="/admin/dashboard" icon={<RxDashboard />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Employees" href="/admin/employees" icon={<PiUsersThree />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Attendance & Time" href="/admin/attendance-time" icon={<FiClock />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Leaves Application" href="/admin/leaves" icon={<LuPlane />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Payroll" href="/admin/payroll" icon={<LuTicket />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Benefits" href="/admin/benefits" icon={<LuHeartHandshake />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Performance Appraisal" href="/admin/performance" icon={<LuBadgeCheck />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Privileges" href="/admin/privileges" icon={<LuPersonStanding />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Incident Report" href="/admin/incident-report" icon={<LuFileWarning />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Reports" href="/admin/reports" icon={<BiStats />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Dashboard" href="/dashboard" icon={<RxDashboard />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Employees" href="/employees" icon={<PiUsersThree />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Attendance & Time" href="/attendance-time" icon={<FiClock />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Leaves Application" href="/leaves" icon={<LuPlane />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Payroll" href="/payroll" icon={<LuTicket />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Benefits" href="/benefits" icon={<LuHeartHandshake />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Performance Appraisal" href="/performance" icon={<LuBadgeCheck />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Privileges" href="/privileges" icon={<LuPersonStanding />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Incident Report" href="/incident-report" icon={<LuFileWarning />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Reports" href="/reports" icon={<BiStats />} showLabel={isSidebarOpen} />
                 </SideBar>
 
                 <div
@@ -95,7 +95,7 @@ function RootLayout({ children }: { children: ReactNode }) {
 const NavContent = () => {
     return (
         <NavbarItem className="flex gap-10 items-center justify-center mt-2">
-            <AuditSignatories/>
+            {/*<AuditSignatories/>*/}
             <Notification />
             <UserMenu />
         </NavbarItem>
