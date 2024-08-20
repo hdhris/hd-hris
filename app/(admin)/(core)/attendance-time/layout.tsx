@@ -19,7 +19,7 @@ function RootLayout({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   const handleTabChange = (key: string) => {
-    router.push(`/admin/attendance-time/${key}`); // Use router.push for navigation
+    router.push(`/attendance-time/${key}`); // Use router.push for navigation
   };
 
   return (
