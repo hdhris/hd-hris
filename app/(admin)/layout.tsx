@@ -21,6 +21,7 @@ import NavBar from "@/components/navbar/NavBar";
 // import AuditSignatories from "@/components/dashboard/AuditSignatories";
 import UserMenu from "@/components/dropdown/UserMenu";
 import Notification from '@/components/functions/notifications/Notification'
+import AuditSignatories from "@/components/admin/dashboard/AuditSignatories";
 function RootLayout({ children }: { children: ReactNode }) {
     // Use a function to lazily initialize the state
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
@@ -95,7 +96,7 @@ function RootLayout({ children }: { children: ReactNode }) {
 const NavContent = () => {
     return (
         <NavbarItem className="flex gap-10 items-center justify-center mt-2">
-            {/*<AuditSignatories/>*/}
+            <AuditSignatories/>
             <Notification />
             <UserMenu />
         </NavbarItem>
