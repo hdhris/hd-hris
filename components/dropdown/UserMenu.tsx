@@ -83,7 +83,7 @@ function UserMenu() {
                         key="privileges"
                         isReadOnly
                     >
-                        <Chip className={text_icon}>Full Access</Chip>
+                        <Chip color='success' className={text_icon}>Full Access</Chip>
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection showDivider>
