@@ -1,6 +1,6 @@
 import React from 'react';
 import {cn} from "@/lib/utils";
-import Text from "@/components/common/typography/Text";
+import Text, {Heading} from "@/components/common/typography/Text";
 
 interface BorderCardProps {
     children: React.ReactNode,
@@ -21,7 +21,7 @@ function BorderCard({children, className, heading, subHeading, startContent, end
             <div className='flex justify-between'>
                 {startContent && startContent}
                 <span className="w-full">
-                    <Text as='h1' className={cn('font-semibold ', classNames?.heading)}>{heading}</Text>
+                    <Heading className={classNames?.heading}>{heading}</Heading>
                     <Text className={cn('text-sm opacity-75', classNames?.subHeading)}>{subHeading}</Text>
                 </span>
                 {endContent && endContent}
