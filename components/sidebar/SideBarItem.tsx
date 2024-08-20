@@ -14,10 +14,11 @@ interface SidebarItem {
 
 export default function SideBarItem({ label, href, icon, showLabel }: SidebarItem) {
     const pathname = usePathname();
-    const isActive = pathname === href;
+    const isActive = pathname.includes(href);
 
     const linkContent = (
         <Link
+            suppressHydrationWarning={true}
             href={href}
             className={cn(
                 "flex items-center p-2 min-w-14 max-w-52 text-gray-900 rounded-lg group",
@@ -35,7 +36,7 @@ export default function SideBarItem({ label, href, icon, showLabel }: SidebarIte
                 </span>
             )}
             {showLabel && (
-                <Text className={cn("ms-3 text-sm text-nowrap", isActive ? "text-white" : "group-hover:text-primary")}>
+                <Text  suppressHydrationWarning={true} className={cn("ms-3 text-sm text-nowrap", isActive ? "text-white" : "group-hover:text-primary")}>
                     {label}
                 </Text>
             )}

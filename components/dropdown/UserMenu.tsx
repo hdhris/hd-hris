@@ -81,6 +81,7 @@ function UserMenu() {
                     <DropdownItem
                         textValue="Privileges"
                         key="privileges"
+                        isReadOnly
                     >
                         <Chip className={text_icon}>Full Access</Chip>
                     </DropdownItem>
