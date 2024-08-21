@@ -35,7 +35,7 @@ function UserMenu() {
             </DropdownTrigger>
             <DropdownMenu
                 aria-label="Custom item styles"
-                disabledKeys={["profile"]}
+                disabledKeys={["profile", 'privileges']}
                 className="p-3"
                 itemClasses={{
                     base: ["rounded", "text-inactive-bar", "data-[hover=true]:text-active-bar", "data-[hover=true]:hover-bg", "data-[selectable=true]:focus:bg-default-50", "data-[pressed=true]:opacity-70", "data-[focus-visible=true]:ring-default-500",],
@@ -72,6 +72,8 @@ function UserMenu() {
                     <DropdownItem
                         textValue="Preferences"
                         key="preferences"
+                        as={Link}
+                        href='/preferences'
                         startContent={<Sliders className={cn("", icon_theme)}/>}
                     >
                         <Text className={text_icon}>Preferences</Text>
@@ -82,6 +84,7 @@ function UserMenu() {
                         textValue="Privileges"
                         key="privileges"
                         isReadOnly
+                        className='opacity-100'
                     >
                         <Chip color='success' className={text_icon}>Full Access</Chip>
                     </DropdownItem>
@@ -90,6 +93,8 @@ function UserMenu() {
                     <DropdownItem
                         textValue="Security and Privacy"
                         key="security_and_privacy"
+                        as={Link}
+                        href='/security&privacy'
                         startContent={<LuShieldCheck className={cn("", icon_theme)}/>}
                     >
                         <Text className={text_icon}>Security and Privacy</Text>
@@ -97,6 +102,8 @@ function UserMenu() {
                     <DropdownItem
                         textValue="Terms and Condition"
                         key="terms_and_condition"
+                        as={Link}
+                        href='/terms&condition'
                         startContent={<Handshake className={cn("", icon_theme)}/>}
                     >
                         <Text className={text_icon}>Terms and Condition</Text>
@@ -104,6 +111,8 @@ function UserMenu() {
                     <DropdownItem
                         textValue="Help and Support"
                         key="help_and_support"
+                        as={Link}
+                        href='/help&support'
                         startContent={<Lifebuoy className={cn("", icon_theme)}/>}
                     >
                         <Text className={text_icon}>Help and Support</Text>
@@ -113,6 +122,8 @@ function UserMenu() {
                     <DropdownItem
                         textValue="Log Out"
                         key="logout"
+                        as={Link}
+                        href='/api/auth/signout'
                         startContent={<SignOut className={cn("", icon_theme)}/>}
                     >
                         <Text className={text_icon}>Log out</Text>

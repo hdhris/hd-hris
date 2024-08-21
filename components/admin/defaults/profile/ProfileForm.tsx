@@ -150,8 +150,8 @@ export default function ProfileForm() {
                             <div className='relative flex justify-between items-center'>
                                 <Text>Contact Information</Text>
                                 <Badge content={<Plus/>} shape='circle' classNames={{
-                                    badge: 'size-6', base: 'absolute right-2'
-                                }}>{''}</Badge>
+                                    badge: 'size-6', base: 'absolute right-2 cursor-pointer',
+                                }} onClick={() => alert('hi')}>{''}</Badge>
                             </div>
                         </div>
                         <FormFields items={contact_info}/>
