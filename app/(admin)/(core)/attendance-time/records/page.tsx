@@ -133,13 +133,13 @@ export default function Page() {
       <div className="flex flex-col gap-1">
         <Calendar
           classNames={{ cell: "text-sm", gridBodyRow: "first:mt-0 -mt-1" }}
-          className="h-fit"
+          className="h-fit shadow-none border overflow-hidden"
           aria-label="Date (Controlled)"
           showMonthAndYearPickers
           value={value}
           onChange={setValue}
         />
-        <Card>
+        <Card shadow="none" className="border">
           <CardHeader className="flex gap-1">
             <div className="flex flex-col">
               <p className="text-md">
