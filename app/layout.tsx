@@ -51,8 +51,8 @@ export default function RootLayout({
             </Default>
         </Switch>
         {/*<Footer/>*/}
-        {/*<SpeedInsights/>*/}
-        {/*<Analytics/>*/}
+        <SpeedInsights/>
+        <Analytics/>
     </Providers>
 
     </body>
