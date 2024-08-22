@@ -7,9 +7,10 @@ import {Handshake, Lifebuoy, SignOut, Sliders, UserCircleGear} from "@phosphor-i
 import {Avatar} from "@nextui-org/avatar";
 import {icon_theme, text_icon} from "@/lib/utils";
 import Text from "@/components/common/typography/Text"
-import {LuShieldCheck} from "react-icons/lu";
+import {LuShieldAlert, LuShieldCheck} from "react-icons/lu";
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
+import {PiCloudArrowDown, PiPlugs} from "react-icons/pi";
 
 function UserMenu() {
     return (<>
@@ -91,13 +92,40 @@ function UserMenu() {
                 </DropdownSection>
                 <DropdownSection showDivider>
                     <DropdownItem
-                        textValue="Security and Privacy"
-                        key="security_and_privacy"
+                        textValue="Security"
+                        key="security"
                         as={Link}
-                        href='/security&privacy'
+                        href='/security'
                         startContent={<LuShieldCheck className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Security and Privacy</Text>
+                        <Text className={text_icon}>Security</Text>
+                    </DropdownItem>
+                    <DropdownItem
+                        textValue="Privacy"
+                        key="privacy"
+                        as={Link}
+                        href='/privacy'
+                        startContent={<LuShieldAlert className={cn("", icon_theme)}/>}
+                    >
+                        <Text className={text_icon}>Privacy</Text>
+                    </DropdownItem>
+                    <DropdownItem
+                        textValue="Data Backup"
+                        key="data_backup"
+                        as={Link}
+                        href='/backup'
+                        startContent={<PiCloudArrowDown className={cn("", icon_theme)}/>}
+                    >
+                        <Text className={text_icon}>Data Backup</Text>
+                    </DropdownItem>
+                    <DropdownItem
+                        textValue="Integrations"
+                        key="integrations"
+                        as={Link}
+                        href='/integrations'
+                        startContent={<PiPlugs className={cn("", icon_theme)}/>}
+                    >
+                        <Text className={text_icon}>Integrations</Text>
                     </DropdownItem>
                     <DropdownItem
                         textValue="Terms and Condition"
