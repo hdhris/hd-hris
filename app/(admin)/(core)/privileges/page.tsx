@@ -4,8 +4,8 @@ import React from "react";
 const treeData = [
   { id: 1, name: "CEO", parent: 0, role: "", max_member: 1 },
   { id: 1.5, name: "COO", parent: 0, role: "", max_member: 1 },
-  { id: 2, name: "HR Manageer", parent: 1, role: "hr", max_member: 1 },
-  { id: 3, name: "Executive", parent: 1, role: "", max_member: 1 },
+  { id: 2, name: "HR Manageer", parent: 1.5, role: "hr", max_member: 1 },
+  { id: 3, name: "Executive", parent: 1.5, role: "", max_member: 1 },
   { id: 4, name: "Manager", parent: 2, role: "", max_member: 1 },
   { id: 5, name: "I.S. Sales", parent: 4, role: "", max_member: 1 },
   { id: 6, name: "I.S. Finance", parent: 4, role: "", max_member: 1 },
