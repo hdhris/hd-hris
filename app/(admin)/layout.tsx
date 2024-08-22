@@ -47,7 +47,7 @@ function RootLayout({ children }: { children: ReactNode }) {
     };
 
     return (
-        <main className="h-full w-full fixed top-0 left-0 flex bg-[#FAFAFA] overflow-auto">
+        <main className="h-full w-full fixed top-0 left-0 flex bg-[#FAFAFA] overflow-x-auto md:overflow-hidden overflow-y-hidden">
             {/* NavBar fixed at the top */}
             <NavBar className="fixed top-0 left-0 w-full z-20">
                 <NavContent />
