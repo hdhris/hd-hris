@@ -63,7 +63,7 @@ function RootLayout({ children }: { children: ReactNode }) {
                     )}
                 >
                     <SideBarItem label="Dashboard" href="/dashboard" icon={<RxDashboard />} showLabel={isSidebarOpen} />
-                    <SideBarItem label="Employees" href="/employees" icon={<PiUsersThree />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Employee Management" href="/employeemanagement" icon={<PiUsersThree />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Attendance & Time" href="/attendance-time" icon={<FiClock />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Leaves Application" href="/leaves" icon={<LuPlane />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Payroll" href="/payroll" icon={<LuTicket />} showLabel={isSidebarOpen} />
