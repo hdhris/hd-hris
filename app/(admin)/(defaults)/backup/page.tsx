@@ -1,9 +1,12 @@
+'use client'
 import React from 'react';
 import Title from "@/components/common/typography/Title";
 import {Heading} from "@/components/common/typography/Text";
 import SelectionMenu from "@/components/dropdown/SelectionMenu";
 import {Button} from "@nextui-org/button";
 import {Divider} from "@nextui-org/divider";
+import TestTable from "@/components/admin/defaults/backup/TestTable";
+import TestingTable from "@/sampleTableConfiguration/TestingTable";
 
 
 const backupFrequencyOptions = [{
@@ -24,6 +27,7 @@ const backupSelectionOptions = [{
 }, {
     uid: '4', name: 'Salary',
 },]
+
 
 function Page() {
     return (<section className='space-y-5'>
@@ -92,7 +96,7 @@ function Page() {
                             Upload
                         </Button>
                     </Title>
-
+                    <TestingTable/>
                 </div>
             </div>
         </div>

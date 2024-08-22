@@ -247,9 +247,9 @@ function TableData<T extends { id: string | number }>({
                 </div>)}
             </div>
             <div className='flex justify-between items-center'>
-                <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
+                {counterName && <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
                     <span><CountUp start={0} end={sortedItems.length}/> </span> {counterName}
-                </h1>
+                </h1>}
                 {contentTop && contentTop}
             </div>
         </div>);
@@ -275,53 +275,53 @@ function TableData<T extends { id: string | number }>({
     const emptyContent = sortedItems.length === 0 && !isLoading && 'No data found. Try to refresh';
 
     return (<div className="grid grid-rows-[auto,1fr,auto] h-full">
-        <section className='pb-3'>
-            {topContent}
-        </section>
-        <div className='flex flex-col h-full overflow-y-hidden'>
-            <ScrollShadow size={20} className='flex-1'>
-                <Table
-                    sortDescriptor={sortDescriptor}
-                    onSortChange={setSortDescriptor}
-                    selectedKeys={selectedKeys}
-                    onSelectionChange={setSelectedKeys}
-                    selectionMode={selectionMode}
-                    {...props}
-                >
-                    <TableHeader columns={config.columns}>
-                        {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn
-                            key={column.uid}
-                            align={column.uid === "actions" ? "center" : "start"}
-                            allowsSorting={column.sortable}
-                        >
-                            {column.name.toUpperCase()}
-                        </TableColumn>)}
-                    </TableHeader>
-                    <TableBody
-                        emptyContent={emptyContent}
-                        items={sortedItems}
-                        loadingContent={isLoading ? (<Spinner
-                            color="success"
-                            label="Loading..."
-                            classNames={{
-                                base: 'h-screen mt-52', // wrapper: "" // Uncomment and specify if needed
-                            }}
-                        />) : null}
-                        loadingState={loadingState}
+            <section className='pb-3'>
+                {topContent}
+            </section>
+            <div className='flex flex-col h-full overflow-y-hidden'>
+                <ScrollShadow size={20} className='flex-1'>
+                    <Table
+                        sortDescriptor={sortDescriptor}
+                        onSortChange={setSortDescriptor}
+                        selectedKeys={selectedKeys}
+                        onSelectionChange={setSelectedKeys}
+                        selectionMode={selectionMode}
+                        {...props}
                     >
-                        {(item: T) => (<TableRow key={item.id} className='cursor-pointer '>
-                            {(columnKey: React.Key) => (<TableCell key={columnKey} className='py-3'>
-                                {config.rowCell(item, columnKey)}
-                            </TableCell>)}
-                        </TableRow>)}
-                    </TableBody>
-                </Table>
-            </ScrollShadow>
-        </div>
-        <section>
-            {selectionMode === "multiple" && bottomContent}
-        </section>
-    </div>);
+                        <TableHeader columns={config.columns}>
+                            {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn
+                                key={column.uid}
+                                align={column.uid === "actions" ? "center" : "start"}
+                                allowsSorting={column.sortable}
+                            >
+                                {column.name.toUpperCase()}
+                            </TableColumn>)}
+                        </TableHeader>
+                        <TableBody
+                            emptyContent={emptyContent}
+                            items={sortedItems}
+                            loadingContent={isLoading ? (<Spinner
+                                color="success"
+                                label="Loading..."
+                                classNames={{
+                                    base: 'h-screen mt-52', // wrapper: "" // Uncomment and specify if needed
+                                }}
+                            />) : null}
+                            loadingState={loadingState}
+                        >
+                            {(item: T) => (<TableRow key={item.id} className='cursor-pointer '>
+                                {(columnKey: React.Key) => (<TableCell key={columnKey} className='py-3'>
+                                    {config.rowCell(item, columnKey)}
+                                </TableCell>)}
+                            </TableRow>)}
+                        </TableBody>
+                    </Table>
+                </ScrollShadow>
+            </div>
+            <section>
+                {selectionMode === "multiple" && bottomContent}
+            </section>
+        </div>);
 }
 
 export default TableData;
