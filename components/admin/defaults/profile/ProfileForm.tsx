@@ -94,7 +94,7 @@ export default function ProfileForm() {
                                        }}/>
                                 Upload new picture
                             </Button>
-                            <Button size='sm' radius='md' color='danger'>Delete</Button>
+                            <Button size='sm' radius='md' color='danger'>Remove</Button>
                         </div>
                     </div>
 
