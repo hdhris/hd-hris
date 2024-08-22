@@ -6,6 +6,7 @@ import {Button} from "@nextui-org/button";
 import {Divider} from "@nextui-org/divider";
 import BackupFiles from "@/components/admin/defaults/backup/BackupFiles";
 import {ActionButtons} from "@/components/actions/ActionButton";
+import ProfileForm from "@/components/admin/defaults/profile/ProfileForm";
 
 const backupFrequencyOptions = [{uid: '1', name: 'Daily'}, {uid: '2', name: 'Weekly'}, {
     uid: '3', name: 'Monthly'
@@ -19,7 +20,7 @@ const backupSelectionOptions = [{uid: '1', name: 'All'}, {uid: '2', name: 'Emplo
 
 
 const BackupSettings: React.FC = () => (<div className='space-y-4 pr-4'>
-    <Section title='Backup Settings' subtitle='Ensure your information is safe with regular data backups.'/>
+    <ProfileForm/>
     <div className='ms-5 space-y-5'>
         <Section title='Backup Frequency' subtitle='Set how often your data is backed up.'>
             <SelectionMenu label='Weekly' options={backupFrequencyOptions} isRequired={false}/>
@@ -44,27 +45,27 @@ const BackupSettings: React.FC = () => (<div className='space-y-4 pr-4'>
 </div>);
 
 const RestoreManagement: React.FC = () => (<div className='pl-4 space-y-4'>
-        <Section title='Restore Management' subtitle='Manage and restore data from backups when needed.'/>
-        <div className='ms-5 space-y-5'>
-            <Section title='Restore Options' subtitle='Choose from various restore options to recover your data.'>
-                <Button size='sm' variant='faded' as='label' htmlFor='dropzone-file'>
-                    <input
-                        id='dropzone-file'
-                        type='file'
-                        name='pic'
-                        className='hidden'
-                        accept='image/*'
-                    />
-                    Upload
-                </Button>
-            </Section>
-            <BackupFiles/>
-        </div>
-    </div>);
+    <Section title='Restore Management' subtitle='Manage and restore data from backups when needed.'/>
+    <div className='ms-5 space-y-5'>
+        <Section title='Restore Options' subtitle='Choose from various restore options to recover your data.'>
+            <Button size='sm' variant='faded' as='label' htmlFor='dropzone-file'>
+                <input
+                    id='dropzone-file'
+                    type='file'
+                    name='pic'
+                    className='hidden'
+                    accept='image/*'
+                />
+                Upload
+            </Button>
+        </Section>
+        <BackupFiles/>
+    </div>
+</div>);
 
 function Page() {
     return (<section className='h-full flex flex-col gap-4'>
-        <Heading as='h1' className='text-3xl font-bold'>Data Backup</Heading>
+        <Heading as='h1' className='text-3xl font-bold'>Account Settings</Heading>
         <div className='grid grid-cols-2 gap-4 w-full h-4/5'>
             <BackupSettings/>
             <RestoreManagement/>

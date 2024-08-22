@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import Text from "@/components/common/typography/Text";
+import Typography from "@/components/common/typography/Typography";
 import React, { ReactNode } from "react";
 import { cn, Tooltip } from "@nextui-org/react";
 import { usePathname } from "next/navigation";
@@ -42,14 +42,14 @@ export default function SideBarItem({
         </span>
       )}
       {showLabel && (
-        <Text
+        <Typography
           className={cn(
             "ms-3 text-sm text-nowrap",
             isActive ? "text-white" : "group-hover:text-primary"
           )}
         >
           {label}
-        </Text>
+        </Typography>
       )}
     </Link>
   );

@@ -1,6 +1,6 @@
 'use client'
 import React, {useState, useEffect, useMemo} from 'react';
-import Text from "@/components/common/typography/Text";
+import Typography from "@/components/common/typography/Typography";
 import Image from "next/image";
 import logo from "@/public/logo.svg";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
@@ -101,8 +101,8 @@ function OTP() {
                 <CardHeader className='grid place-items-center gap-2'>
                     <Image src={logo} className="w-24 h-24 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500"
                            alt="WageWise Logo" />
-                    <Text className='font-semibold text-xl'>Instant Access, Securely Restored</Text>
-                    <Text className='text-center'>Retrieve Your Account with a Single Code</Text>
+                    <Typography className='font-semibold text-xl'>Instant Access, Securely Restored</Typography>
+                    <Typography className='text-center'>Retrieve Your Account with a Single Code</Typography>
                 </CardHeader>
                 <CardBody>
                     {error && <Chip classNames={{

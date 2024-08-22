@@ -1,6 +1,6 @@
 "use client"
 import React, {useState} from 'react';
-import Text from "@/components/common/typography/Text";
+import Typography from "@/components/common/typography/Typography";
 import Image from "next/image";
 import logo from "@/public/logo.svg";
 import {Card, CardBody, CardHeader} from "@nextui-org/card";
@@ -50,8 +50,8 @@ function Forgot() {
                 <CardHeader className='grid place-items-center gap-2'>
                     <Image src={logo} className="w-24 h-24 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500 object-contain"
                            alt="WageWise Logo"/>
-                    <Text className='font-semibold text-xl'>Unlock Your Access with Ease</Text>
-                    <Text className='text-center'>Don&apos;t Let a Forgotten Password Hold You Back</Text>
+                    <Typography className='font-semibold text-xl'>Unlock Your Access with Ease</Typography>
+                    <Typography className='text-center'>Don&apos;t Let a Forgotten Password Hold You Back</Typography>
                 </CardHeader>
                 <CardBody>
                     {error && <Chip classNames={{

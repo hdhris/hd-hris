@@ -1,7 +1,7 @@
 'use client'
 
 import {FiChevronDown, FiChevronLeft} from "react-icons/fi";
-import Text from "@/components/common/typography/Text";
+import Typography from "@/components/common/typography/Typography";
 import React, {ReactNode, useState} from "react";
 import {cn} from "@/lib/utils";
 import Link from "next/link";
@@ -33,17 +33,17 @@ export default function SideBarCollapse({children, icon, label, href}: SideBarCo
                 <Switch expression={href!}>
                     <Case of={href != null}>
                         <Link href={href!} className='w-full'>
-                            <Text
+                            <Typography
                                 className={cn("flex-1 ml-1 text-left text-sm rtl:text-right whitespace-nowrap", toggle && 'font-semibold text-slate-800')}>
                                 {label}
-                            </Text>
+                            </Typography>
                         </Link>
                     </Case>
                     <Default>
-                        <Text
+                        <Typography
                             className={cn("flex-1 ml-1 text-left text-sm rtl:text-right whitespace-nowrap", toggle && 'font-semibold text-slate-800')}>
                             {label}
-                        </Text>
+                        </Typography>
                     </Default>
                 </Switch>
 

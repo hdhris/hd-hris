@@ -1,5 +1,5 @@
 'use client';
-import React, {useEffect, useRef} from 'react';
+import React, {Suspense, useEffect, useRef} from 'react';
 import {
     Button,
     Dropdown,
@@ -41,6 +41,7 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
     counterName?: string;
     isLoading?: boolean;
     contentTop?: React.JSX.Element;
+    onSelectToDelete?: boolean
 }
 
 interface SearchProps<T> {
@@ -65,6 +66,7 @@ function TableData<T extends { id: string | number }>({
                                                           config,
                                                           items,
                                                           sort,
+                                                          onSelectToDelete,
                                                           searchingItemKey,
                                                           filterConfig,
                                                           filterItems,
@@ -193,76 +195,82 @@ function TableData<T extends { id: string | number }>({
     };
 
     const topContent = React.useMemo(() => {
-        return (<div className="flex flex-col gap-4">
-            <div className="flex justify-between gap-3 items-end">
-                <Input
-                    isClearable
-                    variant="bordered"
-                    radius="sm"
-                    className="w-full sm:max-w-[44%]"
-                    color="primary"
-                    placeholder={`Search by ${searchingItemKey.map((item) => item.toString().replace(/[,_]+/g, ' ')).join(", ").toUpperCase()}`}
-                    startContent={<SearchIcon className={cn("text-small", icon_color, icon_size)}/>}
-                    value={filterValue} // Set the value of the input
-                    onClear={() => onClear()}
-                    onValueChange={onSearchChange}
-                />
-                {filterItems && (<div className="flex gap-3 items-center">
-                    <Dropdown classNames={{content: 'rounded'}}>
-                        <DropdownTrigger className="hidden sm:flex">
-                            <Button radius="sm" endContent={<ChevronDownIcon
-                                className={cn('text-small', icon_color, icon_size)}/>} variant="bordered">
-                                {filter !== "all" && filter.size > 0 ? capitalize(Array.from(filter)[0] as string) : "Filter..."}
-                            </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                            aria-label="Table Columns"
-                            className="max-h-96 overflow-y-auto"
-                            closeOnSelect={false}
-                            selectedKeys={filter}
-                            selectionMode="single"
-                            onSelectionChange={(keys) => {
-                                setFilter(keys as Selection);
-                                const newSearchParams = new URLSearchParams(searchParams.toString());
-                                if (keys !== "all" && keys.size > 0) {
-                                    newSearchParams.set('filter', Array.from(keys).join(','));
-                                } else {
-                                    newSearchParams.delete('filter');
-                                }
-                                if (filterValue) {
-                                    newSearchParams.set('search', filterValue);
-                                }
-                                router.push(`${getCurrentPath}?${newSearchParams.toString()}`);
-                            }}
-                        >
-                            {filterItems.map((item) => (
-                                <DropdownSection key={item.category} title={item.category} showDivider>
-                                    {item.filtered.map((data) => (<DropdownItem key={data.uid} className="capitalize">
-                                        {capitalize(data.name)}
-                                    </DropdownItem>))}
-                                </DropdownSection>))}
-                        </DropdownMenu>
-                    </Dropdown>
-                    {endContent && endContent()}
-                </div>)}
-            </div>
-            <div className='flex justify-between items-center'>
-                {counterName && <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
-                    <span><CountUp start={0} end={sortedItems.length}/> </span> {counterName}
-                </h1>}
-                {contentTop && contentTop}
-            </div>
-        </div>);
+        return (<Suspense fallback={<Spinner/>}>
+                <div className="flex flex-col gap-4">
+                    <div className="flex justify-between gap-3 items-end">
+                        <Input
+                            isClearable
+                            variant="bordered"
+                            radius="sm"
+                            className="w-full sm:max-w-[44%]"
+                            color="primary"
+                            placeholder={`Search by ${searchingItemKey.map((item) => item.toString().replace(/[,_]+/g, ' ')).join(", ").toUpperCase()}`}
+                            startContent={<SearchIcon className={cn("text-small", icon_color, icon_size)}/>}
+                            value={filterValue} // Set the value of the input
+                            onClear={() => onClear()}
+                            onValueChange={onSearchChange}
+                        />
+                        {filterItems && (<div className="flex gap-3 items-center">
+                            <Dropdown classNames={{content: 'rounded'}}>
+                                <DropdownTrigger className="hidden sm:flex">
+                                    <Button radius="sm" endContent={<ChevronDownIcon
+                                        className={cn('text-small', icon_color, icon_size)}/>} variant="bordered">
+                                        {filter !== "all" && filter.size > 0 ? capitalize(Array.from(filter)[0] as string) : "Filter..."}
+                                    </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu
+                                    aria-label="Table Columns"
+                                    className="max-h-96 overflow-y-auto"
+                                    closeOnSelect={false}
+                                    selectedKeys={filter}
+                                    selectionMode="single"
+                                    onSelectionChange={(keys) => {
+                                        setFilter(keys as Selection);
+                                        const newSearchParams = new URLSearchParams(searchParams.toString());
+                                        if (keys !== "all" && keys.size > 0) {
+                                            newSearchParams.set('filter', Array.from(keys).join(','));
+                                        } else {
+                                            newSearchParams.delete('filter');
+                                        }
+                                        if (filterValue) {
+                                            newSearchParams.set('search', filterValue);
+                                        }
+                                        router.push(`${getCurrentPath}?${newSearchParams.toString()}`);
+                                    }}
+                                >
+                                    {filterItems.map((item) => (
+                                        <DropdownSection key={item.category} title={item.category} showDivider>
+                                            {item.filtered.map((data) => (
+                                                <DropdownItem key={data.uid} className="capitalize">
+                                                    {capitalize(data.name)}
+                                                </DropdownItem>))}
+                                        </DropdownSection>))}
+                                </DropdownMenu>
+                            </Dropdown>
+                            {endContent && endContent()}
+                        </div>)}
+                    </div>
+                    <div className='flex justify-between items-center'>
+                        {counterName &&
+                            <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
+                                <span><CountUp start={0} end={sortedItems.length}/> </span> {counterName}
+                            </h1>}
+                        {contentTop && contentTop}
+                    </div>
+                </div>
+            </Suspense>
+
+        );
     }, [searchingItemKey, filterValue, onSearchChange, filterItems, filter, endContent, sortedItems.length, counterName, contentTop, onClear, searchParams, router, getCurrentPath]);
 
     const bottomContent = React.useMemo(() => {
         return (<section className="py-2 px-2 flex justify-between items-center">
             <div className='flex gap-4 items-center'>
                 <Text className="text-small font-semibold opacity-50">
-                    {selectedKeys === "all" ? "All users selected" : `${selectedKeys.size} of ${sortedItems.length} selected`}
+                    {selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${sortedItems.length} selected`}
                 </Text>
-                {isActionable && (<Tooltip color="danger"
-                                           content={`Delete ${selectedKeys === "all" ? "all users selected" : `${selectedKeys.size} users`}`}>
+                {onSelectToDelete && isActionable && (<Tooltip color="danger"
+                                                               content={`Delete ${selectedKeys === "all" ? "all users selected" : `${selectedKeys.size} users`}`}>
                     <span className="text-lg text-danger cursor-pointer active:opacity-50">
                         <Trash2/>
                     </span>
@@ -275,53 +283,53 @@ function TableData<T extends { id: string | number }>({
     const emptyContent = sortedItems.length === 0 && !isLoading && 'No data found. Try to refresh';
 
     return (<div className="grid grid-rows-[auto,1fr,auto] h-full">
-            <section className='pb-3'>
-                {topContent}
-            </section>
-            <div className='flex flex-col h-full overflow-y-hidden'>
-                <ScrollShadow size={20} className='flex-1'>
-                    <Table
-                        sortDescriptor={sortDescriptor}
-                        onSortChange={setSortDescriptor}
-                        selectedKeys={selectedKeys}
-                        onSelectionChange={setSelectedKeys}
-                        selectionMode={selectionMode}
-                        {...props}
-                    >
-                        <TableHeader columns={config.columns}>
-                            {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn
-                                key={column.uid}
-                                align={column.uid === "actions" ? "center" : "start"}
-                                allowsSorting={column.sortable}
-                            >
-                                {column.name.toUpperCase()}
-                            </TableColumn>)}
-                        </TableHeader>
-                        <TableBody
-                            emptyContent={emptyContent}
-                            items={sortedItems}
-                            loadingContent={isLoading ? (<Spinner
-                                color="success"
-                                label="Loading..."
-                                classNames={{
-                                    base: 'h-screen mt-52', // wrapper: "" // Uncomment and specify if needed
-                                }}
-                            />) : null}
-                            loadingState={loadingState}
+        <section className='pb-3'>
+            {topContent}
+        </section>
+        <div className='flex flex-col h-full overflow-y-hidden'>
+            <ScrollShadow size={20} className='flex-1'>
+                <Table
+                    sortDescriptor={sortDescriptor}
+                    onSortChange={setSortDescriptor}
+                    selectedKeys={selectedKeys}
+                    onSelectionChange={setSelectedKeys}
+                    selectionMode={selectionMode}
+                    {...props}
+                >
+                    <TableHeader columns={config.columns}>
+                        {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn
+                            key={column.uid}
+                            align={column.uid === "actions" ? "center" : "start"}
+                            allowsSorting={column.sortable}
                         >
-                            {(item: T) => (<TableRow key={item.id} className='cursor-pointer '>
-                                {(columnKey: React.Key) => (<TableCell key={columnKey} className='py-3'>
-                                    {config.rowCell(item, columnKey)}
-                                </TableCell>)}
-                            </TableRow>)}
-                        </TableBody>
-                    </Table>
-                </ScrollShadow>
-            </div>
-            <section>
-                {selectionMode === "multiple" && bottomContent}
-            </section>
-        </div>);
+                            {column.name.toUpperCase()}
+                        </TableColumn>)}
+                    </TableHeader>
+                    <TableBody
+                        emptyContent={emptyContent}
+                        items={sortedItems}
+                        loadingContent={isLoading ? (<Spinner
+                            color="success"
+                            label="Loading..."
+                            classNames={{
+                                base: 'h-screen mt-52', // wrapper: "" // Uncomment and specify if needed
+                            }}
+                        />) : null}
+                        loadingState={loadingState}
+                    >
+                        {(item: T) => (<TableRow key={item.id} className='cursor-pointer '>
+                            {(columnKey: React.Key) => (<TableCell key={columnKey} className='py-3'>
+                                {config.rowCell(item, columnKey)}
+                            </TableCell>)}
+                        </TableRow>)}
+                    </TableBody>
+                </Table>
+            </ScrollShadow>
+        </div>
+        <section>
+            {selectionMode === "multiple" && bottomContent}
+        </section>
+    </div>);
 }
 
 export default TableData;

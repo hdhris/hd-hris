@@ -6,7 +6,7 @@ import {
 import {Handshake, Lifebuoy, SignOut, Sliders, UserCircleGear} from "@phosphor-icons/react";
 import {Avatar} from "@nextui-org/avatar";
 import {icon_theme, text_icon} from "@/lib/utils";
-import Text from "@/components/common/typography/Text"
+import Typography from "@/components/common/typography/Typography"
 import {LuShieldAlert, LuShieldCheck} from "react-icons/lu";
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
@@ -63,12 +63,12 @@ function UserMenu() {
                     </DropdownItem>
                     <DropdownItem
                         as={Link}
-                        href='/profile'
+                        href='/account'
                         textValue="Account Settings"
                         key="account_settings"
                         startContent={<UserCircleGear className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Account Settings</Text>
+                        <Typography className={text_icon}>Account Settings</Typography>
                     </DropdownItem>
                     <DropdownItem
                         textValue="Preferences"
@@ -77,7 +77,7 @@ function UserMenu() {
                         href='/preferences'
                         startContent={<Sliders className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Preferences</Text>
+                        <Typography className={text_icon}>Preferences</Typography>
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection aria-label="Profile & Actions" showDivider>
@@ -98,7 +98,7 @@ function UserMenu() {
                         href='/security'
                         startContent={<LuShieldCheck className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Security</Text>
+                        <Typography className={text_icon}>Security</Typography>
                     </DropdownItem>
                     <DropdownItem
                         textValue="Privacy"
@@ -107,7 +107,7 @@ function UserMenu() {
                         href='/privacy'
                         startContent={<LuShieldAlert className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Privacy</Text>
+                        <Typography className={text_icon}>Privacy</Typography>
                     </DropdownItem>
                     <DropdownItem
                         textValue="Data Backup"
@@ -116,7 +116,7 @@ function UserMenu() {
                         href='/backup'
                         startContent={<PiCloudArrowDown className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Data Backup</Text>
+                        <Typography className={text_icon}>Data Backup</Typography>
                     </DropdownItem>
                     <DropdownItem
                         textValue="Integrations"
@@ -125,7 +125,7 @@ function UserMenu() {
                         href='/integrations'
                         startContent={<PiPlugs className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Integrations</Text>
+                        <Typography className={text_icon}>Integrations</Typography>
                     </DropdownItem>
                     <DropdownItem
                         textValue="Terms and Condition"
@@ -134,7 +134,7 @@ function UserMenu() {
                         href='/terms&condition'
                         startContent={<Handshake className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Terms and Condition</Text>
+                        <Typography className={text_icon}>Terms and Condition</Typography>
                     </DropdownItem>
                     <DropdownItem
                         textValue="Help and Support"
@@ -143,7 +143,7 @@ function UserMenu() {
                         href='/help&support'
                         startContent={<Lifebuoy className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Help and Support</Text>
+                        <Typography className={text_icon}>Help and Support</Typography>
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection>
@@ -154,7 +154,7 @@ function UserMenu() {
                         href='/api/auth/signout'
                         startContent={<SignOut className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Log out</Text>
+                        <Typography className={text_icon}>Log out</Typography>
                     </DropdownItem>
                 </DropdownSection>
             </DropdownMenu>

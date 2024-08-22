@@ -12,7 +12,7 @@ import {
 } from "@nextui-org/react";
 import {IoIosNotifications} from "react-icons/io";
 import {icon_size, icon_size_sm, text_icon} from "@/lib/utils";
-import Text from "@/components/common/typography/Text"
+import Typography from "@/components/common/typography/Typography"
 import {BsCheck2All} from "react-icons/bs";
 import {LuCheckCheck, LuSettings} from "react-icons/lu";
 import {getDateRequestedAgo, getRandomDateTime} from "@/lib/utils/dateFormatter";
@@ -56,7 +56,7 @@ function Notification() {
                     key="title"
                 >
                     <div className="flex items-center justify-between px-2">
-                        <Text className="font-semibold text-2xl text-inactive-bar">Notifications</Text>
+                        <Typography className="font-semibold text-2xl text-inactive-bar">Notifications</Typography>
                         <Link href="/" className="w-fit h-fit text-primary flex items-center gap-2"><LuCheckCheck className='text-primary'/>Mark all as read</Link>
                     </div>
                 </DropdownItem>
@@ -69,8 +69,8 @@ function Notification() {
                             className="group w-full justify-start"
                             name={
                                 <div className="flex items-center justify-between">
-                                    <Text className={text_icon}>Subject</Text>
-                                    <Text className={cn("text-tiny font-normal opacity-75", text_icon)}>
+                                    <Typography className={text_icon}>Subject</Typography>
+                                    <Typography className={cn("text-tiny font-normal opacity-75", text_icon)}>
                                         {getDateRequestedAgo(
                                             getRandomDateTime(
                                                 new Date("4/13/2024, 12:00:00 AM"),
@@ -78,7 +78,7 @@ function Notification() {
                                             ),
                                             true
                                         )}
-                                    </Text>
+                                    </Typography>
                                 </div>
                             }
                             description="content hhjhdjkjdkkkdkldklkdlkdlddlkldklkdlkdlkdkdldhjdhjhdjdjdj"
@@ -105,8 +105,8 @@ function Notification() {
                             className="group w-full justify-start"
                             name={
                                 <div className="flex items-center justify-between">
-                                    <Text className={text_icon}>Subject</Text>
-                                    <Text className={cn("text-tiny font-normal opacity-75", text_icon)}>
+                                    <Typography className={text_icon}>Subject</Typography>
+                                    <Typography className={cn("text-tiny font-normal opacity-75", text_icon)}>
                                         {getDateRequestedAgo(
                                             getRandomDateTime(
                                                 new Date("4/13/2024, 12:00:00 AM"),
@@ -114,7 +114,7 @@ function Notification() {
                                             ),
                                             true
                                         )}
-                                    </Text>
+                                    </Typography>
                                 </div>
                             }
                             description="content hhjhdjkjdkkkdkldklkdlkdlddlkldklkdlkdlkdkdldhjdhjhdjdjdj"
@@ -141,8 +141,8 @@ function Notification() {
                             className="group w-full justify-start"
                             name={
                                 <div className="flex items-center justify-between">
-                                    <Text className={text_icon}>Subject</Text>
-                                    <Text className={cn("text-tiny font-normal opacity-75", text_icon)}>
+                                    <Typography className={text_icon}>Subject</Typography>
+                                    <Typography className={cn("text-tiny font-normal opacity-75", text_icon)}>
                                         {getDateRequestedAgo(
                                             getRandomDateTime(
                                                 new Date("4/13/2024, 12:00:00 AM"),
@@ -150,7 +150,7 @@ function Notification() {
                                             ),
                                             true
                                         )}
-                                    </Text>
+                                    </Typography>
                                 </div>
                             }
                             description="content hhjhdjkjdkkkdkldklkdlkdlddlkldklkdlkdlkdkdldhjdhjhdjdjdj"
@@ -177,8 +177,8 @@ function Notification() {
                             className="group w-full justify-start"
                             name={
                                 <div className="flex items-center justify-between">
-                                    <Text className={text_icon}>Subject</Text>
-                                    <Text className={cn("text-tiny font-normal opacity-75", text_icon)}>
+                                    <Typography className={text_icon}>Subject</Typography>
+                                    <Typography className={cn("text-tiny font-normal opacity-75", text_icon)}>
                                         {getDateRequestedAgo(
                                             getRandomDateTime(
                                                 new Date("4/13/2024, 12:00:00 AM"),
@@ -186,7 +186,7 @@ function Notification() {
                                             ),
                                             true
                                         )}
-                                    </Text>
+                                    </Typography>
                                 </div>
                             }
                             description="content hhjhdjkjdkkkdkldklkdlkdlddlkldklkdlkdlkdkdldhjdhjhdjdjdj"

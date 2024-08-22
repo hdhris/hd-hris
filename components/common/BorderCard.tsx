@@ -1,6 +1,6 @@
 import React from 'react';
 import {cn} from "@/lib/utils";
-import Text, {Heading} from "@/components/common/typography/Text";
+import Typography, {Heading} from "@/components/common/typography/Typography";
 
 interface BorderCardProps {
     children: React.ReactNode,
@@ -22,7 +22,7 @@ function BorderCard({children, className, heading, subHeading, startContent, end
                 {startContent && startContent}
                 <span className="w-full">
                     <Heading className={classNames?.heading}>{heading}</Heading>
-                    <Text className={cn('text-sm opacity-75', classNames?.subHeading)}>{subHeading}</Text>
+                    <Typography className={cn('text-sm opacity-75', classNames?.subHeading)}>{subHeading}</Typography>
                 </span>
                 {endContent && endContent}
             </div>

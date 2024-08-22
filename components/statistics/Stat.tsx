@@ -2,7 +2,7 @@ import React, {ReactNode} from "react";
 import {cn} from "@/lib/utils";
 import BorderCard from "@/components/common/BorderCard";
 import {Divider} from "@nextui-org/divider";
-import Text from "@/components/common/typography/Text";
+import Typography from "@/components/common/typography/Typography";
 import {Case, Switch} from "@/components/common/Switch";
 import {IoTrendingDownOutline, IoTrendingUpOutline} from "react-icons/io5";
 import {FaArrowTrendDown, FaArrowTrendUp} from "react-icons/fa6";
@@ -25,12 +25,12 @@ export function Stat({data, className}: { data: StatProps[], className?: string 
                                                         className={cn(`flex items-center`, className)}>
             <div className="flex flex-col">
                 <div className="flex flex-col">
-                    <Text as={'h2'}
-                          className="text-lg font-semibold text-gray-400 dark:text-gray-500">{item.title}</Text>
+                    <Typography as={'h2'}
+                                className="text-lg font-semibold text-gray-400 dark:text-gray-500">{item.title}</Typography>
                 </div>
                 <div className="flex justify-between items-center">
-                    <Text as={'h1'}
-                          className="text-3xl font-bold text-gray-600 dark:text-gray-500">{item.value}</Text>
+                    <Typography as={'h1'}
+                                className="text-3xl font-bold text-gray-600 dark:text-gray-500">{item.value}</Typography>
 
                     {item.status && item.percent && <div>
                         <Switch expression={item.status}>
@@ -41,8 +41,8 @@ export function Stat({data, className}: { data: StatProps[], className?: string 
                                 <FaArrowTrendDown className="text-[#FE5B6E]"/>
                             </Case>
                         </Switch>
-                        <Text className="text-medium text-gray-400 dark:text-gray-500">
-                            {item.percent}%</Text>
+                        <Typography className="text-medium text-gray-400 dark:text-gray-500">
+                            {item.percent}%</Typography>
                     </div>}
 
                 </div>

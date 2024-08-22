@@ -1,6 +1,6 @@
 "use client"
 import React, {useState} from 'react';
-import Text from "@/components/common/typography/Text";
+import Typography from "@/components/common/typography/Typography";
 import Image from "next/image";
 import logo from "@/public/logo.svg";
 import {z} from "zod";
@@ -71,7 +71,7 @@ function ChangePassword() {
 
     const passwordChangeSuccessfullyModal = () => {
         return (<div>
-            <Text className='text-center'>Password Changed Successfully</Text>
+            <Typography className='text-center'>Password Changed Successfully</Typography>
         </div>)
     }
 
@@ -87,8 +87,8 @@ function ChangePassword() {
             <CardHeader className='grid place-items-center gap-2'>
                 <Image src={logo} className="w-24 h-24 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500"
                        alt="WageWise Logo"/>
-                <Text className='font-semibold text-xl'>Reclaim Control, Reinforce Security</Text>
-                <Text className='text-center'>Elevate Your Protection with a Fresh Password</Text>
+                <Typography className='font-semibold text-xl'>Reclaim Control, Reinforce Security</Typography>
+                <Typography className='text-center'>Elevate Your Protection with a Fresh Password</Typography>
             </CardHeader>
             <CardBody>
                 {error && <Chip classNames={{
@@ -114,9 +114,9 @@ function ChangePassword() {
                 {(onClose) => (<>
                     <ModalHeader className="flex flex-col gap-1">Password Change Successfully</ModalHeader>
                     <ModalBody>
-                        <Text>Your password has been successfully updated. You can now log in using your new password.
+                        <Typography>Your password has been successfully updated. You can now log in using your new password.
                             If you did not initiate this change or suspect any unauthorized activity, please contact our
-                            support team immediately.</Text>
+                            support team immediately.</Typography>
                     </ModalBody>
                     <ModalFooter>
                         <Button color="danger" variant="light" onPress={onClose}>
