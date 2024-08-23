@@ -31,34 +31,47 @@ function AccountSecurity() {
     })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
-    const [isVisible, setIsVisible] = useState(false)
+    const [isVisibleCurrent, setIsVisibleCurrent] = useState(false)
+    const [isVisibleNew, setIsVisibleNew] = useState(false)
+    const [isVisibleConfirm, setIsVisibleConfirm] = useState(false)
     const {isDirty, isValid} = useFormState(form)
-    const handlePasswordVisibility = (e: { preventDefault: () => void }) => {
+    const handleCurrentPasswordVisibility = (e: { preventDefault: () => void }) => {
         e.preventDefault();
-        setIsVisible(!isVisible);
+        setIsVisibleCurrent(!isVisibleCurrent);
     } //handlePasswordVisibility
+
+    const handleNewPasswordVisibility = (e: { preventDefault: () => void }) => {
+        e.preventDefault();
+        setIsVisibleNew(!isVisibleNew);
+    } //handlePasswordVisibility
+
+ const handleConfirmPasswordVisibility = (e: { preventDefault: () => void }) => {
+        e.preventDefault();
+     setIsVisibleConfirm(!isVisibleConfirm);
+    } //handlePasswordVisibility
+
 
     const currentPassword: FormInputProps[] = [
         {
-            name: "current_password", label: "Current Password",   type: isVisible ? "text" : "password",  endContent: (<Button key='current_password' variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
-                                                                                                                                onClick={handlePasswordVisibility}>
-                {isVisible ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
+            name: "current_password", label: "Current Password",   type: isVisibleCurrent ? "text" : "password",  endContent: (<Button key='current_password' variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
+                                                                                                                                onClick={handleCurrentPasswordVisibility}>
+                {isVisibleCurrent ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
             </Button>)
         }]
     const changePassword: FormInputProps[] = [
         {
-            name: "new_password", label: "New Password",   type: isVisible ? "text" : "password", endContent: (<Button key='new_password' variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
-                                                                                                                       onClick={handlePasswordVisibility}>
-                {isVisible ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
+            name: "new_password", label: "New Password",   type: isVisibleNew ? "text" : "password", endContent: (<Button key='new_password' variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
+                                                                                                                       onClick={handleNewPasswordVisibility}>
+                {isVisibleNew ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
             </Button>)
         }, {
             name: "confirm_password",
             label: "Confirm Password",
-            type: isVisible ? "text" : "password",
+            type: isVisibleConfirm ? "text" : "password",
 
             endContent: (<Button key='confirm_password' variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
-                                 onClick={handlePasswordVisibility}>
-                {isVisible ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
+                                 onClick={handleConfirmPasswordVisibility}>
+                {isVisibleConfirm ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
             </Button>)
         }]
 

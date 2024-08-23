@@ -6,7 +6,7 @@ import AccountSecurity from "@/components/admin/defaults/profile/AccountSecurity
 
 
 const AccountSettings: React.FC = () => (<div className='space-y-4 pr-4'>
-    <div className='ms-5 space-y-5 h-[500px]'>
+    <div className='ms-5 space-y-5 h-[550px]'>
         <ProfileForm/>
     </div>
 </div>);
