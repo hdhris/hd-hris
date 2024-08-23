@@ -19,7 +19,7 @@ const backupSelectionOptions = [{uid: '1', name: 'All'}, {uid: '2', name: 'Emplo
 }, {uid: '4', name: 'Salary'},];
 
 
-const BackupSettings: React.FC = () => (<div className='space-y-4 pr-4'>
+const ColumnOne: React.FC = () => (<div className='space-y-4 pr-4'>
     <Section title='Knowledge Base or FAQ'
              subtitle='Find answers to common questions and troubleshooting tips in the Knowledge Base or FAQ section.'/>
     <div className='ms-5 space-y-5 h-[250px] overflow-hidden'>
@@ -34,11 +34,9 @@ const BackupSettings: React.FC = () => (<div className='space-y-4 pr-4'>
                 <AccordionItem classNames={{
                     title: 'text-medium'
                 }} key="2" aria-label="Accordion 2" title="How do I sign up for an account?">
-                    <Text className='text-base'>• To register an account, the process is restricted to HR managers only.
-                        When adding an employee account, credentials are sent directly to the employee's email address.
-                        The HR manager initiates the registration by entering the employee's details and then the
-                        employee receives an email with instructions to set their credentials and complete the account
-                        setup. This ensures secure and personalized access for each employee.</Text>
+                    <Text className='text-base'>
+                        • To register an account, the process is restricted to HR managers only. When adding an employee account, credentials are sent directly to the employee&apos;s email address. The HR manager initiates the registration by entering the employee&apos;s details and then the employee receives an email with instructions to set their credentials and complete the account setup. This ensures secure and personalized access for each employee.
+                    </Text>
                 </AccordionItem>
                 <AccordionItem classNames={{
                     title: 'text-medium'
@@ -78,7 +76,7 @@ const BackupSettings: React.FC = () => (<div className='space-y-4 pr-4'>
     </div>
 </div>);
 
-const RestoreManagement: React.FC = () => (<div className='pl-4 space-y-4'>
+const ColumnTwo: React.FC = () => (<div className='pl-4 space-y-4'>
     <Section title='Video Tutorials or Guides'
              subtitle='Watch video tutorials or download guides for step-by-step instructions and helpful tips.'/>
     <div className='ms-5 space-y-5'>
@@ -102,8 +100,8 @@ function Page() {
     return (<section className='h-full flex flex-col gap-4'>
         <Heading as='h1' className='text-3xl font-bold'>Help and Support</Heading>
         <div className='grid grid-cols-2 gap-4 w-full h-4/5'>
-            <BackupSettings/>
-            <RestoreManagement/>
+            <ColumnOne/>
+            <ColumnTwo/>
         </div>
     </section>);
 }
