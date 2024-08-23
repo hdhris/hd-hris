@@ -22,6 +22,7 @@ import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
 import {useRouter} from "next/navigation";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {LuXCircle} from "react-icons/lu";
+import ForgotButton from "@/components/forgot/ForgotButton";
 
 function Login() {
 
@@ -100,8 +101,7 @@ function Login() {
                         <FormFields items={loginFields}/>
                         <div className='flex justify-between'>
                             <Checkbox size='sm'>Remember Me</Checkbox>
-                            <Button size='sm' variant='light' className='w-fit text-blue-400' as={Link}
-                                    href={'/forgot'}>Forgot Password</Button>
+                            <ForgotButton/>
                         </div>
 
                         {/*<Typography as={Link} href={'/forgot'} className='text-red-400 cursor-pointer text-right text-small'></Typography>*/}

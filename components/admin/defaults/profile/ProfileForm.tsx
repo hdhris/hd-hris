@@ -145,15 +145,17 @@ export default function ProfileForm() {
         console.log("Submitted values:", values);
     }
 
-    return (<ScrollShadow className="h-full" size={10}>
+    return (
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2'>
-                    <FormFields items={upperInput}/>
-                    <div className='grid grid-cols-2 gap-4'>
-                        <FormFields items={formNames}/>
-                        <FormFields items={[{
-                            name: "birth_date", label: "Birth Date", Component: (field) => {
-                                return (<div className="w-full flex flex-row gap-4">
+                <form onSubmit={form.handleSubmit(onSubmit)}
+                      className='space-y-5 flex flex-col p-2 h-full overflow-hidden'>
+                    <ScrollShadow className="h-full pr-4" size={10}>
+                        <FormFields items={upperInput}/>
+                        <div className='grid grid-cols-2 gap-4'>
+                            <FormFields items={formNames}/>
+                            <FormFields items={[{
+                                name: "birth_date", label: "Birth Date", Component: (field) => {
+                                    return (<div className="w-full flex flex-row gap-4">
                                         <DatePicker
                                             onChange={field.onChange}
                                             aria-label="Birth Date"
@@ -164,58 +166,57 @@ export default function ProfileForm() {
                                             showMonthAndYearPickers
                                         />
                                     </div>);
-                            }
-                        }]} size='sm'/>
-                        <Selection
-                            items={street}
-                            placeholder=""
-                            label='Gender'
-                            name='gender'
-                            aria-label="gender"
-                        />
-                        <div className='col-span-2 space-y-2'>
-                            <Divider/>
-                            <Text className='text-medium font-semibold'>Contact Information</Text>
+                                }
+                            }]} size='sm'/>
+                            <Selection
+                                items={street}
+                                placeholder=""
+                                label='Gender'
+                                name='gender'
+                                aria-label="gender"
+                            />
+                            <div className='col-span-2 space-y-2'>
+                                <Divider/>
+                                <Text className='text-medium font-semibold'>Contact Information</Text>
+                            </div>
+                            <FormFields items={contact_info} size='sm'/>
+                            <div className='col-span-2 space-y-2'>
+                                <Divider/>
+                                <Text className='text-medium font-semibold'>Address Information</Text>
+                            </div>
+                            <Selection
+                                items={street}
+                                placeholder=""
+                                label='Street/Purok'
+                                name='street_or_purok'
+                                aria-label="Street or Purok"
+                            />
+                            <Selection
+                                items={street}
+                                placeholder=""
+                                label='Barangay'
+                                name='barangay'
+                                aria-label="Barangay"
+                            />
+                            <Selection
+                                items={street}
+                                placeholder=""
+                                label='City'
+                                name='city'
+                                aria-label="City"
+                            />
+                            <Selection
+                                items={street}
+                                placeholder=""
+                                label='Province'
+                                name='province'
+                                aria-label="Province"
+                            />
                         </div>
-                        <FormFields items={contact_info} size='sm'/>
-                        <div className='col-span-2 space-y-2'>
-                            <Divider/>
-                            <Text className='text-medium font-semibold'>Address Information</Text>
-                        </div>
-                        <Selection
-                            items={street}
-                            placeholder=""
-                            label='Street/Purok'
-                            name='street_or_purok'
-                            aria-label="Street or Purok"
-                        />
-                        <Selection
-                            items={street}
-                            placeholder=""
-                            label='Barangay'
-                            name='barangay'
-                            aria-label="Barangay"
-                        />
-                        <Selection
-                            items={street}
-                            placeholder=""
-                            label='City'
-                            name='city'
-                            aria-label="City"
-                        />
-                        <Selection
-                            items={street}
-                            placeholder=""
-                            label='Province'
-                            name='province'
-                            aria-label="Province"
-                        />
+                    </ScrollShadow>
+                    <div className='flex justify-end gap-2'>
+                        <Button type='submit' size='sm' radius='md' color='primary'>Apply Changes</Button>
                     </div>
-                    {/* <div className='flex justify-end gap-2'>
-                        <Button type='submit' size='sm' radius='md'>Cancel</Button>
-                        <Button type='submit' size='sm' radius='md' color='primary'>Apply</Button>
-                    </div> */}
                 </form>
-            </Form>
-        </ScrollShadow>);
+            </Form>);
 }
