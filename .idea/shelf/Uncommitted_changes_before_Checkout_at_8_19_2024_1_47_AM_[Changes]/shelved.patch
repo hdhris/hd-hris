@@ -1,0 +1,16 @@
+Index: .env
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.env b/.env
+new file mode 100644
+--- /dev/null	(date 1724051403100)
++++ b/.env	(date 1724051403100)
+@@ -0,0 +1,6 @@
++APP_NAME=HRiS
++NODE_ENV=development
++DEBUG=true
++NEXTAUTH_URL=https://localhost:3000
++NEXTAUTH_SECRET="tb/CbgwfjKUt4m5ozPYcwIonhAFBFe+zUYvw05SmAzU="
++BASE_URL="http://localhost:3000"

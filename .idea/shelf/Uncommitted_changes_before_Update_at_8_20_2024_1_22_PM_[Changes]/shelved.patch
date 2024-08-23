@@ -1,0 +1,42 @@
+Index: app/(admin)/(core)/resign/page.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/(admin)/(core)/resign/page.tsx b/app/(admin)/(core)/resign/page.tsx
+deleted file mode 100644
+--- a/app/(admin)/(core)/resign/page.tsx	(revision 227ead123a767d6d3beef11e3adbe0593a4914ec)
++++ /dev/null	(revision 227ead123a767d6d3beef11e3adbe0593a4914ec)
+@@ -1,11 +0,0 @@
+-import React from 'react'
+-
+-const page = () => {
+-  return (
+-    <div>
+-      
+-    </div>
+-  )
+-}
+-
+-export default page
+Index: app/(admin)/(core)/department/page.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/(admin)/(core)/department/page.tsx b/app/(admin)/(core)/department/page.tsx
+deleted file mode 100644
+--- a/app/(admin)/(core)/department/page.tsx	(revision 227ead123a767d6d3beef11e3adbe0593a4914ec)
++++ /dev/null	(revision 227ead123a767d6d3beef11e3adbe0593a4914ec)
+@@ -1,11 +0,0 @@
+-import React from 'react'
+-
+-const page = () => {
+-  return (
+-    <div>
+-      
+-    </div>
+-  )
+-}
+-
+-export default page

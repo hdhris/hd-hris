@@ -1,0 +1,4 @@
+diff --git a/app/admin/employees/resign/page.tsx b/app/admin/employees/resign/page.tsx
+new file mode 100644
+diff --git a/app/admin/employees/suspend/page.tsx b/app/admin/employees/suspend/page.tsx
+new file mode 100644
