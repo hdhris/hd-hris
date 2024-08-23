@@ -6,8 +6,10 @@ import BorderCard from "@/components/common/BorderCard";
 import Typography from "@/components/common/typography/Typography";
 import {Chip} from "@nextui-org/chip";
 import {leaveList, leaves} from "@/sampleData/admin/dashboard/LeaveData";
+import {useIsClient} from "@/hooks/ClientRendering";
+import Loading from "@/components/spinner/Loading";
 
-function ActiveLeaves() {
+function Leaves() {
     return (
         <BorderCard heading={
             <>Leave Requests: <Chip size="sm" className="p-0"><Typography className="text-tiny font-semibold">{leaveList.length}</Typography></Chip></>
@@ -39,4 +41,15 @@ function ActiveLeaves() {
     );
 }
 
+function ActiveLeaves() {
+    const isClient = useIsClient()
+    return (
+        <>
+            {
+                isClient ? <Leaves/> : <Loading/>
+            }
+        </>
+    )
+
+}
 export default ActiveLeaves;

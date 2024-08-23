@@ -31,6 +31,7 @@ import {ChevronDownIcon} from "@nextui-org/shared-icons";
 import {cn, icon_color, icon_size} from "@/lib/utils";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useIsClient} from "@/hooks/ClientRendering";
+import Loading from "@/components/spinner/Loading";
 
 interface TableProp<T extends { id: string | number }> extends TableProps {
     config: TableConfigProps<T>;
@@ -330,13 +331,7 @@ function TableData<T extends { id: string | number; }>(props: TableProp<T> & Sea
     return (<>
             {isClient ? <Suspense fallback={<Spinner/>}>
                 <DataTable {...props}/>
-            </Suspense> : <div className='w-full h-full grid place-items-center'>
-                <div className='flex flex-col gap-4 items-center'>
-                    <Spinner />
-                    <Text>Loading...</Text>
-                </div>
-
-            </div>}
+            </Suspense> : <Loading/>}
         </>
 
     );

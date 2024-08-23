@@ -9,7 +9,7 @@ export default async function Home() {
     const session = await getServerSession(authOption);
     if(session){
         if(session.user.role === 'admin'){
-            redirect('/dashboard')
+            redirect('/admin/dashboard')
         } else if(session.user.role === 'employee'){
             redirect('/')
         }

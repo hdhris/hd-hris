@@ -68,7 +68,7 @@ function Login() {
 
             if (res) {
                 if (res.ok && res.status === 200) {
-                    router.push('/dashboard');
+                    router.push('/admin/dashboard');
                 } else if (res && res.status === 401) {
                     setError(res.error!);
                 }
