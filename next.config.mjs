@@ -3,15 +3,15 @@ const nextConfig = {
     env: {
         APP_NAME: process.env.APP_NAME
     },
-    // async redirects() {
-    //     return [
-    //         {
-    //             source: "/attendance-time",
-    //             destination: "/attendance-time/records",
-    //             permanent: true,
-    //         },
-    //     ];
-    // },
+    async redirects() {
+        return [
+            {
+                source: "/attendance-time",
+                destination: "/attendance-time/records",
+                permanent: true,
+            },
+        ];
+    },
     async headers() {
         return [
             {
