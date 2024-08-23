@@ -16,7 +16,7 @@ export function useEmployees() {
 }
 
 export function useAudit() {
-    return useSWR<Signatory[]>('/api/audit/signatories', fetcher, {
+    return useSWR<Signatory[]>('/api/admin/audit/signatories', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }

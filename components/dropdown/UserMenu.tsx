@@ -57,7 +57,7 @@ function UserMenu() {
                     </DropdownItem>
                     <DropdownItem
                         as={Link}
-                        href='/admin/account'
+                        href='/account'
                         textValue="Account Settings"
                         key="account_settings"
                         startContent={<UserCircleGear className={cn("", icon_theme)}/>}
@@ -68,7 +68,7 @@ function UserMenu() {
                         textValue="Preferences"
                         key="preferences"
                         as={Link}
-                        href='/admin/preferences'
+                        href='/preferences'
                         startContent={<Sliders className={cn("", icon_theme)}/>}
                     >
                         <Typography className={text_icon}>Preferences</Typography>
@@ -77,7 +77,7 @@ function UserMenu() {
                 <DropdownSection aria-label="Profile & Actions" showDivider>
                     <DropdownItem
                         textValue="Privileges"
-                        key="/admin/privileges"
+                        key="/privileges"
                         isReadOnly
                         className='opacity-100'
                     >
@@ -89,7 +89,7 @@ function UserMenu() {
                         textValue="Security"
                         key="security"
                         as={Link}
-                        href='/admin/security'
+                        href='/security'
                         startContent={<LuShieldCheck className={cn("", icon_theme)}/>}
                     >
                         <Typography className={text_icon}>Security</Typography>
@@ -98,7 +98,7 @@ function UserMenu() {
                         textValue="Privacy"
                         key="privacy"
                         as={Link}
-                        href='/admin/privacy'
+                        href='/privacy'
                         startContent={<LuShieldAlert className={cn("", icon_theme)}/>}
                     >
                         <Typography className={text_icon}>Privacy</Typography>
@@ -107,7 +107,7 @@ function UserMenu() {
                         textValue="Data Backup"
                         key="data_backup"
                         as={Link}
-                        href='/admin/backup'
+                        href='/backup'
                         startContent={<PiCloudArrowDown className={cn("", icon_theme)}/>}
                     >
                         <Typography className={text_icon}>Data Backup</Typography>
@@ -116,7 +116,7 @@ function UserMenu() {
                         textValue="Integrations"
                         key="integrations"
                         as={Link}
-                        href='/admin/integrations'
+                        href='/integrations'
                         startContent={<PiPlugs className={cn("", icon_theme)}/>}
                     >
                         <Typography className={text_icon}>Integrations</Typography>
@@ -125,7 +125,7 @@ function UserMenu() {
                         textValue="Terms and Condition"
                         key="terms_and_condition"
                         as={Link}
-                        href='/admin/terms&condition'
+                        href='/terms&condition'
                         startContent={<Handshake className={cn("", icon_theme)}/>}
                     >
                         <Typography className={text_icon}>Terms and Condition</Typography>
@@ -134,7 +134,7 @@ function UserMenu() {
                         textValue="Help and Support"
                         key="help_and_support"
                         as={Link}
-                        href='/admin/help&support'
+                        href='/help&support'
                         startContent={<Lifebuoy className={cn("", icon_theme)}/>}
                     >
                         <Typography className={text_icon}>Help and Support</Typography>
