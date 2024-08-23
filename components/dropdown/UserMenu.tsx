@@ -13,33 +13,26 @@ import {Chip} from "@nextui-org/chip";
 import {PiCloudArrowDown, PiPlugs} from "react-icons/pi";
 
 function UserMenu() {
-    return (<>
-        <Dropdown
-            radius="sm"
-        >
+    return (
+        <Dropdown radius="sm">
             <DropdownTrigger>
-      <span className="cursor-pointer">
-        <Badge
-            content=""
-            color="success"
-            shape="circle"
-            placement="bottom-right"
-        >
-          <Avatar
-              src="https://avatars.githubusercontent.com/u/30373425?v=4"
-              size="sm"
-              showFallback
-              fallback={<Skeleton className="flex rounded-full"/>}
-          />
-        </Badge>
-      </span>
+                <span className="cursor-pointer">
+                    <Badge content="" color="success" shape="circle" placement="bottom-right">
+                        <Avatar
+                            src="https://avatars.githubusercontent.com/u/30373425?v=4"
+                            size="sm"
+                            showFallback
+                            fallback={<Skeleton className="flex rounded-full"/>}
+                        />
+                    </Badge>
+                </span>
             </DropdownTrigger>
             <DropdownMenu
                 aria-label="Custom item styles"
                 disabledKeys={["profile", 'privileges']}
                 className="p-3"
                 itemClasses={{
-                    base: ["rounded", "text-inactive-bar", "data-[hover=true]:text-active-bar", "data-[hover=true]:hover-bg", "data-[selectable=true]:focus:bg-default-50", "data-[pressed=true]:opacity-70", "data-[focus-visible=true]:ring-default-500",],
+                    base: ["rounded", "text-inactive-bar", "data-[hover=true]:text-active-bar", "data-[hover=true]:hover-bg", "data-[selectable=true]:focus:bg-default-50", "data-[pressed=true]:opacity-70", "data-[focus-visible=true]:ring-default-500"],
                 }}
             >
                 <DropdownSection aria-label="Profile & Actions" showDivider>
@@ -159,7 +152,7 @@ function UserMenu() {
                 </DropdownSection>
             </DropdownMenu>
         </Dropdown>
-    </>);
+    );
 }
 
 export default UserMenu;

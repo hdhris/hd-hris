@@ -19,29 +19,29 @@ const backupSelectionOptions = [{uid: '1', name: 'All'}, {uid: '2', name: 'Emplo
 
 
 
-const BackupSettings: React.FC = () => (<div className='space-y-4 pr-4'>
+const BackupSettings: React.FC = () => (<div className='space-y-4 pr-4 overflow-hidden'>
     <ProfileForm/>
-    <div className='ms-5 space-y-5'>
-        <Section title='Backup Frequency' subtitle='Set how often your data is backed up.'>
-            <SelectionMenu label='Weekly' options={backupFrequencyOptions} isRequired={false}/>
-        </Section>
-        <Section title='Backup Locations' subtitle='Choose where your backups are stored.'>
-            <Button size='sm' variant='faded'>Configure</Button>
-        </Section>
-        <Section title='Data Selection' subtitle='Select which data to include in backups.'>
-            <SelectionMenu label='All' options={backupSelectionOptions} isRequired={false}/>
-        </Section>
-        <Divider/>
-    </div>
-    <Section title='Backup Management' subtitle='Manage your backup settings and storage options.'/>
-    <div className='ms-5 space-y-5'>
-        <Section title='Manual Backup' subtitle='Initiate a manual data backup at any time.'>
-            <Button size='sm' variant='faded'>Backup Now</Button>
-        </Section>
-        <Section title='Scheduled Backups' subtitle='Set up automatic backups on a regular schedule.'>
-            <Button size='sm' variant='faded'>Configure</Button>
-        </Section>
-    </div>
+    {/*<div className='ms-5 space-y-5'>*/}
+    {/*    <Section title='Backup Frequency' subtitle='Set how often your data is backed up.'>*/}
+    {/*        <SelectionMenu label='Weekly' options={backupFrequencyOptions} isRequired={false}/>*/}
+    {/*    </Section>*/}
+    {/*    <Section title='Backup Locations' subtitle='Choose where your backups are stored.'>*/}
+    {/*        <Button size='sm' variant='faded'>Configure</Button>*/}
+    {/*    </Section>*/}
+    {/*    <Section title='Data Selection' subtitle='Select which data to include in backups.'>*/}
+    {/*        <SelectionMenu label='All' options={backupSelectionOptions} isRequired={false}/>*/}
+    {/*    </Section>*/}
+    {/*    <Divider/>*/}
+    {/*</div>*/}
+    {/*<Section title='Backup Management' subtitle='Manage your backup settings and storage options.'/>*/}
+    {/*<div className='ms-5 space-y-5'>*/}
+    {/*    <Section title='Manual Backup' subtitle='Initiate a manual data backup at any time.'>*/}
+    {/*        <Button size='sm' variant='faded'>Backup Now</Button>*/}
+    {/*    </Section>*/}
+    {/*    <Section title='Scheduled Backups' subtitle='Set up automatic backups on a regular schedule.'>*/}
+    {/*        <Button size='sm' variant='faded'>Configure</Button>*/}
+    {/*    </Section>*/}
+    {/*</div>*/}
 </div>);
 
 const RestoreManagement: React.FC = () => (<div className='pl-4 space-y-4'>
@@ -68,7 +68,6 @@ function Page() {
         <Heading as='h1' className='text-3xl font-bold'>Account Settings</Heading>
         <div className='grid grid-cols-2 gap-4 w-full h-4/5'>
             <BackupSettings/>
-            <RestoreManagement/>
         </div>
         <ActionButtons label='Apply'/>
     </section>);
