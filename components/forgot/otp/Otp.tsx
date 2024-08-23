@@ -18,6 +18,8 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { calculateTimeLeft } from "@/lib/utils/timeLeft";
 import Link from "next/link";
 import {LuXCircle} from "react-icons/lu";
+import {setCookie} from "cookies-next";
+import {useRouter} from "next/navigation";
 
 
 interface TimeLeft {
@@ -26,6 +28,7 @@ interface TimeLeft {
 }
 
 function OTP() {
+    const router = useRouter()
     const otpClassName = "w-12 h-12 text-medium font-semibold"
     const formSchema = z.object({
         otp: z.string().length(6, { message: "Please enter a valid OTP." })
@@ -84,14 +87,15 @@ function OTP() {
     }];
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        // Submit logic here
+        setCookie('otp', values.otp, { maxAge: 2 * 60 }); // Cookie expires in 2 minutes
+        router.push('/forgot/change');
     }
 
     const renderTimeLeftHTML = (timeLeft: TimeLeft) => {
         if (!timeLeft) return "0";
         const { minutes, seconds } = timeLeft;
         const timeString = `${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
-        return <div className='text-tiny grid place-items-center'>OTP expires in {timeString}</div>;
+        return <div className='text-tiny grid place-items-center' suppressHydrationWarning={true}>OTP expires in {timeString}</div>;
     };
 
 
@@ -116,7 +120,7 @@ function OTP() {
                                 timeLeft !== null && timeLeft.seconds > 0 || timeLeft!.minutes > 0 ?
                                     <Button type='submit' isDisabled={!isDirty || !isValid} className='w-full'
                                             color='primary'
-                                            radius='sm' as={Link} href="/forgot/change">
+                                            radius='sm'>
                                         {loading ? <Spinner size="sm"/> : "Verify"}
                                     </Button> :
                                     <Button type='submit' className='w-full' color='primary'
