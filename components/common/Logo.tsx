@@ -10,7 +10,7 @@ function LogoMemo() {
         <div className='flex gap-2 items-center'>
             <Image src={logo} alt="logo" width={48} height={48} priority />
             {APP_NAME && (
-                <Typography suppressHydrationWarning={true} className='text-lg font-bold text-primary'>
+                <Typography className='text-lg font-bold text-primary'>
                     {APP_NAME}
                 </Typography>
             )}

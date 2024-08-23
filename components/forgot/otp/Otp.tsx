@@ -111,7 +111,7 @@ function OTP() {
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2'>
                             <FormFields items={loginFields}/>
-                            <div suppressHydrationWarning>{renderTimeLeftHTML(timeLeft!)}</div>
+                            <div>{renderTimeLeftHTML(timeLeft!)}</div>
                             {
                                 timeLeft !== null && timeLeft.seconds > 0 || timeLeft!.minutes > 0 ?
                                     <Button type='submit' isDisabled={!isDirty || !isValid} className='w-full'

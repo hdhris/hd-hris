@@ -28,7 +28,7 @@ function ActiveLeaves() {
                                     <span className="text-tiny text-default-400">{item.email}</span>
                                 </div>
                             </div>
-                            <Typography as="span" suppressHydrationWarning className="text-tiny text-default-400 opacity-50 self-end">{item.dateRequested as string}</Typography>
+                            <Typography as="span" className="text-tiny text-default-400 opacity-50 self-end">{item.dateRequested as string}</Typography>
                             </div>
                         </ListboxItem>
                     )}

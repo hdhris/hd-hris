@@ -11,6 +11,7 @@ import {LuShieldAlert, LuShieldCheck} from "react-icons/lu";
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
 import {PiCloudArrowDown, PiPlugs} from "react-icons/pi";
+import {signOut} from "next-auth/react";
 
 function UserMenu() {
     return (
@@ -143,8 +144,7 @@ function UserMenu() {
                     <DropdownItem
                         textValue="Log Out"
                         key="logout"
-                        as={Link}
-                        href='/api/auth/signout'
+                        onClick={() => signOut({callbackUrl: "/"})}
                         startContent={<SignOut className={cn("", icon_theme)}/>}
                     >
                         <Typography className={text_icon}>Log out</Typography>

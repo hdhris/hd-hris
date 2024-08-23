@@ -30,6 +30,7 @@ import {FilterProps} from "@/types/table/default_config";
 import {ChevronDownIcon} from "@nextui-org/shared-icons";
 import {cn, icon_color, icon_size} from "@/lib/utils";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
+import {useIsClient} from "@/hooks/ClientRendering";
 
 interface TableProp<T extends { id: string | number }> extends TableProps {
     config: TableConfigProps<T>;
@@ -174,16 +175,6 @@ function DataTable<T extends { id: string | number }>({
             router.push(`${getCurrentPath}`);
         }
     }, [getCurrentPath, router]);
-// const onSearchChange = React.useCallback((value?: string) => {
-//         if (value) {
-//             router.push(`${getCurrentPath}?search=${value}${filter !== "all" && filter.size > 0 ? `&filter=${Array.from(filter).join(',')}` : ''}`);
-//             setFilterValue(value);
-//
-//         } else {
-//             setFilterValue("");
-//             router.push(`${getCurrentPath}${filter !== "all" && filter.size > 0 ? `?filter=${Array.from(filter).join(',')}` : ''}`);
-//         }
-//     }, [getCurrentPath, router, filter]);
 
     const onClear = React.useCallback(() => {
         setFilterValue("");
@@ -298,7 +289,7 @@ function DataTable<T extends { id: string | number }>({
                     selectionMode={selectionMode}
                     {...props}
                 >
-                    <TableHeader columns={config.columns} suppressHydrationWarning={true}>
+                    <TableHeader columns={config.columns}>
                         {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn
                             key={column.uid}
                             align={column.uid === "actions" ? "center" : "start"}
@@ -335,13 +326,10 @@ function DataTable<T extends { id: string | number }>({
 }
 
 function TableData<T extends { id: string | number; }>(props: TableProp<T> & SearchProps<T>) {
-    const [isClient, setIsClient] = useState(false)
-    useEffect(() => {
-        setIsClient(true)
-    }, [])
+    const isClient = useIsClient();
     return (<>
             {isClient ? <Suspense fallback={<Spinner/>}>
-                <DataTable {...props} suppressHydrationWarning={true}/>
+                <DataTable {...props}/>
             </Suspense> : <div className='w-full h-full grid place-items-center'>
                 <div className='flex flex-col gap-4 items-center'>
                     <Spinner />
