@@ -36,7 +36,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
 
-    return (<html lang="en" suppressHydrationWarning={true}>
+    return (<html lang="en">
     <body>
     <Providers className={inter.className}>
 
@@ -51,8 +51,8 @@ export default function RootLayout({
             </Default>
         </Switch>
         {/*<Footer/>*/}
-        {/*<SpeedInsights/>*/}
-        {/*<Analytics/>*/}
+        <SpeedInsights/>
+        <Analytics/>
     </Providers>
 
     </body>

@@ -1,7 +1,7 @@
 'use client'
 import React, {ReactNode, useEffect, useMemo, useState} from "react";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
-import Text from "@/components/common/typography/Text";
+import Typography from "@/components/common/typography/Typography";
 import dayjs from "dayjs";
 import {LuCalendarClock} from "react-icons/lu";
 import {cn, icon_size} from "@/lib/utils";
@@ -42,30 +42,30 @@ function DateComponent({ onClockShow }: Props) {
                 {onClockShow ? (
                     <div className="flex flex-col gap-3 p-2 mb-20 ml-2">
                         <div className="flex flex-row gap-2 items-center">
-                            <Text className="text-6xl font-semibold">{date[0]}</Text>
+                            <Typography className="text-6xl font-semibold">{date[0]}</Typography>
                             <div className="flex flex-col">
-                                <Text className="text-xl font-semibold">{date[1]}</Text>
-                                <Text className="text-lg font-semibold opacity-50">
+                                <Typography className="text-xl font-semibold">{date[1]}</Typography>
+                                <Typography className="text-lg font-semibold opacity-50">
                                     {date[2]}
-                                </Text>
+                                </Typography>
                             </div>
                         </div>
                         <Divider />
                         <div className="flex gap-2 items-center">
-                            <Text>{date[3]}</Text>
+                            <Typography>{date[3]}</Typography>
                             <Divider orientation="vertical" />
-                            <Text className="text-inactive-bar">{`${date[4]} ${date[5]}`}</Text>
+                            <Typography className="text-inactive-bar">{`${date[4]} ${date[5]}`}</Typography>
                         </div>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-3 p-2 mb-20">
                         <div className="flex flex-col gap-2 items-center">
-                            <Text className="font-semibold text-2xl">
+                            <Typography className="font-semibold text-2xl">
                                 {date[4].split(":")[0]}
-                            </Text>
-                            <Text className="font-semibold text-2xl">
+                            </Typography>
+                            <Typography className="font-semibold text-2xl">
                                 {date[4].split(":")[1]}
-                            </Text>
+                            </Typography>
                         </div>
                     </div>
                 )}

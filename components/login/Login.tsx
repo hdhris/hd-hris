@@ -1,6 +1,6 @@
 "use client"
 import React, {useState} from 'react';
-import Text from "@/components/common/typography/Text";
+import Typography from "@/components/common/typography/Typography";
 import Image from "next/image";
 import logo from "@/public/logo.svg";
 import {Card, CardBody, CardHeader} from "@nextui-org/card";
@@ -22,6 +22,7 @@ import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
 import {useRouter} from "next/navigation";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {LuXCircle} from "react-icons/lu";
+import ForgotButton from "@/components/forgot/ForgotButton";
 
 function Login() {
 
@@ -87,9 +88,9 @@ function Login() {
             <CardHeader className='grid place-items-center gap-2'>
                 <Image src={logo} className="w-24 h-24 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500"
                        alt="WageWise Logo"/>
-                <Text className='font-semibold text-xl'>Secure Access Starts Here</Text>
-                <Text className='text-center'>Login to GVC-PMS for Effortless Payroll
-                    Management</Text>
+                <Typography className='font-semibold text-xl'>Secure Access Starts Here</Typography>
+                <Typography className='text-center'>Login to GVC-PMS for Effortless Payroll
+                    Management</Typography>
             </CardHeader>
             <CardBody>
                 {error && <Chip classNames={{
@@ -100,11 +101,10 @@ function Login() {
                         <FormFields items={loginFields}/>
                         <div className='flex justify-between'>
                             <Checkbox size='sm'>Remember Me</Checkbox>
-                            <Button size='sm' variant='light' className='w-fit text-blue-400' as={Link}
-                                    href={'/forgot'}>Forgot Password</Button>
+                            <ForgotButton/>
                         </div>
 
-                        {/*<Text as={Link} href={'/forgot'} className='text-red-400 cursor-pointer text-right text-small'></Text>*/}
+                        {/*<Typography as={Link} href={'/forgot'} className='text-red-400 cursor-pointer text-right text-small'></Typography>*/}
 
                         <Button type='submit' isDisabled={!isDirty || !isValid} className='w-full' color='primary'
                                 radius='sm'

@@ -6,7 +6,7 @@ import {
 import {ControllerRenderProps, FieldValues, useFormContext} from "react-hook-form";
 import InputStyle from "@/lib/custom/styles/InputStyle";
 import {SelectionProp} from "./types/SelectionProp";
-import {Input} from "@nextui-org/input";
+import {Input, InputProps} from "@nextui-org/input";
 import {Select, SelectItem} from "@nextui-org/select";
 
 export interface FormInputProps {
@@ -26,9 +26,10 @@ export interface FormInputProps {
 
 interface FormsControlProps {
     items: FormInputProps[];
+    size?: InputProps['size']
 }
 
-const renderFormItem = (item: FormInputProps, control: any, index: number) => (
+const renderFormItem = (item: FormInputProps, control: any, index: number, size:InputProps['size']) => (
     <FormField
         key={index}
         control={control}
@@ -54,6 +55,7 @@ const renderFormItem = (item: FormInputProps, control: any, index: number) => (
                             variant="bordered"
                             color="success"
                             placeholder={item.placeholder}
+                            size={size}
                             className={item.inputClassName}
                             {...field}
                             classNames={InputStyle}
@@ -120,7 +122,7 @@ export const Selection = ({
     );
 };
 
-export default function FormFields({items}: FormsControlProps) {
+export default function FormFields({items, size}: FormsControlProps) {
     const {control} = useFormContext();
-    return <>{items.map((item, index) => renderFormItem(item, control, index))}</>;
+    return <>{items.map((item, index) => renderFormItem(item, control, index, size))}</>;
 }

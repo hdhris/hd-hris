@@ -6,39 +6,34 @@ import {
 import {Handshake, Lifebuoy, SignOut, Sliders, UserCircleGear} from "@phosphor-icons/react";
 import {Avatar} from "@nextui-org/avatar";
 import {icon_theme, text_icon} from "@/lib/utils";
-import Text from "@/components/common/typography/Text"
-import {LuShieldCheck} from "react-icons/lu";
+import Typography from "@/components/common/typography/Typography"
+import {LuShieldAlert, LuShieldCheck} from "react-icons/lu";
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
+import {PiCloudArrowDown, PiPlugs} from "react-icons/pi";
+import {signOut} from "next-auth/react";
 
 function UserMenu() {
-    return (<>
-        <Dropdown
-            radius="sm"
-        >
+    return (
+        <Dropdown radius="sm">
             <DropdownTrigger>
-      <span className="cursor-pointer">
-        <Badge
-            content=""
-            color="success"
-            shape="circle"
-            placement="bottom-right"
-        >
-          <Avatar
-              src="https://avatars.githubusercontent.com/u/30373425?v=4"
-              size="sm"
-              showFallback
-              fallback={<Skeleton className="flex rounded-full"/>}
-          />
-        </Badge>
-      </span>
+                <span className="cursor-pointer">
+                    <Badge content="" color="success" shape="circle" placement="bottom-right">
+                        <Avatar
+                            src="https://avatars.githubusercontent.com/u/30373425?v=4"
+                            size="sm"
+                            showFallback
+                            fallback={<Skeleton className="flex rounded-full"/>}
+                        />
+                    </Badge>
+                </span>
             </DropdownTrigger>
             <DropdownMenu
                 aria-label="Custom item styles"
                 disabledKeys={["profile", 'privileges']}
                 className="p-3"
                 itemClasses={{
-                    base: ["rounded", "text-inactive-bar", "data-[hover=true]:text-active-bar", "data-[hover=true]:hover-bg", "data-[selectable=true]:focus:bg-default-50", "data-[pressed=true]:opacity-70", "data-[focus-visible=true]:ring-default-500",],
+                    base: ["rounded", "text-inactive-bar", "data-[hover=true]:text-active-bar", "data-[hover=true]:hover-bg", "data-[selectable=true]:focus:bg-default-50", "data-[pressed=true]:opacity-70", "data-[focus-visible=true]:ring-default-500"],
                 }}
             >
                 <DropdownSection aria-label="Profile & Actions" showDivider>
@@ -62,12 +57,12 @@ function UserMenu() {
                     </DropdownItem>
                     <DropdownItem
                         as={Link}
-                        href='/profile'
+                        href='/account'
                         textValue="Account Settings"
                         key="account_settings"
                         startContent={<UserCircleGear className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Account Settings</Text>
+                        <Typography className={text_icon}>Account Settings</Typography>
                     </DropdownItem>
                     <DropdownItem
                         textValue="Preferences"
@@ -76,13 +71,13 @@ function UserMenu() {
                         href='/preferences'
                         startContent={<Sliders className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Preferences</Text>
+                        <Typography className={text_icon}>Preferences</Typography>
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection aria-label="Profile & Actions" showDivider>
                     <DropdownItem
                         textValue="Privileges"
-                        key="privileges"
+                        key="/privileges"
                         isReadOnly
                         className='opacity-100'
                     >
@@ -91,13 +86,40 @@ function UserMenu() {
                 </DropdownSection>
                 <DropdownSection showDivider>
                     <DropdownItem
-                        textValue="Security and Privacy"
-                        key="security_and_privacy"
+                        textValue="Security"
+                        key="security"
                         as={Link}
-                        href='/security&privacy'
+                        href='/security'
                         startContent={<LuShieldCheck className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Security and Privacy</Text>
+                        <Typography className={text_icon}>Security</Typography>
+                    </DropdownItem>
+                    <DropdownItem
+                        textValue="Privacy"
+                        key="privacy"
+                        as={Link}
+                        href='/privacy'
+                        startContent={<LuShieldAlert className={cn("", icon_theme)}/>}
+                    >
+                        <Typography className={text_icon}>Privacy</Typography>
+                    </DropdownItem>
+                    <DropdownItem
+                        textValue="Data Backup"
+                        key="data_backup"
+                        as={Link}
+                        href='/backup'
+                        startContent={<PiCloudArrowDown className={cn("", icon_theme)}/>}
+                    >
+                        <Typography className={text_icon}>Data Backup</Typography>
+                    </DropdownItem>
+                    <DropdownItem
+                        textValue="Integrations"
+                        key="integrations"
+                        as={Link}
+                        href='/integrations'
+                        startContent={<PiPlugs className={cn("", icon_theme)}/>}
+                    >
+                        <Typography className={text_icon}>Integrations</Typography>
                     </DropdownItem>
                     <DropdownItem
                         textValue="Terms and Condition"
@@ -106,7 +128,7 @@ function UserMenu() {
                         href='/terms&condition'
                         startContent={<Handshake className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Terms and Condition</Text>
+                        <Typography className={text_icon}>Terms and Condition</Typography>
                     </DropdownItem>
                     <DropdownItem
                         textValue="Help and Support"
@@ -115,23 +137,22 @@ function UserMenu() {
                         href='/help&support'
                         startContent={<Lifebuoy className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Help and Support</Text>
+                        <Typography className={text_icon}>Help and Support</Typography>
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection>
                     <DropdownItem
                         textValue="Log Out"
                         key="logout"
-                        as={Link}
-                        href='/api/auth/signout'
+                        onClick={() => signOut({callbackUrl: "/"})}
                         startContent={<SignOut className={cn("", icon_theme)}/>}
                     >
-                        <Text className={text_icon}>Log out</Text>
+                        <Typography className={text_icon}>Log out</Typography>
                     </DropdownItem>
                 </DropdownSection>
             </DropdownMenu>
         </Dropdown>
-    </>);
+    );
 }
 
 export default UserMenu;

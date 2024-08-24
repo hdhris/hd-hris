@@ -1,5 +1,5 @@
 'use client';
-import React, {useEffect, useRef} from 'react';
+import React, {Suspense, useEffect, useRef, useState} from 'react';
 import {
     Button,
     Dropdown,
@@ -30,6 +30,8 @@ import {FilterProps} from "@/types/table/default_config";
 import {ChevronDownIcon} from "@nextui-org/shared-icons";
 import {cn, icon_color, icon_size} from "@/lib/utils";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
+import {useIsClient} from "@/hooks/ClientRendering";
+import Loading from "@/components/spinner/Loading";
 
 interface TableProp<T extends { id: string | number }> extends TableProps {
     config: TableConfigProps<T>;
@@ -41,6 +43,7 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
     counterName?: string;
     isLoading?: boolean;
     contentTop?: React.JSX.Element;
+    onSelectToDelete?: boolean
 }
 
 interface SearchProps<T> {
@@ -61,10 +64,11 @@ function genericSearch<T>(object: T, searchingItemKey: Array<keyof T>, query: st
     return searchable;
 }
 
-function TableData<T extends { id: string | number }>({
+function DataTable<T extends { id: string | number }>({
                                                           config,
                                                           items,
                                                           sort,
+                                                          onSelectToDelete,
                                                           searchingItemKey,
                                                           filterConfig,
                                                           filterItems,
@@ -78,6 +82,7 @@ function TableData<T extends { id: string | number }>({
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>(sort ? sort : {
         column: "id", direction: "descending"
     });
+
     const getCurrentPath = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -119,6 +124,7 @@ function TableData<T extends { id: string | number }>({
         }
         return filteredUsers;
     }, [items, hasSearchFilter, filterConfig, filter, searchingItemKey, filterValue]);
+
 
     const chipContainerRef = useRef<HTMLDivElement>(null);
 
@@ -170,16 +176,6 @@ function TableData<T extends { id: string | number }>({
             router.push(`${getCurrentPath}`);
         }
     }, [getCurrentPath, router]);
-// const onSearchChange = React.useCallback((value?: string) => {
-//         if (value) {
-//             router.push(`${getCurrentPath}?search=${value}${filter !== "all" && filter.size > 0 ? `&filter=${Array.from(filter).join(',')}` : ''}`);
-//             setFilterValue(value);
-//
-//         } else {
-//             setFilterValue("");
-//             router.push(`${getCurrentPath}${filter !== "all" && filter.size > 0 ? `?filter=${Array.from(filter).join(',')}` : ''}`);
-//         }
-//     }, [getCurrentPath, router, filter]);
 
     const onClear = React.useCallback(() => {
         setFilterValue("");
@@ -193,83 +189,89 @@ function TableData<T extends { id: string | number }>({
     };
 
     const topContent = React.useMemo(() => {
-        return (<div className="flex flex-col gap-4">
-            <div className="flex justify-between gap-3 items-end">
-                <Input
-                    isClearable
-                    variant="bordered"
-                    radius="sm"
-                    className="w-full sm:max-w-[44%]"
-                    color="primary"
-                    placeholder={`Search by ${searchingItemKey.map((item) => item.toString().replace(/[,_]+/g, ' ')).join(", ").toUpperCase()}`}
-                    startContent={<SearchIcon className={cn("text-small", icon_color, icon_size)}/>}
-                    value={filterValue} // Set the value of the input
-                    onClear={() => onClear()}
-                    onValueChange={onSearchChange}
-                />
-                {filterItems && (<div className="flex gap-3 items-center">
-                    <Dropdown classNames={{content: 'rounded'}}>
-                        <DropdownTrigger className="hidden sm:flex">
-                            <Button radius="sm" endContent={<ChevronDownIcon
-                                className={cn('text-small', icon_color, icon_size)}/>} variant="bordered">
-                                {filter !== "all" && filter.size > 0 ? capitalize(Array.from(filter)[0] as string) : "Filter..."}
-                            </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                            aria-label="Table Columns"
-                            className="max-h-96 overflow-y-auto"
-                            closeOnSelect={false}
-                            selectedKeys={filter}
-                            selectionMode="single"
-                            onSelectionChange={(keys) => {
-                                setFilter(keys as Selection);
-                                const newSearchParams = new URLSearchParams(searchParams.toString());
-                                if (keys !== "all" && keys.size > 0) {
-                                    newSearchParams.set('filter', Array.from(keys).join(','));
-                                } else {
-                                    newSearchParams.delete('filter');
-                                }
-                                if (filterValue) {
-                                    newSearchParams.set('search', filterValue);
-                                }
-                                router.push(`${getCurrentPath}?${newSearchParams.toString()}`);
-                            }}
-                        >
-                            {filterItems.map((item) => (
-                                <DropdownSection key={item.category} title={item.category} showDivider>
-                                    {item.filtered.map((data) => (<DropdownItem key={data.uid} className="capitalize">
-                                        {capitalize(data.name)}
-                                    </DropdownItem>))}
-                                </DropdownSection>))}
-                        </DropdownMenu>
-                    </Dropdown>
-                    {endContent && endContent()}
-                </div>)}
-            </div>
-            <div className='flex justify-between items-center'>
-                <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
-                    <span><CountUp start={0} end={sortedItems.length}/> </span> {counterName}
-                </h1>
-                {contentTop && contentTop}
-            </div>
-        </div>);
+        return (<Suspense fallback={<Spinner/>}>
+                <div className="flex flex-col gap-4">
+                    <div className="flex justify-between gap-3 items-end">
+                        <Input
+                            isClearable
+                            variant="bordered"
+                            radius="sm"
+                            className="w-full sm:max-w-[44%]"
+                            color="primary"
+                            placeholder={`Search by ${searchingItemKey.map((item) => item.toString().replace(/[,_]+/g, ' ')).join(", ").toUpperCase()}`}
+                            startContent={<SearchIcon className={cn("text-small", icon_color, icon_size)}/>}
+                            value={filterValue} // Set the value of the input
+                            onClear={() => onClear()}
+                            onValueChange={onSearchChange}
+                        />
+                        {filterItems && (<div className="flex gap-3 items-center">
+                            <Dropdown classNames={{content: 'rounded'}}>
+                                <DropdownTrigger className="hidden sm:flex">
+                                    <Button radius="sm" endContent={<ChevronDownIcon
+                                        className={cn('text-small', icon_color, icon_size)}/>} variant="bordered">
+                                        {filter !== "all" && filter.size > 0 ? capitalize(Array.from(filter)[0] as string) : "Filter..."}
+                                    </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu
+                                    aria-label="Table Columns"
+                                    className="max-h-96 overflow-y-auto"
+                                    closeOnSelect={false}
+                                    selectedKeys={filter}
+                                    selectionMode="single"
+                                    onSelectionChange={(keys) => {
+                                        setFilter(keys as Selection);
+                                        const newSearchParams = new URLSearchParams(searchParams.toString());
+                                        if (keys !== "all" && keys.size > 0) {
+                                            newSearchParams.set('filter', Array.from(keys).join(','));
+                                        } else {
+                                            newSearchParams.delete('filter');
+                                        }
+                                        if (filterValue) {
+                                            newSearchParams.set('search', filterValue);
+                                        }
+                                        router.push(`${getCurrentPath}?${newSearchParams.toString()}`);
+                                    }}
+                                >
+                                    {filterItems.map((item) => (
+                                        <DropdownSection key={item.category} title={item.category} showDivider>
+                                            {item.filtered.map((data) => (
+                                                <DropdownItem key={data.uid} className="capitalize">
+                                                    {capitalize(data.name)}
+                                                </DropdownItem>))}
+                                        </DropdownSection>))}
+                                </DropdownMenu>
+                            </Dropdown>
+                            {endContent && endContent()}
+                        </div>)}
+                    </div>
+                    <div className='flex justify-between items-center'>
+                        {counterName &&
+                            <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
+                                <span><CountUp start={0} end={sortedItems.length}/> </span> {counterName}
+                            </h1>}
+                        {contentTop && contentTop}
+                    </div>
+                </div>
+            </Suspense>
+
+        );
     }, [searchingItemKey, filterValue, onSearchChange, filterItems, filter, endContent, sortedItems.length, counterName, contentTop, onClear, searchParams, router, getCurrentPath]);
 
     const bottomContent = React.useMemo(() => {
         return (<section className="py-2 px-2 flex justify-between items-center">
             <div className='flex gap-4 items-center'>
                 <Text className="text-small font-semibold opacity-50">
-                    {selectedKeys === "all" ? "All users selected" : `${selectedKeys.size} of ${sortedItems.length} selected`}
+                    {selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${sortedItems.length} selected`}
                 </Text>
-                {isActionable && (<Tooltip color="danger"
-                                           content={`Delete ${selectedKeys === "all" ? "all users selected" : `${selectedKeys.size} users`}`}>
+                {onSelectToDelete && isActionable && (<Tooltip color="danger"
+                                                               content={`Delete ${selectedKeys === "all" ? "all users selected" : `${selectedKeys.size} users`}`}>
                     <span className="text-lg text-danger cursor-pointer active:opacity-50">
                         <Trash2/>
                     </span>
                 </Tooltip>)}
             </div>
         </section>);
-    }, [isActionable, selectedKeys, sortedItems.length]);
+    }, [isActionable, onSelectToDelete, selectedKeys, sortedItems.length]);
 
     const loadingState = isLoading ? "loading" : "idle";
     const emptyContent = sortedItems.length === 0 && !isLoading && 'No data found. Try to refresh';
@@ -310,7 +312,7 @@ function TableData<T extends { id: string | number }>({
                         loadingState={loadingState}
                     >
                         {(item: T) => (<TableRow key={item.id} className='cursor-pointer '>
-                            {(columnKey: React.Key) => (<TableCell key={columnKey} className='py-3'>
+                            {(columnKey: React.Key) => (<TableCell key={String(columnKey)} className='py-3'>
                                 {config.rowCell(item, columnKey)}
                             </TableCell>)}
                         </TableRow>)}
@@ -322,6 +324,17 @@ function TableData<T extends { id: string | number }>({
             {selectionMode === "multiple" && bottomContent}
         </section>
     </div>);
+}
+
+function TableData<T extends { id: string | number; }>(props: TableProp<T> & SearchProps<T>) {
+    const isClient = useIsClient();
+    return (<>
+            {isClient ? <Suspense fallback={<Spinner/>}>
+                <DataTable {...props}/>
+            </Suspense> : <Loading/>}
+        </>
+
+    );
 }
 
 export default TableData;

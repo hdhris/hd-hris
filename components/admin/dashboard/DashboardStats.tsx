@@ -15,7 +15,7 @@ import {ApexOptions} from "apexcharts";
 import Stackedbar from "@/components/common/charts/StackBar";
 import dynamic from "next/dynamic";
 import {ButtonGroup, Listbox, ListboxItem, Tab, Tabs} from "@nextui-org/react";
-import Text from "@/components/common/typography/Text";
+import Typography from "@/components/common/typography/Typography";
 import {Avatar} from "@nextui-org/avatar";
 import {topDepartmentList, topEmployeeList} from "@/sampleData/admin/dashboard/TopEmployeeList";
 import BorderCard from "@/components/common/BorderCard";
@@ -77,7 +77,7 @@ const DashboardStats = () => {
         title: "Leaves",
         status: "decreased",
         percent: 10,
-        footer: <Text className="text-medium">Common: <span className="text-medium font-semibold">Sick Leave</span></Text>,
+        footer: <Typography className="text-medium">Common: <span className="text-medium font-semibold">Sick Leave</span></Typography>,
         chart: <AreaChart data={leavesStat} showTooltip={false}/>
     }, {
         icon: <LuCalendarX2 className={cn("", icon_color, icon_size)}/>,
@@ -365,14 +365,14 @@ const TopSalaries = () => {
                     <Avatar alt={item.name} className="flex-shrink-0" size="sm" src={item.picture}/>
                     <div className="flex justify-between items-center w-full">
                         <div className="flex flex-col">
-                            <Text
-                                className="text-small w-3/4 overflow-hidden whitespace-nowrap overflow-ellipsis">{item.name}</Text>
-                            <Text
-                                className="text-tiny text-default-400 w-3/4 overflow-hidden whitespace-nowrap overflow-ellipsis">{(item.email)}</Text>
+                            <Typography
+                                className="text-small w-3/4 overflow-hidden whitespace-nowrap overflow-ellipsis">{item.name}</Typography>
+                            <Typography
+                                className="text-tiny text-default-400 w-3/4 overflow-hidden whitespace-nowrap overflow-ellipsis">{(item.email)}</Typography>
                         </div>
-                        <Text
+                        <Typography
                             className="text-default-400">₱<CountUp start={0} end={item.amount as number}
-                                                                   formattingFn={(val) => compactNumber(val)}/></Text>
+                                                                   formattingFn={(val) => compactNumber(val)}/></Typography>
                     </div>
                 </div>
             </ListboxItem>)}
@@ -390,10 +390,10 @@ const TopSalaries = () => {
                 <div className="flex gap-2 items-center">
                     <span className="w-2 h-2 rounded-full" style={{backgroundColor: `#${item.color}`}}></span>
                     <div className="flex justify-between items-center w-full">
-                        <Text className="text-small">{item.name}</Text>
-                        <Text
+                        <Typography className="text-small">{item.name}</Typography>
+                        <Typography
                             className="text-default-400">₱<CountUp start={0} end={item.amount as number}
-                                                                   formattingFn={(val) => compactNumber(val)}/></Text>
+                                                                   formattingFn={(val) => compactNumber(val)}/></Typography>
 
                     </div>
                 </div>
