@@ -1,32 +1,28 @@
 "use client";
 
 import React, { ReactNode, useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation"; 
 import { Tabs, Tab } from "@nextui-org/react";
+import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import BreadcrumbComponent from "@/components/common/breadcrumb";
 
 type TabKeys = "employees" | "suspend" | "resign" | "appraisal";
 
 const RootLayout = ({ children }: { children: ReactNode }) => {
-  const router = useRouter();
-  const pathname = usePathname(); 
+  const router = useRouter(); 
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<TabKeys>("employees");
 
   useEffect(() => {
-    // Redirect to /employeemanagement/employees if at /employeemanagement
-    if (pathname === "/employeemanagement") {
-      router.replace("/employeemanagement/employees");
-    } else {
-      const currentTab = pathname.includes("suspend")
-        ? "suspend"
-        : pathname.includes("resign")
-        ? "resign"
-        : pathname.includes("appraisal")
-        ? "appraisal"
-        : "employees";
-      setActiveTab(currentTab);
-    }
-  }, [pathname, router]);
+    const tab = pathname.includes("suspend")
+      ? "suspend"
+      : pathname.includes("resign")
+      ? "resign"
+      : pathname.includes("appraisal")
+      ? "appraisal"
+      : "employees";  // Default to "employees"
+    setActiveTab(tab);
+  }, [pathname]);
 
   const handleTabChange = (key: TabKeys) => {
     router.push(`/employeemanagement/${key}`);
@@ -52,9 +48,8 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col -mt-2">
       <BreadcrumbComponent paths={breadcrumbPaths[activeTab]} />
-      
       <Tabs
         aria-label="Employee Management Tabs"
         disableAnimation
@@ -66,10 +61,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
         <Tab key="resign" title="Resign" />
         <Tab key="appraisal" title="Appraisal" />
       </Tabs>
-
-      <div className="scroll-shadow">
-        {children}
-      </div>
+      <ScrollShadow>{children}</ScrollShadow>
     </div>
   );
 };
