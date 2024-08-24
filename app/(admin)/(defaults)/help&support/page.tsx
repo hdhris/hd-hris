@@ -22,7 +22,7 @@ const backupSelectionOptions = [{uid: '1', name: 'All'}, {uid: '2', name: 'Emplo
 const ColumnOne: React.FC = () => (<div className='space-y-4 pr-4'>
     <Section title='Knowledge Base or FAQ'
              subtitle='Find answers to common questions and troubleshooting tips in the Knowledge Base or FAQ section.'/>
-    <div className='ms-5 space-y-5 h-[250px] overflow-hidden'>
+    <div className='ms-16 space-y-5 h-[250px] overflow-hidden'>
         <ScrollShadow className="h-full pr-4" size={10}>
             <Accordion variant="light">
                 <AccordionItem classNames={{
@@ -89,7 +89,7 @@ const ColumnTwo: React.FC = () => (<div className='pl-4 space-y-4'>
         </div>
 
         <Section title='HD-HRIS User Manual' subtitle='Download the HD-HRIS User Manual in PDF format.'>
-            <Button size='sm' variant='faded' as={Link} href={'/user-manual.pdf'}>Download</Button>
+            <Button size='sm' variant='faded' as={Link} href={'/user-manual.pdf'} target='_blank'>Download</Button>
         </Section>
 
 

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import Typography from "@/components/common/typography/Typography";
+import Typography from "../../components/common/typography/Typography";
 import React, { ReactNode } from "react";
 import { cn, Tooltip } from "@nextui-org/react";
 import { usePathname } from "next/navigation";

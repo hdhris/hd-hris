@@ -69,7 +69,6 @@ function Page() {
             <BackupSettings/>
             <RestoreManagement/>
         </div>
-        <ActionButtons label='Apply'/>
     </section>);
 }
 

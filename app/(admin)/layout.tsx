@@ -15,13 +15,14 @@ import {
 } from "react-icons/lu";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import {BiStats} from "react-icons/bi";
-import SideBarItem from "@/components/sidebar/SideBarItem";
-import SideBar from "@/components/sidebar/SideBar";
-import NavBar from "@/components/navbar/NavBar";
-// import AuditSignatories from "@/components/dashboard/AuditSignatories";
-import UserMenu from "@/components/dropdown/UserMenu";
-import Notification from '@/components/functions/notifications/Notification'
-import AuditSignatories from "@/components/admin/dashboard/AuditSignatories";
+// import SideBarItem from "@/components/sidebar/SideBarItem";
+// import SideBar from "@/components/sidebar/SideBar";
+import SideBarItem from "../../components/sidebar/SideBarItem";
+import SideBar from "../../components/sidebar/SideBar";
+import NavBar from "../../components/navbar/NavBar";
+import UserMenu from "../../components/dropdown/UserMenu";
+import Notification from '../../components/functions/notifications/Notification'
+import AuditSignatories from "../../components/admin/dashboard/AuditSignatories";
 function RootLayout({ children }: { children: ReactNode }) {
     // Use a function to lazily initialize the state
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
