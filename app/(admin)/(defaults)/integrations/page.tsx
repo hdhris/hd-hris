@@ -35,7 +35,7 @@ const ColumnOne: React.FC = () => {
                                     classNames={{
                                         subHeading: 'max-w-64 whitespace-nowrap overflow-hidden text-ellipsis'
                                     }}
-                                    title='ZKTeco'
+                                    title='TiDB'
                                     subtitle='an open-source, cloud-native, distributed, MySQL-Compatible database for elastic scale and real-time analytics'>
                                     <Switch defaultSelected size='sm' color="primary"/>
                                 </Section>
