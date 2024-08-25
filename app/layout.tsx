@@ -9,7 +9,7 @@ import {Case, Default, Switch} from "@/components/common/Switch";
 import MaintenanceBreak from "@/components/maintainance/Maintenance";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
-import {redirect} from "next/navigation";
+
 
 
 const inter = Inter({subsets: ["latin"]});

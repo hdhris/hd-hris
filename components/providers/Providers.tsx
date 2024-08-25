@@ -5,13 +5,17 @@ import React from "react";
 import {SessionProvider} from "next-auth/react";
 import SWRProvider from "@/components/providers/SWRProvider";
 import {useRouter} from 'next/navigation'
+import {EdgeStoreProvider} from "@/lib/edgestore/edgestore";
+
 export function Providers({children, className}: { children: React.ReactNode, className?: string }) {
     const router = useRouter();
-    return (<SessionProvider>
-        <SWRProvider>
-            <NextUIProvider className={className} navigate={router.push}>
-                {children}
-            </NextUIProvider>
-        </SWRProvider>
-        </SessionProvider>)
+    return (<EdgeStoreProvider>
+        <SessionProvider>
+            <SWRProvider>
+                <NextUIProvider className={className} navigate={router.push}>
+                    {children}
+                </NextUIProvider>
+            </SWRProvider>
+        </SessionProvider>
+    </EdgeStoreProvider>)
 }

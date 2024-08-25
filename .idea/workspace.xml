@@ -5,7 +5,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adjusting the CI/CD">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/preview.yaml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/__test__/login.test.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/edgestore/[...edgestore]/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/upload/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/upload/upload.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/date/DateComponent.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/ui/fileupload/multi-file.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/ui/fileupload/multi-image.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/ui/fileupload/single-image.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/util/RenderList.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/edgestore/edgestore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/layout.test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/__test__/layout.test.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/privacy/PrivacyPolicyForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/privacy/PrivacyPolicyForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/providers/Providers.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/providers/Providers.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/sidebar/SideBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/sidebar/SideBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tailwind.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tailwind.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,6 +37,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="JavaScript File" />
+        <option value="CSS File" />
         <option value="TypeScript JSX File" />
         <option value="TypeScript File" />
       </list>
@@ -61,32 +85,54 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Jest.NextAuth Credentials Provider.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "Vitest.All Tests in vitest.config.ts.executor": "Run",
     "Vitest.All Tests.executor": "Run",
     "Vitest.RootLayout Component.executor": "Run",
     "Vitest.RootLayout.executor": "Run",
     "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/John/WebstormProjects/Home-Design-HRIS/public/js",
+    "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs.jest.jest_package": "C:/Users/John/WebstormProjects/Home-Design-HRIS/node_modules/jest",
     "nodejs_package_manager_path": "npm",
     "npm.build.executor": "Run",
     "npm.dev.executor": "Run",
     "npm.test:ui.executor": "Run",
+    "npm.test:watch.executor": "Run",
     "settings.editor.selected.configurable": "configurable.group.appearance",
     "ts.external.directory.path": "C:\\Users\\John\\WebstormProjects\\Home-Design-HRIS\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\js" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\ui\fileupload" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\js" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\__test__" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\assets" />
     </key>
   </component>
-  <component name="RunManager" selected="Vitest.RootLayout Component">
+  <component name="RunManager" selected="Jest.NextAuth Credentials Provider">
+    <configuration name="NextAuth Credentials Provider" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
+      <node-interpreter value="project" />
+      <jest-package value="$PROJECT_DIR$/node_modules/jest" />
+      <working-dir value="$PROJECT_DIR$" />
+      <envs />
+      <scope-kind value="SUITE" />
+      <test-file value="$PROJECT_DIR$/__test__/login.test.tsx" />
+      <test-names>
+        <test-name value="NextAuth Credentials Provider" />
+      </test-names>
+      <method v="2" />
+    </configuration>
     <configuration name="All Tests in vitest.config.ts" type="JavaScriptTestRunnerVitest" nameIsGenerated="true">
       <config value="$PROJECT_DIR$/vitest.config.ts" />
       <node-interpreter value="project" />
@@ -130,29 +176,19 @@
       </test-names>
       <method v="2" />
     </configuration>
-    <configuration name="dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+    <configuration name="test:watch" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/package.json" />
       <command value="run" />
       <scripts>
-        <script value="dev" />
-      </scripts>
-      <node-interpreter value="project" />
-      <envs />
-      <method v="2" />
-    </configuration>
-    <configuration name="test:ui" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="test:ui" />
+        <script value="test:watch" />
       </scripts>
       <node-interpreter value="project" />
       <envs />
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="npm.dev" />
-      <item itemvalue="npm.test:ui" />
+      <item itemvalue="Jest.NextAuth Credentials Provider" />
+      <item itemvalue="npm.test:watch" />
       <item itemvalue="Vitest.All Tests in vitest.config.ts" />
       <item itemvalue="Vitest.All Tests" />
       <item itemvalue="Vitest.RootLayout Component" />
@@ -160,11 +196,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Jest.NextAuth Credentials Provider" />
+        <item itemvalue="npm.test:watch" />
         <item itemvalue="Vitest.RootLayout Component" />
         <item itemvalue="Vitest.RootLayout" />
         <item itemvalue="Vitest.All Tests" />
-        <item itemvalue="npm.dev" />
-        <item itemvalue="npm.test:ui" />
       </list>
     </recent_temporary>
   </component>
@@ -209,6 +245,7 @@
       <updated>1724471179761</updated>
       <workItem from="1724471184428" duration="14881000" />
       <workItem from="1724508928078" duration="5371000" />
+      <workItem from="1724571635555" duration="29857000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -250,7 +287,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724569564642</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="adjusting the CI/CD">
+      <option name="closed" value="true" />
+      <created>1724570053450</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1724570053450</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
