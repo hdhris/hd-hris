@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import TableData from '@/components/tabledata/TableData';
 import { Employee } from "@/types/employeee/EmployeeType";
 import { TableConfigProps } from '@/types/table/TableDataTypes';
-import Image from 'next/image'
+import { Avatar } from '@nextui-org/react';
 
 const Page = () => {
     const [employees, setEmployees] = useState<Employee[]>([]);
@@ -26,36 +26,44 @@ const Page = () => {
             }
         };
 
-
         fetchEmployees();
     }, []);
 
     const config: TableConfigProps<Employee> = {
         columns: [
-            { uid: 'picture', name: 'Picture', sortable: false }, // New column for the picture
-            { uid: 'name', name: 'Name', sortable: true },
-            { uid: 'position', name: 'Position', sortable: true },
+            { uid: 'name', name: 'Name', sortable: true }, // Merged Picture and Name
             { uid: 'department', name: 'Department', sortable: true },
+            { uid: 'position', name: 'Position', sortable: true },
+            { uid: 'contact', name: 'Contact', sortable: false }, // Merged Email and Phone
             { uid: 'status', name: 'Status', sortable: true },
             // Add more columns as needed
         ],
         rowCell: (item, columnKey) => {
             switch (columnKey) {
-                case 'picture':
-                    return <img src={item.picture} alt={item.name} className="w-10 h-10 rounded-full" />; // Image with some basic styling
                 case 'name':
-                    return <span>{item.name}</span>;
-                case 'position':
-                    return <span>{item.position}</span>;
+                    return (
+                        <div className="flex items-center">
+                            <Avatar src={item.picture} alt={item.name} className="w-10 h-10 rounded-full mr-2" />
+                            <span>{item.name}</span>
+                        </div>
+                    );
                 case 'department':
                     return <span>{item.department}</span>;
+                case 'position':
+                    return <span>{item.position}</span>;
+                case 'contact':
+                    return (
+                        <div>
+                            <div>{item.email}</div>
+                            <div>{item.phone}</div>
+                        </div>
+                    );
                 case 'status':
                     return <span>{item.status}</span>;
+
                 // Handle other cases based on your columns
                 default:
-                    return <>
-                    
-                    </>; // Return an empty fragment instead of null
+                    return <></>; // Return an empty fragment instead of null
             }
         },
     };
@@ -65,7 +73,7 @@ const Page = () => {
     return (
         <div>
             <TableData
-            aria-label='Employee Table'
+                aria-label='Employee Table'
                 config={config}
                 items={employees}
                 searchingItemKey={searchingItemKey}
@@ -75,7 +83,8 @@ const Page = () => {
                 classNames={{
                   wrapper: 'h-[30rem]'
                 }}
-                className='min-h-52'/>
+                className='min-h-52'
+            />
         </div>
     );
 };
