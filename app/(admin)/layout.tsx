@@ -23,6 +23,7 @@ import NavBar from "../../components/navbar/NavBar";
 import UserMenu from "../../components/dropdown/UserMenu";
 import Notification from '../../components/functions/notifications/Notification'
 import AuditSignatories from "../../components/admin/dashboard/AuditSignatories";
+import {LiaUsersSolid} from "react-icons/lia";
 function RootLayout({ children }: { children: ReactNode }) {
     // Use a function to lazily initialize the state
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
@@ -72,6 +73,7 @@ function RootLayout({ children }: { children: ReactNode }) {
                     <SideBarItem label="Performance Appraisal" href="/performance" icon={<LuBadgeCheck />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Privileges" href="/privileges" icon={<LuPersonStanding />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Incident Report" href="/incident-report" icon={<LuFileWarning />} showLabel={isSidebarOpen} />
+                    <SideBarItem label="Training And Seminars" href="/training&seminars" icon={<LiaUsersSolid />} showLabel={isSidebarOpen} />
                     <SideBarItem label="Reports" href="/reports" icon={<BiStats />} showLabel={isSidebarOpen} />
                 </SideBar>
 
