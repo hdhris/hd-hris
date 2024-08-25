@@ -1,15 +1,7 @@
-
 import mime from "mime";
 import { join } from "path";
 import { stat, mkdir, writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
-
-
-// export const config = {
-//     api: {
-//         bodyParser: false,
-//     },
-// };
 
 export async function POST(req: NextRequest) {
     // Parse form data
@@ -38,7 +30,7 @@ export async function POST(req: NextRequest) {
             await mkdir(uploadDir, { recursive: true });
         } else {
             console.error("Error while trying to create directory when uploading a file\n", e);
-            return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
+            return NextResponse.json({ error: "Error creating directory." }, { status: 500 });
         }
     }
 
@@ -48,7 +40,7 @@ export async function POST(req: NextRequest) {
         await writeFile(`${uploadDir}/${filename}`, buffer);
         const fileUrl = `${relativeUploadDir}/${filename}`;
 
-        // Save file information to the database if needed
+        // Optionally save file information to the database
         // const result = await prisma.file.create({
         //     data: {
         //         url: fileUrl,
