@@ -5,8 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adding table action module">
+      <change afterPath="$PROJECT_DIR$/app/(admin)/layout.test.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jest.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/preview.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/preview.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/production.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/production.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(admin)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,8 +23,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript File" />
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
@@ -60,28 +67,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;Vitest.All Tests in vitest.config.ts.executor&quot;: &quot;Run&quot;,
-    &quot;Vitest.All Tests.executor&quot;: &quot;Run&quot;,
-    &quot;Vitest.RootLayout Component.executor&quot;: &quot;Run&quot;,
-    &quot;Vitest.RootLayout.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;npm.build.executor&quot;: &quot;Run&quot;,
-    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
-    &quot;npm.test:ui.executor&quot;: &quot;Run&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.appearance&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\John\\WebstormProjects\\Home-Design-HRIS\\node_modules\\typescript\\lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Vitest.All Tests in vitest.config.ts.executor": "Run",
+    "Vitest.All Tests.executor": "Run",
+    "Vitest.RootLayout Component.executor": "Run",
+    "Vitest.RootLayout.executor": "Run",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "npm.build.executor": "Run",
+    "npm.dev.executor": "Run",
+    "npm.test:ui.executor": "Run",
+    "settings.editor.selected.configurable": "configurable.group.appearance",
+    "ts.external.directory.path": "C:\\Users\\John\\WebstormProjects\\Home-Design-HRIS\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\assets" />
     </key>
   </component>
@@ -150,20 +159,20 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="npm.dev" />
+      <item itemvalue="npm.test:ui" />
       <item itemvalue="Vitest.All Tests in vitest.config.ts" />
       <item itemvalue="Vitest.All Tests" />
       <item itemvalue="Vitest.RootLayout Component" />
       <item itemvalue="Vitest.RootLayout" />
-      <item itemvalue="npm.dev" />
-      <item itemvalue="npm.test:ui" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Vitest.RootLayout Component" />
-        <item itemvalue="Vitest.All Tests" />
-        <item itemvalue="npm.test:ui" />
         <item itemvalue="Vitest.RootLayout" />
+        <item itemvalue="Vitest.All Tests" />
         <item itemvalue="npm.dev" />
+        <item itemvalue="npm.test:ui" />
       </list>
     </recent_temporary>
   </component>
