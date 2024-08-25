@@ -47,9 +47,12 @@ interface SectionProps {
     title: string;
     subtitle: string;
     children?: React.ReactNode;
+    className?: string
+    classNames?: TitleProps['classNames']
 }
-export const Section: React.FC<SectionProps> = ({title, subtitle, children}) => (<div className='ms-10 space-y-5'>
-    <Title heading={title} subHeading={subtitle}>
+export const Section: React.FC<SectionProps> = ({title, subtitle, children, classNames, className}) => (
+    <div className={cn('ms-10 space-y-5', className)}>
+    <Title heading={title} subHeading={subtitle} classNames={classNames}>
         {children}
     </Title>
 </div>);

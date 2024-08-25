@@ -4,16 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adding redirect in next.config.mjs">
-      <change afterPath="$PROJECT_DIR$/setupTests.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/backup/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/backup/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/help&amp;support/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/help&amp;support/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/sidebar/SideBarItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/sidebar/SideBarItem.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adjusting the CI/CD">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/preview.yaml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +15,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="TypeScript JSX File" />
         <option value="TypeScript File" />
       </list>
     </option>
@@ -38,12 +31,12 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "code-with-john"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;code-with-john&quot;
   }
-}]]></component>
+}</component>
   <component name="GithubProjectSettings">
     <option name="branchProtectionPatterns">
       <list>
@@ -57,9 +50,9 @@
     &quot;accountId&quot;: &quot;b8769079-f3db-4d82-82b1-706a222244b8&quot;
   }
 }</component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2l5Xz8Uce2wh5BhuFY4GsJcJbXX" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -81,13 +74,15 @@
     "npm.build.executor": "Run",
     "npm.dev.executor": "Run",
     "npm.test:ui.executor": "Run",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "configurable.group.appearance",
     "ts.external.directory.path": "C:\\Users\\John\\WebstormProjects\\Home-Design-HRIS\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\assets" />
     </key>
   </component>
@@ -156,20 +151,20 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="npm.test:ui" />
       <item itemvalue="npm.dev" />
+      <item itemvalue="npm.test:ui" />
       <item itemvalue="Vitest.All Tests in vitest.config.ts" />
       <item itemvalue="Vitest.All Tests" />
-      <item itemvalue="Vitest.RootLayout" />
       <item itemvalue="Vitest.RootLayout Component" />
+      <item itemvalue="Vitest.RootLayout" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Vitest.RootLayout Component" />
-        <item itemvalue="Vitest.All Tests" />
-        <item itemvalue="npm.test:ui" />
         <item itemvalue="Vitest.RootLayout" />
+        <item itemvalue="Vitest.All Tests" />
         <item itemvalue="npm.dev" />
+        <item itemvalue="npm.test:ui" />
       </list>
     </recent_temporary>
   </component>
@@ -212,9 +207,50 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1724471179761</updated>
-      <workItem from="1724471184428" duration="5925000" />
+      <workItem from="1724471184428" duration="14881000" />
+      <workItem from="1724508928078" duration="5371000" />
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="testing routes">
+      <option name="closed" value="true" />
+      <created>1724477633934</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1724477633934</updated>
+    </task>
+    <task id="LOCAL-00005" summary="done integrations">
+      <option name="closed" value="true" />
+      <created>1724483469684</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1724483469684</updated>
+    </task>
+    <task id="LOCAL-00006" summary="adding table action module">
+      <option name="closed" value="true" />
+      <created>1724512125828</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1724512125828</updated>
+    </task>
+    <task id="LOCAL-00007" summary="adding tests">
+      <option name="closed" value="true" />
+      <created>1724569232005</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1724569232005</updated>
+    </task>
+    <task id="LOCAL-00008" summary="adjusting the CI/CD">
+      <option name="closed" value="true" />
+      <created>1724569564642</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1724569564642</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -234,6 +270,11 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fixing the error regarding  location is not defined" />
     <MESSAGE value="adding redirect in next.config.mjs" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding redirect in next.config.mjs" />
+    <MESSAGE value="testing routes" />
+    <MESSAGE value="done integrations" />
+    <MESSAGE value="adding table action module" />
+    <MESSAGE value="adding tests" />
+    <MESSAGE value="adjusting the CI/CD" />
+    <option name="LAST_COMMIT_MESSAGE" value="adjusting the CI/CD" />
   </component>
 </project>

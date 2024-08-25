@@ -10,14 +10,6 @@ import {MdAlternateEmail} from "react-icons/md";
 import {FaFacebookMessenger} from "react-icons/fa6";
 import {icon_color, icon_size} from "@/lib/utils";
 
-const backupFrequencyOptions = [{uid: '1', name: 'Daily'}, {uid: '2', name: 'Weekly'}, {
-    uid: '3', name: 'Monthly'
-}, {uid: '4', name: 'Yearly'},];
-
-const backupSelectionOptions = [{uid: '1', name: 'All'}, {uid: '2', name: 'Employee'}, {
-    uid: '3', name: 'Attendance'
-}, {uid: '4', name: 'Salary'},];
-
 
 const ColumnOne: React.FC = () => (<div className='space-y-4 pr-4'>
     <Section title='Knowledge Base or FAQ'
