@@ -4,30 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adjusting the CI/CD">
-      <change afterPath="$PROJECT_DIR$/__test__/login.test.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/edgestore/[...edgestore]/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/upload/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/upload/upload.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/date/DateComponent.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/ui/fileupload/multi-file.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/ui/fileupload/multi-image.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/ui/fileupload/single-image.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/util/RenderList.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/edgestore/edgestore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/layout.test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/__test__/layout.test.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/defaults/privacy/PrivacyPolicyForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/privacy/PrivacyPolicyForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/providers/Providers.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/providers/Providers.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/sidebar/SideBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/sidebar/SideBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tailwind.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tailwind.config.ts" afterDir="false" />
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adding an upload file">
+      <change beforePath="$PROJECT_DIR$/app/api/upload/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/upload/route.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -245,7 +223,7 @@
       <updated>1724471179761</updated>
       <workItem from="1724471184428" duration="14881000" />
       <workItem from="1724508928078" duration="5371000" />
-      <workItem from="1724571635555" duration="29857000" />
+      <workItem from="1724571635555" duration="30064000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -295,7 +273,23 @@
       <option name="project" value="LOCAL" />
       <updated>1724570053450</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="adding an upload file">
+      <option name="closed" value="true" />
+      <created>1724608789506</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1724608789506</updated>
+    </task>
+    <task id="LOCAL-00011" summary="adding an upload file">
+      <option name="closed" value="true" />
+      <created>1724608801884</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1724608801884</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -320,6 +314,7 @@
     <MESSAGE value="adding table action module" />
     <MESSAGE value="adding tests" />
     <MESSAGE value="adjusting the CI/CD" />
-    <option name="LAST_COMMIT_MESSAGE" value="adjusting the CI/CD" />
+    <MESSAGE value="adding an upload file" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding an upload file" />
   </component>
 </project>
