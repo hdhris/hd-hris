@@ -5,6 +5,7 @@ import { UploadCloudIcon, X } from 'lucide-react';
 import * as React from 'react';
 import { useDropzone, type DropzoneOptions } from 'react-dropzone';
 import { twMerge } from 'tailwind-merge';
+import Image from 'next/image';
 
 const variants = {
     base: 'relative rounded-md aspect-square flex justify-center items-center flex-col cursor-pointer min-h-[150px] min-w-[200px] border border-dashed border-gray-400 dark:border-gray-300 transition-colors duration-200 ease-in-out',
@@ -147,7 +148,7 @@ const MultiImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
                     {/* Images */}
                     {value?.map(({ file, progress }, index) => (
                         <div key={index} className={variants.image + ' aspect-square'}>
-                            <img
+                            <Image
                                 className="h-full w-full rounded-md object-cover"
                                 src={imageUrls[index]}
                                 alt={typeof file === 'string' ? file : file.name}

@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="deleting config in the upload/route">
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="fixing some bugs">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/fileupload/single-image.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/fileupload/single-image.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/fileupload/multi-image.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/fileupload/multi-image.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -224,7 +224,7 @@
       <updated>1724471179761</updated>
       <workItem from="1724471184428" duration="14881000" />
       <workItem from="1724508928078" duration="5371000" />
-      <workItem from="1724571635555" duration="30474000" />
+      <workItem from="1724571635555" duration="30748000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -298,7 +298,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724609079179</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="fixing some bugs">
+      <option name="closed" value="true" />
+      <created>1724609417390</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1724609417390</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -325,6 +333,7 @@
     <MESSAGE value="adjusting the CI/CD" />
     <MESSAGE value="adding an upload file" />
     <MESSAGE value="deleting config in the upload/route" />
-    <option name="LAST_COMMIT_MESSAGE" value="deleting config in the upload/route" />
+    <MESSAGE value="fixing some bugs" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing some bugs" />
   </component>
 </project>
