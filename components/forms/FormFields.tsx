@@ -72,7 +72,7 @@ const renderFormItem = (item: FormInputProps, control: any, index: number, size:
 );
 
 export const Selection = ({
-                              placeholder, items, name, label, isRequired, description, onChange
+                              placeholder, items, name, label, isRequired, description, onChange, disableKeys, selectedKeys, onOpenChange, value
                           }: SelectionProp & FormInputProps) => {
     const {control} = useFormContext();
 
@@ -91,24 +91,29 @@ export const Selection = ({
                     <FormControl>
                         <Select
                             id={name}
-                            onChange={(e) => {
-                                field.onChange(e);
-                                if (onChange) {
-                                    onChange(e);
-                                }
-                            }}
+                            // onChange={(e) => {
+                            //     field.onChange(e);
+                            //     if (onChange) {
+                            //         onChange(e);
+                            //     }
+                            // }}
                             aria-label="Selection"
                             color="primary"
                             variant="bordered"
+                            selectedKeys={[field.value] || selectedKeys}
+                            disabledKeys={disableKeys}
+                            onOpenChange={onOpenChange}
+                            // value={value}
                             classNames={{
                                 trigger: "rounded",
                                 popoverContent: "rounded",
                             }}
                             radius="sm"
                             placeholder={placeholder}
+                            {...field}
                         >
                             {items.map((item, index) => (
-                                <SelectItem key={index} value={item.toLowerCase()}>
+                                <SelectItem key={item.toLowerCase()} value={item.toLowerCase()}>
                                     {item}
                                 </SelectItem>
                             ))}
@@ -121,6 +126,7 @@ export const Selection = ({
         />
     );
 };
+
 
 export default function FormFields({items, size}: FormsControlProps) {
     const {control} = useFormContext();

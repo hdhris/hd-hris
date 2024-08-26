@@ -4,9 +4,29 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="img to Image">
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="test">
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/apps/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/update-password/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/update-profile/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/userprofile/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/ui/toast.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/ui/toaster.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/ui/use-toast.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/helper/zodValidation/UpdateProfile.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/types/routes/default/types.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/upload/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/upload/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/account/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/account/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/security/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/security/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/forms/FormFields.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/forms/types/SelectionProp.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/forms/types/SelectionProp.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/queries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/queries.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,41 +82,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Jest.NextAuth Credentials Provider.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "Vitest.All Tests in vitest.config.ts.executor": "Run",
-    "Vitest.All Tests.executor": "Run",
-    "Vitest.RootLayout Component.executor": "Run",
-    "Vitest.RootLayout.executor": "Run",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/John/WebstormProjects/Home-Design-HRIS/public/js",
-    "list.type.of.created.stylesheet": "CSS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs.jest.jest_package": "C:/Users/John/WebstormProjects/Home-Design-HRIS/node_modules/jest",
-    "nodejs_package_manager_path": "npm",
-    "npm.build.executor": "Run",
-    "npm.dev.executor": "Run",
-    "npm.test:ui.executor": "Run",
-    "npm.test:watch.executor": "Run",
-    "settings.editor.selected.configurable": "configurable.group.appearance",
-    "ts.external.directory.path": "C:\\Users\\John\\WebstormProjects\\Home-Design-HRIS\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Jest.NextAuth Credentials Provider.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;Vitest.All Tests in vitest.config.ts.executor&quot;: &quot;Run&quot;,
+    &quot;Vitest.All Tests.executor&quot;: &quot;Run&quot;,
+    &quot;Vitest.RootLayout Component.executor&quot;: &quot;Run&quot;,
+    &quot;Vitest.RootLayout.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/John/WebstormProjects/Home-Design-HRIS/app/api/admin/(core)/update-profile&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs.jest.jest_package&quot;: &quot;C:/Users/John/WebstormProjects/Home-Design-HRIS/node_modules/jest&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.build.executor&quot;: &quot;Run&quot;,
+    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
+    &quot;npm.test:ui.executor&quot;: &quot;Run&quot;,
+    &quot;npm.test:watch.executor&quot;: &quot;Run&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.appearance&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\John\\WebstormProjects\\Home-Design-HRIS\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(core)\update-profile" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\js" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\ui" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(core)" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\ui\fileupload" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\js" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\__test__" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app" />
     </key>
   </component>
   <component name="RunManager" selected="Jest.NextAuth Credentials Provider">
@@ -224,7 +245,10 @@
       <updated>1724471179761</updated>
       <workItem from="1724471184428" duration="14881000" />
       <workItem from="1724508928078" duration="5371000" />
-      <workItem from="1724571635555" duration="31391000" />
+      <workItem from="1724571635555" duration="33139000" />
+      <workItem from="1724650764372" duration="15324000" />
+      <workItem from="1724668691219" duration="657000" />
+      <workItem from="1724669702699" duration="463000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -314,7 +338,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724609698762</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="test">
+      <option name="closed" value="true" />
+      <created>1724610387424</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1724610387424</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -343,6 +375,7 @@
     <MESSAGE value="deleting config in the upload/route" />
     <MESSAGE value="fixing some bugs" />
     <MESSAGE value="img to Image" />
-    <option name="LAST_COMMIT_MESSAGE" value="img to Image" />
+    <MESSAGE value="test" />
+    <option name="LAST_COMMIT_MESSAGE" value="test" />
   </component>
 </project>

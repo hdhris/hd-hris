@@ -1,4 +1,4 @@
-'use client'
+
 import React from 'react';
 import {Heading} from "@/components/common/typography/Typography";
 import ProfileForm from "@/components/admin/defaults/profile/ProfileForm";

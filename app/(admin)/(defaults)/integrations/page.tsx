@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heading, Section } from "@/components/common/typography/Typography";
 import { Switch, Tab, Tabs } from '@nextui-org/react';
 import { Card, CardBody } from "@nextui-org/card";
@@ -8,40 +8,56 @@ import Text from "@/components/Text";
 import BorderCard from "@/components/common/BorderCard";
 import { Avatar } from "@nextui-org/avatar";
 import RenderList from "@/components/util/RenderList";
+import { useIntegrations } from "@/services/queries";
 
 const ColumnOne: React.FC = () => {
-    const [selected, setSelected] = useState("all");
-    const items = [{
-        key: "tidb",
-        avatarSrc: "https://static.pingcap.com/files/2023/07/09063705/TiDB-logo.png",
-        title: 'TiDB',
-        subtitle: 'an open-source, cloud-native, distributed, MySQL-Compatible database for elastic scale and real-time analytics',
-    }, {
-        key: "zkteco",
-        avatarSrc: "https://logovectorseek.com/wp-content/uploads/2020/04/zkteco-logo-vector.png",
-        title: 'ZKTeco',
-        subtitle: 'globally renowned provider of biometric verification algorithm techniques, sensors and software platforms.',
-    }, {
-        key: "cloudinary",
-        avatarSrc: "https://storage.googleapis.com/clean-finder-353810/$HRokgbx8Dplf8fWi1w8E2hyYx6qmhxmXMIQqXvvaNYeZr84881PBxe",
-        title: 'Cloudinary',
-        subtitle: 'an open-source, cloud-native, distributed, MySQL-Compatible database for elastic scale and real-time analytics',
-    }, {
-        key: "cloudinary",
-        avatarSrc: "https://storage.googleapis.com/clean-finder-353810/$HRokgbx8Dplf8fWi1w8E2hyYx6qmhxmXMIQqXvvaNYeZr84881PBxe",
-        title: 'Cloudinary',
-        subtitle: 'an open-source, cloud-native, distributed, MySQL-Compatible database for elastic scale and real-time analytics',
-    }, {
-        key: "cloudinary",
-        avatarSrc: "https://storage.googleapis.com/clean-finder-353810/$HRokgbx8Dplf8fWi1w8E2hyYx6qmhxmXMIQqXvvaNYeZr84881PBxe",
-        title: 'Cloudinary',
-        subtitle: 'an open-source, cloud-native, distributed, MySQL-Compatible database for elastic scale and real-time analytics',
-    }, {
-        key: "cloudinary",
-        avatarSrc: "https://storage.googleapis.com/clean-finder-353810/$HRokgbx8Dplf8fWi1w8E2hyYx6qmhxmXMIQqXvvaNYeZr84881PBxe",
-        title: 'Cloudinary',
-        subtitle: 'an open-source, cloud-native, distributed, MySQL-Compatible database for elastic scale and real-time analytics',
-    },];
+    const [selected, setSelected] = useState<string>("all");
+    const [items, setItems] = useState<any[]>([]);
+    const { data, isLoading } = useIntegrations();
+
+    useEffect(() => {
+        if (data) {
+            setItems(data);
+        }
+    }, [data]);
+
+    const filterItems = (type: string) => {
+        if (type === "all") {
+            return items;
+        }
+        return items.filter(item => item.type === type);
+    };
+
+    const IntegrationLists = React.useMemo(() => {
+        return (
+            <div className='grid grid-cols-2 lg:grid-cols-3 gap-4'>
+                <RenderList items={filterItems(selected)}
+                            map={(item, key) => (
+                                <BorderCard heading='' className='w-full' key={key}>
+                                    <div className='flex items-center'>
+                                        <div className='flex-shrink-0'>
+                                            <Avatar
+                                                src={item.avatarSrc}
+                                                size='md'
+                                            />
+                                        </div>
+                                        <Section
+                                            className='ms-2 flex-1'
+                                            classNames={{
+                                                subHeading: 'text-ellipsis'
+                                            }}
+                                            title={item.title}
+                                            subtitle={item.subtitle}
+                                        >
+                                            <Switch defaultSelected size='sm' color="primary"/>
+                                        </Section>
+                                    </div>
+                                </BorderCard>
+                            )}
+                />
+            </div>
+        );
+    }, [selected, items]);
 
     return (
         <div className='space-y-4 pr-4'>
@@ -56,67 +72,25 @@ const ColumnOne: React.FC = () => {
                     onSelectionChange={(key) => setSelected(key as string)}
                 >
                     <Tab key="all" title="All">
-                        <div className='grid grid-cols-2 lg:grid-cols-3 gap-4'>
-                            <RenderList items={items}
-                                        map={(item, key) => (
-                                            <BorderCard heading='' className='w-full' key={key}>
-                                                <div className='flex items-center'>
-                                                    <div className='flex-shrink-0'>
-                                                        <Avatar
-                                                            src={item.avatarSrc}
-                                                            size='md'
-                                                        />
-                                                    </div>
-                                                    <Section
-                                                        className='ms-2 flex-1'
-                                                        classNames={{
-                                                            subHeading: 'text-ellipsis'
-                                                        }}
-                                                        title={item.title}
-                                                        subtitle={item.subtitle}
-                                                    >
-                                                        <Switch defaultSelected size='sm' color="primary"/>
-                                                    </Section>
-                                                </div>
-                                            </BorderCard>
-                                        )}
-                            />
-                        </div>
-
+                        {IntegrationLists}
                     </Tab>
                     <Tab key="database" title={<div className="flex flex-row items-center space-x-2">
                         <LuDatabase/>
                         <Text>Database</Text>
                     </div>}>
-                        <Card>
-                            <CardBody>
-                                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-                                commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-                                dolore eu fugiat nulla pariatur.
-                            </CardBody>
-                        </Card>
+                        {IntegrationLists}
                     </Tab>
                     <Tab key="cloud_storage" title={<div className="flex flex-row items-center space-x-2">
                         <LuCloud/>
                         <Text>Cloud Storage</Text>
                     </div>}>
-                        <Card>
-                            <CardBody>
-                                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-                                mollit anim id est laborum.
-                            </CardBody>
-                        </Card>
+                        {IntegrationLists}
                     </Tab>
                     <Tab key="attendance_monitoring" title={<div className="flex flex-row items-center space-x-2">
                         <LuCalendarRange />
                         <Text>Attendance Monitoring</Text>
                     </div>}>
-                        <Card>
-                            <CardBody>
-                                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-                                mollit anim id est laborum.
-                            </CardBody>
-                        </Card>
+                        {IntegrationLists}
                     </Tab>
                 </Tabs>
             </div>

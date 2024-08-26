@@ -1,7 +1,7 @@
 'use client'
 import {Avatar, DatePicker} from "@nextui-org/react";
 import {Form} from "@/components/ui/form";
-import React, {useCallback, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {z} from "zod";
 import {UserRound} from "lucide-react";
 import Text from "@/components/Text";
@@ -12,32 +12,43 @@ import FormFields, {FormInputProps, Selection} from "@/components/forms/FormFiel
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {Button} from "@nextui-org/button";
 import {Divider} from "@nextui-org/divider";
+import {useUser} from "@/services/queries";
+import {DateValue, parseDate} from "@internationalized/date";
+import dayjs from "dayjs";
+import {updateProfileSchema} from "@/helper/zodValidation/UpdateProfile";
+import {axiosInstance} from "@/services/fetcher";
 
-const yearLimit = new Date();
-yearLimit.setFullYear(new Date().getFullYear() - 21);
 
-const formSchema = z.object({
-    rfid: z.coerce.number().min(2, {message: "RFID must be at least 2 characters."}),
-    first_name: z.string().min(2, {message: "First Name must be at least 2 characters."}),
-    last_name: z.string().min(2, {message: "Last Name must be at least 2 characters."}),
-    gender: z.enum(["male", "female", "others"]),
-    birth_date: z.coerce.date().max(yearLimit, {message: "Must be at least 21 years old."}),
-    age: z.coerce.number().min(21, {message: "Must be at least 21 years old."}),
-    civil_status: z.enum(["single", "married", "widowed", "separated", "divorced", "others"]),
-    email: z.string().email("Invalid email address."),
-    phone_no: z.string().length(10).transform((value) => parseInt(value)),
-    street_or_purok: z.string().min(5, {message: "Street or Purok must be at least 5 characters."}),
-    barangay: z.string().min(5, {message: "Barangay must be at least 5 characters."}),
-    city: z.string().min(5, {message: "City must be at least 5 characters."}),
-    province: z.string().min(5, {message: "Province must be at least 5 characters."})
-});
+type FormData = {
+    civil_status: string
+    city: string
+    barangay: string
+    province: string
+    street_or_purok: string
+}
 
 export default function ProfileForm() {
     const [image, setImage] = useState<string | ArrayBuffer | null>(null);
+    const [birthdate, setBirthdate] = useState<DateValue>()
     const [fileError, setFileError] = useState<string>("");
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const {data: profile, isLoading} = useUser();
+    const form = useForm<z.infer<typeof updateProfileSchema>>({
+        resolver: zodResolver(updateProfileSchema),
     });
+
+    useEffect(() => {
+        if(profile){
+            form.reset(profile)
+            setImage(profile.profilePicture);
+            if (profile.birthdate) {
+                const date = dayjs(profile.birthdate).format("YYYY-MM-DD");
+                console.log(parseDate(date))
+                setBirthdate(parseDate(date))
+                form.setValue("birth_date", date)
+            }
+        }
+
+    }, [form, profile]);
 
     const imageRef = useRef<string | null>(null);
 
@@ -139,10 +150,21 @@ export default function ProfileForm() {
         name: "phone_no", label: "Phone No.", type: "tel"
     }];
 
+    const civilStatus = ["Single", "Married", "Widowed", "Separated", "Divorced", "Others"];
     const street = ["Street", "Purok"];
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log("Submitted values:", values);
+    async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
+        console.log(values)
+        try {
+            const response = await axiosInstance.post('/api/admin/update-profile', values, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            console.log(response.data);
+        } catch (error) {
+            console.error("Error submitting form:", error);
+        }
     }
 
     return (
@@ -157,23 +179,32 @@ export default function ProfileForm() {
                                 name: "birth_date", label: "Birth Date", Component: (field) => {
                                     return (<div className="w-full flex flex-row gap-4">
                                         <DatePicker
-                                            onChange={field.onChange}
+                                            onChange={(e) => {
+                                                field.onChange(e);
+                                                setBirthdate(e);
+                                                form.setValue("birth_date", dayjs(e.toString()).format("YYYY-MM-DD"));
+                                            }}
+                                            name='birth_date'
                                             aria-label="Birth Date"
                                             variant="bordered"
                                             radius="sm"
-                                            classNames={{selectorIcon: icon_color}}
+                                            classNames={{
+                                                selectorIcon: icon_color,
+                                            }}
                                             color="primary"
+                                            value={birthdate}
+                                            // value={parseDate(dayjs(birthdate).format("YYYY-MM-DD")) as DateValue}
                                             showMonthAndYearPickers
                                         />
                                     </div>);
                                 }
                             }]} size='sm'/>
                             <Selection
-                                items={street}
+                                items={civilStatus}
                                 placeholder=""
-                                label='Gender'
-                                name='gender'
-                                aria-label="gender"
+                                label='Civil Status'
+                                name='civil_status'
+                                aria-label="Civil Status"
                             />
                             <div className='col-span-2 space-y-2'>
                                 <Divider/>
