@@ -4,30 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="test">
-      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/apps/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/update-password/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/update-profile/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/userprofile/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/ui/toast.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/ui/toaster.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/ui/use-toast.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/helper/zodValidation/UpdateProfile.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/types/routes/default/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/account/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/account/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/security/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/security/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/forms/FormFields.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/forms/types/SelectionProp.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/forms/types/SelectionProp.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/queries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/queries.ts" afterDir="false" />
-    </list>
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adding simple backen to the account settings" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -248,7 +225,7 @@
       <workItem from="1724571635555" duration="33139000" />
       <workItem from="1724650764372" duration="15324000" />
       <workItem from="1724668691219" duration="657000" />
-      <workItem from="1724669702699" duration="463000" />
+      <workItem from="1724669702699" duration="870000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -346,7 +323,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724610387424</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="adding simple backen to the account settings">
+      <option name="closed" value="true" />
+      <created>1724673232205</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1724673232205</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -376,6 +361,7 @@
     <MESSAGE value="fixing some bugs" />
     <MESSAGE value="img to Image" />
     <MESSAGE value="test" />
-    <option name="LAST_COMMIT_MESSAGE" value="test" />
+    <MESSAGE value="adding simple backen to the account settings" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding simple backen to the account settings" />
   </component>
 </project>
