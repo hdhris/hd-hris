@@ -22,12 +22,12 @@ const ColumnOne: React.FC = () => {
         }
     }, [data]);
 
-    const filterItems = (type: string) => {
+    const filterItems = React.useCallback((type: string) => {
         if (type === "all") {
             return items;
         }
         return items.filter(item => item.type === type);
-    };
+    }, [items]);
 
     const IntegrationLists = React.useMemo(() => {
         return (
