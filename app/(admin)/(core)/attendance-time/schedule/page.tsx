@@ -5,10 +5,20 @@ import {
   CardBody,
   CardFooter,
   Spinner,
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
+  Input,
+  TimeInput,
 } from "@nextui-org/react";
 import React, { useEffect, useState } from "react";
 import { batch, emp_sched } from "./schedules";
 import dayjs from "dayjs";
+import { Time } from "@internationalized/date";
 
 const colorValue: {
   border: { [key: string]: string }; // Allow any string as key for border colors
@@ -102,11 +112,11 @@ const getScheduleTime = (scheduleName: string) => {
 
 export default function Page() {
   const [isClient, setIsClient] = useState(false);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   useEffect(() => {
     setIsClient(true);
   }, []);
   const data = batch;
-  const sched = emp_sched;
   const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
   return (
     <div className="flex p-1 min-w-[1230px]">
@@ -123,9 +133,9 @@ export default function Page() {
                   } -z-50`}
                 >
                   <CardHeader>
-                    <h5>{item.name}</h5>
+                    <h5 className="font-semibold">{item.name}</h5>
                   </CardHeader>
-                  <CardBody className="flex justify-center items-center">
+                  <CardBody className="flex justify-center items-center py-0">
                     <div className="w-fit flex gap-2">
                       {formatTime(item.clock_in)}
                       <p>-</p>
@@ -146,6 +156,7 @@ export default function Page() {
                 </Card>
               );
             })}
+            <Button onPress={onOpen}>Add Schedule</Button>
           </>
         ) : (
           <Spinner className="m-10" />
@@ -200,6 +211,44 @@ export default function Page() {
           </div>
         )}
       </div>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Add Schedule
+              </ModalHeader>
+              <ModalBody>
+                <div className="flex flex-wrap gap-4">
+                  <Input
+                    type="file"
+                    label="Name"
+                    labelPlacement="outside-left"
+                  />
+                  <TimeInput
+                    label="Start.."
+                    defaultValue={new Time(8)}
+                    labelPlacement="outside-left"
+                  />
+                  <TimeInput
+                    label="End...."
+                    defaultValue={new Time(17)}
+                    labelPlacement="outside-left"
+                  />
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={onClose}>
+                  Add
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

@@ -34,8 +34,8 @@ const columns = [
     label: "STATUS",
   },
   {
-    key: "time",
-    label: "TIME",
+    key: "timestamp",
+    label: "TIME STAMP",
   },
 ];
 // Define your dummy data
@@ -47,10 +47,34 @@ const avatar = [
   { key: "4", src: "https://i.pravatar.cc/150?u=a04258114e29026302d" },
 ];
 const dummyData = [
-  { key: "1", name: "Tony Reichert", status: "TIME IN", time: "8:30 am" },
-  { key: "2", name: "Zoey Lang", status: "TIME OUT", time: "8:29 am" },
-  { key: "3", name: "Jane Fisher", status: "TIME IN", time: "8:28 am" },
-  { key: "4", name: "William Howard", status: "TIME OUT", time: "8:27 am" },
+  {
+    key: "1",
+    name: "Tony Reichert",
+    status: "Fingerprint",
+    timestamp: "8:30 am",
+    punch: "CHECK IN",
+  },
+  {
+    key: "2",
+    name: "Zoey Lang",
+    status: "Fingerprint",
+    timestamp: "8:29 am",
+    punch: "CHECK OUT",
+  },
+  {
+    key: "3",
+    name: "Jane Fisher",
+    status: "Face ID",
+    timestamp: "8:28 am",
+    punch: "CHECK IN",
+  },
+  {
+    key: "4",
+    name: "William Howard",
+    status: "Face ID",
+    timestamp: "8:27 am",
+    punch: "CHECK OUT",
+  },
 ];
 
 // Function to create repeated data
@@ -157,8 +181,8 @@ export default function Page() {
               <TableHeader
                 columns={[
                   {
-                    key: "time",
-                    label: "TIME",
+                    key: "timestamp",
+                    label: "TIME STAMP",
                   },
                   {
                     key: "punch",
@@ -177,15 +201,30 @@ export default function Page() {
               <TableBody
                 emptyContent={"No records for this day."}
                 items={[
-                  { key: "1", time: "8:30 am", punch: "IN", status: "EARLY" },
+                  {
+                    key: "1",
+                    timestamp: "8:30 am",
+                    punch: "IN",
+                    status: "EARLY",
+                  },
                   {
                     key: "2",
-                    time: "12:00 pm",
+                    timestamp: "12:00 pm",
                     punch: "OUT",
                     status: "ONTIME",
                   },
-                  { key: "3", time: "1:30 pm", punch: "IN", status: "LATE" },
-                  { key: "4", time: "4:58 pm", punch: "OUT", status: "EARLY" },
+                  {
+                    key: "3",
+                    timestamp: "1:30 pm",
+                    punch: "IN",
+                    status: "LATE",
+                  },
+                  {
+                    key: "4",
+                    timestamp: "4:58 pm",
+                    punch: "OUT",
+                    status: "EARLY",
+                  },
                 ]}
               >
                 {(row) => (
