@@ -4,7 +4,30 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adding simple backen to the account settings" />
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adding simple backen to the account settings">
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/recovery-email/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/security/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/helper/zodValidation/EmailValidation.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/preferences/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/preferences/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/security/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/security/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/terms&amp;condition/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/terms&amp;condition/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/update-password/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/update-password/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/update-profile/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/update-profile/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/userprofile/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/profile/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/dropdown/SelectionMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/dropdown/SelectionMenu.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/toast.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/toast.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/toaster.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/toaster.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/zodValidation/UpdateProfile.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/UpdateProfile.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/queries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/queries.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/routes/default/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/routes/default/types.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -90,11 +113,11 @@
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\js" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\assets\icons\products" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\ui" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(core)" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\ui\fileupload" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\js" />
     </key>
   </component>
   <component name="RunManager" selected="Jest.NextAuth Credentials Provider">
@@ -225,7 +248,9 @@
       <workItem from="1724571635555" duration="33139000" />
       <workItem from="1724650764372" duration="15324000" />
       <workItem from="1724668691219" duration="657000" />
-      <workItem from="1724669702699" duration="870000" />
+      <workItem from="1724669702699" duration="1047000" />
+      <workItem from="1724684252412" duration="2464000" />
+      <workItem from="1724731170428" duration="24824000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -331,7 +356,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724673232205</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="adding simple backen to the account settings">
+      <option name="closed" value="true" />
+      <created>1724673380988</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1724673380988</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

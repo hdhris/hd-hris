@@ -82,16 +82,20 @@ function AccountSecurity() {
 
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-
+        setLoading(true)
         try {
-            const response = await axiosInstance.post('/api/admin/update-password', values, {
+            const response = await axiosInstance.put('/api/admin/update-password', values, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
-            toast({
-                description: response.data.message,
-            })
+            if(response.status === 200) {
+                toast({
+                    description: response.data.message,
+                    variant: 'success',
+                })
+            }
+
             console.log(response.data);
         } catch (error: any) {
             toast({
@@ -100,6 +104,7 @@ function AccountSecurity() {
             })
             console.error("Error submitting form:", error);
         }
+        setLoading(false)
     }
 
     return (<>
@@ -115,10 +120,14 @@ function AccountSecurity() {
                         <ForgotButton/>
                     </div>
                     <div className='self-end'>
-                        <Button type='submit' size='sm' className='w-full'
+                        <Button type='submit'
+                                spinner={<Spinner size='sm'/>}
+                                isLoading={loading}
+                                size='sm'
+                                className='w-full'
                                 color='primary'
                                 radius='sm'>
-                            {loading ? <Spinner size="sm"/> : "Confirm"}
+                           Save
                         </Button>
                     </div>
 

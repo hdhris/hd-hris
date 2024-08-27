@@ -94,15 +94,15 @@ function UserMenu() {
                     >
                         <Typography className={text_icon}>Security</Typography>
                     </DropdownItem>
-                    <DropdownItem
-                        textValue="Privacy"
-                        key="privacy"
-                        as={Link}
-                        href='/privacy'
-                        startContent={<LuShieldAlert className={cn("", icon_theme)}/>}
-                    >
-                        <Typography className={text_icon}>Privacy</Typography>
-                    </DropdownItem>
+                    {/*<DropdownItem*/}
+                    {/*    textValue="Privacy"*/}
+                    {/*    key="privacy"*/}
+                    {/*    as={Link}*/}
+                    {/*    href='/privacy'*/}
+                    {/*    startContent={<LuShieldAlert className={cn("", icon_theme)}/>}*/}
+                    {/*>*/}
+                    {/*    <Typography className={text_icon}>Privacy</Typography>*/}
+                    {/*</DropdownItem>*/}
                     <DropdownItem
                         textValue="Data Backup"
                         key="data_backup"

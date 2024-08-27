@@ -9,10 +9,11 @@ import BorderCard from "@/components/common/BorderCard";
 import { Avatar } from "@nextui-org/avatar";
 import RenderList from "@/components/util/RenderList";
 import { useIntegrations } from "@/services/queries";
+import {Integrations} from "@/types/routes/default/types";
 
 const ColumnOne: React.FC = () => {
     const [selected, setSelected] = useState<string>("all");
-    const [items, setItems] = useState<any[]>([]);
+    const [items, setItems] = useState<Integrations[]>([]);
     const { data, isLoading } = useIntegrations();
 
     useEffect(() => {
@@ -57,7 +58,7 @@ const ColumnOne: React.FC = () => {
                 />
             </div>
         );
-    }, [selected, items]);
+    }, [filterItems, selected]);
 
     return (
         <div className='space-y-4 pr-4'>

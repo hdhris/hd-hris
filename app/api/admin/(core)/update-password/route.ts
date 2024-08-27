@@ -9,7 +9,7 @@ const passwordSchema = z.object({
 });
 
 
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest) {
     try {
         // Check if the request is JSON
         if (req.headers.get('Content-Type')?.includes('application/json')) {

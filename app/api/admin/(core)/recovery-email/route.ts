@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import {updateProfileSchema} from "@/helper/zodValidation/UpdateProfile";
+import {NextResponse} from "next/server";
+import {recoveryFormSchema} from "@/helper/zodValidation/EmailValidation";
+import {z} from "zod";
 
-
-export async function PUT(req: NextRequest) {
+export async function POST(req: Request) {
     try {
         if (req.headers.get('Content-Type')?.includes('application/json')) {
             const data = await req.json();
-            const parsedData = updateProfileSchema.parse(data);
+            const parsedData = recoveryFormSchema.parse(data);
 
             // Validate the parsed data
             if(!parsedData) {
@@ -17,7 +16,7 @@ export async function PUT(req: NextRequest) {
             // Process the validated data (e.g., update profile in database)
             // Example: await updateProfile(parsedData);
 
-            return NextResponse.json({ message: 'Profile updated successfully'});
+            return NextResponse.json({ message: 'Recovery email sent successfully'});
         } else {
             return NextResponse.json({ message: 'Unsupported Content-Type' }, { status: 400 });
         }
