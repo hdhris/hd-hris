@@ -101,6 +101,7 @@ function AccountSecurity() {
             toast({
                 title: 'Error',
                 description: error.message,
+                variant: 'danger'
             })
             console.error("Error submitting form:", error);
         }
@@ -133,17 +134,6 @@ function AccountSecurity() {
 
                 </form>
             </Form>
-            {/*</div>*/}
-            <Divider/>
-            <Section title='Account Control' subtitle='Manage account deactivation or deletion.'/>
-            <div className='ms-5 space-y-5'>
-                <Section title='Deactivate Account' subtitle='Temporarily disable your account.'>
-                    <Button size='sm' variant='faded'>Deactivate</Button>
-                </Section>
-                <Section title='Delete Account' subtitle='Permanently remove your account.'>
-                    <Button size='sm' color='danger'>Delete</Button>
-                </Section>
-            </div>
         </>);
 }
 

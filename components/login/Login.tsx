@@ -19,15 +19,13 @@ import Link from "next/link";
 import {icon_color} from "@/lib/utils";
 import {signIn} from "next-auth/react";
 import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
-import {useRouter} from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {LuXCircle} from "react-icons/lu";
 import ForgotButton from "@/components/forgot/ForgotButton";
 
 function Login() {
-
     const router = useRouter()
-
 
     const form = useForm<z.infer<typeof LoginValidation>>({
         resolver: zodResolver(LoginValidation), defaultValues: {
@@ -69,7 +67,8 @@ function Login() {
 
             if (res) {
                 if (res.ok && res.status === 200) {
-                    router.push('/dashboard');
+                        router.push('/dashboard');
+
                 } else if (res && res.status === 401) {
                     setError(res.error!);
                 }

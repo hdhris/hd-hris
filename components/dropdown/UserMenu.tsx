@@ -12,6 +12,7 @@ import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
 import {PiCloudArrowDown, PiPlugs} from "react-icons/pi";
 import {signOut} from "next-auth/react";
+import {MdOutlinePrivacyTip} from "react-icons/md";
 
 function UserMenu() {
     return (
@@ -94,15 +95,15 @@ function UserMenu() {
                     >
                         <Typography className={text_icon}>Security</Typography>
                     </DropdownItem>
-                    {/*<DropdownItem*/}
-                    {/*    textValue="Privacy"*/}
-                    {/*    key="privacy"*/}
-                    {/*    as={Link}*/}
-                    {/*    href='/privacy'*/}
-                    {/*    startContent={<LuShieldAlert className={cn("", icon_theme)}/>}*/}
-                    {/*>*/}
-                    {/*    <Typography className={text_icon}>Privacy</Typography>*/}
-                    {/*</DropdownItem>*/}
+                    <DropdownItem
+                        textValue="Privacy Policy"
+                        key="privacy-policy"
+                        as={Link}
+                        href='/privacy-policy'
+                        startContent={<MdOutlinePrivacyTip className={cn("", icon_theme)}/>}
+                    >
+                        <Typography className={text_icon}>Privacy Policy</Typography>
+                    </DropdownItem>
                     <DropdownItem
                         textValue="Data Backup"
                         key="data_backup"

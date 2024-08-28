@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FileState, MultiFileDropzone } from "@/components/ui/fileupload/multi-file";
+import { FileState, FileDropzone } from "@/components/ui/fileupload/file";
 import {useEdgeStore} from "@/lib/edgestore/edgestore";
 
 function FileUpload() {
@@ -21,7 +21,7 @@ function FileUpload() {
     }
     return (
         <div>
-            <MultiFileDropzone
+            <FileDropzone
                 value={fileStates}
                 onChange={(files) => {
                     setFileStates(files);

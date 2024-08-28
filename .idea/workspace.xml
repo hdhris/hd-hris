@@ -5,7 +5,35 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="partially done">
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy-policy/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/deactivate-account/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/delete-account/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountControl.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/helper/zodValidation/PasswordValidation.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/notif1.ogg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/requests.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/account/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/account/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/preferences/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/preferences/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/terms&amp;condition/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/terms&amp;condition/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/profile/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/profile/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/update-password/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-password/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/update-profile/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-profile/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/auth/authOption.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/authOption.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/privacy/PrivacyPolicyForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/privacy/PrivacyPolicyForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/types/SelectionProp.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/types/SelectionProp.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/forms/FormFields.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/forms/types/SelectionProp.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/login/Login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/login/Login.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/fileupload/multi-file.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/fileupload/file.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/zodValidation/LoginValidation.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/LoginValidation.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/fetcher.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/fetcher.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/routes/default/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/routes/default/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,7 +109,7 @@
     &quot;npm.dev.executor&quot;: &quot;Run&quot;,
     &quot;npm.test:ui.executor&quot;: &quot;Run&quot;,
     &quot;npm.test:watch.executor&quot;: &quot;Run&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.appearance&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\John\\WebstormProjects\\Home-Design-HRIS\\node_modules\\typescript\\lib&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
@@ -92,11 +120,11 @@
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\js" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\assets\icons\products" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\ui" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(core)" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\ui\fileupload" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\assets\notification-sounds" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\common\forms" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\forms" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(defaut)\(account)" />
     </key>
   </component>
   <component name="RunManager" selected="Jest.NextAuth Credentials Provider">
@@ -229,7 +257,12 @@
       <workItem from="1724668691219" duration="657000" />
       <workItem from="1724669702699" duration="1047000" />
       <workItem from="1724684252412" duration="2464000" />
-      <workItem from="1724731170428" duration="25337000" />
+      <workItem from="1724731170428" duration="26139000" />
+      <workItem from="1724821959289" duration="12871000" />
+      <workItem from="1724839331394" duration="1750000" />
+      <workItem from="1724851192723" duration="6076000" />
+      <workItem from="1724857374882" duration="26000" />
+      <workItem from="1724857415903" duration="7809000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -351,7 +384,23 @@
       <option name="project" value="LOCAL" />
       <updated>1724773686427</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="partially done">
+      <option name="closed" value="true" />
+      <created>1724774108944</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1724774108944</updated>
+    </task>
+    <task id="LOCAL-00020" summary="partially done">
+      <option name="closed" value="true" />
+      <created>1724774115584</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1724774115584</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

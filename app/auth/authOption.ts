@@ -54,7 +54,9 @@ const authOptions: NextAuthOptions = {
         signIn: "/",
     },
     secret: process.env.NEXTAUTH_SECRET, session: {
-        strategy: "jwt"
+        strategy: "jwt",
+        // maxAge: 60 * 60, // Set max age to 1 hour (3600 seconds)
+        // updateAge: 5 * 60,  // Update JWT every 5 minutes if activity is detected
     },
 }
 

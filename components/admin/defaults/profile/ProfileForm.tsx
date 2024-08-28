@@ -8,7 +8,7 @@ import Text from "@/components/Text";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {cn, icon_color} from "@/lib/utils";
-import FormFields, {FormInputProps, Selection} from "@/components/forms/FormFields";
+import FormFields, {FormInputProps, Selection} from "@/components/common/forms/FormFields";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {Button} from "@nextui-org/button";
 import {Divider} from "@nextui-org/divider";
@@ -127,7 +127,7 @@ export default function ProfileForm() {
                                 />
                                 Upload new picture
                             </Button>
-                            <Button size='sm' radius='md' color='danger' onClick={handleRemovePhoto}>
+                            <Button size='sm' radius='sm' color='danger' onClick={handleRemovePhoto}>
                                 Remove
                             </Button>
                         </div>
@@ -158,11 +158,7 @@ export default function ProfileForm() {
     async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
         setLoading(true)
         try {
-            const response = await axiosInstance.put('/api/admin/update-profile', values, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            const response = await axiosInstance.put('/api/admin/update-profile', values);
             if (response.status === 200) {
                 toast({
                     description: response.data.message, variant: 'success',

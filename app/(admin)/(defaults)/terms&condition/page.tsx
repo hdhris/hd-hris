@@ -177,11 +177,7 @@ function Page() {
             </div>
             <Chip>You agreed to the terms and conditions on August 12, 2020 12:00 GMT +08.</Chip>
         </div>
-
-        {/*<div className='grid grid-cols-2 gap-4 w-full h-4/5'>*/}
         <ColumnOne/>
-        {/*<ColumnTwo/>*/}
-        {/*</div>*/}
     </section>);
 }
 

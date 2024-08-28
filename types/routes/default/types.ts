@@ -32,3 +32,5 @@ export interface LoginActivity {
     location: string;
     access_method: string;
 }
+
+
