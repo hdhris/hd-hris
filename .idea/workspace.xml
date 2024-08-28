@@ -4,36 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="partially done">
-      <change afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/privacy-policy/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/deactivate-account/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/delete-account/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountControl.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/helper/zodValidation/PasswordValidation.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/notification-sounds/notif1.ogg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/requests.ts" afterDir="false" />
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adding a notification sound">
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/I love you message tone.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/Iphone Notification.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/Mario notification.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/Pikachu notification.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/best message.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/huawei bongo notification.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/messenger notification sound.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/samsung notification sound.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/whooo.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/notification-sounds/xiaomi notification.mp3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/account/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/account/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/preferences/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/preferences/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/terms&amp;condition/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/terms&amp;condition/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/profile/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/profile/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/update-password/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-password/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/update-profile/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-profile/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/auth/authOption.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/authOption.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/defaults/privacy/PrivacyPolicyForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/privacy/PrivacyPolicyForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/types/SelectionProp.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/types/SelectionProp.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/forms/FormFields.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/forms/types/SelectionProp.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/login/Login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/login/Login.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/fileupload/multi-file.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/fileupload/file.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/zodValidation/LoginValidation.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/LoginValidation.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/fetcher.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/fetcher.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/routes/default/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/routes/default/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/notification-sounds/notif1.ogg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,33 +73,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Jest.NextAuth Credentials Provider.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;Vitest.All Tests in vitest.config.ts.executor&quot;: &quot;Run&quot;,
-    &quot;Vitest.All Tests.executor&quot;: &quot;Run&quot;,
-    &quot;Vitest.RootLayout Component.executor&quot;: &quot;Run&quot;,
-    &quot;Vitest.RootLayout.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/John/WebstormProjects/Home-Design-HRIS/app/api/admin/(core)/update-profile&quot;,
-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs.jest.jest_package&quot;: &quot;C:/Users/John/WebstormProjects/Home-Design-HRIS/node_modules/jest&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;npm.build.executor&quot;: &quot;Run&quot;,
-    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
-    &quot;npm.test:ui.executor&quot;: &quot;Run&quot;,
-    &quot;npm.test:watch.executor&quot;: &quot;Run&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\John\\WebstormProjects\\Home-Design-HRIS\\node_modules\\typescript\\lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Jest.NextAuth Credentials Provider.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Vitest.All Tests in vitest.config.ts.executor": "Run",
+    "Vitest.All Tests.executor": "Run",
+    "Vitest.RootLayout Component.executor": "Run",
+    "Vitest.RootLayout.executor": "Run",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/John/WebstormProjects/Home-Design-HRIS/public/notification-sounds",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs.jest.jest_package": "C:/Users/John/WebstormProjects/Home-Design-HRIS/node_modules/jest",
+    "nodejs_package_manager_path": "npm",
+    "npm.build.executor": "Run",
+    "npm.dev.executor": "Run",
+    "npm.test:ui.executor": "Run",
+    "npm.test:watch.executor": "Run",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "C:\\Users\\John\\WebstormProjects\\Home-Design-HRIS\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\notification-sounds" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(core)\update-profile" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\js" />
     </key>
@@ -262,7 +247,7 @@
       <workItem from="1724839331394" duration="1750000" />
       <workItem from="1724851192723" duration="6076000" />
       <workItem from="1724857374882" duration="26000" />
-      <workItem from="1724857415903" duration="7809000" />
+      <workItem from="1724857415903" duration="8955000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -400,7 +385,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724774115584</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="adding a notification sound">
+      <option name="closed" value="true" />
+      <created>1724865296493</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1724865296493</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -432,6 +425,7 @@
     <MESSAGE value="test" />
     <MESSAGE value="adding simple backen to the account settings" />
     <MESSAGE value="partially done" />
-    <option name="LAST_COMMIT_MESSAGE" value="partially done" />
+    <MESSAGE value="adding a notification sound" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding a notification sound" />
   </component>
 </project>

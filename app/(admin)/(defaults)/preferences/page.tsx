@@ -24,7 +24,18 @@ const languages = [{uid: 'en', name: 'English'}]
 const regions = [{uid: 'ph', name: 'Philippines'}]
 const timezones = [{uid: 'cst', name: 'CST • GMT +08'}]
 const text_size = [{uid: 'sm', name: 'Small'}, {uid: 'md', name: 'Medium'}, {uid: 'lg', name: 'Large'}]
-const notifications = [{uid: '/notification-sounds/notif1.ogg', name: 'Ohh'}, {uid: 'customize', name: 'Customize'}]
+const notifications = [
+    {uid: '/notification-sounds/best message.mp3', name: 'Best Message'},
+    {uid: '/notification-sounds/huawei bongo notification.mp3', name: 'Huawei Bongo'},
+    {uid: '/notification-sounds/I love you message tone.mp3', name: 'I Love You'},
+    {uid: '/notification-sounds/Iphone Notification.mp3', name: 'Iphone'},
+    {uid: '/notification-sounds/Mario notification.mp3', name: 'Mario'},
+    {uid: '/notification-sounds/messenger notification sound.mp3', name: 'Messenger'},
+    {uid: '/notification-sounds/Pikachu notification.mp3', name: 'Pickachu'},
+    {uid: '/notification-sounds/samsung notification sound.mp3', name: 'Samsung'},
+    {uid: '/notification-sounds/whooo.wav', name: 'Whoha'},
+    {uid: '/notification-sounds/xiaomi notification.mp3', name: 'Xiaomi'},
+    {uid: 'customize', name: 'Customize'}]
 
 
 const ColumnOne: React.FC = () => (<div className='space-y-4 pr-4'>
@@ -55,12 +66,12 @@ const ColumnTwo: React.FC = () => {
     const [ringtone, setRingtone] = useState<FileState[]>([])
     const {edgestore} = useEdgeStore();
 
-    const handleNotiificationSelection = async (key: SharedSelection) => {
+    const handleNotiificationSelection = (key: SharedSelection) => {
         if(key.anchorKey === 'customize') {
             onOpen();
         } else {
             let audio = new Audio(key.anchorKey);
-            await audio.play();
+            audio.play();
         }
     }
     function updateFileProgress(key: string, progress: FileState['progress']) {
@@ -105,7 +116,7 @@ const ColumnTwo: React.FC = () => {
                 </Section>
                 <Section title='Notification Sound' subtitle='Choose a sound for your notifications.'>
                     {/*<Button size='sm' variant='faded' >Configure</Button>*/}
-                    <SelectionMenu label='Medium' options={notifications} onSelectionChange={handleNotiificationSelection} isRequired={false}/>
+                    <SelectionMenu label='Best Message' options={notifications} onSelectionChange={handleNotiificationSelection} isRequired={false}/>
                 </Section>
             </div>
         </div>
