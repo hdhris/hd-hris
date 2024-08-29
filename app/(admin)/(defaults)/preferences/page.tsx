@@ -1,41 +1,44 @@
 'use client'
-import React, {useState} from 'react';
+import React, {useCallback} from 'react';
 import {Heading, Section} from "@/components/common/typography/Typography";
-import {Button} from "@nextui-org/button";
 import {Divider} from "@nextui-org/divider";
-import {
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    SharedSelection,
-    Switch,
-    useDisclosure
-} from '@nextui-org/react';
+import {SharedSelection, Switch} from '@nextui-org/react';
 import SelectionMenu from "@/components/dropdown/SelectionMenu";
 import {ActionButtons} from "@/components/actions/ActionButton";
-import {FileDropzone, FileState} from '@/components/ui/fileupload/file';
-import {useEdgeStore} from "@/lib/edgestore/edgestore";
-import {Key} from "@react-types/shared";
 
 
 const languages = [{uid: 'en', name: 'English'}]
 const regions = [{uid: 'ph', name: 'Philippines'}]
 const timezones = [{uid: 'cst', name: 'CST • GMT +08'}]
 const text_size = [{uid: 'sm', name: 'Small'}, {uid: 'md', name: 'Medium'}, {uid: 'lg', name: 'Large'}]
-const notifications = [
-    {uid: '/notification-sounds/best message.mp3', name: 'Best Message'},
-    {uid: '/notification-sounds/huawei bongo notification.mp3', name: 'Huawei Bongo'},
-    {uid: '/notification-sounds/I love you message tone.mp3', name: 'I Love You'},
-    {uid: '/notification-sounds/Iphone Notification.mp3', name: 'Iphone'},
-    {uid: '/notification-sounds/Mario notification.mp3', name: 'Mario'},
-    {uid: '/notification-sounds/messenger notification sound.mp3', name: 'Messenger'},
-    {uid: '/notification-sounds/Pikachu notification.mp3', name: 'Pickachu'},
-    {uid: '/notification-sounds/samsung notification sound.mp3', name: 'Samsung'},
-    {uid: '/notification-sounds/whooo.wav', name: 'Whoha'},
-    {uid: '/notification-sounds/xiaomi notification.mp3', name: 'Xiaomi'},
-    {uid: 'customize', name: 'Customize'}]
+const notifications = [{
+    uid: '/notification-sounds/best message.mp3',
+    name: 'Best Message'
+}, {
+    uid: '/notification-sounds/huawei bongo notification.mp3',
+    name: 'Huawei Bongo'
+}, {
+    uid: '/notification-sounds/I love you message tone.mp3',
+    name: 'I Love You'
+}, {
+    uid: '/notification-sounds/Iphone Notification.mp3',
+    name: 'Iphone'
+}, {
+    uid: '/notification-sounds/Mario notification.mp3',
+    name: 'Mario'
+}, {
+    uid: '/notification-sounds/messenger notification sound.mp3',
+    name: 'Messenger'
+}, {
+    uid: '/notification-sounds/Pikachu notification.mp3',
+    name: 'Pickachu'
+}, {
+    uid: '/notification-sounds/samsung notification sound.mp3',
+    name: 'Samsung'
+}, {uid: '/notification-sounds/whooo.wav', name: 'Whoha'}, {
+    uid: '/notification-sounds/xiaomi notification.mp3',
+    name: 'Xiaomi'
+}]
 
 
 const ColumnOne: React.FC = () => (<div className='space-y-4 pr-4'>
@@ -62,35 +65,9 @@ const ColumnOne: React.FC = () => (<div className='space-y-4 pr-4'>
 </div>);
 
 const ColumnTwo: React.FC = () => {
-    const {onClose, onOpen, onOpenChange, isOpen} = useDisclosure()
-    const [ringtone, setRingtone] = useState<FileState[]>([])
-    const {edgestore} = useEdgeStore();
-
-    const handleNotiificationSelection = (key: SharedSelection) => {
-        if(key.anchorKey === 'customize') {
-            onOpen();
-        } else {
-            let audio = new Audio(key.anchorKey);
-            audio.play();
-        }
-    }
-    function updateFileProgress(key: string, progress: FileState['progress']) {
-        setRingtone((fileStates) => {
-            const newFileStates = structuredClone(fileStates);
-            const fileState = newFileStates.find((fileState) => fileState.key === key,);
-            if (fileState) {
-                fileState.progress = progress;
-            }
-            return newFileStates;
-        });
-    }
-
-    const handleOnClose = React.useCallback(() => {
-        setRingtone([])
-        onClose();
-    }, [onClose])
-
-
+    const handleNotificationSelection = useCallback((value: SharedSelection) => {
+        new Audio(value.anchorKey).play()
+    }, [])
     return (<>
         <div className='pl-4 space-y-4'>
             <Section title='Accessibility Options'
@@ -116,59 +93,11 @@ const ColumnTwo: React.FC = () => {
                 </Section>
                 <Section title='Notification Sound' subtitle='Choose a sound for your notifications.'>
                     {/*<Button size='sm' variant='faded' >Configure</Button>*/}
-                    <SelectionMenu label='Best Message' options={notifications} onSelectionChange={handleNotiificationSelection} isRequired={false}/>
+                    <SelectionMenu label='Best Message' options={notifications}
+                                   onSelectionChange={handleNotificationSelection} isRequired={false}/>
                 </Section>
             </div>
         </div>
-        <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            placement="top-center"
-        >
-            <ModalContent>
-
-                <ModalHeader className="flex flex-col gap-1">Log in</ModalHeader>
-                <ModalBody>
-                    <FileDropzone
-                        value={ringtone}
-                        onChange={setRingtone}
-                        onFilesAdded={async (addedFiles) => {
-                            setRingtone(addedFiles);
-                            await Promise.all(addedFiles.map(async (addedFileState) => {
-                                try {
-                                    const res = await edgestore.publicFiles.upload({
-                                        file: addedFileState.file, onProgressChange: async (progress) => {
-                                            updateFileProgress(addedFileState.key, progress);
-                                            if (progress === 100) {
-                                                // wait 1 second to set it to complete
-                                                // so that the user can see the progress bar at 100%
-                                                await new Promise((resolve) => setTimeout(resolve, 1000));
-                                                updateFileProgress(addedFileState.key, 'COMPLETE');
-                                            }
-                                        },
-                                    });
-                                    console.log(res);
-                                } catch (err) {
-                                    updateFileProgress(addedFileState.key, 'ERROR');
-                                }
-                            }),);
-                        }}
-                        dropzoneOptions={{
-                            maxFiles: 1,
-                            // accept: {'audio': ['.mp3', '.wav', '.mp4a', '.ogg', '.m4r']},
-                            // maxSize: 100 * 1024
-                        }}/>
-                </ModalBody>
-                <ModalFooter>
-                    <Button color="danger" variant="flat" onPress={handleOnClose}>
-                        Close
-                    </Button>
-                    <Button color="primary" onPress={handleOnClose}>
-                        Sign in
-                    </Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
     </>)
 };
 

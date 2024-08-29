@@ -5,7 +5,7 @@ import Typography, {Heading} from "@/components/common/typography/Typography";
 interface BorderCardProps {
     children: React.ReactNode,
     className?: string,
-    heading: React.ReactNode,
+    heading?: React.ReactNode,
     subHeading?: React.ReactNode,
     endContent?: React.ReactNode
     startContent?: React.ReactNode

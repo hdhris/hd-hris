@@ -2,28 +2,23 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import Typography, {Heading, Section} from "@/components/common/typography/Typography";
 import {Button} from "@nextui-org/button";
-import {Divider} from "@nextui-org/divider";
-import {Listbox, ListboxItem, Spinner, Switch} from '@nextui-org/react';
+import {cn, Listbox, ListboxItem, SharedSelection, Switch} from '@nextui-org/react';
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {Avatar} from "@nextui-org/avatar";
 import {useLoginActivity} from "@/services/queries";
 import {LoginActivity} from "@/types/routes/default/types";
 import Loading from "@/components/spinner/Loading";
 import SelectionMenu from "@/components/dropdown/SelectionMenu";
-import {useForm} from "react-hook-form";
-import {z} from "zod";
-import {zodResolver} from "@hookform/resolvers/zod";
-import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
-import {Form} from "@/components/ui/form";
 import {ActionButtons} from "@/components/actions/ActionButton";
-import ForgotButton from "@/components/forgot/ForgotButton";
-import {recoveryFormSchema} from "@/helper/zodValidation/EmailValidation";
-import {axiosInstance} from "@/services/fetcher";
 import {getRandomInt} from "@/lib/utils/numberFormat";
-import RenderList from "@/components/util/RenderList";
 import {Chip} from "@nextui-org/chip";
+import QuestionnairesForm from "@/components/admin/defaults/security/QuestionnairesForm";
+import {axiosInstance} from "@/services/fetcher";
+import {useToast} from "@/components/ui/use-toast";
 
-const twoFA = [{uid: 'off', name: 'Off'}, {uid: 'email', name: 'Email'}, {uid: 'sms', name: 'SMS'}];
+const twoFA = [{uid: 'off', name: 'Off'}, {uid: 'email', name: 'Email'}, {
+    uid: 'app', name: 'App'
+}, {uid: 'push_notification', name: 'Push Notification'}];
 
 
 // Function to format a number into the format "123 456 7890"
@@ -35,91 +30,90 @@ function formatNumber(number: number): string {
 
 const ColumnOne: React.FC = () => {
     const [codes, setCodes] = useState<string[]>()
-    const emailForm: FormInputProps[] = [{
-        label: 'Recovery Email',
-        name: 'email',
-        description: 'Enter an alternative email address for recovery purposes.'
-    },]
+    const [twoFASelection, setTwoFASelection] = useState<string>("");
+    const [isOn, setIsOn] = useState(false)
+    const [loading, setLoading] = useState(false)
 
-    const recoveryForm = useForm<z.infer<typeof recoveryFormSchema>>({
-        resolver: zodResolver(recoveryFormSchema)
-    })
-
-    async function onSubmit(values: z.infer<typeof recoveryFormSchema>) {
-        try {
-            const res = await axiosInstance.post('/api/admin/recovery-email', values, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            alert(res.data.message)
-
-        } catch (error: any) {
-            alert(error.message)
-        }
-    }
-
+    const {toast} = useToast()
 
     const generatedCode = useCallback(() => {
-
         Array.from({length: 3}, () => {
-            const codes = [
-                getRandomInt(1000000000, 9999999999),
-                getRandomInt(1000000000, 9999999999),
-                getRandomInt(1000000000, 9999999999)
-            ];
+            const codes = [getRandomInt(1000000000, 9999999999), getRandomInt(1000000000, 9999999999), getRandomInt(1000000000, 9999999999)];
             const formattedCodes = codes.map(code => formatNumber(code));
             setCodes(formattedCodes)
         });
 
     }, [])
 
-    useEffect(() => {
-        generatedCode()
-    }, [generatedCode]);
+    const isNotAllowed = !isOn ? 'opacity-75 cursor-not-allowed' : ''
+
+    const handleTwoFASelection = (key: SharedSelection) => {
+        setTwoFASelection(key.currentKey!)
+    }
+    const handleOnSave = useCallback(async () => {
+        setLoading(true)
+        const values = {
+            isOn, twoFASelection, codes
+        }
+        try {
+            const res = await axiosInstance.put('/api/admin/security/configurations', values)
+            if (res.status === 200) {
+                console.log(res.data)
+                toast({
+                    title: 'Success',
+                    description: 'Successfully applied changes',
+                    duration: 3000,
+                    variant: 'success',
+                })
+            }
+        } catch (error: any) {
+            toast({
+                title: 'Error',
+                description: error.message,
+                duration: 3000,
+                variant: 'danger'
+            })
+            console.log(error)
+        }
+
+        setLoading(false)
+
+    }, [isOn, twoFASelection, codes, toast])
 
     return (<div className='pl-4 space-y-4'>
-        <Section title="Security Options" subtitle="Manage your account's security settings"/>
+        <Section title="Security Options" subtitle="Manage your account's security settings">
+            <Switch isSelected={isOn} onValueChange={setIsOn} size='sm' color="primary"/>
+        </Section>
+
         <div className='ms-5 space-y-5'>
             <Section title='Two-Factor Authentication'
-                     subtitle="Enable two-factor authentication to secure your account.">
-                <SelectionMenu label='Email' options={twoFA} isRequired={false}/>
+                     subtitle="Enable two-factor authentication to secure your account."
+                     className={isNotAllowed}
+            >
+                <SelectionMenu isDisabled={!isOn} label='Email' options={twoFA} onSelectionChange={handleTwoFASelection}
+                               isRequired={false}/>
+
             </Section>
             <Section title='Recovery Codes'
+                     className={isNotAllowed}
                      subtitle='Generate and save backup codes to use if the primary 2FA method is unavailable.'>
-                <Button size='sm' variant='faded' onClick={generatedCode}>Generate</Button>
+                <Button size='sm' variant='faded' isDisabled={!isOn} onClick={generatedCode}>Generate</Button>
             </Section>
-            <div className='ms-10 space-x-2'>
-                {codes && codes.map((code, index) => (
-                    <Chip key={index}>{code}</Chip>
-                ))}
+            <div className={cn('ms-10 space-x-2', !isOn ? 'hidden' : '')}>
+                {codes && codes.map((code, index) => (<Chip key={index}>{code}</Chip>))}
             </div>
-            <div className='space-y-2'>
+            <div className={cn('space-y-2', isNotAllowed)}>
                 <Section title='Security Questions'
+                         className={isNotAllowed}
                          subtitle='Setup security questions to verify identity during account recovery.'>
-                    <Button size='sm' variant='faded'>Add Question</Button>
+                    <QuestionnairesForm isDisabled={!isOn}/>
+                    {/*<Button size='sm' variant='faded' isDisabled={!isOn}>Add Question</Button>*/}
                 </Section>
-                <Button className='ms-10' size='sm' variant='faded'>View Q&A</Button>
+                <Button className='ms-10' size='sm' variant='faded' isDisabled={!isOn}>View Q&A</Button>
             </div>
-            <Form {...recoveryForm}>
-                <form onSubmit={recoveryForm.handleSubmit(onSubmit)} className='ms-8 space-y-5 flex flex-col p-2'>
-                    <FormFields items={emailForm}/>
-                    <div className='self-end'>
-                        <Button type='submit'
-                                spinner={<Spinner size='sm'/>}
-                            // isLoading={loading}
-                                size='sm'
-                                className='w-full'
-                                color='primary'
-                                radius='sm'>
-                            Save
-                        </Button>
-                    </div>
-
-                </form>
-            </Form>
 
         </div>
+        <ActionButtons label='Apply' onSave={handleOnSave} isLoading={loading}/>
     </div>)
 };
 
@@ -142,6 +136,16 @@ const ColumnTwo: React.FC = () => {
         }
     }, [data]);
 
+
+    // const handleOnSave = useCallback(() => {
+    //     // Handle save logic
+    //     const values = {
+    //         isOn: isOn,
+    //         twoFASelection,
+    //
+    //     }
+    //
+    // }, [])
 // Flatten grouped items before rendering
     const flattenedItems = useMemo(() => {
         return Object.values(items).flat();
@@ -185,7 +189,7 @@ const ColumnTwo: React.FC = () => {
                 {isLoading ? (<Loading/>) : (LoginActivity)}
             </ScrollShadow>
         </div>
-        <ActionButtons label='Apply'/>
+        {/*<ActionButtons label='Apply' onSave={handleOnSave}/>*/}
     </div>)
 };
 

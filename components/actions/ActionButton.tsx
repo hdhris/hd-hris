@@ -37,10 +37,11 @@ interface ActionButton {
     onCancel?: () => void
     onSave?: () => void
     label?: string
+    isLoading?: boolean
 }
-export const ActionButtons: React.FC<ActionButton> = ({onCancel, onSave, className, label}) => (
+export const ActionButtons: React.FC<ActionButton> = ({onCancel, onSave, className, label, isLoading}) => (
     <div className={cn('flex justify-end space-x-3 mt-auto', className)}>
         <Button size='sm' variant='light' onClick={onCancel}>Cancel</Button>
-        <Button size='sm' variant='solid' color='primary' onClick={onSave}>{label}</Button>
+        <Button size='sm' variant='solid' color='primary' onClick={onSave} isLoading={isLoading}>{label}</Button>
     </div>
 );
