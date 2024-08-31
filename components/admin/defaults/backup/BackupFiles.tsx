@@ -5,16 +5,12 @@ import Text from "@/components/Text";
 import TableData from "@/components/tabledata/TableData";
 import {ColumnsProps, TableConfigProps} from "@/types/table/TableDataTypes";
 import {backupData, TableProps} from "@/sampleData/admin/defaults/backup/backupData";
-import {ActionButtons} from "@/components/actions/ActionButton";
 
 
-const tableColumns: ColumnsProps[] = [{name: 'Backup Files', uid: 'backupFiles'}, {
-    name: 'Timestamps', uid: 'timestamps'
-}, {name: 'Destination', uid: 'destination'}, {name: 'Status', uid: 'status'},]
+const tableColumns: ColumnsProps[] = [{
+    name: 'Date', uid: 'date', sortable: true,
+}, {name: 'Time', uid: 'time', sortable: true,}, {name: 'Size', uid: 'size', sortable: true,}, {name: 'Status', uid: 'status', sortable: true,},{name: 'Action', uid: 'action'}, ]
 
-const department_status_color_map: Record<string, BadgeProps["color"]> = {
-    active: "success", inactive: "danger",
-}
 
 function BackupFiles() {
     const TableEntry: TableConfigProps<TableProps> = {
@@ -24,21 +20,17 @@ function BackupFiles() {
         }
     }
 
-    return (<div className='h-80'>
-            <TableData
-                aria-label="User Table"
-                config={TableEntry}
-                items={backupData}
-                removeWrapper
-                isStriped
-                isCompact
-                selectionBehavior='toggle'
-                selectionMode="multiple"
-                isHeaderSticky
-                searchingItemKey={["backupFiles"]}
-            />
-            <ActionButtons label='Restore'/>
-        </div>
+    return (<TableData
+            aria-label="User Table"
+            config={TableEntry}
+            items={backupData}
+            removeWrapper
+            isStriped
+            isCompact
+            selectionBehavior='toggle'
+            isHeaderSticky
+            // searchingItemKey={["backupFiles"]}
+        />
 
     );
 

@@ -4,7 +4,8 @@ import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import Typography from "@/components/common/typography/Typography";
 import dayjs from "dayjs";
 import {LuCalendarClock} from "react-icons/lu";
-import {cn, icon_size} from "@/lib/utils";
+import {icon_size} from "@/lib/utils";
+import {cn} from '@nextui-org/react'
 import {Divider} from "@nextui-org/divider";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import DateComponent from "@/components/date/DateComponent";

@@ -9,7 +9,8 @@ import BarChart, {BarChartProps} from "@/components/common/charts/Bar";
 import RadialChart from "@/components/common/charts/Radial";
 import {compactNumber, getRandomInt, numberWithCommas} from "@/lib/utils/numberFormat";
 import CountUp from "react-countup";
-import {cn, icon_color, icon_size} from "@/lib/utils";
+import {icon_color, icon_size} from "@/lib/utils";
+import {cn} from '@nextui-org/react'
 import AreaChart, {AreaChartProps} from "@/components/common/charts/Area";
 import {ApexOptions} from "apexcharts";
 import Stackedbar from "@/components/common/charts/StackBar";

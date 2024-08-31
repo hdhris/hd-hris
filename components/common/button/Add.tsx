@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from "next/link";
-import {btnClass, cn, icon_size, icon_size_sm} from "@/lib/utils";
+import {btnClass, icon_size, icon_size_sm} from "@/lib/utils";
+import {cn} from '@nextui-org/react'
 import {Button} from "@nextui-org/button";
 import {ButtonProps} from "@nextui-org/react";
 import {LuPlus} from "react-icons/lu";

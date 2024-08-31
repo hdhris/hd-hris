@@ -1,5 +1,5 @@
 import React from 'react';
-import {cn} from "@/lib/utils";
+import {cn} from "@nextui-org/react";
 import Typography, {Heading} from "@/components/common/typography/Typography";
 
 interface BorderCardProps {
@@ -18,14 +18,14 @@ interface BorderCardProps {
 
 function BorderCard({children, className, heading, subHeading, startContent, endContent, classNames}: BorderCardProps) {
     return (<article className={cn("bg-white rounded border border-gray-200 dark:bg-gray-800 p-5", className, classNames?.container)}>
-            <div className='flex justify-between'>
-                {startContent && startContent}
-                <span className="w-full">
+        { startContent || heading && <div className='flex justify-between'>
+            {startContent && startContent}
+            <span className="w-full">
                     <Heading className={classNames?.heading}>{heading}</Heading>
                     <Typography className={cn('text-sm opacity-75', classNames?.subHeading)}>{subHeading}</Typography>
                 </span>
-                {endContent && endContent}
-            </div>
+            {endContent && endContent}
+        </div>}
             {children}
         </article>);
 }

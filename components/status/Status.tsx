@@ -1,20 +1,21 @@
-import {ChipProps} from "@nextui-org/react";
+import {ChipProps, cn} from "@nextui-org/react";
 import React from "react";
 import {Chip} from "@nextui-org/chip";
 
 interface StatusProps {
-    text?: React.ReactNode
-    color: ChipProps['color']
+    children?: React.ReactNode
+    isCapitalize?: boolean
+    color?: ChipProps['color']
 }
-export const Status = ({text, color}:StatusProps) => {
+export const Status = ({children, color, isCapitalize}:StatusProps) => {
     return (
         <Chip
-            className="capitalize border-none gap-1 text-default-600"
-            color={color}
+            className={cn("border-none gap-1 text-default-600", isCapitalize && 'capitalize')}
+            color={color || 'default'}
             size="sm"
             variant="dot"
         >
-            {text && text}
+            {children}
         </Chip>
     );
 }

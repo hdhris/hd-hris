@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heading, Section } from "@/components/common/typography/Typography";
 import { Switch, Tab, Tabs } from '@nextui-org/react';
-import { Card, CardBody } from "@nextui-org/card";
 import { LuCalendarRange, LuCloud, LuDatabase } from "react-icons/lu";
 import Text from "@/components/Text";
 import BorderCard from "@/components/common/BorderCard";

@@ -28,7 +28,8 @@ import CountUp from "react-countup";
 import {TableConfigProps} from "@/types/table/TableDataTypes";
 import {FilterProps} from "@/types/table/default_config";
 import {ChevronDownIcon} from "@nextui-org/shared-icons";
-import {cn, icon_color, icon_size} from "@/lib/utils";
+import {icon_color, icon_size} from "@/lib/utils";
+import {cn} from '@nextui-org/react'
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
@@ -47,7 +48,7 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
 }
 
 interface SearchProps<T> {
-    searchingItemKey: Array<keyof T>;
+    searchingItemKey?: Array<keyof T>;
 }
 
 function genericSearch<T>(object: T, searchingItemKey: Array<keyof T>, query: string): boolean {
@@ -99,7 +100,7 @@ function DataTable<T extends { id: string | number }>({
         if (Array.isArray(items)) {
             filteredUsers = [...items].filter(item => item !== undefined);
 
-            if (hasSearchFilter) {
+            if (hasSearchFilter && searchingItemKey) {
                 filteredUsers = filteredUsers.filter((user) => genericSearch(user, searchingItemKey, filterValue));
             }
 
@@ -192,18 +193,22 @@ function DataTable<T extends { id: string | number }>({
         return (<Suspense fallback={<Spinner/>}>
                 <div className="flex flex-col gap-4">
                     <div className="flex justify-between gap-3 items-end">
-                        <Input
-                            isClearable
-                            variant="bordered"
-                            radius="sm"
-                            className="w-full sm:max-w-[44%]"
-                            color="primary"
-                            placeholder={`Search by ${searchingItemKey.map((item) => item.toString().replace(/[,_]+/g, ' ')).join(", ").toUpperCase()}`}
-                            startContent={<SearchIcon className={cn("text-small", icon_color, icon_size)}/>}
-                            value={filterValue} // Set the value of the input
-                            onClear={() => onClear()}
-                            onValueChange={onSearchChange}
-                        />
+                        {
+                            searchingItemKey && (
+                                <Input
+                                    isClearable
+                                    variant="bordered"
+                                    radius="sm"
+                                    className="max-w-sm"
+                                    color="primary"
+                                    placeholder={`Search by ${searchingItemKey.map((item) => item.toString().replace(/[,_]+/g, ' ')).join(", ").toUpperCase()}`}
+                                    startContent={<SearchIcon className={cn("text-small", icon_color, icon_size)}/>}
+                                    value={filterValue} // Set the value of the input
+                                    onClear={() => onClear()}
+                                    onValueChange={onSearchChange}
+                                />
+                            )
+                        }
                         {filterItems && (<div className="flex gap-3 items-center">
                             <Dropdown classNames={{content: 'rounded'}}>
                                 <DropdownTrigger className="hidden sm:flex">
@@ -276,7 +281,7 @@ function DataTable<T extends { id: string | number }>({
     const loadingState = isLoading ? "loading" : "idle";
     const emptyContent = sortedItems.length === 0 && !isLoading && 'No data found. Try to refresh';
 
-    return (<div className="grid grid-rows-[auto,1fr,auto] h-full">
+    return (<div className="grid grid-rows-[auto,1fr,auto] h-full w-full">
         <section className='pb-3'>
             {topContent}
         </section>

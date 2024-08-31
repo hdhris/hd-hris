@@ -7,7 +7,8 @@ import {UserRound} from "lucide-react";
 import Text from "@/components/Text";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {cn, icon_color} from "@/lib/utils";
+import {icon_color} from "@/lib/utils";
+import {cn} from '@nextui-org/react'
 import FormFields, {FormInputProps, Selection} from "@/components/common/forms/FormFields";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {Button} from "@nextui-org/button";

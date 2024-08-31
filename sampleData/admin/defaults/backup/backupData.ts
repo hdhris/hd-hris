@@ -39,6 +39,186 @@ export const backupData: TableProps[] = [{
     timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
     destination: 'Destination',
     status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
+}, {
+    id: 5,
+    backupFiles: 'Payroll Files',
+    timestamps: dayjs(getRandomDateTime(new Date('2022-01-01'), new Date('2022-02-01'))).format('YYYY DD MMM hh:mm A'),
+    destination: 'Destination',
+    status: 'success'
 }
 
 ]

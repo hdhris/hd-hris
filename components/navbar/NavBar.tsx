@@ -2,7 +2,7 @@
 import React, {ReactNode} from 'react';
 import {Navbar, NavbarBrand, NavbarContent, NavbarMenu, NavbarMenuToggle} from "@nextui-org/react";
 import Logo from "@/components/common/Logo";
-import {cn} from "@/lib/utils";
+import {cn} from "@nextui-org/react";
 
 function NavBar({children, className}: {children: ReactNode, className?: string}) {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
