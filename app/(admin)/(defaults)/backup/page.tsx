@@ -6,6 +6,7 @@ import {Chip, cn} from '@nextui-org/react';
 import BorderCard from "@/components/common/BorderCard";
 import BackupRetention from "@/components/admin/defaults/backup/BackupRetention";
 import BackupStrategy from "@/components/admin/defaults/backup/BackupStrategy";
+import BackupFrequency from "@/components/admin/defaults/backup/BackupFrequency";
 
 
 const BackupSettings: React.FC = () => {
@@ -13,11 +14,11 @@ const BackupSettings: React.FC = () => {
         <Section title='Backup Settings' subtitle='Ensure your information is safe with regular data backups.'/>
         <div className='ms-5 space-y-5'>
             <Section className='me-6' title='Backup Frequency' subtitle='Set how often your data is backed up.'>
-                <Button size='sm' variant='faded'>Set Up</Button>
-                {/*<SelectionMenu label='Weekly' options={backupFrequencyOptions} isRequired={false}/>*/}
+                <BackupFrequency/>
             </Section>
-            <Section title='Backup Strategy' subtitle='Choose a backup approach that best fits your data protection needs.'>
-               <BackupStrategy/>
+            <Section title='Backup Strategy'
+                     subtitle='Choose a backup approach that best fits your data protection needs.'>
+                <BackupStrategy/>
             </Section>
         </div>
 
@@ -59,35 +60,35 @@ const RestoreManagement: React.FC = () => (<div className='pl-4 space-y-4'>
 
 function Page() {
     return (<section className='h-full flex flex-col gap-4 w-full'>
-            <div className='flex justify-between items-center'>
-                <Heading as='h1' className='text-3xl font-bold'>Data Backup</Heading>
-                {/*
+        <div className='flex justify-between items-center'>
+            <Heading as='h1' className='text-3xl font-bold'>Data Backup</Heading>
+            {/*
                 TODO: change the "border-success" based on the status
                 */}
-                <Chip color='success' variant='dot' className={cn('border-success')}>Last backup completed successfully
-                    on June 15, 2023</Chip>
-            </div>
-            <div className='grid grid-cols-2 gap-4 w-full h-4/5'>
-                <BackupSettings/>
-                <RestoreManagement/>
-            </div>
-            <div className='flex flex-col gap-2'>
+            <Chip color='success' variant='dot' className={cn('border-success')}>Last backup completed successfully
+                on June 15, 2023</Chip>
+        </div>
+        <div className='grid grid-cols-2 gap-4 w-full h-4/5'>
+            <BackupSettings/>
+            <RestoreManagement/>
+        </div>
+        <div className='flex flex-col gap-2'>
 
-                <Section title='Backup History' subtitle='' className='ms-2' classNames={{
-                    heading: 'text-lg'
-                }}/>
+            <Section title='Backup History' subtitle='' className='ms-2' classNames={{
+                heading: 'text-lg'
+            }}/>
 
-                <BorderCard className='p-2' heading={<div className='flex justify-end'>
-                    <Button size='sm' color='primary'>Restore Options</Button>
+            <BorderCard className='p-2' heading={<div className='flex justify-end'>
+                <Button size='sm' color='primary'>Restore Options</Button>
+            </div>
+
+            }>
+                <div className='h-80 overflow-hidden'>
+                    <BackupFiles/>
                 </div>
-
-                }>
-                    <div className='h-80 overflow-hidden'>
-                        <BackupFiles/>
-                    </div>
-                </BorderCard>
-            </div>
-        </section>);
+            </BorderCard>
+        </div>
+    </section>);
 }
 
 export default Page;

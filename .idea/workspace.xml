@@ -4,12 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="done backup retention">
-      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/backup/strategy/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/admin/defaults/backup/BackupStrategy.tsx" afterDir="false" />
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="done Backup Strategy">
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/backup/frequency/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/admin/defaults/backup/BackupFrequency.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/backup/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/backup/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/defaults/backup/BackupRetention.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/backup/BackupRetention.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,7 +73,7 @@
     "Vitest.RootLayout Component.executor": "Run",
     "Vitest.RootLayout.executor": "Run",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/John/WebstormProjects/Home-Design-HRIS/app/api/admin/(defaut)/backup/strategy",
+    "last_opened_file_path": "C:/Users/John/WebstormProjects/Home-Design-HRIS/app/api/admin/(defaut)/backup/frequency",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -92,10 +91,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(defaut)\backup\frequency" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\admin\defaults\backup" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(defaut)\backup\strategy" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\notification-sounds" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(core)\update-profile" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\js" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(defaut)\backup" />
@@ -246,7 +246,7 @@
       <workItem from="1725095920888" duration="284000" />
       <workItem from="1725096306635" duration="94000" />
       <workItem from="1725096415931" duration="516000" />
-      <workItem from="1725097034808" duration="18636000" />
+      <workItem from="1725097034808" duration="22093000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -424,7 +424,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725116900163</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="done Backup Strategy">
+      <option name="closed" value="true" />
+      <created>1725120351463</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1725120351463</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -462,6 +470,7 @@
     <MESSAGE value="adding backend in security page" />
     <MESSAGE value="fixing cn" />
     <MESSAGE value="done backup retention" />
-    <option name="LAST_COMMIT_MESSAGE" value="done backup retention" />
+    <MESSAGE value="done Backup Strategy" />
+    <option name="LAST_COMMIT_MESSAGE" value="done Backup Strategy" />
   </component>
 </project>
