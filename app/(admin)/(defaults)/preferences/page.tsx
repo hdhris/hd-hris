@@ -46,10 +46,10 @@ const ColumnOne: React.FC = () => (<div className='space-y-4 pr-4'>
              subtitle='Set your preferred language and regional settings for a personalized experience.'/>
     <div className='ms-5 space-y-5'>
         <Section title='Language Selection' subtitle='Choose your preferred language for a customized experience.'>
-            <SelectionMenu label='English' options={languages} isRequired={false}/>
+            <SelectionMenu placeholder='English' options={languages} isRequired={false}/>
         </Section>
         <Section title='Region Settings' subtitle='Adjust your regional settings for a tailored experience.'>
-            <SelectionMenu label='Philippines' options={regions} isRequired={false}/>
+            <SelectionMenu placeholder='Philippines' options={regions} isRequired={false}/>
         </Section>
         <Divider/>
     </div>
@@ -59,7 +59,7 @@ const ColumnOne: React.FC = () => (<div className='space-y-4 pr-4'>
             <Switch defaultSelected size='sm' color="primary"/>
         </Section>
         <Section title='Timezone Selection' subtitle='Select your timezone for accurate date and time display.'>
-            <SelectionMenu label='CST • GMT +08' options={timezones} isRequired={false}/>
+            <SelectionMenu placeholder='CST • GMT +08' options={timezones} isRequired={false}/>
         </Section>
     </div>
 </div>);
@@ -74,7 +74,7 @@ const ColumnTwo: React.FC = () => {
                      subtitle='Offers features to improve accessibility for users with disabilities or special needs.'/>
             <div className='ms-5 space-y-5'>
                 <Section title='Text Size Adjustment' subtitle="Adjust the text size for better readability.">
-                    <SelectionMenu label='Medium' options={text_size} isRequired={false}/>
+                    <SelectionMenu placeholder='Medium' options={text_size} isRequired={false}/>
                 </Section>
                 <Divider/>
             </div>
@@ -93,7 +93,7 @@ const ColumnTwo: React.FC = () => {
                 </Section>
                 <Section title='Notification Sound' subtitle='Choose a sound for your notifications.'>
                     {/*<Button size='sm' variant='faded' >Configure</Button>*/}
-                    <SelectionMenu label='Best Message' options={notifications}
+                    <SelectionMenu placeholder='Best Message' options={notifications}
                                    onSelectionChange={handleNotificationSelection} isRequired={false}/>
                 </Section>
             </div>

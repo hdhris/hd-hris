@@ -308,7 +308,7 @@ function DataTable<T extends { id: string | number }>({
                         emptyContent={emptyContent}
                         items={sortedItems}
                         loadingContent={isLoading ? (<Spinner
-                            color="success"
+                            color="primary"
                             label="Loading..."
                             classNames={{
                                 base: 'h-screen mt-52', // wrapper: "" // Uncomment and specify if needed

@@ -90,7 +90,7 @@ const ColumnOne: React.FC = () => {
                      subtitle="Enable two-factor authentication to secure your account."
                      className={isNotAllowed}
             >
-                <SelectionMenu isDisabled={!isOn} label='Email' options={twoFA} onSelectionChange={handleTwoFASelection}
+                <SelectionMenu isDisabled={!isOn} placeholder='Email' options={twoFA} onSelectionChange={handleTwoFASelection}
                                isRequired={false}/>
 
             </Section>

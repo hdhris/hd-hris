@@ -4,34 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adding backend in security page">
-      <change afterPath="$PROJECT_DIR$/hooks/IntegrationHook.ts" afterDir="false" />
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="fixing cn">
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/backup/backup-logs/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/backup/retention/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/admin/defaults/backup/BackupRetention.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/dashboard/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/backup/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/backup/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/integrations/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/dashboard/DashboardStats.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/dashboard/DashboardStats.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/preferences/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/preferences/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/security/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/security/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/terms&amp;condition/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/terms&amp;condition/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/admin/defaults/backup/BackupFiles.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/backup/BackupFiles.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/BorderCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/BorderCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/button/Add.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/button/Add.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/navbar/NavBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/navbar/NavBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/sidebar/SideBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/sidebar/SideBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/sidebar/SideBarCollapse.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/sidebar/SideBarCollapse.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/statistics/Stat.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/statistics/Stat.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/statistics/StatCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/statistics/StatCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/dropdown/SelectionMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/dropdown/SelectionMenu.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/status/Status.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/status/Status.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/tabledata/TableData.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/tabledata/TableData.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/addButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/addButton.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/button.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/button.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/input-otp.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/input-otp.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/label.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/label.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/sheet.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/sheet.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/toast.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/toast.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sampleData/admin/defaults/backup/backupData.ts" beforeDir="false" afterPath="$PROJECT_DIR$/sampleData/admin/defaults/backup/backupData.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sampleTableConfiguration/TestingTable.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/sampleTableConfiguration/TestingTable.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/queries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/queries.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/routes/default/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/routes/default/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,11 +106,11 @@
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\js" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(defaut)\backup" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\assets\notification-sounds" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\common\forms" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\forms" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(defaut)\(account)" />
     </key>
   </component>
   <component name="RunManager" selected="Jest.NextAuth Credentials Provider">
@@ -267,7 +254,7 @@
       <workItem from="1725095920888" duration="284000" />
       <workItem from="1725096306635" duration="94000" />
       <workItem from="1725096415931" duration="516000" />
-      <workItem from="1725097034808" duration="4965000" />
+      <workItem from="1725097034808" duration="15284000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -429,7 +416,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724945458454</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="fixing cn">
+      <option name="closed" value="true" />
+      <created>1725106368054</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1725106368054</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -465,6 +460,7 @@
     <MESSAGE value="adding a more notification sound" />
     <MESSAGE value="adding backend" />
     <MESSAGE value="adding backend in security page" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding backend in security page" />
+    <MESSAGE value="fixing cn" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing cn" />
   </component>
 </project>

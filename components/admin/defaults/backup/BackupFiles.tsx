@@ -1,29 +1,70 @@
 'use client'
-import React from 'react';
-import {BadgeProps} from "@nextui-org/react";
-import Text from "@/components/Text";
+import React, {useMemo} from 'react';
 import TableData from "@/components/tabledata/TableData";
 import {ColumnsProps, TableConfigProps} from "@/types/table/TableDataTypes";
-import {backupData, TableProps} from "@/sampleData/admin/defaults/backup/backupData";
+import {useBackupLogs} from "@/services/queries";
+import {BackupEntry} from "@/types/routes/default/types";
+import {Case, Default, Switch} from "@/components/common/Switch";
+import {Status} from "@/components/status/Status";
+import {ChipProps, cn} from "@nextui-org/react";
+import {LuDownload, LuRotateCcw, LuTrash2} from "react-icons/lu";
+import {icon_size_sm} from "@/lib/utils";
+import {Button} from "@nextui-org/button";
 
 
 const tableColumns: ColumnsProps[] = [{
     name: 'Date', uid: 'date', sortable: true,
-}, {name: 'Time', uid: 'time', sortable: true,}, {name: 'Size', uid: 'size', sortable: true,}, {name: 'Status', uid: 'status', sortable: true,},{name: 'Action', uid: 'action'}, ]
+}, {name: 'Time', uid: 'time', sortable: true,}, {name: 'Type', uid: 'type', sortable: true,}, {
+    name: 'Size', uid: 'size', sortable: true,
+}, {name: 'Status', uid: 'status', sortable: true,}, {name: 'Action', uid: 'action'},]
 
+const backupStatus: Record<string, ChipProps['color']> = {
+    Completed: "success", Failed: "danger"
+}
 
 function BackupFiles() {
-    const TableEntry: TableConfigProps<TableProps> = {
-        columns: tableColumns, rowCell: (item: TableProps, columnKey: React.Key) => {
-            const cellValue = item[columnKey as keyof TableProps];
-            return (<Text>{String(cellValue)}</Text>)
+    const {data, isLoading} = useBackupLogs()
+
+    const backupLogsData = useMemo(() => {
+        if (data) {
+            return data
+        }
+        return []
+    }, [data])
+
+    const TableEntry: TableConfigProps<BackupEntry> = {
+        columns: tableColumns, rowCell: (item: BackupEntry, columnKey: React.Key) => {
+            const cellValue = item[columnKey as keyof BackupEntry];
+            return (<Switch expression={columnKey as string}>
+                <Case of='status'>
+                    <Status color={backupStatus[cellValue]}>{cellValue}</Status>
+                </Case>
+                <Case of='action'>
+                    <div className='flex gap-2'>
+                        <Button size='sm' variant='light' isIconOnly>
+                            <LuDownload className={cn("text-default-400", icon_size_sm)}/>
+                        </Button>
+                        <Button size='sm' variant='light' isIconOnly>
+                            <LuRotateCcw className={cn("text-default-400", icon_size_sm)}/>
+                        </Button>
+                        <Button size='sm' variant='light' isIconOnly>
+                            <LuTrash2 className={cn("text-danger-400", icon_size_sm)}/>
+                        </Button>
+                    </div>
+                </Case>
+                <Default>
+                    {cellValue}
+                </Default>
+
+            </Switch>)
         }
     }
 
     return (<TableData
             aria-label="User Table"
             config={TableEntry}
-            items={backupData}
+            isLoading={isLoading}
+            items={backupLogsData}
             removeWrapper
             isStriped
             isCompact

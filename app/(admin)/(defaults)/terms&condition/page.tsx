@@ -145,7 +145,7 @@ const ColumnTwo: React.FC = () => (<div className='pl-4 space-y-4'>
              subtitle='Offers features to improve accessibility for users with disabilities or special needs.'/>
     <div className='ms-5 space-y-5'>
         <Section title='Text Size Adjustment' subtitle="Adjust the text size for better readability.">
-            <SelectionMenu label='Medium' options={text_size} isRequired={false}/>
+            <SelectionMenu placeholder='Medium' options={text_size} isRequired={false}/>
         </Section>
         <Divider/>
     </div>

@@ -33,4 +33,14 @@ export interface LoginActivity {
     access_method: string;
 }
 
+export interface BackupEntry {
+    id: number;
+    date: string;
+    time: string;
+    type: 'Full Backup' | 'Incremental' | 'Differential';
+    size: string;
+    status: 'Completed' | 'Failed';
+}
+
+
 
