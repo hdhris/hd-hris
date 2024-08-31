@@ -1,4 +1,3 @@
-'use client'
 import React from 'react';
 import {Heading, Section} from "@/components/common/typography/Typography";
 import {Button} from "@nextui-org/button";
@@ -6,18 +5,19 @@ import BackupFiles from "@/components/admin/defaults/backup/BackupFiles";
 import {Chip, cn} from '@nextui-org/react';
 import BorderCard from "@/components/common/BorderCard";
 import BackupRetention from "@/components/admin/defaults/backup/BackupRetention";
+import BackupStrategy from "@/components/admin/defaults/backup/BackupStrategy";
 
 
 const BackupSettings: React.FC = () => {
     return (<div className='space-y-4 pr-4'>
         <Section title='Backup Settings' subtitle='Ensure your information is safe with regular data backups.'/>
         <div className='ms-5 space-y-5'>
-            <Section title='Backup Frequency' subtitle='Set how often your data is backed up.'>
+            <Section className='me-6' title='Backup Frequency' subtitle='Set how often your data is backed up.'>
                 <Button size='sm' variant='faded'>Set Up</Button>
                 {/*<SelectionMenu label='Weekly' options={backupFrequencyOptions} isRequired={false}/>*/}
             </Section>
-            <Section title='Data Selection' subtitle='Select which data to include in backups.'>
-                <Button size='sm' variant='faded'>Select Data</Button>
+            <Section title='Backup Strategy' subtitle='Choose a backup approach that best fits your data protection needs.'>
+               <BackupStrategy/>
             </Section>
         </div>
 

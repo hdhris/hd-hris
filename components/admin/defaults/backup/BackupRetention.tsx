@@ -1,3 +1,4 @@
+'use client'
 import React, {useCallback, useEffect, useState} from 'react';
 import {
     Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Selection, Switch, useDisclosure
