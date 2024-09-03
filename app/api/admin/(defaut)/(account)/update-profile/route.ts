@@ -14,6 +14,8 @@ export async function PUT(req: NextRequest) {
                 return NextResponse.json({ message: 'Validation error' }, { status: 400 });
             }
 
+            //TODO: implement a code that will track changes
+
             // Process the validated data (e.g., update profile in database)
             // Example: await updateProfile(parsedData);
 

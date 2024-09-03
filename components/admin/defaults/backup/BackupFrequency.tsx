@@ -11,6 +11,7 @@ import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import {parseAbsoluteToLocal, ZonedDateTime} from "@internationalized/date";
 import dayjs from "dayjs";
+import {Case, Switch} from "@/components/common/Switch";
 
 
 function BackupFrequency() {
@@ -70,8 +71,9 @@ function BackupFrequency() {
                                        onSelectionChange={setTimePeriod}/>
                     </Section>
                     <Section title='Backup Time'
+                             className={timePeriod !== 'all' && timePeriod.has('off') ? 'opacity-50 cursor-not-allowed' : ''}
                              subtitle='Specify the time schedule for your backups.'>
-                        <TimeInput aria-label='Backup Time' value={value} hideTimeZone onChange={setValue}
+                        <TimeInput aria-label='Backup Time' isDisabled={timePeriod !== 'all' && timePeriod.has('off')} value={value} hideTimeZone onChange={setValue}
                                    variant='bordered'/>
                     </Section>
                 </ModalBody>

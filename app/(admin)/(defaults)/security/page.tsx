@@ -2,7 +2,7 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import Typography, {Heading, Section} from "@/components/common/typography/Typography";
 import {Button} from "@nextui-org/button";
-import {cn, Listbox, ListboxItem, SharedSelection, Switch} from '@nextui-org/react';
+import {cn, Listbox, ListboxItem, SharedSelection, Switch, Tooltip} from '@nextui-org/react';
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {Avatar} from "@nextui-org/avatar";
 import {useLoginActivity} from "@/services/queries";
@@ -15,6 +15,8 @@ import {Chip} from "@nextui-org/chip";
 import QuestionnairesForm from "@/components/admin/defaults/security/QuestionnairesForm";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
+import {LuLogOut, LuTrash2} from "react-icons/lu";
+import {icon_size_sm} from "@/lib/utils";
 
 const twoFA = [{uid: 'off', name: 'Off'}, {uid: 'email', name: 'Email'}, {
     uid: 'app', name: 'App'
@@ -60,18 +62,12 @@ const ColumnOne: React.FC = () => {
             if (res.status === 200) {
                 console.log(res.data)
                 toast({
-                    title: 'Success',
-                    description: 'Successfully applied changes',
-                    duration: 3000,
-                    variant: 'success',
+                    title: 'Success', description: 'Successfully applied changes', duration: 3000, variant: 'success',
                 })
             }
         } catch (error: any) {
             toast({
-                title: 'Error',
-                description: error.message,
-                duration: 3000,
-                variant: 'danger'
+                title: 'Error', description: error.message, duration: 3000, variant: 'danger'
             })
             console.log(error)
         }
@@ -90,7 +86,8 @@ const ColumnOne: React.FC = () => {
                      subtitle="Enable two-factor authentication to secure your account."
                      className={isNotAllowed}
             >
-                <SelectionMenu isDisabled={!isOn} placeholder='Email' options={twoFA} onSelectionChange={handleTwoFASelection}
+                <SelectionMenu isDisabled={!isOn} placeholder='Email' options={twoFA}
+                               onSelectionChange={handleTwoFASelection}
                                isRequired={false}/>
 
             </Section>
@@ -119,6 +116,7 @@ const ColumnOne: React.FC = () => {
 
 const ColumnTwo: React.FC = () => {
     const {data, isLoading} = useLoginActivity();
+    const {toast} = useToast()
     const [items, setItems] = useState<Record<string, LoginActivity[]>>({});
 
     useEffect(() => {
@@ -152,6 +150,49 @@ const ColumnTwo: React.FC = () => {
     }, [items]);
 
     const LoginActivity = useMemo(() => {
+        const handleDelete = async (key: string) => {
+            const values = {
+                type: 'delete',
+                key
+            }
+            try{
+                const res = await axiosInstance.post('/api/admin/security/login-activity', values)
+                if (res.status === 200) {
+                    toast({
+                        title: 'Success', description: 'Successfully deleted login activity', duration: 3000, variant: 'success',
+                    })
+                    //TODO: apply logic to revalidate the list
+
+                }
+            }catch (e) {
+                toast({
+                    title: 'Error', description: 'Failed to delete login activity', duration: 3000, variant: 'danger'
+                })
+                console.error(e)
+            }
+        }
+        const handleSignOut = async (key: string) => {
+
+            const values = {
+                type: 'sign out',
+                key
+            }
+            try{
+                const res = await axiosInstance.post('/api/admin/security/login-activity', values)
+                if (res.status === 200) {
+                    toast({
+                        title: 'Success', description: 'Successfully signed out', duration: 3000, variant: 'success',
+                    })
+                    //TODO: apply logic after signing out
+
+                }
+            }catch (e) {
+                toast({
+                    title: 'Error', description: 'Failed to signed out', duration: 3000, variant: 'danger'
+                })
+                console.error(e)
+            }
+        }
         return (<Listbox
             classNames={{
                 list: "max-h-[300px] gap-2",
@@ -161,20 +202,33 @@ const ColumnTwo: React.FC = () => {
             label="Assigned to"
             variant="flat"
         >
-            {(item) => (<ListboxItem key={item.key} textValue={item.key} className='border border-default-200 rounded'>
-                <div className="flex gap-2 items-center">
-                    <Avatar alt={item.device_name} className="flex-shrink-0" size="sm" src={item.device_icon}/>
-                    <div className="flex justify-between items-center w-full">
-                        <div className="flex flex-col">
-                            <Typography
-                                className="text-medium font-semibold">Was logged in
-                                on{item.device_name + " (" + item.platform + ")"}</Typography>
-                            <Typography
-                                className="text-tiny text-default-400">{(item.access_method + " on " + item.date + " at " + item.time)}</Typography>
+            {(item) => (<ListboxItem key={item.key} textValue={item.key}
+                                     className='border border-default-200 rounded cursor-default data-[hover=true]:bg-transparent'>
+                <div className='flex justify-between items-center'>
+                    <div className="flex gap-2 items-center">
+                        <Avatar alt={item.device_name} className="flex-shrink-0" size="sm" src={item.device_icon}/>
+                        <div className="flex justify-between items-center w-full">
+                            <div className="flex flex-col">
+                                <Typography
+                                    className="text-medium font-semibold">Was logged in
+                                    on {item.device_name + " (" + item.platform + ")"}</Typography>
+                                <Typography
+                                    className="text-tiny text-default-400">{(item.access_method + " on " + item.date + " at " + item.time)}</Typography>
+                            </div>
+
                         </div>
-                        {/*<Typography*/}
-                        {/*    className="text-default-400">₱<CountUp start={0} end={item.amount as number}*/}
-                        {/*                                           formattingFn={(val) => compactNumber(val)}/></Typography>*/}
+                    </div>
+                    <div className='flex gap-2'>
+                        <Tooltip content='Sign out on this device'>
+                            <Button size='sm' variant='light' isIconOnly onClick={handleSignOut.bind(null, item.key)}>
+                                <LuLogOut className={cn("text-default-400", icon_size_sm)}/>
+                            </Button>
+                        </Tooltip>
+                        <Tooltip content='Delete' color='danger'>
+                            <Button size='sm' variant='light' isIconOnly onClick={handleDelete.bind(null, item.key)}>
+                                <LuTrash2 className={cn("text-danger-400", icon_size_sm)}/>
+                            </Button>
+                        </Tooltip>
                     </div>
                 </div>
             </ListboxItem>)}

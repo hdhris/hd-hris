@@ -6,6 +6,7 @@ import * as React from 'react';
 import {type DropzoneOptions, useDropzone} from 'react-dropzone';
 import {twMerge} from 'tailwind-merge';
 import {cn} from "@nextui-org/react";
+import Typography from "@/components/common/typography/Typography";
 
 const variants = {
     base: 'relative rounded-md p-4 w-full flex justify-center items-center flex-col cursor-pointer border border-dashed border-gray-400 dark:border-gray-300 transition-colors duration-200 ease-in-out',
@@ -94,7 +95,16 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
         return undefined;
     }, [fileRejections, dropzoneOptions]);
 
-    return (<div className="w-full">
+
+    const formatsArray = dropzoneOptions?.accept
+        ? Array.from(new Set(Object.values(dropzoneOptions.accept).flat()))
+        : [];
+
+    const supportedFormats = formatsArray.length > 1
+        ? formatsArray.join(', ')
+        : formatsArray[0] || 'None';
+
+    return (<div className="w-full h-full">
         <div className="flex w-full flex-col gap-2">
             <div className="w-full">
                 {/* Main File Input */}
@@ -105,9 +115,21 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
                 >
                     <input ref={ref} {...getInputProps()} />
                     <div className="flex flex-col items-center justify-center text-xs text-gray-400">
-                        <UploadCloudIcon className="mb-1 h-7 w-7"/>
-                        <div className="text-gray-400">
-                            drag & drop or click to upload
+                        <UploadCloudIcon className="mb-1 size-10"/>
+                        <div className='flex flex-col gap-2'>
+                            <Typography className="text-medium font-semibold text-center">
+                                Drop files here
+                            </Typography>
+                            {
+                                supportedFormats !== 'None' && (
+                                    <Typography className="text-sm text-center">
+                                        Supported format: {supportedFormats}
+                                    </Typography>
+                                )
+                            }
+
+                            <Typography className='text-center text-lg font-bold py-2'>OR</Typography>
+                            <Typography className='text-default-400/75 text-center font-semibold text-medium'>Browse files</Typography>
                         </div>
                     </div>
                 </div>
@@ -136,14 +158,14 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
                     <div className="grow"/>
                     <div className="flex w-12 justify-end text-xs">
                         {progress === 'PENDING' ? (<button
-                                type="button"
-                                className="rounded-md p-1 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                onClick={() => {
-                                    void onChange?.(value.filter((_, index) => index !== i),);
-                                }}
-                            >
-                                <Trash2Icon className="shrink-0"/>
-                            </button>) : progress === 'ERROR' ? (<LucideFileWarning
+                            type="button"
+                            className="rounded-md p-1 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            onClick={() => {
+                                void onChange?.(value.filter((_, index) => index !== i),);
+                            }}
+                        >
+                            <Trash2Icon className="shrink-0"/>
+                        </button>) : progress === 'ERROR' ? (<LucideFileWarning
                             className="shrink-0 text-red-600 dark:text-red-400"/>) : progress !== 'COMPLETE' ? (
                             <div className="flex flex-col items-end gap-0.5">
                                 {abortController && (<button

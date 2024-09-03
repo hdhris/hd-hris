@@ -15,6 +15,8 @@ export async function PUT(req: NextRequest) {
         if (req.headers.get('Content-Type')?.includes('application/json')) {
             const data = await req.json();
 
+            //TODO: check if the password is the same as the password in the database
+            
             //Validate the current password
 
             // Validate the parsed data

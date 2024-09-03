@@ -5,7 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="updating packages">
+      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/security/login-activity/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/admin/defaults/backup/RestoreOption.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/admin/defaults/profile/NotificationSettings.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/isolatedPages/preferences/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/account/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/backup/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/backup/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/preferences/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/preferences/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(defaults)/security/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(defaults)/security/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/deactivate-account/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/deactivate-account/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/delete-account/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/delete-account/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-password/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-password/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-profile/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-profile/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/backup/BackupFrequency.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/backup/BackupFrequency.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/backup/BackupRetention.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/backup/BackupRetention.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/fileupload/file.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/fileupload/file.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,11 +108,11 @@
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(core)\update-profile" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\isolatedPages" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(defaut)\backup" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\assets\notification-sounds" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\common\forms" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\forms" />
     </key>
   </component>
   <component name="RunManager" selected="Jest.NextAuth Credentials Provider">
@@ -174,10 +191,10 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="npm.test:watch" />
         <item itemvalue="Vitest.RootLayout" />
         <item itemvalue="Vitest.RootLayout Component" />
         <item itemvalue="Vitest.All Tests" />
+        <item itemvalue="npm.test:watch" />
         <item itemvalue="Jest.NextAuth Credentials Provider" />
       </list>
     </recent_temporary>
@@ -245,6 +262,7 @@
       <workItem from="1725185318700" duration="124000" />
       <workItem from="1725185503811" duration="159000" />
       <workItem from="1725185760399" duration="297000" />
+      <workItem from="1725348711153" duration="12843000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />

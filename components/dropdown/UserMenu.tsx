@@ -16,7 +16,9 @@ import {MdOutlinePrivacyTip} from "react-icons/md";
 
 function UserMenu() {
     return (
-        <Dropdown radius="sm">
+        <Dropdown radius="sm"
+
+        >
             <DropdownTrigger>
                 <span className="cursor-pointer">
                     <Badge content="" color="success" shape="circle" placement="bottom-right">
@@ -56,15 +58,15 @@ function UserMenu() {
                             }}
                         />
                     </DropdownItem>
-                    <DropdownItem
-                        as={Link}
-                        href='/account'
-                        textValue="Account Settings"
-                        key="account_settings"
-                        startContent={<UserCircleGear className={cn("", icon_theme)}/>}
-                    >
-                        <Typography className={text_icon}>Account Settings</Typography>
-                    </DropdownItem>
+                    {/*<DropdownItem*/}
+                    {/*    as={Link}*/}
+                    {/*    href='/preferences'*/}
+                    {/*    textValue="Account Settings"*/}
+                    {/*    key="account_settings"*/}
+                    {/*    startContent={<UserCircleGear className={cn("", icon_theme)}/>}*/}
+                    {/*>*/}
+                    {/*    <Typography className={text_icon}>Account Settings</Typography>*/}
+                    {/*</DropdownItem>*/}
                     <DropdownItem
                         textValue="Preferences"
                         key="preferences"
@@ -78,7 +80,7 @@ function UserMenu() {
                 <DropdownSection aria-label="Profile & Actions" showDivider>
                     <DropdownItem
                         textValue="Privileges"
-                        key="/privileges"
+                        key="privileges"
                         isReadOnly
                         className='opacity-100'
                     >

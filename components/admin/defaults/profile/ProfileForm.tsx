@@ -98,7 +98,7 @@ export default function ProfileForm() {
 
     const upperInput: FormInputProps[] = [{
         name: "picture", Component: () => {
-            return (<div className='grid grid-cols-2 relative'>
+            return (<div className='grid grid-cols-2 relative mb-2'>
                 <div className='flex items-center gap-2'>
                     <div className="w-fit">
                         <Avatar
@@ -135,22 +135,22 @@ export default function ProfileForm() {
                     </div>
                 </div>
                 <div className=''>
-                    <FormFields items={[{name: "username", label: "Username"}]}/>
+                    <FormFields items={[{name: "username", label: "Username", isRequired: true}]}/>
                 </div>
             </div>);
         }
     }];
 
     const formNames: FormInputProps[] = [{
-        name: "first_name", label: "First Name"
+        name: "first_name", label: "First Name", isRequired: true
     }, {
-        name: "last_name", label: "Last Name"
+        name: "last_name", label: "Last Name", isRequired: true
     }];
 
     const contact_info: FormInputProps[] = [{
-        name: "email", label: "Email"
+        name: "email", label: "Email", isRequired: true
     }, {
-        name: "phone_no", label: "Phone No.", type: "tel"
+        name: "phone_no", label: "Phone No.", type: "tel", isRequired: true
     }];
 
     const civilStatus = ["Single", "Married", "Widowed", "Separated", "Divorced", "Others"];
@@ -184,10 +184,13 @@ export default function ProfileForm() {
                         name: "birth_date", label: "Birth Date", Component: (field) => {
                             return (<div className="w-full flex flex-row gap-4">
                                 <DatePicker
+                                    isRequired={true}
                                     onChange={(e) => {
+                                        if(e){
+                                            form.setValue("birth_date", dayjs(e.toString()).format("YYYY-MM-DD"));
+                                        }
                                         field.onChange(e);
                                         setBirthdate(e);
-                                        form.setValue("birth_date", dayjs(e.toString()).format("YYYY-MM-DD"));
                                     }}
                                     name='birth_date'
                                     aria-label="Birth Date"
@@ -206,6 +209,7 @@ export default function ProfileForm() {
                     }]} size='sm'/>
                     <Selection
                         items={civilStatus}
+                        isRequired={true}
                         placeholder=""
                         label='Civil Status'
                         name='civil_status'
@@ -221,6 +225,7 @@ export default function ProfileForm() {
                         <Text className='text-medium font-semibold'>Address Information</Text>
                     </div>
                     <Selection
+                        // isRequired={true}
                         items={street}
                         placeholder=""
                         label='Street/Purok'
@@ -228,6 +233,7 @@ export default function ProfileForm() {
                         aria-label="Street or Purok"
                     />
                     <Selection
+                        // isRequired={true}
                         items={street}
                         placeholder=""
                         label='Barangay'
@@ -235,6 +241,7 @@ export default function ProfileForm() {
                         aria-label="Barangay"
                     />
                     <Selection
+                        // isRequired={true}
                         items={street}
                         placeholder=""
                         label='City'
@@ -242,6 +249,7 @@ export default function ProfileForm() {
                         aria-label="City"
                     />
                     <Selection
+                        // isRequired={true}
                         items={street}
                         placeholder=""
                         label='Province'
