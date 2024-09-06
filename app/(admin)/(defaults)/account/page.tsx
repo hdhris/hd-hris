@@ -1,8 +1,10 @@
-
 import React from 'react';
-import {Heading} from "@/components/common/typography/Typography";
+import {Heading, Section} from "@/components/common/typography/Typography";
 import ProfileForm from "@/components/admin/defaults/profile/ProfileForm";
 import AccountSecurity from "@/components/admin/defaults/profile/AccountSecurity";
+import {Divider} from "@nextui-org/divider";
+import {Button} from "@nextui-org/button";
+import AccountControl from '@/components/admin/defaults/profile/AccountControl';
 
 
 const AccountSettings: React.FC = () => (<div className='space-y-4 pr-4'>
@@ -19,6 +21,8 @@ function Page() {
             <AccountSettings/>
             <div className='pl-4 space-y-4'>
                 <AccountSecurity/>
+                <Divider/>
+                <AccountControl/>
             </div>
         </div>
     </section>);

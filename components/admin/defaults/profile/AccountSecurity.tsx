@@ -82,24 +82,30 @@ function AccountSecurity() {
 
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-
+        setLoading(true)
         try {
-            const response = await axiosInstance.post('/api/admin/update-password', values, {
+            const response = await axiosInstance.put('/api/admin/update-password', values, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
-            toast({
-                description: response.data.message,
-            })
+            if(response.status === 200) {
+                toast({
+                    description: response.data.message,
+                    variant: 'success',
+                })
+            }
+
             console.log(response.data);
         } catch (error: any) {
             toast({
                 title: 'Error',
                 description: error.message,
+                variant: 'danger'
             })
             console.error("Error submitting form:", error);
         }
+        setLoading(false)
     }
 
     return (<>
@@ -115,26 +121,19 @@ function AccountSecurity() {
                         <ForgotButton/>
                     </div>
                     <div className='self-end'>
-                        <Button type='submit' size='sm' className='w-full'
+                        <Button type='submit'
+                                spinner={<Spinner size='sm'/>}
+                                isLoading={loading}
+                                size='sm'
+                                className='w-full'
                                 color='primary'
                                 radius='sm'>
-                            {loading ? <Spinner size="sm"/> : "Confirm"}
+                           Save
                         </Button>
                     </div>
 
                 </form>
             </Form>
-            {/*</div>*/}
-            <Divider/>
-            <Section title='Account Control' subtitle='Manage account deactivation or deletion.'/>
-            <div className='ms-5 space-y-5'>
-                <Section title='Deactivate Account' subtitle='Temporarily disable your account.'>
-                    <Button size='sm' variant='faded'>Deactivate</Button>
-                </Section>
-                <Section title='Delete Account' subtitle='Permanently remove your account.'>
-                    <Button size='sm' color='danger'>Delete</Button>
-                </Section>
-            </div>
         </>);
 }
 

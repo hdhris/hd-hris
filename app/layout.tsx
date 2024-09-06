@@ -9,6 +9,7 @@ import {Case, Default, Switch} from "@/components/common/Switch";
 import MaintenanceBreak from "@/components/maintainance/Maintenance";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
+import {Toaster} from "@/components/ui/toaster";
 
 
 
@@ -54,6 +55,7 @@ export default function RootLayout({
         <SpeedInsights/>
         <Analytics/>
     </Providers>
+    <Toaster />
 
     </body>
     </html>);

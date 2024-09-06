@@ -2,17 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { Heading, Section } from "@/components/common/typography/Typography";
 import { Switch, Tab, Tabs } from '@nextui-org/react';
-import { Card, CardBody } from "@nextui-org/card";
 import { LuCalendarRange, LuCloud, LuDatabase } from "react-icons/lu";
 import Text from "@/components/Text";
 import BorderCard from "@/components/common/BorderCard";
 import { Avatar } from "@nextui-org/avatar";
 import RenderList from "@/components/util/RenderList";
 import { useIntegrations } from "@/services/queries";
+import {Integrations} from "@/types/routes/default/types";
 
 const ColumnOne: React.FC = () => {
     const [selected, setSelected] = useState<string>("all");
-    const [items, setItems] = useState<any[]>([]);
+    const [items, setItems] = useState<Integrations[]>([]);
     const { data, isLoading } = useIntegrations();
 
     useEffect(() => {
@@ -21,12 +21,12 @@ const ColumnOne: React.FC = () => {
         }
     }, [data]);
 
-    const filterItems = (type: string) => {
+    const filterItems = React.useCallback((type: string) => {
         if (type === "all") {
             return items;
         }
         return items.filter(item => item.type === type);
-    };
+    }, [items]);
 
     const IntegrationLists = React.useMemo(() => {
         return (
@@ -57,7 +57,7 @@ const ColumnOne: React.FC = () => {
                 />
             </div>
         );
-    }, [selected, items]);
+    }, [filterItems, selected]);
 
     return (
         <div className='space-y-4 pr-4'>

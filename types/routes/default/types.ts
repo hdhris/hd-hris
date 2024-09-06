@@ -20,3 +20,27 @@ export interface UserProfile {
     city: string;
     province: string;
 }
+
+export interface LoginActivity {
+    key: string;
+    device_name: string;
+    device_icon: string;
+    platform: string;
+    date: string;
+    time: string;
+    ip_address: string;
+    location: string;
+    access_method: string;
+}
+
+export interface BackupEntry {
+    id: number;
+    date: string;
+    time: string;
+    type: 'Full Backup' | 'Incremental' | 'Differential';
+    size: string;
+    status: 'Completed' | 'Failed';
+}
+
+
+

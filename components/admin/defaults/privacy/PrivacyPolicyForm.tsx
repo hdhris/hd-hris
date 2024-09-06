@@ -6,7 +6,7 @@ import FormFields from "@/components/common/forms/FormFields";
 import {Button} from "@nextui-org/button";
 import {DatePicker, Spinner, Textarea} from "@nextui-org/react";
 import {Form} from "@/components/ui/form";
-import {FormInputProps} from "@/components/forms/FormFields";
+import {FormInputProps} from "@/components/common/forms/FormFields";
 import {icon_color} from "@/lib/utils";
 import FileUpload from "@/components/common/forms/FileUpload";
 

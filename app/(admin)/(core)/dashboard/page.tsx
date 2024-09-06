@@ -2,10 +2,10 @@ import React from 'react';
 import {Button} from "@nextui-org/button";
 import {DashboardStats, LeaveData, SalaryData, TopSalaries} from "@/components/admin/dashboard/DashboardStats";
 import BorderCard from "@/components/common/BorderCard";
-import {btnClass, cn, icon_color, icon_size, icon_size_sm} from "@/lib/utils";
+import {btnClass, icon_color} from "@/lib/utils";
 import ActiveLeaves from "@/components/admin/dashboard/ActiveLeaves";
-import AddEmployees from "@/components/admin/add/AddEmployees";
-import {LuArrowUpFromDot, LuMaximize} from "react-icons/lu";
+import {LuMaximize} from "react-icons/lu";
+import {cn} from "@nextui-org/react";
 
 function Page() {
     return (<section className='grid grid-rows-[auto,1fr,auto, auto] gap-4 h-full'>

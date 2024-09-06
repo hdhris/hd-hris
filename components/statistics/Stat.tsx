@@ -1,5 +1,5 @@
 import React, {ReactNode} from "react";
-import {cn} from "@/lib/utils";
+import {cn} from "@nextui-org/react";
 import BorderCard from "@/components/common/BorderCard";
 import {Divider} from "@nextui-org/divider";
 import Typography from "@/components/common/typography/Typography";

@@ -1,19 +1,12 @@
 'use client'
 import React, {Suspense} from 'react';
-import {Avatar, AvatarGroup, BadgeProps, Selection, Spinner, Tooltip, useDisclosure} from "@nextui-org/react";
+import {Avatar, AvatarGroup, BadgeProps, Selection, Spinner, Tooltip} from "@nextui-org/react";
 import Text from "@/components/Text";
 import TableData from "@/components/tabledata/TableData";
 import {TableConfigProps} from "@/types/table/TableDataTypes";
 import {DepartmentInfo} from "@/types/employeee/DepartmentType";
 import {departmentColumns, departmentFilter, departments} from "@/sampleData/admin/employees/Department";
-import {Status} from "@/components/status/Status";
-// import BorderCard from "@/components/BorderCard";
-// import {Case, Default, Switch} from "@/lib/Switch";
-import Add from "@/components/ui/addButton";
-import Link from "next/link";
-import {btnClass, cn} from "@/lib/utils";
-import {CircleCheck, CircleX, Plus} from "lucide-react";
-import {Button} from "@nextui-org/button";
+import {CircleCheck, CircleX} from "lucide-react";
 import {Switch as Switch2} from "@nextui-org/switch";
 import {Case, Default, Switch} from "@/components/common/Switch";
 import BorderCard from "@/components/common/BorderCard";
@@ -24,7 +17,6 @@ const department_status_color_map: Record<string, BadgeProps["color"]> = {
 }
 
 function DepartmentTable() {
-    const {isOpen, onOpen, onOpenChange} = useDisclosure()
 
 
     const filterConfig = (key: Selection) => {
@@ -87,10 +79,9 @@ function DepartmentTable() {
                         isSelected={isActive}
                         size="sm"
                         color={department_status_color_map[item.department_status.toLowerCase()]}
-                        thumbIcon={() => isActive ? (
-                            <Tooltip color='danger' content={'Deactivate ' + item.department}>
-                                <CircleCheck className="stroke-success-500"/>
-                            </Tooltip>) : (<Tooltip color='success' content={'Activate ' + item.department}>
+                        thumbIcon={() => isActive ? (<Tooltip color='danger' content={'Deactivate ' + item.department}>
+                            <CircleCheck className="stroke-success-500"/>
+                        </Tooltip>) : (<Tooltip color='success' content={'Activate ' + item.department}>
                             <CircleX className='stroke-danger-500'/>
                         </Tooltip>)}
                     />

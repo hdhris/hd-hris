@@ -8,19 +8,20 @@ type Options = {
 };
 
 interface SelectionMenuProps extends Omit<SelectProps, 'children'> {
-    label: string;
+    placeholder?: string;
     options: Options[];
 }
 
-function SelectionMenu({label, options, ...props}: SelectionMenuProps) {
+function SelectionMenu({placeholder, options, ...props}: SelectionMenuProps) {
     return (<Select {...props} size='sm' classNames={{
-        base: 'min-w-[130px]',
+        base: 'min-w-[150px]',
     }} aria-label="Selection" color="primary" variant="bordered" radius="sm"
-                    placeholder={label}>
+                    placeholder={placeholder}>
         {options.map((opt) => (<SelectItem key={opt.uid} value={opt.uid}>
             {capitalize(opt.name)}
         </SelectItem>))}
     </Select>);
+
 }
 
 export default SelectionMenu;
