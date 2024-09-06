@@ -1,9 +1,71 @@
+// department route.ts
 import { NextResponse } from "next/server";
+import {
+  DepartmentInfo,
+  EmployeeAssociate,
+} from "@/types/employeee/DepartmentType";
 import { Employee } from "@/types/employeee/EmployeeType";
 import { getRandomDateTime } from "@/lib/utils/dateFormatter";
+// Predefined list of departments
+const predefinedDepartments: DepartmentInfo[] = [
+  {
+    id: 1,
+    department: "Engineering",
+    department_status: "active",
+    heads: null,
+    assistants: [],
+    associated_employees: [],
+    total_employees: 0,
+    resignedEmployees: 0,
+  },
+  {
+    id: 2,
+    department: "Human Resources",
+    department_status: "active",
+    heads: null,
+    assistants: [],
+    associated_employees: [],
+    total_employees: 0,
+    resignedEmployees: 0,
+  },
+  {
+    id: 3,
+    department: "Marketing",
+    department_status: "active",
+    heads: null,
+    assistants: [],
+    associated_employees: [],
+    total_employees: 0,
+    resignedEmployees: 0,
+  },
+  {
+    id: 4,
+    department: "Finance",
+    department_status: "active",
+    heads: null,
+    assistants: [],
+    associated_employees: [],
+    total_employees: 0,
+    resignedEmployees: 0,
+  },
+  {
+    id: 5,
+    department: "Sales",
+    department_status: "active",
+    heads: null,
+    assistants: [],
+    associated_employees: [],
+    total_employees: 0,
+    resignedEmployees: 0,
+  },
+];
 
 export async function GET() {
-    const employees: Employee[] = [
+    try {
+      // Fetch the employees data
+
+      //I HAVE NO OTHER OPTION TO MERGE THIS DATA TO ITS RESPECTIVE DEPARTMENTS!!!!
+      const employees: Employee[] = [
         {
             id: 1,
             rfid: '123456',
@@ -303,7 +365,79 @@ export async function GET() {
             resignationDate: null,
             resignationReason: null,
         },
-    ];
-
-    return NextResponse.json(employees, { status: 200 });
-}
+      ];
+  
+      // Map to keep track of departments
+      const departmentsMap = new Map<string, DepartmentInfo>();
+  
+      // Initialize the departmentsMap with predefined departments
+      predefinedDepartments.forEach((department) => {
+        departmentsMap.set(department.department, { ...department });
+      });
+  
+      // Track the number of resigned employees per department
+      const resignedEmployeesCount: { [department: string]: number } = {};
+  
+      // Group employees by department
+      employees.forEach((employee) => {
+        const { department, id, name, position, picture, status } = employee;
+  
+        if (!departmentsMap.has(department)) {
+          console.warn(`Department ${department} not found in predefined list.`);
+          return; // Or you can choose to add the department dynamically
+        }
+  
+        const dept = departmentsMap.get(department)!;
+  
+        const employeeAssociate: EmployeeAssociate = {
+          employee_id: id,
+          fullName: name,
+          job_title: position,
+          picture: picture,
+        };
+  
+        // Assign department head, assistants, or associated employees
+        if (position.includes("Manager")) {
+          if (dept.heads === null) {
+            dept.heads = {
+              job: position,
+              fullName: name,
+              picture: picture,
+            };
+          } else {
+            dept.assistants?.push({
+              job: position,
+              fullName: name,
+              picture: picture,
+            });
+          }
+        } else {
+          dept.associated_employees.push(employeeAssociate);
+        }
+  
+        // Increment the total employees for the department
+        dept.total_employees += 1;
+  
+        // Track resigned employees
+        if (status === "resigned") {
+          if (!resignedEmployeesCount[department]) {
+            resignedEmployeesCount[department] = 0;
+          }
+          resignedEmployeesCount[department] += 1;
+        }
+      });
+  
+      // Add the resigned employees count to each department
+      departmentsMap.forEach((dept) => {
+        dept.resignedEmployees = resignedEmployeesCount[dept.department] || 0;
+      });
+  
+      // Convert the departmentsMap to an array for response
+      const departmentData = Array.from(departmentsMap.values());
+  
+      return NextResponse.json(departmentData, { status: 200 });
+    } catch (error) {
+      console.error('Failed to fetch departments:', error);
+      return NextResponse.json({ error: 'Failed to fetch departments' }, { status: 500 });
+    }
+  }

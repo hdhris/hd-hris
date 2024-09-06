@@ -105,6 +105,7 @@ export default function ProfileForm() {
                             <div className='space-x-2'>
                                 <Button size='sm' radius='md' variant='bordered' as='label' htmlFor='dropzone-file'>
                                     <input
+                                        aria-label="tag"
                                         id="dropzone-file"
                                         type="file"
                                         name='pic'
