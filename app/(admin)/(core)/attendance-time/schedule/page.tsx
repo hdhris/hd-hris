@@ -185,7 +185,7 @@ export default function Page() {
                 ([name, { schedule, workday }]) => (
                   <tr
                     key={name}
-                    className="h-16 divide-x divide-gray-200 hover:bg-gray-200"
+                    className="h-16 divide-x divide-gray-200 transition-all duration-100 hover:bg-gray-200"
                   >
                     <td className=" px-4 py-2 truncate text-sm font-semibold w-[200px] max-w-[200px]">
                       {name}
