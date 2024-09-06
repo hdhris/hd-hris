@@ -12,18 +12,24 @@ import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {RiEyeCloseLine, RiEyeLine} from "react-icons/ri";
 import {icon_color} from "@/lib/utils";
+import {axiosInstance} from "@/services/fetcher";
+import {useToast} from "@/components/ui/use-toast";
 
 
 const formSchema = z.object({
-    new_password: z.string().min(2, {
-        message: "Username must be at least 2 characters.",
-    }), confirm_password: z.string().min(4, {
-        message: "Password must be at least 4 characters.",
+    current_password: z.string().min(8, {
+        message: "Password must be at least 8 characters.",
+    }),
+    new_password: z.string().min(8, {
+        message: "Password must be at least 8 characters.",
+    }), confirm_password: z.string().min(8, {
+        message: "Password must be at least 8 characters.",
     })
 }).refine(data => data.new_password === data.confirm_password, {
     message: "Passwords do not match", path: ["confirm_password"],
 });
 function AccountSecurity() {
+    const { toast } = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema), defaultValues: {
             new_password: "", confirm_password: ""
@@ -34,7 +40,6 @@ function AccountSecurity() {
     const [isVisibleCurrent, setIsVisibleCurrent] = useState(false)
     const [isVisibleNew, setIsVisibleNew] = useState(false)
     const [isVisibleConfirm, setIsVisibleConfirm] = useState(false)
-    const {isDirty, isValid} = useFormState(form)
     const handleCurrentPasswordVisibility = (e: { preventDefault: () => void }) => {
         e.preventDefault();
         setIsVisibleCurrent(!isVisibleCurrent);
@@ -77,7 +82,32 @@ function AccountSecurity() {
 
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        setLoading(true)
+        try {
+            const response = await axiosInstance.put('/api/admin/update-password', values, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if(response.status === 200) {
+                toast({
+                    description: response.data.message,
+                    variant: 'success',
+                })
+            }
+
+            console.log(response.data);
+        } catch (error: any) {
+            toast({
+                title: 'Error',
+                description: error.message,
+                variant: 'danger'
+            })
+            console.error("Error submitting form:", error);
+        }
+        setLoading(false)
     }
+
     return (<>
             <Section title='Account Security' subtitle='Protect your account by updating your password.'/>
             {/*<div className='ms-5 space-y-5'>*/}
@@ -91,26 +121,19 @@ function AccountSecurity() {
                         <ForgotButton/>
                     </div>
                     <div className='self-end'>
-                        <Button type='submit' size='sm' isDisabled={!isDirty || !isValid} className='w-full'
+                        <Button type='submit'
+                                spinner={<Spinner size='sm'/>}
+                                isLoading={loading}
+                                size='sm'
+                                className='w-full'
                                 color='primary'
                                 radius='sm'>
-                            {loading ? <Spinner size="sm"/> : "Confirm"}
+                           Save
                         </Button>
                     </div>
 
                 </form>
             </Form>
-            {/*</div>*/}
-            <Divider/>
-            <Section title='Account Control' subtitle='Manage account deactivation or deletion.'/>
-            <div className='ms-5 space-y-5'>
-                <Section title='Deactivate Account' subtitle='Temporarily disable your account.'>
-                    <Button size='sm' variant='faded'>Deactivate</Button>
-                </Section>
-                <Section title='Delete Account' subtitle='Permanently remove your account.'>
-                    <Button size='sm' color='danger'>Delete</Button>
-                </Section>
-            </div>
         </>);
 }
 

@@ -1,9 +1,10 @@
 import React from 'react';
 import {Plus} from "lucide-react";
 import Link from "next/link";
-import {btnClass, cn} from "@/lib/utils";
+import {cn} from "@nextui-org/react";
 import {Button} from "@nextui-org/button";
 import {ButtonProps} from "@nextui-org/react";
+import {btnClass} from "@/lib/utils";
 
 interface AddProps extends ButtonProps{
     name: string,

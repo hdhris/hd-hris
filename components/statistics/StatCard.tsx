@@ -1,7 +1,7 @@
 import React from 'react'
 import leave_icon from "../../assets/icon/svg/leave.svg";
 import {IoIosArrowRoundDown, IoIosArrowRoundUp} from "react-icons/io";
-import {cn} from "@/lib/utils";
+import {cn} from "@nextui-org/react";
 import Image from 'next/image'
 
 interface StatCardProps {

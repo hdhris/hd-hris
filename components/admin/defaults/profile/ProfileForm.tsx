@@ -1,43 +1,57 @@
 'use client'
 import {Avatar, DatePicker} from "@nextui-org/react";
 import {Form} from "@/components/ui/form";
-import React, {useCallback, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {z} from "zod";
 import {UserRound} from "lucide-react";
 import Text from "@/components/Text";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {cn, icon_color} from "@/lib/utils";
-import FormFields, {FormInputProps, Selection} from "@/components/forms/FormFields";
+import {icon_color} from "@/lib/utils";
+import {cn} from '@nextui-org/react'
+import FormFields, {FormInputProps, Selection} from "@/components/common/forms/FormFields";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {Button} from "@nextui-org/button";
 import {Divider} from "@nextui-org/divider";
+import {useUser} from "@/services/queries";
+import {DateValue, parseDate} from "@internationalized/date";
+import dayjs from "dayjs";
+import {updateProfileSchema} from "@/helper/zodValidation/UpdateProfile";
+import {axiosInstance} from "@/services/fetcher";
+import {toast} from "@/components/ui/use-toast";
 
-const yearLimit = new Date();
-yearLimit.setFullYear(new Date().getFullYear() - 21);
 
-const formSchema = z.object({
-    rfid: z.coerce.number().min(2, {message: "RFID must be at least 2 characters."}),
-    first_name: z.string().min(2, {message: "First Name must be at least 2 characters."}),
-    last_name: z.string().min(2, {message: "Last Name must be at least 2 characters."}),
-    gender: z.enum(["male", "female", "others"]),
-    birth_date: z.coerce.date().max(yearLimit, {message: "Must be at least 21 years old."}),
-    age: z.coerce.number().min(21, {message: "Must be at least 21 years old."}),
-    civil_status: z.enum(["single", "married", "widowed", "separated", "divorced", "others"]),
-    email: z.string().email("Invalid email address."),
-    phone_no: z.string().length(10).transform((value) => parseInt(value)),
-    street_or_purok: z.string().min(5, {message: "Street or Purok must be at least 5 characters."}),
-    barangay: z.string().min(5, {message: "Barangay must be at least 5 characters."}),
-    city: z.string().min(5, {message: "City must be at least 5 characters."}),
-    province: z.string().min(5, {message: "Province must be at least 5 characters."})
-});
+type FormData = {
+    civil_status: string
+    city: string
+    barangay: string
+    province: string
+    street_or_purok: string
+}
 
 export default function ProfileForm() {
+    const [loading, setLoading] = useState(false)
     const [image, setImage] = useState<string | ArrayBuffer | null>(null);
+    const [birthdate, setBirthdate] = useState<DateValue>()
     const [fileError, setFileError] = useState<string>("");
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const {data: profile, isLoading} = useUser();
+    const form = useForm<z.infer<typeof updateProfileSchema>>({
+        resolver: zodResolver(updateProfileSchema),
     });
+
+    useEffect(() => {
+        if (profile) {
+            form.reset(profile)
+            setImage(profile.profilePicture);
+            if (profile.birthdate) {
+                const date = dayjs(profile.birthdate).format("YYYY-MM-DD");
+                console.log(parseDate(date))
+                setBirthdate(parseDate(date))
+                form.setValue("birth_date", date)
+            }
+        }
+
+    }, [form, profile]);
 
     const imageRef = useRef<string | null>(null);
 
@@ -85,6 +99,7 @@ export default function ProfileForm() {
     const upperInput: FormInputProps[] = [{
         name: "picture", Component: () => {
             return (<div className='grid grid-cols-2 relative'>
+<<<<<<< HEAD
                     <div className='flex items-center gap-2'>
                         <div className="w-fit">
                             <Avatar
@@ -119,12 +134,47 @@ export default function ProfileForm() {
                                     Remove
                                 </Button>
                             </div>
+=======
+                <div className='flex items-center gap-2'>
+                    <div className="w-fit">
+                        <Avatar
+                            showFallback
+                            src={image as string}
+                            isBordered={!!fileError}
+                            color={fileError ? 'danger' : 'default'}
+                            className='w-16 h-16'
+                            fallback={<UserRound className="w-10 h-10 text-default-500" size={20}/>}
+                        />
+                    </div>
+                    <div className='flex flex-col gap-2'>
+                        <Text className='text-sm'>Upload your photo</Text>
+                        <Text className={cn('italic text-xs', fileError && 'text-red-500')}>
+                            Pick a profile picture under 5mb
+                        </Text>
+                        {fileError && <Text className='text-red-500 font-semibold text-xs'>{fileError}</Text>}
+                        <div className='space-x-2'>
+                            <Button size='sm' radius='md' variant='bordered' as='label' htmlFor='dropzone-file'>
+                                <input
+                                    id="dropzone-file"
+                                    type="file"
+                                    name='pic'
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                />
+                                Upload new picture
+                            </Button>
+                            <Button size='sm' radius='sm' color='danger' onClick={handleRemovePhoto}>
+                                Remove
+                            </Button>
+>>>>>>> origin/main
                         </div>
                     </div>
-                    <div className=''>
-                        <FormFields items={[{name: "username", label: "Username"}]}/>
-                    </div>
-                </div>);
+                </div>
+                <div className=''>
+                    <FormFields items={[{name: "username", label: "Username"}]}/>
+                </div>
+            </div>);
         }
     }];
 
@@ -135,89 +185,117 @@ export default function ProfileForm() {
     }];
 
     const contact_info: FormInputProps[] = [{
-        name: "email", label: "Email", type: "email"
+        name: "email", label: "Email"
     }, {
         name: "phone_no", label: "Phone No.", type: "tel"
     }];
 
+    const civilStatus = ["Single", "Married", "Widowed", "Separated", "Divorced", "Others"];
     const street = ["Street", "Purok"];
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log("Submitted values:", values);
+    async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
+        setLoading(true)
+        try {
+            const response = await axiosInstance.put('/api/admin/update-profile', values);
+            if (response.status === 200) {
+                toast({
+                    description: response.data.message, variant: 'success',
+                })
+            }
+
+
+        } catch (error) {
+            console.error("Error submitting form:", error);
+        }
+        setLoading(false)
     }
 
-    return (
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}
-                      className='space-y-5 flex flex-col p-2 h-full overflow-hidden'>
-                    <ScrollShadow className="h-full pr-4" size={10}>
-                        <FormFields items={upperInput}/>
-                        <div className='grid grid-cols-2 gap-4'>
-                            <FormFields items={formNames}/>
-                            <FormFields items={[{
-                                name: "birth_date", label: "Birth Date", Component: (field) => {
-                                    return (<div className="w-full flex flex-row gap-4">
-                                        <DatePicker
-                                            onChange={field.onChange}
-                                            aria-label="Birth Date"
-                                            variant="bordered"
-                                            radius="sm"
-                                            classNames={{selectorIcon: icon_color}}
-                                            color="primary"
-                                            showMonthAndYearPickers
-                                        />
-                                    </div>);
-                                }
-                            }]} size='sm'/>
-                            <Selection
-                                items={street}
-                                placeholder=""
-                                label='Gender'
-                                name='gender'
-                                aria-label="gender"
-                            />
-                            <div className='col-span-2 space-y-2'>
-                                <Divider/>
-                                <Text className='text-medium font-semibold'>Contact Information</Text>
-                            </div>
-                            <FormFields items={contact_info} size='sm'/>
-                            <div className='col-span-2 space-y-2'>
-                                <Divider/>
-                                <Text className='text-medium font-semibold'>Address Information</Text>
-                            </div>
-                            <Selection
-                                items={street}
-                                placeholder=""
-                                label='Street/Purok'
-                                name='street_or_purok'
-                                aria-label="Street or Purok"
-                            />
-                            <Selection
-                                items={street}
-                                placeholder=""
-                                label='Barangay'
-                                name='barangay'
-                                aria-label="Barangay"
-                            />
-                            <Selection
-                                items={street}
-                                placeholder=""
-                                label='City'
-                                name='city'
-                                aria-label="City"
-                            />
-                            <Selection
-                                items={street}
-                                placeholder=""
-                                label='Province'
-                                name='province'
-                                aria-label="Province"
-                            />
-                        </div>
-                    </ScrollShadow>
-                    <div className='flex justify-end gap-2'>
-                        <Button type='submit' size='sm' radius='md' color='primary'>Apply Changes</Button>
+    return (<Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}
+              className='space-y-5 flex flex-col p-2 h-full overflow-hidden'>
+            <ScrollShadow className="h-full pr-4" size={10}>
+                <FormFields items={upperInput}/>
+                <div className='grid grid-cols-2 gap-4'>
+                    <FormFields items={formNames}/>
+                    <FormFields items={[{
+                        name: "birth_date", label: "Birth Date", Component: (field) => {
+                            return (<div className="w-full flex flex-row gap-4">
+                                <DatePicker
+                                    onChange={(e) => {
+                                        field.onChange(e);
+                                        setBirthdate(e);
+                                        form.setValue("birth_date", dayjs(e.toString()).format("YYYY-MM-DD"));
+                                    }}
+                                    name='birth_date'
+                                    aria-label="Birth Date"
+                                    variant="bordered"
+                                    radius="sm"
+                                    classNames={{
+                                        selectorIcon: icon_color,
+                                    }}
+                                    color="primary"
+                                    value={birthdate}
+                                    // value={parseDate(dayjs(birthdate).format("YYYY-MM-DD")) as DateValue}
+                                    showMonthAndYearPickers
+                                />
+                            </div>);
+                        }
+                    }]} size='sm'/>
+                    <Selection
+                        items={civilStatus}
+                        placeholder=""
+                        label='Civil Status'
+                        name='civil_status'
+                        aria-label="Civil Status"
+                    />
+                    <div className='col-span-2 space-y-2'>
+                        <Divider/>
+                        <Text className='text-medium font-semibold'>Contact Information</Text>
                     </div>
-                </form>
-            </Form>);
+                    <FormFields items={contact_info} size='sm'/>
+                    <div className='col-span-2 space-y-2'>
+                        <Divider/>
+                        <Text className='text-medium font-semibold'>Address Information</Text>
+                    </div>
+                    <Selection
+                        items={street}
+                        placeholder=""
+                        label='Street/Purok'
+                        name='street_or_purok'
+                        aria-label="Street or Purok"
+                    />
+                    <Selection
+                        items={street}
+                        placeholder=""
+                        label='Barangay'
+                        name='barangay'
+                        aria-label="Barangay"
+                    />
+                    <Selection
+                        items={street}
+                        placeholder=""
+                        label='City'
+                        name='city'
+                        aria-label="City"
+                    />
+                    <Selection
+                        items={street}
+                        placeholder=""
+                        label='Province'
+                        name='province'
+                        aria-label="Province"
+                    />
+                </div>
+            </ScrollShadow>
+            <div className='flex justify-end gap-2'>
+                <Button type='submit'
+                        isLoading={loading}
+                        size='sm'
+                        radius='md'
+                        color='primary'>
+                    Save
+                </Button>
+            </div>
+        </form>
+    </Form>);
 }

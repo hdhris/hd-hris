@@ -3,7 +3,7 @@
 import {FiChevronDown, FiChevronLeft} from "react-icons/fi";
 import Typography from "@/components/common/typography/Typography";
 import React, {ReactNode, useState} from "react";
-import {cn} from "@/lib/utils";
+import {cn} from "@nextui-org/react";
 import Link from "next/link";
 import {Button} from "@nextui-org/button";
 import {Case, Default, Switch} from "@/components/common/Switch";
