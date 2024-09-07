@@ -1,13 +1,11 @@
-import React, { useState } from "react";
-import { useFormContext, ControllerRenderProps, FieldValues } from "react-hook-form";
-import { Avatar, DatePicker, Input, TimeInput, Checkbox } from "@nextui-org/react";
-import { Time } from "@internationalized/date";
-import FormFields from "@/components/forms/FormFields";
-import { Selection } from "@/components/forms/FormFields";
-import { UserRound } from "lucide-react";
-import Text from "@/components/Text";
-import { Button } from "@nextui-org/button";
-import { cn, icon_color } from "@/lib/utils";
+'use client';
+
+import React, { useState } from 'react';
+import { useFormContext, Controller } from 'react-hook-form';
+import { DatePicker, TimeInput, Checkbox, Input, Select, SelectItem } from '@nextui-org/react';
+import { parseDate, CalendarDate } from '@internationalized/date';
+import { Time } from '@internationalized/date';
+import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 type FormValues = {
   department: string;
@@ -23,26 +21,11 @@ type WorkSchedule = {
   [key: string]: { timeIn: Time | null; timeOut: Time | null };
 };
 
-type FormInputProps = {
-  name: string;
-  label: string;
-  placeholder?: string;
-  isRequired?: boolean;
-  type?: string;
-  Component?: (
-    field: ControllerRenderProps<FieldValues, string>
-  ) => JSX.Element;
-};
-
-function assertFormInputProps(
-  items: any[]
-): asserts items is FormInputProps[] {}
+const availableDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 const JobInformationForm: React.FC = () => {
   const { control, setValue } = useFormContext<FormValues>();
   const [workSchedule, setWorkSchedule] = useState<WorkSchedule>({});
-
-  const availableDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
   const handleDayToggle = (day: string, isChecked: boolean) => {
     if (isChecked) {
@@ -67,109 +50,163 @@ const JobInformationForm: React.FC = () => {
     setValue(`workSchedule.${day}.${type}`, value);
   };
 
-  const formItems: FormInputProps[] = [
-    {
-      name: "department",
-      label: "Department",
-      placeholder: "Select Department",
-      isRequired: true,
-      Component: (field: ControllerRenderProps<FieldValues, string>) => (
-        <Selection
-          {...field}
-          items={["HR", "Engineering", "Marketing"]}
-          placeholder="Select Department"
-        />
-      ),
-    },
-    {
-      name: "hireDate",
-      label: "Hire Date",
-      placeholder: "Select Hire Date",
-      isRequired: true,
-      type: "date",
-      Component: (field: ControllerRenderProps<FieldValues, string>) => (
-        <DatePicker
-          {...field}
-          onChange={field.onChange}
-          aria-label="Hired Date"
-          variant="bordered"
-          radius="sm"
-          classNames={{ selectorIcon: icon_color }}
-          color="primary"
-          showMonthAndYearPickers
-        />
-      ),
-    },
-    {
-      name: "jobTitle",
-      label: "Job Title",
-      placeholder: "Select Job Title",
-      isRequired: true,
-      Component: (field: ControllerRenderProps<FieldValues, string>) => (
-        <Selection
-          {...field}
-          items={["Manager", "Developer", "Designer"]}
-          placeholder="Select Job Title"
-        />
-      ),
-    },
-    {
-      name: "jobRole",
-      label: "Job Role",
-      placeholder: "Select Job Role",
-      isRequired: true,
-      Component: (field: ControllerRenderProps<FieldValues, string>) => (
-        <Selection
-          {...field}
-          items={["Frontend", "Backend", "Fullstack"]}
-          placeholder="Select Job Role"
-        />
-      ),
-    },
-    {
-      name: "workingType",
-      label: "Working Type",
-      placeholder: "Select Working Type",
-      isRequired: true,
-      Component: (field: ControllerRenderProps<FieldValues, string>) => (
-        <Selection
-          {...field}
-          items={["Full-time", "Part-time", "Contract"]}
-          placeholder="Select Working Type"
-        />
-      ),
-    },
-    {
-      name: "contractYears",
-      label: "Years Of Contract",
-      placeholder: "Enter Years of Contract",
-      isRequired: true,
-      Component: (field: ControllerRenderProps<FieldValues, string>) => (
-        <Input variant="bordered"
-          {...field}
-          type="number"
-          placeholder="Years Of Contract"
-          labelPlacement="outside"
-        />
-      ),
-    },
-    
-  ];
-
-  assertFormInputProps(formItems);
-
-
   return (
-    <form>
-      <p className="text-sm text-gray-600 mb-3">
-        Please provide the job information.
-      </p>
-      <div className="grid grid-cols-2 gap-3">
-        <FormFields items={formItems} />
+    <form className="space-y-6">
+      {/* Department */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
+        <Controller
+          name="department"
+          control={control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Department</FormLabel>
+              <FormControl>
+                <Select
+                  {...field}
+                  aria-label="Department"
+                  placeholder="Select Department"
+                  variant="bordered"
+                  className="border rounded"
+                >
+                  <SelectItem key="HR" value="HR">HR</SelectItem>
+                  <SelectItem key="Engineering" value="Engineering">Engineering</SelectItem>
+                  <SelectItem key="Marketing" value="Marketing">Marketing</SelectItem>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Hire Date */}
+        <Controller
+          name="hireDate"
+          control={control}
+          render={({ field }) => {
+            const parsedValue = field.value ? parseDate(field.value) : null;
+
+            return (
+              <FormItem>
+                <FormLabel>Hire Date</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    value={parsedValue}
+                    onChange={(date: CalendarDate) => field.onChange(date.toString())}
+                    aria-label="Hire Date"
+                    variant="bordered"
+                    className="border rounded"
+                    showMonthAndYearPickers
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+
+        {/* Job Title */}
+        <Controller
+          name="jobTitle"
+          control={control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Job Title</FormLabel>
+              <FormControl>
+                <Select
+                  {...field}
+                  aria-label="Job Title"
+                  placeholder="Select Job Title"
+                  variant="bordered"
+                  className="border rounded"
+                >
+                  <SelectItem key="Manager" value="Manager">Manager</SelectItem>
+                  <SelectItem key="Developer" value="Developer">Developer</SelectItem>
+                  <SelectItem key="Designer" value="Designer">Designer</SelectItem>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Job Role */}
+        <Controller
+          name="jobRole"
+          control={control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Job Role</FormLabel>
+              <FormControl>
+                <Select
+                  {...field}
+                  aria-label="Job Role"
+                  placeholder="Select Job Role"
+                  variant="bordered"
+                  className="border rounded"
+
+                >
+                  <SelectItem key="Frontend" value="Frontend">Frontend</SelectItem>
+                  <SelectItem key="Backend" value="Backend">Backend</SelectItem>
+                  <SelectItem key="Fullstack" value="Fullstack">Fullstack</SelectItem>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Working Type */}
+        <Controller
+          name="workingType"
+          control={control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Working Type</FormLabel>
+              <FormControl>
+                <Select
+                  {...field}
+                  aria-label="Working Type"
+                  placeholder="Select Working Type"
+                  variant="bordered"
+                  className="border rounded"
+                  radius="sm"
+                >
+                  <SelectItem key="Full-time" value="Full-time">Full-time</SelectItem>
+                  <SelectItem key="Part-time" value="Part-time">Part-time</SelectItem>
+                  <SelectItem key="Contract" value="Contract">Contract</SelectItem>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Years Of Contract */}
+        <Controller
+          name="contractYears"
+          control={control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Years Of Contract</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="number"
+                  placeholder="Enter Years of Contract"
+                  aria-label="Years Of Contract"
+                  variant="bordered"
+                  radius="sm"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
+      {/* Work Schedule */}
       <div className="mt-5">
-        <h3 className="text-lg font-semibold mb-3">Work Schedule</h3>
+        <h3 className="text-lg font-semibold mb-4">Work Schedule</h3>
         <div className="border rounded-md p-4">
           <div className="grid grid-cols-4 gap-4 mb-2">
             <div className="font-semibold">Days</div>

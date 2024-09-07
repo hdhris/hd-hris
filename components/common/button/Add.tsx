@@ -1,17 +1,10 @@
 import React from 'react';
 import Link from "next/link";
-<<<<<<< HEAD
-import { btnClass, cn, icon_size_sm } from "@/lib/utils";
-import { Button } from "@nextui-org/button";
-import { ButtonProps } from "@nextui-org/react";
-import { LuPlus } from "react-icons/lu";
-=======
 import {btnClass, icon_size, icon_size_sm} from "@/lib/utils";
 import {cn} from '@nextui-org/react'
 import {Button} from "@nextui-org/button";
 import {ButtonProps} from "@nextui-org/react";
 import {LuPlus} from "react-icons/lu";
->>>>>>> origin/main
 
 interface AddProps extends ButtonProps {
     name: string;

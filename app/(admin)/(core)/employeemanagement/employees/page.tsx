@@ -1,4 +1,4 @@
-"use client"; // Ensure this component is a client component
+"use client";
 
 import React, { useEffect, useState } from "react";
 import TableData from "@/components/tabledata/TableData";
@@ -11,33 +11,45 @@ const Page = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await fetch("/api/employeemanagement/employees");
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data: Employee[] = await response.json();
-        setEmployees(data);
-      } catch (error) {
-        console.error("Failed to fetch employees:", error);
-      } finally {
-        setLoading(false);
+  const fetchEmployees = async () => {
+    try {
+      const response = await fetch("/api/employeemanagement/employees");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
       }
-    };
+      const data: Employee[] = await response.json();
+      setEmployees(data);
+    } catch (error) {
+      console.error("Failed to fetch employees:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchEmployees();
   }, []);
 
-  const handleEdit = (id: number) => {
-    // Implement your edit logic here
-    // console.log("Edit employee with id:", id);
+  const handleEdit = async (id: number) => {
+    // This is a placeholder. You would typically open a modal or navigate to an edit page.
+    console.log("Edit employee with id:", id);
+    // After editing, you might want to refetch the employees or update the local state
+    await fetchEmployees();
   };
 
-  const handleDelete = (id: number) => {
-    // Implement your delete logic here
-    // console.log("Delete employee with id:", id);
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`/api/employeemanagement/employees?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete employee");
+      }
+      // Refetch employees after successful deletion
+      await fetchEmployees();
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+    }
   };
 
   const config: TableConfigProps<Employee> = {
@@ -75,16 +87,16 @@ const Page = () => {
           );
         case "status":
           return <span>{item.status}</span>;
-        case "actions": // Add this case to handle the actions column
+        case "actions":
           return (
             <TableActionButton
               name={item.name}
-              onEdit={() => handleEdit(item.id)} // Pass id directly as number
-              onDelete={() => handleDelete(item.id)} // Pass id directly as number
+              onEdit={() => handleEdit(item.id)}
+              onDelete={() => handleDelete(item.id)}
             />
           );
         default:
-          return <></>; // Return an empty fragment instead of null
+          return <></>;
       }
     },
   };

@@ -99,42 +99,6 @@ export default function ProfileForm() {
     const upperInput: FormInputProps[] = [{
         name: "picture", Component: () => {
             return (<div className='grid grid-cols-2 relative'>
-<<<<<<< HEAD
-                    <div className='flex items-center gap-2'>
-                        <div className="w-fit">
-                            <Avatar
-                                showFallback
-                                src={image as string}
-                                isBordered={!!fileError}
-                                color={fileError ? 'danger' : 'default'}
-                                className='w-16 h-16'
-                                fallback={<UserRound className="w-10 h-10 text-default-500" size={20}/>}
-                            />
-                        </div>
-                        <div className='flex flex-col gap-2'>
-                            <Text className='text-sm'>Upload your photo</Text>
-                            <Text className={cn('italic text-xs', fileError && 'text-red-500')}>
-                                Pick a profile picture under 5mb
-                            </Text>
-                            {fileError && <Text className='text-red-500 font-semibold text-xs'>{fileError}</Text>}
-                            <div className='space-x-2'>
-                                <Button size='sm' radius='md' variant='bordered' as='label' htmlFor='dropzone-file'>
-                                    <input
-                                        aria-label="tag"
-                                        id="dropzone-file"
-                                        type="file"
-                                        name='pic'
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                    />
-                                    Upload new picture
-                                </Button>
-                                <Button size='sm' radius='md' color='danger' onClick={handleRemovePhoto}>
-                                    Remove
-                                </Button>
-                            </div>
-=======
                 <div className='flex items-center gap-2'>
                     <div className="w-fit">
                         <Avatar
@@ -155,6 +119,7 @@ export default function ProfileForm() {
                         <div className='space-x-2'>
                             <Button size='sm' radius='md' variant='bordered' as='label' htmlFor='dropzone-file'>
                                 <input
+                                    aria-label="tag"
                                     id="dropzone-file"
                                     type="file"
                                     name='pic'
@@ -167,7 +132,6 @@ export default function ProfileForm() {
                             <Button size='sm' radius='sm' color='danger' onClick={handleRemovePhoto}>
                                 Remove
                             </Button>
->>>>>>> origin/main
                         </div>
                     </div>
                 </div>

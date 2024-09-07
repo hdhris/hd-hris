@@ -11,11 +11,17 @@ import {
   FormField,
   FormMessage,
 } from '@/components/ui/form';
+import { FileState, FileDropzone } from "@/components/ui/fileupload/file";
+import { useEdgeStore } from "@/lib/edgestore/edgestore";
+import { SharedSelection } from '@nextui-org/react';
 
 const EducationalBackgroundForm = () => {
   const { control, watch, setValue } = useFormContext();
   const [showStrand, setShowStrand] = useState(false);
   const [showCourse, setShowCourse] = useState(false);
+  const [fileStates, setFileStates] = useState<FileState[]>([]);
+  const { edgestore } = useEdgeStore();
+  const [select,setSelect]= useState<string>('')
 
   // Watch form fields
   const elementary = watch('elementary');
@@ -41,6 +47,25 @@ const EducationalBackgroundForm = () => {
     if (universityCollege) highestDegree = 'University/College';
     setValue('highestDegree', highestDegree);
   }, [elementary, highSchool, seniorHighSchool, universityCollege, setValue]);
+
+  function updateFileProgress(key: string, progress: FileState['progress']) {
+    setFileStates((fileStates) => {
+      const newFileStates = structuredClone(fileStates);
+      const fileState = newFileStates.find(
+        (fileState) => fileState.key === key,
+      );
+      if (fileState) {
+        fileState.progress = progress;
+      }
+      return newFileStates;
+    });
+  }
+
+  const handleSelect =(key:SharedSelection) => {
+    if(key.anchorKey === 'tvl'){
+      setSelect(key as string)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -124,6 +149,7 @@ const EducationalBackgroundForm = () => {
                     placeholder="Select Strand"
                     variant="bordered"
                     className="border rounded"
+                    onSelectionChange={handleSelect}
                   >
                     <SelectItem key="humss" value="HUMSS">HUMSS</SelectItem>
                     <SelectItem key="abm" value="ABM">ABM</SelectItem>
@@ -131,6 +157,29 @@ const EducationalBackgroundForm = () => {
                     <SelectItem key="gas" value="GAS">GAS</SelectItem>
                     <SelectItem key="tvl" value="TVL">TVL</SelectItem>
                   </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+         {/* Course - Show if University/College is entered */}
+         {select && (
+          <FormField
+            name="tvlCourse"
+            control={control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>TVL Course</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Enter Course"
+                    variant="bordered"
+                    className="border rounded"
+                    isRequired
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -196,6 +245,50 @@ const EducationalBackgroundForm = () => {
                   variant="bordered"
                   className="border rounded"
                   isReadOnly
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Certificate Upload */}
+        <FormField
+          name="certificates"
+          control={control}
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Certificates</FormLabel>
+              <FormControl>
+                <FileDropzone
+                  value={fileStates}
+                  onChange={(files) => {
+                    setFileStates(files);
+                    field.onChange(files.map(f => f.file));
+                  }}
+                  onFilesAdded={async (addedFiles) => {
+                    setFileStates([...fileStates, ...addedFiles]);
+                    await Promise.all(
+                      addedFiles.map(async (addedFileState) => {
+                        try {
+                          const res = await edgestore.publicFiles.upload({
+                            file: addedFileState.file,
+                            onProgressChange: async (progress) => {
+                              updateFileProgress(addedFileState.key, progress);
+                              if (progress === 100) {
+                                await new Promise((resolve) => setTimeout(resolve, 1000));
+                                updateFileProgress(addedFileState.key, 'COMPLETE');
+                              }
+                            },
+                          });
+                          console.log(res);
+                        } catch (err) {
+                          console.error(err);
+                          updateFileProgress(addedFileState.key, 'ERROR');
+                        }
+                      }),
+                    );
+                  }}
                 />
               </FormControl>
               <FormMessage />
