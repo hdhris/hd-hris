@@ -3,10 +3,11 @@
 import {formatFileSize} from '@edgestore/react/utils';
 import {CheckCircleIcon, FileIcon, LucideFileWarning, Trash2Icon, UploadCloudIcon, XIcon,} from 'lucide-react';
 import * as React from 'react';
-import {type DropzoneOptions, useDropzone} from 'react-dropzone';
+import {useDropzone} from 'react-dropzone';
 import {twMerge} from 'tailwind-merge';
 import {cn} from "@nextui-org/react";
 import Typography from "@/components/common/typography/Typography";
+import {FileState, InputProps} from "@/types/components/file-upload/types";
 
 const variants = {
     base: 'relative rounded-md p-4 w-full flex justify-center items-center flex-col cursor-pointer border border-dashed border-gray-400 dark:border-gray-300 transition-colors duration-200 ease-in-out',
@@ -16,19 +17,6 @@ const variants = {
     reject: 'border border-red-700 bg-red-700 bg-opacity-10',
 };
 
-export type FileState = {
-    file: File; key: string; // used to identify the file in the progress callback
-    progress: 'PENDING' | 'COMPLETE' | 'ERROR' | number; abortController?: AbortController;
-};
-
-type InputProps = {
-    className?: string;
-    value?: FileState[];
-    onChange?: (files: FileState[]) => void | Promise<void>;
-    onFilesAdded?: (addedFiles: FileState[]) => void | Promise<void>;
-    disabled?: boolean;
-    dropzoneOptions?: Omit<DropzoneOptions, 'disabled'>;
-};
 
 const ERROR_MESSAGES = {
     fileTooLarge(maxSize: number) {
@@ -96,16 +84,15 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
     }, [fileRejections, dropzoneOptions]);
 
 
-    const formatsArray = dropzoneOptions?.accept
-        ? Array.from(new Set(Object.values(dropzoneOptions.accept).flat()))
-        : [];
+    const formatsArray = dropzoneOptions?.accept ? Array.from(new Set(Object.values(dropzoneOptions.accept).flat())) : [];
 
-    const supportedFormats = formatsArray.length > 1
-        ? formatsArray.join(', ')
-        : formatsArray[0] || 'None';
+    const supportedFormats = formatsArray.length > 1 ? formatsArray.join(', ') : formatsArray[0] || 'None';
+
+    const numberOfFiles = dropzoneOptions?.maxFiles && dropzoneOptions?.maxFiles > 1
 
     return (<div className="w-full h-full">
         <div className="flex w-full flex-col gap-2">
+
             <div className="w-full">
                 {/* Main File Input */}
                 <div
@@ -118,18 +105,15 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
                         <UploadCloudIcon className="mb-1 size-10"/>
                         <div className='flex flex-col gap-2'>
                             <Typography className="text-medium font-semibold text-center">
-                                Drop files here
+                                Drop {`${numberOfFiles || dropzoneOptions?.maxFiles === undefined ? 'files' : 'file'}`} here
                             </Typography>
-                            {
-                                supportedFormats !== 'None' && (
-                                    <Typography className="text-sm text-center">
-                                        Supported format: {supportedFormats}
-                                    </Typography>
-                                )
-                            }
+                            {supportedFormats !== 'None' && (<Typography className="text-sm text-center">
+                                Supported format: {supportedFormats}
+                            </Typography>)}
 
                             <Typography className='text-center text-lg font-bold py-2'>OR</Typography>
-                            <Typography className='text-default-400/75 text-center font-semibold text-medium'>Browse files</Typography>
+                            <Typography className='text-default-400/75 text-center font-semibold text-medium'>Browse
+                                files</Typography>
                         </div>
                     </div>
                 </div>

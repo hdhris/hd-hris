@@ -63,10 +63,16 @@ function BackupFiles() {
     return (<TableData
             aria-label="User Table"
             config={TableEntry}
+            // className='first:flex-1'
+            classNames={{
+                th: ['first:w-96 max-w-50'],
+                tr: 'divide-x divide-gray-200',
+                tbody: 'divide-y divide-gray-200'
+            }}
             isLoading={isLoading}
             items={backupLogsData}
             removeWrapper
-            isStriped
+            // isStriped
             isCompact
             selectionBehavior='toggle'
             isHeaderSticky

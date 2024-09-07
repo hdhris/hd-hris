@@ -79,11 +79,7 @@ function Page() {
                 heading: 'text-lg'
             }}/>
 
-            <BorderCard className='p-2' heading={<div className='flex justify-end'>
-               <RestoreOption/>
-            </div>
-
-            }>
+            <BorderCard className='p-2'>
                 <div className='h-80 overflow-hidden'>
                     <BackupFiles/>
                 </div>

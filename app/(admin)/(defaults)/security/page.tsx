@@ -233,7 +233,7 @@ const ColumnTwo: React.FC = () => {
                 </div>
             </ListboxItem>)}
         </Listbox>);
-    }, [flattenedItems]);
+    }, [flattenedItems, toast]);
 
     return (<div className='space-y-4 pr-4'>
         <Section title='Login Activity'

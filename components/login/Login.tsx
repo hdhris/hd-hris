@@ -12,23 +12,22 @@ import {RiEyeCloseLine, RiEyeLine} from "react-icons/ri";
 import {Button} from "@nextui-org/button";
 import {Form} from "@/components/ui/form";
 import {Chip} from "@nextui-org/chip";
-import {Checkbox, Spinner} from "@nextui-org/react";
-// import FormFields, {FormInputProps} from "@/components/forms/FormFields";
-import login_hero from '@/assets/hero/login_hero.svg'
-import Link from "next/link";
+import {Checkbox} from "@nextui-org/react";
 import {icon_color} from "@/lib/utils";
-import {signIn} from "next-auth/react";
-import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
-import {usePathname, useRouter} from "next/navigation";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {LuXCircle} from "react-icons/lu";
 import ForgotButton from "@/components/forgot/ForgotButton";
+import {login} from "@/actions/authActions";
+import DES from "@/lib/cryptography/3des";
+import Simple3Des from "@/lib/cryptography/3des";
 
+const loginSchema = z.object({
+    username: z.string().min(1, {message: "Username is required."}), password: z.string().min(1, {message: "Password is required."})
+})
 function Login() {
-    const router = useRouter()
 
-    const form = useForm<z.infer<typeof LoginValidation>>({
-        resolver: zodResolver(LoginValidation), defaultValues: {
+    const form = useForm<z.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema), defaultValues: {
             username: "", password: ""
         },
     })
@@ -55,32 +54,30 @@ function Login() {
         </Button>)
     }]
 
-    async function onSubmit(values: z.infer<typeof LoginValidation>) {
-        setError(""); // Clear any previous errors
-        setLoading(true); // Set loading state to true
+    async function onSubmit(values: z.infer<typeof loginSchema>) {
+
+
+        const des = new Simple3Des()
+        const en = des.encryptData('Hello')
+        const val = Simple3Des.validate("jyuiue3i989390");
+        console.log(val)
+        setError("");
+        setLoading(true);
         try {
-            const res = await signIn('credentials', {
-                username: values.username,
-                password: values.password,
-                redirect: false
-            });
-
-            if (res) {
-                if (res.ok && res.status === 200) {
-                        router.push('/dashboard');
-
-                } else if (res && res.status === 401) {
-                    setError(res.error!);
-                }
-            } else {
-                setError("Sign in failed. Please try again."); // Handle other potential errors
+            const res = await login(values);
+            if(res){
+                console.log(res.error)
+                setError(res.error.message)
             }
+
         } catch (error) {
-            setError("Error signing in. Please try again."); // Catch any unexpected errors
+            console.log(error)
+            setError("Error signing in. Please try again.");
         } finally {
-            setLoading(false); // Ensure loading
+            setLoading(false);
         }
     }
+
 
     return (<section className='h-full flex items-center justify-center gap-10'>
         <Card className='p-4 ' shadow='sm' radius='sm'>
@@ -94,7 +91,7 @@ function Login() {
             <CardBody>
                 {error && <Chip classNames={{
                     base: 'p-5 max-w-full'
-                }} variant='flat' startContent={<LuXCircle />} color='danger' radius="sm">{error}</Chip>}
+                }} variant='flat' startContent={<LuXCircle/>} color='danger' radius="sm">{error}</Chip>}
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2'>
                         <FormFields items={loginFields}/>

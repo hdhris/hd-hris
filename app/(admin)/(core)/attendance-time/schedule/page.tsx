@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { batch, emp_sched } from "./schedules";
 import dayjs from "dayjs";
+import {useIsClient} from "@/hooks/ClientRendering";
 
 const colorValue: {
   border: { [key: string]: string }; // Allow any string as key for border colors
@@ -101,10 +102,7 @@ const getScheduleTime = (scheduleName: string) => {
 };
 
 export default function Page() {
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = useIsClient()
   const data = batch;
   const sched = emp_sched;
   const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];

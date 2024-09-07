@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     env: {
-        APP_NAME: process.env.APP_NAME
+        APP_NAME: process.env.APP_NAME,
+        DES_SECRET: process.env.DES_SECRET
     },
     async redirects() {
         return [

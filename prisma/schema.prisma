@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  picture     String?
+  firstName   String
+  lastName    String
+  email       String    @unique
+  phone       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  middle_name String?   @db.VarChar
+  extension   String?   @db.VarChar
+  pre_fix     String?   @db.VarChar
+  suffix      String?   @db.VarChar
+  accounts    Account[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  password          String?
+  privilege         Privilege       @default(LIMITED_ACCESS)
+  role              Role            @default(USER)
+  id                String          @id @default(cuid())
+  username          String          @unique
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Account_user_fkey")
+  authenticators    Authenticator[]
+  sessions          Session[]
+
+  @@unique([username, provider])
+}
+
+model Session {
+  sessionToken String   @unique
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  ipAddress    String?
+  accountId    String
+  account      Account  @relation(fields: [accountId], references: [id], onDelete: Cascade, map: "Session_account_fkey")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  accountId            String
+  account              Account @relation(fields: [accountId], references: [id], onDelete: Cascade, map: "Authenticator_account_fkey")
+
+  @@id([accountId, credentialID])
+}
+
+enum Privilege {
+  FULL_ACCESS
+  LIMITED_ACCESS
+}
+
+enum Role {
+  ADMIN
+  USER
+}

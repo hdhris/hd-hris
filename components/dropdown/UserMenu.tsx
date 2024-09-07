@@ -3,20 +3,22 @@ import React from 'react';
 import {
     Badge, cn, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Skeleton, User
 } from "@nextui-org/react";
-import {Handshake, Lifebuoy, SignOut, Sliders, UserCircleGear} from "@phosphor-icons/react";
+import {Handshake, Lifebuoy, SignOut, Sliders} from "@phosphor-icons/react";
 import {Avatar} from "@nextui-org/avatar";
 import {icon_theme, text_icon} from "@/lib/utils";
 import Typography from "@/components/common/typography/Typography"
-import {LuShieldAlert, LuShieldCheck} from "react-icons/lu";
+import {LuShieldCheck} from "react-icons/lu";
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
-import {PiCloudArrowDown, PiPlugs} from "react-icons/pi";
+import {PiCloudArrowDown} from "react-icons/pi";
 import {signOut} from "next-auth/react";
 import {MdOutlinePrivacyTip} from "react-icons/md";
+import {IoApps} from "react-icons/io5";
+import {logout} from "@/actions/authActions";
+import {Button} from "@nextui-org/button";
 
 function UserMenu() {
-    return (
-        <Dropdown radius="sm"
+    return (<Dropdown radius="sm"
 
         >
             <DropdownTrigger>
@@ -116,11 +118,11 @@ function UserMenu() {
                         <Typography className={text_icon}>Data Backup</Typography>
                     </DropdownItem>
                     <DropdownItem
-                        textValue="Integrations"
-                        key="integrations"
+                        textValue="Apps"
+                        key="apps"
                         as={Link}
-                        href='/integrations'
-                        startContent={<PiPlugs className={cn("", icon_theme)}/>}
+                        href='/apps'
+                        startContent={<IoApps className={cn("", icon_theme)}/>}
                     >
                         <Typography className={text_icon}>Integrations</Typography>
                     </DropdownItem>
@@ -147,15 +149,19 @@ function UserMenu() {
                     <DropdownItem
                         textValue="Log Out"
                         key="logout"
-                        onClick={() => signOut({callbackUrl: "/"})}
-                        startContent={<SignOut className={cn("", icon_theme)}/>}
+                        className='px-0 py-0'
                     >
-                        <Typography className={text_icon}>Log out</Typography>
+                        <form action={logout}>
+                           <Button size='sm' variant='light' type='submit' className='w-full justify-start text-sm' startContent={<SignOut className={cn("", icon_theme)}/>}>
+                               <Typography className={text_icon}>Log out</Typography>
+                           </Button>
+
+                        </form>
+
                     </DropdownItem>
                 </DropdownSection>
             </DropdownMenu>
-        </Dropdown>
-    );
+        </Dropdown>);
 }
 
 export default UserMenu;
