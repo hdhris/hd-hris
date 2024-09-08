@@ -11,21 +11,21 @@ import {LuShieldCheck} from "react-icons/lu";
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
 import {PiCloudArrowDown} from "react-icons/pi";
-import {signOut} from "next-auth/react";
+import {useSession} from "next-auth/react";
 import {MdOutlinePrivacyTip} from "react-icons/md";
 import {IoApps} from "react-icons/io5";
 import {logout} from "@/actions/authActions";
 import {Button} from "@nextui-org/button";
 
 function UserMenu() {
+    const session = useSession();
     return (<Dropdown radius="sm"
-
         >
             <DropdownTrigger>
                 <span className="cursor-pointer">
                     <Badge content="" color="success" shape="circle" placement="bottom-right">
                         <Avatar
-                            src="https://avatars.githubusercontent.com/u/30373425?v=4"
+                            src={session.status !== "loading" && session.data?.user?.image ? session.data.user.image : undefined}
                             size="sm"
                             showFallback
                             fallback={<Skeleton className="flex rounded-full"/>}
@@ -49,14 +49,14 @@ function UserMenu() {
                         className="h-14 gap-2 opacity-100"
                     >
                         <User
-                            name="Junior Garcia"
-                            description="@jrgarciadev"
+                            name={session.status !== "loading" && session.data?.user?.name ? session.data.user.name : "No Name"}
+                            description={session.status !== "loading" && session.data?.user?.email ? session.data.user.email : "No Email"}
                             classNames={{
                                 name: "text-inactive-bar text-md font-semibold",
                                 description: "text-inactive-bar text-sm",
                             }}
                             avatarProps={{
-                                size: "sm", src: "https://avatars.githubusercontent.com/u/30373425?v=4",
+                                size: "sm", src:  `${session.status !== "loading" && session.data?.user?.image ? session.data.user.image : undefined}`,
                             }}
                         />
                     </DropdownItem>
@@ -86,7 +86,7 @@ function UserMenu() {
                         isReadOnly
                         className='opacity-100'
                     >
-                        <Chip color='success' className={text_icon}>Full Access</Chip>
+                        <Chip color='success' className={text_icon}>{session.data?.user.privilege}</Chip>
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection showDivider>

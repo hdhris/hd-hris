@@ -4,25 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="partially done in the login backend">
-      <change afterPath="$PROJECT_DIR$/actions/notifications.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/utils/authUtils/authUtils.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/utils/parser/JsonObject.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tsconfig.server.json" afterDir="false" />
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="maybe sure">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__test__/login.test.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/profile/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/profile/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-password/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-password/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/auth.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/login/Login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/login/Login.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prisma/prisma.ts" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/prisma.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prisma/seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/seed.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/types/SelectionProp.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/types/SelectionProp.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/utils/authUtils/authUtils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/authUtils/authUtils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/queries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/queries.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/routes/default/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/routes/default/types.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/types/types.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/types.d.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -284,7 +278,7 @@
       <workItem from="1725782384345" duration="340000" />
       <workItem from="1725782745093" duration="152000" />
       <workItem from="1725783035612" duration="7961000" />
-      <workItem from="1725791812531" duration="18865000" />
+      <workItem from="1725791812531" duration="32193000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -510,7 +504,23 @@
       <option name="project" value="LOCAL" />
       <updated>1725684923861</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="maybe sure">
+      <option name="closed" value="true" />
+      <created>1725813751129</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1725813751129</updated>
+    </task>
+    <task id="LOCAL-00033" summary="maybe sure">
+      <option name="closed" value="true" />
+      <created>1725813933881</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1725813933881</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -552,6 +562,7 @@
     <MESSAGE value="done Backup Frequency" />
     <MESSAGE value="partially creating RestoreOption.tsx" />
     <MESSAGE value="partially done in the login backend" />
-    <option name="LAST_COMMIT_MESSAGE" value="partially done in the login backend" />
+    <MESSAGE value="maybe sure" />
+    <option name="LAST_COMMIT_MESSAGE" value="maybe sure" />
   </component>
 </project>

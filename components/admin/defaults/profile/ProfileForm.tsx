@@ -19,6 +19,7 @@ import dayjs from "dayjs";
 import {updateProfileSchema} from "@/helper/zodValidation/UpdateProfile";
 import {axiosInstance} from "@/services/fetcher";
 import {toast} from "@/components/ui/use-toast";
+import {Address} from "@/types/routes/default/types";
 
 
 type FormData = {
@@ -33,6 +34,10 @@ export default function ProfileForm() {
     const [loading, setLoading] = useState(false)
     const [image, setImage] = useState<string | ArrayBuffer | null>(null);
     const [birthdate, setBirthdate] = useState<DateValue>()
+    const [regions, setRegions] = useState<{key: number, label: string}[]>([])
+    const [provinces, setProvinces] = useState<{key: number, label: string}[]>([])
+    const [municipals, setMunicipals] = useState<{key: number, label: string}[]>([])
+    const [barangays, setBarangays] = useState<{key: number, label: string}[]>([])
     const [fileError, setFileError] = useState<string>("");
     const {data: profile, isLoading} = useUser();
     const form = useForm<z.infer<typeof updateProfileSchema>>({
@@ -41,17 +46,25 @@ export default function ProfileForm() {
 
     useEffect(() => {
         if (profile) {
-            form.reset(profile)
-            setImage(profile.profilePicture);
-            if (profile.birthdate) {
-                const date = dayjs(profile.birthdate).format("YYYY-MM-DD");
+            setRegions(profile.addresses.filter((id) => id.parent_code === 0).map((region) => ({key: region.address_code, label: region.address_name})));
+            setProvinces(profile.addresses.map((prov) => ({key: prov.address_code, label: prov.address_name})));
+            setMunicipals(profile.addresses.map((mun) => ({key: mun.address_code, label: mun.address_name})));
+            setBarangays(profile.addresses.map((bar) => ({key: bar.address_code, label: bar.address_name})));
+            // address.filter((id) => id.address_code === 0).map((region) => region.address_name);
+            form.reset(profile.users)
+            setImage(profile.users.picture);
+            if (profile.users.birthdate) {
+                const date = dayjs(profile.users.birthdate).format("YYYY-MM-DD");
                 console.log(parseDate(date))
                 setBirthdate(parseDate(date))
                 form.setValue("birth_date", date)
             }
         }
+        console.log(regions)
 
     }, [form, profile]);
+
+
 
     const imageRef = useRef<string | null>(null);
 
@@ -95,6 +108,8 @@ export default function ProfileForm() {
         // Reset input value to ensure the file change event triggers again if the same file is selected
         (e.target as HTMLInputElement).value = "";
     };
+
+    // const regions = address.filter((id) => id.address_code === 0).map((region) => region.address_name);
 
     const upperInput: FormInputProps[] = [{
         name: "picture", Component: () => {
@@ -150,10 +165,10 @@ export default function ProfileForm() {
     const contact_info: FormInputProps[] = [{
         name: "email", label: "Email", isRequired: true
     }, {
-        name: "phone_no", label: "Phone No.", type: "tel", isRequired: true
+        name: "contact_no", label: "Phone No.", type: "tel", isRequired: true
     }];
 
-    const civilStatus = ["Single", "Married", "Widowed", "Separated", "Divorced", "Others"];
+    const gender = [{key: "M", label: "M"}, {key: "F", label: "F"}];
     const street = ["Street", "Purok"];
 
     async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
@@ -173,6 +188,13 @@ export default function ProfileForm() {
         setLoading(false)
     }
 
+    const region = [{
+        key: "region",
+        label: "Region",
+    }, {
+        key: "province",
+        label: "Province",
+    }];
     return (<Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}
               className='space-y-5 flex flex-col p-2 h-full overflow-hidden'>
@@ -208,12 +230,12 @@ export default function ProfileForm() {
                         }
                     }]} size='sm'/>
                     <Selection
-                        items={civilStatus}
+                        items={gender}
                         isRequired={true}
                         placeholder=""
-                        label='Civil Status'
-                        name='civil_status'
-                        aria-label="Civil Status"
+                        label='Gender'
+                        name='gender'
+                        aria-label="Gender"
                     />
                     <div className='col-span-2 space-y-2'>
                         <Divider/>
@@ -226,36 +248,38 @@ export default function ProfileForm() {
                     </div>
                     <Selection
                         // isRequired={true}
-                        items={street}
+                        items={regions}
                         placeholder=""
-                        label='Street/Purok'
-                        name='street_or_purok'
-                        aria-label="Street or Purok"
+                        label='Region'
+                        name='addr_region'
+                        aria-label="Region"
                     />
                     <Selection
                         // isRequired={true}
-                        items={street}
-                        placeholder=""
-                        label='Barangay'
-                        name='barangay'
-                        aria-label="Barangay"
-                    />
-                    <Selection
-                        // isRequired={true}
-                        items={street}
-                        placeholder=""
-                        label='City'
-                        name='city'
-                        aria-label="City"
-                    />
-                    <Selection
-                        // isRequired={true}
-                        items={street}
+                        items={provinces}
                         placeholder=""
                         label='Province'
-                        name='province'
+                        name='addr_province'
                         aria-label="Province"
                     />
+                    <Selection
+                        // isRequired={true}
+                        items={municipals}
+                        placeholder=""
+                        label='Municipality'
+                        name='addr_municipal'
+                        aria-label="Municipality"
+                    />
+                    <Selection
+                        // isRequired={true}
+                        items={barangays}
+                        placeholder=""
+                        label='Barangay'
+                        name='addr_barangay'
+                        aria-label="Barangay"
+                    />
+
+
                 </div>
             </ScrollShadow>
             <div className='flex justify-end gap-2'>

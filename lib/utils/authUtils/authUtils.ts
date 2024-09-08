@@ -34,10 +34,11 @@ export const getUserData = async (username: string, password: string) => {
     });
 
     if (data) {
-        const privileges = processJsonObject<UserPrivileges>(data.sys_privileges?.accessibility);
-        const isWebAccess = privileges?.web_access;
+        const privileges = data.sys_privileges;
+        const accessibility = processJsonObject<UserPrivileges>(privileges?.accessibility);
+        const isWebAccess = accessibility?.web_access;
 
-        const role = !privileges || isWebAccess ? 'admin' : 'user';
+        const role = !accessibility || isWebAccess ? 'admin' : 'user';
 
         console.log("Your Role is: " + role);
         return {
@@ -45,7 +46,8 @@ export const getUserData = async (username: string, password: string) => {
             name: 'John Doe',
             role: role,
             picture: data.trans_employees?.picture!,
-            email: data.trans_employees?.email!
+            email: data.trans_employees?.email!,
+            privilege: privileges?.name
         };
     }
 

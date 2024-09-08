@@ -9,56 +9,6 @@ import {handleAuthorization} from "@/lib/utils/authUtils/authUtils";
 import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
 
 
-interface UserPrivileges {
-    web_access?: boolean
-    admin_panel?: boolean
-}
-
-
-const getUserData = async (username: string, password: string): Promise<User | null> => {
-
-    // Encrypt the password
-    const encrypt = new Simple3Des().encryptData(password);
-
-    // Query the database
-    const data = await prisma.sys_accounts.findFirst({
-        where: {
-            AND: [{
-                username: username, password: encrypt,
-            }, {
-                banned_till: {
-                    gte: new Date()
-                }
-            }]
-
-        }, include: {
-            trans_employees: true, sys_privileges: true
-        }
-    });
-
-    if (data) {
-        const privileges = processJsonObject<UserPrivileges>(data.sys_privileges?.accessibility);
-        const isWebAccess = privileges?.web_access
-
-        const role = !privileges || isWebAccess ? "admin" : "user"
-
-
-        return {
-            id: String(data.id),
-            name: "John Doe",
-            role: role,
-            picture: data.trans_employees?.picture!,
-            email: data.trans_employees?.email!
-        }
-    }
-
-    // Log the results
-    // console.log("Query results in db:", db);
-
-
-    return null;
-
-}
 export const {handlers, signIn, signOut, auth} = NextAuth({
     adapter: PrismaAdapter(prisma), providers: [Credentials({
         credentials: {
@@ -91,7 +41,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         }, async jwt({token, user, session}) {
             if (user) {
                 return {
-                    ...token, picture: user.picture, id: user.id, name: user.name, role: user.role, email: user.email
+                    ...token, picture: user.picture, id: user.id, name: user.name, role: user.role, email: user.email, privilege: user.privilege,
                 } as JWT;
             }
             return token;

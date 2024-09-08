@@ -5,21 +5,33 @@ export interface Integrations {
     subtitle: string;
     type: string;
 }
-
+export interface Address {
+    address_code: number;
+    address_name: string;
+    parent_code: number | null;
+}
+export interface Profile {
+    addresses: Address[];
+    users : UserProfile;
+}
 export interface UserProfile {
-    profilePicture: string;
     username: string;
+    picture: string;
+    prefix: string | null;
     first_name: string;
     last_name: string;
-    birthdate: string; // Format: YYYY-MM-DD
-    civil_status: "single" | "married" | "widowed" | "separated" | "divorced" | "others" // Add other statuses as needed
+    suffix: string | null;
+    extension: string | null;
     email: string;
-    phone_no: string;
-    street_or_purok: string;
-    barangay: string;
-    city: string;
-    province: string;
+    birthdate: string; // ISO 8601 date string
+    gender: string; // Assuming gender is limited to 'M' or 'F'
+    contact_no: string;
+    addr_baranggay: number;
+    addr_municipal: number;
+    addr_province: number;
+    addr_region: number;
 }
+
 
 export interface LoginActivity {
     key: string;
