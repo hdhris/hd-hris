@@ -56,11 +56,6 @@ function Login() {
 
     async function onSubmit(values: z.infer<typeof loginSchema>) {
 
-
-        const des = new Simple3Des()
-        const en = des.encryptData('Hello')
-        const val = Simple3Des.validate("jyuiue3i989390");
-        console.log(val)
         setError("");
         setLoading(true);
         try {

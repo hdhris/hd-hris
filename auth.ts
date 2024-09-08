@@ -1,67 +1,62 @@
 import NextAuth, {Session, User} from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
 import {JWT} from "next-auth/jwt";
 import {PrismaAdapter} from "@auth/prisma-adapter";
 import prisma from "@/prisma/prisma";
 import Simple3Des from "@/lib/cryptography/3des";
-import {formatFullName} from "@/lib/utils/nameFormatter";
+import {processJsonObject} from "@/lib/utils/parser/JsonObject";
+import {handleAuthorization} from "@/lib/utils/authUtils/authUtils";
+import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
+
+
+interface UserPrivileges {
+    web_access?: boolean
+    admin_panel?: boolean
+}
+
 
 const getUserData = async (username: string, password: string): Promise<User | null> => {
 
+    // Encrypt the password
+    const encrypt = new Simple3Des().encryptData(password);
 
-    // const des = new Simple3Des()
-    // const decrypt = Simple3Des.validate(username) ? des.decryptData(username) : null
-    // console.log(decrypt)
-    const encrypt = new Simple3Des().encryptData(password)
-    const data = await prisma.account.findFirst({
-        select: {
-            id: true, role: true, privilege: true, user: {
-                select: {
-                    picture: true,
-                    firstName: true,
-                    lastName: true,
-                    middle_name: true,
-                    extension: true,
-                    pre_fix: true,
-                    suffix: true,
-                    email: true,
+    // Query the database
+    const data = await prisma.sys_accounts.findFirst({
+        where: {
+            AND: [{
+                username: username, password: encrypt,
+            }, {
+                banned_till: {
+                    gte: new Date()
                 }
-            }
-        }, where: {
-            username: username, password: encrypt
+            }]
+
+        }, include: {
+            trans_employees: true, sys_privileges: true
         }
-    })
-    console.log(data)
+    });
+
     if (data) {
-        const user = {
-            isAdmin: data.role === "ADMIN",
-            picture: data.user.picture!,
-            role: data.role,
-            id: data.id,
-            name: formatFullName(data.user.pre_fix!, data.user.firstName, data.user.middle_name!, data.user.lastName, data.user.extension!, data.user.suffix!),
-            privilege: "admin"
+        const privileges = processJsonObject<UserPrivileges>(data.sys_privileges?.accessibility);
+        const isWebAccess = privileges?.web_access
+
+        const role = !privileges || isWebAccess ? "admin" : "user"
+
+
+        return {
+            id: String(data.id),
+            name: "John Doe",
+            role: role,
+            picture: data.trans_employees?.picture!,
+            email: data.trans_employees?.email!
         }
-
-        console.log(user)
-
-        return user
     }
 
-    // console.log("Data: ", data)
-    // if (username === "admin" && password === "password123") {
-    //
-    //     return {
-    //         isAdmin: true,
-    //         picture: "https://avatars.githubusercontent.com/u/30373425?v=4",
-    //         role: "HR Manager",
-    //         id: "1",
-    //         name: "John Doe",
-    //         privilege: "admin"
-    //
-    //     }
-    // }
-    return null
+    // Log the results
+    // console.log("Query results in db:", db);
+
+
+    return null;
 
 }
 export const {handlers, signIn, signOut, auth} = NextAuth({
@@ -69,27 +64,21 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         credentials: {
             username: {}, password: {},
         }, authorize: async (credentials) => {
-            if (!credentials?.username || !credentials?.password) throw new Error('Fields cannot be empty');
-//
-            let user = null
-            try {
-                const {username, password} = await LoginValidation.parseAsync(credentials);
-                // const encryptPass = Hash.validate(password) ? hash.decryptData(password) : null
-                // console.log(encryptPass);
-                user = getUserData(username, password);
-
-                // const verifyPassword = await bcrypt.compare(credentials.password, user.password)
-
-
-            } catch (e) {
-                console.log(e)
-                if (!user) throw new Error('Invalid username or password');
-                // console.log(e)
+            // Type assertion to ensure correct type
+            if (!credentials.username || !credentials.password) {
+                throw new Error('Fields cannot be empty');
             }
 
+            // Validate credentials
+            const { username, password } = await LoginValidation.parseAsync(credentials as { username: string; password: string });
 
-            // return verifyPassword ? JSON.parse(JSON.stringify(user)) : null;
-            return user ? JSON.parse(JSON.stringify(user)) : null
+            // Get user data
+            const user = await handleAuthorization({ username, password });
+            if (!user) {
+                throw new Error('Invalid credentials');
+            }
+
+            return user;
         },
     })], callbacks: {
         authorized({request: {nextUrl}, auth}) {
@@ -102,12 +91,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         }, async jwt({token, user, session}) {
             if (user) {
                 return {
-                    ...token,
-                    role: user.isAdmin ? "admin" : "user",
-                    picture: user.picture,
-                    id: user.id,
-                    name: user.name,
-                    isAdmin: user.isAdmin
+                    ...token, picture: user.picture, id: user.id, name: user.name, role: user.role, email: user.email
                 } as JWT;
             }
             return token;
@@ -121,3 +105,5 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         strategy: "jwt"
     }
 })
+
+

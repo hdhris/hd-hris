@@ -14,7 +14,6 @@ import SideBar from "@/components/sidebar/SideBar";
 import NavBar from "@/components/navbar/NavBar";
 import UserMenu from "@/components/dropdown/UserMenu";
 import Notification from '@/components/functions/notifications/Notification'
-import AuditSignatories from "@/components/admin/dashboard/AuditSignatories";
 import {LiaUsersSolid} from "react-icons/lia";
 
 function RootLayout({children}: { children: ReactNode }) {
@@ -82,6 +81,7 @@ function RootLayout({children}: { children: ReactNode }) {
                 {isSidebarOpen ? <LuChevronLeft/> : <LuChevronRight/>}
             </div>
         </section>
+
 
         <ScrollShadow className="p-4 mt-16 mb-4 w-full min-w-[980px]">
             {children}
