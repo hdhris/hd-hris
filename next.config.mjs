@@ -9,7 +9,12 @@ const nextConfig = {
                 source: "/attendance-time",
                 destination: "/attendance-time/records",
                 permanent: true,
-            },
+              },  
+              {
+                source: "/employeemanagement",
+                destination: "/employeemanagement/employees",
+                permanent: true,
+              },
         ];
     },
     async headers() {

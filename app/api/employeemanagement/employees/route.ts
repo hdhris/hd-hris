@@ -1,75 +1,47 @@
-import { NextResponse } from "next/server";
-import { Employee } from "@/types/employeee/EmployeeType";
-import { getRandomDateTime } from "@/lib/utils/dateFormatter";
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
 export async function GET() {
-    const employees: Employee[] = [
-        {
-            id: 1,
-            rfid: '123456',
-            picture: "https://randomuser.me/api/portraits/men/1.jpg",
-            name: "John Doe",
-            age: 30,
-            position: "Software Engineer",
-            department: "Engineering",
-            email: "john.doe@example.com",
-            phone: "123-456-7890",
-            gender: "male",
-            status: "active",
-            suspensionReason: null,
-            suspensionDate: null,
-            suspensionDuration: null,
-            retirementDate: null,
-            terminationReason: null,
-            terminationDate: null,
-            resignationDate: null,
-            resignationReason: null,
-        },
-        {
-            id: 2,
-            rfid: '654321',
-            picture: "https://randomuser.me/api/portraits/women/2.jpg",
-            name: "Jane Smith",
-            age: 45,
-            position: "Project Manager",
-            department: "Management",
-            email: "jane.smith@example.com",
-            phone: "098-765-4321",
-            gender: "female",
-            status: "retired",
-            suspensionReason: null,
-            suspensionDate: null,
-            suspensionDuration: null,
-            retirementDate: getRandomDateTime(new Date("2022-01-01"), new Date("2023-01-01")),
-            terminationReason: null,
-            terminationDate: null,
-            resignationDate: null,
-            resignationReason: null,
-        },
-        // Add more employee data as needed
-        
-        {
-            id: 3,
-            rfid: '6543212321',
-            picture: "https://randomuser.me/api/portraits/women/2.jpg",
-            name: "Justin Beiber",
-            age: 45,
-            position: "Project Manager",
-            department: "Management",
-            email: "jane.smith@example.com",
-            phone: "098-765-4321",
-            gender: "female",
-            status: "retired",
-            suspensionReason: null,
-            suspensionDate: null,
-            suspensionDuration: null,
-            retirementDate: getRandomDateTime(new Date("2022-01-01"), new Date("2023-01-01")),
-            terminationReason: null,
-            terminationDate: null,
-            resignationDate: null,
-            resignationReason: null,
-        },
-    ];
+  try {
+    const employees = await prisma.employee.findMany();
+    return NextResponse.json(employees);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch employees' }, { status: 500 });
+  }
+}
 
-    return NextResponse.json(employees, { status: 200 });
+export async function POST(request: NextRequest) {
+  try {
+    const data = await request.json();
+    const employee = await prisma.employee.create({ data });
+    return NextResponse.json(employee, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to create employee' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { id, ...data } = await request.json();
+    const employee = await prisma.employee.update({
+      where: { id: Number(id) },
+      data,
+    });
+    return NextResponse.json(employee);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to update employee' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    await prisma.employee.delete({
+      where: { id: Number(id) },
+    });
+    return NextResponse.json({ message: 'Employee deleted successfully' });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to delete employee' }, { status: 500 });
+  }
 }
