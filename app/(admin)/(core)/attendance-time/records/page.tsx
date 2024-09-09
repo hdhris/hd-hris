@@ -143,7 +143,7 @@ export default function Page() {
   
   useEffect(()=>{
     fetchAttandance(date.day, date.month, date.year);
-  },[])
+  },[date.day, date.month, date.year])
   const handleDateChange = (newDate: CalendarDate) => {
     setDate(newDate);
     fetchAttandance(newDate.day, newDate.month, newDate.year);
