@@ -19,9 +19,11 @@ const Page = () => {
           throw new Error("Network response was not ok");
         }
         const data: Employee[] = await response.json();
-        const suspendedEmployees = data.filter((employee) =>["suspended"].includes(employee.status)
-      );
-        setEmployees(suspendedEmployees);
+
+        // Filter employees who are retired, resigned, or terminated
+        const resignType = data.filter((employee) =>["retired", "resigned", "terminated"].includes(employee.status)
+        );
+        setEmployees(resignType);
       } catch (error) {
         console.error("Failed to fetch employees:", error);
       } finally {
@@ -67,9 +69,9 @@ const Page = () => {
       { uid: "name", name: "Name", sortable: true },
       { uid: "department", name: "Department", sortable: true },
       { uid: "position", name: "Position", sortable: true },
-      { uid: "duration", name: "Duration", sortable: false },
-      { uid: "suspensionDate", name: "Suspended Date", sortable: true },
-      { uid: "suspensionReason", name: "Suspended Reason", sortable: false },
+      { uid: "resignationType", name: "Resignation Type", sortable: false },
+      { uid: "resignationDate", name: "Resignation Date", sortable: true },
+      { uid: "resignationReason", name: "Resignation Reason", sortable: false },
       { uid: "actions", name: "Actions", sortable: false },
     ],
     rowCell: (item, columnKey) => {
@@ -89,39 +91,38 @@ const Page = () => {
           return <span>{item.department}</span>;
         case "position":
           return <span>{item.position}</span>;
-        case "duration":
-          return "suspensionDuration" in item ? (
-            <div>
-              {item.suspensionDuration
-                ? `${item.suspensionDuration} Days`
-                : "N/A"}
-            </div>
-          ) : (
-            <div>"N/A"</div>
-          );
-        case "suspensionDate":
-          return "suspensionDate" in item ? (
-            <span>
-              {item.suspensionDate
-                ? new Date(item.suspensionDate).toLocaleDateString()
-                : "N/A"}
-            </span>
-          ) : (
-            <span>"N/A"</span>
-          );
-        case "suspensionReason":
-          return "suspensionReason" in item ? (
-            <span>{item.suspensionReason ?? "N/A"}</span>
-          ) : (
-            <span>"N/A"</span>
-          );
-
-        case "actions": // Add this case to handle the actions column
+        case "resignationType":
+          return <span>{item.status}</span>;
+        case "resignationDate":
+          if ("resignationDate" in item && item.resignationDate) {
+            return (
+              <span>{new Date(item.resignationDate).toLocaleDateString()}</span>
+            );
+          } else if ("retirementDate" in item && item.retirementDate) {
+            return (
+              <span>{new Date(item.retirementDate).toLocaleDateString()}</span>
+            );
+          } else if ("terminationDate" in item && item.terminationDate) {
+            return (
+              <span>{new Date(item.terminationDate).toLocaleDateString()}</span>
+            );
+          } else {
+            return <span>N/A</span>;
+          }
+        case "resignationReason":
+          if ("resignationReason" in item && item.resignationReason) {
+            return <span>{item.resignationReason}</span>;
+          } else if ("terminationReason" in item && item.terminationReason) {
+            return <span>{item.terminationReason}</span>;
+          } else {
+            return <span>N/A</span>;
+          }
+        case "actions":
           return (
             <TableActionButton
               name={item.name}
-              onEdit={() => handleEdit(item.id)} // Pass id directly as number
-              onDelete={() => handleDelete(item.id)} // Pass id directly as number
+              onEdit={() => handleEdit(item.id)}
+              onDelete={() => handleDelete(item.id)}
             />
           );
         default:
