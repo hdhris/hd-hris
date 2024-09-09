@@ -1,8 +1,10 @@
+// page.tsx
+
 "use client";
 
 import React, { useEffect, useState } from "react";
 import TableData from "@/components/tabledata/TableData";
-import { Employee } from "@/types/employeee/EmployeeType";
+import { EmployeeAll as Employee } from "@/types/employeee/EmployeeType";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Avatar } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
@@ -31,22 +33,22 @@ const Page = () => {
   }, []);
 
   const handleEdit = async (id: number) => {
-    // This is a placeholder. You would typically open a modal or navigate to an edit page.
     console.log("Edit employee with id:", id);
-    // After editing, you might want to refetch the employees or update the local state
-    await fetchEmployees();
+    await fetchEmployees(); // Refetch employees after edit
   };
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`/api/employeemanagement/employees?id=${id}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `/api/employeemanagement/employees?id=${id}`,
+        {
+          method: "DELETE",
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to delete employee");
       }
-      // Refetch employees after successful deletion
-      await fetchEmployees();
+      await fetchEmployees(); // Refetch employees after delete
     } catch (error) {
       console.error("Error deleting employee:", error);
     }
@@ -68,10 +70,12 @@ const Page = () => {
             <div className="flex items-center">
               <Avatar
                 src={item.picture}
-                alt={item.name}
+                alt={item.firstName + item.lastName}
                 className="w-10 h-10 rounded-full mr-2"
               />
-              <span>{item.name}</span>
+              <span>
+                  {item.firstName} {item.lastName}
+              </span>
             </div>
           );
         case "department":
@@ -90,7 +94,7 @@ const Page = () => {
         case "actions":
           return (
             <TableActionButton
-              name={item.name}
+              name={item.firstName}
               onEdit={() => handleEdit(item.id)}
               onDelete={() => handleDelete(item.id)}
             />
@@ -102,7 +106,8 @@ const Page = () => {
   };
 
   const searchingItemKey: Array<keyof Employee> = [
-    "name",
+    "firstName",
+    "lastName",
     "position",
     "department",
     "status",
