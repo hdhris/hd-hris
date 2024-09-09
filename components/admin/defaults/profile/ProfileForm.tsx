@@ -1,5 +1,5 @@
 'use client'
-import {Avatar, DatePicker} from "@nextui-org/react";
+import {Avatar, DatePicker, SharedSelection} from "@nextui-org/react";
 import {Form} from "@/components/ui/form";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {z} from "zod";
@@ -35,6 +35,7 @@ export default function ProfileForm() {
     const [image, setImage] = useState<string | ArrayBuffer | null>(null);
     const [birthdate, setBirthdate] = useState<DateValue>()
     const [regions, setRegions] = useState<{key: number, label: string}[]>([])
+    const [selectedRegion, setSelectedRegion] = useState<string>("")
     const [provinces, setProvinces] = useState<{key: number, label: string}[]>([])
     const [municipals, setMunicipals] = useState<{key: number, label: string}[]>([])
     const [barangays, setBarangays] = useState<{key: number, label: string}[]>([])
@@ -44,25 +45,28 @@ export default function ProfileForm() {
         resolver: zodResolver(updateProfileSchema),
     });
 
+    const handleSelectedRegion = useCallback((key: SharedSelection) => {
+        setSelectedRegion(key.currentKey!)
+    }, [])
+
     useEffect(() => {
         if (profile) {
             setRegions(profile.addresses.filter((id) => id.parent_code === 0).map((region) => ({key: region.address_code, label: region.address_name})));
             setProvinces(profile.addresses.map((prov) => ({key: prov.address_code, label: prov.address_name})));
             setMunicipals(profile.addresses.map((mun) => ({key: mun.address_code, label: mun.address_name})));
             setBarangays(profile.addresses.map((bar) => ({key: bar.address_code, label: bar.address_name})));
+            // setSelectedRegion(String(profile.users.addr_region))
             // address.filter((id) => id.address_code === 0).map((region) => region.address_name);
+            setSelectedRegion(String(profile.users.addr_region))
             form.reset(profile.users)
             setImage(profile.users.picture);
             if (profile.users.birthdate) {
                 const date = dayjs(profile.users.birthdate).format("YYYY-MM-DD");
-                console.log(parseDate(date))
                 setBirthdate(parseDate(date))
                 form.setValue("birth_date", date)
             }
         }
-        console.log(regions)
-
-    }, [form, profile]);
+    }, [form, profile, regions]);
 
 
 
@@ -249,10 +253,12 @@ export default function ProfileForm() {
                     <Selection
                         // isRequired={true}
                         items={regions}
+                        selectedKeys={[selectedRegion]}
                         placeholder=""
                         label='Region'
                         name='addr_region'
                         aria-label="Region"
+                        onSelectionChange={handleSelectedRegion}
                     />
                     <Selection
                         // isRequired={true}
@@ -261,23 +267,24 @@ export default function ProfileForm() {
                         label='Province'
                         name='addr_province'
                         aria-label="Province"
+
                     />
-                    <Selection
-                        // isRequired={true}
-                        items={municipals}
-                        placeholder=""
-                        label='Municipality'
-                        name='addr_municipal'
-                        aria-label="Municipality"
-                    />
-                    <Selection
-                        // isRequired={true}
-                        items={barangays}
-                        placeholder=""
-                        label='Barangay'
-                        name='addr_barangay'
-                        aria-label="Barangay"
-                    />
+                    {/*<Selection*/}
+                    {/*    // isRequired={true}*/}
+                    {/*    items={municipals}*/}
+                    {/*    placeholder=""*/}
+                    {/*    label='Municipality'*/}
+                    {/*    name='addr_municipal'*/}
+                    {/*    aria-label="Municipality"*/}
+                    {/*/>*/}
+                    {/*<Selection*/}
+                    {/*    // isRequired={true}*/}
+                    {/*    items={barangays}*/}
+                    {/*    placeholder=""*/}
+                    {/*    label='Barangay'*/}
+                    {/*    name='addr_barangay'*/}
+                    {/*    aria-label="Barangay"*/}
+                    {/*/>*/}
 
 
                 </div>

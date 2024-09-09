@@ -20,7 +20,7 @@ export interface UserProfile {
     prefix: string | null;
     first_name: string;
     last_name: string;
-    suffix: string | null;
+    suffix?: string | null;
     extension: string | null;
     email: string;
     birthdate: string; // ISO 8601 date string

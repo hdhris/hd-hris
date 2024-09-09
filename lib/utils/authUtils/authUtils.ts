@@ -22,9 +22,10 @@ export const getUserData = async (username: string, password: string) => {
             AND: [{
                 username: username, password: encrypt,
             }, {
-                banned_till: {
-                    gte: new Date()
-                }
+                // banned_till: {
+                //     equals: null,
+                //     gte: new Date()
+                // }
             }]
         },
         include: {
@@ -32,6 +33,7 @@ export const getUserData = async (username: string, password: string) => {
             sys_privileges: true
         }
     });
+    console.log(data)
 
     if (data) {
         const privileges = data.sys_privileges;

@@ -1,5 +1,7 @@
 
 import {Key} from '@react-types/shared';
+import SelectionMenu from "../../../dropdown/SelectionMenu";
+import {SelectProps} from "@nextui-org/react";
 
 interface Items {
     key: string | number,
