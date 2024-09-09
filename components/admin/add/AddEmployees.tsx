@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Add from "@/components/common/button/Add";
 import BreadcrumbComponent from "@/components/common/breadcrumb";
 import {
@@ -8,6 +8,7 @@ import {
   ModalBody,
   ModalFooter,
   Button,
+  Divider,
   useDisclosure,
 } from "@nextui-org/react";
 import PersonalInformationForm from "./PersonalInformationForm";
@@ -16,25 +17,25 @@ import JobInformationForm from "./JobInformation";
 import { useForm, FormProvider } from "react-hook-form";
 import axios from "axios";
 
-const AddEmployee = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [currentStep, setCurrentStep] = useState(1);
+interface AddEmployeeProps {
+  onEmployeeAdded: () => void;
+}
 
+const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const methods = useForm({
     defaultValues: {
-      ID: "",
-      profileImage: null,
+      picture: "",
       firstName: "",
       middleName: "",
       lastName: "",
       gender: "",
       birthdate: "",
-      email: "",
-      phoneNo: "",
-      region: "",
-      province: "",
-      city: "",
-      purok: "",
+      addr_region: "",
+      addr_province: "",
+      addr_municipal: "",
+      addr_baranggay: "",
+      // Include default values for educational background and job information fields
       elementary: "",
       highSchool: "",
       seniorHighSchool: "",
@@ -43,42 +44,54 @@ const AddEmployee = () => {
       course: "",
       highestDegree: "",
       certificates: [],
-      department: "",
       hireDate: "",
       jobTitle: "",
       jobRole: "",
       workingType: "",
       contractYears: "",
-      workSchedule: {},
+      workSchedules: {}, // Add the initial structure for work schedules if needed
     },
     mode: "onChange",
   });
 
-  const [savedData, setSavedData] = useState({});
-
-  const nextStep = (e: React.MouseEvent) => {
-    e.preventDefault();
-    methods.trigger().then((isValid) => {
-      if (isValid && currentStep < 3) {
-        setSavedData(methods.getValues());
-        setCurrentStep((prev) => prev + 1);
-      }
-    });
-  };
-
-  const prevStep = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (currentStep > 1) {
-      setCurrentStep((prev) => prev - 1);
-      methods.reset(savedData);
-    }
-  };
-
   const handleFormSubmit = async (data: any) => {
     try {
-      const response = await axios.post("/api/employees", data);
+      // Combine the educational background fields into a single JSON object
+      const educationalBackground = {
+        elementary: data.elementary,
+        highSchool: data.highSchool,
+        seniorHighSchool: data.seniorHighSchool,
+        seniorHighStrand: data.seniorHighStrand,
+        universityCollege: data.universityCollege,
+        course: data.course,
+        highestDegree: data.highestDegree,
+        certificates:
+          data.certificates?.map((file: any) => ({
+            fileName: file.name,
+            fileUrl: file.url,
+          })) || [],
+      };
+
+      // Prepare data for submission
+      const fullData = {
+        ...data,
+        birthdate: data.birthdate ? new Date(data.birthdate) : null,
+        hireDate: data.hireDate ? new Date(data.hireDate) : null,
+        addr_region: parseInt(data.addr_region),
+        addr_province: parseInt(data.addr_province),
+        addr_municipal: parseInt(data.addr_municipal),
+        addr_baranggay: parseInt(data.addr_baranggay),
+        educationalBackground: JSON.stringify(educationalBackground), // Convert to JSON string
+      };
+
+      const response = await axios.post(
+        "/api/employeemanagement/employees",
+        fullData
+      );
       console.log("Employee created:", response.data);
+
       onClose();
+      onEmployeeAdded();
     } catch (error) {
       console.error("Error creating employee:", error);
     }
@@ -86,22 +99,11 @@ const AddEmployee = () => {
 
   const handleCancel = () => {
     methods.reset();
-    setSavedData({});
-    setCurrentStep(1);
     onClose();
   };
 
   const renderBreadcrumb = () => {
-    const breadcrumbPaths = [
-      { title: "Add Employee", link: "#" },
-      { 
-        title:
-          currentStep === 1 ? "Personal Information" :
-          currentStep === 2 ? "Educational Background" : 
-          "Job Information",
-        link: "#"
-      },
-    ];
+    const breadcrumbPaths = [{ title: "Add Employee", link: "#" }];
     return <BreadcrumbComponent paths={breadcrumbPaths} />;
   };
 
@@ -122,27 +124,33 @@ const AddEmployee = () => {
                 <ModalHeader className="flex flex-col gap-1">
                   {renderBreadcrumb()}
                 </ModalHeader>
-                <ModalBody>
-                  {currentStep === 1 && <PersonalInformationForm />}
-                  {currentStep === 2 && <EducationalBackgroundForm />}
-                  {currentStep === 3 && <JobInformationForm />}
+                <ModalBody className="max-h-[70vh] overflow-y-auto">
+                  <h2 className="text-lg font-semibold mb-2">
+                    Personal Information
+                  </h2>
+                  <PersonalInformationForm />
+
+                  <Divider className="my-6" />
+
+                  <h2 className="text-lg font-semibold mb-2">
+                    Educational Background
+                  </h2>
+                  <EducationalBackgroundForm />
+
+                  <Divider className="my-6" />
+
+                  <h2 className="text-lg font-semibold mb-2">
+                    Job Information
+                  </h2>
+                  <JobInformationForm />
                 </ModalBody>
                 <ModalFooter>
                   <Button color="danger" variant="light" onClick={handleCancel}>
                     Cancel
                   </Button>
-                  {currentStep > 1 && (
-                    <Button onClick={prevStep}>Back</Button>
-                  )}
-                  {currentStep < 3 ? (
-                    <Button color="primary" onClick={nextStep}>
-                      Next
-                    </Button>
-                  ) : (
-                    <Button color="primary" type="submit">
-                      Save
-                    </Button>
-                  )}
+                  <Button color="primary" type="submit">
+                    Save
+                  </Button>
                 </ModalFooter>
               </>
             </ModalContent>

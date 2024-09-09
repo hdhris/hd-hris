@@ -1,18 +1,105 @@
-import React, { useState, useRef, useCallback } from "react";
-import { useFormContext, Controller } from "react-hook-form";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { useFormContext, Controller, useWatch } from "react-hook-form";
 import { Input } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
 import { Avatar, Button, DatePicker, Divider } from "@nextui-org/react";
 import { UserRound } from "lucide-react";
 import Text from "@/components/Text";
-import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  FormControl,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import axios from "axios";
+
+// Define the type for address options
+interface AddressOption {
+  address_code: number;
+  address_name: string;
+}
+
+
+
+// Define gender options based on EmployeeAll type
+const genderOptions = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+];
 
 const PersonalInformationForm: React.FC = () => {
   const { control, setValue } = useFormContext();
-  const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
+  const [imagePreview, setImagePreview] = useState<string | undefined>(
+    undefined
+  );
+
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [addressOptions, setAddressOptions] = useState<{
+    region: AddressOption[];
+    province: AddressOption[];
+    municipal: AddressOption[];
+    baranggay: AddressOption[];
+  }>({
+    region: [],
+    province: [],
+    municipal: [],
+    baranggay: [],
+  });
 
+  // Watch selected values
+  const selectedRegion = useWatch({ name: "addr_region" });
+  const selectedProvince = useWatch({ name: "addr_province" });
+  const selectedMunicipal = useWatch({ name: "addr_municipal" });
+
+  // Fetch address options
+  const fetchAddressOptions = async (
+    parentCode: number | null,
+    level: string
+  ) => {
+    try {
+      const response = await axios.get<AddressOption[]>(
+        `/api/employeemanagement/addresses?parentCode=${parentCode}`
+      );
+      setAddressOptions((prev) => ({ ...prev, [level]: response.data }));
+    } catch (error) {
+      console.error(`Error fetching ${level}:`, error);
+    }
+  };
+
+  // Fetch regions on component mount
+  useEffect(() => {
+    fetchAddressOptions(0, "region");
+  }, []);
+
+  // Fetch provinces when a region is selected
+  useEffect(() => {
+    if (selectedRegion) {
+      fetchAddressOptions(parseInt(selectedRegion as string), "province");
+      setValue("addr_province", "");
+      setValue("addr_municipal", "");
+      setValue("addr_baranggay", "");
+    }
+  }, [selectedRegion, setValue]);
+
+  // Fetch municipalities when a province is selected
+  useEffect(() => {
+    if (selectedProvince) {
+      fetchAddressOptions(parseInt(selectedProvince as string), "municipal");
+      setValue("addr_municipal", "");
+      setValue("addr_baranggay", "");
+    }
+  }, [selectedProvince, setValue]);
+
+  // Fetch barangays when a municipality is selected
+  useEffect(() => {
+    if (selectedMunicipal) {
+      fetchAddressOptions(parseInt(selectedMunicipal as string), "baranggay");
+      setValue("addr_baranggay", "");
+    }
+  }, [selectedMunicipal, setValue]);
+
+  // Handle image change
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -29,10 +116,12 @@ const PersonalInformationForm: React.FC = () => {
     }
   };
 
+  // Handle avatar click
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
 
+  // Handle removing photo
   const handleRemovePhoto = useCallback(() => {
     setImagePreview(undefined);
     fileInputRef.current!.value = "";
@@ -40,76 +129,67 @@ const PersonalInformationForm: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Profile Section */}
-      <div className="grid grid-cols-2 gap-4">
-        <FormItem>
-          <FormLabel>Profile Image</FormLabel>
-          <FormControl>
-            <div className="flex items-center gap-2">
-              <Avatar
-                src={imagePreview || undefined}
-                className="w-20 h-20 text-large cursor-pointer"
-                onClick={handleAvatarClick}
-                showFallback
-                fallback={<UserRound className="w-12 h-12 text-default-500" />}
-                isBordered={!!fileError}
-                color={fileError ? "danger" : "default"}
-              />
-              <div className="flex flex-col gap-2">
-                <Text className="text-sm">Upload your photo</Text>
-                <Text className="italic text-xs text-gray-500">
-                  {fileError || "Pick a profile picture under 5MB"}
-                </Text>
-                <div className="space-x-2">
-                  <Button
-                    size="sm"
-                    radius="md"
-                    variant="bordered"
-                    as="label"
-                    htmlFor="dropzone-file"
-                  >
-                    <input
-                      aria-label="tag"
-                      ref={fileInputRef}
-                      id="dropzone-file"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageChange}
-                    />
-                    Upload New Picture
-                  </Button>
-                  {imagePreview && (
+    {/* Profile Section */}
+    <div className="grid grid-cols-2 gap-4">
+      <Controller
+        name="picture"
+        control={control}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Profile Image</FormLabel>
+            <FormControl>
+              <div className="flex items-center gap-2">
+                <Avatar
+                  src={imagePreview || undefined}
+                  className="w-20 h-20 text-large cursor-pointer"
+                  onClick={handleAvatarClick}
+                  showFallback
+                  fallback={<UserRound className="w-12 h-12 text-default-500" />}
+                  isBordered={!!fileError}
+                  color={fileError ? "danger" : "default"}
+                />
+                <div className="flex flex-col gap-2">
+                  <Text className="text-sm">Upload your photo</Text>
+                  <Text className="italic text-xs text-gray-500">
+                    {fileError || "Pick a profile picture under 5MB"}
+                  </Text>
+                  <div className="space-x-2">
                     <Button
                       size="sm"
                       radius="md"
-                      color="danger"
-                      onClick={handleRemovePhoto}
+                      variant="bordered"
+                      as="label"
+                      htmlFor="dropzone-file"
                     >
-                      Remove
+                      <input
+                        aria-label="tag"
+                        ref={fileInputRef}
+                        id="dropzone-file"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageChange}
+                      />
+                      Upload New Picture
                     </Button>
-                  )}
+                    {imagePreview && (
+                      <Button
+                        size="sm"
+                        radius="md"
+                        color="danger"
+                        onClick={handleRemovePhoto}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </FormControl>
-        </FormItem>
-
-        {/* ID */}
-        <Controller
-          name="ID"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ID</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Enter ID" variant="bordered" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    </div>
 
       <Divider />
       <Text className="text-medium font-semibold">Basic Information</Text>
@@ -123,14 +203,17 @@ const PersonalInformationForm: React.FC = () => {
             <FormItem>
               <FormLabel>First Name</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Enter first name" variant="bordered" />
+                <Input
+                  {...field}
+                  placeholder="Enter first name"
+                  variant="bordered"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
-        {/* Middle Name */}
+        {/* First Name */}
         <Controller
           name="middleName"
           control={control}
@@ -138,7 +221,11 @@ const PersonalInformationForm: React.FC = () => {
             <FormItem>
               <FormLabel>Middle Name</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Enter middle name" variant="bordered" />
+                <Input
+                  {...field}
+                  placeholder="Enter middle name"
+                  variant="bordered"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -153,14 +240,17 @@ const PersonalInformationForm: React.FC = () => {
             <FormItem>
               <FormLabel>Last Name</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Enter last name" variant="bordered" />
+                <Input
+                  {...field}
+                  placeholder="Enter last name"
+                  variant="bordered"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Gender */}
         <Controller
           name="gender"
           control={control}
@@ -168,19 +258,24 @@ const PersonalInformationForm: React.FC = () => {
             <FormItem>
               <FormLabel>Gender</FormLabel>
               <FormControl>
-                <Select {...field} placeholder="Select gender" variant="bordered">
-                  <SelectItem key="male" value="Male">Male</SelectItem>
-                  <SelectItem key="female" value="Female">Female</SelectItem>
-                  <SelectItem key="other" value="Other">Other</SelectItem>
+                <Select
+                  {...field}
+                  placeholder="Select gender"
+                  variant="bordered"
+                >
+                  {genderOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
-        {/* Birthdate */}
-        <Controller
+        {/* Birth Date */}
+         <Controller
           name="birthdate"
           control={control}
           render={({ field }) => (
@@ -211,7 +306,11 @@ const PersonalInformationForm: React.FC = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Enter email" variant="bordered" />
+                <Input
+                  {...field}
+                  placeholder="Enter email"
+                  variant="bordered"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -226,7 +325,11 @@ const PersonalInformationForm: React.FC = () => {
             <FormItem>
               <FormLabel>Phone No.</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Enter phone number" variant="bordered" />
+                <Input
+                  {...field}
+                  placeholder="Enter phone number"
+                  variant="bordered"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -235,21 +338,35 @@ const PersonalInformationForm: React.FC = () => {
       </div>
 
       <Divider />
-      <Text className="text-medium font-semibold">Address Information</Text>
+      <Text className="text-medium font-semibold">Address</Text>
 
       <div className="grid grid-cols-2 gap-4">
         {/* Region */}
         <Controller
-          name="region"
+          name="addr_region"
           control={control}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Region</FormLabel>
               <FormControl>
-                <Select {...field} placeholder="Select region" variant="bordered">
-                  <SelectItem key="region1" value="Region 1">Region 1</SelectItem>
-                  <SelectItem key="region2" value="Region 2">Region 2</SelectItem>
-                  <SelectItem key="region3" value="Region 3">Region 3</SelectItem>
+                <Select
+                  {...field}
+                  placeholder="Select region"
+                  onChange={(value) => {
+                    field.onChange(value);
+                    setValue("addr_province", "");
+                    setValue("addr_municipal", "");
+                    setValue("addr_baranggay", "");
+                  }}
+                >
+                  {addressOptions.region.map((option) => (
+                    <SelectItem
+                      key={option.address_code}
+                      value={option.address_code}
+                    >
+                      {option.address_name}
+                    </SelectItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormMessage />
@@ -259,16 +376,29 @@ const PersonalInformationForm: React.FC = () => {
 
         {/* Province */}
         <Controller
-          name="province"
+          name="addr_province"
           control={control}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Province</FormLabel>
               <FormControl>
-                <Select {...field} placeholder="Select province" variant="bordered">
-                  <SelectItem key="province1" value="Province 1">Province 1</SelectItem>
-                  <SelectItem key="province2" value="Province 2">Province 2</SelectItem>
-                  <SelectItem key="province3" value="Province 3">Province 3</SelectItem>
+                <Select
+                  {...field}
+                  placeholder="Select province"
+                  onChange={(value) => {
+                    field.onChange(value);
+                    setValue("addr_municipal", "");
+                    setValue("addr_baranggay", "");
+                  }}
+                >
+                  {addressOptions.province.map((option) => (
+                    <SelectItem
+                      key={option.address_code}
+                      value={option.address_code}
+                    >
+                      {option.address_name}
+                    </SelectItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormMessage />
@@ -276,18 +406,54 @@ const PersonalInformationForm: React.FC = () => {
           )}
         />
 
-        {/* City */}
+        {/* Municipal */}
         <Controller
-          name="city"
+          name="addr_municipal"
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>City/Municipality</FormLabel>
+              <FormLabel>Municipal</FormLabel>
               <FormControl>
-                <Select {...field} placeholder="Select city/municipality" variant="bordered">
-                  <SelectItem key="city1" value="City 1">City 1</SelectItem>
-                  <SelectItem key="city2" value="City 2">City 2</SelectItem>
-                  <SelectItem key="city3" value="City 3">City 3</SelectItem>
+                <Select
+                  {...field}
+                  placeholder="Select municipal"
+                  onChange={(value) => {
+                    field.onChange(value);
+                    setValue("addr_baranggay", "");
+                  }}
+                >
+                  {addressOptions.municipal.map((option) => (
+                    <SelectItem
+                      key={option.address_code}
+                      value={option.address_code}
+                    >
+                      {option.address_name}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Baranggay */}
+        <Controller
+          name="addr_baranggay"
+          control={control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Baranggay</FormLabel>
+              <FormControl>
+                <Select {...field} placeholder="Select baranggay">
+                  {addressOptions.baranggay.map((option) => (
+                    <SelectItem
+                      key={option.address_code}
+                      value={option.address_code}
+                    >
+                      {option.address_name}
+                    </SelectItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormMessage />
