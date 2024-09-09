@@ -8,40 +8,8 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model cache {
-  key        String @id @db.VarChar(255)
-  value      String
-  expiration Int
-}
-
-model cache_locks {
-  key        String @id @db.VarChar(255)
-  owner      String @db.VarChar(255)
-  expiration Int
-}
-
-model employees {
-  employee_id Int      @id
-  firstname   String   @db.VarChar(255)
-  lastname    String   @db.VarChar(255)
-  created_at  DateTime @db.Timestamp(6)
-  updated_at  DateTime @db.Timestamp(6)
-}
-
-model migrations {
-  id        Int    @id
-  migration String @db.VarChar(255)
-  batch     Int
-}
-
-model password_reset_tokens {
-  email      String    @id @db.VarChar(255)
-  token      String    @db.VarChar(255)
-  created_at DateTime? @db.Timestamp(6)
-}
-
 model ref_addresses {
-  address_code                                                  Int               @id
+  address_code                                                  Int               @id @default(autoincrement())
   address_name                                                  String
   parent_code                                                   Int?
   trans_employees_trans_employees_addr_regionToref_addresses    trans_employees[] @relation("trans_employees_addr_regionToref_addresses")
@@ -50,330 +18,559 @@ model ref_addresses {
   trans_employees_trans_employees_addr_baranggayToref_addresses trans_employees[] @relation("trans_employees_addr_baranggayToref_addresses")
 }
 
-model ref_attendance_sessions {
-  attendance_session_id Int                 @id
-  session               String              @db.VarChar(10)
-  trans_attendances     trans_attendances[]
+model ref_departments {
+  id              Int               @id @default(autoincrement())
+  name            String?           @db.VarChar(45)
+  color           String?           @db.VarChar(10)
+  is_active       Boolean?
+  created_at      DateTime?         @db.Timestamp(6)
+  updated_at      DateTime?         @db.Timestamp(6)
+  deleted_at      DateTime?         @db.Timestamp(6)
+  trans_employees trans_employees[]
 }
 
-model ref_departments {
-  department_id   Int               @id
-  department_name String            @db.VarChar(45)
-  color           String?           @db.VarChar(45)
-  isactive        String            @default("1") @db.Bit(1)
+model ref_job_classes {
+  id              Int               @id @default(autoincrement())
+  name            String?           @db.VarChar(45)
+  superior_id     Int?
+  is_active       Boolean?
   created_at      DateTime          @db.Timestamp(6)
   updated_at      DateTime          @db.Timestamp(6)
   deleted_at      DateTime?         @db.Timestamp(6)
   trans_employees trans_employees[]
 }
 
-model ref_employee_working_types {
-  employee_working_type_id Int               @id
-  working_type             String            @db.VarChar(45)
-  isactive                 String            @default("1") @db.Bit(1)
-  trans_employees          trans_employees[]
-}
-
-model ref_genders {
-  gender_id       Int               @id
-  gender_name     String            @db.VarChar(10)
-  trans_employees trans_employees[]
-}
-
-model ref_job_classes {
-  job_id          Int               @id
-  job_title       String?           @db.VarChar(45)
-  trans_employees trans_employees[]
-}
-
 model ref_leave_types {
-  leave_type_id   Int            @id
-  leave_type_name String         @db.VarChar(45)
-  duration_days   Int?
-  isactive        String?        @default("1") @db.Bit(1)
-  created_at      DateTime       @db.Timestamp(6)
-  updated_at      DateTime       @db.Timestamp(6)
-  deleted_at      DateTime?      @db.Timestamp(6)
-  trans_leaves    trans_leaves[]
-}
-
-model ref_payhead_type {
-  payhead_type_id    Int                  @id
-  payhead_type_name  String               @db.VarChar(45)
-  trans_payhead_list trans_payhead_list[]
-}
-
-model sessions {
-  id            String  @id @db.VarChar(255)
-  user_id       BigInt?
-  ip_address    String? @db.VarChar(45)
-  user_agent    String?
-  payload       String
-  last_activity Int
-
-  @@index([last_activity], map: "sessions_last_activity_index")
-  @@index([user_id], map: "sessions_user_id_index")
-}
-
-model trans_accounts {
-  account_id       Int                @id
-  employee_id      Int
-  username         String             @db.VarChar(45)
-  password         String             @db.VarChar(45)
-  isactive         String             @default("1") @db.Bit(1)
-  isadmin          String             @default("0") @db.Bit(1)
-  trans_employees  trans_employees    @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_accounts_employees1")
-  trans_privileges trans_privileges[]
-
-  @@index([employee_id], map: "fk_accounts_employees1_idx")
+  duration_days    Int?
+  created_at       DateTime       @db.Timestamp(6)
+  updated_at       DateTime       @db.Timestamp(6)
+  deleted_at       DateTime?      @db.Timestamp(6)
+  id               Int            @id @default(autoincrement())
+  name             String         @db.VarChar(45)
+  code             String?        @db.VarChar(45)
+  is_carry_forward Boolean?
+  is_active        Boolean?
+  trans_leaves     trans_leaves[]
 }
 
 model trans_attendance_details {
-  attendance_id     Int               @id
-  shift_len         DateTime?         @db.Time(6)
-  under_time        DateTime?         @db.Time(6)
-  late_duration     DateTime?         @db.Time(6)
-  status            String?           @db.VarChar(45)
-  trans_attendances trans_attendances @relation(fields: [attendance_id], references: [attendance_id], onDelete: NoAction, onUpdate: NoAction, map: "attendance_details_attendance_attendance_id_fk")
-}
-
-model trans_attendances {
-  attendance_id            Int                       @id
-  employee_id              Int
-  date                     DateTime                  @db.Date
-  time_in                  DateTime?                 @db.Time(6)
-  time_out                 DateTime?                 @db.Time(6)
-  attendance_session_id    Int
-  trans_attendance_details trans_attendance_details?
-  trans_employees          trans_employees           @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_attendance_employees1")
-  ref_attendance_sessions  ref_attendance_sessions   @relation(fields: [attendance_session_id], references: [attendance_session_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_attendances_ref_attendance_sessions1")
-
-  @@index([employee_id], map: "fk_attendance_employees1_idx")
-  @@index([attendance_session_id], map: "fk_trans_attendances_ref_attendance_sessions1_idx")
+  id                      Int              @id @default(autoincrement())
+  employee_id             Int?
+  payroll_date_id         Int?
+  attendance_records_json Json?            @db.Json
+  paid_hours              Int?
+  paid_double_hours       Int?
+  paid_leaves             Int?
+  paid_overtimes          Int?
+  created_at              DateTime?        @db.Timestamp(6)
+  updated_at              DateTime?        @db.Timestamp(6)
+  deleted_at              DateTime?        @db.Timestamp(6)
+  trans_employees         trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_attendance_details_trans_employees_1")
 }
 
 model trans_employees {
-  employee_id                                                 Int                        @id
-  rfid                                                        Int?                       @unique(map: "trans_employees_pk")
-  picture                                                     String?
-  first_name                                                  String                     @db.VarChar(45)
-  last_name                                                   String                     @db.VarChar(45)
-  middle_name                                                 String?                    @db.VarChar(45)
-  suffix                                                      String?                    @db.VarChar(5)
-  email                                                       String?                    @db.VarChar(45)
-  phone_no                                                    String?                    @db.VarChar(45)
-  birthdate                                                   DateTime?                  @db.Date
-  job_id                                                      Int
-  status_                                                     String?                    @db.VarChar(10)
-  department_id                                               Int
-  gender_id                                                   Int
-  ishead                                                      String                     @default("0") @db.Bit(1)
-  isassistant                                                 String                     @default("0") @db.Bit(1)
-  working_type_id                                             Int
-  addr_region                                                 Int
-  addr_province                                               Int
-  addr_municipal                                              Int
-  addr_baranggay                                              Int
-  created_at                                                  DateTime                   @db.Timestamp(6)
-  updated_at                                                  DateTime?                  @db.Timestamp(6)
-  deleted_at                                                  DateTime?                  @db.Timestamp(6)
-  trans_accounts                                              trans_accounts[]
-  trans_attendances                                           trans_attendances[]
-  ref_genders                                                 ref_genders                @relation(fields: [gender_id], references: [gender_id], onDelete: NoAction, onUpdate: NoAction, map: "employees_gender_fk")
-  ref_departments                                             ref_departments            @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_department1")
-  ref_job_classes                                             ref_job_classes            @relation(fields: [job_id], references: [job_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_job_class1")
-  ref_addresses_trans_employees_addr_regionToref_addresses    ref_addresses              @relation("trans_employees_addr_regionToref_addresses", fields: [addr_region], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses1")
-  ref_addresses_trans_employees_addr_provinceToref_addresses  ref_addresses              @relation("trans_employees_addr_provinceToref_addresses", fields: [addr_province], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses2")
-  ref_addresses_trans_employees_addr_municipalToref_addresses ref_addresses              @relation("trans_employees_addr_municipalToref_addresses", fields: [addr_municipal], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses3")
-  ref_addresses_trans_employees_addr_baranggayToref_addresses ref_addresses              @relation("trans_employees_addr_baranggayToref_addresses", fields: [addr_baranggay], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses4")
-  ref_employee_working_types                                  ref_employee_working_types @relation(fields: [working_type_id], references: [employee_working_type_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_employee_working_types1")
-  trans_leaves                                                trans_leaves[]
-  trans_notifications                                         trans_notifications[]
-  trans_overtimes                                             trans_overtimes[]
-  trans_payhead_affecteds                                     trans_payhead_affecteds[]
-  trans_payrolls                                              trans_payrolls[]
-  trans_schedules                                             trans_schedules[]
-  trans_sessions                                              trans_sessions[]
-  trans_units                                                 trans_units[]
-  trans_variables                                             trans_variables[]
-
-  @@index([department_id], map: "fk_employees_department1_idx")
-  @@index([job_id], map: "fk_employees_job_class1_idx")
-  @@index([addr_region], map: "fk_trans_employees_ref_addresses1_idx")
-  @@index([addr_province], map: "fk_trans_employees_ref_addresses2_idx")
-  @@index([addr_municipal], map: "fk_trans_employees_ref_addresses3_idx")
-  @@index([addr_baranggay], map: "fk_trans_employees_ref_addresses4_idx")
-  @@index([working_type_id], map: "fk_trans_employees_ref_employee_working_types1_idx")
-}
-
-model trans_leave_attachments {
-  attachment_id Int          @id
-  leave_id      Int
-  attachment    String
-  trans_leaves  trans_leaves @relation(fields: [leave_id], references: [leave_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_attachment_leave1")
-
-  @@index([leave_id], map: "fk_leave_attachment_leave1_idx")
+  id                                                                     Int                            @id @default(autoincrement())
+  branch_id                                                              Int?
+  picture                                                                String?
+  first_name                                                             String                         @db.VarChar(45)
+  last_name                                                              String                         @db.VarChar(45)
+  middle_name                                                            String?                        @db.VarChar(45)
+  suffix                                                                 String?                        @db.VarChar(10)
+  extension                                                              String?                        @db.VarChar(10)
+  email                                                                  String?                        @db.VarChar(45)
+  contact_no                                                             String?                        @db.VarChar(45)
+  birthdate                                                              DateTime?                      @db.Date
+  gender                                                                 String?                        @db.VarChar(10)
+  job_id                                                                 Int?
+  department_id                                                          Int?
+  addr_region                                                            Int?
+  addr_province                                                          Int?
+  addr_municipal                                                         Int?
+  addr_baranggay                                                         Int?
+  hired_at                                                               DateTime?                      @db.Timestamp(6)
+  created_at                                                             DateTime                       @db.Timestamp(6)
+  updated_at                                                             DateTime                       @db.Timestamp(6)
+  deleted_at                                                             DateTime?                      @db.Timestamp(6)
+  statutory_no_json                                                      Json?                          @db.Json
+  family_bg_json                                                         Json?                          @db.Json
+  educational_bg_json                                                    Json?                          @db.Json
+  civil_service_eligibility_json                                         Json?                          @db.Json
+  work_experience_json                                                   Json?                          @db.Json
+  voluntary_organizations_json                                           Json?                          @db.Json
+  training_programs_attended_json                                        Json?                          @db.Json
+  government_issued_id_json                                              Json?                          @db.Json
+  prefix                                                                 String?                        @db.VarChar(10)
+  suspension_json                                                        Json?                          @db.Json
+  resignation_json                                                       Json?                          @db.Json
+  termination_json                                                       Json?                          @db.Json
+  dim_employee_benefits                                                  dim_employee_benefits[]
+  dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
+  dim_incident_reports_dim_incident_reports_reported_byTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_reported_byTotrans_employees")
+  dim_leave_balances                                                     dim_leave_balances[]
+  dim_payhead_affecteds                                                  dim_payhead_affecteds[]
+  dim_schedules                                                          dim_schedules[]
+  dim_training_participants                                              dim_training_participants[]
+  fact_performance_evaluations                                           fact_performance_evaluations[]
+  log_attendances                                                        log_attendances[]
+  sys_accounts                                                           sys_accounts[]
+  sys_notifications                                                      sys_notifications[]
+  sys_variables                                                          sys_variables[]
+  trans_attendance_details                                               trans_attendance_details[]
+  trans_cash_advances_trans_cash_advances_employee_idTotrans_employees   trans_cash_advances[]          @relation("trans_cash_advances_employee_idTotrans_employees")
+  trans_cash_advances_trans_cash_advances_approval_byTotrans_employees   trans_cash_advances[]          @relation("trans_cash_advances_approval_byTotrans_employees")
+  ref_departments                                                        ref_departments?               @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_department1")
+  ref_job_classes                                                        ref_job_classes?               @relation(fields: [job_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_job_class1")
+  ref_addresses_trans_employees_addr_regionToref_addresses               ref_addresses?                 @relation("trans_employees_addr_regionToref_addresses", fields: [addr_region], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses1")
+  ref_addresses_trans_employees_addr_provinceToref_addresses             ref_addresses?                 @relation("trans_employees_addr_provinceToref_addresses", fields: [addr_province], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses2")
+  ref_addresses_trans_employees_addr_municipalToref_addresses            ref_addresses?                 @relation("trans_employees_addr_municipalToref_addresses", fields: [addr_municipal], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses3")
+  ref_addresses_trans_employees_addr_baranggayToref_addresses            ref_addresses?                 @relation("trans_employees_addr_baranggayToref_addresses", fields: [addr_baranggay], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses4")
+  ref_branches                                                           ref_branches?                  @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_branch_7")
+  trans_leaves                                                           trans_leaves[]
+  trans_leaves_trans_leaves_approved_byTotrans_employees                 trans_leaves[]                 @relation("trans_leaves_approved_byTotrans_employees")
+  trans_overtimes                                                        trans_overtimes[]
+  trans_overtimes_trans_overtimes_approved_byTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_approved_byTotrans_employees")
+  trans_payrolls                                                         trans_payrolls[]
 }
 
 model trans_leaves {
-  leave_id                Int                       @id
-  employee_id             Int
-  leave_type_id           Int
-  start_date              DateTime?                 @db.Date
-  end_date                DateTime?                 @db.Date
-  comment                 String?
-  status                  String?                   @db.VarChar(8)
-  created_at              DateTime                  @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
-  updated_at              DateTime                  @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
-  trans_leave_attachments trans_leave_attachments[]
-  trans_employees         trans_employees           @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
-  ref_leave_types         ref_leave_types           @relation(fields: [leave_type_id], references: [leave_type_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
-
-  @@index([employee_id], map: "fk_leave_employees1_idx")
-  @@index([leave_type_id], map: "fk_leave_leave_type1_idx")
-}
-
-model trans_notifications {
-  notification_id Int             @id
-  employee_id     Int
-  content         String
-  isseen          DateTime?       @db.Timestamp(6)
-  isread          DateTime?       @db.Timestamp(6)
-  created_at      DateTime        @db.Timestamp(6)
-  deleted_at      DateTime?       @db.Timestamp(6)
-  trans_employees trans_employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_notification_employees1")
-
-  @@index([employee_id], map: "fk_notification_employees1_idx")
+  employee_id                                               Int?
+  start_date                                                DateTime?        @db.Date
+  end_date                                                  DateTime?        @db.Date
+  comment                                                   String?
+  status                                                    String?          @db.VarChar(10)
+  created_at                                                DateTime         @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
+  updated_at                                                DateTime         @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  id                                                        Int              @id @default(autoincrement())
+  type_id                                                   Int?
+  reason                                                    String?
+  approved_by                                               Int?
+  approval_at                                               DateTime?        @db.Timestamp(6)
+  deleted_at                                                DateTime?        @db.Timestamp(6)
+  trans_employees                                           trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
+  ref_leave_types                                           ref_leave_types? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
+  trans_employees_trans_leaves_approved_byTotrans_employees trans_employees? @relation("trans_leaves_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
 }
 
 model trans_overtimes {
-  overtime_id     Int             @id
-  employee_id     Int
-  start_date      DateTime?       @db.Date
-  end_date        DateTime?       @db.Date
-  duration_mins   Int
-  status          String          @db.VarChar(45)
-  created_at      DateTime        @db.Timestamp(6)
-  updated_at      DateTime        @db.Timestamp(6)
-  trans_employees trans_employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_overtime_employee_employee_id")
-
-  @@index([employee_id], map: "fk_overtime_employee_employee_id_idx")
-}
-
-model trans_payhead_affecteds {
-  payhead_affected_id Int                @id
-  payhead_id          Int
-  employee_id         Int
-  trans_employees     trans_employees    @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_affecteds_trans_employees1")
-  trans_payhead_list  trans_payhead_list @relation(fields: [payhead_id], references: [payhead_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_affecteds_trans_payhead_list1")
-
-  @@index([employee_id], map: "fk_trans_payhead_affecteds_trans_employees1_idx")
-  @@index([payhead_id], map: "fk_trans_payhead_affecteds_trans_payhead_list1_idx")
+  employee_id                                                  Int?
+  status                                                       String?          @db.VarChar(10)
+  created_at                                                   DateTime         @db.Timestamp(6)
+  updated_at                                                   DateTime         @db.Timestamp(6)
+  id                                                           Int              @id @default(autoincrement())
+  date                                                         DateTime?        @db.Date
+  clock_in                                                     DateTime?        @db.Time(6)
+  clock_out                                                    DateTime?        @db.Time(6)
+  requested_mins                                               Int?
+  reason                                                       String?
+  approved_by                                                  Int?
+  approved_at                                                  DateTime?        @db.Timestamp(6)
+  rate_per_hour                                                Decimal?         @db.Decimal(10, 2)
+  comment                                                      String?
+  rendered_mins                                                Int?
+  deleted_at                                                   DateTime?        @db.Timestamp(6)
+  trans_employees                                              trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_overtime_employee_employee_id")
+  trans_employees_trans_overtimes_approved_byTotrans_employees trans_employees? @relation("trans_overtimes_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_overtimes_trans_employees_2")
 }
 
 model trans_payhead_breakdowns {
-  payhead_breakdown_id Int                @id
-  payroll_id           Int
-  payhead_id           Int
-  amount               Decimal?           @db.Decimal(11, 2)
-  trans_payhead_list   trans_payhead_list @relation(fields: [payhead_id], references: [payhead_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_breakdowns_trans_payhead_list1")
-
-  @@index([payhead_id], map: "fk_trans_payhead_breakdowns_trans_payhead_list1_idx")
-  @@index([payroll_id], map: "fk_trans_payhead_breakdowns_trans_payrolls1_idx")
-}
-
-model trans_payhead_list {
-  payhead_id               Int                        @id
-  payhead_name             String                     @db.VarChar(45)
-  payhead_type_id          Int
-  calculation              String?                    @db.VarChar(45)
-  isactive                 String                     @default("1") @db.Bit(1)
-  ismandatory              String                     @default("0") @db.Bit(1)
-  created_at               DateTime                   @db.Timestamp(6)
-  updated_at               DateTime                   @db.Timestamp(6)
-  deleted_at               DateTime?                  @db.Timestamp(6)
-  trans_payhead_affecteds  trans_payhead_affecteds[]
-  trans_payhead_breakdowns trans_payhead_breakdowns[]
-  ref_payhead_type         ref_payhead_type           @relation(fields: [payhead_type_id], references: [payhead_type_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_list_ref_payhead_type1")
-
-  @@index([payhead_type_id], map: "fk_trans_payhead_list_ref_payhead_type1_idx")
+  payroll_id         Int?
+  payhead_id         Int?
+  amount             Decimal?        @db.Decimal(10, 2)
+  id                 Int             @id @default(autoincrement())
+  created_at         DateTime        @db.Timestamp(6)
+  updated_at         DateTime        @db.Timestamp(6)
+  trans_payhead_list ref_payheads?   @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_breakdowns_trans_payhead_list1")
+  trans_payrolls     trans_payrolls? @relation(fields: [payroll_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_breakdowns_trans_payrolls_2")
 }
 
 model trans_payrolls {
-  payroll_id             Int             @id
-  employee_id            Int
-  start_date             DateTime?       @db.Date
-  end_date               DateTime?       @db.Date
-  gross_total_amount     Decimal?        @db.Decimal(11, 2)
-  deduction_total_amount Decimal?        @db.Decimal(11, 2)
-  created_at             DateTime        @db.Timestamp(6)
-  updated_at             DateTime        @db.Timestamp(6)
-  trans_employees        trans_employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payroll_employees")
-
-  @@index([employee_id], map: "fk_payroll_employees_idx")
+  employee_id              Int
+  gross_total_amount       Decimal?                   @db.Decimal(10, 2)
+  deduction_total_amount   Decimal?                   @db.Decimal(10, 2)
+  created_at               DateTime                   @db.Timestamp(6)
+  updated_at               DateTime                   @db.Timestamp(6)
+  id                       Int                        @id @default(autoincrement())
+  date_id                  Int?
+  deleted_at               DateTime?                  @db.Timestamp(6)
+  trans_payhead_breakdowns trans_payhead_breakdowns[]
+  trans_employees          trans_employees            @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payroll_employees")
+  trans_payroll_date       trans_payroll_date?        @relation(fields: [date_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payrolls_trans_payroll_date_2")
 }
 
-model trans_privileges {
-  priviledge_id  Int            @id
-  account_id     Int
-  privilege_name String         @default("view") @db.VarChar(30)
-  permissions    String?
-  trans_accounts trans_accounts @relation(fields: [account_id], references: [account_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_privilege_accounts")
-
-  @@index([account_id], map: "fk_privilege_accounts_idx")
+model dim_employee_benefits {
+  id                          Int                           @id @default(autoincrement())
+  employee_id                 Int?
+  plan_id                     Int?
+  enrollment_date             DateTime?                     @db.Date
+  created_at                  DateTime                      @db.Timestamp(6)
+  updated_at                  DateTime                      @db.Timestamp(6)
+  terminated_at               DateTime?                     @db.Timestamp(6)
+  coverage_amount             Decimal?                      @db.Decimal(10, 2)
+  contribution_amount         Decimal?                      @db.Decimal(10, 2)
+  ref_benefit_plans           ref_benefit_plans?            @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_employee_benefits_ref_benefit_plan_1")
+  trans_employees             trans_employees?              @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_employee_benefits_trans_employees_2")
+  trans_benefit_contributions trans_benefit_contributions[]
 }
 
-model trans_schedules {
-  schedule_id     Int             @id
-  employee_id     Int
-  day_of_week     String?         @db.VarChar(9)
-  time_in         DateTime?       @db.Time(6)
-  time_out        DateTime?       @db.Time(6)
-  updated_at      DateTime        @db.Timestamp(6)
-  trans_employees trans_employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_schedule_employees1")
-
-  @@index([employee_id], map: "fk_schedule_employees1_idx")
+model dim_incident_reports {
+  id                                                                Int              @id @default(autoincrement())
+  employee_id                                                       Int?
+  occurance_date                                                    DateTime?        @db.Date
+  type                                                              String?          @db.VarChar(10)
+  location                                                          String?
+  severity                                                          String?          @db.VarChar(10)
+  description                                                       String?
+  reported_by                                                       Int?
+  comments                                                          String?
+  created_at                                                        DateTime         @db.Timestamp(6)
+  updated_at                                                        DateTime         @db.Timestamp(6)
+  deleted_at                                                        DateTime?        @db.Timestamp(6)
+  trans_employees_dim_incident_reports_employee_idTotrans_employees trans_employees? @relation("dim_incident_reports_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_incident_reports_trans_employees_1")
+  trans_employees_dim_incident_reports_reported_byTotrans_employees trans_employees? @relation("dim_incident_reports_reported_byTotrans_employees", fields: [reported_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_incident_reports_trans_employees_2")
 }
 
-model trans_sessions {
-  login_id        Int             @id
-  employee_id     Int
-  login_date      DateTime?       @db.Date
-  token           String?
-  trans_employees trans_employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_login_employees1")
-
-  @@index([employee_id], map: "fk_login_employees1_idx")
+model dim_leave_balances {
+  id                 Int              @id @default(autoincrement())
+  employee_id        Int?
+  year               Int?
+  allocated_days     Int?
+  used_days          Int?
+  remaining_days     Int?
+  carry_forward_days Int?
+  created_at         DateTime         @db.Timestamp(6)
+  updated_at         DateTime         @db.Timestamp(6)
+  deleted_at         DateTime?        @db.Timestamp(6)
+  trans_employees    trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_leave_balances_trans_employees_1")
 }
 
-model trans_units {
-  units_id        Int             @id
-  employee_id     Int
-  units           Int
-  updated_at      DateTime        @db.Timestamp(6)
-  trans_employees trans_employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_units_employees1")
-
-  @@index([employee_id], map: "fk_units_employees1_idx")
-}
-
-model trans_variables {
-  variable_id     Int              @id
-  variable_name   String           @db.VarChar(50)
-  data            Json             @db.Json
+model dim_payhead_affecteds {
+  id              Int              @id @default(autoincrement())
+  payhead_id      Int?
   employee_id     Int?
+  created_at      DateTime?        @db.Timestamp(6)
+  updated_at      DateTime?        @db.Timestamp(6)
+  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_affecteds_trans_employees1")
+  ref_payheads    ref_payheads?    @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_affecteds_trans_payhead_list1")
+}
+
+model dim_schedules {
+  id                  Int                  @id @default(autoincrement())
+  employee_id         Int?
+  days_json           Json?                @db.Json
+  batch_id            Int?
+  created_at          DateTime             @db.Timestamp(6)
+  updated_at          DateTime             @db.Timestamp(6)
+  deleted_at          DateTime?            @db.Timestamp(6)
+  ref_batch_schedules ref_batch_schedules? @relation(fields: [batch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_schedules_ref_batch_schedule_2")
+  trans_employees     trans_employees?     @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_schedule_employees1")
+}
+
+model dim_training_participants {
+  id                    Int                     @id @default(autoincrement())
+  program_id            Int?
+  employee_id           Int?
+  enrollement_date      DateTime?               @db.Time(6)
+  status                String?                 @db.VarChar(10)
+  feedback              String?
+  created_at            DateTime                @db.Timestamp(6)
+  updated_at            DateTime                @db.Timestamp(6)
+  terminated_at         DateTime?               @db.Timestamp(6)
+  ref_training_programs ref_training_programs?  @relation(fields: [program_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_training_participants_ref_training_programs_1")
+  trans_employees       trans_employees?        @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_training_participants_trans_employees_2")
+  fact_training_records fact_training_records[]
+}
+
+model dim_training_schedules {
+  id                    Int                     @id @default(autoincrement())
+  program_id            Int?
+  location              String?
+  session_timestamp     DateTime?               @db.Timestamp(6)
+  hour_duration         Int?
+  created_at            DateTime                @db.Timestamp(6)
+  updated_at            DateTime                @db.Timestamp(6)
+  deleted_at            DateTime?               @db.Timestamp(6)
+  ref_training_programs ref_training_programs?  @relation(fields: [program_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_training_schedules_ref_training_programs_1")
+  fact_training_records fact_training_records[]
+}
+
+model fact_evaluation_breakdowns {
+  id                           Int                           @id @default(autoincrement())
+  criteria_id                  Int?
+  evaluation_id                Int?
+  rating                       Decimal?                      @db.Decimal(10, 2)
+  max_rate                     Decimal?                      @db.Decimal(10, 2)
+  created_at                   DateTime                      @db.Timestamp(6)
+  updated_at                   DateTime                      @db.Timestamp(6)
+  fact_performance_evaluations fact_performance_evaluations? @relation(fields: [evaluation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_evaluation_breakdowns_fact_performance_evaluations_2")
+  ref_performance_criterias    ref_performance_criterias?    @relation(fields: [criteria_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_evaluation_breakdowns_ref_performance_criterias_1")
+}
+
+model fact_performance_evaluations {
+  id                         Int                          @id @default(autoincrement())
+  employee_id                Int?
+  eval_date_from             DateTime?                    @db.Date
+  eval_date_to               DateTime?                    @db.Date
+  total_rating               Decimal?                     @db.Decimal(10, 2)
+  max_rate                   Decimal?                     @db.Decimal(10, 2)
+  created_at                 DateTime                     @db.Timestamp(6)
+  updated_at                 DateTime                     @db.Timestamp(6)
+  deleted_at                 DateTime?                    @db.Timestamp(6)
+  fact_evaluation_breakdowns fact_evaluation_breakdowns[]
+  trans_employees            trans_employees?             @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_performance_evaluations_trans_employees_1")
+}
+
+model fact_training_records {
+  id                        Int                        @id @default(autoincrement())
+  schedule_id               Int?
+  participant_id            Int?
+  rating                    Int?
+  feedback                  String?
+  suggestion                String?
+  created_at                DateTime                   @db.Timestamp(6)
+  updated_at                DateTime                   @db.Timestamp(6)
+  deleted_at                DateTime?                  @db.Timestamp(6)
+  dim_training_participants dim_training_participants? @relation(fields: [participant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_training_records_dim_training_participants_1")
+  dim_training_schedules    dim_training_schedules?    @relation(fields: [schedule_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_training_records_dim_training_schedules_2")
+}
+
+model log_attendances {
+  id              Int             @id @default(autoincrement())
+  employee_id     Int
+  timestamp       DateTime        @db.Timestamp(6)
+  status          Int?
+  created_at      DateTime?       @db.Timestamp(6)
+  punch           Int?
+  trans_employees trans_employees @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_attendance_employees1")
+}
+
+model ref_batch_schedules {
+  id            Int             @id @default(autoincrement())
+  name          String?         @db.VarChar(45)
+  clock_in      DateTime?       @db.Time(6)
+  clock_out     DateTime?       @db.Time(6)
+  is_active     Boolean?
+  created_at    DateTime        @db.Timestamp(6)
+  updated_at    DateTime        @db.Timestamp(6)
+  deleted_at    DateTime?       @db.Timestamp(6)
+  break_min     Int?
+  dim_schedules dim_schedules[]
+}
+
+model ref_benefit_plans {
+  id                        Int                     @id @default(autoincrement())
+  name                      String?                 @db.VarChar(45)
+  type                      String?                 @db.VarChar(10)
+  eligibility_criteria_json Json?                   @db.Json
+  coverage_details          String?
+  employer_contribution     Decimal?                @db.Decimal(10, 2)
+  employee_contribution     Decimal?                @db.Decimal(10, 2)
+  effective_date            DateTime?               @db.Date
+  expiration_date           DateTime?               @db.Date
+  description               String?
+  created_at                DateTime                @db.Timestamp(6)
+  updated_at                DateTime                @db.Timestamp(6)
+  deleted_at                DateTime?               @db.Timestamp(6)
+  is_active                 Boolean?
+  dim_employee_benefits     dim_employee_benefits[]
+}
+
+model ref_branches {
+  id              Int               @id @default(autoincrement())
+  name            String?           @db.VarChar(45)
+  addr_region     Int?
+  addr_province   Int?
+  addr_municipal  Int?
+  addr_baranggay  Int?
+  is_active       Boolean?
+  created_at      DateTime          @db.Timestamp(6)
+  updated_at      DateTime          @db.Timestamp(6)
+  deleted_at      DateTime?         @db.Timestamp(6)
+  trans_employees trans_employees[]
+}
+
+model ref_payheads {
+  payhead_name             String?                    @db.VarChar(45)
+  payhead_type_id          Int?
+  calculation              Json?                      @db.Json
+  created_at               DateTime                   @db.Timestamp(6)
+  updated_at               DateTime                   @db.Timestamp(6)
+  deleted_at               DateTime?                  @db.Timestamp(6)
+  id                       Int                        @id @default(autoincrement())
+  is_active                Boolean?
+  is_mandatory             Boolean?
+  dim_payhead_affecteds    dim_payhead_affecteds[]
+  trans_payhead_breakdowns trans_payhead_breakdowns[]
+}
+
+model ref_performance_criterias {
+  id                         Int                          @id @default(autoincrement())
+  name                       String?                      @db.VarChar(45)
+  description                String?
+  max_rate                   Decimal?                     @db.Decimal(10, 2)
+  is_active                  Boolean?
+  created_at                 DateTime                     @db.Timestamp(6)
+  updated_at                 DateTime                     @db.Timestamp(6)
+  deleted_at                 DateTime?                    @db.Timestamp(6)
+  fact_evaluation_breakdowns fact_evaluation_breakdowns[]
+}
+
+model ref_training_programs {
+  id                        Int                         @id @default(autoincrement())
+  name                      String?                     @db.VarChar(45)
+  description               String?
+  hour_duration             Int?
+  location                  String?
+  start_date                DateTime?                   @db.Date
+  end_date                  DateTime?                   @db.Date
+  employee_instructor_id    Int?
+  max_participants          Int?
+  is_active                 Boolean?
+  created_at                DateTime                    @db.Timestamp(6)
+  updated_at                DateTime                    @db.Timestamp(6)
+  deleted_at                DateTime?                   @db.Timestamp(6)
+  dim_training_participants dim_training_participants[]
+  dim_training_schedules    dim_training_schedules[]
+}
+
+model sys_accounts {
+  id                  Int                   @id @default(autoincrement())
+  employee_id         Int?
+  username            String?               @db.VarChar(45)
+  password            String?               @db.VarChar(45)
+  created_at          DateTime?             @db.Timestamp(6)
+  updated_at          DateTime?             @db.Timestamp(6)
+  privilege_id        Int?
+  banned_till         DateTime?             @db.Date
+  trans_employees     trans_employees?      @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_accounts_employees1")
+  sys_privileges      sys_privileges?       @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sys_accounts_sys_privileges_2")
+  sys_recovery_tokens sys_recovery_tokens[]
+  sys_sessions        sys_sessions[]
+}
+
+model sys_notifications {
+  id              Int              @id @default(autoincrement())
+  employee_id     Int?
+  content         String?
+  seen_at         DateTime?        @db.Timestamp(6)
+  read_at         DateTime?        @db.Timestamp(6)
+  created_at      DateTime?        @db.Timestamp(6)
+  deleted_at      DateTime?        @db.Timestamp(6)
+  updated_at      DateTime?        @db.Timestamp(6)
+  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_notification_employees1")
+}
+
+model sys_privileges {
+  id            Int            @id @default(autoincrement())
+  accessibility Json?
+  name          String?        @db.VarChar(45)
+  created_at    DateTime       @db.Timestamp(6)
+  updated_at    DateTime       @db.Timestamp(6)
+  deleted_at    DateTime?      @db.Timestamp(6)
+  sys_accounts  sys_accounts[]
+}
+
+model sys_recovery_tokens {
+  id           Int           @id @default(autoincrement())
+  account_id   Int?
+  token        String?
+  created_at   DateTime      @db.Timestamp(6)
+  expired_at   DateTime?     @db.Timestamp(6)
+  sys_accounts sys_accounts? @relation(fields: [account_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sys_recovery_tokens_sys_accounts_1")
+}
+
+model sys_sessions {
+  id           Int           @id @default(autoincrement())
+  account_id   Int?
+  ip_address   String?       @db.Inet
+  expires_at   DateTime?     @db.Timestamp(6)
+  created_at   DateTime      @db.Timestamp(6)
+  updated_at   DateTime?     @db.Timestamp(6)
+  countrycode  String?       @db.VarChar(4)
+  countryname  String?       @db.VarChar(45)
+  region       String?       @db.VarChar(45)
+  city         String?       @db.VarChar(45)
+  platform     String?       @db.VarChar(45)
+  os           String?       @db.VarChar(45)
+  os_version   Int
+  login_count  Int
+  type         String?       @db.VarChar(45)
+  sys_accounts sys_accounts? @relation(fields: [account_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_sessions_sys_accounts_2")
+}
+
+model sys_variables {
+  id              Int              @id @default(autoincrement())
+  employee_id     Int?
+  key             String?          @db.VarChar(45)
+  data            Json?            @db.Json
   created_at      DateTime         @db.Timestamp(6)
   updated_at      DateTime         @db.Timestamp(6)
-  trans_employees trans_employees? @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_variables_trans_employees1")
-
-  @@index([employee_id], map: "fk_trans_variables_trans_employees1_idx")
+  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_variables_trans_employees1")
 }
 
-model users {
-  id                Int       @id
-  name              String    @db.VarChar(255)
-  email             String    @unique(map: "users_email_unique") @db.VarChar(255)
-  email_verified_at DateTime? @db.Timestamp(6)
-  password          String    @db.VarChar(255)
-  remember_token    String?   @db.VarChar(100)
-  created_at        DateTime? @db.Timestamp(6)
-  updated_at        DateTime? @db.Timestamp(6)
+model trans_benefit_contributions {
+  id                    Int                    @id @default(autoincrement())
+  employee_benefit_id   Int?
+  contribution_date     DateTime?              @db.Date
+  employer_contribution Decimal?               @db.Decimal(10, 2)
+  employee_contribution Decimal?               @db.Decimal(10, 2)
+  total_contribution    Decimal?               @db.Decimal(10, 2)
+  created_at            DateTime               @db.Timestamp(6)
+  updated_at            DateTime               @db.Timestamp(6)
+  deleted_at            DateTime?              @db.Timestamp(6)
+  dim_employee_benefits dim_employee_benefits? @relation(fields: [employee_benefit_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_benefit_contributions_dim_employee_benefits_1")
+}
+
+model trans_cash_advance_disbursements {
+  id                            Int                             @id @default(autoincrement())
+  cash_advance_id               Int?
+  disbursed_at                  DateTime?                       @db.Timestamp(6)
+  amount                        Decimal?                        @db.Decimal(10, 2)
+  payment_method                String?                         @db.VarChar(10)
+  status                        String?                         @db.VarChar(10)
+  created_at                    DateTime                        @db.Timestamp(6)
+  updated_at                    DateTime                        @db.Timestamp(6)
+  deleted_at                    DateTime?                       @db.Timestamp(6)
+  trans_cash_advances           trans_cash_advances?            @relation(fields: [cash_advance_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advance_disbursements_trans_cash_advances_1")
+  trans_cash_advance_repayments trans_cash_advance_repayments[]
+}
+
+model trans_cash_advance_repayments {
+  id                               Int                               @id @default(autoincrement())
+  disbursement_id                  Int?
+  repayment_at                     DateTime?                         @db.Timestamp(6)
+  amount_repaid                    Decimal?                          @db.Decimal(10, 2)
+  payment_method                   String?                           @db.VarChar(10)
+  status                           String?                           @db.VarChar(10)
+  created_at                       DateTime                          @db.Timestamp(6)
+  updated_at                       DateTime                          @db.Timestamp(6)
+  deleted_at                       DateTime?                         @db.Timestamp(6)
+  trans_cash_advance_disbursements trans_cash_advance_disbursements? @relation(fields: [disbursement_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advance_repayments_trans_cash_advance_disbursemen")
+}
+
+model trans_cash_advances {
+  id                                                               Int                                @id @default(autoincrement())
+  employee_id                                                      Int?
+  amount_requested                                                 Decimal?                           @db.Decimal(10, 2)
+  reason                                                           String?
+  status                                                           String?                            @db.VarChar(10)
+  approval_by                                                      Int?
+  approval_at                                                      DateTime?                          @db.Timestamp(6)
+  comment                                                          String?
+  created_at                                                       DateTime                           @db.Timestamp(6)
+  updated_at                                                       DateTime                           @db.Timestamp(6)
+  deleted_at                                                       DateTime?                          @db.Timestamp(6)
+  trans_cash_advance_disbursements                                 trans_cash_advance_disbursements[]
+  trans_employees_trans_cash_advances_employee_idTotrans_employees trans_employees?                   @relation("trans_cash_advances_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advances_trans_employees_1")
+  trans_employees_trans_cash_advances_approval_byTotrans_employees trans_employees?                   @relation("trans_cash_advances_approval_byTotrans_employees", fields: [approval_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advances_trans_employees_2")
+}
+
+model trans_payroll_date {
+  id             Int              @id @default(autoincrement())
+  start_date     DateTime?        @db.Date
+  end_date       DateTime?        @db.Date
+  is_processed   Boolean?
+  created_at     DateTime         @db.Timestamp(6)
+  updated_at     DateTime         @db.Timestamp(6)
+  deleted_at     DateTime?        @db.Timestamp(6)
+  trans_payrolls trans_payrolls[]
 }
