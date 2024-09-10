@@ -22,33 +22,8 @@ import { Time } from "@internationalized/date";
 import { axiosInstance } from "@/services/fetcher";
 import { useIsClient } from "@/hooks/ClientRendering";
 import { AxiosResponse } from "axios";
+import { BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
 
-interface Employee {
-  id: number;
-  employee_id: number;
-  days_json: string[];
-  batch_id: number;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-  trans_employees: {
-    last_name: string;
-    first_name: string;
-    middle_name: string;
-  };
-}
-
-interface Batch {
-  id: number;
-  name: string;
-  clock_in: string;
-  clock_out: string;
-  break_min: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-}
 
 const getRandomColor = (index: number) => {
   const colors = ["teal", "pink", "violet", "orange"];
@@ -132,14 +107,14 @@ export default function Page() {
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const [colorMap, setColorMap] = useState<Map<number, number>>(new Map());
   const isClient = useIsClient();
-  const [batchData, setBatchData] = useState<Batch[]>([]);
-  const [empScheduleData, setEmpScheduleData] = useState<Employee[]>([]);
+  const [batchData, setBatchData] = useState<BatchSchedule[]>([]);
+  const [empScheduleData, setEmpScheduleData] = useState<EmployeeSchedule[]>([]);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   // const colorMap = useRef<Map<number, number>>(new Map());
   const getSchedules = async () => {
     try {
-      const response: AxiosResponse<{ batch: Batch[]; emp_sched: Employee[] }> =
+      const response: AxiosResponse<{ batch: BatchSchedule[]; emp_sched: EmployeeSchedule[] }> =
         await axiosInstance.get("/api/admin/attendance-time/schedule");
       setBatchData(response.data.batch);
       const newColorMap = new Map<number, number>();
@@ -154,7 +129,7 @@ export default function Page() {
     }
   };
   // Batch Card (with default gray border and hover effect for color change)
-  const BatchCard = ({ item, index }: { item: Batch; index: number }) => {
+  const BatchCard = ({ item, index }: { item: BatchSchedule; index: number }) => {
     return (
       <Card
         key={item.id}
@@ -196,7 +171,7 @@ export default function Page() {
   };
 
   // Card for Schedule Time (no border initially, but adds on hover)
-  const getScheduleCard = (scheduleItem: Batch | undefined, id: number) => {
+  const getScheduleCard = (scheduleItem: BatchSchedule | undefined, id: number) => {
     if (scheduleItem) {
       let startTime = dayjs(`${getShortTime(scheduleItem.clock_in)}`, "HH:mm")
         .format("h:mma")

@@ -282,9 +282,10 @@ function DataTable<T extends { id: string | number }>({
     const emptyContent = sortedItems.length === 0 && !isLoading && 'No data found. Try to refresh';
 
     return (<div className="grid grid-rows-[auto,1fr,auto] h-full w-full">
-        <section className='pb-3'>
+        {/* Show section if either one is not null */}
+        {(counterName ||contentTop || endContent || filterItems || searchingItemKey) && <section className='pb-3'>
             {topContent}
-        </section>
+        </section>}
         <div className='flex flex-col h-full overflow-y-hidden'>
             <ScrollShadow size={20} className='flex-1'>
                 <Table

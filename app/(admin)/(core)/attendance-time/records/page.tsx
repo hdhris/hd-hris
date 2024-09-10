@@ -22,115 +22,23 @@ import { parseDate } from "@internationalized/date";
 import { AxiosResponse } from "axios";
 import { axiosInstance } from "@/services/fetcher";
 import { CalendarDate } from "@nextui-org/react";
-const statusColorMap = {
-  active: "success",
-  paused: "danger",
-  vacation: "warning",
-};
-const columns = [
-  {
-    key: "name",
-    label: "NAME",
-  },
-  {
-    key: "status",
-    label: "STATUS",
-  },
-  {
-    key: "punch",
-    label: "PUNCH",
-  },
-  {
-    key: "timestamp",
-    label: "TIME STAMP",
-  },
-];
-// Define your dummy data
-// key: "1", Add keys for unique identity
-// const avatar = [
-//   { key: "1", src: "https://i.pravatar.cc/150?u=a042581f4e29026024d" },
-//   { key: "2", src: "https://i.pravatar.cc/150?u=a04258a2462d826712d" },
-//   { key: "3", src: "https://i.pravatar.cc/150?u=a042581f4e29026704d" },
-//   { key: "4", src: "https://i.pravatar.cc/150?u=a04258114e29026302d" },
-// ];
+import { AttendanceLog } from "@/types/attendance-time/AttendanceTypes";
+import TableData from "@/components/tabledata/TableData";
+import { TableConfigProps } from "@/types/table/TableDataTypes";
 const convertTo12HourFormat = (isoString: string): string => {
   const date = new Date(isoString);
-  return date.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
+  return date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
     hour12: true,
   });
 };
-const statusType = [
-  "Password",
-  "Fingerprint",
-  "Card",
-  "Face",
-  "Other",
-]
-const punchType = [
-  "IN",
-  "OUT",
-]
-// const dummyData = [
-//   {
-//     key: "1",
-//     name: "Tony Reichert",
-//     status: "Fingerprint",
-//     timestamp: "8:30 am",
-//     punch: "CHECK IN",
-//   },
-//   {
-//     key: "2",
-//     name: "Zoey Lang",
-//     status: "Fingerprint",
-//     timestamp: "8:29 am",
-//     punch: "CHECK OUT",
-//   },
-//   {
-//     key: "3",
-//     name: "Jane Fisher",
-//     status: "Face ID",
-//     timestamp: "8:28 am",
-//     punch: "CHECK IN",
-//   },
-//   {
-//     key: "4",
-//     name: "William Howard",
-//     status: "Face ID",
-//     timestamp: "8:27 am",
-//     punch: "CHECK OUT",
-//   },
-// ];
-
-// // Function to create repeated data
-// const generateData = (data: any, times: any) => {
-//   const repeatedData = [];
-//   for (let i = 0; i < times; i++) {
-//     repeatedData.push(
-//       ...data.map((item: any) => ({ ...item, id: `${item.name}-${i}` }))
-//     ); // Add unique id for each entry
-//   }
-//   return repeatedData;
-// };
-
-interface AttendanceLog {
-  id: number;
-  employee_id: number;
-  timestamp: string; // ISO format string
-  status: number;
-  punch: number; // ISO format string
-  created_at: string; // ISO format string
-  trans_employees: {
-    last_name: string;
-    first_name: string;
-    middle_name: string;
-    picture: string;
-  };
-}
+const statusType = ["Password", "Fingerprint", "Card", "Face ID", "Other"];
+const punchType = ["IN", "OUT"];
 
 export default function Page() {
   const today = new Date();
+  const [isLoading, setIsLoading] = useState(true);
   const [attendanceLog, setAttendanceLog] = useState<AttendanceLog[]>([]);
   let [date, setDate] = React.useState(
     parseDate(
@@ -140,32 +48,92 @@ export default function Page() {
       )}-${String(today.getDate()).padStart(2, "0")}`
     )
   );
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     fetchAttandance(date.day, date.month, date.year);
   },[date.day, date.month, date.year])
   const handleDateChange = (newDate: CalendarDate) => {
     setDate(newDate);
     fetchAttandance(newDate.day, newDate.month, newDate.year);
   };
-  const fetchAttandance = async (day: number, month:number, year:number) => {
+  const fetchAttandance = async (day: number, month: number, year: number) => {
+    setIsLoading(true);
     try {
-      const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const response: AxiosResponse<AttendanceLog[]> = await axiosInstance.get(`/api/admin/attendance-time/records`, {
-        params: { date } // Sending date as a query parameter, if necessary
-      });
-      setAttendanceLog(response.data)
+      const date = `${year}-${String(month).padStart(2, "0")}-${String(
+        day
+      ).padStart(2, "0")}`;
+      const response: AxiosResponse<AttendanceLog[]> = await axiosInstance.get(
+        `/api/admin/attendance-time/records`,
+        {
+          params: { date },
+        }
+      );
+      setAttendanceLog(response.data);
     } catch (error) {
       console.error("Error fetching schedules:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
-  // const items = generateData(dummyData, 10); // Generate data repeated 10 times
-  // const items = dummyData; // Generate data repeated 10 times
   const [selectedKey, setSelectedKey] = React.useState<any>("");
   // const selectedItem = dummyData.find((item) => item.key === selectedKey);
+  const config: TableConfigProps<AttendanceLog> = {
+    columns: [
+      { uid: "name", name: "Name", sortable: true },
+      { uid: "status", name: "Status", sortable: true },
+      { uid: "punch", name: "Punch", sortable: true },
+      { uid: "timestamp", name: "Timestamp", sortable: true },
+    ],
+    rowCell: (item, columnKey) => {
+      switch (columnKey) {
+        case "name":
+          return (
+            <div className="flex items-center space-x-2">
+              <Avatar src={item.trans_employees.picture} />
+              <p>{`${item.trans_employees.last_name}, ${item.trans_employees.first_name} ${item.trans_employees.middle_name[0]}`}</p>
+            </div>
+          );
+        case "status":
+          return (
+            <Chip
+              className="capitalize"
+              color="primary"
+              size="sm"
+              variant="faded"
+            >
+              {statusType[item.status]}
+            </Chip>
+          );
+        case "punch":
+          return (
+            <Chip
+              color={item.punch === 0 ? "success" : "danger"}
+              size="sm"
+              variant="flat"
+            >
+              {punchType[item.punch]}
+            </Chip>
+          );
+        case "status":
+          return <span>{item.status}</span>;
+        case "timestamp":
+          return <span>{convertTo12HourFormat(item.timestamp)}</span>;
+        default:
+          return <></>;
+      }
+    },
+  };
+  // const searchingItemKey: Array<keyof AttendanceLog> = [
+  //   "trans_employees"
+  // ];
   return (
     <div className="flex flex-row p-1 gap-1">
-      <Table
+      <TableData
+        config={config}
+        items={attendanceLog}
+        // searchingItemKey={searchingItemKey}
+        // counterName="Attendance Logs"
+        isLoading={isLoading}
         className="flex-1 h-[calc(100vh-9.5rem)] overflow-y-auto"
         removeWrapper
         isHeaderSticky
@@ -176,51 +144,7 @@ export default function Page() {
           setSelectedKey(key as any);
           console.log(selectedKey);
         }}
-      >
-        <TableHeader columns={columns}>
-          {(column) => (
-            <TableColumn key={column.key}>{column.label}</TableColumn>
-          )}
-        </TableHeader>
-        <TableBody emptyContent={"No records for this day."} items={attendanceLog}>
-          {attendanceLog.map((row) => (
-            <TableRow
-              key={row.id}
-              className={`${selectedKey === row.id ? "bg-gray-300" : ""}`}
-            >
-              {(columnKey) => (
-                <TableCell>
-                  {columnKey === "name" ? (
-                    <div className="flex items-center space-x-2">
-                      <Avatar
-                        src={row.trans_employees.picture}
-                      />
-                      {/* <p>{getKeyValue(row, columnKey)}</p> */}
-                      <p>{`${row.trans_employees.last_name} ${row.trans_employees.first_name} ${row.trans_employees.middle_name}`}</p>
-                    </div>
-                  ) : columnKey === "status" ? (
-                    <Chip
-                      className="capitalize"
-                      color="primary"
-                      size="sm"
-                      variant="flat"
-                    >
-                      {/* {getKeyValue(row, columnKey)} */}
-                      {statusType[row.status]}
-                    </Chip>
-                  ) : columnKey === "punch"? (
-                    punchType[row.punch]
-                  ) : columnKey === "timestamp"? (
-                    convertTo12HourFormat(row.timestamp)
-                  ) : (
-                    getKeyValue(row, columnKey)
-                  )}
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      />
       <div className="flex flex-col gap-1">
         <Calendar
           classNames={{ cell: "text-sm", gridBodyRow: "first:mt-0 -mt-1" }}

@@ -3,9 +3,9 @@ import prisma from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
-    // const { searchParams } = new URL(req.url);
-    // const date = searchParams.get('date') as string;
-    const date = "2024-09-07";
+    const { searchParams } = new URL(req.url);
+    const date = searchParams.get('date') as string;
+    // const date = "2024-09-07";
     const isoDateStart = new Date(`${date}T00:00:00.000Z`).toISOString();
     const isoDateEnd = new Date(`${date}T23:59:59.999Z`).toISOString();
     const attendances = await prisma.log_attendances.findMany({
