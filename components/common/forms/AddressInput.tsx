@@ -51,36 +51,36 @@ const AddressSelection: React.FC = () => {
   }, [addressData]);
 
   useEffect(() => {
-    if (selectedRegion) {
-      const provinceData = addressData.filter(
-        (item) => item.parent_code === Number(selectedRegion)
-      );
-      setProvinces(provinceData);
-      setSelectedProvince(null);
-      setCities([]);
-      setBarangays([]);
-    }
-  }, [selectedRegion]);
+    if (!selectedRegion) return;
 
-  useEffect(() => {
+    // Update provinces when region changes
+    const provinceData = addressData.filter(
+        (item) => item.parent_code === Number(selectedRegion)
+    );
+    setProvinces(provinceData);
+    setSelectedProvince(null); // Reset province when region changes
+    setCities([]);             // Reset cities
+    setBarangays([]);           // Reset barangays
+
     if (selectedProvince) {
+      // Update cities when province changes
       const cityData = addressData.filter(
-        (item) => item.parent_code === Number(selectedProvince)
+          (item) => item.parent_code === Number(selectedProvince)
       );
       setCities(cityData);
-      setSelectedCity(null);
-      setBarangays([]);
+      setSelectedCity(null);    // Reset city when province changes
+      setBarangays([]);         // Reset barangays
     }
-  }, [selectedProvince]);
 
-  useEffect(() => {
     if (selectedCity) {
+      // Update barangays when city changes
       const barangayData = addressData.filter(
-        (item) => item.parent_code === Number(selectedCity)
+          (item) => item.parent_code === Number(selectedCity)
       );
       setBarangays(barangayData);
     }
-  }, [selectedCity]);
+  }, [addressData, selectedRegion, selectedProvince, selectedCity]);
+
 
   return (
     <div>

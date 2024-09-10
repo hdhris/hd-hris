@@ -8,7 +8,6 @@ import {auth} from "@/auth";
 
 export default async function Home() {
     const session = await auth()
-    console.log(session)
     // const session = await getServerSession(authOption);
     if(session){
         if(session.user.role === 'admin'){
