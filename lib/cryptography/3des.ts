@@ -1,37 +1,37 @@
-class Simple3Des {
+class SimpleAES {
     private secretKey: CryptoKey | null = null;
+    private keyPromise: Promise<void>;
 
     constructor() {
-        // Constructor cannot be async, so the key import logic must be moved outside
+        // Automatically initialize the secret key on instantiation
+        const secret = process.env.AES_SECRET!;
+        this.keyPromise = this.importKey(secret);
     }
 
-    // Call this method after creating an instance to initialize the key
-    public async initialize(): Promise<void> {
-        const secret = process.env.DES_SECRET!;
-        await this.importKey(secret);
-    }
-
-    // Truncate the secret to 24 bytes (192 bits) and import it for use in Web Crypto API
+    // Import the AES key
     private async importKey(secret: string): Promise<void> {
-        const truncatedKey = await this.truncateHash(secret, 24); // Triple DES key size is 24 bytes
+        const keyMaterial = await this.truncateHash(secret, 32); // AES-256 key size is 32 bytes
         this.secretKey = await crypto.subtle.importKey(
             'raw',
-            truncatedKey,
-            { name: 'DES-EDE3' },
+            keyMaterial,
+            { name: 'AES-CBC' }, // Use AES-CBC for simplicity
             false,
             ['encrypt', 'decrypt']
         );
     }
 
-    // Equivalent truncation using SHA-1
+    // Truncate the key using SHA-256
     private async truncateHash(key: string, length: number): Promise<ArrayBuffer> {
         const encoder = new TextEncoder();
         const keyBytes = encoder.encode(key);
-        const hashBuffer = await crypto.subtle.digest('SHA-1', keyBytes);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', keyBytes);
         return hashBuffer.slice(0, length);
     }
 
     public async encryptData(plaintext: string): Promise<string> {
+        await this.keyPromise;
+
+        const iv = crypto.getRandomValues(new Uint8Array(16)); // Initialization vector (IV)
         const encoder = new TextEncoder();
         const plaintextBytes = encoder.encode(plaintext);
 
@@ -39,55 +39,63 @@ class Simple3Des {
 
         const encryptedBytes = await crypto.subtle.encrypt(
             {
-                name: 'DES-EDE3',
-                iv: new Uint8Array(0), // No IV in EDE mode
+                name: 'AES-CBC',
+                iv: iv,
             },
             this.secretKey,
             plaintextBytes
         );
 
-        return this.arrayBufferToBase64(encryptedBytes);
+        const ivBase64 = this.arrayBufferToBase64(iv);
+        const encryptedBase64 = this.arrayBufferToBase64(encryptedBytes);
+
+        return `${ivBase64}:${encryptedBase64}`; // Return both IV and ciphertext
     }
 
-    public async decryptData(encryptedtext: string): Promise<string> {
-        // Validate the base64 encoded input before decryption
-        if (!Simple3Des.validate(encryptedtext)) {
-            throw new Error('Invalid encrypted text format');
-        }
+    public async decryptData(encryptedText: string): Promise<string> {
+        await this.keyPromise;
 
-        const encryptedBytes = this.base64ToArrayBuffer(encryptedtext);
+        const [ivBase64, encryptedBase64] = encryptedText.split(':');
+        const iv = this.base64ToArrayBuffer(ivBase64);
+        const encryptedBytes = this.base64ToArrayBuffer(encryptedBase64);
 
         if (!this.secretKey) throw new Error('Secret key is not initialized.');
 
         try {
             const decryptedBytes = await crypto.subtle.decrypt(
                 {
-                    name: 'DES-EDE3',
-                    iv: new Uint8Array(0), // No IV in EDE mode
+                    name: 'AES-CBC',
+                    iv: iv,
                 },
                 this.secretKey,
                 encryptedBytes
             );
 
-            const decoder = new TextDecoder('utf-16le');
+            const decoder = new TextDecoder();
             return decoder.decode(decryptedBytes);
         } catch (error) {
             throw new Error('Decryption failed. The data might be corrupted or the key is incorrect.');
         }
     }
 
-    // Helper function to convert ArrayBuffer to base64 string
+    public async compare(plaintext: string, encryptedText: string): Promise<boolean> {
+        try {
+            const decryptedText = await this.decryptData(encryptedText);
+            return decryptedText === plaintext;
+        } catch (error) {
+            return false;
+        }
+    }
+
     private arrayBufferToBase64(buffer: ArrayBuffer): string {
         let binary = '';
         const bytes = new Uint8Array(buffer);
-        const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
+        for (let i = 0; i < bytes.byteLength; i++) {
             binary += String.fromCharCode(bytes[i]);
         }
         return btoa(binary);
     }
 
-    // Helper function to convert base64 string to ArrayBuffer
     private base64ToArrayBuffer(base64: string): ArrayBuffer {
         const binaryString = atob(base64);
         const len = binaryString.length;
@@ -98,14 +106,8 @@ class Simple3Des {
         return bytes.buffer;
     }
 
-    // Validate that the cipher is a valid base64 encoded string
-    private static validate(cipher: string): boolean {
-        try {
-            // Check if the input is valid base64 by attempting to decode it
-            atob(cipher);
-            return true;
-        } catch (error) {
-            return false;
-        }
+    public static validate(cipher: string): boolean {
+        return cipher.includes(':'); // Simple validation for format
     }
 }
+export default SimpleAES

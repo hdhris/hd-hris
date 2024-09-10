@@ -2,7 +2,7 @@
 const nextConfig = {
     env: {
         APP_NAME: process.env.APP_NAME,
-        DES_SECRET: process.env.DES_SECRET,
+        AES_SECRET: process.env.AES_SECRET,
         VISITORAPI: process.env.VISITORAPI
     },
     async redirects() {

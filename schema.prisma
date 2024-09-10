@@ -436,7 +436,7 @@ model sys_accounts {
   id                  Int                   @id @default(autoincrement())
   employee_id         Int?
   username            String?               @db.VarChar(45)
-  password            String?               @db.VarChar(45)
+  password            String?               @db.VarChar(255)
   created_at          DateTime?             @db.Timestamp(6)
   updated_at          DateTime?             @db.Timestamp(6)
   privilege_id        Int?

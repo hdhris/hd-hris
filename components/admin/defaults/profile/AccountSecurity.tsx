@@ -36,10 +36,10 @@ function AccountSecurity() {
     const session = useSession()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema), defaultValues: {
+            current_password: "",
             new_password: "", confirm_password: ""
         },
     })
-    const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const [isVisibleCurrent, setIsVisibleCurrent] = useState(false)
     const [isVisibleNew, setIsVisibleNew] = useState(false)
@@ -95,7 +95,11 @@ function AccountSecurity() {
                 }
             });
             if(response.status === 200) {
-                form.reset()
+                form.reset({
+                    current_password: "",
+                    new_password: "",
+                    confirm_password: ""
+                })
                 toast({
                     description: `${response.data.message} and you will be signed out in 1 minute or signed out now.`,
                     action: <ToastAction altText="Sign out" onClick={() => signOut({callbackUrl: '/'})}>Sign out</ToastAction>,

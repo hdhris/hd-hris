@@ -9,8 +9,8 @@ import {cn} from "@nextui-org/react";
 import {auth} from "@/auth";
 
 async function Page() {
-    const session = await auth()
-    console.log(session?.id)
+    // const session = await auth()
+    // console.log("Session: ", session)
     return (<section className='grid grid-rows-[auto,1fr,auto, auto] gap-4 h-full'>
             <div className='grid grid-cols-4 gap-4 w-full'>
                 <DashboardStats/>

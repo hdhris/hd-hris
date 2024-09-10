@@ -1,11 +1,11 @@
 'use client'
 import React from 'react';
 import {
-    Badge, cn, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Skeleton, User
+    Badge, cn, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Skeleton, Tooltip, User
 } from "@nextui-org/react";
 import {Handshake, Lifebuoy, SignOut, Sliders} from "@phosphor-icons/react";
 import {Avatar} from "@nextui-org/avatar";
-import {icon_theme, text_icon} from "@/lib/utils";
+import {icon_theme, text_icon, text_truncated} from "@/lib/utils";
 import Typography from "@/components/common/typography/Typography"
 import {LuShieldCheck} from "react-icons/lu";
 import Link from "next/link";
@@ -18,14 +18,23 @@ import {logout} from "@/actions/authActions";
 import {Button} from "@nextui-org/button";
 
 function UserMenu() {
-    const session = useSession();
+    const session_server = useSession();
+
+    // Check if session is not loading
+    const isLoaded = session_server?.status !== "loading";
+
+    // Get user data with default values
+    const name = isLoaded ? session_server?.data?.user?.name ?? "-----" : "-----";
+    const email = isLoaded ? session_server?.data?.user?.email ?? "-----" : "-----";
+    const pic = isLoaded ? session_server?.data?.user?.picture : undefined;
+
     return (<Dropdown radius="sm"
         >
             <DropdownTrigger>
                 <span className="cursor-pointer">
                     <Badge content="" color="success" shape="circle" placement="bottom-right">
                         <Avatar
-                            src={session.status !== "loading" && session.data?.user?.image ? session.data.user.image : undefined}
+                            src={pic}
                             size="sm"
                             showFallback
                             fallback={<Skeleton className="flex rounded-full"/>}
@@ -35,7 +44,7 @@ function UserMenu() {
             </DropdownTrigger>
             <DropdownMenu
                 aria-label="Custom item styles"
-                disabledKeys={["profile", 'privileges']}
+                disabledKeys={['privileges']}
                 className="p-3"
                 itemClasses={{
                     base: ["rounded", "text-inactive-bar", "data-[hover=true]:text-active-bar", "data-[hover=true]:hover-bg", "data-[selectable=true]:focus:bg-default-50", "data-[pressed=true]:opacity-70", "data-[focus-visible=true]:ring-default-500"],
@@ -46,19 +55,23 @@ function UserMenu() {
                         textValue="Profile"
                         isReadOnly
                         key="profile"
-                        className="h-14 gap-2 opacity-100"
+                        className="h-14 gap-2 opacity-100 "
                     >
-                        <User
-                            name={session.status !== "loading" && session.data?.user?.name ? session.data.user.name : "No Name"}
-                            description={session.status !== "loading" && session.data?.user?.email ? session.data.user.email : "No Email"}
-                            classNames={{
-                                name: "text-inactive-bar text-md font-semibold",
-                                description: "text-inactive-bar text-sm",
-                            }}
-                            avatarProps={{
-                                size: "sm", src:  `${session.status !== "loading" && session.data?.user?.image ? session.data.user.image : undefined}`,
-                            }}
-                        />
+                        <Tooltip content={name}>
+                            <User
+                                name={name}
+                                description={email}
+                                classNames={{
+                                    name: cn("text-md font-semibold w-32", text_truncated),
+                                    description: "text-sm",
+                                }}
+                                avatarProps={{
+                                    size: "sm", src:  `${pic}`,
+                                    showFallback: true, fallback: <Skeleton className="flex rounded-full"/>
+                                }}
+                            />
+                        </Tooltip>
+
                     </DropdownItem>
                     {/*<DropdownItem*/}
                     {/*    as={Link}*/}
@@ -86,7 +99,7 @@ function UserMenu() {
                         isReadOnly
                         className='opacity-100'
                     >
-                        <Chip color='success' className={text_icon}>{session.data?.user.privilege}</Chip>
+                        <Chip color='success' className={text_icon}>{isLoaded ? session_server?.data?.user.privilege : "---"}</Chip>
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection showDivider>

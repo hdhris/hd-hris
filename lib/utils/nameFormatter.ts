@@ -1,11 +1,19 @@
-export function formatFullName(
-    prefix: string = '',      // Optional prefix
-    first_name: string,
-    middle_name: string,
-    last_name: string,
-    extension: string = '',  // Extensions like Jr., Sr.
-    suffixes: string[] | string = [] // Other suffixes like PhD, MD, etc.
-) {
+type EmpName = {
+    prefix?: string | null;
+    first_name: string;
+    last_name: string;
+    middle_name?: string | null;
+    suffix?: string | null;
+    extension?: string | null;
+};
+
+export function getEmpFullName(emp: EmpName | null) {
+    if (!emp) {
+        return ''; // Return an empty string if emp is null
+    }
+
+    const { prefix = '', first_name, last_name, middle_name = '', suffix = '', extension = '' } = emp;
+
     let formattedName = '';
 
     // Add the prefix if provided
@@ -14,7 +22,7 @@ export function formatFullName(
     }
 
     // Start with last name and first name
-    formattedName += `${last_name} ${first_name}`;
+    formattedName += `${last_name}, ${first_name}`;
 
     // Add the middle initial if middle name is provided
     if (middle_name) {
@@ -26,9 +34,9 @@ export function formatFullName(
         formattedName += ` ${extension}`;
     }
 
-    // Add any other suffixes
-    if (suffixes.length > 0) {
-        formattedName += ` ${typeof suffixes === 'string' ? suffixes : suffixes.join(' ')}`;
+    // Add the suffix if provided
+    if (suffix) {
+        formattedName += ` ${suffix}`;
     }
 
     return formattedName;

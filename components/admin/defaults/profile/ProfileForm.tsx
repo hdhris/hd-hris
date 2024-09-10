@@ -20,6 +20,7 @@ import {updateProfileSchema} from "@/helper/zodValidation/UpdateProfile";
 import {axiosInstance} from "@/services/fetcher";
 import {toast} from "@/components/ui/use-toast";
 import {Address} from "@/types/routes/default/types";
+import AddressInput from "@/components/common/forms/AddressInput";
 
 
 type FormData = {
@@ -51,13 +52,6 @@ export default function ProfileForm() {
 
     useEffect(() => {
         if (profile) {
-            setRegions(profile.addresses.filter((id) => id.parent_code === 0).map((region) => ({key: region.address_code, label: region.address_name})));
-            setProvinces(profile.addresses.map((prov) => ({key: prov.address_code, label: prov.address_name})));
-            setMunicipals(profile.addresses.map((mun) => ({key: mun.address_code, label: mun.address_name})));
-            setBarangays(profile.addresses.map((bar) => ({key: bar.address_code, label: bar.address_name})));
-            // setSelectedRegion(String(profile.users.addr_region))
-            // address.filter((id) => id.address_code === 0).map((region) => region.address_name);
-            setSelectedRegion(String(profile.users.addr_region))
             form.reset(profile.users)
             setImage(profile.users.picture);
             if (profile.users.birthdate) {
@@ -174,7 +168,7 @@ export default function ProfileForm() {
     }];
 
     const gender = [{key: "M", label: "M"}, {key: "F", label: "F"}];
-    const street = ["Street", "Purok"];
+    // const street = ["Street", "Purok"];
 
     async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
         setLoading(true)
@@ -193,13 +187,13 @@ export default function ProfileForm() {
         setLoading(false)
     }
 
-    const region = [{
-        key: "region",
-        label: "Region",
-    }, {
-        key: "province",
-        label: "Province",
-    }];
+    // const region = [{
+    //     key: "region",
+    //     label: "Region",
+    // }, {
+    //     key: "province",
+    //     label: "Province",
+    // }];
     return (<Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}
               className='space-y-5 flex flex-col p-2 h-full overflow-hidden'>
@@ -251,25 +245,28 @@ export default function ProfileForm() {
                         <Divider/>
                         <Text className='text-medium font-semibold'>Address Information</Text>
                     </div>
-                    <Selection
-                        // isRequired={true}
-                        items={regions}
-                        selectedKeys={[selectedRegion]}
-                        placeholder=""
-                        label='Region'
-                        name='addr_region'
-                        aria-label="Region"
-                        onSelectionChange={handleSelectedRegion}
+                    <AddressInput
+                        initialRegion={12}
                     />
-                    <Selection
-                        // isRequired={true}
-                        items={provinces}
-                        placeholder=""
-                        label='Province'
-                        name='addr_province'
-                        aria-label="Province"
+                    {/*<Selection*/}
+                    {/*    // isRequired={true}*/}
+                    {/*    items={regions}*/}
+                    {/*    selectedKeys={[selectedRegion]}*/}
+                    {/*    placeholder=""*/}
+                    {/*    label='Region'*/}
+                    {/*    name='addr_region'*/}
+                    {/*    aria-label="Region"*/}
+                    {/*    onSelectionChange={handleSelectedRegion}*/}
+                    {/*/>*/}
+                    {/*<Selection*/}
+                    {/*    // isRequired={true}*/}
+                    {/*    items={provinces}*/}
+                    {/*    placeholder=""*/}
+                    {/*    label='Province'*/}
+                    {/*    name='addr_province'*/}
+                    {/*    aria-label="Province"*/}
 
-                    />
+                    {/*/>*/}
                     {/*<Selection*/}
                     {/*    // isRequired={true}*/}
                     {/*    items={municipals}*/}

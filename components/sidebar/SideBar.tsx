@@ -31,4 +31,3 @@ export default function SideBar({children, className, onClockShow}: {
         </aside>
     );
 }
-

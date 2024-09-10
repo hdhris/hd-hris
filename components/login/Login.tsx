@@ -18,14 +18,16 @@ import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {LuXCircle} from "react-icons/lu";
 import ForgotButton from "@/components/forgot/ForgotButton";
 import {login} from "@/actions/authActions";
-import DES from "@/lib/cryptography/3des";
 import Simple3Des from "@/lib/cryptography/3des";
+import SimpleAES from "@/lib/cryptography/3des";
+import {useRouter} from "next/navigation";
 
 const loginSchema = z.object({
     username: z.string().min(1, {message: "Username is required."}), password: z.string().min(1, {message: "Password is required."})
 })
 function Login() {
 
+    const router = useRouter()
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema), defaultValues: {
             username: "", password: ""
@@ -56,16 +58,30 @@ function Login() {
 
     async function onSubmit(values: z.infer<typeof loginSchema>) {
 
-        const des = new Simple3Des()
-        // des.decryptData("7tUlw+Az1jzLbUsDU8qBQ/vheiV3o4c1")
-        console.log(des.decryptData("7tUlw+Az1jzLbUsDU8qBQ/vheiV3o4c1"))
+        // const simple3Des = new SimpleAES(); // Initialization happens automatically
+        //
+        // const plaintext = 'password';
+        // console.log("Plain Text: ", plaintext)
+        // const encryptedText = await simple3Des.encryptData(plaintext);
+        // console.log('Encrypted:', encryptedText);
+        // console.log('Length:', encryptedText.length);
+        //
+        // const decryptedText = await simple3Des.decryptData(encryptedText)
+        // console.log("Decrypted: ", decryptedText)
+        // const isMatch = await simple3Des.compare(plaintext, encryptedText);
+        // console.log('Does the decrypted text match the plaintext?', isMatch);
         setError("");
         setLoading(true);
         try {
-            const res = await login(values);
-            if(res){
-                console.log(res.error)
-                setError(res.error.message)
+            const loginResponse = await login(values);
+
+            if (loginResponse.success) {
+                // Redirect to dashboard
+                router.push("/dashboard")
+
+            } else if (loginResponse.error) {
+                // Display error message
+                setError(loginResponse.error.message)
             }
 
         } catch (error) {
@@ -83,7 +99,7 @@ function Login() {
                 <Image src={logo} className="w-24 h-24 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500"
                        alt="WageWise Logo"/>
                 <Typography className='font-semibold text-xl'>Secure Access Starts Here</Typography>
-                <Typography className='text-center'>Login to GVC-PMS for Effortless Payroll
+                <Typography className='text-center'>Login to {process.env.APP_NAME} for Effortless Payroll
                     Management</Typography>
             </CardHeader>
             <CardBody>
