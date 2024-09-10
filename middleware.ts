@@ -32,6 +32,9 @@ export default auth((req: any) => {
 
 
 export const config = {
+    unstable_allowDynamic: [
+        './node_modules/axios/lib/utils.js'
+    ],
     matcher: [
         '/((?!_next/static|_next/image|favicon.ico|api/auth|globals.css|layout|public/).*)',
         '/:path*', '/public/assets/(.*)', '/public/notification-sounds/(.*)'

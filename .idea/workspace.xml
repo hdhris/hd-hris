@@ -4,14 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="done in updating account">
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="nizam merge">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/types/SelectionProp.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/types/SelectionProp.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/login/Login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/login/Login.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/employeemanagement/employees/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/employeemanagement/employees/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/employeemanagement/employees/routetsbc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/cryptography/3des.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/cryptography/3des.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/utils/authUtils/authUtils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/authUtils/authUtils.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/routes/default/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/routes/default/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,7 +31,7 @@
     </option>
   </component>
   <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="origin/nizam" />
+    <option name="BRANCH" value="origin/france" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -274,7 +275,8 @@
       <workItem from="1725783035612" duration="7961000" />
       <workItem from="1725791812531" duration="32366000" />
       <workItem from="1725848755046" duration="45000" />
-      <workItem from="1725860354262" duration="6535000" />
+      <workItem from="1725860354262" duration="7990000" />
+      <workItem from="1725961828734" duration="2023000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -524,7 +526,23 @@
       <option name="project" value="LOCAL" />
       <updated>1725827145548</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="done Login.tsx">
+      <option name="closed" value="true" />
+      <created>1725867246370</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1725867246370</updated>
+    </task>
+    <task id="LOCAL-00036" summary="nizam merge">
+      <option name="closed" value="true" />
+      <created>1725868292311</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1725868292311</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -542,8 +560,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="adding redirect in next.config.mjs" />
-    <MESSAGE value="testing routes" />
     <MESSAGE value="done integrations" />
     <MESSAGE value="adding table action module" />
     <MESSAGE value="adding tests" />
@@ -567,6 +583,8 @@
     <MESSAGE value="partially done in the login backend" />
     <MESSAGE value="maybe sure" />
     <MESSAGE value="done in updating account" />
-    <option name="LAST_COMMIT_MESSAGE" value="done in updating account" />
+    <MESSAGE value="done Login.tsx" />
+    <MESSAGE value="nizam merge" />
+    <option name="LAST_COMMIT_MESSAGE" value="nizam merge" />
   </component>
 </project>

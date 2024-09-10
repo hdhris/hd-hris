@@ -65,7 +65,7 @@ export const handleAuthorization = async (credentials: { username: string; passw
     const { username, password } = await LoginValidation.parseAsync(credentials);
 
     // Get IP and User-Agent
-    const ipResponse = await axios.get('https://ipapi.co/json');
+    const ipResponse = await fetch('https://ipapi.co/json').then(data => data.json());
     const ua = parse(headers().get('user-agent')!);
 
     // Get user data
