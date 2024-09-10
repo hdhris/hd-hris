@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import addressJson from './address.json';
+import addressJson from '@/components/common/forms/address/address.json';
 
 export async function GET(req: Request) {
   try {

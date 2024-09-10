@@ -9,6 +9,7 @@ export async function PUT(req: NextRequest) {
             const data = await req.json();
             const parsedData = updateProfileSchema.parse(data);
 
+            console.log("Update Profile: ", data)
             // Validate the parsed data
             if(!parsedData) {
                 return NextResponse.json({ message: 'Validation error' }, { status: 400 });

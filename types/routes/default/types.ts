@@ -10,10 +10,10 @@ export interface Address {
     address_name: string;
     parent_code: number | null;
 }
-export interface Profile {
-    addresses: Address[];
-    users : UserProfile;
-}
+// export interface Profile {
+//     addresses: Address[];
+//     users : UserProfile;
+// }
 export interface UserProfile {
     username: string;
     picture: string;
@@ -26,10 +26,10 @@ export interface UserProfile {
     birthdate: string; // ISO 8601 date string
     gender: string; // Assuming gender is limited to 'M' or 'F'
     contact_no: string;
-    addr_baranggay: number;
-    addr_municipal: number;
-    addr_province: number;
-    addr_region: number;
+    barangay: string;
+    city: string;
+    province: string;
+    region: string;
 }
 
 

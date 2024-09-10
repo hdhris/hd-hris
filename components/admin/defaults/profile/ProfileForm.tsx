@@ -1,5 +1,5 @@
 'use client'
-import {Avatar, DatePicker, SharedSelection} from "@nextui-org/react";
+import {Avatar, cn, DatePicker, SharedSelection} from "@nextui-org/react";
 import {Form} from "@/components/ui/form";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {z} from "zod";
@@ -8,7 +8,6 @@ import Text from "@/components/Text";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {icon_color} from "@/lib/utils";
-import {cn} from '@nextui-org/react'
 import FormFields, {FormInputProps, Selection} from "@/components/common/forms/FormFields";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {Button} from "@nextui-org/button";
@@ -19,49 +18,33 @@ import dayjs from "dayjs";
 import {updateProfileSchema} from "@/helper/zodValidation/UpdateProfile";
 import {axiosInstance} from "@/services/fetcher";
 import {toast} from "@/components/ui/use-toast";
-import {Address} from "@/types/routes/default/types";
-import AddressInput from "@/components/common/forms/AddressInput";
+import AddressInput from "@/components/common/forms/address/AddressInput";
 
 
-type FormData = {
-    civil_status: string
-    city: string
-    barangay: string
-    province: string
-    street_or_purok: string
-}
+
 
 export default function ProfileForm() {
     const [loading, setLoading] = useState(false)
     const [image, setImage] = useState<string | ArrayBuffer | null>(null);
     const [birthdate, setBirthdate] = useState<DateValue>()
-    const [regions, setRegions] = useState<{key: number, label: string}[]>([])
-    const [selectedRegion, setSelectedRegion] = useState<string>("")
-    const [provinces, setProvinces] = useState<{key: number, label: string}[]>([])
-    const [municipals, setMunicipals] = useState<{key: number, label: string}[]>([])
-    const [barangays, setBarangays] = useState<{key: number, label: string}[]>([])
     const [fileError, setFileError] = useState<string>("");
     const {data: profile, isLoading} = useUser();
     const form = useForm<z.infer<typeof updateProfileSchema>>({
         resolver: zodResolver(updateProfileSchema),
     });
 
-    const handleSelectedRegion = useCallback((key: SharedSelection) => {
-        setSelectedRegion(key.currentKey!)
-    }, [])
 
     useEffect(() => {
         if (profile) {
-            form.reset(profile.users)
-            setImage(profile.users.picture);
-            if (profile.users.birthdate) {
-                const date = dayjs(profile.users.birthdate).format("YYYY-MM-DD");
+            form.reset(profile)
+            setImage(profile.picture);
+            if (profile.birthdate) {
+                const date = dayjs(profile.birthdate).format("YYYY-MM-DD");
                 setBirthdate(parseDate(date))
                 form.setValue("birth_date", date)
             }
         }
-    }, [form, profile, regions]);
-
+    }, [form, profile]);
 
 
     const imageRef = useRef<string | null>(null);
@@ -168,6 +151,7 @@ export default function ProfileForm() {
     }];
 
     const gender = [{key: "M", label: "M"}, {key: "F", label: "F"}];
+
     // const street = ["Street", "Purok"];
 
     async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
@@ -207,7 +191,7 @@ export default function ProfileForm() {
                                 <DatePicker
                                     isRequired={true}
                                     onChange={(e) => {
-                                        if(e){
+                                        if (e) {
                                             form.setValue("birth_date", dayjs(e.toString()).format("YYYY-MM-DD"));
                                         }
                                         field.onChange(e);
@@ -245,45 +229,7 @@ export default function ProfileForm() {
                         <Divider/>
                         <Text className='text-medium font-semibold'>Address Information</Text>
                     </div>
-                    <AddressInput
-                        initialRegion={12}
-                    />
-                    {/*<Selection*/}
-                    {/*    // isRequired={true}*/}
-                    {/*    items={regions}*/}
-                    {/*    selectedKeys={[selectedRegion]}*/}
-                    {/*    placeholder=""*/}
-                    {/*    label='Region'*/}
-                    {/*    name='addr_region'*/}
-                    {/*    aria-label="Region"*/}
-                    {/*    onSelectionChange={handleSelectedRegion}*/}
-                    {/*/>*/}
-                    {/*<Selection*/}
-                    {/*    // isRequired={true}*/}
-                    {/*    items={provinces}*/}
-                    {/*    placeholder=""*/}
-                    {/*    label='Province'*/}
-                    {/*    name='addr_province'*/}
-                    {/*    aria-label="Province"*/}
-
-                    {/*/>*/}
-                    {/*<Selection*/}
-                    {/*    // isRequired={true}*/}
-                    {/*    items={municipals}*/}
-                    {/*    placeholder=""*/}
-                    {/*    label='Municipality'*/}
-                    {/*    name='addr_municipal'*/}
-                    {/*    aria-label="Municipality"*/}
-                    {/*/>*/}
-                    {/*<Selection*/}
-                    {/*    // isRequired={true}*/}
-                    {/*    items={barangays}*/}
-                    {/*    placeholder=""*/}
-                    {/*    label='Barangay'*/}
-                    {/*    name='addr_barangay'*/}
-                    {/*    aria-label="Barangay"*/}
-                    {/*/>*/}
-
+                    <AddressInput/>
 
                 </div>
             </ScrollShadow>

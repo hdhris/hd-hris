@@ -1,8 +1,8 @@
 import {NextResponse} from "next/server";
-import {Profile, UserProfile} from "@/types/routes/default/types";
 import prisma from "@/prisma/prisma";
 import {auth} from "@/auth";
 import dayjs from "dayjs";
+import {UserProfile} from "@/types/routes/default/types";
 
 export async function GET() {
     //get the user id from the token
@@ -32,15 +32,9 @@ export async function GET() {
             },
         }
     })
-    const location = [user_data?.trans_employees?.addr_region, user_data?.trans_employees?.addr_province, user_data?.trans_employees?.addr_municipal, user_data?.trans_employees?.addr_baranggay].filter((value): value is number => value !== undefined && value !== null);
-
-    const addresses = await prisma.ref_addresses.findMany()
-
-    const address = addresses.filter((address) => location.includes(address.address_code!))
 
 
-
-    const user: UserProfile = {
+    const users: UserProfile = {
         username: user_data?.username!,
         picture: user_data?.trans_employees?.picture!,
         prefix: user_data?.trans_employees?.prefix!,
@@ -52,19 +46,12 @@ export async function GET() {
         birthdate: dayjs(user_data?.trans_employees?.birthdate!).format("YYYY-MM-DD"),
         gender: user_data?.trans_employees?.gender!,
         contact_no: user_data?.trans_employees?.contact_no!,
-        addr_baranggay: user_data?.trans_employees?.addr_baranggay!,
-        addr_municipal: user_data?.trans_employees?.addr_municipal!,
-        addr_province: user_data?.trans_employees?.addr_province!,
-        addr_region: user_data?.trans_employees?.addr_region!,
-
-
+        barangay: String(user_data?.trans_employees?.addr_baranggay!),
+        city: String(user_data?.trans_employees?.addr_municipal!),
+        province: String(user_data?.trans_employees?.addr_province!,),
+        region: String(user_data?.trans_employees?.addr_region!,)
     }
-
-    const data:Profile = {
-        users: user,
-        addresses
-    }
-    return NextResponse.json(data)
+    return NextResponse.json(users)
 
 }
 
