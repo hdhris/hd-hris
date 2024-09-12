@@ -74,8 +74,9 @@ function BackupRetention() {
                                            onSelectionChange={setRetentionPeriod}/>
                         </Section>
                         <Section title='Auto-Deletion'
+                                 className={retentionPeriod !== 'all' && retentionPeriod.has('off') ? 'opacity-50 cursor-not-allowed' : ''}
                                  subtitle='Automatically delete backups that exceed the retention period.'>
-                            <Switch isSelected={isAutoDelete} onValueChange={setIsAutoDelete} size='sm' color="primary"/>
+                            <Switch isSelected={isAutoDelete} isDisabled={retentionPeriod !== 'all' && retentionPeriod.has('off')} onValueChange={setIsAutoDelete} size='sm' color="primary"/>
                         </Section>
                     </ModalBody>
                     <ModalFooter>

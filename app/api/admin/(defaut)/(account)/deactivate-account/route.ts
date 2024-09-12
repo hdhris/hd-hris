@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
             // Check if passwords match
             if (parsedData.password !== password) {
-                return NextResponse.json({ message: 'Cannot deactivate account' }, { status: 400 });
+                return NextResponse.json({ message: 'Cannot deactivate preferences' }, { status: 400 });
             }
 
             //TODO: insert deactivate date into database

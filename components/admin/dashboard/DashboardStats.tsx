@@ -69,7 +69,7 @@ const DashboardStats = () => {
         value: <CountUp start={0} end={data?.emp!} formattingFn={(value) => compactNumber(value)}/>, // value: '500',
         title: "Employees",
         status: "increased",
-        footer: <AddEmployees/>,
+        footer: <AddEmployees onEmployeeAdded={() => {alert("added")}}/>,
         percent: 3.6,
         chart: <BarChart data={employeesStat.data}/>
     }, {

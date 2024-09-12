@@ -9,10 +9,13 @@ export async function PUT(req: NextRequest) {
             const data = await req.json();
             const parsedData = updateProfileSchema.parse(data);
 
+            console.log("Update Profile: ", data)
             // Validate the parsed data
             if(!parsedData) {
                 return NextResponse.json({ message: 'Validation error' }, { status: 400 });
             }
+
+            //TODO: implement a code that will track changes
 
             // Process the validated data (e.g., update profile in database)
             // Example: await updateProfile(parsedData);

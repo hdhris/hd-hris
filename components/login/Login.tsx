@@ -12,23 +12,24 @@ import {RiEyeCloseLine, RiEyeLine} from "react-icons/ri";
 import {Button} from "@nextui-org/button";
 import {Form} from "@/components/ui/form";
 import {Chip} from "@nextui-org/chip";
-import {Checkbox, Spinner} from "@nextui-org/react";
-// import FormFields, {FormInputProps} from "@/components/forms/FormFields";
-import login_hero from '@/assets/hero/login_hero.svg'
-import Link from "next/link";
+import {Checkbox} from "@nextui-org/react";
 import {icon_color} from "@/lib/utils";
-import {signIn} from "next-auth/react";
-import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
-import {usePathname, useRouter} from "next/navigation";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {LuXCircle} from "react-icons/lu";
 import ForgotButton from "@/components/forgot/ForgotButton";
+import {login} from "@/actions/authActions";
+import Simple3Des from "@/lib/cryptography/3des";
+import SimpleAES from "@/lib/cryptography/3des";
+import {useRouter} from "next/navigation";
 
+const loginSchema = z.object({
+    username: z.string().min(1, {message: "Username is required."}), password: z.string().min(1, {message: "Password is required."})
+})
 function Login() {
-    const router = useRouter()
 
-    const form = useForm<z.infer<typeof LoginValidation>>({
-        resolver: zodResolver(LoginValidation), defaultValues: {
+    const router = useRouter()
+    const form = useForm<z.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema), defaultValues: {
             username: "", password: ""
         },
     })
@@ -55,32 +56,42 @@ function Login() {
         </Button>)
     }]
 
-    async function onSubmit(values: z.infer<typeof LoginValidation>) {
-        setError(""); // Clear any previous errors
-        setLoading(true); // Set loading state to true
+    async function onSubmit(values: z.infer<typeof loginSchema>) {
+
+        // const simple3Des = new SimpleAES(); // Initialization happens automatically
+        //
+        // const plaintext = 'password';
+        // console.log("Plain Text: ", plaintext)
+        // const encryptedText = await simple3Des.encryptData(plaintext);
+        // console.log('Encrypted:', encryptedText);
+        // console.log('Length:', encryptedText.length);
+        //
+        // const decryptedText = await simple3Des.decryptData(encryptedText)
+        // console.log("Decrypted: ", decryptedText)
+        // const isMatch = await simple3Des.compare(plaintext, encryptedText);
+        // console.log('Does the decrypted text match the plaintext?', isMatch);
+        setError("");
+        setLoading(true);
         try {
-            const res = await signIn('credentials', {
-                username: values.username,
-                password: values.password,
-                redirect: false
-            });
+            const loginResponse = await login(values);
 
-            if (res) {
-                if (res.ok && res.status === 200) {
-                        router.push('/dashboard');
+            if (loginResponse.success) {
+                // Redirect to dashboard
+                router.push("/dashboard")
 
-                } else if (res && res.status === 401) {
-                    setError(res.error!);
-                }
-            } else {
-                setError("Sign in failed. Please try again."); // Handle other potential errors
+            } else if (loginResponse.error) {
+                // Display error message
+                setError(loginResponse.error.message)
             }
+
         } catch (error) {
-            setError("Error signing in. Please try again."); // Catch any unexpected errors
+            console.log(error)
+            setError("Error signing in. Please try again.");
         } finally {
-            setLoading(false); // Ensure loading
+            setLoading(false);
         }
     }
+
 
     return (<section className='h-full flex items-center justify-center gap-10'>
         <Card className='p-4 ' shadow='sm' radius='sm'>
@@ -88,13 +99,13 @@ function Login() {
                 <Image src={logo} className="w-24 h-24 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500"
                        alt="WageWise Logo"/>
                 <Typography className='font-semibold text-xl'>Secure Access Starts Here</Typography>
-                <Typography className='text-center'>Login to GVC-PMS for Effortless Payroll
+                <Typography className='text-center'>Login to {process.env.APP_NAME} for Effortless Payroll
                     Management</Typography>
             </CardHeader>
             <CardBody>
                 {error && <Chip classNames={{
                     base: 'p-5 max-w-full'
-                }} variant='flat' startContent={<LuXCircle />} color='danger' radius="sm">{error}</Chip>}
+                }} variant='flat' startContent={<LuXCircle/>} color='danger' radius="sm">{error}</Chip>}
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2'>
                         <FormFields items={loginFields}/>

@@ -1,5 +1,5 @@
 'use client'
-import {Avatar, DatePicker} from "@nextui-org/react";
+import {Avatar, cn, DatePicker, SharedSelection} from "@nextui-org/react";
 import {Form} from "@/components/ui/form";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {z} from "zod";
@@ -8,7 +8,6 @@ import Text from "@/components/Text";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {icon_color} from "@/lib/utils";
-import {cn} from '@nextui-org/react'
 import FormFields, {FormInputProps, Selection} from "@/components/common/forms/FormFields";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {Button} from "@nextui-org/button";
@@ -19,15 +18,10 @@ import dayjs from "dayjs";
 import {updateProfileSchema} from "@/helper/zodValidation/UpdateProfile";
 import {axiosInstance} from "@/services/fetcher";
 import {toast} from "@/components/ui/use-toast";
+import AddressInput from "@/components/common/forms/address/AddressInput";
 
 
-type FormData = {
-    civil_status: string
-    city: string
-    barangay: string
-    province: string
-    street_or_purok: string
-}
+
 
 export default function ProfileForm() {
     const [loading, setLoading] = useState(false)
@@ -39,19 +33,19 @@ export default function ProfileForm() {
         resolver: zodResolver(updateProfileSchema),
     });
 
+
     useEffect(() => {
         if (profile) {
             form.reset(profile)
-            setImage(profile.profilePicture);
+            setImage(profile.picture);
             if (profile.birthdate) {
                 const date = dayjs(profile.birthdate).format("YYYY-MM-DD");
-                console.log(parseDate(date))
                 setBirthdate(parseDate(date))
                 form.setValue("birth_date", date)
             }
         }
-
     }, [form, profile]);
+
 
     const imageRef = useRef<string | null>(null);
 
@@ -96,9 +90,11 @@ export default function ProfileForm() {
         (e.target as HTMLInputElement).value = "";
     };
 
+    // const regions = address.filter((id) => id.address_code === 0).map((region) => region.address_name);
+
     const upperInput: FormInputProps[] = [{
         name: "picture", Component: () => {
-            return (<div className='grid grid-cols-2 relative'>
+            return (<div className='grid grid-cols-2 relative mb-2'>
                 <div className='flex items-center gap-2'>
                     <div className="w-fit">
                         <Avatar
@@ -136,28 +132,30 @@ export default function ProfileForm() {
                     </div>
                 </div>
                 <div className=''>
-                    <FormFields items={[{name: "username", label: "Username"}]}/>
+                    <FormFields items={[{name: "username", label: "Username", isRequired: true}]}/>
                 </div>
             </div>);
         }
     }];
 
     const formNames: FormInputProps[] = [{
-        name: "first_name", label: "First Name"
+        name: "first_name", label: "First Name", isRequired: true
     }, {
-        name: "last_name", label: "Last Name"
+        name: "last_name", label: "Last Name", isRequired: true
     }];
 
     const contact_info: FormInputProps[] = [{
-        name: "email", label: "Email"
+        name: "email", label: "Email", isRequired: true
     }, {
-        name: "phone_no", label: "Phone No.", type: "tel"
+        name: "contact_no", label: "Phone No.", type: "tel", isRequired: true
     }];
 
-    const civilStatus = ["Single", "Married", "Widowed", "Separated", "Divorced", "Others"];
-    const street = ["Street", "Purok"];
+    const gender = [{key: "M", label: "M"}, {key: "F", label: "F"}];
+
+    // const street = ["Street", "Purok"];
 
     async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
+        alert("hi")
         setLoading(true)
         try {
             const response = await axiosInstance.put('/api/admin/update-profile', values);
@@ -185,10 +183,13 @@ export default function ProfileForm() {
                         name: "birth_date", label: "Birth Date", Component: (field) => {
                             return (<div className="w-full flex flex-row gap-4">
                                 <DatePicker
+                                    isRequired={true}
                                     onChange={(e) => {
+                                        if (e) {
+                                            form.setValue("birth_date", dayjs(e.toString()).format("YYYY-MM-DD"));
+                                        }
                                         field.onChange(e);
                                         setBirthdate(e);
-                                        form.setValue("birth_date", dayjs(e.toString()).format("YYYY-MM-DD"));
                                     }}
                                     name='birth_date'
                                     aria-label="Birth Date"
@@ -206,11 +207,12 @@ export default function ProfileForm() {
                         }
                     }]} size='sm'/>
                     <Selection
-                        items={civilStatus}
+                        items={gender}
+                        isRequired={true}
                         placeholder=""
-                        label='Civil Status'
-                        name='civil_status'
-                        aria-label="Civil Status"
+                        label='Gender'
+                        name='gender'
+                        aria-label="Gender"
                     />
                     <div className='col-span-2 space-y-2'>
                         <Divider/>
@@ -221,34 +223,8 @@ export default function ProfileForm() {
                         <Divider/>
                         <Text className='text-medium font-semibold'>Address Information</Text>
                     </div>
-                    <Selection
-                        items={street}
-                        placeholder=""
-                        label='Street/Purok'
-                        name='street_or_purok'
-                        aria-label="Street or Purok"
-                    />
-                    <Selection
-                        items={street}
-                        placeholder=""
-                        label='Barangay'
-                        name='barangay'
-                        aria-label="Barangay"
-                    />
-                    <Selection
-                        items={street}
-                        placeholder=""
-                        label='City'
-                        name='city'
-                        aria-label="City"
-                    />
-                    <Selection
-                        items={street}
-                        placeholder=""
-                        label='Province'
-                        name='province'
-                        aria-label="Province"
-                    />
+                    {/*<AddressInput/>*/}
+
                 </div>
             </ScrollShadow>
             <div className='flex justify-end gap-2'>

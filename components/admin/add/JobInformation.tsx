@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { DatePicker, TimeInput, Checkbox, Input, Select, SelectItem } from '@nextui-org/react';
 import { parseDate, CalendarDate } from '@internationalized/date';
@@ -26,6 +26,40 @@ const availableDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "
 const JobInformationForm: React.FC = () => {
   const { control, setValue } = useFormContext<FormValues>();
   const [workSchedule, setWorkSchedule] = useState<WorkSchedule>({});
+  const [departments, setDepartments] = useState<Array<{ id: number; name: string }>>([]);
+  const [jobTitles, setJobTitles] = useState<Array<{ id: number; name: string }>>([]);
+
+  useEffect(() => {
+    // Fetch departments and job titles when component mounts
+    fetchDepartments();
+    fetchJobTitles();
+  }, []);
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await fetch('/api/employeemanagement/departments');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Fetched departments:', data); // Log the fetched data
+      setDepartments(data);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+    }
+  };
+  
+  const fetchJobTitles = async () => {
+    try {
+      const response = await fetch('/api/employeemanagement/job_title');
+      const data = await response.json();
+      console.log('Fetched job titles:', data); // Log the fetched data
+      setJobTitles(data);
+    } catch (error) {
+      console.error('Error fetching job titles:', error);
+    }
+  };
+  
 
   const handleDayToggle = (day: string, isChecked: boolean) => {
     if (isChecked) {
@@ -68,9 +102,9 @@ const JobInformationForm: React.FC = () => {
                   variant="bordered"
                   className="border rounded"
                 >
-                  <SelectItem key="HR" value="HR">HR</SelectItem>
-                  <SelectItem key="Engineering" value="Engineering">Engineering</SelectItem>
-                  <SelectItem key="Marketing" value="Marketing">Marketing</SelectItem>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id.toString()}>{dept.name}</SelectItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormMessage />
@@ -119,9 +153,9 @@ const JobInformationForm: React.FC = () => {
                   variant="bordered"
                   className="border rounded"
                 >
-                  <SelectItem key="Manager" value="Manager">Manager</SelectItem>
-                  <SelectItem key="Developer" value="Developer">Developer</SelectItem>
-                  <SelectItem key="Designer" value="Designer">Designer</SelectItem>
+                  {jobTitles.map((job) => (
+                    <SelectItem key={job.id} value={job.id.toString()}>{job.name}</SelectItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormMessage />
@@ -129,79 +163,7 @@ const JobInformationForm: React.FC = () => {
           )}
         />
 
-        {/* Job Role */}
-        <Controller
-          name="jobRole"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Job Role</FormLabel>
-              <FormControl>
-                <Select
-                  {...field}
-                  aria-label="Job Role"
-                  placeholder="Select Job Role"
-                  variant="bordered"
-                  className="border rounded"
-
-                >
-                  <SelectItem key="Frontend" value="Frontend">Frontend</SelectItem>
-                  <SelectItem key="Backend" value="Backend">Backend</SelectItem>
-                  <SelectItem key="Fullstack" value="Fullstack">Fullstack</SelectItem>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Working Type */}
-        <Controller
-          name="workingType"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Working Type</FormLabel>
-              <FormControl>
-                <Select
-                  {...field}
-                  aria-label="Working Type"
-                  placeholder="Select Working Type"
-                  variant="bordered"
-                  className="border rounded"
-                  radius="sm"
-                >
-                  <SelectItem key="Full-time" value="Full-time">Full-time</SelectItem>
-                  <SelectItem key="Part-time" value="Part-time">Part-time</SelectItem>
-                  <SelectItem key="Contract" value="Contract">Contract</SelectItem>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Years Of Contract */}
-        <Controller
-          name="contractYears"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Years Of Contract</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="number"
-                  placeholder="Enter Years of Contract"
-                  aria-label="Years Of Contract"
-                  variant="bordered"
-                  radius="sm"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* ... (rest of the form remains the same) */}
       </div>
 
       {/* Work Schedule */}

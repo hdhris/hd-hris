@@ -17,7 +17,7 @@ export async function DELETE(req: Request) {
 
             // Check if passwords match
             if (parsedData.password !== password) {
-                return NextResponse.json({ message: 'Cannot delete account' }, { status: 400 });
+                return NextResponse.json({ message: 'Cannot delete preferences' }, { status: 400 });
             }
 
             //TODO: insert deactivate date into database
