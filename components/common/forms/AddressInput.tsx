@@ -5,41 +5,38 @@ import { AddressType } from "@/types/References/Informations";
 import axios from "axios";
 
 interface AddressInputProps {
-    initialRegion?: number;
-    initialProvince?: number;
-    initialMunicipal?: number;
-    initialBaranggay?: number;
-    onRegionChange?: (region: number) => void;
-    onProvinceChange?: (province: number) => void;
-    onMunicipalChange?: (municipal: number) => void;
-    onBaranggayChange?: (baranggay: number) => void;
-    className?: string;
-  }
+  initialRegion?: number;
+  initialProvince?: number;
+  initialMunicipal?: number;
+  initialBaranggay?: number;
+  onRegionChange?: (region: number) => void;
+  onProvinceChange?: (province: number) => void;
+  onMunicipalChange?: (municipal: number) => void;
+  onBaranggayChange?: (baranggay: number) => void;
+  className?: string;
+}
 
-const AddressSelection: React.FC<AddressInputProps> = (
-    {
-        initialRegion,
-        initialProvince,
-        initialMunicipal,
-        initialBaranggay,
-        onRegionChange,
-        onProvinceChange,
-        onMunicipalChange,
-        onBaranggayChange,
-        className,
-      }: AddressInputProps
-) => {
+const AddressSelection: React.FC<AddressInputProps> = ({
+  initialRegion,
+  initialProvince,
+  initialMunicipal,
+  initialBaranggay,
+  onRegionChange,
+  onProvinceChange,
+  onMunicipalChange,
+  onBaranggayChange,
+  className,
+}: AddressInputProps) => {
   const [addressData, setAddressData] = useState<AddressType[]>([]);
   const [regions, setRegions] = useState<AddressType[]>([]);
   const [provinces, setProvinces] = useState<AddressType[]>([]);
-  const [municipal, setMunicipal] = useState<AddressType[]>([]);
+  const [municipalities, setMunicipalities] = useState<AddressType[]>([]);
   const [barangays, setBarangays] = useState<AddressType[]>([]);
-
 
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
-  const [selectedMunicipal, setSelectedMunicipal] = useState<string | null>(null);
-  const [selectedBaranggay, setSelectedBaranggay] = useState<string | null>(null);
+  const [selectedMunicipality, setSelectedMunicipality] = useState<string | null>(null);
+  const [selectedBarangay, setSelectedBarangay] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAddressData = async () => {
@@ -56,14 +53,21 @@ const AddressSelection: React.FC<AddressInputProps> = (
 
   useEffect(() => {
     if (addressData) {
-      const fetchRegions = () => {
-        const regionData = addressData.filter((item) => item.parent_code === 0);
-        setRegions(regionData);
+      const regionData = addressData.filter((item) => item.parent_code === 0);
+      setRegions(regionData);
+
+      if (initialRegion && !selectedRegion){
+        setSelectedRegion(String(initialRegion))
+        setProvinces(addressData.filter((item) => item.parent_code === initialRegion))
       };
-      fetchRegions();
-      if(initialRegion) setSelectedRegion(String(initialRegion))
+      if (initialProvince && !selectedProvince){
+        setSelectedProvince(String(initialProvince))
+        setMunicipalities(addressData.filter((item) => item.parent_code === initialProvince))
+      };
+      if (initialMunicipal) setSelectedMunicipality(String(initialMunicipal));
+      if (initialBaranggay) setSelectedBarangay(String(initialBaranggay));
     }
-  }, [addressData]);
+  }, [addressData, initialRegion, initialProvince, initialMunicipal, initialBaranggay]);
 
   useEffect(() => {
     if (selectedRegion) {
@@ -72,55 +76,51 @@ const AddressSelection: React.FC<AddressInputProps> = (
       );
       setProvinces(provinceData);
       setSelectedProvince(null);
-      setMunicipal([]);
+      setMunicipalities([]);
       setBarangays([]);
-      if(initialProvince) setSelectedProvince(String(initialProvince))
       if (onRegionChange) onRegionChange(Number(selectedRegion));
     }
-  }, [selectedRegion,onRegionChange]);
+  }, [selectedRegion]);
 
   useEffect(() => {
     if (selectedProvince) {
       const cityData = addressData.filter(
         (item) => item.parent_code === Number(selectedProvince)
       );
-      setMunicipal(cityData);
-      setSelectedMunicipal(null);
+      setMunicipalities(cityData);
+      setSelectedMunicipality(null);
       setBarangays([]);
-      if(initialMunicipal) setSelectedRegion(String(initialMunicipal))
       if (onProvinceChange) onProvinceChange(Number(selectedProvince));
     }
-  }, [selectedProvince,onProvinceChange]);
+  }, [selectedProvince]);
 
   useEffect(() => {
-    if (selectedMunicipal) {
+    if (selectedMunicipality) {
       const barangayData = addressData.filter(
-        (item) => item.parent_code === Number(selectedMunicipal)
+        (item) => item.parent_code === Number(selectedMunicipality)
       );
       setBarangays(barangayData);
-      if(initialBaranggay) setSelectedRegion(String(initialBaranggay))
-      if (onMunicipalChange) onMunicipalChange(Number(selectedMunicipal));
+      if (onMunicipalChange) onMunicipalChange(Number(selectedMunicipality));
     }
-  }, [selectedMunicipal,onMunicipalChange]);
+  }, [selectedMunicipality]);
 
   useEffect(() => {
-    if (selectedBaranggay && onBaranggayChange) {
-      onBaranggayChange(Number(selectedBaranggay));
+    if (selectedBarangay && onBaranggayChange) {
+      onBaranggayChange(Number(selectedBarangay));
     }
-  }, [selectedBaranggay, onBaranggayChange]);
+  }, [selectedBarangay]);
 
   return (
     <div className={className}>
       <Select
         label="Region"
         placeholder="Select a region"
-        isLoading={!(addressData.length>0)}
-        defaultSelectedKeys={[String(initialRegion)]}
+        isLoading={!(regions.length > 0)}
         onChange={(e) => setSelectedRegion(e.target.value)}
-        value={selectedRegion || undefined}
+        selectedKeys={selectedRegion || undefined}
       >
         {regions.map((region) => (
-          <SelectItem key={region.address_code} value={region.address_code}>
+          <SelectItem key={region.address_code} value={String(region.address_code)}>
             {region.address_name}
           </SelectItem>
         ))}
@@ -129,13 +129,12 @@ const AddressSelection: React.FC<AddressInputProps> = (
       <Select
         label="Province"
         placeholder="Select a province"
-        defaultSelectedKeys={[String(initialProvince)]}
         onChange={(e) => setSelectedProvince(e.target.value)}
-        value={selectedProvince || undefined}
-        disabled={!selectedRegion}
+        selectedKeys={selectedProvince || undefined}
+        isLoading={!(provinces.length > 0)}
       >
         {provinces.map((province) => (
-          <SelectItem key={province.address_code} value={province.address_code}>
+          <SelectItem key={province.address_code} value={String(province.address_code)}>
             {province.address_name}
           </SelectItem>
         ))}
@@ -144,14 +143,13 @@ const AddressSelection: React.FC<AddressInputProps> = (
       <Select
         label="Municipality"
         placeholder="Select a municipality"
-        defaultSelectedKeys={[String(initialMunicipal)]}
-        onChange={(e) => setSelectedMunicipal(e.target.value)}
-        value={selectedMunicipal || undefined}
-        disabled={!selectedProvince}
+        onChange={(e) => setSelectedMunicipality(e.target.value)}
+        selectedKeys={selectedMunicipality || undefined}
+        isLoading={!(municipalities.length > 0)}
       >
-        {municipal.map((city) => (
-          <SelectItem key={city.address_code} value={city.address_code}>
-            {city.address_name}
+        {municipalities.map((municipality) => (
+          <SelectItem key={municipality.address_code} value={String(municipality.address_code)}>
+            {municipality.address_name}
           </SelectItem>
         ))}
       </Select>
@@ -159,13 +157,12 @@ const AddressSelection: React.FC<AddressInputProps> = (
       <Select
         label="Barangay"
         placeholder="Select a barangay"
-        defaultSelectedKeys={[String(initialBaranggay)]}
-        onChange={(e) => setSelectedBaranggay(e.target.value)}
-        value={selectedBaranggay || undefined}
-        disabled={!selectedMunicipal}
+        onChange={(e) => setSelectedBarangay(e.target.value)}
+        selectedKeys={selectedBarangay || undefined}
+        isLoading={!(barangays.length > 0)}
       >
         {barangays.map((barangay) => (
-          <SelectItem key={barangay.address_code} value={barangay.address_code}>
+          <SelectItem key={barangay.address_code} value={String(barangay.address_code)}>
             {barangay.address_name}
           </SelectItem>
         ))}
