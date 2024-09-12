@@ -1,16 +1,13 @@
-// page.tsx
-
 "use client";
 
 import React, { useEffect, useState } from "react";
 import TableData from "@/components/tabledata/TableData";
-import { EmployeeAll as Employee } from "@/types/employeee/EmployeeType";
-import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Avatar } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
+import { TableConfigProps } from "@/types/table/TableDataTypes";
 
 const Page = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchEmployees = async () => {
@@ -19,7 +16,8 @@ const Page = () => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const data: Employee[] = await response.json();
+      const data = await response.json();
+      console.log("Fetched employee data:", data);
       setEmployees(data);
     } catch (error) {
       console.error("Failed to fetch employees:", error);
@@ -34,7 +32,7 @@ const Page = () => {
 
   const handleEdit = async (id: number) => {
     console.log("Edit employee with id:", id);
-    await fetchEmployees(); // Refetch employees after edit
+    await fetchEmployees();
   };
 
   const handleDelete = async (id: number) => {
@@ -48,19 +46,17 @@ const Page = () => {
       if (!response.ok) {
         throw new Error("Failed to delete employee");
       }
-      await fetchEmployees(); // Refetch employees after delete
+      await fetchEmployees();
     } catch (error) {
       console.error("Error deleting employee:", error);
     }
   };
 
-  const config: TableConfigProps<Employee> = {
+  const config: TableConfigProps<any> = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "department", name: "Department", sortable: true },
-      { uid: "position", name: "Position", sortable: true },
-      { uid: "contact", name: "Contact", sortable: false },
-      { uid: "status", name: "Status", sortable: true },
+      { uid: "email", name: "Email", sortable: true },
+      { uid: "contact_no", name: "Contact", sortable: false },
       { uid: "actions", name: "Actions", sortable: false },
     ],
     rowCell: (item, columnKey) => {
@@ -69,32 +65,23 @@ const Page = () => {
           return (
             <div className="flex items-center">
               <Avatar
-                src={item.picture}
-                alt={item.firstName + item.lastName}
-                className="w-10 h-10 rounded-full mr-2"
+                src={item.picture || ''}
+                alt={`${item.first_name} ${item.last_name}`}
+                className="w-10 h-10 rounded-full mr-10"
               />
               <span>
-                  {item.firstName} {item.lastName}
+                {item.first_name} {item.last_name}
               </span>
             </div>
           );
-        case "department":
-          return <span>{item.department}</span>;
-        case "position":
-          return <span>{item.position}</span>;
-        case "contact":
-          return (
-            <div>
-              <div>{item.email}</div>
-              <div>{item.phone}</div>
-            </div>
-          );
-        case "status":
-          return <span>{item.status}</span>;
+        case "email":
+          return <span>{item.email || 'N/A'}</span>;
+        case "contact_no":
+          return <span>{item.contact_no || 'N/A'}</span>;
         case "actions":
           return (
             <TableActionButton
-              name={item.firstName}
+              name={`${item.first_name} ${item.last_name}`}
               onEdit={() => handleEdit(item.id)}
               onDelete={() => handleDelete(item.id)}
             />
@@ -105,13 +92,7 @@ const Page = () => {
     },
   };
 
-  const searchingItemKey: Array<keyof Employee> = [
-    "firstName",
-    "lastName",
-    "position",
-    "department",
-    "status",
-  ];
+  const searchingItemKey = ["first_name", "last_name", "email", "contact_no"];
 
   return (
     <div className="mt-2">
@@ -126,7 +107,7 @@ const Page = () => {
         classNames={{
           wrapper: "h-[27rem]",
         }}
-        className="min-h-52"
+        className="min-h-45"
       />
     </div>
   );
