@@ -81,6 +81,9 @@ export const Selection = ({
             name={name!}
             render={({field}) => {
 
+                // console.log("Keys based on selectedKeys: ", selectedKeys)
+                // console.log("Keys based on fields: ", field.value)
+                // console.log("Keys: ", selectedKeys ? selectedKeys : (field.value ? [String(field.value)] : []))
                 return (<FormItem>
                         {label && (<FormLabel htmlFor={name}>
                                 {label}

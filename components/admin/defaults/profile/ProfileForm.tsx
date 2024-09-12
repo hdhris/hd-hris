@@ -155,6 +155,7 @@ export default function ProfileForm() {
     // const street = ["Street", "Purok"];
 
     async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
+        alert("hi")
         setLoading(true)
         try {
             const response = await axiosInstance.put('/api/admin/update-profile', values);
@@ -171,13 +172,6 @@ export default function ProfileForm() {
         setLoading(false)
     }
 
-    // const region = [{
-    //     key: "region",
-    //     label: "Region",
-    // }, {
-    //     key: "province",
-    //     label: "Province",
-    // }];
     return (<Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}
               className='space-y-5 flex flex-col p-2 h-full overflow-hidden'>
@@ -229,7 +223,7 @@ export default function ProfileForm() {
                         <Divider/>
                         <Text className='text-medium font-semibold'>Address Information</Text>
                     </div>
-                    <AddressInput/>
+                    {/*<AddressInput/>*/}
 
                 </div>
             </ScrollShadow>
