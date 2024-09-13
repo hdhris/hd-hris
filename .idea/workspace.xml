@@ -4,6 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="implementing change credentials">
+      <change afterPath="$PROJECT_DIR$/helper/zodValidation/NewPasswordValidation.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/attendance-time/overtime/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/attendance-time/overtime/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/records/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/records/[...date]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/schedule/route.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/schedule/route.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/notification/notification-configuration/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/notification/notification-configuration/[...id]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(minor)/address/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(minor)/address/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/auth/login-checkpoint/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/login-checkpoint/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/NotificationSettings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/NotificationSettings.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/prisma.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sampleData/admin/employees/Employees.ts" beforeDir="false" />
+    </list>
     <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adding partial checkpoint" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -172,11 +189,11 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="npm.server" />
-        <item itemvalue="npm.dev" />
         <item itemvalue="Vitest.RootLayout" />
         <item itemvalue="Vitest.RootLayout Component" />
         <item itemvalue="Vitest.All Tests" />
+        <item itemvalue="npm.server" />
+        <item itemvalue="npm.dev" />
       </list>
     </recent_temporary>
   </component>
@@ -274,6 +291,7 @@
       <workItem from="1726147242312" duration="11590000" />
       <workItem from="1726192758339" duration="12900000" />
       <workItem from="1726206890238" duration="9309000" />
+      <workItem from="1726218604692" duration="11627000" />
       <workItem from="1726218604692" duration="11703000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
@@ -612,6 +630,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726234766064</updated>
     </task>
+    <option name="localTasksCounter" value="46" />
+    <task id="LOCAL-00045" summary="implementing change credentials">
+      <option name="closed" value="true" />
+      <created>1726234766064</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1726234766064</updated>
+    </task>
     <task id="LOCAL-00046" summary="adding partial checkpoint">
       <option name="closed" value="true" />
       <created>1726240723552</created>
@@ -638,6 +665,7 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <MESSAGE value="img to Image" />
     <MESSAGE value="test" />
     <MESSAGE value="adding simple backen to the account settings" />
     <MESSAGE value="partially done" />
@@ -661,6 +689,8 @@
     <MESSAGE value="adding validation in login" />
     <MESSAGE value="small changes in AddressInput.tsx" />
     <MESSAGE value="address input component" />
+    <MESSAGE value="implementing change credentials" />
+    <option name="LAST_COMMIT_MESSAGE" value="implementing change credentials" />
     <MESSAGE value="implementing change credentials" />
     <MESSAGE value="adding partial checkpoint" />
     <option name="LAST_COMMIT_MESSAGE" value="adding partial checkpoint" />
