@@ -16,8 +16,9 @@ import EducationalBackgroundForm from "./EducationalBackgroundForm";
 import JobInformationForm from "./JobInformation";
 import { useForm, FormProvider } from "react-hook-form";
 import axios from "axios";
+
 interface AddEmployeeProps {
-  onEmployeeAdded: () => Promise<void>;
+  onEmployeeAdded: () => void;
 }
 
 interface EmployeeFormData {
@@ -50,7 +51,7 @@ interface EmployeeFormData {
 const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const toast = useToast(); // Ensure Chakra UI's ToastProvider is wrapping your app
+  const toast = useToast();
 
   const methods = useForm<EmployeeFormData>({
     defaultValues: {
@@ -81,10 +82,8 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
     },
     mode: "onChange",
   });
-
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
-
     try {
       const educationalBackground = {
         elementary: data.elementary,
@@ -94,7 +93,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         universityCollege: data.universityCollege,
         course: data.course,
         highestDegree: data.highestDegree,
-        certificates: data.certificates.map(file => ({
+        certificates: data.certificates.map((file) => ({
           fileName: file.name,
           fileUrl: file.url,
         })),
@@ -102,7 +101,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
 
       const fullData = {
         ...data,
-        birthdate: data.birthdate ? new Date(data.birthdate).toISOString() : null,
+        birthdate: data.birthdate
+          ? new Date(data.birthdate).toISOString()
+          : null,
         hireDate: data.hireDate ? new Date(data.hireDate).toISOString() : null,
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
@@ -111,10 +112,11 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         educationalBackground: JSON.stringify(educationalBackground),
       };
 
-      const response = await axios.post("/api/employeemanagement/employees", fullData);
-
-      if (response.status === 201) { // Check for 201 status code
-        console.log("Employee added successfully"); // Debugging log
+      const response = await axios.post(
+        "/api/employeemanagement/employees",
+        fullData
+      );
+      if (response.status === 200 || response.status === 201) {
         toast({
           title: "Success",
           description: "Employee successfully added!",
@@ -123,9 +125,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
           isClosable: true,
         });
 
-        await onEmployeeAdded();
-        methods.reset();
-        onClose(); // Close the modal after displaying toast
+        onEmployeeAdded(); // Call this function to refresh the employee list
+        methods.reset(); // Reset form after submission
+        onClose(); // Close modal
       }
     } catch (error) {
       console.error("Error creating employee:", error);
@@ -141,49 +143,36 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
     }
   };
 
-  const handleCancel = () => {
-    methods.reset();
-    onClose();
-  };
-
   return (
     <>
       <Add variant="flat" name="Add Employee" onClick={onOpen} />
       <Modal
         size="4xl"
         isOpen={isOpen}
-        onClose={handleCancel}
+        onClose={onClose}
         scrollBehavior="inside"
         isDismissable={false}
       >
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
             <ModalContent>
-              <ModalHeader className="flex flex-col gap-1">
-                Add New Employee
-              </ModalHeader>
-              <ModalBody className="max-h-[70vh] overflow-y-auto">
-                <h2 className="text-lg font-semibold mb-2">
-                  Personal Information
-                </h2>
+              <ModalHeader>Add New Employee</ModalHeader>
+              <ModalBody>
+                <h2>Personal Information</h2>
                 <PersonalInformationForm />
-
                 <Divider className="my-6" />
-
-                <h2 className="text-lg font-semibold mb-2">
-                  Educational Background
-                </h2>
+                <h2>Educational Background</h2>
                 <EducationalBackgroundForm />
-
                 <Divider className="my-6" />
-
-                <h2 className="text-lg font-semibold mb-2">
-                  Job Information
-                </h2>
+                <h2>Job Information</h2>
                 <JobInformationForm />
               </ModalBody>
-              <ModalFooter className="flex justify-between">
-                <Button color="danger" variant="light" onClick={handleCancel} disabled={isSubmitting}>
+              <ModalFooter>
+                <Button
+                  color="danger"
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                >
                   Cancel
                 </Button>
                 <Button color="primary" type="submit" disabled={isSubmitting}>
