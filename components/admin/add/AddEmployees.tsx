@@ -1,6 +1,5 @@
-import React from "react";
-import Add from "@/components/common/button/Add";
-import BreadcrumbComponent from "@/components/common/breadcrumb";
+import React, { useState } from "react";
+import { useToast } from "@chakra-ui/react";
 import {
   Modal,
   ModalContent,
@@ -11,6 +10,7 @@ import {
   Divider,
   useDisclosure,
 } from "@nextui-org/react";
+import Add from "@/components/common/button/Add";
 import PersonalInformationForm from "./PersonalInformationForm";
 import EducationalBackgroundForm from "./EducationalBackgroundForm";
 import JobInformationForm from "./JobInformation";
@@ -21,21 +21,50 @@ interface AddEmployeeProps {
   onEmployeeAdded: () => void;
 }
 
+interface EmployeeFormData {
+  picture: string;
+  first_name: string;
+  middle_name: string;
+  last_name: string;
+  gender: string;
+  birthdate: string;
+  addr_region: string;
+  addr_province: string;
+  addr_municipal: string;
+  addr_baranggay: string;
+  elementary: string;
+  highSchool: string;
+  seniorHighSchool: string;
+  seniorHighStrand: string;
+  universityCollege: string;
+  course: string;
+  highestDegree: string;
+  certificates: Array<{ name: string; url: string }>;
+  hireDate: string;
+  jobTitle: string;
+  jobRole: string;
+  workingType: string;
+  contractYears: string;
+  workSchedules: Record<string, unknown>;
+}
+
 const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const methods = useForm({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const toast = useToast();
+
+  const methods = useForm<EmployeeFormData>({
     defaultValues: {
       picture: "",
-      firstName: "",
-      middleName: "",
-      lastName: "",
+      first_name: "",
+      middle_name: "",
+      last_name: "",
       gender: "",
       birthdate: "",
       addr_region: "",
       addr_province: "",
       addr_municipal: "",
       addr_baranggay: "",
-      // Include default values for educational background and job information fields
       elementary: "",
       highSchool: "",
       seniorHighSchool: "",
@@ -49,14 +78,13 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       jobRole: "",
       workingType: "",
       contractYears: "",
-      workSchedules: {}, // Add the initial structure for work schedules if needed
+      workSchedules: {},
     },
     mode: "onChange",
   });
-
-  const handleFormSubmit = async (data: any) => {
+  const handleFormSubmit = async (data: EmployeeFormData) => {
+    setIsSubmitting(true);
     try {
-      // Combine the educational background fields into a single JSON object
       const educationalBackground = {
         elementary: data.elementary,
         highSchool: data.highSchool,
@@ -65,46 +93,54 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         universityCollege: data.universityCollege,
         course: data.course,
         highestDegree: data.highestDegree,
-        certificates:
-          data.certificates?.map((file: any) => ({
-            fileName: file.name,
-            fileUrl: file.url,
-          })) || [],
+        certificates: data.certificates.map((file) => ({
+          fileName: file.name,
+          fileUrl: file.url,
+        })),
       };
 
-      // Prepare data for submission
       const fullData = {
         ...data,
-        birthdate: data.birthdate ? new Date(data.birthdate) : null,
-        hireDate: data.hireDate ? new Date(data.hireDate) : null,
-        addr_region: parseInt(data.addr_region),
-        addr_province: parseInt(data.addr_province),
-        addr_municipal: parseInt(data.addr_municipal),
-        addr_baranggay: parseInt(data.addr_baranggay),
-        educationalBackground: JSON.stringify(educationalBackground), // Convert to JSON string
+        birthdate: data.birthdate
+          ? new Date(data.birthdate).toISOString()
+          : null,
+        hireDate: data.hireDate ? new Date(data.hireDate).toISOString() : null,
+        addr_region: parseInt(data.addr_region, 10),
+        addr_province: parseInt(data.addr_province, 10),
+        addr_municipal: parseInt(data.addr_municipal, 10),
+        addr_baranggay: parseInt(data.addr_baranggay, 10),
+        educationalBackground: JSON.stringify(educationalBackground),
       };
 
       const response = await axios.post(
         "/api/employeemanagement/employees",
         fullData
       );
-      console.log("Employee created:", response.data);
+      if (response.status === 200 || response.status === 201) {
+        toast({
+          title: "Success",
+          description: "Employee successfully added!",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
 
-      onClose();
-      onEmployeeAdded();
+        onEmployeeAdded(); // tawagon para mag refresh
+        methods.reset(); // tangalon ang data sa fields
+        onClose(); // close model
+      }
     } catch (error) {
       console.error("Error creating employee:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add employee. Please try again.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const handleCancel = () => {
-    methods.reset();
-    onClose();
-  };
-
-  const renderBreadcrumb = () => {
-    const breadcrumbPaths = [{ title: "Add Employee", link: "#" }];
-    return <BreadcrumbComponent paths={breadcrumbPaths} />;
   };
 
   return (
@@ -113,46 +149,36 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       <Modal
         size="4xl"
         isOpen={isOpen}
-        onClose={handleCancel}
+        onClose={onClose}
         scrollBehavior="inside"
         isDismissable={false}
       >
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
             <ModalContent>
-              <>
-                <ModalHeader className="flex flex-col gap-1">
-                  {renderBreadcrumb()}
-                </ModalHeader>
-                <ModalBody className="max-h-[70vh] overflow-y-auto">
-                  <h2 className="text-lg font-semibold mb-2">
-                    Personal Information
-                  </h2>
-                  <PersonalInformationForm />
-
-                  <Divider className="my-6" />
-
-                  <h2 className="text-lg font-semibold mb-2">
-                    Educational Background
-                  </h2>
-                  <EducationalBackgroundForm />
-
-                  <Divider className="my-6" />
-
-                  <h2 className="text-lg font-semibold mb-2">
-                    Job Information
-                  </h2>
-                  <JobInformationForm />
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onClick={handleCancel}>
-                    Cancel
-                  </Button>
-                  <Button color="primary" type="submit">
-                    Save
-                  </Button>
-                </ModalFooter>
-              </>
+              <ModalHeader>Add New Employee</ModalHeader>
+              <ModalBody>
+                <h2>Personal Information</h2>
+                <PersonalInformationForm />
+                <Divider className="my-6" />
+                <h2>Educational Background</h2>
+                <EducationalBackgroundForm />
+                <Divider className="my-6" />
+                <h2>Job Information</h2>
+                <JobInformationForm />
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  color="danger"
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button color="primary" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Saving..." : "Save"}
+                </Button>
+              </ModalFooter>
             </ModalContent>
           </form>
         </FormProvider>
