@@ -125,9 +125,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
           isClosable: true,
         });
 
-        onEmployeeAdded(); // Call this function to refresh the employee list
-        methods.reset(); // Reset form after submission
-        onClose(); // Close modal
+        onEmployeeAdded(); // tawagon para mag refresh
+        methods.reset(); // tangalon ang data sa fields
+        onClose(); // close model
       }
     } catch (error) {
       console.error("Error creating employee:", error);
