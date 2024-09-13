@@ -26,10 +26,10 @@ export interface UserProfile {
     birthdate: string; // ISO 8601 date string
     gender: string; // Assuming gender is limited to 'M' or 'F'
     contact_no: string;
-    barangay: string;
-    city: string;
-    province: string;
-    region: string;
+    addr_baranggay: string;
+    addr_municipal: string;
+    addr_province: string;
+    addr_region: string;
 }
 
 
@@ -54,5 +54,11 @@ export interface BackupEntry {
     status: 'Completed' | 'Failed';
 }
 
+export interface NotificationConfiguration {
+    isAllowEmailNotification: boolean;
+    isAllowPushNotification: boolean;
+    isDoNotDisturb: boolean;
+    notificationSound: string;
+}
 
 

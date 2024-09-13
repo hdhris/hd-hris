@@ -43,13 +43,13 @@ export async function GET() {
         suffix: user_data?.trans_employees?.suffix!,
         extension: user_data?.trans_employees?.extension!,
         email: user_data?.trans_employees?.email!,
-        birthdate: dayjs(user_data?.trans_employees?.birthdate!).format("YYYY-MM-DD"),
+        birthdate: user_data?.trans_employees?.birthdate! && dayjs(user_data?.trans_employees?.birthdate!).format("YYYY-MM-DD"),
         gender: user_data?.trans_employees?.gender!,
         contact_no: user_data?.trans_employees?.contact_no!,
-        barangay: String(user_data?.trans_employees?.addr_baranggay!),
-        city: String(user_data?.trans_employees?.addr_municipal!),
-        province: String(user_data?.trans_employees?.addr_province!,),
-        region: String(user_data?.trans_employees?.addr_region!,)
+        addr_baranggay: String(user_data?.trans_employees?.addr_baranggay!),
+        addr_municipal: String(user_data?.trans_employees?.addr_municipal!),
+        addr_province: String(user_data?.trans_employees?.addr_province!,),
+        addr_region: String(user_data?.trans_employees?.addr_region!,)
     }
     return NextResponse.json(users)
 

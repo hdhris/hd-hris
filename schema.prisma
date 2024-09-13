@@ -88,8 +88,8 @@ model trans_employees {
   addr_municipal                                                         Int?
   addr_baranggay                                                         Int?
   hired_at                                                               DateTime?                      @db.Timestamp(6)
-  created_at                                                             DateTime                       @db.Timestamp(6)
-  updated_at                                                             DateTime                       @db.Timestamp(6)
+  created_at                                                             DateTime?                      @db.Timestamp(6)
+  updated_at                                                             DateTime?                      @db.Timestamp(6)
   deleted_at                                                             DateTime?                      @db.Timestamp(6)
   statutory_no_json                                                      Json?                          @db.Json
   family_bg_json                                                         Json?                          @db.Json
@@ -114,7 +114,7 @@ model trans_employees {
   log_attendances                                                        log_attendances[]
   sys_accounts                                                           sys_accounts[]
   sys_notifications                                                      sys_notifications[]
-  sys_variables                                                          sys_variables[]
+  sys_variables                                                          sys_variables?
   trans_attendance_details                                               trans_attendance_details[]
   trans_cash_advances_trans_cash_advances_employee_idTotrans_employees   trans_cash_advances[]          @relation("trans_cash_advances_employee_idTotrans_employees")
   trans_cash_advances_trans_cash_advances_approval_byTotrans_employees   trans_cash_advances[]          @relation("trans_cash_advances_approval_byTotrans_employees")
@@ -499,11 +499,11 @@ model sys_sessions {
 
 model sys_variables {
   id              Int              @id @default(autoincrement())
-  employee_id     Int?
+  employee_id     Int?             @unique(map: "employee_id")
   key             String?          @db.VarChar(45)
   data            Json?            @db.Json
   created_at      DateTime         @db.Timestamp(6)
-  updated_at      DateTime         @db.Timestamp(6)
+  updated_at      DateTime?        @db.Timestamp(6)
   trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_variables_trans_employees1")
 }
 

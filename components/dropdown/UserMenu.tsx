@@ -1,12 +1,21 @@
-'use client'
-import React from 'react';
+'use client';
+import React, {useEffect, useState} from 'react';
 import {
-    Badge, cn, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Skeleton, Tooltip, User
+    Badge,
+    cn,
+    Dropdown,
+    DropdownItem,
+    DropdownMenu,
+    DropdownSection,
+    DropdownTrigger,
+    Skeleton,
+    Tooltip,
+    User
 } from "@nextui-org/react";
 import {Handshake, Lifebuoy, SignOut, Sliders} from "@phosphor-icons/react";
 import {Avatar} from "@nextui-org/avatar";
 import {icon_theme, text_icon, text_truncated} from "@/lib/utils";
-import Typography from "@/components/common/typography/Typography"
+import Typography from "@/components/common/typography/Typography";
 import {LuShieldCheck} from "react-icons/lu";
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
@@ -16,72 +25,71 @@ import {MdOutlinePrivacyTip} from "react-icons/md";
 import {IoApps} from "react-icons/io5";
 import {logout} from "@/actions/authActions";
 import {Button} from "@nextui-org/button";
+import {UserRound} from "lucide-react";
 
-function UserMenu() {
-    const session_server = useSession();
+interface UserProfile {
+    name: string
+    email: string
+    pic: string | null
+    privilege: string | null
+}
+const UserMenu: React.FC = () => {
+    const {data: sessionData, status} = useSession();
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+    useEffect(() => {
+        const isLoaded = status !== "loading";
+        const user = isLoaded ? sessionData?.user : null;
 
-    // Check if session is not loading
-    const isLoaded = session_server?.status !== "loading";
+        const name = user?.name ?? "-----";
+        const email = user?.email ?? "-----";
+        const pic = user?.picture ?? null;
+        const privilege = user?.privilege ?? null;
+        setUserProfile({
+            name,
+            email,
+            pic,
+            privilege
+        })
+    }, [sessionData?.user, status]);
 
-    // Get user data with default values
-    const name = isLoaded ? session_server?.data?.user?.name ?? "-----" : "-----";
-    const email = isLoaded ? session_server?.data?.user?.email ?? "-----" : "-----";
-    const pic = isLoaded ? session_server?.data?.user?.picture : undefined;
-
-    return (<Dropdown radius="sm"
-        >
+    return (<Dropdown radius="sm">
             <DropdownTrigger>
                 <span className="cursor-pointer">
                     <Badge content="" color="success" shape="circle" placement="bottom-right">
                         <Avatar
-                            src={pic}
+                            src={userProfile?.pic!}
                             size="sm"
                             showFallback
-                            fallback={<Skeleton className="flex rounded-full"/>}
+                            fallback={!userProfile?.pic && <UserRound className="w-6 h-6 text-default-500" size={20}/>}
                         />
                     </Badge>
                 </span>
             </DropdownTrigger>
             <DropdownMenu
                 aria-label="Custom item styles"
-                disabledKeys={['privileges']}
                 className="p-3"
                 itemClasses={{
                     base: ["rounded", "text-inactive-bar", "data-[hover=true]:text-active-bar", "data-[hover=true]:hover-bg", "data-[selectable=true]:focus:bg-default-50", "data-[pressed=true]:opacity-70", "data-[focus-visible=true]:ring-default-500"],
                 }}
             >
                 <DropdownSection aria-label="Profile & Actions" showDivider>
-                    <DropdownItem
-                        textValue="Profile"
-                        isReadOnly
-                        key="profile"
-                        className="h-14 gap-2 opacity-100 "
-                    >
-                        <Tooltip content={name}>
+                    <DropdownItem textValue="Profile" isReadOnly key="profile" className="h-14 gap-2 opacity-100">
+                        <Tooltip content={userProfile?.name}>
                             <User
-                                name={name}
-                                description={email}
+                                name={userProfile?.name}
+                                description={userProfile?.email}
                                 classNames={{
-                                    name: cn("text-md font-semibold w-32", text_truncated),
-                                    description: "text-sm",
+                                    name: cn("text-md font-semibold w-32", text_truncated), description: "text-sm",
                                 }}
                                 avatarProps={{
-                                    size: "sm", src:  `${pic}`,
-                                    showFallback: true, fallback: <Skeleton className="flex rounded-full"/>
+                                    size: "sm",
+                                    src: userProfile?.pic!,
+                                    showFallback: true,
+                                    fallback: !userProfile?.pic && <UserRound className="w-6 h-6 text-default-500" size={20}/>
                                 }}
                             />
                         </Tooltip>
-
                     </DropdownItem>
-                    {/*<DropdownItem*/}
-                    {/*    as={Link}*/}
-                    {/*    href='/preferences'*/}
-                    {/*    textValue="Account Settings"*/}
-                    {/*    key="account_settings"*/}
-                    {/*    startContent={<UserCircleGear className={cn("", icon_theme)}/>}*/}
-                    {/*>*/}
-                    {/*    <Typography className={text_icon}>Account Settings</Typography>*/}
-                    {/*</DropdownItem>*/}
                     <DropdownItem
                         textValue="Preferences"
                         key="preferences"
@@ -92,17 +100,12 @@ function UserMenu() {
                         <Typography className={text_icon}>Preferences</Typography>
                     </DropdownItem>
                 </DropdownSection>
-                <DropdownSection aria-label="Profile & Actions" showDivider>
-                    <DropdownItem
-                        textValue="Privileges"
-                        key="privileges"
-                        isReadOnly
-                        className='opacity-100'
-                    >
-                        <Chip color='success' className={text_icon}>{isLoaded ? session_server?.data?.user.privilege : "---"}</Chip>
+                <DropdownSection aria-label="User Privileges" showDivider>
+                    <DropdownItem textValue="Privileges" key="privileges" isReadOnly className='opacity-100'>
+                        <Chip color='success' className={text_icon}>{userProfile?.privilege ?? "---"}</Chip>
                     </DropdownItem>
                 </DropdownSection>
-                <DropdownSection showDivider>
+                <DropdownSection>
                     <DropdownItem
                         textValue="Security"
                         key="security"
@@ -159,22 +162,18 @@ function UserMenu() {
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection>
-                    <DropdownItem
-                        textValue="Log Out"
-                        key="logout"
-                        className='px-0 py-0'
-                    >
+                    <DropdownItem textValue="Log Out" key="logout" className='px-0 py-0'>
                         <form action={logout}>
-                           <Button size='sm' variant='light' type='submit' className='w-full justify-start text-sm' startContent={<SignOut className={cn("", icon_theme)}/>}>
-                               <Typography className={text_icon}>Log out</Typography>
-                           </Button>
-
+                            <Button size='sm' variant='light' type='submit' className='w-full justify-start text-sm'
+                                    startContent={<SignOut className={cn("", icon_theme)}/>}
+                            >
+                                <Typography className={text_icon}>Log out</Typography>
+                            </Button>
                         </form>
-
                     </DropdownItem>
                 </DropdownSection>
             </DropdownMenu>
         </Dropdown>);
-}
+};
 
 export default UserMenu;

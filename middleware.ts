@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt'
 import {auth} from "@/auth";
+import {getEmployeeId} from "@/helper/employee_id/employee_id";
 
 
 export default auth((req: any) => {
@@ -27,14 +28,13 @@ export default auth((req: any) => {
         const newUrl = new URL("/api/auth/signin", req.nextUrl.origin)
         return Response.redirect(newUrl)
     }
+
+
 })
 
 
 
 export const config = {
-    unstable_allowDynamic: [
-        './node_modules/axios/lib/utils.js'
-    ],
     matcher: [
         '/((?!_next/static|_next/image|favicon.ico|api/auth|globals.css|layout|public/).*)',
         '/:path*', '/public/assets/(.*)', '/public/notification-sounds/(.*)'

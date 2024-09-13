@@ -15,6 +15,7 @@ import NavBar from "@/components/navbar/NavBar";
 import UserMenu from "@/components/dropdown/UserMenu";
 import Notification from '@/components/functions/notifications/Notification'
 import {LiaUsersSolid} from "react-icons/lia";
+import Authorization from "@/components/admin/dashboard/Authorization";
 
 function RootLayout({children}: { children: ReactNode }) {
     // Use a function to lazily initialize the state
@@ -84,6 +85,7 @@ function RootLayout({children}: { children: ReactNode }) {
 
 
         <ScrollShadow className="p-4 mt-16 mb-4 w-full min-w-[980px]">
+            <Authorization/>
             {children}
         </ScrollShadow>
 
