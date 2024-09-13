@@ -8,8 +8,10 @@ import { ActionButtons } from "@/components/actions/ActionButton";
 import { NotificationConfiguration } from "@/types/routes/default/types";
 import fetcher, { axiosInstance } from "@/services/fetcher";
 import useSWR from "swr";
+import {useSession} from "next-auth/react";
 
 const NotificationSettings: React.FC = () => {
+    const session = useSession()
     // Default notification configuration values
     const defaultNotificationConfig: NotificationConfiguration = {
         isAllowEmailNotification: false,
@@ -20,7 +22,7 @@ const NotificationSettings: React.FC = () => {
 
     // Fetch data using SWR
     const { data, isLoading } = useSWR<NotificationConfiguration>(
-        `/api/admin/notification/notification-configuration`,
+        `/api/admin/notification/notification-configuration/id/${session.data?.user.employee_id}`,
         fetcher
     );
 

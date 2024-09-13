@@ -1,15 +1,14 @@
 import prisma from "@/prisma/prisma";
-import { getEmployeeId } from "@/helper/employee_id/employee_id";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
-        // Retrieve employee ID
-        const id = await getEmployeeId();
+        // Convert id to a number
+        const employeeId = parseInt(params.id, 10);
 
-        // Check if employee ID is valid
-        if (!id) {
-            return NextResponse.json({ error: "Employee ID not found" }, { status: 400 });
+        // Check if the employee ID is valid
+        if (isNaN(employeeId)) {
+            return NextResponse.json({ error: "Invalid Employee ID" }, { status: 400 });
         }
 
         // Query the database for the notification
@@ -20,7 +19,7 @@ export async function GET() {
                         key: "notification",
                     },
                     {
-                        employee_id: id,
+                        employee_id: employeeId,
                     },
                 ],
             },

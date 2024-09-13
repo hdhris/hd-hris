@@ -85,7 +85,6 @@ function RootLayout({children}: { children: ReactNode }) {
 
 
         <ScrollShadow className="p-4 mt-16 mb-4 w-full min-w-[980px]">
-            <Authorization/>
             {children}
         </ScrollShadow>
 
