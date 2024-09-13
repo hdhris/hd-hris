@@ -4,41 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="address input component">
-      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/notification/notification-configuration/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/notification/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/admin/dashboard/Authorization.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/helper/employee_id/employee_id.ts" afterDir="false" />
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="implementing change credentials">
+      <change afterPath="$PROJECT_DIR$/helper/zodValidation/NewPasswordValidation.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/dashboard/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/employeemanagement/department/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/employeemanagement/employees/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/employeemanagement/layout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/employeemanagement/resign/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/employeemanagement/suspend/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/profile/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/profile/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-profile/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/(account)/update-profile/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/edgestore/[...edgestore]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/edgestore/[...edgestore]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/employeemanagement/addresses/route.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/employeemanagement/department/route.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/employeemanagement/employees/route.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/employeemanagement/job_title/route.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/attendance-time/overtime/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/attendance-time/overtime/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/records/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/records/[...date]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/schedule/route.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/schedule/route.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/notification/notification-configuration/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/notification/notification-configuration/[...id]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(minor)/address/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(minor)/address/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/auth/login-checkpoint/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/login-checkpoint/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/NotificationSettings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/NotificationSettings.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FileUpload.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/address/AddressInput.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/address/AddressInput.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/dropdown/UserMenu.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/zodValidation/AddressValidation.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/AddressValidation.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/zodValidation/UpdateProfile.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/UpdateProfile.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utils/authUtils/authUtils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/authUtils/authUtils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/prisma.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/schema.prisma" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/routes/default/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/routes/default/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/types.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/types.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sampleData/admin/employees/Employees.ts" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,13 +32,13 @@
         <option value="JavaScript File" />
         <option value="CSS File" />
         <option value="tsconfig.json" />
-        <option value="TypeScript File" />
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
   <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="origin/nizam" />
+    <option name="BRANCH" value="origin/france" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -126,11 +107,11 @@
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\notification-sounds" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(core)\attendance-time\records\[...date]" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(defaut)\notification\notification-configuration\[...id]" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\(admin)\authorized" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\common\forms\address" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\assets" />
     </key>
   </component>
   <component name="RunManager" selected="npm.server">
@@ -309,7 +290,7 @@
       <workItem from="1726147242312" duration="11590000" />
       <workItem from="1726192758339" duration="12900000" />
       <workItem from="1726206890238" duration="9309000" />
-      <workItem from="1726218604692" duration="5635000" />
+      <workItem from="1726218604692" duration="11627000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -639,7 +620,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726107830492</updated>
     </task>
-    <option name="localTasksCounter" value="45" />
+    <task id="LOCAL-00045" summary="implementing change credentials">
+      <option name="closed" value="true" />
+      <created>1726234766064</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1726234766064</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -657,7 +646,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixing some bugs" />
     <MESSAGE value="img to Image" />
     <MESSAGE value="test" />
     <MESSAGE value="adding simple backen to the account settings" />
@@ -682,6 +670,7 @@
     <MESSAGE value="adding validation in login" />
     <MESSAGE value="small changes in AddressInput.tsx" />
     <MESSAGE value="address input component" />
-    <option name="LAST_COMMIT_MESSAGE" value="address input component" />
+    <MESSAGE value="implementing change credentials" />
+    <option name="LAST_COMMIT_MESSAGE" value="implementing change credentials" />
   </component>
 </project>

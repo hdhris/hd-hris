@@ -101,8 +101,6 @@ export default function ProfileForm() {
 
     const upperInput: FormInputProps[] = [{
         name: "picture", Component: () => {
-
-
             return (<div className='grid grid-cols-2 relative mb-2'>
                 <div className='flex items-center gap-2'>
                     <div className="w-fit">
