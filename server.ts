@@ -1,7 +1,6 @@
 import http from "http";
-import prisma from "./prisma/prisma";
+import prisma_server from "./prisma/prisma-server";
 import { Server } from "socket.io";
-import {withPulse} from "@prisma/extension-pulse/node";
 
 const httpServer = http.createServer((req, res) => {
     // Define the routes
@@ -36,9 +35,8 @@ httpServer.listen(PORT, async () => {
 });
 
 async function streamPlayerUpdates(io: Server) {
-    const pulse = prisma.$extends(withPulse({ apiKey: process.env.PULSE_API_KEY || '' }));
     try{
-        const stream = await pulse.sys_accounts.stream();
+        const stream = await prisma_server.sys_accounts.stream();
         // Handle Prisma stream events
         for await (const event of stream) {
             console.log(`received event: `, event);

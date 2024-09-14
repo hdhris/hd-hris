@@ -13,20 +13,22 @@ import {icon_color} from "@/lib/utils";
 import {useForm, useFormState} from "react-hook-form";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {NewPasswordValidation} from "@/helper/zodValidation/NewPasswordValidation";
-import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
-
-const ChangeCredentialSchema = LoginValidation.merge(NewPasswordValidation).omit({
-    password: true, current_password: true
-}).refine(data => data.new_password === data.confirm_password, {
-    message: "Passwords do not match", path: ["confirm_password"],
-})
+import {ChangeCredentialSchema} from "@/helper/zodValidation/ChangeCredentialValidation";
+import {useSession} from "next-auth/react";
+import {axiosInstance} from "@/services/fetcher";
+import {useToast} from "@/components/ui/use-toast";
+import {useRouter} from "next/navigation";
+import {AxiosError} from "axios";
+import {login} from "@/actions/authActions";
 
 function Page() {
     const [isVisibleNew, setIsVisibleNew] = useState(false)
     const [isVisibleConfirm, setIsVisibleConfirm] = useState(false)
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
+    const {data, update} = useSession()
+    const {toast} = useToast()
+    const router = useRouter()
 
 
     const credential = useForm<z.infer<typeof ChangeCredentialSchema>>({
@@ -65,29 +67,37 @@ function Page() {
     }]
 
     async function onSubmit(values: z.infer<typeof ChangeCredentialSchema>) {
-
-        // const simple3Des = new SimpleAES(); // Initialization happens automatically
-        //
-        // const plaintext = 'password';
-        // console.log("Plain Text: ", plaintext)
-        // const encryptedText = await simple3Des.encryptData(plaintext);
-        // console.log('Encrypted:', encryptedText);
-        // console.log('Length:', encryptedText.length);
-        //
-        // const decryptedText = await simple3Des.decryptData(encryptedText)
-        // console.log("Decrypted: ", decryptedText)
-        // const isMatch = await simple3Des.compare(plaintext, encryptedText);
-        // console.log('Does the decrypted text match the plaintext?', isMatch);
         setError("");
         setLoading(true);
         try {
+            const res = await axiosInstance.put("/api/auth/login-checkpoint", values)
+            if (res.status === 200) {
+                const loginResponse = await login({username: values.username, password: values.new_password})
+                if (loginResponse.success) {
+                    // Redirect to dashboard
+                    router.push("/dashboard")
 
+                } else if (loginResponse.error) {
+                    // Display error message
+                    setError(loginResponse.error.message)
+                }
 
-            console.log(values)
+                console.log(data)
+            } else if(res.status === 400){
+                setError(res.data.message);
+            }
+
 
         } catch (error) {
-            console.log(error)
-            setError("Error signing in. Please try again.");
+            if(error instanceof AxiosError){
+                setError(error.response?.data.message);
+
+            } else {
+                setError("Error updating your account. Please try again.");
+            }
+
+            console.log("Error: ", error)
+
         } finally {
             setLoading(false);
         }
@@ -96,9 +106,9 @@ function Page() {
     return (<section className='h-screen flex items-center justify-center gap-10'>
         <Card className='p-4 ' shadow='sm' radius='sm'>
             <CardHeader className='grid place-items-center gap-2'>
-                <Typography className='font-semibold text-xl'>Change Your Credentials</Typography>
-                <Typography className='text-center'>You must change your username and password before
-                    continuing.</Typography>
+                <Typography className='font-semibold text-xl'>Setup Your Account</Typography>
+                <Typography className='text-center'>Complete Your Account Setup: Essential Steps for a Smooth
+                    Start</Typography>
             </CardHeader>
             <CardBody>
                 {error && <Chip classNames={{
@@ -111,7 +121,8 @@ function Page() {
 
                         </div>
 
-                        <Button type="submit" className="w-full" isDisabled={!isDirty || !isValid} isLoading={loading}>
+                        <Button type="submit" color="primary" className="w-full" isDisabled={!isDirty || !isValid}
+                                isLoading={loading}>
                             Update Credentials
                         </Button>
                     </form>
