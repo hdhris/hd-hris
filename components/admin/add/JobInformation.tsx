@@ -1,17 +1,28 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useFormContext, Controller } from 'react-hook-form';
-import { DatePicker, TimeInput, Checkbox, Input, Select, SelectItem } from '@nextui-org/react';
-import { parseDate, CalendarDate } from '@internationalized/date';
-import { Time } from '@internationalized/date';
-import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import React, { useState, useEffect } from "react";
+import { useFormContext, Controller } from "react-hook-form";
+import {
+  DatePicker,
+  TimeInput,
+  Checkbox,
+  Input,
+  Select,
+  SelectItem,
+} from "@nextui-org/react";
+import { parseDate, CalendarDate } from "@internationalized/date";
+import { Time } from "@internationalized/date";
+import {
+  FormControl,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 type FormValues = {
-  department: string;
-  hireDate: string;
-  jobTitle: string;
-  jobRole: string;
+  department_id: string;
+  hired_at: string;
+  job_id: string;
   workingType: string;
   contractYears: string;
   workSchedule?: WorkSchedule;
@@ -21,13 +32,35 @@ type WorkSchedule = {
   [key: string]: { timeIn: Time | null; timeOut: Time | null };
 };
 
-const availableDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const availableDays = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+// Helper function to safely parse date
+const safeParseDate = (dateString: string) => {
+  try {
+    return parseDate(dateString);
+  } catch (error) {
+    console.error("Date parsing error:", error);
+    return null;
+  }
+};
 
 const JobInformationForm: React.FC = () => {
   const { control, setValue } = useFormContext<FormValues>();
   const [workSchedule, setWorkSchedule] = useState<WorkSchedule>({});
-  const [departments, setDepartments] = useState<Array<{ id: number; name: string }>>([]);
-  const [jobTitles, setJobTitles] = useState<Array<{ id: number; name: string }>>([]);
+  const [departments, setDepartments] = useState<
+    Array<{ id: number; name: string }>
+  >([]);
+  const [jobTitles, setJobTitles] = useState<
+    Array<{ id: number; name: string }>
+  >([]);
 
   useEffect(() => {
     // Fetch departments and job titles when component mounts
@@ -37,35 +70,34 @@ const JobInformationForm: React.FC = () => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await fetch('/api/employeemanagement/departments');
+      const response = await fetch("/api/employeemanagement/department");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Fetched departments:', data); // Log the fetched data
+      console.log("Fetched departments:", data); // Log the fetched data
       setDepartments(data);
     } catch (error) {
-      console.error('Error fetching departments:', error);
+      console.error("Error fetching departments:", error);
     }
   };
-  
+
   const fetchJobTitles = async () => {
     try {
-      const response = await fetch('/api/employeemanagement/job_title');
+      const response = await fetch("/api/employeemanagement/job_title");
       const data = await response.json();
-      console.log('Fetched job titles:', data); // Log the fetched data
+      console.log("Fetched job titles:", data); // Log the fetched data
       setJobTitles(data);
     } catch (error) {
-      console.error('Error fetching job titles:', error);
+      console.error("Error fetching job titles:", error);
     }
   };
-  
 
   const handleDayToggle = (day: string, isChecked: boolean) => {
     if (isChecked) {
       setWorkSchedule((prev) => ({
         ...prev,
-        [day]: { timeIn: new Time(9, 0), timeOut: new Time(17, 0) }
+        [day]: { timeIn: new Time(9, 0), timeOut: new Time(17, 0) },
       }));
     } else {
       setWorkSchedule((prev) => {
@@ -73,13 +105,22 @@ const JobInformationForm: React.FC = () => {
         return rest;
       });
     }
-    setValue(`workSchedule.${day}`, isChecked ? { timeIn: new Time(9, 0), timeOut: new Time(17, 0) } : { timeIn: null, timeOut: null });
+    setValue(
+      `workSchedule.${day}`,
+      isChecked
+        ? { timeIn: new Time(9, 0), timeOut: new Time(17, 0) }
+        : { timeIn: null, timeOut: null }
+    );
   };
 
-  const handleTimeChange = (day: string, type: "timeIn" | "timeOut", value: Time | null) => {
+  const handleTimeChange = (
+    day: string,
+    type: "timeIn" | "timeOut",
+    value: Time | null
+  ) => {
     setWorkSchedule((prev) => ({
       ...prev,
-      [day]: { ...prev[day], [type]: value }
+      [day]: { ...prev[day], [type]: value },
     }));
     setValue(`workSchedule.${day}.${type}`, value);
   };
@@ -89,7 +130,7 @@ const JobInformationForm: React.FC = () => {
       {/* Department */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
         <Controller
-          name="department"
+          name="department_id"
           control={control}
           render={({ field }) => (
             <FormItem>
@@ -103,7 +144,9 @@ const JobInformationForm: React.FC = () => {
                   className="border rounded"
                 >
                   {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id.toString()}>{dept.name}</SelectItem>
+                    <SelectItem key={dept.id} value={dept.id.toString()}>
+                      {dept.name}
+                    </SelectItem>
                   ))}
                 </Select>
               </FormControl>
@@ -114,10 +157,10 @@ const JobInformationForm: React.FC = () => {
 
         {/* Hire Date */}
         <Controller
-          name="hireDate"
+          name="hired_at"
           control={control}
           render={({ field }) => {
-            const parsedValue = field.value ? parseDate(field.value) : null;
+            const parsedValue = field.value ? safeParseDate(field.value) : null;
 
             return (
               <FormItem>
@@ -125,7 +168,9 @@ const JobInformationForm: React.FC = () => {
                 <FormControl>
                   <DatePicker
                     value={parsedValue}
-                    onChange={(date: CalendarDate) => field.onChange(date.toString())}
+                    onChange={(date: CalendarDate) =>
+                      field.onChange(date.toString())
+                    }
                     aria-label="Hire Date"
                     variant="bordered"
                     className="border rounded"
@@ -140,7 +185,7 @@ const JobInformationForm: React.FC = () => {
 
         {/* Job Title */}
         <Controller
-          name="jobTitle"
+          name="job_id"
           control={control}
           render={({ field }) => (
             <FormItem>
@@ -154,7 +199,9 @@ const JobInformationForm: React.FC = () => {
                   className="border rounded"
                 >
                   {jobTitles.map((job) => (
-                    <SelectItem key={job.id} value={job.id.toString()}>{job.name}</SelectItem>
+                    <SelectItem key={job.id} value={job.id.toString()}>
+                      {job.name}
+                    </SelectItem>
                   ))}
                 </Select>
               </FormControl>
@@ -193,12 +240,15 @@ const JobInformationForm: React.FC = () => {
               <TimeInput
                 isDisabled={!workSchedule[day]}
                 value={workSchedule[day]?.timeOut || null}
-                onChange={(newTime) => handleTimeChange(day, "timeOut", newTime)}
+                onChange={(newTime) =>
+                  handleTimeChange(day, "timeOut", newTime)
+                }
                 className="w-full"
               />
               {workSchedule[day] && (
                 <div className="text-sm text-gray-600">
-                  {workSchedule[day].timeIn?.toString()} - {workSchedule[day].timeOut?.toString()}
+                  {workSchedule[day].timeIn?.toString()} -{" "}
+                  {workSchedule[day].timeOut?.toString()}
                 </div>
               )}
             </div>
