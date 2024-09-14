@@ -26,8 +26,7 @@ function Page() {
     const [isVisibleConfirm, setIsVisibleConfirm] = useState(false)
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
-    const {data, update} = useSession()
-    const {toast} = useToast()
+    const {data} = useSession()
     const router = useRouter()
 
 

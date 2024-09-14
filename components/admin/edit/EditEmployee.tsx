@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+"use client"
+import React, {useState, useEffect, useCallback} from "react";
 import {
   Modal,
   ModalContent,
@@ -84,18 +85,12 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ employeeId, onEmployeeUpdat
     mode: "onChange",
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchEmployeeData();
-    }
-  }, [isOpen, employeeId]);
-
-  const fetchEmployeeData = async () => {
+  const fetchEmployeeData = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(`/api/employeemanagement/employees?id=${employeeId}`);
       const employeeData = response.data;
-      
+
       methods.reset({
         picture: employeeData.picture || "",
         first_name: employeeData.first_name || "",
@@ -132,7 +127,14 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ employeeId, onEmployeeUpdat
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [employeeId, methods, toast]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchEmployeeData();
+    }
+  }, [isOpen, fetchEmployeeData]);
+
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);

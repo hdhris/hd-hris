@@ -77,10 +77,6 @@ export const handleAuthorization = async (credentials: { username: string; passw
     // Validate credentials
     const { username, password } = await LoginValidation.parseAsync(credentials);
 
-    // Get IP and User-Agent
-    const ipResponse = await fetch('https://ipapi.co/json').then(data => data.json());
-    const ua = parse(headers().get('user-agent')!);
-
     // Get user data
     const user = await getUserData(username, password);
     if (user?.error) {
@@ -91,6 +87,11 @@ export const handleAuthorization = async (credentials: { username: string; passw
     if (user.role !== 'admin') {
         throw new Error('Only admin can login');
     }
+
+    // Get IP and User-Agent
+    const ipResponse = await fetch('https://ipapi.co/json').then(data => data.json());
+    const ua = parse(headers().get('user-agent')!);
+
 
     // Handle session
     const existingSession = await prisma.sys_sessions.findFirst({
@@ -125,7 +126,9 @@ export const handleAuthorization = async (credentials: { username: string; passw
                 platform: ua.browser, // Browser name
                 os: ua.os, // OS name
                 os_version: ua.osVersion, // OS version
-                login_count: 1 // Start the login count as 1
+                login_count: 1, // Start the login count as 1
+                login_provider: "Credentials", // Login provider
+                provider_token: null
             },
         });
     }

@@ -92,8 +92,8 @@ model log_attendances {
   employee_id     Int
   timestamp       DateTime        @db.Timestamp(6)
   status          Int?
-  punch           DateTime?       @db.Timestamp(6)
   created_at      DateTime?       @db.Timestamp(6)
+  punch           Int?
   trans_employees trans_employees @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_attendance_employees1")
 }
 
@@ -116,6 +116,7 @@ model ref_batch_schedules {
   created_at    DateTime        @db.Timestamp(6)
   updated_at    DateTime        @db.Timestamp(6)
   deleted_at    DateTime?       @db.Timestamp(6)
+  break_min     Int?
   dim_schedules dim_schedules[]
 }
 
@@ -221,8 +222,8 @@ model ref_training_programs {
 model sys_accounts {
   id                  Int                   @id @default(autoincrement())
   employee_id         Int?
-  username            String?               @db.VarChar(45)
-  password            String?               @db.VarChar(255)
+  username            String                @unique @default("") @db.VarChar(45)
+  password            String                @db.VarChar(255)
   created_at          DateTime?             @db.Timestamp(6)
   updated_at          DateTime?             @db.Timestamp(6)
   privilege_id        Int?
@@ -235,7 +236,7 @@ model sys_accounts {
 
 model sys_privileges {
   id            Int            @id @default(autoincrement())
-  accessibility Json?          @db.JsonB
+  accessibility Json?
   name          String?        @db.VarChar(45)
   created_at    DateTime       @db.Timestamp(6)
   updated_at    DateTime       @db.Timestamp(6)
@@ -253,27 +254,29 @@ model sys_recovery_tokens {
 }
 
 model sys_sessions {
-  id           Int           @id @default(autoincrement())
-  account_id   Int?
-  ip_address   String?       @db.Inet
-  expires_at   DateTime?     @db.Timestamp(6)
-  created_at   DateTime      @db.Timestamp(6)
-  updated_at   DateTime?     @db.Timestamp(6)
-  countrycode  String?       @db.VarChar(4)
-  countryname  String?       @db.VarChar(45)
-  region       String?       @db.VarChar(45)
-  city         String?       @db.VarChar(45)
-  platform     String?       @db.VarChar(45)
-  os           String?       @db.VarChar(45)
-  os_version   Int
-  login_count  Int
-  type         String?       @db.VarChar(45)
-  sys_accounts sys_accounts? @relation(fields: [account_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_sessions_sys_accounts_2")
+  id             Int           @id @default(autoincrement())
+  account_id     Int?
+  ip_address     String?       @db.Inet
+  expires_at     DateTime?     @db.Timestamp(6)
+  created_at     DateTime      @db.Timestamp(6)
+  updated_at     DateTime?     @db.Timestamp(6)
+  countrycode    String?       @db.VarChar(4)
+  countryname    String?       @db.VarChar(45)
+  region         String?       @db.VarChar(45)
+  city           String?       @db.VarChar(45)
+  platform       String?       @db.VarChar(45)
+  os             String?       @db.VarChar(45)
+  os_version     Int
+  login_count    Int
+  type           String?       @db.VarChar(45)
+  provider_token String?       @db.VarChar(255)
+  login_provider String        @db.VarChar(50)
+  sys_accounts   sys_accounts? @relation(fields: [account_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_sessions_sys_accounts_2")
 }
 
 model sys_variables {
   id              Int              @id @default(autoincrement())
-  employee_id     Int?
+  employee_id     Int?             @unique(map: "employee_id")
   key             String?          @db.VarChar(45)
   data            Json?            @db.Json
   created_at      DateTime         @db.Timestamp(6)
@@ -318,7 +321,7 @@ model trans_employees {
   middle_name                                                            String?                        @db.VarChar(45)
   suffix                                                                 String?                        @db.VarChar(10)
   extension                                                              String?                        @db.VarChar(10)
-  email                                                                  String?                        @db.VarChar(45)
+  email                                                                  String?                        @unique(map: "unique_email") @db.VarChar(45)
   contact_no                                                             String?                        @db.VarChar(45)
   birthdate                                                              DateTime?                      @db.Date
   gender                                                                 String?                        @db.VarChar(10)
@@ -355,7 +358,7 @@ model trans_employees {
   log_attendances                                                        log_attendances[]
   sys_accounts                                                           sys_accounts[]
   sys_notifications                                                      sys_notifications[]
-  sys_variables                                                          sys_variables[]
+  sys_variables                                                          sys_variables?
   trans_attendance_details                                               trans_attendance_details[]
   trans_cash_advances_trans_cash_advances_employee_idTotrans_employees   trans_cash_advances[]          @relation("trans_cash_advances_employee_idTotrans_employees")
   trans_cash_advances_trans_cash_advances_approval_byTotrans_employees   trans_cash_advances[]          @relation("trans_cash_advances_approval_byTotrans_employees")

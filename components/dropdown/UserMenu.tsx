@@ -27,7 +27,6 @@ interface UserProfile {
 
 const UserMenu: React.FC = () => {
     const {data: sessionData, status,} = useSession();
-    console.log(sessionData)
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
     useEffect(() => {
         const isLoaded = status !== "loading";
