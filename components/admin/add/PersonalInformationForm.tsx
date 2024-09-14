@@ -19,8 +19,6 @@ interface AddressOption {
   address_name: string;
 }
 
-
-
 // Define gender options based on EmployeeAll type
 const genderOptions = [
   { value: "male", label: "Male" },
@@ -197,7 +195,7 @@ const PersonalInformationForm: React.FC = () => {
       <div className="grid grid-cols-2 gap-4">
         {/* First Name */}
         <Controller
-          name="firstName"
+          name="first_name"
           control={control}
           render={({ field }) => (
             <FormItem>
@@ -215,7 +213,7 @@ const PersonalInformationForm: React.FC = () => {
         />
         {/* First Name */}
         <Controller
-          name="middleName"
+          name="middle_name"
           control={control}
           render={({ field }) => (
             <FormItem>
@@ -234,7 +232,7 @@ const PersonalInformationForm: React.FC = () => {
 
         {/* Last Name */}
         <Controller
-          name="lastName"
+          name="last_name"
           control={control}
           render={({ field }) => (
             <FormItem>
@@ -319,7 +317,7 @@ const PersonalInformationForm: React.FC = () => {
 
         {/* Phone Number */}
         <Controller
-          name="phoneNo"
+          name="contact_no"
           control={control}
           render={({ field }) => (
             <FormItem>

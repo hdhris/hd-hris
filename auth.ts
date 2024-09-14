@@ -34,7 +34,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         }, async jwt({token, user, session}) {
             if (user) {
                 return {
-                    ...token, picture: user.picture, id: user.id, name: user.name, role: user.role, email: user.email, privilege: user.privilege,
+                    ...token, picture: user.picture, id: user.id, name: user.name, role: user.role, email: user.email, privilege: user.privilege, employee_id: user.employee_id
                 } as JWT;
             }
             return token;

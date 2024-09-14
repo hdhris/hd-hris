@@ -106,7 +106,8 @@ export const getUserData = async (username: string, password: string) => {
         role,
         picture: user.trans_employees?.picture || '',
         email: user.trans_employees?.email || '',
-        privilege: privileges?.name || 'N/A'
+        privilege: privileges?.name || 'N/A',
+        employee_id: user.trans_employees?.id || null
     };
 };
 

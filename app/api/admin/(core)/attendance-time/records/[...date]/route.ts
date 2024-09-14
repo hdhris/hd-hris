@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import {NextRequest, NextResponse} from "next/server";
+import prisma from "@/prisma/prisma";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest, {params}: {params : {date: string }}) {
   try {
-    const { searchParams } = new URL(req.url);
-    const date = searchParams.get('date') as string;
+
+    const {date} = params
     // const date = "2024-09-07";
     const isoDateStart = new Date(`${date}T00:00:00.000Z`).toISOString();
     const isoDateEnd = new Date(`${date}T23:59:59.999Z`).toISOString();

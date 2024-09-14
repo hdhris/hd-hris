@@ -1,11 +1,9 @@
 "use client";
-
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Tabs, Tab } from "@nextui-org/react";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import BreadcrumbComponent from "@/components/common/breadcrumb";
-import AddEmployee from "@/components/admin/add/AddEmployees";
 
 type TabKeys = "employees" | "suspend" | "resign" | "department";
 
@@ -44,7 +42,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
     ],
     department: [
       { title: "Employee Management", link: "/employeemanagement" },
-      { title: "Department", link: "/employeemanagement/appraisal" },
+      { title: "Department", link: "/employeemanagement/department" },
     ],
   };
 
@@ -53,7 +51,6 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
       <div>
         <BreadcrumbComponent paths={breadcrumbPaths[activeTab]} />
       </div>
-
       <div className="mt-2 flex justify-between items-center">
         <Tabs
           aria-label="Employee Management Tabs"
@@ -66,10 +63,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
           <Tab key="resign" title="Resign" />
           <Tab key="department" title="Department" />
         </Tabs>
-
-        <AddEmployee />
       </div>
-
       <ScrollShadow>{children}</ScrollShadow>
     </div>
   );

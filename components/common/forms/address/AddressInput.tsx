@@ -20,10 +20,10 @@ const AddressInput: React.FC = () => {
     // const initialCity = getValues('city') ? String(getValues('city')) : undefined;
     // const initialBarangay = getValues('barangay') ? String(getValues('barangay')) : undefined;
 
-    const initialRegion = getValues('region') ? String(getValues('region')) : '';
-    const initialProvince = getValues('province') ? String(getValues('province')) : '';
-    const initialCity = getValues('city') ? String(getValues('city')) : '';
-    const initialBarangay = getValues('barangay') ? String(getValues('barangay')) : '';
+    const initialRegion = getValues('addr_region') ? String(getValues('addr_region')) : '';
+    const initialProvince = getValues('addr_province') ? String(getValues('addr_province')) : '';
+    const initialCity = getValues('addr_municipal') ? String(getValues('addr_municipal')) : '';
+    const initialBarangay = getValues('addr_baranggay') ? String(getValues('addr_baranggay')) : '';
 
 
     // Load initial values from form
@@ -146,12 +146,12 @@ const AddressInput: React.FC = () => {
             {/* Region Selection */}
             <Controller
                 control={control}
-                name="region"
+                name="addr_region"
                 defaultValue={selectedRegion}
                 render={({ field }) => (
                     <Selection
                         placeholder="Select Region"
-                        name="region"
+                        name="addr_province"
                         label="Region"
                         items={regions}
                         isRequired={true}
@@ -159,7 +159,7 @@ const AddressInput: React.FC = () => {
                         onSelectionChange={(e) => {
                             const regionKey = e.currentKey as string;
                             setSelectedRegion(regionKey);
-                            setValue('region', regionKey);
+                            setValue('addr_province', regionKey);
                             field.onChange(regionKey);
                         }}
                     />
@@ -169,21 +169,21 @@ const AddressInput: React.FC = () => {
             {/* Province Selection */}
             <Controller
                 control={control}
-                name="province"
+                name="addr_province"
                 defaultValue={selectedProvince}
                 render={({ field }) => (
                     <Selection
                         placeholder="Select Province"
-                        name="province"
+                        name="addr_province"
                         label="Province"
                         items={provinces}
-                        // isDisabled={provinces.length === 0}
+                        isDisabled={provinces.length === 0}
                         isRequired={true}
                         selectedKeys={selectedProvince ? [selectedProvince] : undefined}
                         onSelectionChange={(e) => {
                             const provinceKey = e.currentKey as string;
                             setSelectedProvince(provinceKey);
-                            setValue('province', provinceKey);
+                            setValue('addr_province', provinceKey);
                             field.onChange(provinceKey);
                         }}
                     />
@@ -193,21 +193,21 @@ const AddressInput: React.FC = () => {
             {/* City/Municipality Selection */}
             <Controller
                 control={control}
-                name="city"
+                name="addr_municipal"
                 defaultValue={selectedCity}
                 render={({ field }) => (
                     <Selection
                         placeholder="Select City/Municipality"
-                        name="city"
+                        name="addr_municipal"
                         label="City/Municipality"
                         items={cities}
-                        // isDisabled={cities.length === 0}
+                        isDisabled={cities.length === 0}
                         isRequired={true}
                         selectedKeys={selectedCity ? [selectedCity] : undefined}
                         onSelectionChange={(e) => {
                             const cityKey = e.currentKey as string;
                             setSelectedCity(cityKey);
-                            setValue('city', cityKey);
+                            setValue('addr_municipal', cityKey);
                             field.onChange(cityKey);
                         }}
                     />
@@ -217,21 +217,21 @@ const AddressInput: React.FC = () => {
             {/* Barangay Selection */}
             <Controller
                 control={control}
-                name="barangay"
+                name="addr_baranggay"
                 defaultValue={selectedBarangay}
                 render={({ field }) => (
                     <Selection
                         placeholder="Select Barangay"
-                        name="barangay"
+                        name="addr_baranggay"
                         label="Barangay"
                         items={barangays}
-                        // isDisabled={barangays.length === 0}
+                        isDisabled={barangays.length === 0}
                         isRequired={true}
                         selectedKeys={selectedBarangay ? [selectedBarangay] : undefined}
                         onSelectionChange={(e) => {
                             const barangayKey = e.currentKey as string;
                             setSelectedBarangay(barangayKey);
-                            setValue('barangay', barangayKey);
+                            setValue('addr_baranggay', barangayKey);
                             field.onChange(barangayKey);
                         }}
                     />

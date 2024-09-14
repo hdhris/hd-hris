@@ -4,15 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="small changes in AddressInput.tsx">
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="implementing change credentials">
+      <change afterPath="$PROJECT_DIR$/helper/zodValidation/NewPasswordValidation.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/attendance-time/overtime/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/attendance-time/overtime/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/records/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/records/[...date]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/schedule/route.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/schedule/route.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(defaut)/notification/notification-configuration/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(defaut)/notification/notification-configuration/[...id]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(minor)/address/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(minor)/address/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/auth/login-checkpoint/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/login-checkpoint/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/AccountSecurity.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/NotificationSettings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/NotificationSettings.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/defaults/profile/ProfileForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/address/AddressInput.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/address/AddressInput.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/zodValidation/AddressValidation.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/AddressValidation.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/prisma.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/prisma.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/prisma.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sampleData/admin/employees/Employees.ts" beforeDir="false" />
     </list>
+    <list default="true" id="7a63c444-7037-4583-86b1-7e9b9cef9a0a" name="Changes" comment="adding partial checkpoint" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,14 +32,14 @@
       <list>
         <option value="JavaScript File" />
         <option value="CSS File" />
-        <option value="TypeScript JSX File" />
         <option value="tsconfig.json" />
+        <option value="TypeScript JSX File" />
         <option value="TypeScript File" />
       </list>
     </option>
   </component>
   <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="origin/nizam" />
+    <option name="BRANCH" value="origin/france" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -99,11 +108,11 @@
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\notification-sounds" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(core)\attendance-time\records\[...date]" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\api\admin\(defaut)\notification\notification-configuration\[...id]" />
+      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app\(admin)\authorized" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\components\common\forms\address" />
       <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\app" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\public\assets" />
-      <recent name="C:\Users\John\WebstormProjects\Home-Design-HRIS\isolatedPages" />
     </key>
   </component>
   <component name="RunManager" selected="npm.server">
@@ -277,7 +286,13 @@
       <workItem from="1725860354262" duration="7990000" />
       <workItem from="1725961828734" duration="24237000" />
       <workItem from="1726059820715" duration="11788000" />
-      <workItem from="1726106840831" duration="824000" />
+      <workItem from="1726106840831" duration="8427000" />
+      <workItem from="1726119573570" duration="8906000" />
+      <workItem from="1726147242312" duration="11590000" />
+      <workItem from="1726192758339" duration="12900000" />
+      <workItem from="1726206890238" duration="9309000" />
+      <workItem from="1726218604692" duration="11627000" />
+      <workItem from="1726218604692" duration="11703000" />
     </task>
     <task id="LOCAL-00004" summary="testing routes">
       <option name="closed" value="true" />
@@ -599,7 +614,40 @@
       <option name="project" value="LOCAL" />
       <updated>1725995721413</updated>
     </task>
-    <option name="localTasksCounter" value="44" />
+    <task id="LOCAL-00044" summary="address input component">
+      <option name="closed" value="true" />
+      <created>1726107830492</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1726107830492</updated>
+    </task>
+    <task id="LOCAL-00045" summary="implementing change credentials">
+      <option name="closed" value="true" />
+      <created>1726234766064</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1726234766064</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
+    <task id="LOCAL-00045" summary="implementing change credentials">
+      <option name="closed" value="true" />
+      <created>1726234766064</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1726234766064</updated>
+    </task>
+    <task id="LOCAL-00046" summary="adding partial checkpoint">
+      <option name="closed" value="true" />
+      <created>1726240723552</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1726240723552</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -617,8 +665,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="deleting config in the upload/route" />
-    <MESSAGE value="fixing some bugs" />
     <MESSAGE value="img to Image" />
     <MESSAGE value="test" />
     <MESSAGE value="adding simple backen to the account settings" />
@@ -642,6 +688,11 @@
     <MESSAGE value="Merge remote-tracking branch 'origin/nizam' into john&#10;&#10;# Conflicts:&#10;#&#9;components/common/forms/AddressInput.tsx" />
     <MESSAGE value="adding validation in login" />
     <MESSAGE value="small changes in AddressInput.tsx" />
-    <option name="LAST_COMMIT_MESSAGE" value="small changes in AddressInput.tsx" />
+    <MESSAGE value="address input component" />
+    <MESSAGE value="implementing change credentials" />
+    <option name="LAST_COMMIT_MESSAGE" value="implementing change credentials" />
+    <MESSAGE value="implementing change credentials" />
+    <MESSAGE value="adding partial checkpoint" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding partial checkpoint" />
   </component>
 </project>

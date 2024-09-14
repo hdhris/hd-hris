@@ -277,7 +277,7 @@ model sys_variables {
   key             String?          @db.VarChar(45)
   data            Json?            @db.Json
   created_at      DateTime         @db.Timestamp(6)
-  updated_at      DateTime         @db.Timestamp(6)
+  updated_at      DateTime?        @db.Timestamp(6)
   trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_variables_trans_employees1")
 }
 
@@ -329,8 +329,8 @@ model trans_employees {
   addr_municipal                                                         Int?
   addr_baranggay                                                         Int?
   hired_at                                                               DateTime?                      @db.Timestamp(6)
-  created_at                                                             DateTime                       @db.Timestamp(6)
-  updated_at                                                             DateTime                       @db.Timestamp(6)
+  created_at                                                             DateTime?                      @db.Timestamp(6)
+  updated_at                                                             DateTime?                      @db.Timestamp(6)
   deleted_at                                                             DateTime?                      @db.Timestamp(6)
   statutory_no_json                                                      Json?                          @db.Json
   family_bg_json                                                         Json?                          @db.Json

@@ -15,6 +15,7 @@ import NavBar from "@/components/navbar/NavBar";
 import UserMenu from "@/components/dropdown/UserMenu";
 import Notification from '@/components/functions/notifications/Notification'
 import {LiaUsersSolid} from "react-icons/lia";
+import Authorization from "@/components/admin/dashboard/Authorization";
 
 function RootLayout({children}: { children: ReactNode }) {
     // Use a function to lazily initialize the state
