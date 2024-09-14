@@ -6,6 +6,7 @@ declare module "next-auth" {
             id: string; name: string
             role: string; picture: string
             privilege: string; employee_id: number | null
+            isDefaultAccount: boolean
         } & DefaultSession["user"];
 
     }
@@ -17,6 +18,7 @@ declare module "next-auth" {
         picture: string
         privilege: string;
         employee_id: number | null
+        isDefaultAccount: boolean
     }
 
     interface User extends DefaultUser {
@@ -26,6 +28,7 @@ declare module "next-auth" {
         picture: string
         privilege: string;
         employee_id: number | null
+        isDefaultAccount: boolean
     }
 
     interface User extends DefaultUser {
@@ -35,6 +38,7 @@ declare module "next-auth" {
         picture: string
         privilege: string;
         employee_id: number | null
+        isDefaultAccount: boolean
     }
 }
 
@@ -46,5 +50,6 @@ declare module "next-auth/jwt" {
         picture: string;
         privilege: string;
         employee_id: number | null
+        isDefaultAccount: boolean
     }
 }

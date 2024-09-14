@@ -59,8 +59,8 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
           onSelectionChange={(key) => handleTabChange(key as TabKeys)}
         >
           <Tab key="employees" title="Employees" />
-          <Tab key="suspend" title="Suspend" />
-          <Tab key="resign" title="Resign" />
+          {/* <Tab key="suspend" title="Suspend" />
+          <Tab key="resign" title="Resign" /> */}
           <Tab key="department" title="Department" />
         </Tabs>
       </div>
