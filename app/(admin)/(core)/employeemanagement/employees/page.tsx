@@ -4,23 +4,45 @@ import TableData from "@/components/tabledata/TableData";
 import { Avatar } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
-import { useToast } from "@chakra-ui/react";
+import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import AddEmployee from "@/components/admin/add/AddEmployees";
+import EditEmployee from "@/components/admin/edit/EditEmployee";
 
 interface Employee {
   id: number;
   first_name: string;
+  middle_name: string;
   last_name: string;
+  gender: string;
+  birthdate: string;
+  addr_region: string;
+  addr_province: string;
+  addr_municipal: string;
+  addr_baranggay: string;
+  elementary: string;
+  highSchool: string;
+  seniorHighSchool: string;
+  seniorHighStrand: string;
+  universityCollege: string;
+  course: string;
+  highestDegree: string;
+  certificates: Array<{ name: string; url: string }>;
+  hired_at: string;
+  department_id: string;
+  job_id: string;
+  workSchedules: Record<string, unknown>;
   email: string;
   contact_no: string;
   picture: string;
 }
 
-const EmployeesPage: React.FC = () => {
+const Page: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  const toast = useToast();
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const fetchEmployees = useCallback(async () => {
     setLoading(true);
@@ -32,45 +54,56 @@ const EmployeesPage: React.FC = () => {
       toast({
         title: "Error",
         description: "Failed to fetch employees. Please try again.",
-        status: "error",
         duration: 3000,
-        isClosable: true,
       });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     fetchEmployees();
   }, [fetchEmployees]);
 
-  const handleEdit = async (id: number) => {
-    console.log("Edit employee with id:", id);
+  const handleEdit = async (employee: Employee) => {
+    try {
+      setSelectedEmployeeId(employee.id);
+      setIsEditModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching employee details:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch employee details. Please try again.",
+        duration: 3000,
+      });
+    }
   };
 
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(`/api/employeemanagement/employees?id=${id}`);
-      toast({
-        title: "Success",
-        description: "Employee successfully deleted!",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
+      setDeleteSuccess(true);
       await fetchEmployees();
     } catch (error) {
       console.error("Error deleting employee:", error);
       toast({
         title: "Error",
         description: "Failed to delete employee. Please try again.",
-        status: "error",
         duration: 3000,
-        isClosable: true,
       });
     }
   };
+
+  useEffect(() => {
+    if (!loading && deleteSuccess) {
+      toast({
+        title: "Success",
+        description: "Employee successfully deleted!",
+        duration: 3000,
+      });
+      setDeleteSuccess(false);
+    }
+  }, [loading, deleteSuccess]);
 
   const config: TableConfigProps<Employee> = {
     columns: [
@@ -102,7 +135,7 @@ const EmployeesPage: React.FC = () => {
           return (
             <TableActionButton
               name={`${item.first_name} ${item.last_name}`}
-              onEdit={() => handleEdit(item.id)}
+              onEdit={() => handleEdit(item)}
               onDelete={() => handleDelete(item.id)}
             />
           );
@@ -121,9 +154,6 @@ const EmployeesPage: React.FC = () => {
 
   return (
     <div id="employee-page" className="mt-2">
-      <div className="flex justify-end mb-4">
-        <AddEmployee onEmployeeAdded={fetchEmployees} />
-      </div>
       <TableData
         aria-label="Employee Table"
         config={config}
@@ -132,13 +162,30 @@ const EmployeesPage: React.FC = () => {
         counterName="Employees"
         selectionMode="multiple"
         isLoading={loading}
+        isHeaderSticky={true}
         classNames={{
-          wrapper: "h-[27rem]",
+          wrapper: "h-[27rem] overflow-y-auto",
         }}
-        className="min-h-45"
+        contentTop={
+          <div className="flex items-center justify-between">
+            <div className="ml-4">
+              <AddEmployee onEmployeeAdded={fetchEmployees} />
+            </div>
+            <div className="ml-auto mr-4"></div>
+          </div>
+        }
       />
+
+      {selectedEmployeeId !== null && (
+        <EditEmployee
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          employeeId={selectedEmployeeId}
+          onEmployeeUpdated={fetchEmployees}
+        />
+      )}
     </div>
   );
 };
 
-export default EmployeesPage;
+export default Page;

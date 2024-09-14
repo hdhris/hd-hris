@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { z } from 'zod';
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
 
@@ -16,6 +16,7 @@ const employeeSchema = z.object({
   email: z.string().email().max(45).optional(),
   contact_no: z.string().max(45).optional(),
   birthdate: z.string().optional(),
+  hired_at: z.string().optional(),
   gender: z.string().max(10).optional(),
   job_id: z.number().optional(),
   department_id: z.number().optional(),
@@ -40,13 +41,31 @@ const employeeSchema = z.object({
 // Helper function to log database operations
 function logDatabaseOperation(operation: string, result: any) {
   console.log(`Database operation: ${operation}`);
-  console.log('Result:', JSON.stringify(result, null, 2));
+  console.log("Result:", JSON.stringify(result, null, 2));
+}
+
+// Error handling
+function handleError(error: unknown, operation: string) {
+  console.error(`Error during ${operation} operation:`, error);
+  if (error instanceof z.ZodError) {
+    return NextResponse.json(
+      { error: "Invalid data", details: error.errors },
+      { status: 400 }
+    );
+  }
+  if (error instanceof Error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  return NextResponse.json(
+    { error: `Failed to ${operation} employee` },
+    { status: 500 }
+  );
 }
 
 // GET - Fetch all employees or a single employee by ID
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const id = url.searchParams.get('id');
+  const id = url.searchParams.get("id");
 
   try {
     let result;
@@ -57,22 +76,45 @@ export async function GET(req: Request) {
     }
     return NextResponse.json(result);
   } catch (error) {
-    return handleError(error, 'fetch');
+    return handleError(error, "fetch");
   }
 }
 
 async function getEmployeeById(id: number) {
-  const employee = await prisma.trans_employees.findUnique({ where: { id } });
-  logDatabaseOperation('GET employee by ID', employee);
+  const employee = await prisma.trans_employees.findFirst({
+    where: {
+      id,
+      deleted_at: null, // Exclude employees marked as deleted
+    },
+    include: {
+      ref_departments: true,
+      ref_job_classes: true,
+      ref_addresses_trans_employees_addr_regionToref_addresses: true,
+      ref_addresses_trans_employees_addr_provinceToref_addresses: true,
+      ref_addresses_trans_employees_addr_municipalToref_addresses: true,
+      ref_addresses_trans_employees_addr_baranggayToref_addresses: true,
+    },
+  });
+  logDatabaseOperation("GET employee by ID", employee);
   if (!employee) {
-    throw new Error('Employee not found');
+    throw new Error("Employee not found");
   }
   return employee;
 }
 
 async function getAllEmployees() {
-  const employees = await prisma.trans_employees.findMany();
-  logDatabaseOperation('GET all employees', employees);
+  const employees = await prisma.trans_employees.findMany({
+    where: { deleted_at: null }, // Exclude employees marked as deleted
+    include: {
+      ref_departments: true,
+      ref_job_classes: true,
+      ref_addresses_trans_employees_addr_regionToref_addresses: true,
+      ref_addresses_trans_employees_addr_provinceToref_addresses: true,
+      ref_addresses_trans_employees_addr_municipalToref_addresses: true,
+      ref_addresses_trans_employees_addr_baranggayToref_addresses: true,
+    },
+  });
+  logDatabaseOperation("GET all employees", employees);
   return employees;
 }
 
@@ -81,10 +123,13 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
     const validatedData = employeeSchema.parse(data);
-    const employee = await createEmployee(validatedData);
+    const employee = await createEmployee({
+      ...validatedData,
+      picture: validatedData.picture, // This should now be the URL from EdgeStore
+    });
     return NextResponse.json(employee, { status: 201 });
   } catch (error) {
-    return handleError(error, 'create');
+    return handleError(error, "create");
   }
 }
 
@@ -92,21 +137,25 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
   const employee = await prisma.trans_employees.create({
     data: {
       ...data,
+      hired_at: data.hired_at ? new Date(data.hired_at) : undefined,
       birthdate: data.birthdate ? new Date(data.birthdate) : undefined,
       created_at: new Date(),
       updated_at: new Date(),
     },
   });
-  logDatabaseOperation('CREATE employee', employee);
+  logDatabaseOperation("CREATE employee", employee);
   return employee;
 }
 
 // PUT - Update an existing employee
 export async function PUT(req: Request) {
   const url = new URL(req.url);
-  const id = url.searchParams.get('id');
+  const id = url.searchParams.get("id");
   if (!id) {
-    return NextResponse.json({ error: 'Employee ID is required' }, { status: 400 });
+    return NextResponse.json(
+      { error: "Employee ID is required" },
+      { status: 400 }
+    );
   }
 
   try {
@@ -115,11 +164,14 @@ export async function PUT(req: Request) {
     const employee = await updateEmployee(parseInt(id), validatedData);
     return NextResponse.json(employee);
   } catch (error) {
-    return handleError(error, 'update');
+    return handleError(error, "update");
   }
 }
 
-async function updateEmployee(id: number, data: Partial<z.infer<typeof employeeSchema>>) {
+async function updateEmployee(
+  id: number,
+  data: Partial<z.infer<typeof employeeSchema>>
+) {
   const employee = await prisma.trans_employees.update({
     where: { id },
     data: {
@@ -128,39 +180,33 @@ async function updateEmployee(id: number, data: Partial<z.infer<typeof employeeS
       updated_at: new Date(),
     },
   });
-  logDatabaseOperation('UPDATE employee', employee);
+  logDatabaseOperation("UPDATE employee", employee);
   return employee;
 }
 
-// DELETE - Remove an employee
+// DELETE - Mark an employee as deleted
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
-  const id = url.searchParams.get('id');
+  const id = url.searchParams.get("id");
   if (!id) {
-    return NextResponse.json({ error: 'Employee ID is required' }, { status: 400 });
+    return NextResponse.json(
+      { error: "Employee ID is required" },
+      { status: 400 }
+    );
   }
 
   try {
-    await deleteEmployee(parseInt(id));
-    return NextResponse.json({ message: 'Employee deleted successfully' });
+    await softDeleteEmployee(parseInt(id));
+    return NextResponse.json({ message: "Employee marked as deleted" });
   } catch (error) {
-    return handleError(error, 'delete');
+    return handleError(error, "delete");
   }
 }
 
-async function deleteEmployee(id: number) {
-  const result = await prisma.trans_employees.delete({ where: { id } });
-  logDatabaseOperation('DELETE employee', result);
-}
-
-// Error handling
-function handleError(error: unknown, operation: string) {
-  console.error(`Error during ${operation} operation:`, error);
-  if (error instanceof z.ZodError) {
-    return NextResponse.json({ error: 'Invalid data', details: error.errors }, { status: 400 });
-  }
-  if (error instanceof Error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  return NextResponse.json({ error: `Failed to ${operation} employee` }, { status: 500 });
+async function softDeleteEmployee(id: number) {
+  const result = await prisma.trans_employees.update({
+    where: { id },
+    data: { deleted_at: new Date() }, // Set deleted_at to mark as deleted
+  });
+  logDatabaseOperation("SOFT DELETE employee", result);
 }

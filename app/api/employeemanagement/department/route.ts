@@ -1,18 +1,153 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
+import { z } from 'zod';
 
-export async function GET() {
+const prisma = new PrismaClient();
+
+// Department schema for validation
+const departmentSchema = z.object({
+  name: z.string().max(45), // Name is required and max length 45
+  color: z.string().max(10).optional(), // Optional field
+  is_active: z.boolean().optional(), // Optional field, defaults to true in create
+});
+
+// Helper function to log database operations
+function logDatabaseOperation(operation: string, result: any) {
+  console.log(`Database operation: ${operation}`);
+  console.log('Result:', JSON.stringify(result, null, 2));
+}
+
+// GET - Fetch all departments or a single department by ID
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const id = url.searchParams.get('id');
+
   try {
-    const departments = await prisma.ref_departments.findMany({
-      where: { is_active: true },
-      select: { id: true, name: true },
-    });
-    return NextResponse.json(departments);
+    let result;
+    if (id) {
+      result = await getDepartmentById(parseInt(id));
+    } else {
+      result = await getAllDepartments();
+    }
+    return NextResponse.json(result);
   } catch (error) {
-    console.error('Error fetching departments:', error);
-    return NextResponse.json({ error: 'Failed to fetch departments' }, { status: 500 });
+    return handleError(error, 'fetch');
   }
 }
+
+async function getDepartmentById(id: number) {
+  const department = await prisma.ref_departments.findFirst({
+    where: {
+      id,
+      deleted_at: null, // Exclude departments marked as deleted
+    },
+  });
+  logDatabaseOperation('GET department by ID', department);
+  if (!department) {
+    throw new Error('Department not found');
+  }
+  return department;
+}
+
+async function getAllDepartments() {
+  const departments = await prisma.ref_departments.findMany({
+    where: { deleted_at: null }, // Exclude departments marked as deleted
+  });
+  logDatabaseOperation('GET all departments', departments);
+  return departments;
+}
+
+// POST - Create a new department
+export async function POST(req: Request) {
+  try {
+    const data = await req.json();
+    const validatedData = departmentSchema.parse(data);
+    const department = await createDepartment(validatedData);
+    return NextResponse.json(department, { status: 201 });
+  } catch (error) {
+    return handleError(error, 'create');
+  }
+}
+
+async function createDepartment(data: z.infer<typeof departmentSchema>) {
+  const department = await prisma.ref_departments.create({
+    data: {
+      ...data,
+      is_active: data.is_active !== undefined ? data.is_active : true, // Default to true if not provided
+      created_at: new Date(),
+      updated_at: new Date(),
+    },
+  });
+  logDatabaseOperation('CREATE department', department);
+  return department;
+}
+
+// PUT - Update an existing department
+export async function PUT(req: Request) {
+  const url = new URL(req.url);
+  const id = url.searchParams.get('id');
+  if (!id) {
+    return NextResponse.json({ error: 'Department ID is required' }, { status: 400 });
+  }
+
+  try {
+    const data = await req.json();
+    const validatedData = departmentSchema.partial().parse(data); // Partial update allowed
+    const department = await updateDepartment(parseInt(id), validatedData);
+    return NextResponse.json(department);
+  } catch (error) {
+    return handleError(error, 'update');
+  }
+}
+
+async function updateDepartment(id: number, data: Partial<z.infer<typeof departmentSchema>>) {
+  const department = await prisma.ref_departments.update({
+    where: { id },
+    data: {
+      ...data,
+      updated_at: new Date(),
+    },
+  });
+  logDatabaseOperation('UPDATE department', department);
+  return department;
+}
+
+// DELETE - Mark a department as deleted (soft delete)
+export async function DELETE(req: Request) {
+  const url = new URL(req.url);
+  const id = url.searchParams.get('id');
+  if (!id) {
+    return NextResponse.json({ error: 'Department ID is required' }, { status: 400 });
+  }
+
+  try {
+    await softDeleteDepartment(parseInt(id));
+    return NextResponse.json({ message: 'Department marked as deleted' });
+  } catch (error) {
+    return handleError(error, 'delete');
+  }
+}
+
+async function softDeleteDepartment(id: number) {
+  const result = await prisma.ref_departments.update({
+    where: { id },
+    data: { deleted_at: new Date() }, // Set deleted_at to mark as deleted
+  });
+  logDatabaseOperation('SOFT DELETE department', result);
+}
+
+// Error handling
+function handleError(error: unknown, operation: string) {
+  console.error(`Error during ${operation} operation:`, error);
+  if (error instanceof z.ZodError) {
+    return NextResponse.json({ error: 'Invalid data', details: error.errors }, { status: 400 });
+  }
+  if (error instanceof Error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  return NextResponse.json({ error: `Failed to ${operation} department` }, { status: 500 });
+}
+
 
 // // department route.ts
 // import { NextResponse } from "next/server";
