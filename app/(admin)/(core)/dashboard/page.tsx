@@ -7,10 +7,10 @@ import ActiveLeaves from "@/components/admin/dashboard/ActiveLeaves";
 import {LuMaximize} from "react-icons/lu";
 import {cn} from "@nextui-org/react";
 import Authorization from "@/components/admin/dashboard/Authorization";
+import {auth} from "@/auth";
 
 
 async function Page() {
-
     return (<>
 
             <section className='grid grid-rows-[auto,1fr,auto, auto] gap-4 h-full'>

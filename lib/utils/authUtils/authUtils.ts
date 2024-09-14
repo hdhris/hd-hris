@@ -16,49 +16,6 @@ interface UserPrivileges {
     admin_panel?: boolean;
 }
 
-// export const getUserData = async (username: string, password: string) => {
-//     // Encrypt the password
-//     const encrypt = new SimpleAES();
-//
-//     // Query the database
-//     const data = await prisma.sys_accounts.findFirst({
-//         where: {
-//             AND: [{
-//                 username: username, password: encrypt,
-//             }, {
-//                 // banned_till: {
-//                 //     equals: null,
-//                 //     gte: new Date()
-//                 // }
-//             }]
-//         },
-//         include: {
-//             trans_employees: true,
-//             sys_privileges: true
-//         }
-//     });
-//     console.log(data)
-//
-//     if (data) {
-//         const privileges = data.sys_privileges;
-//         const accessibility = processJsonObject<UserPrivileges>(privileges?.accessibility);
-//         const isWebAccess = accessibility?.web_access;
-//
-//         const role = !accessibility || isWebAccess ? 'admin' : 'user';
-//
-//         console.log("Your Role is: " + role);
-//         return {
-//             id: String(data.id),
-//             name: 'John Doe',
-//             role: role,
-//             picture: data.trans_employees?.picture!,
-//             email: data.trans_employees?.email!,
-//             privilege: privileges?.name
-//         };
-//     }
-//
-//     return null;
-// };
 
 export const getUserData = async (username: string, password: string) => {
     const encrypt = new SimpleAES();
@@ -107,7 +64,8 @@ export const getUserData = async (username: string, password: string) => {
         picture: user.trans_employees?.picture || '',
         email: user.trans_employees?.email || '',
         privilege: privileges?.name || 'N/A',
-        employee_id: user.trans_employees?.id || null
+        employee_id: user.trans_employees?.id || null,
+        isDefaultAccount: user.username === 'admin'
     };
 };
 
