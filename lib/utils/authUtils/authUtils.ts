@@ -88,50 +88,5 @@ export const handleAuthorization = async (credentials: { username: string; passw
         throw new Error('Only admin can login');
     }
 
-    // Get IP and User-Agent
-    const ipResponse = await fetch('https://ipapi.co/json').then(data => data.json());
-    const ua = parse(headers().get('user-agent')!);
-
-
-    // Handle session
-    const existingSession = await prisma.sys_sessions.findFirst({
-        where: {
-            account_id: Number(user.id),
-            ip_address: ipResponse.ip,
-        },
-    });
-
-    if (existingSession) {
-        await prisma.sys_sessions.update({
-            where: { id: existingSession.id },
-            data: {
-                updated_at: new Date(), // Update timestamp
-                login_count: existingSession.login_count + 1, // Increment login count
-                expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24), // Update expiration time
-            },
-        });
-    } else {
-        await prisma.sys_sessions.create({
-            data: {
-                account_id: Number(user.id),
-                ip_address: ipResponse.ip,
-                expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24), // Expires in 24 hours
-                created_at: new Date(),
-                updated_at: null,
-                countrycode: ipResponse.country_code, // Country code from geoip
-                countryname: ipResponse.country_name, // Country name
-                region: ipResponse.region, // Region code
-                city: ipResponse.city, // City name
-                type: 'Browser', // Browser type
-                platform: ua.browser, // Browser name
-                os: ua.os, // OS name
-                os_version: ua.osVersion, // OS version
-                login_count: 1, // Start the login count as 1
-                login_provider: "Credentials", // Login provider
-                provider_token: null
-            },
-        });
-    }
-
     return JSON.parse(JSON.stringify(user));
 };

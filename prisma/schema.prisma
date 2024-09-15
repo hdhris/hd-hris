@@ -222,12 +222,14 @@ model ref_training_programs {
 model sys_accounts {
   id                  Int                   @id @default(autoincrement())
   employee_id         Int?
-  username            String                @unique @default("") @db.VarChar(45)
-  password            String                @db.VarChar(255)
+  username            String?               @unique @default("") @db.VarChar(45)
+  password            String?               @db.VarChar(255)
   created_at          DateTime?             @db.Timestamp(6)
   updated_at          DateTime?             @db.Timestamp(6)
-  privilege_id        Int?
   banned_till         DateTime?             @db.Date
+  privilege_id        Int?
+  provider_account_id String                @default("") @db.VarChar(255)
+  provider_name       String                @default("") @db.VarChar(50)
   trans_employees     trans_employees?      @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_accounts_employees1")
   sys_privileges      sys_privileges?       @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sys_accounts_sys_privileges_2")
   sys_recovery_tokens sys_recovery_tokens[]
@@ -254,24 +256,26 @@ model sys_recovery_tokens {
 }
 
 model sys_sessions {
-  id             Int           @id @default(autoincrement())
-  account_id     Int?
-  ip_address     String?       @db.Inet
-  expires_at     DateTime?     @db.Timestamp(6)
-  created_at     DateTime      @db.Timestamp(6)
-  updated_at     DateTime?     @db.Timestamp(6)
-  countrycode    String?       @db.VarChar(4)
-  countryname    String?       @db.VarChar(45)
-  region         String?       @db.VarChar(45)
-  city           String?       @db.VarChar(45)
-  platform       String?       @db.VarChar(45)
-  os             String?       @db.VarChar(45)
-  os_version     Int
-  login_count    Int
-  type           String?       @db.VarChar(45)
-  provider_token String?       @db.VarChar(255)
-  login_provider String        @db.VarChar(50)
-  sys_accounts   sys_accounts? @relation(fields: [account_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_sessions_sys_accounts_2")
+  id                     Int           @id @default(autoincrement())
+  account_id             Int?
+  ip_address             String?       @db.Inet
+  expires_at             DateTime?     @db.Timestamp(6)
+  created_at             DateTime      @db.Timestamp(6)
+  updated_at             DateTime?     @db.Timestamp(6)
+  countrycode            String?       @db.VarChar(4)
+  countryname            String?       @db.VarChar(45)
+  region                 String?       @db.VarChar(45)
+  city                   String?       @db.VarChar(45)
+  platform               String?       @db.VarChar(45)
+  os                     String?       @db.VarChar(45)
+  os_version             Int?
+  login_count            Int
+  platform_type          String?       @db.VarChar(45)
+  session_token          String        @unique(map: "sys_sessions_session_token_unique") @db.VarChar(255)
+  oauth_access_token     String?       @db.VarChar(255)
+  oauth_refresh_token    String?       @db.VarChar(255)
+  oauth_token_expires_at DateTime?     @db.Timestamp(6)
+  sys_accounts           sys_accounts? @relation(fields: [account_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_sessions_sys_accounts_2")
 }
 
 model sys_variables {
