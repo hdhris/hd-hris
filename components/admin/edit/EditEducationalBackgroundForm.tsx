@@ -14,10 +14,10 @@ import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { SharedSelection } from "@nextui-org/react";
 
 interface Certificate {
-    fileName: string;
-    fileUrl: string;
-  }
-  
+  fileName: string;
+  fileUrl: string;
+}
+
 const EditEducationalBackgroundForm = () => {
   const { control, watch, setValue } = useFormContext();
   const [showStrand, setShowStrand] = useState(false);
@@ -32,8 +32,8 @@ const EditEducationalBackgroundForm = () => {
   const seniorHighSchool = watch("seniorHighSchool");
   const universityCollege = watch("universityCollege");
   const seniorHighStrand = watch("seniorHighStrand");
+  const certificates = watch("certificates");
 
-  
   // Show Strand field when Senior High School is entered
   useEffect(() => {
     setShowStrand(!!seniorHighSchool);
@@ -58,6 +58,21 @@ const EditEducationalBackgroundForm = () => {
     if (universityCollege) highestDegree = "University/College";
     setValue("highestDegree", highestDegree);
   }, [elementary, highSchool, seniorHighSchool, universityCollege, setValue]);
+
+  useEffect(() => {
+    // Convert fetched certificates into FileState format
+    if (certificates) {
+      const initialFileStates: FileState[] = certificates.map(
+        (cert: Certificate) => ({
+          key: cert.fileName, // Unique identifier for the file
+          file: cert.fileUrl, // Assuming URL here
+          name: cert.fileName, // Displayed file name
+          progress: "COMPLETE", // Since it's already uploaded
+        })
+      );
+      setFileStates(initialFileStates); // Set the state to display the files
+    }
+  }, [certificates]);
 
   function updateFileProgress(key: string, progress: FileState["progress"]) {
     setFileStates((fileStates) => {
@@ -275,7 +290,6 @@ const EditEducationalBackgroundForm = () => {
           )}
         />
 
-
         {/* Certificate Upload */}
         <FormField
           name="certificates"
@@ -285,13 +299,14 @@ const EditEducationalBackgroundForm = () => {
               <FormLabel>Certificates</FormLabel>
               <FormControl>
                 <FileDropzone
-                  value={fileStates}
+                  value={fileStates} // Set the initial files (fetched or newly uploaded)
                   onChange={(files) => {
                     setFileStates(files);
-                    field.onChange(files.map((f) => f.file));
+                    field.onChange(files.map((f) => f.file)); // Update form value
                   }}
                   onFilesAdded={async (addedFiles) => {
-                    setFileStates([...fileStates, ...addedFiles]);
+                    setFileStates([...fileStates, ...addedFiles]); // Add new files to the state
+
                     await Promise.all(
                       addedFiles.map(async (addedFileState) => {
                         try {
@@ -311,6 +326,12 @@ const EditEducationalBackgroundForm = () => {
                             },
                           });
                           console.log(res);
+                          // Here you can update certificates value with the new uploaded certificate URL
+                          const updatedCertificates = [
+                            ...certificates,
+                            { name: addedFileState.name, url: res.url },
+                          ];
+                          setValue("certificates", updatedCertificates);
                         } catch (err) {
                           console.error(err);
                           updateFileProgress(addedFileState.key, "ERROR");
