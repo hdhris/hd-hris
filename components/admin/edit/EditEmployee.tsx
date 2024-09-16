@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   ModalContent,
@@ -92,13 +92,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
     mode: "onChange",
   });
 
-  useEffect(() => {
-    if (isOpen && employeeId) {
-      fetchEmployeeData();
-    }
-  }, [isOpen, employeeId]);
-
-  const fetchEmployeeData = async () => {
+  const fetchEmployeeData = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
@@ -110,13 +104,11 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         throw new Error("Employee data not found or invalid");
       }
 
-      // Parse the educational background JSON
       const educationalBg =
         typeof employeeData.educational_bg_json === "string"
           ? JSON.parse(employeeData.educational_bg_json || "{}")
           : employeeData.educational_bg_json || {};
 
-      // Handle certificates (map them to usable form for displaying)
       const certificatesWithUrls = (educationalBg.certificates || []).map(
         (cert: { fileName: string; fileUrl: string }) => ({
           name: cert.fileName,
@@ -124,7 +116,6 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         })
       );
 
-      // Reset form fields with fetched employee data
       methods.reset({
         picture: employeeData.picture || "",
         first_name: employeeData.first_name || "",
@@ -172,7 +163,13 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [employeeId, methods, toast, onClose]);
+
+  useEffect(() => {
+    if (isOpen && employeeId) {
+      fetchEmployeeData();
+    }
+  }, [isOpen, employeeId, fetchEmployeeData]);
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
@@ -182,7 +179,6 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
     });
 
     try {
-      // Upload new picture to EdgeStore if changed
       let pictureUrl = typeof data.picture === "string" ? data.picture : "";
       if (data.picture instanceof File) {
         const result = await edgestore.publicFiles.upload({
@@ -191,7 +187,6 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         pictureUrl = result.url;
       }
 
-      // Upload new certificates to EdgeStore if changed
       const updatedCertificates = await Promise.all(
         data.certificates.map(async (cert) => {
           if (cert.url instanceof File) {
@@ -310,3 +305,4 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
 };
 
 export default EditEmployee;
+
