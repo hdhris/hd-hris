@@ -21,7 +21,6 @@ import axios from "axios";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { parseDate } from "@internationalized/date";
 
-// Define the type for address options
 interface AddressOption {
   address_code: number;
   address_name: string;
@@ -36,21 +35,20 @@ const safeParseDate = (dateString: string) => {
   }
 };
 
-// Define gender options based on EmployeeAll type
 const genderOptions = [
   { value: "M", label: "Male" },
   { value: "F", label: "Female" },
 ];
 
-const PersonalInformationForm: React.FC = () => {
-  const { control, setValue } = useFormContext();
+const EditPersonalInformationForm: React.FC = () => {
+  const { control, setValue, getValues } = useFormContext();
   const [imagePreview, setImagePreview] = useState<string | undefined>(
     undefined
   );
   const { edgestore } = useEdgeStore();
-
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [addressOptions, setAddressOptions] = useState<{
     region: AddressOption[];
     province: AddressOption[];
@@ -63,59 +61,93 @@ const PersonalInformationForm: React.FC = () => {
     baranggay: [],
   });
 
-  // Watch selected values
-  const selectedRegion = useWatch({ name: "addr_region" });
-  const selectedProvince = useWatch({ name: "addr_province" });
-  const selectedMunicipal = useWatch({ name: "addr_municipal" });
+  const [loadingState, setLoadingState] = useState({
+    region: false,
+    province: false,
+    municipal: false,
+    baranggay: false,
+  });
 
-  // Fetch address options
-  const fetchAddressOptions = async (
-    parentCode: number | null,
-    level: string
-  ) => {
-    try {
-      const response = await axios.get<AddressOption[]>(
-        `/api/employeemanagement/addresses?parentCode=${parentCode}`
-      );
-      setAddressOptions((prev) => ({ ...prev, [level]: response.data }));
-    } catch (error) {
-      console.error(`Error fetching ${level}:`, error);
-    }
-  };
+  const selectedRegion = useWatch({ control, name: "addr_region" });
+  const selectedProvince = useWatch({ control, name: "addr_province" });
+  const selectedMunicipal = useWatch({ control, name: "addr_municipal" });
 
-  // Fetch regions on component mount
+  const fetchAddressOptions = useCallback(
+    async (parentCode: number | null, level: keyof typeof addressOptions) => {
+      setLoadingState((prev) => ({ ...prev, [level]: true }));
+      try {
+        const response = await axios.get<AddressOption[]>(
+          `/api/employeemanagement/addresses?parentCode=${parentCode}`
+        );
+        setAddressOptions((prev) => ({ ...prev, [level]: response.data }));
+      } catch (error) {
+        console.error(`Error fetching ${level}:`, error);
+      } finally {
+        setLoadingState((prev) => ({ ...prev, [level]: false }));
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     fetchAddressOptions(0, "region");
-  }, []);
+  }, [fetchAddressOptions]);
 
-  // Fetch provinces when a region is selected
   useEffect(() => {
     if (selectedRegion) {
-      fetchAddressOptions(parseInt(selectedRegion as string), "province");
-      setValue("addr_province", "");
+      fetchAddressOptions(parseInt(selectedRegion), "province");
+      setValue("addr_province", ""); // Clear lower-level fields on region change
       setValue("addr_municipal", "");
       setValue("addr_baranggay", "");
     }
-  }, [selectedRegion, setValue]);
+  }, [selectedRegion, setValue, fetchAddressOptions]);
 
-  // Fetch municipalities when a province is selected
   useEffect(() => {
     if (selectedProvince) {
-      fetchAddressOptions(parseInt(selectedProvince as string), "municipal");
-      setValue("addr_municipal", "");
+      fetchAddressOptions(parseInt(selectedProvince), "municipal");
+      setValue("addr_municipal", ""); // Clear lower-level fields on province change
       setValue("addr_baranggay", "");
     }
-  }, [selectedProvince, setValue]);
+  }, [selectedProvince, setValue, fetchAddressOptions]);
 
-  // Fetch barangays when a municipality is selected
   useEffect(() => {
     if (selectedMunicipal) {
-      fetchAddressOptions(parseInt(selectedMunicipal as string), "baranggay");
-      setValue("addr_baranggay", "");
+      fetchAddressOptions(parseInt(selectedMunicipal), "baranggay");
+      setValue("addr_baranggay", ""); // Clear baranggay on municipal change
     }
-  }, [selectedMunicipal, setValue]);
+  }, [selectedMunicipal, setValue, fetchAddressOptions]);
 
-  // Handle image change
+  // Populate fields with initial data from the server
+  useEffect(() => {
+    const pictureValue = getValues("picture");
+    const region = getValues("addr_region");
+    const province = getValues("addr_province");
+    const municipal = getValues("addr_municipal");
+    const gender = getValues("gender");
+    const baranggay = getValues("addr_baranggay");
+
+    if (pictureValue) {
+      setImagePreview(pictureValue);
+    }
+
+    if (region) {
+      fetchAddressOptions(parseInt(region), "province");
+    }
+    if (province) {
+      fetchAddressOptions(parseInt(province), "municipal");
+    }
+    if (municipal) {
+      fetchAddressOptions(parseInt(municipal), "baranggay");
+    }
+
+    if (gender) {
+      setValue("gender", gender); // Set gender value
+    }
+  }, [getValues, setValue]);
+
+  // Image handling logic...
+  // Rest of the component logic...
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -125,20 +157,15 @@ const PersonalInformationForm: React.FC = () => {
       }
 
       try {
-        // Upload file to EdgeStore
         const res = await edgestore.publicFiles.upload({
           file,
           onProgressChange: (progress) => {
-            // Handle upload progress if needed
             console.log(`Upload progress: ${progress}%`);
           },
         });
 
-        console.log("File uploaded successfully:", res.url);
-
-        // Set the URL of the uploaded file
         setImagePreview(res.url);
-        setValue("picture", res.url); // Assuming 'picture' is the field name in your form
+        setValue("picture", res.url);
       } catch (error) {
         console.error("Error uploading file:", error);
         setFileError("Failed to upload image");
@@ -146,16 +173,10 @@ const PersonalInformationForm: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    console.log("Image preview updated:", imagePreview);
-  }, [imagePreview]);
-
-  // Handle avatar click
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
 
-  // Handle removing photo
   const handleRemovePhoto = useCallback(() => {
     setImagePreview(undefined);
     fileInputRef.current!.value = "";
@@ -231,7 +252,6 @@ const PersonalInformationForm: React.FC = () => {
       <Text className="text-medium font-semibold">Basic Information</Text>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* First Name */}
         <Controller
           name="first_name"
           control={control}
@@ -249,7 +269,6 @@ const PersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-        {/* First Name */}
         <Controller
           name="middle_name"
           control={control}
@@ -267,8 +286,6 @@ const PersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-
-        {/* Last Name */}
         <Controller
           name="last_name"
           control={control}
@@ -286,7 +303,6 @@ const PersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-
         <Controller
           name="gender"
           control={control}
@@ -295,7 +311,12 @@ const PersonalInformationForm: React.FC = () => {
               <FormLabel>Gender</FormLabel>
               <FormControl>
                 <Select
-                  {...field}
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    field.onChange(value);
+                    setValue("gender", value); // Explicitly set the value
+                  }}
                   placeholder="Select gender"
                   variant="bordered"
                 >
@@ -310,7 +331,7 @@ const PersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-        {/* Birth Date */}
+
         <Controller
           name="birthdate"
           control={control}
@@ -338,7 +359,6 @@ const PersonalInformationForm: React.FC = () => {
           }}
         />
       </div>
-
       <Divider />
       <Text className="text-medium font-semibold">Contact Information</Text>
 
@@ -381,12 +401,10 @@ const PersonalInformationForm: React.FC = () => {
           )}
         />
       </div>
-
       <Divider />
-      <Text className="text-medium font-semibold">Address</Text>
+      <Text className="text-medium font-semibold">Address Information</Text>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* Region */}
         <Controller
           name="addr_region"
           control={control}
@@ -395,31 +413,30 @@ const PersonalInformationForm: React.FC = () => {
               <FormLabel>Region</FormLabel>
               <FormControl>
                 <Select
-                  {...field}
-                  placeholder="Select region"
-                  onChange={(value) => {
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
                     field.onChange(value);
-                    setValue("addr_province", "");
-                    setValue("addr_municipal", "");
-                    setValue("addr_baranggay", "");
                   }}
+                  placeholder={
+                    loadingState.region ? "Loading..." : "Select region"
+                  }
+                  variant="bordered"
                 >
-                  {addressOptions.region.map((option) => (
+                  {addressOptions.region.map((region) => (
                     <SelectItem
-                      key={option.address_code}
-                      value={option.address_code}
+                      key={region.address_code.toString()}
+                      value={region.address_code.toString()}
                     >
-                      {option.address_name}
+                      {region.address_name}
                     </SelectItem>
                   ))}
                 </Select>
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Province */}
         <Controller
           name="addr_province"
           control={control}
@@ -428,30 +445,31 @@ const PersonalInformationForm: React.FC = () => {
               <FormLabel>Province</FormLabel>
               <FormControl>
                 <Select
-                  {...field}
-                  placeholder="Select province"
-                  onChange={(value) => {
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
                     field.onChange(value);
-                    setValue("addr_municipal", "");
-                    setValue("addr_baranggay", "");
                   }}
+                  placeholder={
+                    loadingState.province ? "Loading..." : "Select province"
+                  }
+                  variant="bordered"
+                  isDisabled={!selectedRegion || loadingState.province}
                 >
-                  {addressOptions.province.map((option) => (
+                  {addressOptions.province.map((province) => (
                     <SelectItem
-                      key={option.address_code}
-                      value={option.address_code}
+                      key={province.address_code.toString()}
+                      value={province.address_code.toString()}
                     >
-                      {option.address_name}
+                      {province.address_name}
                     </SelectItem>
                   ))}
                 </Select>
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Municipal */}
         <Controller
           name="addr_municipal"
           control={control}
@@ -460,29 +478,31 @@ const PersonalInformationForm: React.FC = () => {
               <FormLabel>Municipal</FormLabel>
               <FormControl>
                 <Select
-                  {...field}
-                  placeholder="Select municipal"
-                  onChange={(value) => {
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
                     field.onChange(value);
-                    setValue("addr_baranggay", "");
                   }}
+                  placeholder={
+                    loadingState.municipal ? "Loading..." : "Select municipal"
+                  }
+                  variant="bordered"
+                  isDisabled={!selectedProvince || loadingState.municipal}
                 >
-                  {addressOptions.municipal.map((option) => (
+                  {addressOptions.municipal.map((municipal) => (
                     <SelectItem
-                      key={option.address_code}
-                      value={option.address_code}
+                      key={municipal.address_code.toString()}
+                      value={municipal.address_code.toString()}
                     >
-                      {option.address_name}
+                      {municipal.address_name}
                     </SelectItem>
                   ))}
                 </Select>
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Baranggay */}
         <Controller
           name="addr_baranggay"
           control={control}
@@ -490,18 +510,28 @@ const PersonalInformationForm: React.FC = () => {
             <FormItem>
               <FormLabel>Baranggay</FormLabel>
               <FormControl>
-                <Select {...field} placeholder="Select baranggay">
-                  {addressOptions.baranggay.map((option) => (
+                <Select
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    field.onChange(value);
+                  }}
+                  placeholder={
+                    loadingState.baranggay ? "Loading..." : "Select baranggay"
+                  }
+                  variant="bordered"
+                  isDisabled={!selectedMunicipal || loadingState.baranggay}
+                >
+                  {addressOptions.baranggay.map((baranggay) => (
                     <SelectItem
-                      key={option.address_code}
-                      value={option.address_code}
+                      key={baranggay.address_code.toString()}
+                      value={baranggay.address_code.toString()}
                     >
-                      {option.address_name}
+                      {baranggay.address_name}
                     </SelectItem>
                   ))}
                 </Select>
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
@@ -510,4 +540,4 @@ const PersonalInformationForm: React.FC = () => {
   );
 };
 
-export default PersonalInformationForm;
+export default EditPersonalInformationForm;

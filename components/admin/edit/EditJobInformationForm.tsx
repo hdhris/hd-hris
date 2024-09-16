@@ -52,8 +52,8 @@ const safeParseDate = (dateString: string) => {
   }
 };
 
-const JobInformationForm: React.FC = () => {
-  const { control, setValue } = useFormContext<FormValues>();
+const EditJobInformationForm: React.FC = () => {
+  const { control, setValue, getValues } = useFormContext<FormValues>();
   const [workSchedule, setWorkSchedule] = useState<WorkSchedule>({});
   const [departments, setDepartments] = useState<
     Array<{ id: number; name: string }>
@@ -137,8 +137,12 @@ const JobInformationForm: React.FC = () => {
               <FormLabel>Department</FormLabel>
               <FormControl>
                 <Select
-                  {...field}
-                  aria-label="Department"
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    field.onChange(value);
+                    setValue("department_id", value); // Explicitly set the value
+                  }}
                   placeholder="Select Department"
                   variant="bordered"
                   className="border rounded"
@@ -166,7 +170,7 @@ const JobInformationForm: React.FC = () => {
               <FormItem>
                 <FormLabel>Hire Date</FormLabel>
                 <FormControl>
-                <DatePicker
+                  <DatePicker
                     value={parsedValue}
                     onChange={(date: CalendarDate | null) => {
                       field.onChange(date ? date.toString() : "");
@@ -192,7 +196,12 @@ const JobInformationForm: React.FC = () => {
               <FormLabel>Job Title</FormLabel>
               <FormControl>
                 <Select
-                  {...field}
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    field.onChange(value);
+                    setValue("job_id", value); // Explicitly set the value
+                  }}
                   aria-label="Job Title"
                   placeholder="Select Job Title"
                   variant="bordered"
@@ -257,4 +266,4 @@ const JobInformationForm: React.FC = () => {
   );
 };
 
-export default JobInformationForm;
+export default EditJobInformationForm;

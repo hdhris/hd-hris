@@ -27,6 +27,7 @@ interface EmployeeFormData {
   middle_name: string;
   last_name: string;
   gender: string;
+  email: string;
   birthdate: string;
   addr_region: string;
   addr_province: string;
@@ -58,6 +59,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       middle_name: "",
       last_name: "",
       gender: "",
+      email: "thereisno@gmail.com",
       birthdate: "",
       addr_region: "",
       addr_province: "",
@@ -87,6 +89,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
     });
 
     try {
+      // Transform the educational background data
       const educationalBackground = {
         elementary: data.elementary,
         highSchool: data.highSchool,
@@ -101,12 +104,11 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         })),
       };
 
+      // Prepare the final data structure for submission
       const fullData = {
         ...data,
         picture: data.picture,
-        birthdate: data.birthdate
-          ? new Date(data.birthdate).toISOString()
-          : null,
+        birthdate: data.birthdate ? new Date(data.birthdate).toISOString() : null,
         hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
@@ -117,10 +119,12 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         educational_bg_json: educationalBackground,
       };
 
+      // API call to create the employee
       const response = await axios.post(
         "/api/employeemanagement/employees",
         fullData
       );
+
       if (response.status === 201) {
         onEmployeeAdded(); // Call to refresh the table
         methods.reset(); // Clear the form fields
@@ -175,25 +179,16 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
               <ModalFooter>
                 <Button
                   color="danger"
-                  onClick={onClose}
+                  onClick={() => {
+                    methods.reset(); 
+                    onClose();       
+                  }}
                   disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
                 <Button color="primary" type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Saving..." : "Save"}
-                </Button>
-                <Button
-                  onClick={() => {
-                    toast({
-                      title: "Button Clicked",
-                      description: "You clicked the button!",
-
-                      duration: 1000,
-                    });
-                  }}
-                >
-                  Show Toast
                 </Button>
               </ModalFooter>
             </ModalContent>

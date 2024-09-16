@@ -1,58 +1,69 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { Input } from '@nextui-org/input';
-import { Select, SelectItem } from '@nextui-org/select';
+import React, { useState, useEffect } from "react";
+import { useFormContext } from "react-hook-form";
+import { Input } from "@nextui-org/input";
+import { Select, SelectItem } from "@nextui-org/select";
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormField,
   FormMessage,
-} from '@/components/ui/form';
+} from "@/components/ui/form";
 import { FileState, FileDropzone } from "@/components/ui/fileupload/file";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
-import { SharedSelection } from '@nextui-org/react';
+import { SharedSelection } from "@nextui-org/react";
 
-const EducationalBackgroundForm = () => {
+interface Certificate {
+    fileName: string;
+    fileUrl: string;
+  }
+  
+const EditEducationalBackgroundForm = () => {
   const { control, watch, setValue } = useFormContext();
   const [showStrand, setShowStrand] = useState(false);
   const [showCourse, setShowCourse] = useState(false);
   const [fileStates, setFileStates] = useState<FileState[]>([]);
   const { edgestore } = useEdgeStore();
-  const [select,setSelect]= useState<string>('')
+  const [select, setSelect] = useState<string | null>(null);
 
   // Watch form fields
-  const elementary = watch('elementary');
-  const highSchool = watch('highSchool');
-  const seniorHighSchool = watch('seniorHighSchool');
-  const universityCollege = watch('universityCollege');
+  const elementary = watch("elementary");
+  const highSchool = watch("highSchool");
+  const seniorHighSchool = watch("seniorHighSchool");
+  const universityCollege = watch("universityCollege");
+  const seniorHighStrand = watch("seniorHighStrand");
 
+  
   // Show Strand field when Senior High School is entered
   useEffect(() => {
     setShowStrand(!!seniorHighSchool);
   }, [seniorHighSchool]);
 
-  // Show Course field when University/College is entered
   useEffect(() => {
-    setShowCourse(!!universityCollege);
-  }, [universityCollege]);
+    const initialSelect = seniorHighStrand || null;
+    setSelect(initialSelect);
+    setShowCourse(initialSelect === "tvl");
+  }, [seniorHighStrand]);
+
+  // Update showCourse based on select state
+  useEffect(() => {
+    setShowCourse(select === "tvl");
+  }, [select]);
 
   // Determine the highest degree based on entered fields
   useEffect(() => {
-    let highestDegree = 'Elementary School';
-    if (highSchool) highestDegree = 'High School';
-    if (seniorHighSchool) highestDegree = 'Senior High School';
-    if (universityCollege) highestDegree = 'University/College';
-    setValue('highestDegree', highestDegree);
+    let highestDegree = "Elementary School";
+    if (highSchool) highestDegree = "High School";
+    if (seniorHighSchool) highestDegree = "Senior High School";
+    if (universityCollege) highestDegree = "University/College";
+    setValue("highestDegree", highestDegree);
   }, [elementary, highSchool, seniorHighSchool, universityCollege, setValue]);
 
-  function updateFileProgress(key: string, progress: FileState['progress']) {
+  function updateFileProgress(key: string, progress: FileState["progress"]) {
     setFileStates((fileStates) => {
       const newFileStates = structuredClone(fileStates);
       const fileState = newFileStates.find(
-        (fileState) => fileState.key === key,
+        (fileState) => fileState.key === key
       );
       if (fileState) {
         fileState.progress = progress;
@@ -61,15 +72,14 @@ const EducationalBackgroundForm = () => {
     });
   }
 
-  const handleSelect =(key:SharedSelection) => {
-    if(key.anchorKey === 'tvl'){
-      setSelect(key as string)
-    }
-  }
+  const handleSelect = (keys: SharedSelection) => {
+    const value = Array.from(keys)[0] as string;
+    setSelect(value);
+    setValue("seniorHighStrand", value);
+  };
 
   return (
     <div className="space-y-6">
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Elementary School */}
         <FormField
@@ -144,17 +154,31 @@ const EducationalBackgroundForm = () => {
                 <FormLabel>Senior High School Strand</FormLabel>
                 <FormControl>
                   <Select
-                    {...field}
+                    selectedKeys={field.value ? [field.value] : []}
+                    onSelectionChange={(keys) => {
+                      handleSelect(keys);
+                      const value = Array.from(keys)[0];
+                      field.onChange(value);
+                    }}
                     placeholder="Select Strand"
                     variant="bordered"
                     className="border rounded"
-                    onSelectionChange={handleSelect}
                   >
-                    <SelectItem key="humss" value="HUMSS">HUMSS</SelectItem>
-                    <SelectItem key="abm" value="ABM">ABM</SelectItem>
-                    <SelectItem key="stem" value="STEM">STEM</SelectItem>
-                    <SelectItem key="gas" value="GAS">GAS</SelectItem>
-                    <SelectItem key="tvl" value="TVL">TVL</SelectItem>
+                    <SelectItem key="humss" value="HUMSS">
+                      HUMSS
+                    </SelectItem>
+                    <SelectItem key="abm" value="ABM">
+                      ABM
+                    </SelectItem>
+                    <SelectItem key="stem" value="STEM">
+                      STEM
+                    </SelectItem>
+                    <SelectItem key="gas" value="GAS">
+                      GAS
+                    </SelectItem>
+                    <SelectItem key="tvl" value="TVL">
+                      TVL
+                    </SelectItem>
                   </Select>
                 </FormControl>
                 <FormMessage />
@@ -163,8 +187,8 @@ const EducationalBackgroundForm = () => {
           />
         )}
 
-         {/* TVL Course - TVL is entered */}
-         {select && (
+        {/* TVL Course - Show only when "TVL" is selected */}
+        {showCourse && (
           <FormField
             name="tvlCourse"
             control={control}
@@ -251,6 +275,7 @@ const EducationalBackgroundForm = () => {
           )}
         />
 
+
         {/* Certificate Upload */}
         <FormField
           name="certificates"
@@ -263,7 +288,7 @@ const EducationalBackgroundForm = () => {
                   value={fileStates}
                   onChange={(files) => {
                     setFileStates(files);
-                    field.onChange(files.map(f => f.file));
+                    field.onChange(files.map((f) => f.file));
                   }}
                   onFilesAdded={async (addedFiles) => {
                     setFileStates([...fileStates, ...addedFiles]);
@@ -275,17 +300,22 @@ const EducationalBackgroundForm = () => {
                             onProgressChange: async (progress) => {
                               updateFileProgress(addedFileState.key, progress);
                               if (progress === 100) {
-                                await new Promise((resolve) => setTimeout(resolve, 1000));
-                                updateFileProgress(addedFileState.key, 'COMPLETE');
+                                await new Promise((resolve) =>
+                                  setTimeout(resolve, 1000)
+                                );
+                                updateFileProgress(
+                                  addedFileState.key,
+                                  "COMPLETE"
+                                );
                               }
                             },
                           });
                           console.log(res);
                         } catch (err) {
                           console.error(err);
-                          updateFileProgress(addedFileState.key, 'ERROR');
+                          updateFileProgress(addedFileState.key, "ERROR");
                         }
-                      }),
+                      })
                     );
                   }}
                 />
@@ -299,4 +329,4 @@ const EducationalBackgroundForm = () => {
   );
 };
 
-export default EducationalBackgroundForm;
+export default EditEducationalBackgroundForm;
