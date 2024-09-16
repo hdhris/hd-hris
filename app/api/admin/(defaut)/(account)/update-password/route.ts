@@ -17,12 +17,12 @@ export async function PUT(req: NextRequest) {
         hasContentType(req) // checks the content type if false it will return a response otherwise pass
         const data = await req.json();
 
-        // Get the session ID
+        // Get the user-session ID
         const sessionId = await auth();
-        const userId = Number(sessionId?.user.id);
+        const userId =sessionId?.user.id;
 
         // Retrieve the user's current password from the database
-        const dbPassword = await prisma.sys_accounts.findFirst({
+        const dbPassword = await prisma.credentials.findUnique({
             select: { password: true },
             where: { id: userId }
         });
@@ -57,7 +57,7 @@ export async function PUT(req: NextRequest) {
 
         // Encrypt the new password and update it in the database
         const encryptedPassword = await des.encryptData(parsedData.new_password);
-        const updateResult = await prisma.sys_accounts.update({
+        const updateResult = await prisma.credentials.update({
             where: { id: userId },
             data: { password: encryptedPassword }
         });

@@ -11,13 +11,8 @@ class SimpleAES {
     // Import the AES key
     private async importKey(secret: string): Promise<void> {
         const keyMaterial = await this.truncateHash(secret, 32); // AES-256 key size is 32 bytes
-        this.secretKey = await crypto.subtle.importKey(
-            'raw',
-            keyMaterial,
-            { name: 'AES-CBC' }, // Use AES-CBC for simplicity
-            false,
-            ['encrypt', 'decrypt']
-        );
+        this.secretKey = await crypto.subtle.importKey('raw', keyMaterial, {name: 'AES-CBC'}, // Use AES-CBC for simplicity
+            false, ['encrypt', 'decrypt']);
     }
 
     // Truncate the key using SHA-256
@@ -37,14 +32,9 @@ class SimpleAES {
 
         if (!this.secretKey) throw new Error('Secret key is not initialized.');
 
-        const encryptedBytes = await crypto.subtle.encrypt(
-            {
-                name: 'AES-CBC',
-                iv: iv,
-            },
-            this.secretKey,
-            plaintextBytes
-        );
+        const encryptedBytes = await crypto.subtle.encrypt({
+            name: 'AES-CBC', iv: iv,
+        }, this.secretKey, plaintextBytes);
 
         const ivBase64 = this.arrayBufferToBase64(iv);
         const encryptedBase64 = this.arrayBufferToBase64(encryptedBytes);
@@ -62,14 +52,9 @@ class SimpleAES {
         if (!this.secretKey) throw new Error('Secret key is not initialized.');
 
         try {
-            const decryptedBytes = await crypto.subtle.decrypt(
-                {
-                    name: 'AES-CBC',
-                    iv: iv,
-                },
-                this.secretKey,
-                encryptedBytes
-            );
+            const decryptedBytes = await crypto.subtle.decrypt({
+                name: 'AES-CBC', iv: iv,
+            }, this.secretKey, encryptedBytes);
 
             const decoder = new TextDecoder();
             return decoder.decode(decryptedBytes);
@@ -110,4 +95,5 @@ class SimpleAES {
         return cipher.includes(':'); // Simple validation for format
     }
 }
+
 export default SimpleAES

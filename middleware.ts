@@ -21,14 +21,14 @@ export default auth((req: any) => {
         return NextResponse.next();
     }
 
-    // Redirect unauthenticated users to the login checkpoint
-    if (req.auth.user.isDefaultAccount) {
-        return NextResponse.redirect(new URL("/auth/login-checkpoint", req.nextUrl.origin));
-    }
-
     if (!req.auth && req.nextUrl.pathname !== "/api/auth/signin") {
         const newUrl = new URL("/api/auth/signin", req.nextUrl.origin)
         return Response.redirect(newUrl)
+    }
+
+    // Redirect unauthenticated users to the login checkpoint
+    if (req.auth.user && req.auth.user.isDefaultAccount) {
+        return NextResponse.redirect(new URL("/auth/login-checkpoint", req.nextUrl.origin));
     }
 
     return NextResponse.next(); // Proceed if authenticated

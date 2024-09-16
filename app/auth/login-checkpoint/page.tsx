@@ -76,13 +76,11 @@ function Page() {
                 if (loginResponse.success) {
                     // Redirect to dashboard
                     router.push("/dashboard")
-
                 } else if (loginResponse.error) {
                     // Display error message
                     setError(loginResponse.error.message)
                 }
 
-                console.log(data)
             } else if(res.status === 400){
                 setError(res.data.message);
             }

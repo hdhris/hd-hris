@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+"use client"
+import React, {useState, useEffect, useCallback} from "react";
 import {
   Modal,
   ModalContent,
@@ -84,18 +85,12 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ employeeId, onEmployeeUpdat
     mode: "onChange",
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchEmployeeData();
-    }
-  }, [isOpen, employeeId]);
-
-  const fetchEmployeeData = async () => {
+  const fetchEmployeeData = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(`/api/employeemanagement/employees?id=${employeeId}`);
       const employeeData = response.data;
-      
+
       methods.reset({
         picture: employeeData.picture || "",
         first_name: employeeData.first_name || "",
@@ -132,7 +127,14 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ employeeId, onEmployeeUpdat
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [employeeId, methods, toast]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchEmployeeData();
+    }
+  }, [isOpen, fetchEmployeeData]);
+
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
@@ -192,45 +194,45 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ employeeId, onEmployeeUpdat
   };
 
   return (
-    <Modal
-      size="5xl"
-      isOpen={isOpen}
-      onClose={onClose}
-      scrollBehavior="inside"
-      isDismissable={false}
-    >
-      <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
-          <ModalContent>
-            <ModalHeader className="flex flex-col gap-1">Edit Employee Information</ModalHeader>
-            <ModalBody>
-              {isLoading ? (
-                <div>Loading employee data...</div>
-              ) : (
-                <>
-                  <h2 className="text-lg font-semibold">Personal Information</h2>
-                  <PersonalInformationForm />
-                  <Divider className="my-6" />
-                  <h2 className="text-lg font-semibold">Educational Background</h2>
-                  <EducationalBackgroundForm />
-                  <Divider className="my-6" />
-                  <h2 className="text-lg font-semibold">Job Information</h2>
-                  <JobInformationForm />
-                </>
-              )}
-            </ModalBody>
-            <ModalFooter>
-              <Button color="danger" variant="light" onPress={onClose}>
-                Cancel
-              </Button>
-              <Button color="primary" type="submit" disabled={isSubmitting || isLoading}>
-                {isSubmitting ? "Updating..." : "Update"}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </form>
-      </FormProvider>
-    </Modal>
+      <Modal
+          size="5xl"
+          isOpen={isOpen}
+          onClose={onClose}
+          scrollBehavior="inside"
+          isDismissable={false}
+      >
+        <FormProvider {...methods}>
+          <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
+            <ModalContent>
+              <ModalHeader className="flex flex-col gap-1">Edit Employee Information</ModalHeader>
+              <ModalBody>
+                {isLoading ? (
+                    <div>Loading employee data...</div>
+                ) : (
+                    <>
+                      <h2 className="text-lg font-semibold">Personal Information</h2>
+                      <PersonalInformationForm />
+                      <Divider className="my-6" />
+                      <h2 className="text-lg font-semibold">Educational Background</h2>
+                      <EducationalBackgroundForm />
+                      <Divider className="my-6" />
+                      <h2 className="text-lg font-semibold">Job Information</h2>
+                      <JobInformationForm />
+                    </>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button color="primary" type="submit" disabled={isSubmitting || isLoading}>
+                  {isSubmitting ? "Updating..." : "Update"}
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </form>
+        </FormProvider>
+      </Modal>
   );
 };
 

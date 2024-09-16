@@ -7,11 +7,21 @@ import {UserProfile} from "@/types/routes/default/types";
 export async function GET() {
     //get the user id from the token
     const token_id = await auth()
-    // TODO: get user profile from database
-    const user_data = await prisma.sys_accounts.findFirst({
+
+    const username = await prisma.credentials.findUnique({
+        select: {
+            username: true
+        },
         where: {
-            id: Number(token_id?.user.id)
-        }, include: {
+            id: token_id?.user.id
+        }
+    })
+    // TODO: get user profile from database
+    const user_data = await prisma.sys_users.findUnique({
+        where: {
+            id: token_id?.user.id
+        },
+        include: {
             trans_employees: {
                 select: {
                     picture: true,
@@ -35,7 +45,7 @@ export async function GET() {
 
 
     const users: UserProfile = {
-        username: user_data?.username!,
+        username: username?.username!,
         picture: user_data?.trans_employees?.picture!,
         prefix: user_data?.trans_employees?.prefix!,
         first_name: user_data?.trans_employees?.first_name!,

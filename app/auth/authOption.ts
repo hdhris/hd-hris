@@ -34,7 +34,7 @@
 //             return user ? JSON.parse(JSON.stringify(user)) : null
 //         }
 //     })], callbacks: {
-//         async jwt({token, user, session}) {
+//         async jwt({token, user, user-session}) {
 //             if (user) {
 //                 return {
 //                     ...token,
@@ -46,13 +46,13 @@
 //                 };
 //             }
 //             return token;
-//         }, async session({session, token, user}) {
-//             session.user = token;
-//             return session;
+//         }, async user-session({user-session, token, user}) {
+//             user-session.user = token;
+//             return user-session;
 //         }
 //     }, pages: {
 //         signIn: "/",
-//     }, secret: process.env.NEXTAUTH_SECRET, session: {
+//     }, secret: process.env.NEXTAUTH_SECRET, user-session: {
 //         strategy: "jwt", // maxAge: 60 * 60, // Set max age to 1 hour (3600 seconds)
 //         // updateAge: 5 * 60,  // Update JWT every 5 minutes if activity is detected
 //     },

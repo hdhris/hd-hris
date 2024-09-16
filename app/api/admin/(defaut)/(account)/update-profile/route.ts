@@ -24,9 +24,9 @@ export async function PUT(req: NextRequest) {
 
 // Step 1: Retrieve the employeeId from sys_accounts
         const sessionId = await auth();
-        const userId = Number(sessionId?.user.id);
+        const userId = sessionId?.user.id;
 // Retrieve the employee_id associated with the sys_account
-        const account = await prisma.sys_accounts.findUnique({
+        const account = await prisma.sys_users.findUnique({
             where: { id: userId },
             select: { employee_id: true, trans_employees: true }, // Include the trans_employees to check existence
         });
@@ -54,7 +54,7 @@ export async function PUT(req: NextRequest) {
                     });
 
                     // Update the username in sys_accounts
-                    await prisma.sys_accounts.update({
+                    await prisma.credentials.update({
                         where: { id: userId },
                         data: {
                             username: username,
@@ -62,10 +62,9 @@ export async function PUT(req: NextRequest) {
                     });
                 } else {
                     // If employee_id does not exist, create a new trans_employees record and associate it
-                    await prisma.sys_accounts.update({
+                    await prisma.sys_users.update({
                         where: { id: userId },
                         data: {
-                            username: username,
                             trans_employees: {
                                 create: {
                                     picture: data.picture,
