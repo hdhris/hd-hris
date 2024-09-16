@@ -14,28 +14,24 @@ import {RiEyeCloseLine, RiEyeLine} from "react-icons/ri";
 import {icon_color} from "@/lib/utils";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
+import {signOut, useSession} from "next-auth/react";
+import {ToastAction} from "@/components/ui/toast"
+import {NewPasswordValidation} from "@/helper/zodValidation/NewPasswordValidation";
 
 
-const formSchema = z.object({
-    current_password: z.string().min(8, {
-        message: "Password must be at least 8 characters.",
-    }),
-    new_password: z.string().min(8, {
-        message: "Password must be at least 8 characters.",
-    }), confirm_password: z.string().min(8, {
-        message: "Password must be at least 8 characters.",
-    })
-}).refine(data => data.new_password === data.confirm_password, {
+const ChangePasswordSchema = NewPasswordValidation.refine(data => data.new_password === data.confirm_password, {
     message: "Passwords do not match", path: ["confirm_password"],
-});
+})
 function AccountSecurity() {
     const { toast } = useToast()
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema), defaultValues: {
+
+    const session = useSession()
+    const form = useForm<z.infer<typeof ChangePasswordSchema>>({
+        resolver: zodResolver(ChangePasswordSchema), defaultValues: {
+            current_password: "",
             new_password: "", confirm_password: ""
         },
     })
-    const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const [isVisibleCurrent, setIsVisibleCurrent] = useState(false)
     const [isVisibleNew, setIsVisibleNew] = useState(false)
@@ -81,8 +77,9 @@ function AccountSecurity() {
         }]
 
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof ChangePasswordSchema>) {
         setLoading(true)
+
         try {
             const response = await axiosInstance.put('/api/admin/update-password', values, {
                 headers: {
@@ -90,17 +87,31 @@ function AccountSecurity() {
                 }
             });
             if(response.status === 200) {
+                form.reset({
+                    current_password: "",
+                    new_password: "",
+                    confirm_password: ""
+                })
                 toast({
+                    description: `${response.data.message} and you will be signed out in 1 minute or signed out now.`,
+                    action: <ToastAction altText="Sign out" onClick={() => signOut({callbackUrl: '/'})}>Sign out</ToastAction>,
+                    variant: 'success'
+                })
+
+                setTimeout(() => {
+                    signOut({callbackUrl: '/'})
+                }, 60000)
+            } else {
+                toast({
+                    title: 'Error',
                     description: response.data.message,
-                    variant: 'success',
+                    variant: 'danger'
                 })
             }
-
-            console.log(response.data);
         } catch (error: any) {
             toast({
                 title: 'Error',
-                description: error.message,
+                description: error.response.data.message,
                 variant: 'danger'
             })
             console.error("Error submitting form:", error);
@@ -122,7 +133,6 @@ function AccountSecurity() {
                     </div>
                     <div className='self-end'>
                         <Button type='submit'
-                                spinner={<Spinner size='sm'/>}
                                 isLoading={loading}
                                 size='sm'
                                 className='w-full'

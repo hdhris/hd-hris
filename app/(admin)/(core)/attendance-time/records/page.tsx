@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Calendar,
@@ -19,54 +19,28 @@ import {
   getKeyValue,
 } from "@nextui-org/react";
 import { parseDate } from "@internationalized/date";
-const statusColorMap = {
-  active: "success",
-  paused: "danger",
-  vacation: "warning",
+import { AxiosResponse } from "axios";
+import { axiosInstance } from "@/services/fetcher";
+import { CalendarDate } from "@nextui-org/react";
+import { AttendanceLog } from "@/types/attendance-time/AttendanceTypes";
+import TableData from "@/components/tabledata/TableData";
+import { TableConfigProps } from "@/types/table/TableDataTypes";
+const convertTo12HourFormat = (isoString: string): string => {
+  const date = new Date(isoString);
+  return date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 };
-const columns = [
-  {
-    key: "name",
-    label: "NAME",
-  },
-  {
-    key: "status",
-    label: "STATUS",
-  },
-  {
-    key: "time",
-    label: "TIME",
-  },
-];
-// Define your dummy data
-// key: "1", Add keys for unique identity
-const avatar = [
-  { key: "1", src: "https://i.pravatar.cc/150?u=a042581f4e29026024d" },
-  { key: "2", src: "https://i.pravatar.cc/150?u=a04258a2462d826712d" },
-  { key: "3", src: "https://i.pravatar.cc/150?u=a042581f4e29026704d" },
-  { key: "4", src: "https://i.pravatar.cc/150?u=a04258114e29026302d" },
-];
-const dummyData = [
-  { key: "1", name: "Tony Reichert", status: "TIME IN", time: "8:30 am" },
-  { key: "2", name: "Zoey Lang", status: "TIME OUT", time: "8:29 am" },
-  { key: "3", name: "Jane Fisher", status: "TIME IN", time: "8:28 am" },
-  { key: "4", name: "William Howard", status: "TIME OUT", time: "8:27 am" },
-];
-
-// Function to create repeated data
-const generateData = (data: any, times: any) => {
-  const repeatedData = [];
-  for (let i = 0; i < times; i++) {
-    repeatedData.push(
-      ...data.map((item: any) => ({ ...item, id: `${item.name}-${i}` }))
-    ); // Add unique id for each entry
-  }
-  return repeatedData;
-};
+const statusType = ["Password", "Fingerprint", "Card", "Face ID", "Other"];
+const punchType = ["IN", "OUT"];
 
 export default function Page() {
   const today = new Date();
-  let [value, setValue] = React.useState(
+  const [isLoading, setIsLoading] = useState(true);
+  const [attendanceLog, setAttendanceLog] = useState<AttendanceLog[]>([]);
+  let [date, setDate] = React.useState(
     parseDate(
       `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
         2,
@@ -74,13 +48,92 @@ export default function Page() {
       )}-${String(today.getDate()).padStart(2, "0")}`
     )
   );
-  // const items = generateData(dummyData, 10); // Generate data repeated 10 times
-  const items = dummyData; // Generate data repeated 10 times
+
+  useEffect(() => {
+    fetchAttandance(date.day, date.month, date.year);
+  },[date.day, date.month, date.year])
+  const handleDateChange = (newDate: CalendarDate) => {
+    setDate(newDate);
+    fetchAttandance(newDate.day, newDate.month, newDate.year);
+  };
+  const fetchAttandance = async (day: number, month: number, year: number) => {
+    setIsLoading(true);
+    try {
+      const date = `${year}-${String(month).padStart(2, "0")}-${String(
+        day
+      ).padStart(2, "0")}`;
+      const response: AxiosResponse<AttendanceLog[]> = await axiosInstance.get(
+        `/api/admin/attendance-time/records`,
+        {
+          params: { date },
+        }
+      );
+      setAttendanceLog(response.data);
+    } catch (error) {
+      console.error("Error fetching schedules:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const [selectedKey, setSelectedKey] = React.useState<any>("");
-  const selectedItem = dummyData.find((item) => item.key === selectedKey);
+  // const selectedItem = dummyData.find((item) => item.key === selectedKey);
+  const config: TableConfigProps<AttendanceLog> = {
+    columns: [
+      { uid: "name", name: "Name", sortable: true },
+      { uid: "status", name: "Status", sortable: true },
+      { uid: "punch", name: "Punch", sortable: true },
+      { uid: "timestamp", name: "Timestamp", sortable: true },
+    ],
+    rowCell: (item, columnKey) => {
+      switch (columnKey) {
+        case "name":
+          return (
+            <div className="flex items-center space-x-2">
+              <Avatar src={item.trans_employees.picture} />
+              <p>{`${item.trans_employees.last_name}, ${item.trans_employees.first_name} ${item.trans_employees.middle_name[0]}`}</p>
+            </div>
+          );
+        case "status":
+          return (
+            <Chip
+              className="capitalize"
+              color="primary"
+              size="sm"
+              variant="faded"
+            >
+              {statusType[item.status]}
+            </Chip>
+          );
+        case "punch":
+          return (
+            <Chip
+              color={item.punch === 0 ? "success" : "danger"}
+              size="sm"
+              variant="flat"
+            >
+              {punchType[item.punch]}
+            </Chip>
+          );
+        case "status":
+          return <span>{item.status}</span>;
+        case "timestamp":
+          return <span>{convertTo12HourFormat(item.timestamp)}</span>;
+        default:
+          return <></>;
+      }
+    },
+  };
+  // const searchingItemKey: Array<keyof AttendanceLog> = [
+  //   "trans_employees"
+  // ];
   return (
     <div className="flex flex-row p-1 gap-1">
-      <Table
+      <TableData
+        config={config}
+        items={attendanceLog}
+        // searchingItemKey={searchingItemKey}
+        // counterName="Attendance Logs"
+        isLoading={isLoading}
         className="flex-1 h-[calc(100vh-9.5rem)] overflow-y-auto"
         removeWrapper
         isHeaderSticky
@@ -91,59 +144,21 @@ export default function Page() {
           setSelectedKey(key as any);
           console.log(selectedKey);
         }}
-      >
-        <TableHeader columns={columns}>
-          {(column) => (
-            <TableColumn key={column.key}>{column.label}</TableColumn>
-          )}
-        </TableHeader>
-        <TableBody emptyContent={"No records for this day."} items={items}>
-          {items.map((row) => (
-            <TableRow
-              key={row.key}
-              className={`${selectedKey === row.key ? "bg-gray-300" : ""}`}
-            >
-              {(columnKey) => (
-                <TableCell>
-                  {columnKey === "name" ? (
-                    <div className="flex items-center space-x-2">
-                      <Avatar
-                        src={avatar.find((item) => item.key === row.key)?.src}
-                      />
-                      <p>{getKeyValue(row, columnKey)}</p>
-                    </div>
-                  ) : columnKey === "status" ? (
-                    <Chip
-                      className="capitalize"
-                      color="primary"
-                      size="sm"
-                      variant="flat"
-                    >
-                      {getKeyValue(row, columnKey)}
-                    </Chip>
-                  ) : (
-                    getKeyValue(row, columnKey)
-                  )}
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      />
       <div className="flex flex-col gap-1">
         <Calendar
           classNames={{ cell: "text-sm", gridBodyRow: "first:mt-0 -mt-1" }}
           className="h-fit shadow-none border overflow-hidden"
           aria-label="Date (Controlled)"
           showMonthAndYearPickers
-          value={value}
-          onChange={setValue}
+          value={date}
+          onChange={handleDateChange}
         />
         <Card shadow="none" className="border">
           <CardHeader className="flex gap-1">
             <div className="flex flex-col">
               <p className="text-md">
-                {selectedItem ? selectedItem.name : "No selected"}
+                {/* {selectedItem ? selectedItem.name : "No selected"} */}
               </p>
               <p className="text-small text-default-500">On time</p>
             </div>
@@ -157,8 +172,8 @@ export default function Page() {
               <TableHeader
                 columns={[
                   {
-                    key: "time",
-                    label: "TIME",
+                    key: "timestamp",
+                    label: "TIME STAMP",
                   },
                   {
                     key: "punch",
@@ -177,15 +192,30 @@ export default function Page() {
               <TableBody
                 emptyContent={"No records for this day."}
                 items={[
-                  { key: "1", time: "8:30 am", punch: "IN", status: "EARLY" },
+                  {
+                    key: "1",
+                    timestamp: "8:30 am",
+                    punch: "IN",
+                    status: "EARLY",
+                  },
                   {
                     key: "2",
-                    time: "12:00 pm",
+                    timestamp: "12:00 pm",
                     punch: "OUT",
                     status: "ONTIME",
                   },
-                  { key: "3", time: "1:30 pm", punch: "IN", status: "LATE" },
-                  { key: "4", time: "4:58 pm", punch: "OUT", status: "EARLY" },
+                  {
+                    key: "3",
+                    timestamp: "1:30 pm",
+                    punch: "IN",
+                    status: "LATE",
+                  },
+                  {
+                    key: "4",
+                    timestamp: "4:58 pm",
+                    punch: "OUT",
+                    status: "EARLY",
+                  },
                 ]}
               >
                 {(row) => (

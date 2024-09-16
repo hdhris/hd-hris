@@ -1,3 +1,14 @@
+import dayjs from "dayjs";
+import duration from 'dayjs/plugin/duration';
+dayjs.extend(duration);
+
+type TimeDifference = {
+    years?: number;
+    months?: number;
+    days?: number;
+    hours?: number;
+    minutes?: number;
+};
 export const getDateRequestedAgo = (referenceDate: Date, isDay?: boolean): string => {
     const currentDate = new Date();
     // const formatter = new Intl.DateTimeFormat('en-US', {
@@ -26,6 +37,38 @@ export const getDateRequestedAgo = (referenceDate: Date, isDay?: boolean): strin
     }
 
 
+};
+
+export const  calculateRemainingDays = (targetDate: string) => {
+    const now = dayjs(); // Current date
+    const target = dayjs(targetDate); // Target date
+
+    // Calculate the duration between now and the target date
+    const diff = dayjs.duration(target.diff(now));
+
+    // Create the result object with only non-zero values
+    const result: TimeDifference = {
+        years: diff.years() > 0 ? diff.years() : undefined,
+        months: diff.months() > 0 ? diff.months() : undefined,
+        days: diff.days() > 0 ? diff.days() : undefined,
+        hours: diff.hours() > 0 ? diff.hours() : undefined,
+        minutes: diff.minutes() > 0 ? diff.minutes() : undefined
+    };
+
+    // Construct the result string
+    const timeUnits = [
+        { unit: 'yr/s', value: result.years },
+        { unit: 'mo/s', value: result.months },
+        { unit: 'day/s', value: result.days },
+        { unit: 'hr/s', value: result.hours },
+        { unit: 'min/s', value: result.minutes }
+    ];
+
+    // Filter out zero or undefined values and format the string
+    return timeUnits
+        .filter(({ value }) => value !== undefined && value > 0)
+        .map(({ unit, value }) => `${value}${unit}`)
+        .join(' ');
 };
 
 export const getRandomDateTime = (startDate: Date, endDate: Date): Date => {

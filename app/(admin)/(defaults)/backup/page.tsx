@@ -7,6 +7,7 @@ import BorderCard from "@/components/common/BorderCard";
 import BackupRetention from "@/components/admin/defaults/backup/BackupRetention";
 import BackupStrategy from "@/components/admin/defaults/backup/BackupStrategy";
 import BackupFrequency from "@/components/admin/defaults/backup/BackupFrequency";
+import RestoreOption from "@/components/admin/defaults/backup/RestoreOption";
 
 
 const BackupSettings: React.FC = () => {
@@ -78,11 +79,7 @@ function Page() {
                 heading: 'text-lg'
             }}/>
 
-            <BorderCard className='p-2' heading={<div className='flex justify-end'>
-                <Button size='sm' color='primary'>Restore Options</Button>
-            </div>
-
-            }>
+            <BorderCard className='p-2'>
                 <div className='h-80 overflow-hidden'>
                     <BackupFiles/>
                 </div>
