@@ -31,22 +31,22 @@ const io = new Server(httpServer, {
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, async () => {
     console.log(`socket.io server is running on port ${PORT}`);
-    await streamPlayerUpdates(io);
+    // await streamPlayerUpdates(io);
 });
 
-async function streamPlayerUpdates(io: Server) {
-    try{
-        const stream = await prisma_server.sys_accounts.stream();
-        // Handle Prisma stream events
-        for await (const event of stream) {
-            console.log(`received event: `, event);
-
-            if (event.action === "update") {
-                io.sockets.emit("update", event);
-            }
-        }
-    } catch (err){
-        console.log("Error while parsing: ", err)
-    }
-
-}
+// async function streamPlayerUpdates(io: Server) {
+//     try{
+//         const stream = await prisma_server.sys_accounts.stream();
+//         // Handle Prisma stream events
+//         for await (const event of stream) {
+//             console.log(`received event: `, event);
+//
+//             if (event.action === "update") {
+//                 io.sockets.emit("update", event);
+//             }
+//         }
+//     } catch (err){
+//         console.log("Error while parsing: ", err)
+//     }
+//
+// }
