@@ -6,6 +6,7 @@ import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
 import {SignJWT} from "jose";
 import {SupabaseAdapter} from "@auth/supabase-adapter"
 import GoogleProvider from "next-auth/providers/google";
+import prisma from "@/prisma/prisma";
 
 
 export const {handlers, signIn, signOut, auth} = NextAuth({
@@ -28,24 +29,36 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
             // Get user data
             return await handleAuthorization({username, password});
         },
-    }),
-        GoogleProvider({
-            clientId: process.env.AUTH_GOOGLE_ID,
-            clientSecret: process.env.AUTH_GOOGLE_SECRET,
-            authorization: {
-                params: {
-                    prompt: "consent", access_type: "offline", response_type: "code",
-                },
+    }), GoogleProvider({
+        clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET, authorization: {
+            params: {
+                prompt: "consent", access_type: "offline", response_type: "code",
             },
-        }),
-    ], callbacks: {
-        authorized({request: {nextUrl}, auth}) {
-            const isLoggedIn = !!auth?.user;
-            const {pathname} = nextUrl;
-            if (pathname.startsWith('/api/auth/signin') && isLoggedIn) {
-                return Response.redirect(new URL('/dashboard', nextUrl))
+        },
+    }),], callbacks: {
+        async signIn({account, profile, user}) {
+            try {
+                if (account?.provider === 'google') {
+                    const employee_email = await prisma.trans_employees.findFirst({
+                        where: {
+                            email: user.email || undefined, // Handle nullable email
+                        },
+                    });
+
+                    if (!employee_email) {
+                        console.error("Unauthorized login attempt.");
+                        return false; // User is not authorized
+                    }
+
+                    return true; // User is authorized
+                }
+
+                return true; // For other providers
+            } catch (error) {
+                console.error("Login error:", error);
+                return false; // Return false to stop the login process
             }
-            return !!auth
+
         }, async jwt({token, user}) {
             if (user) {
                 return {
@@ -91,6 +104,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         },
     }, pages: {
         signIn: "/",
+        error: "/"
     }, secret: process.env.AUTH_SECRET, session: {
         strategy: "jwt"
     }

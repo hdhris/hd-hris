@@ -5,7 +5,8 @@ declare module "next-auth" {
         accessToken?: string
         user: {
             id: string; name: string
-            role: string; picture: string
+            role: string;
+            picture: string
             privilege: string; employee_id: number | null
             isDefaultAccount: boolean
             // iat?: number

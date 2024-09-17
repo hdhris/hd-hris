@@ -2,6 +2,7 @@
 import prisma from '@/prisma/prisma';
 import {LoginValidation} from '@/helper/zodValidation/LoginValidation';
 import SimpleAES from "@/lib/cryptography/3des";
+import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 
 interface UserPrivileges {
     web_access?: boolean;
@@ -52,8 +53,12 @@ export const getUserData = async (username: string, password: string) => {
 
     // Process user role and return user data
     // const privileges = user.sys_privileges;
-    // const accessibility = processJsonObject<UserPrivileges>(privileges?.accessibility);
-    // const role = !accessibility?.web_access ? 'user' : 'admin';
+    const privileges = await prisma.sys_users.findUnique({
+        where: {id: credential.id},
+        include: {sys_privileges: true}
+    });
+    const accessibility = processJsonObject<UserPrivileges>(privileges?.sys_privileges?.accessibility);
+    const role = !accessibility?.web_access ? 'user' : 'admin';
     //
     // const emp_name = user.trans_employees
     // const name = getEmpFullName(emp_name)
@@ -61,9 +66,12 @@ export const getUserData = async (username: string, password: string) => {
         id: String(credential.id),
         name: credential.users.name || 'No Name', // Use actual user name if available
         picture: credential.users.image || '',
-        email: credential.users.email || '', // privilege: privileges?.name || 'N/A',
+        email: credential.users.email || '',
+        privilege: privileges?.sys_privileges?.name || 'N/A',
         // employee_id: user.trans_employees?.id || null,
+        role,
         isDefaultAccount: credential.username === 'admin'
+
     };
 };
 

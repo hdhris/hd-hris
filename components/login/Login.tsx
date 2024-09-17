@@ -1,5 +1,5 @@
 "use client"
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Typography from "@/components/common/typography/Typography";
 import Image from "next/image";
 import logo from "@/public/logo.svg";
@@ -18,7 +18,7 @@ import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {LuXCircle} from "react-icons/lu";
 import ForgotButton from "@/components/forgot/ForgotButton";
 import {login} from "@/actions/authActions";
-import {useRouter} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 import {Divider} from "@nextui-org/divider";
 import GoogleLogin from "@/components/login/OAthLogin";
 import OAthLogin from "@/components/login/OAthLogin";
@@ -29,8 +29,8 @@ const loginSchema = z.object({
     username: z.string().min(1, {message: "Username is required."}), password: z.string().min(1, {message: "Password is required."})
 })
 function Login() {
-
-    const router = useRouter()
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema), defaultValues: {
             username: "", password: ""
@@ -41,6 +41,14 @@ function Login() {
     const [isVisible, setIsVisible] = useState(false)
     const {isDirty, isValid} = useFormState(form)
 
+
+    useEffect(() => {
+        const errorParam = searchParams.get('error');
+        if (errorParam) {
+            setError("Email not registered. Please contact admin.");
+            router.push('/');
+        }
+    }, [router, searchParams]);
 
     const handlePasswordVisibility = (e: { preventDefault: () => void }) => {
         e.preventDefault();
@@ -108,7 +116,7 @@ function Login() {
             </CardHeader>
             <CardBody>
                 {error && <Chip classNames={{
-                    base: cn('p-5 max-w-1/2', text_truncated)
+                    base: cn('p-5 max-w-1/2 self-center', text_truncated)
                 }} variant='flat' startContent={<LuXCircle/>} color='danger' radius="sm">{error}</Chip>}
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2'>
