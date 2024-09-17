@@ -74,7 +74,7 @@ const formatTimeTo12Hour = (time: string) => {
 };
 
 const EditJobInformationForm: React.FC = () => {
-  const { control, setValue, watch, getValues } = useFormContext<FormValues>();
+  const { control, setValue, watch } = useFormContext<FormValues>();
   const [departments, setDepartments] = useState<
     Array<{ id: number; name: string }>
   >([]);
@@ -84,7 +84,7 @@ const EditJobInformationForm: React.FC = () => {
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
 
   const selectedBatchId = watch("batch_id");
-  const daysJson = watch("days_json") || {};
+  const daysJson = watch("days_json");
 
   useEffect(() => {
     fetchDepartments();
@@ -92,11 +92,20 @@ const EditJobInformationForm: React.FC = () => {
     fetchBatchSchedules();
   }, []);
 
-  const days_json = watch("days_json", {});
+  useEffect(() => {
+    // Populate default values for days_json
+    const defaultDaysJson = {
+      Monday: false,
+      Tuesday: false,
+      Wednesday: false,
+      Thursday: false,
+      Friday: false,
+      Saturday: false,
+      Sunday: false,
+    };
 
-  const handleCheckboxChange = (day: string, checked: boolean) => {
-    setValue(`days_json.${day}`, checked);
-  };
+    setValue("days_json", { ...defaultDaysJson, ...daysJson });
+  }, [daysJson, setValue]);
 
   const fetchDepartments = async () => {
     try {
@@ -148,7 +157,7 @@ const EditJobInformationForm: React.FC = () => {
                   onSelectionChange={(keys) => {
                     const value = Array.from(keys)[0] as string;
                     field.onChange(value);
-                    setValue("department_id", value);
+                    setValue("department_id", value); // Explicitly set the value
                   }}
                   placeholder="Select Department"
                   variant="bordered"
@@ -207,7 +216,7 @@ const EditJobInformationForm: React.FC = () => {
                   onSelectionChange={(keys) => {
                     const value = Array.from(keys)[0] as string;
                     field.onChange(value);
-                    setValue("job_id", value);
+                    setValue("job_id", value); // Explicitly set the value
                   }}
                   aria-label="Job Title"
                   placeholder="Select Job Title"
@@ -255,7 +264,7 @@ const EditJobInformationForm: React.FC = () => {
         </div>
       </div>
 
-      {/* Work Days */}
+      {/* Work Days
       <div className="mt-5">
         <h3 className="text-lg font-semibold mb-4">Work Days</h3>
         <div className="flex flex-wrap gap-4">
@@ -277,7 +286,7 @@ const EditJobInformationForm: React.FC = () => {
             </Checkbox>
           ))}
         </div>
-      </div>
+      </div> */}
     </form>
   );
 };
