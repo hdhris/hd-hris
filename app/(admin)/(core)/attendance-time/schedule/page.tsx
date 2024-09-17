@@ -21,7 +21,7 @@ import dayjs from "dayjs";
 import { Time } from "@internationalized/date";
 import { axiosInstance } from "@/services/fetcher";
 import { useIsClient } from "@/hooks/ClientRendering";
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 
@@ -91,6 +91,27 @@ export default function Page() {
   const [batchData, setBatchData] = useState<BatchSchedule[]>([]);
   const [empScheduleData, setEmpScheduleData] = useState<EmployeeSchedule[]>([]);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+  // Form state
+  const [name, setName] = useState("");
+  const [startTime, setStartTime] = useState(new Time(8));
+  const [endTime, setEndTime] = useState(new Time(17));
+
+  const handleSubmit = async () => {
+    try {
+      // Make the POST request
+      const response = await axios.post("/api/admin/attendance-time/schedule/add-schedule", {
+        name,
+        startTime: startTime.toString(), // or format the time as needed
+        endTime: endTime.toString(),
+      });
+
+      console.log("Batch schedule created", response.data);
+      onOpenChange(); // Close the modal on success
+    } catch (error) {
+      console.error("Error adding batch schedule", error);
+    }
+  };
 
   // const colorMap = useRef<Map<number, number>>(new Map());
   const getSchedules = async () => {
@@ -239,7 +260,7 @@ export default function Page() {
                       {batchData.some(
                         (batch) =>
                           batch.id === employee.batch_id &&
-                          employee.days_json.includes(day.toLowerCase())
+                          Array.isArray(employee.days_json) && employee.days_json.includes(day.toLowerCase())
                       )
                         ? getScheduleCard(
                             batchData.find(
@@ -265,21 +286,26 @@ export default function Page() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                Add Schedule
+                Add Batch Schedule
               </ModalHeader>
               <ModalBody>
                 <div className="flex flex-wrap gap-4">
                   <Input
+                    isRequired={true}
                     type="text"
                     label="Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                   />
                   <TimeInput
                     label="Start"
-                    defaultValue={new Time(8)}
+                    defaultValue={startTime}
+                    onChange={setStartTime} // Update start time
                   />
                   <TimeInput
                     label="End"
-                    defaultValue={new Time(17)}
+                    defaultValue={endTime}
+                    onChange={setEndTime} // Update end time
                   />
                 </div>
               </ModalBody>
@@ -287,7 +313,7 @@ export default function Page() {
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" onPress={onClose}>
+                <Button color="primary" onPress={handleSubmit}>
                   Add
                 </Button>
               </ModalFooter>
