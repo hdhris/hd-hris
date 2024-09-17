@@ -6,15 +6,27 @@ const prisma = new PrismaClient();
 
 // Department schema for validation
 const departmentSchema = z.object({
-  name: z.string().max(45), // Name is required and max length 45
-  color: z.string().max(10).optional(), // Optional field
-  is_active: z.boolean().optional(), // Optional field, defaults to true in create
+  name: z.string().max(45),          // Department name is required, max length 45 characters
+  color: z.string().max(10).optional(), // Optional color
+  is_active: z.boolean().optional(), // Optional field for active status, defaults to true in create
 });
 
 // Helper function to log database operations
 function logDatabaseOperation(operation: string, result: any) {
   console.log(`Database operation: ${operation}`);
   console.log('Result:', JSON.stringify(result, null, 2));
+}
+
+// Error handling function
+function handleError(error: unknown, operation: string) {
+  console.error(`Error during ${operation} operation:`, error);
+  if (error instanceof z.ZodError) {
+    return NextResponse.json({ error: 'Invalid data', details: error.errors }, { status: 400 });
+  }
+  if (error instanceof Error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  return NextResponse.json({ error: `Failed to ${operation} department` }, { status: 500 });
 }
 
 // GET - Fetch all departments or a single department by ID
@@ -35,25 +47,32 @@ export async function GET(req: Request) {
   }
 }
 
+// Function to fetch a department by ID
 async function getDepartmentById(id: number) {
   const department = await prisma.ref_departments.findFirst({
     where: {
       id,
-      deleted_at: null, // Exclude departments marked as deleted
+      deleted_at: null, // Only fetch departments not marked as deleted
     },
   });
+  
   logDatabaseOperation('GET department by ID', department);
+
   if (!department) {
     throw new Error('Department not found');
   }
+
   return department;
 }
 
+// Function to fetch all departments that are not soft deleted
 async function getAllDepartments() {
   const departments = await prisma.ref_departments.findMany({
     where: { deleted_at: null }, // Exclude departments marked as deleted
   });
+  
   logDatabaseOperation('GET all departments', departments);
+  
   return departments;
 }
 
@@ -69,6 +88,7 @@ export async function POST(req: Request) {
   }
 }
 
+// Function to create a new department
 async function createDepartment(data: z.infer<typeof departmentSchema>) {
   const department = await prisma.ref_departments.create({
     data: {
@@ -78,7 +98,9 @@ async function createDepartment(data: z.infer<typeof departmentSchema>) {
       updated_at: new Date(),
     },
   });
+  
   logDatabaseOperation('CREATE department', department);
+  
   return department;
 }
 
@@ -100,6 +122,7 @@ export async function PUT(req: Request) {
   }
 }
 
+// Function to update a department by ID
 async function updateDepartment(id: number, data: Partial<z.infer<typeof departmentSchema>>) {
   const department = await prisma.ref_departments.update({
     where: { id },
@@ -108,11 +131,13 @@ async function updateDepartment(id: number, data: Partial<z.infer<typeof departm
       updated_at: new Date(),
     },
   });
+  
   logDatabaseOperation('UPDATE department', department);
+  
   return department;
 }
 
-// DELETE - Mark a department as deleted (soft delete)
+// DELETE - Soft delete a department by marking it with a deleted_at timestamp
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
@@ -128,26 +153,15 @@ export async function DELETE(req: Request) {
   }
 }
 
+// Function to soft delete a department
 async function softDeleteDepartment(id: number) {
   const result = await prisma.ref_departments.update({
     where: { id },
     data: { deleted_at: new Date() }, // Set deleted_at to mark as deleted
   });
+  
   logDatabaseOperation('SOFT DELETE department', result);
 }
-
-// Error handling
-function handleError(error: unknown, operation: string) {
-  console.error(`Error during ${operation} operation:`, error);
-  if (error instanceof z.ZodError) {
-    return NextResponse.json({ error: 'Invalid data', details: error.errors }, { status: 400 });
-  }
-  if (error instanceof Error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  return NextResponse.json({ error: `Failed to ${operation} department` }, { status: 500 });
-}
-
 
 // // department route.ts
 // import { NextResponse } from "next/server";

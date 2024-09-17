@@ -15,7 +15,7 @@ import EducationalBackgroundForm from "./EducationalBackgroundForm";
 import JobInformationForm from "./JobInformation";
 import { useForm, FormProvider } from "react-hook-form";
 import axios from "axios";
-import { useToast } from "@/components/ui/use-toast"; // Updated import
+import { useToast } from "@/components/ui/use-toast";
 
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
@@ -27,6 +27,7 @@ interface EmployeeFormData {
   middle_name: string;
   last_name: string;
   gender: string;
+  email: string;
   birthdate: string;
   addr_region: string;
   addr_province: string;
@@ -43,13 +44,14 @@ interface EmployeeFormData {
   hired_at: string;
   department_id: string;
   job_id: string;
-  workSchedules: Record<string, unknown>;
+  batch_id: string;
+  days_json: Record<string, boolean>;
 }
 
 const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast(); // Use custom toast
+  const { toast } = useToast();
 
   const methods = useForm<EmployeeFormData>({
     defaultValues: {
@@ -58,6 +60,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       middle_name: "",
       last_name: "",
       gender: "",
+      email: "",
       birthdate: "",
       addr_region: "",
       addr_province: "",
@@ -74,7 +77,8 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       hired_at: "",
       department_id: "",
       job_id: "",
-      workSchedules: {},
+      batch_id: "",
+      days_json: {},
     },
     mode: "onChange",
   });
@@ -115,15 +119,23 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         department_id: parseInt(data.department_id, 10),
         job_id: parseInt(data.job_id, 10),
         educational_bg_json: educationalBackground,
+        batch_id: parseInt(data.batch_id, 10),
+        schedules: [
+          {
+            batch_id: parseInt(data.batch_id, 10),
+            days_json: data.days_json,
+          },
+        ],
       };
 
       const response = await axios.post(
         "/api/employeemanagement/employees",
         fullData
       );
+
       if (response.status === 201) {
-        onEmployeeAdded(); // Call to refresh the table
-        methods.reset(); // Clear the form fields
+        onEmployeeAdded();
+        methods.reset();
 
         toast({
           title: "Success",
@@ -131,10 +143,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
           duration: 3000,
         });
 
-        // Delay closing the modal to ensure toast visibility
         setTimeout(() => {
-          onClose(); // Close the modal
-        }, 500); // Adjust the timeout as needed
+          onClose();
+        }, 500);
       }
     } catch (error) {
       console.error("Error creating employee:", error);
@@ -175,7 +186,10 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
               <ModalFooter>
                 <Button
                   color="danger"
-                  onClick={onClose}
+                  onClick={() => {
+                    methods.reset();
+                    onClose();
+                  }}
                   disabled={isSubmitting}
                 >
                   Cancel
@@ -183,21 +197,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
                 <Button color="primary" type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Saving..." : "Save"}
                 </Button>
-                <Button
-                  onClick={() => {
-                    toast({
-                      title: "Button Clicked",
-                      description: "You clicked the button!",
-
-                      duration: 1000,
-                    });
-                  }}
-                >
-                  Show Toast
-                </Button>
               </ModalFooter>
             </ModalContent>
-          </form>
+          </form> 
         </FormProvider>
       </Modal>
     </>

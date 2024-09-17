@@ -36,6 +36,14 @@ const employeeSchema = z.object({
   suspension_json: z.any().optional(),
   resignation_json: z.any().optional(),
   termination_json: z.any().optional(),
+  schedules: z
+    .array(
+      z.object({
+        batch_id: z.number(),
+        days_json: z.record(z.boolean()),
+      })
+    )
+    .optional(),
 });
 
 // Helper function to log database operations
@@ -66,13 +74,23 @@ function handleError(error: unknown, operation: string) {
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
+  const daysJson = url.searchParams.get("days_json"); // Get days_json from the query string
+
+  let parsedDaysJson;
+  if (daysJson) {
+    try {
+      parsedDaysJson = JSON.parse(daysJson); // Parse days_json back into an object
+    } catch (error) {
+      return NextResponse.json({ error: "Invalid days_json format" }, { status: 400 });
+    }
+  }
 
   try {
     let result;
     if (id) {
-      result = await getEmployeeById(parseInt(id));
+      result = await getEmployeeById(parseInt(id), parsedDaysJson);
     } else {
-      result = await getAllEmployees();
+      result = await getAllEmployees(parsedDaysJson);
     }
     return NextResponse.json(result);
   } catch (error) {
@@ -80,11 +98,21 @@ export async function GET(req: Request) {
   }
 }
 
-async function getEmployeeById(id: number) {
+// Fetch a single employee by ID, with optional days_json filter
+async function getEmployeeById(id: number, daysJson?: Record<string, boolean>) {
   const employee = await prisma.trans_employees.findFirst({
     where: {
       id,
       deleted_at: null, // Exclude employees marked as deleted
+      dim_schedules: daysJson
+        ? {
+            some: {
+              days_json: {
+                equals: daysJson, // Filter by days_json if provided
+              },
+            },
+          }
+        : undefined,
     },
     include: {
       ref_departments: true,
@@ -93,8 +121,10 @@ async function getEmployeeById(id: number) {
       ref_addresses_trans_employees_addr_provinceToref_addresses: true,
       ref_addresses_trans_employees_addr_municipalToref_addresses: true,
       ref_addresses_trans_employees_addr_baranggayToref_addresses: true,
+      dim_schedules: { include: { ref_batch_schedules: true } },
     },
   });
+
   logDatabaseOperation("GET employee by ID", employee);
   if (!employee) {
     throw new Error("Employee not found");
@@ -102,9 +132,21 @@ async function getEmployeeById(id: number) {
   return employee;
 }
 
-async function getAllEmployees() {
+// Fetch all employees, with optional days_json filter
+async function getAllEmployees(daysJson?: Record<string, boolean>) {
   const employees = await prisma.trans_employees.findMany({
-    where: { deleted_at: null }, // Exclude employees marked as deleted
+    where: {
+      deleted_at: null, // Exclude employees marked as deleted
+      dim_schedules: daysJson
+        ? {
+            some: {
+              days_json: {
+                equals: daysJson, // Filter by days_json if provided
+              },
+            },
+          }
+        : undefined,
+    },
     include: {
       ref_departments: true,
       ref_job_classes: true,
@@ -112,12 +154,13 @@ async function getAllEmployees() {
       ref_addresses_trans_employees_addr_provinceToref_addresses: true,
       ref_addresses_trans_employees_addr_municipalToref_addresses: true,
       ref_addresses_trans_employees_addr_baranggayToref_addresses: true,
+      dim_schedules: { include: { ref_batch_schedules: true } },
     },
   });
+
   logDatabaseOperation("GET all employees", employees);
   return employees;
 }
-
 // POST - Create a new employee
 export async function POST(req: Request) {
   try {
@@ -134,6 +177,7 @@ export async function POST(req: Request) {
 }
 
 async function createEmployee(data: z.infer<typeof employeeSchema>) {
+  const {schedules} = data;
   const employee = await prisma.trans_employees.create({
     data: {
       ...data,
@@ -141,6 +185,17 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
       birthdate: data.birthdate ? new Date(data.birthdate) : undefined,
       created_at: new Date(),
       updated_at: new Date(),
+      dim_schedules: schedules
+      
+      ? {
+          create: schedules.map((schedule) => ({
+            batch_id: schedule.batch_id,
+            days_json: schedule.days_json,
+            created_at: new Date(),
+            updated_at: new Date(),
+          })),
+        }
+      : undefined,
     },
   });
   logDatabaseOperation("CREATE employee", employee);
@@ -172,14 +227,45 @@ async function updateEmployee(
   id: number,
   data: Partial<z.infer<typeof employeeSchema>>
 ) {
+  const { schedules, job_id, ...otherData } = data;
+
+  // 1. Update non-relational fields first
   const employee = await prisma.trans_employees.update({
     where: { id },
     data: {
-      ...data,
-      birthdate: data.birthdate ? new Date(data.birthdate) : undefined,
+      ...otherData,
+      birthdate: otherData.birthdate ? new Date(otherData.birthdate) : undefined,
       updated_at: new Date(),
     },
   });
+
+  // 2. Update ref_job_classes relation separately (if job_id exists)
+  if (job_id) {
+    await prisma.trans_employees.update({
+      where: { id },
+      data: {
+        ref_job_classes: { connect: { id: job_id } }, // Connect the job class
+      },
+    });
+  }
+
+  // 3. Update dim_schedules relation separately (if schedules exist)
+  if (schedules) {
+    await prisma.dim_schedules.deleteMany({
+      where: { employee_id: id }, // Delete existing schedules
+    });
+
+    await prisma.dim_schedules.createMany({
+      data: schedules.map((schedule) => ({
+        employee_id: id,
+        batch_id: schedule.batch_id,
+        days_json: schedule.days_json,
+        created_at: new Date(),
+        updated_at: new Date(),
+      })),
+    });
+  }
+
   logDatabaseOperation("UPDATE employee", employee);
   return employee;
 }

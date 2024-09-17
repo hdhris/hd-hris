@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
 
 type FormValues = {
   department_id: string;
@@ -23,15 +24,6 @@ type FormValues = {
   job_id: string;
   batch_id: string;
   days_json: Record<string, boolean>;
-};
-
-type BatchSchedule = {
-  id: number;
-  name: string;
-  clock_in: string;
-  clock_out: string;
-  shift_hours: number;
-  break_minutes: number;
 };
 
 const safeParseDate = (dateString: string) => {
@@ -81,10 +73,14 @@ const formatTimeTo12Hour = (time: string) => {
   }).format(date);
 };
 
-const JobInformationForm: React.FC = () => {
+const EditJobInformationForm: React.FC = () => {
   const { control, setValue, watch } = useFormContext<FormValues>();
-  const [departments, setDepartments] = useState<Array<{ id: number; name: string }>>([]);
-  const [jobTitles, setJobTitles] = useState<Array<{ id: number; name: string }>>([]);
+  const [departments, setDepartments] = useState<
+    Array<{ id: number; name: string }>
+  >([]);
+  const [jobTitles, setJobTitles] = useState<
+    Array<{ id: number; name: string }>
+  >([]);
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
 
   const selectedBatchId = watch("batch_id");
@@ -95,6 +91,21 @@ const JobInformationForm: React.FC = () => {
     fetchJobTitles();
     fetchBatchSchedules();
   }, []);
+
+  useEffect(() => {
+    // Populate default values for days_json
+    const defaultDaysJson = {
+      Monday: false,
+      Tuesday: false,
+      Wednesday: false,
+      Thursday: false,
+      Friday: false,
+      Saturday: false,
+      Sunday: false,
+    };
+
+    setValue("days_json", { ...defaultDaysJson, ...daysJson });
+  }, [daysJson, setValue]);
 
   const fetchDepartments = async () => {
     try {
@@ -133,6 +144,7 @@ const JobInformationForm: React.FC = () => {
   return (
     <form className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
+        {/* Department */}
         <Controller
           name="department_id"
           control={control}
@@ -141,10 +153,15 @@ const JobInformationForm: React.FC = () => {
               <FormLabel>Department</FormLabel>
               <FormControl>
                 <Select
-                  {...field}
-                  aria-label="Department"
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    field.onChange(value);
+                    setValue("department_id", value); // Explicitly set the value
+                  }}
                   placeholder="Select Department"
                   variant="bordered"
+                  className="border rounded"
                 >
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id.toString()}>
@@ -158,11 +175,13 @@ const JobInformationForm: React.FC = () => {
           )}
         />
 
+        {/* Hire Date */}
         <Controller
           name="hired_at"
           control={control}
           render={({ field }) => {
             const parsedValue = field.value ? safeParseDate(field.value) : null;
+
             return (
               <FormItem>
                 <FormLabel>Hire Date</FormLabel>
@@ -172,7 +191,7 @@ const JobInformationForm: React.FC = () => {
                     onChange={(date: CalendarDate | null) => {
                       field.onChange(date ? date.toString() : "");
                     }}
-                    aria-label="Hire Date"
+                    aria-label="Hiredate"
                     variant="bordered"
                     className="border rounded"
                     showMonthAndYearPickers
@@ -184,6 +203,7 @@ const JobInformationForm: React.FC = () => {
           }}
         />
 
+        {/* Job Title */}
         <Controller
           name="job_id"
           control={control}
@@ -192,10 +212,16 @@ const JobInformationForm: React.FC = () => {
               <FormLabel>Job Title</FormLabel>
               <FormControl>
                 <Select
-                  {...field}
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    field.onChange(value);
+                    setValue("job_id", value); // Explicitly set the value
+                  }}
                   aria-label="Job Title"
                   placeholder="Select Job Title"
                   variant="bordered"
+                  className="border rounded"
                 >
                   {jobTitles.map((job) => (
                     <SelectItem key={job.id} value={job.id.toString()}>
@@ -210,6 +236,7 @@ const JobInformationForm: React.FC = () => {
         />
       </div>
 
+      {/* Work Schedule */}
       <div className="mt-5">
         <h3 className="text-lg font-semibold mb-4">Work Schedule</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -218,23 +245,38 @@ const JobInformationForm: React.FC = () => {
               key={schedule.id}
               isPressable
               onPress={() => setValue("batch_id", schedule.id.toString())}
-              className={selectedBatchId === schedule.id.toString() ? "border-2 border-green-500" : ""}
+              className={
+                selectedBatchId === schedule.id.toString()
+                  ? "border-2 border-green-500"
+                  : ""
+              }
             >
               <CardHeader className="font-bold">{schedule.name}</CardHeader>
               <CardBody>
-                <p>{formatTimeTo12Hour(schedule.clock_in)} - {formatTimeTo12Hour(schedule.clock_out)}</p>
-                <p>{schedule.shift_hours} hrs shift</p>
-                <p>{schedule.break_minutes} mins break</p>
+                <p>
+                  {formatTimeTo12Hour(schedule.clock_in)} -{" "}
+                  {formatTimeTo12Hour(schedule.clock_out)}
+                </p>
+                <p>{schedule.break_min} mins break</p>
               </CardBody>
             </Card>
           ))}
         </div>
       </div>
 
+      {/* Work Days
       <div className="mt-5">
         <h3 className="text-lg font-semibold mb-4">Work Days</h3>
         <div className="flex flex-wrap gap-4">
-          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+          {[
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ].map((day) => (
             <Checkbox
               key={day}
               isSelected={daysJson?.[day] || false}
@@ -244,9 +286,9 @@ const JobInformationForm: React.FC = () => {
             </Checkbox>
           ))}
         </div>
-      </div>
+      </div> */}
     </form>
   );
 };
 
-export default JobInformationForm;
+export default EditJobInformationForm;

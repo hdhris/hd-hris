@@ -17,11 +17,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import axios from "axios";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { parseDate } from "@internationalized/date";
 import AddressInput from "@/components/common/forms/address/AddressInput";
 
+interface AddressOption {
+  address_code: number;
+  address_name: string;
+}
 
 const safeParseDate = (dateString: string) => {
   try {
@@ -32,24 +35,37 @@ const safeParseDate = (dateString: string) => {
   }
 };
 
-// Define gender options based on EmployeeAll type
 const genderOptions = [
   { value: "M", label: "Male" },
   { value: "F", label: "Female" },
 ];
 
-const PersonalInformationForm: React.FC = () => {
-  const { control, setValue } = useFormContext();
+const EditPersonalInformationForm: React.FC = () => {
+  const { control, setValue, getValues } = useFormContext();
   const [imagePreview, setImagePreview] = useState<string | undefined>(
     undefined
   );
   const { edgestore } = useEdgeStore();
-
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
- 
 
-  // Handle image change
+
+  // Populate fields with initial data from the server
+  useEffect(() => {
+    const pictureValue = getValues("picture");
+    const gender = getValues("gender");
+  
+
+    if (pictureValue) {
+      setImagePreview(pictureValue);
+    }
+
+    if (gender) {
+      setValue("gender", gender); // Set gender value
+    }
+  }, [getValues, setValue]);
+
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -59,20 +75,15 @@ const PersonalInformationForm: React.FC = () => {
       }
 
       try {
-        // Upload file to EdgeStore
         const res = await edgestore.publicFiles.upload({
           file,
           onProgressChange: (progress) => {
-            // Handle upload progress if needed
             console.log(`Upload progress: ${progress}%`);
           },
         });
 
-        console.log("File uploaded successfully:", res.url);
-
-        // Set the URL of the uploaded file
         setImagePreview(res.url);
-        setValue("picture", res.url); // Assuming 'picture' is the field name in your form
+        setValue("picture", res.url);
       } catch (error) {
         console.error("Error uploading file:", error);
         setFileError("Failed to upload image");
@@ -80,16 +91,10 @@ const PersonalInformationForm: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    console.log("Image preview updated:", imagePreview);
-  }, [imagePreview]);
-
-  // Handle avatar click
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
 
-  // Handle removing photo
   const handleRemovePhoto = useCallback(() => {
     setImagePreview(undefined);
     fileInputRef.current!.value = "";
@@ -165,7 +170,6 @@ const PersonalInformationForm: React.FC = () => {
       <Text className="text-medium font-semibold">Basic Information</Text>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* First Name */}
         <Controller
           name="first_name"
           control={control}
@@ -183,7 +187,6 @@ const PersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-        {/* First Name */}
         <Controller
           name="middle_name"
           control={control}
@@ -201,8 +204,6 @@ const PersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-
-        {/* Last Name */}
         <Controller
           name="last_name"
           control={control}
@@ -220,7 +221,6 @@ const PersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-
         <Controller
           name="gender"
           control={control}
@@ -229,7 +229,12 @@ const PersonalInformationForm: React.FC = () => {
               <FormLabel>Gender</FormLabel>
               <FormControl>
                 <Select
-                  {...field}
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    field.onChange(value);
+                    setValue("gender", value); // Explicitly set the value
+                  }}
                   placeholder="Select gender"
                   variant="bordered"
                 >
@@ -244,7 +249,7 @@ const PersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-        {/* Birth Date */}
+
         <Controller
           name="birthdate"
           control={control}
@@ -272,7 +277,6 @@ const PersonalInformationForm: React.FC = () => {
           }}
         />
       </div>
-
       <Divider />
       <Text className="text-medium font-semibold">Contact Information</Text>
 
@@ -315,15 +319,14 @@ const PersonalInformationForm: React.FC = () => {
           )}
         />
       </div>
-
       <Divider />
-      <Text className="text-medium font-semibold">Address</Text>
+      <Text className="text-medium font-semibold">Address Information</Text>
 
       <div className="grid grid-cols-2 gap-4">
       <AddressInput />
-      </div>
+        </div>
     </div>
   );
 };
 
-export default PersonalInformationForm;
+export default EditPersonalInformationForm;
