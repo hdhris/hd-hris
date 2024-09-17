@@ -23,6 +23,7 @@ import { axiosInstance } from "@/services/fetcher";
 import { useIsClient } from "@/hooks/ClientRendering";
 import { AxiosResponse } from "axios";
 import { BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
+import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 
 
 const getRandomColor = (index: number) => {
@@ -81,26 +82,6 @@ const formatTime = (time: string) => {
   );
 };
 
-const calculateShiftLength = (
-  clockIn: string,
-  clockOut: string,
-  breaks: number
-) => {
-  const [inHour, inMinute] = getShortTime(clockIn).split(":").map(Number);
-  const [outHour, outMinute] = getShortTime(clockOut).split(":").map(Number);
-
-  const clockInMinutes = inHour * 60 + inMinute;
-  const clockOutMinutes = outHour * 60 + outMinute;
-
-  const shiftLengthMinutes = clockOutMinutes - clockInMinutes - breaks;
-
-  const hours = Math.floor(shiftLengthMinutes / 60);
-  const minutes = shiftLengthMinutes % 60;
-
-  return `${hours} hr${hours !== 1 ? "s" : ""} ${
-    minutes > 0 ? `and ${minutes} min${minutes !== 1 ? "s" : ""}` : ""
-  }`;
-};
 
 export default function Page() {
   const [hoveredBatchId, setHoveredBatchId] = useState<number | null>(null);
