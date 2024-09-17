@@ -22,7 +22,7 @@ const NotificationSettings: React.FC = () => {
 
     // Fetch data using SWR
     const { data, isLoading } = useSWR<NotificationConfiguration>(
-        `/api/admin/notification/notification-configuration/id/${session.data?.user.employee_id}`,
+        `/api/admin/notification/notification-configuration/${session.data?.user.employee_id}`,
         fetcher
     );
 

@@ -16,49 +16,6 @@ interface UserPrivileges {
     admin_panel?: boolean;
 }
 
-// export const getUserData = async (username: string, password: string) => {
-//     // Encrypt the password
-//     const encrypt = new SimpleAES();
-//
-//     // Query the database
-//     const data = await prisma.sys_accounts.findFirst({
-//         where: {
-//             AND: [{
-//                 username: username, password: encrypt,
-//             }, {
-//                 // banned_till: {
-//                 //     equals: null,
-//                 //     gte: new Date()
-//                 // }
-//             }]
-//         },
-//         include: {
-//             trans_employees: true,
-//             sys_privileges: true
-//         }
-//     });
-//     console.log(data)
-//
-//     if (data) {
-//         const privileges = data.sys_privileges;
-//         const accessibility = processJsonObject<UserPrivileges>(privileges?.accessibility);
-//         const isWebAccess = accessibility?.web_access;
-//
-//         const role = !accessibility || isWebAccess ? 'admin' : 'user';
-//
-//         console.log("Your Role is: " + role);
-//         return {
-//             id: String(data.id),
-//             name: 'John Doe',
-//             role: role,
-//             picture: data.trans_employees?.picture!,
-//             email: data.trans_employees?.email!,
-//             privilege: privileges?.name
-//         };
-//     }
-//
-//     return null;
-// };
 
 export const getUserData = async (username: string, password: string) => {
     const encrypt = new SimpleAES();
@@ -107,7 +64,8 @@ export const getUserData = async (username: string, password: string) => {
         picture: user.trans_employees?.picture || '',
         email: user.trans_employees?.email || '',
         privilege: privileges?.name || 'N/A',
-        employee_id: user.trans_employees?.id || null
+        employee_id: user.trans_employees?.id || null,
+        isDefaultAccount: user.username === 'admin'
     };
 };
 
@@ -119,10 +77,6 @@ export const handleAuthorization = async (credentials: { username: string; passw
     // Validate credentials
     const { username, password } = await LoginValidation.parseAsync(credentials);
 
-    // Get IP and User-Agent
-    const ipResponse = await fetch('https://ipapi.co/json').then(data => data.json());
-    const ua = parse(headers().get('user-agent')!);
-
     // Get user data
     const user = await getUserData(username, password);
     if (user?.error) {
@@ -132,44 +86,6 @@ export const handleAuthorization = async (credentials: { username: string; passw
     // Check user role
     if (user.role !== 'admin') {
         throw new Error('Only admin can login');
-    }
-
-    // Handle session
-    const existingSession = await prisma.sys_sessions.findFirst({
-        where: {
-            account_id: Number(user.id),
-            ip_address: ipResponse.ip,
-        },
-    });
-
-    if (existingSession) {
-        await prisma.sys_sessions.update({
-            where: { id: existingSession.id },
-            data: {
-                updated_at: new Date(), // Update timestamp
-                login_count: existingSession.login_count + 1, // Increment login count
-                expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24), // Update expiration time
-            },
-        });
-    } else {
-        await prisma.sys_sessions.create({
-            data: {
-                account_id: Number(user.id),
-                ip_address: ipResponse.ip,
-                expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24), // Expires in 24 hours
-                created_at: new Date(),
-                updated_at: null,
-                countrycode: ipResponse.country_code, // Country code from geoip
-                countryname: ipResponse.country_name, // Country name
-                region: ipResponse.region, // Region code
-                city: ipResponse.city, // City name
-                type: 'Browser', // Browser type
-                platform: ua.browser, // Browser name
-                os: ua.os, // OS name
-                os_version: ua.osVersion, // OS version
-                login_count: 1 // Start the login count as 1
-            },
-        });
     }
 
     return JSON.parse(JSON.stringify(user));

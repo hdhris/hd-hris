@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useToast } from "@chakra-ui/react";
 import {
   Modal,
   ModalContent,
@@ -16,6 +15,7 @@ import EducationalBackgroundForm from "./EducationalBackgroundForm";
 import JobInformationForm from "./JobInformation";
 import { useForm, FormProvider } from "react-hook-form";
 import axios from "axios";
+import { useToast } from "@/components/ui/use-toast"; // Updated import
 
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
@@ -40,18 +40,16 @@ interface EmployeeFormData {
   course: string;
   highestDegree: string;
   certificates: Array<{ name: string; url: string }>;
-  hireDate: string;
-  jobTitle: string;
-  jobRole: string;
-  workingType: string;
-  contractYears: string;
+  hired_at: string;
+  department_id: string;
+  job_id: string;
   workSchedules: Record<string, unknown>;
 }
 
 const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const toast = useToast();
+  const { toast } = useToast(); // Use custom toast
 
   const methods = useForm<EmployeeFormData>({
     defaultValues: {
@@ -73,17 +71,21 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       course: "",
       highestDegree: "",
       certificates: [],
-      hireDate: "",
-      jobTitle: "",
-      jobRole: "",
-      workingType: "",
-      contractYears: "",
+      hired_at: "",
+      department_id: "",
+      job_id: "",
       workSchedules: {},
     },
     mode: "onChange",
   });
+
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
+    toast({
+      title: "Submitting",
+      description: "Adding new employee...",
+    });
+
     try {
       const educationalBackground = {
         elementary: data.elementary,
@@ -101,42 +103,45 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
 
       const fullData = {
         ...data,
+        picture: data.picture,
         birthdate: data.birthdate
           ? new Date(data.birthdate).toISOString()
           : null,
-        hireDate: data.hireDate ? new Date(data.hireDate).toISOString() : null,
+        hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
         addr_municipal: parseInt(data.addr_municipal, 10),
         addr_baranggay: parseInt(data.addr_baranggay, 10),
-        educationalBackground: JSON.stringify(educationalBackground),
+        department_id: parseInt(data.department_id, 10),
+        job_id: parseInt(data.job_id, 10),
+        educational_bg_json: educationalBackground,
       };
 
       const response = await axios.post(
         "/api/employeemanagement/employees",
         fullData
       );
-      if (response.status === 200 || response.status === 201) {
+      if (response.status === 201) {
+        onEmployeeAdded(); // Call to refresh the table
+        methods.reset(); // Clear the form fields
+
         toast({
           title: "Success",
           description: "Employee successfully added!",
-          status: "success",
           duration: 3000,
-          isClosable: true,
         });
 
-        onEmployeeAdded(); // tawagon para mag refresh
-        methods.reset(); // tangalon ang data sa fields
-        onClose(); // close model
+        // Delay closing the modal to ensure toast visibility
+        setTimeout(() => {
+          onClose(); // Close the modal
+        }, 500); // Adjust the timeout as needed
       }
     } catch (error) {
       console.error("Error creating employee:", error);
       toast({
         title: "Error",
         description: "Failed to add employee. Please try again.",
-        status: "error",
         duration: 3000,
-        isClosable: true,
       });
     } finally {
       setIsSubmitting(false);
@@ -147,7 +152,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
     <>
       <Add variant="flat" name="Add Employee" onClick={onOpen} />
       <Modal
-        size="4xl"
+        size="5xl"
         isOpen={isOpen}
         onClose={onClose}
         scrollBehavior="inside"
@@ -177,6 +182,18 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
                 </Button>
                 <Button color="primary" type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Saving..." : "Save"}
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast({
+                      title: "Button Clicked",
+                      description: "You clicked the button!",
+
+                      duration: 1000,
+                    });
+                  }}
+                >
+                  Show Toast
                 </Button>
               </ModalFooter>
             </ModalContent>

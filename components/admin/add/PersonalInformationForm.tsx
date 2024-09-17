@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import axios from "axios";
+import { useEdgeStore } from '@/lib/edgestore/edgestore';
 
 // Define the type for address options
 interface AddressOption {
@@ -21,8 +22,8 @@ interface AddressOption {
 
 // Define gender options based on EmployeeAll type
 const genderOptions = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
+  { value: "M", label: "Male" },
+  { value: "F", label: "Female" },
 ];
 
 const PersonalInformationForm: React.FC = () => {
@@ -30,6 +31,7 @@ const PersonalInformationForm: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | undefined>(
     undefined
   );
+  const { edgestore } = useEdgeStore();
 
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -98,21 +100,39 @@ const PersonalInformationForm: React.FC = () => {
   }, [selectedMunicipal, setValue]);
 
   // Handle image change
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 1024 * 1024 * 5) {
         setFileError("File size must be less than 5MB");
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      setFileError("");
+      
+      try {
+        // Upload file to EdgeStore
+        const res = await edgestore.publicFiles.upload({
+          file,
+          onProgressChange: (progress) => {
+            // Handle upload progress if needed
+            console.log(`Upload progress: ${progress}%`);
+          },
+        });
+        
+        console.log('File uploaded successfully:', res.url);
+        
+        // Set the URL of the uploaded file
+        setImagePreview(res.url);
+        setValue('picture', res.url); // Assuming 'picture' is the field name in your form
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        setFileError('Failed to upload image');
+      }
     }
   };
+
+  useEffect(() => {
+    console.log('Image preview updated:', imagePreview);
+  }, [imagePreview]);
 
   // Handle avatar click
   const handleAvatarClick = () => {
