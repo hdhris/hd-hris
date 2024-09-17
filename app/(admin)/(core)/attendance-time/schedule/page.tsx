@@ -270,19 +270,16 @@ export default function Page() {
               <ModalBody>
                 <div className="flex flex-wrap gap-4">
                   <Input
-                    type="file"
-                    label="File"
-                    labelPlacement="outside-left"
+                    type="text"
+                    label="Name"
                   />
                   <TimeInput
                     label="Start"
                     defaultValue={new Time(8)}
-                    labelPlacement="outside-left"
                   />
                   <TimeInput
                     label="End"
                     defaultValue={new Time(17)}
-                    labelPlacement="outside-left"
                   />
                 </div>
               </ModalBody>
