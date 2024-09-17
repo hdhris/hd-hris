@@ -17,9 +17,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import axios from "axios";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { parseDate } from "@internationalized/date";
+import AddressInput from "@/components/common/forms/address/AddressInput";
 
 interface AddressOption {
   address_code: number;
@@ -49,95 +49,15 @@ const EditPersonalInformationForm: React.FC = () => {
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [addressOptions, setAddressOptions] = useState<{
-    region: AddressOption[];
-    province: AddressOption[];
-    municipal: AddressOption[];
-    baranggay: AddressOption[];
-  }>({
-    region: [],
-    province: [],
-    municipal: [],
-    baranggay: [],
-  });
-
-  const [loadingState, setLoadingState] = useState({
-    region: false,
-    province: false,
-    municipal: false,
-    baranggay: false,
-  });
-
-  const selectedRegion = useWatch({ control, name: "addr_region" });
-  const selectedProvince = useWatch({ control, name: "addr_province" });
-  const selectedMunicipal = useWatch({ control, name: "addr_municipal" });
-
-  const fetchAddressOptions = useCallback(
-    async (parentCode: number | null, level: keyof typeof addressOptions) => {
-      setLoadingState((prev) => ({ ...prev, [level]: true }));
-      try {
-        const response = await axios.get<AddressOption[]>(
-          `/api/employeemanagement/addresses?parentCode=${parentCode}`
-        );
-        setAddressOptions((prev) => ({ ...prev, [level]: response.data }));
-      } catch (error) {
-        console.error(`Error fetching ${level}:`, error);
-      } finally {
-        setLoadingState((prev) => ({ ...prev, [level]: false }));
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    fetchAddressOptions(0, "region");
-  }, [fetchAddressOptions]);
-
-  useEffect(() => {
-    if (selectedRegion) {
-      fetchAddressOptions(parseInt(selectedRegion), "province");
-      setValue("addr_province", ""); // Clear lower-level fields on region change
-      setValue("addr_municipal", "");
-      setValue("addr_baranggay", "");
-    }
-  }, [selectedRegion, setValue, fetchAddressOptions]);
-
-  useEffect(() => {
-    if (selectedProvince) {
-      fetchAddressOptions(parseInt(selectedProvince), "municipal");
-      setValue("addr_municipal", ""); // Clear lower-level fields on province change
-      setValue("addr_baranggay", "");
-    }
-  }, [selectedProvince, setValue, fetchAddressOptions]);
-
-  useEffect(() => {
-    if (selectedMunicipal) {
-      fetchAddressOptions(parseInt(selectedMunicipal), "baranggay");
-      setValue("addr_baranggay", ""); // Clear baranggay on municipal change
-    }
-  }, [selectedMunicipal, setValue, fetchAddressOptions]);
 
   // Populate fields with initial data from the server
   useEffect(() => {
     const pictureValue = getValues("picture");
-    const region = getValues("addr_region");
-    const province = getValues("addr_province");
-    const municipal = getValues("addr_municipal");
     const gender = getValues("gender");
-    const baranggay = getValues("addr_baranggay");
+  
 
     if (pictureValue) {
       setImagePreview(pictureValue);
-    }
-
-    if (region) {
-      fetchAddressOptions(parseInt(region), "province");
-    }
-    if (province) {
-      fetchAddressOptions(parseInt(province), "municipal");
-    }
-    if (municipal) {
-      fetchAddressOptions(parseInt(municipal), "baranggay");
     }
 
     if (gender) {
@@ -145,8 +65,6 @@ const EditPersonalInformationForm: React.FC = () => {
     }
   }, [getValues, setValue]);
 
-  // Image handling logic...
-  // Rest of the component logic...
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -405,137 +323,8 @@ const EditPersonalInformationForm: React.FC = () => {
       <Text className="text-medium font-semibold">Address Information</Text>
 
       <div className="grid grid-cols-2 gap-4">
-        <Controller
-          name="addr_region"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Region</FormLabel>
-              <FormControl>
-                <Select
-                  selectedKeys={field.value ? [field.value] : []}
-                  onSelectionChange={(keys) => {
-                    const value = Array.from(keys)[0] as string;
-                    field.onChange(value);
-                  }}
-                  placeholder={
-                    loadingState.region ? "Loading..." : "Select region"
-                  }
-                  variant="bordered"
-                >
-                  {addressOptions.region.map((region) => (
-                    <SelectItem
-                      key={region.address_code.toString()}
-                      value={region.address_code.toString()}
-                    >
-                      {region.address_name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <Controller
-          name="addr_province"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Province</FormLabel>
-              <FormControl>
-                <Select
-                  selectedKeys={field.value ? [field.value] : []}
-                  onSelectionChange={(keys) => {
-                    const value = Array.from(keys)[0] as string;
-                    field.onChange(value);
-                  }}
-                  placeholder={
-                    loadingState.province ? "Loading..." : "Select province"
-                  }
-                  variant="bordered"
-                  isDisabled={!selectedRegion || loadingState.province}
-                >
-                  {addressOptions.province.map((province) => (
-                    <SelectItem
-                      key={province.address_code.toString()}
-                      value={province.address_code.toString()}
-                    >
-                      {province.address_name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <Controller
-          name="addr_municipal"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Municipal</FormLabel>
-              <FormControl>
-                <Select
-                  selectedKeys={field.value ? [field.value] : []}
-                  onSelectionChange={(keys) => {
-                    const value = Array.from(keys)[0] as string;
-                    field.onChange(value);
-                  }}
-                  placeholder={
-                    loadingState.municipal ? "Loading..." : "Select municipal"
-                  }
-                  variant="bordered"
-                  isDisabled={!selectedProvince || loadingState.municipal}
-                >
-                  {addressOptions.municipal.map((municipal) => (
-                    <SelectItem
-                      key={municipal.address_code.toString()}
-                      value={municipal.address_code.toString()}
-                    >
-                      {municipal.address_name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <Controller
-          name="addr_baranggay"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Baranggay</FormLabel>
-              <FormControl>
-                <Select
-                  selectedKeys={field.value ? [field.value] : []}
-                  onSelectionChange={(keys) => {
-                    const value = Array.from(keys)[0] as string;
-                    field.onChange(value);
-                  }}
-                  placeholder={
-                    loadingState.baranggay ? "Loading..." : "Select baranggay"
-                  }
-                  variant="bordered"
-                  isDisabled={!selectedMunicipal || loadingState.baranggay}
-                >
-                  {addressOptions.baranggay.map((baranggay) => (
-                    <SelectItem
-                      key={baranggay.address_code.toString()}
-                      value={baranggay.address_code.toString()}
-                    >
-                      {baranggay.address_name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </div>
+      <AddressInput />
+        </div>
     </div>
   );
 };

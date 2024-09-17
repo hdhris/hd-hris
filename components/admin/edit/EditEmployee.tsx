@@ -10,7 +10,7 @@ import {
 } from "@nextui-org/react";
 import EditPersonalInformationForm from "./EditPersonalInformationForm";
 import EditEducationalBackgroundForm from "./EditEducationalBackgroundForm";
-import JobInformationForm from "./EditJobInformationForm";
+import EditJobInformationForm from "./EditJobInformationForm";
 import { useForm, FormProvider } from "react-hook-form";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
@@ -30,7 +30,7 @@ interface EmployeeFormData {
   last_name: string;
   gender: string;
   email: string;
-  contact_no: number;
+  contact_no: string;
   birthdate: string;
   addr_region: string;
   addr_province: string;
@@ -48,7 +48,8 @@ interface EmployeeFormData {
   hired_at: string;
   department_id: string;
   job_id: string;
-  workSchedules: Record<string, unknown>;
+  batch_id: string; // batch_schedule_id -> batch_id
+  days_json: Record<string, boolean>;
 }
 
 const EditEmployee: React.FC<EditEmployeeProps> = ({
@@ -87,7 +88,8 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       hired_at: "",
       department_id: "",
       job_id: "",
-      workSchedules: {},
+      batch_id: "",
+      days_json: {},
     },
     mode: "onChange",
   });
@@ -145,6 +147,19 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         course: educationalBg.course || "",
         highestDegree: educationalBg.highestDegree || "",
         certificates: certificatesWithUrls,
+        batch_id:
+          employeeData.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() ||
+          "", // Adjusted to batch_id
+          days_json: employeeData.schedules?.[0]?.days_json || {
+            Monday: false,
+            Tuesday: false,
+            Wednesday: false,
+            Thursday: false,
+            Friday: false,
+            Saturday: false,
+            Sunday: false,
+          },
+          
       });
 
       toast({
@@ -193,9 +208,9 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
             const result = await edgestore.publicFiles.upload({
               file: cert.url,
             });
-            return { fileName: cert.name, fileUrl: result.url };
+            return {  fileUrl: result.url };
           }
-          return { fileName: cert.name, fileUrl: cert.url };
+          return { fileUrl: cert.url };
         })
       );
 
@@ -225,6 +240,13 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         department_id: parseInt(data.department_id, 10),
         job_id: parseInt(data.job_id, 10),
         educational_bg_json: JSON.stringify(educationalBackground),
+        batch_id: parseInt(data.batch_id, 10), // Adjusted to batch_id
+        schedules: [
+          {
+            batch_id: parseInt(data.batch_id, 10),
+            days_json: data.days_json,
+          },
+        ],
       };
 
       const response = await axios.put(
@@ -272,29 +294,25 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
                 <>
                   <h2>Personal Information</h2>
                   <EditPersonalInformationForm />
-                  <Divider className="my-6" />
+                  <Divider className="my-4" />
                   <h2>Educational Background</h2>
                   <EditEducationalBackgroundForm />
-                  <Divider className="my-6" />
-                  <h2>Job Information</h2>
-                  <JobInformationForm />
+                  <Divider className="my-4" />
+                  <h2>Job Information & Work Schedules</h2>
+                  <EditJobInformationForm />
                 </>
               )}
             </ModalBody>
             <ModalFooter>
-              <Button
-                color="danger"
-                onClick={onClose}
-                disabled={isSubmitting || isLoading}
-              >
+              <Button color="danger" onClick={onClose}>
                 Cancel
               </Button>
               <Button
-                color="primary"
+                variant ="solid"
                 type="submit"
-                disabled={isSubmitting || isLoading}
+                isDisabled={isSubmitting || isLoading}
               >
-                {isSubmitting ? "Saving..." : "Save Changes"}
+                {isSubmitting ? "Updating..." : "Update"}
               </Button>
             </ModalFooter>
           </ModalContent>
@@ -305,4 +323,3 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
 };
 
 export default EditEmployee;
-

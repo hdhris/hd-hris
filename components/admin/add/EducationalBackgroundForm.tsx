@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/form';
 import { FileState, FileDropzone } from "@/components/ui/fileupload/file";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
-import { SharedSelection } from '@nextui-org/react';
+import { SharedSelection } from '@nextui-org/react'; 
 
 const EducationalBackgroundForm = () => {
   const { control, watch, setValue } = useFormContext();

@@ -12,6 +12,9 @@ import {
 import { FileState, FileDropzone } from "@/components/ui/fileupload/file";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { SharedSelection } from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
+import { Download, X } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Certificate {
   fileName: string;
@@ -19,12 +22,15 @@ interface Certificate {
 }
 
 const EditEducationalBackgroundForm = () => {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch, setValue, getValues } = useFormContext();
   const [showStrand, setShowStrand] = useState(false);
   const [showCourse, setShowCourse] = useState(false);
   const [fileStates, setFileStates] = useState<FileState[]>([]);
   const { edgestore } = useEdgeStore();
   const [select, setSelect] = useState<string | null>(null);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+
+  const { toast } = useToast(); // Importing toast from useToast
 
   // Watch form fields
   const elementary = watch("elementary");
@@ -32,9 +38,7 @@ const EditEducationalBackgroundForm = () => {
   const seniorHighSchool = watch("seniorHighSchool");
   const universityCollege = watch("universityCollege");
   const seniorHighStrand = watch("seniorHighStrand");
-  const certificates = watch("certificates");
 
-  // Show Strand field when Senior High School is entered
   useEffect(() => {
     setShowStrand(!!seniorHighSchool);
   }, [seniorHighSchool]);
@@ -45,12 +49,10 @@ const EditEducationalBackgroundForm = () => {
     setShowCourse(initialSelect === "tvl");
   }, [seniorHighStrand]);
 
-  // Update showCourse based on select state
   useEffect(() => {
     setShowCourse(select === "tvl");
   }, [select]);
 
-  // Determine the highest degree based on entered fields
   useEffect(() => {
     let highestDegree = "Elementary School";
     if (highSchool) highestDegree = "High School";
@@ -60,37 +62,84 @@ const EditEducationalBackgroundForm = () => {
   }, [elementary, highSchool, seniorHighSchool, universityCollege, setValue]);
 
   useEffect(() => {
-    // Convert fetched certificates into FileState format
-    if (certificates) {
-      const initialFileStates: FileState[] = certificates.map(
-        (cert: Certificate) => ({
-          key: cert.fileName, // Unique identifier for the file
-          file: cert.fileUrl, // Assuming URL here
-          name: cert.fileName, // Displayed file name
-          progress: "COMPLETE", // Since it's already uploaded
-        })
-      );
-      setFileStates(initialFileStates); // Set the state to display the files
-    }
-  }, [certificates]);
-
-  function updateFileProgress(key: string, progress: FileState["progress"]) {
-    setFileStates((fileStates) => {
-      const newFileStates = structuredClone(fileStates);
-      const fileState = newFileStates.find(
-        (fileState) => fileState.key === key
-      );
-      if (fileState) {
-        fileState.progress = progress;
-      }
-      return newFileStates;
-    });
-  }
+    // Load existing certificates from form data
+    const existingCertificates = getValues("certificates") || [];
+    setCertificates(existingCertificates);
+  }, [getValues]);
 
   const handleSelect = (keys: SharedSelection) => {
     const value = Array.from(keys)[0] as string;
     setSelect(value);
     setValue("seniorHighStrand", value);
+  };
+
+  useEffect(() => {
+    // Load existing certificates from form data
+    const existingCertificates = getValues("certificates") || [];
+    setCertificates(existingCertificates);
+  }, [getValues]);
+
+  // Function to handle file progress updates
+  function updateFileProgress(key: string, progress: FileState["progress"]) {
+    setFileStates((prevFileStates) => {
+      const newFileStates = prevFileStates.map((fileState) =>
+        fileState.key === key ? { ...fileState, progress } : fileState
+      );
+      return newFileStates;
+    });
+  }
+
+  // Handle file download
+  const handleDownload = async (fileUrl: string, fileName: string) => {
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error("Network response was not ok");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast({
+        title: "Error",
+        description: "Failed to download file. Please try again.",
+        variant: "danger", // Use "danger" variant instead of "destructive"
+      });
+    }
+  };
+
+  // Handle file removal
+  const handleRemove = async (index: number) => {
+    try {
+      const updatedCertificates = [...certificates];
+      const removedCertificate = updatedCertificates.splice(index, 1)[0];
+
+      if (removedCertificate.fileUrl) {
+        // Remove file from EdgeStore
+        await edgestore.publicFiles.delete({
+          url: removedCertificate.fileUrl,
+        });
+      }
+
+      setCertificates(updatedCertificates);
+      setValue("certificates", updatedCertificates);
+      toast({
+        title: "Success",
+        description: "File removed successfully",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error("Error removing file:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove file. Please try again.",
+        variant: "danger", // Use "danger" variant instead of "destructive"
+      });
+    }
   };
 
   return (
@@ -159,7 +208,7 @@ const EditEducationalBackgroundForm = () => {
           )}
         />
 
-        {/* Senior High Strand - Show when Senior High School is entered */}
+        {/* Senior High Strand */}
         {showStrand && (
           <FormField
             name="seniorHighStrand"
@@ -202,7 +251,7 @@ const EditEducationalBackgroundForm = () => {
           />
         )}
 
-        {/* TVL Course - Show only when "TVL" is selected */}
+        {/* TVL Course */}
         {showCourse && (
           <FormField
             name="tvlCourse"
@@ -246,8 +295,8 @@ const EditEducationalBackgroundForm = () => {
           )}
         />
 
-        {/* Course - Show if University/College is entered */}
-        {showCourse && (
+        {/* Course */}
+        {universityCollege && (
           <FormField
             name="course"
             control={control}
@@ -268,9 +317,9 @@ const EditEducationalBackgroundForm = () => {
             )}
           />
         )}
+      </div>
 
-        {/* Highest Degree Attainment */}
-        <FormField
+      <FormField
           name="highestDegree"
           control={control}
           render={({ field }) => (
@@ -290,23 +339,23 @@ const EditEducationalBackgroundForm = () => {
           )}
         />
 
-        {/* Certificate Upload */}
+      {/* File Upload Section */}
+      <div className="space-y-4">
+        <FormLabel>Certificates</FormLabel>
         <FormField
           name="certificates"
           control={control}
           render={({ field }) => (
             <FormItem className="col-span-full">
-              <FormLabel>Certificates</FormLabel>
               <FormControl>
                 <FileDropzone
-                  value={fileStates} // Set the initial files (fetched or newly uploaded)
+                  value={fileStates}
                   onChange={(files) => {
                     setFileStates(files);
-                    field.onChange(files.map((f) => f.file)); // Update form value
+                    field.onChange(files.map((f) => f.file)); // Here, 'field' is correctly used
                   }}
                   onFilesAdded={async (addedFiles) => {
-                    setFileStates([...fileStates, ...addedFiles]); // Add new files to the state
-
+                    setFileStates([...fileStates, ...addedFiles]);
                     await Promise.all(
                       addedFiles.map(async (addedFileState) => {
                         try {
@@ -326,15 +375,25 @@ const EditEducationalBackgroundForm = () => {
                             },
                           });
                           console.log(res);
-                          // Here you can update certificates value with the new uploaded certificate URL
+                          const newCertificate: Certificate = {
+                            fileName: addedFileState.file.name,
+                            fileUrl: res.url,
+                          };
                           const updatedCertificates = [
                             ...certificates,
-                            { name: addedFileState.name, url: res.url },
+                            newCertificate,
                           ];
+                          setCertificates(updatedCertificates);
                           setValue("certificates", updatedCertificates);
                         } catch (err) {
                           console.error(err);
                           updateFileProgress(addedFileState.key, "ERROR");
+                          toast({
+                            title: "Error",
+                            description:
+                              "Failed to upload file. Please try again.",
+                            variant: "danger",
+                          });
                         }
                       })
                     );
@@ -345,6 +404,34 @@ const EditEducationalBackgroundForm = () => {
             </FormItem>
           )}
         />
+
+        {certificates.length > 0 && (
+          <div className="space-y-2">
+            {certificates.map((certificate, index) => (
+              <div key={index} className="flex justify-between items-center">
+                <div>{certificate.fileName}</div>
+                <div className="space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      handleDownload(certificate.fileUrl, certificate.fileName)
+                    }
+                  >
+                    <Download size={16} />
+                  </Button>
+                  <Button
+                    color="danger" // Replace color="danger" with variant="danger"
+                    size="sm"
+                    onClick={() => handleRemove(index)}
+                  >
+                    <X size={16} />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

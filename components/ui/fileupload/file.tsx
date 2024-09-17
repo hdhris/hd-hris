@@ -128,10 +128,10 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
                     <FileIcon size="30" className="shrink-0"/>
                     <div className="min-w-0 text-sm">
                         <div className="overflow-hidden overflow-ellipsis whitespace-nowrap">
-                            {file.name}
+                        {file?.name}
                         </div>
                         <div className="text-xs text-gray-400 dark:text-gray-400">
-                            {formatFileSize(file.size)}
+                        {formatFileSize(file?.size)}
                         </div>
                     </div>
                     <div className="grow"/>

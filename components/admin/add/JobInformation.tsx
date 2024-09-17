@@ -1,17 +1,15 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import {
   DatePicker,
-  TimeInput,
-  Checkbox,
-  Input,
   Select,
   SelectItem,
+  Card,
+  CardBody,
+  CardHeader,
+  Checkbox,
 } from "@nextui-org/react";
 import { parseDate, CalendarDate } from "@internationalized/date";
-import { Time } from "@internationalized/date";
 import {
   FormControl,
   FormItem,
@@ -23,26 +21,19 @@ type FormValues = {
   department_id: string;
   hired_at: string;
   job_id: string;
-  workingType: string;
-  contractYears: string;
-  workSchedule?: WorkSchedule;
+  batch_id: string;
+  days_json: Record<string, boolean>;
 };
 
-type WorkSchedule = {
-  [key: string]: { timeIn: Time | null; timeOut: Time | null };
+type BatchSchedule = {
+  id: number;
+  name: string;
+  clock_in: string;
+  clock_out: string;
+  shift_hours: number;
+  break_minutes: number;
 };
 
-const availableDays = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-
-// Helper function to safely parse date
 const safeParseDate = (dateString: string) => {
   try {
     return parseDate(dateString);
@@ -52,30 +43,63 @@ const safeParseDate = (dateString: string) => {
   }
 };
 
+const formatTimeTo12Hour = (time: string) => {
+  if (!time || typeof time !== "string") {
+    console.error("Invalid time value:", time);
+    return "Invalid time";
+  }
+
+  const timeParts = time.split("T")[1]?.split("Z")[0];
+  if (!timeParts) {
+    console.error("Invalid time format:", time);
+    return "Invalid time";
+  }
+
+  const [hours, minutes] = timeParts.split(":").map(Number);
+
+  if (
+    isNaN(hours) ||
+    isNaN(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    console.error("Invalid hours or minutes:", timeParts);
+    return "Invalid time";
+  }
+
+  const date = new Date();
+  date.setHours(hours);
+  date.setMinutes(minutes);
+  date.setSeconds(0);
+
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  }).format(date);
+};
+
 const JobInformationForm: React.FC = () => {
-  const { control, setValue } = useFormContext<FormValues>();
-  const [workSchedule, setWorkSchedule] = useState<WorkSchedule>({});
-  const [departments, setDepartments] = useState<
-    Array<{ id: number; name: string }>
-  >([]);
-  const [jobTitles, setJobTitles] = useState<
-    Array<{ id: number; name: string }>
-  >([]);
+  const { control, setValue, watch } = useFormContext<FormValues>();
+  const [departments, setDepartments] = useState<Array<{ id: number; name: string }>>([]);
+  const [jobTitles, setJobTitles] = useState<Array<{ id: number; name: string }>>([]);
+  const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
+
+  const selectedBatchId = watch("batch_id");
+  const daysJson = watch("days_json");
 
   useEffect(() => {
-    // Fetch departments and job titles when component mounts
     fetchDepartments();
     fetchJobTitles();
+    fetchBatchSchedules();
   }, []);
 
   const fetchDepartments = async () => {
     try {
       const response = await fetch("/api/employeemanagement/department");
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
       const data = await response.json();
-      console.log("Fetched departments:", data); // Log the fetched data
       setDepartments(data);
     } catch (error) {
       console.error("Error fetching departments:", error);
@@ -84,50 +108,30 @@ const JobInformationForm: React.FC = () => {
 
   const fetchJobTitles = async () => {
     try {
-      const response = await fetch("/api/employeemanagement/job_title");
+      const response = await fetch("/api/employeemanagement/jobclasses");
       const data = await response.json();
-      console.log("Fetched job titles:", data); // Log the fetched data
       setJobTitles(data);
     } catch (error) {
       console.error("Error fetching job titles:", error);
     }
   };
 
-  const handleDayToggle = (day: string, isChecked: boolean) => {
-    if (isChecked) {
-      setWorkSchedule((prev) => ({
-        ...prev,
-        [day]: { timeIn: new Time(9, 0), timeOut: new Time(17, 0) },
-      }));
-    } else {
-      setWorkSchedule((prev) => {
-        const { [day]: _, ...rest } = prev;
-        return rest;
-      });
+  const fetchBatchSchedules = async () => {
+    try {
+      const response = await fetch("/api/employeemanagement/batch_schedules");
+      const data = await response.json();
+      setBatchSchedules(data);
+    } catch (error) {
+      console.error("Error fetching batch schedules:", error);
     }
-    setValue(
-      `workSchedule.${day}`,
-      isChecked
-        ? { timeIn: new Time(9, 0), timeOut: new Time(17, 0) }
-        : { timeIn: null, timeOut: null }
-    );
   };
 
-  const handleTimeChange = (
-    day: string,
-    type: "timeIn" | "timeOut",
-    value: Time | null
-  ) => {
-    setWorkSchedule((prev) => ({
-      ...prev,
-      [day]: { ...prev[day], [type]: value },
-    }));
-    setValue(`workSchedule.${day}.${type}`, value);
+  const handleDayChange = (day: string, checked: boolean) => {
+    setValue(`days_json.${day}`, checked, { shouldValidate: true });
   };
 
   return (
     <form className="space-y-6">
-      {/* Department */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
         <Controller
           name="department_id"
@@ -141,7 +145,6 @@ const JobInformationForm: React.FC = () => {
                   aria-label="Department"
                   placeholder="Select Department"
                   variant="bordered"
-                  className="border rounded"
                 >
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id.toString()}>
@@ -155,23 +158,21 @@ const JobInformationForm: React.FC = () => {
           )}
         />
 
-        {/* Hire Date */}
         <Controller
           name="hired_at"
           control={control}
           render={({ field }) => {
             const parsedValue = field.value ? safeParseDate(field.value) : null;
-
             return (
               <FormItem>
                 <FormLabel>Hire Date</FormLabel>
                 <FormControl>
-                <DatePicker
+                  <DatePicker
                     value={parsedValue}
                     onChange={(date: CalendarDate | null) => {
                       field.onChange(date ? date.toString() : "");
                     }}
-                    aria-label="Hiredate"
+                    aria-label="Hire Date"
                     variant="bordered"
                     className="border rounded"
                     showMonthAndYearPickers
@@ -183,7 +184,6 @@ const JobInformationForm: React.FC = () => {
           }}
         />
 
-        {/* Job Title */}
         <Controller
           name="job_id"
           control={control}
@@ -196,7 +196,6 @@ const JobInformationForm: React.FC = () => {
                   aria-label="Job Title"
                   placeholder="Select Job Title"
                   variant="bordered"
-                  className="border rounded"
                 >
                   {jobTitles.map((job) => (
                     <SelectItem key={job.id} value={job.id.toString()}>
@@ -211,45 +210,38 @@ const JobInformationForm: React.FC = () => {
         />
       </div>
 
-      {/* Work Schedule */}
       <div className="mt-5">
         <h3 className="text-lg font-semibold mb-4">Work Schedule</h3>
-        <div className="border rounded-md p-4">
-          <div className="grid grid-cols-4 gap-4 mb-2">
-            <div className="font-semibold">Days</div>
-            <div className="font-semibold">Time In*</div>
-            <div className="font-semibold">Time Out*</div>
-            <div></div>
-          </div>
-          {availableDays.map((day) => (
-            <div key={day} className="grid grid-cols-4 gap-4 items-center mb-2">
-              <Checkbox
-                isSelected={!!workSchedule[day]}
-                onValueChange={(isChecked) => handleDayToggle(day, isChecked)}
-              >
-                {day}
-              </Checkbox>
-              <TimeInput
-                isDisabled={!workSchedule[day]}
-                value={workSchedule[day]?.timeIn || null}
-                onChange={(newTime) => handleTimeChange(day, "timeIn", newTime)}
-                className="w-full"
-              />
-              <TimeInput
-                isDisabled={!workSchedule[day]}
-                value={workSchedule[day]?.timeOut || null}
-                onChange={(newTime) =>
-                  handleTimeChange(day, "timeOut", newTime)
-                }
-                className="w-full"
-              />
-              {workSchedule[day] && (
-                <div className="text-sm text-gray-600">
-                  {workSchedule[day].timeIn?.toString()} -{" "}
-                  {workSchedule[day].timeOut?.toString()}
-                </div>
-              )}
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {batchSchedules.map((schedule) => (
+            <Card
+              key={schedule.id}
+              isPressable
+              onPress={() => setValue("batch_id", schedule.id.toString())}
+              className={selectedBatchId === schedule.id.toString() ? "border-2 border-green-500" : ""}
+            >
+              <CardHeader className="font-bold">{schedule.name}</CardHeader>
+              <CardBody>
+                <p>{formatTimeTo12Hour(schedule.clock_in)} - {formatTimeTo12Hour(schedule.clock_out)}</p>
+                <p>{schedule.shift_hours} hrs shift</p>
+                <p>{schedule.break_minutes} mins break</p>
+              </CardBody>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <h3 className="text-lg font-semibold mb-4">Work Days</h3>
+        <div className="flex flex-wrap gap-4">
+          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+            <Checkbox
+              key={day}
+              isSelected={daysJson?.[day] || false}
+              onValueChange={(checked) => handleDayChange(day, checked)}
+            >
+              {day}
+            </Checkbox>
           ))}
         </div>
       </div>

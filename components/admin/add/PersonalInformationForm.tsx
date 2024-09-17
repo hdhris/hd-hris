@@ -20,12 +20,8 @@ import {
 import axios from "axios";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { parseDate } from "@internationalized/date";
+import AddressInput from "@/components/common/forms/address/AddressInput";
 
-// Define the type for address options
-interface AddressOption {
-  address_code: number;
-  address_name: string;
-}
 
 const safeParseDate = (dateString: string) => {
   try {
@@ -51,69 +47,7 @@ const PersonalInformationForm: React.FC = () => {
 
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [addressOptions, setAddressOptions] = useState<{
-    region: AddressOption[];
-    province: AddressOption[];
-    municipal: AddressOption[];
-    baranggay: AddressOption[];
-  }>({
-    region: [],
-    province: [],
-    municipal: [],
-    baranggay: [],
-  });
-
-  // Watch selected values
-  const selectedRegion = useWatch({ name: "addr_region" });
-  const selectedProvince = useWatch({ name: "addr_province" });
-  const selectedMunicipal = useWatch({ name: "addr_municipal" });
-
-  // Fetch address options
-  const fetchAddressOptions = async (
-    parentCode: number | null,
-    level: string
-  ) => {
-    try {
-      const response = await axios.get<AddressOption[]>(
-        `/api/employeemanagement/addresses?parentCode=${parentCode}`
-      );
-      setAddressOptions((prev) => ({ ...prev, [level]: response.data }));
-    } catch (error) {
-      console.error(`Error fetching ${level}:`, error);
-    }
-  };
-
-  // Fetch regions on component mount
-  useEffect(() => {
-    fetchAddressOptions(0, "region");
-  }, []);
-
-  // Fetch provinces when a region is selected
-  useEffect(() => {
-    if (selectedRegion) {
-      fetchAddressOptions(parseInt(selectedRegion as string), "province");
-      setValue("addr_province", "");
-      setValue("addr_municipal", "");
-      setValue("addr_baranggay", "");
-    }
-  }, [selectedRegion, setValue]);
-
-  // Fetch municipalities when a province is selected
-  useEffect(() => {
-    if (selectedProvince) {
-      fetchAddressOptions(parseInt(selectedProvince as string), "municipal");
-      setValue("addr_municipal", "");
-      setValue("addr_baranggay", "");
-    }
-  }, [selectedProvince, setValue]);
-
-  // Fetch barangays when a municipality is selected
-  useEffect(() => {
-    if (selectedMunicipal) {
-      fetchAddressOptions(parseInt(selectedMunicipal as string), "baranggay");
-      setValue("addr_baranggay", "");
-    }
-  }, [selectedMunicipal, setValue]);
+ 
 
   // Handle image change
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -386,125 +320,7 @@ const PersonalInformationForm: React.FC = () => {
       <Text className="text-medium font-semibold">Address</Text>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* Region */}
-        <Controller
-          name="addr_region"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Region</FormLabel>
-              <FormControl>
-                <Select
-                  {...field}
-                  placeholder="Select region"
-                  onChange={(value) => {
-                    field.onChange(value);
-                    setValue("addr_province", "");
-                    setValue("addr_municipal", "");
-                    setValue("addr_baranggay", "");
-                  }}
-                >
-                  {addressOptions.region.map((option) => (
-                    <SelectItem
-                      key={option.address_code}
-                      value={option.address_code}
-                    >
-                      {option.address_name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Province */}
-        <Controller
-          name="addr_province"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Province</FormLabel>
-              <FormControl>
-                <Select
-                  {...field}
-                  placeholder="Select province"
-                  onChange={(value) => {
-                    field.onChange(value);
-                    setValue("addr_municipal", "");
-                    setValue("addr_baranggay", "");
-                  }}
-                >
-                  {addressOptions.province.map((option) => (
-                    <SelectItem
-                      key={option.address_code}
-                      value={option.address_code}
-                    >
-                      {option.address_name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Municipal */}
-        <Controller
-          name="addr_municipal"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Municipal</FormLabel>
-              <FormControl>
-                <Select
-                  {...field}
-                  placeholder="Select municipal"
-                  onChange={(value) => {
-                    field.onChange(value);
-                    setValue("addr_baranggay", "");
-                  }}
-                >
-                  {addressOptions.municipal.map((option) => (
-                    <SelectItem
-                      key={option.address_code}
-                      value={option.address_code}
-                    >
-                      {option.address_name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Baranggay */}
-        <Controller
-          name="addr_baranggay"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Baranggay</FormLabel>
-              <FormControl>
-                <Select {...field} placeholder="Select baranggay">
-                  {addressOptions.baranggay.map((option) => (
-                    <SelectItem
-                      key={option.address_code}
-                      value={option.address_code}
-                    >
-                      {option.address_name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <AddressInput />
       </div>
     </div>
   );
