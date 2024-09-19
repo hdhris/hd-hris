@@ -14,9 +14,7 @@ import {useForm, useFormState} from "react-hook-form";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {ChangeCredentialSchema} from "@/helper/zodValidation/ChangeCredentialValidation";
-import {useSession} from "next-auth/react";
 import {axiosInstance} from "@/services/fetcher";
-import {useToast} from "@/components/ui/use-toast";
 import {useRouter} from "next/navigation";
 import {AxiosError} from "axios";
 import {login} from "@/actions/authActions";
@@ -26,8 +24,6 @@ function Page() {
     const [isVisibleConfirm, setIsVisibleConfirm] = useState(false)
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
-    const {data, update} = useSession()
-    const {toast} = useToast()
     const router = useRouter()
 
 
@@ -71,25 +67,29 @@ function Page() {
         setLoading(true);
         try {
             const res = await axiosInstance.put("/api/auth/login-checkpoint", values)
+
+            const data = {
+                username: values.username, password: values.new_password
+            }
             if (res.status === 200) {
-                const loginResponse = await login({username: values.username, password: values.new_password})
+                const loginResponse = await login(data);
+
                 if (loginResponse.success) {
                     // Redirect to dashboard
-                    router.push("/dashboard")
+                    router.push("/dashboard");
 
                 } else if (loginResponse.error) {
                     // Display error message
-                    setError(loginResponse.error.message)
+                    setError(loginResponse.error.message);
                 }
-
-                console.log(data)
-            } else if(res.status === 400){
+            } else if (res.status === 400) {
                 setError(res.data.message);
             }
 
 
         } catch (error) {
-            if(error instanceof AxiosError){
+            if (error instanceof AxiosError) {
+                console.log("Axios Error: ", error)
                 setError(error.response?.data.message);
 
             } else {

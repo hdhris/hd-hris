@@ -3,8 +3,7 @@ import {z} from 'zod';
 import {updateProfileSchema} from "@/helper/zodValidation/UpdateProfile";
 import {hasContentType} from "@/helper/content-type/content-type-check";
 import prisma from "@/prisma/prisma";
-import {auth} from "@/auth";
-
+import {auth, unstable_update} from "@/auth";
 
 export async function PUT(req: NextRequest) {
     try {
@@ -18,81 +17,50 @@ export async function PUT(req: NextRequest) {
             return NextResponse.json({message: 'Validation error'}, {status: 400});
         }
 
+        // Step 1: Retrieve the user ID from the session
+        const session = await auth();
+        const userId = session?.user.id; // Corrected userId reference
 
-        const {addr_province, addr_region, addr_municipal, addr_baranggay, username, birth_date, ...rest} = parsedData
-        //TODO: implement a code that will track changes
+        if (!userId) {
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401});
+        }
 
-// Step 1: Retrieve the employeeId from sys_accounts
-        const sessionId = await auth();
-        const userId = Number(sessionId?.user.id);
-// Retrieve the employee_id associated with the sys_account
-        const account = await prisma.sys_accounts.findUnique({
-            where: { id: userId },
-            select: { employee_id: true, trans_employees: true }, // Include the trans_employees to check existence
+        // Step 2: Retrieve the account associated with the user
+        const account = await prisma.user.findUnique({
+            where: {
+                id: userId
+            },
         });
 
-        await prisma.$transaction(async (prisma) => {
-            if (account) {
-                if (account.employee_id) {
-                    // If employee_id exists, update the existing trans_employees record
-                    await prisma.trans_employees.update({
-                        where: { id: account.employee_id },
-                        data: {
-                            picture: data.picture,
-                            first_name: rest.first_name,
-                            last_name: rest.last_name,
-                            gender: rest.gender,
-                            contact_no: rest.contact_no,
-                            email: rest.email,
-                            birthdate: new Date(birth_date),
-                            addr_province: parseInt(addr_province),
-                            addr_region: parseInt(addr_region),
-                            addr_municipal: parseInt(addr_municipal),
-                            addr_baranggay: parseInt(addr_baranggay),
-                            updated_at: new Date(),
-                        },
-                    });
+        if (account) {
+            try {
+                // Step 3: Update the user account in the database
+                await prisma.user.update({
+                    where: {
+                        id: userId
+                    },
+                    data: {
+                        name: parsedData.display_name,
+                        image: data.picture
+                    }
+                });
 
-                    // Update the username in sys_accounts
-                    await prisma.sys_accounts.update({
-                        where: { id: userId },
-                        data: {
-                            username: username,
-                        },
-                    });
-                } else {
-                    // If employee_id does not exist, create a new trans_employees record and associate it
-                    await prisma.sys_accounts.update({
-                        where: { id: userId },
-                        data: {
-                            username: username,
-                            trans_employees: {
-                                create: {
-                                    picture: data.picture,
-                                    first_name: rest.first_name,
-                                    last_name: rest.last_name,
-                                    gender: rest.gender,
-                                    contact_no: rest.contact_no,
-                                    email: rest.email,
-                                    birthdate: new Date(birth_date),
-                                    addr_province: parseInt(addr_province),
-                                    addr_region: parseInt(addr_region),
-                                    addr_municipal: parseInt(addr_municipal),
-                                    addr_baranggay: parseInt(addr_baranggay),
-                                    created_at: new Date(),
-                                },
-                            },
-                        },
-                    });
-                }
+                // Step 4: Update the session with the new user data
+                await unstable_update({
+                    user: {
+                        name: parsedData.display_name,
+                        image: data.picture
+                    }
+                });
+
+                return NextResponse.json({message: 'Account updated successfully'});
+            } catch (error) {
+                console.error("Update error:", error);
+                return NextResponse.json({message: 'Internal server error'}, {status: 500});
             }
-        });
-
-
-        // Process the validated data (e.g., update profile in database)
-        // Example: await updateProfile(parsedData);
-
-        return NextResponse.json({message: 'Profile updated successfully'});
+        } else {
+            return NextResponse.json({message: 'Account not found'}, {status: 404});
+        }
 
     } catch (error: any) {
         if (error instanceof z.ZodError) {

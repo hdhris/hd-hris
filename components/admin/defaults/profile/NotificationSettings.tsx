@@ -21,20 +21,20 @@ const NotificationSettings: React.FC = () => {
     };
 
     // Fetch data using SWR
-    const { data, isLoading } = useSWR<NotificationConfiguration>(
-        `/api/admin/notification/notification-configuration/${session.data?.user.employee_id}`,
-        fetcher
-    );
+    // const { data, isLoading } = useSWR<NotificationConfiguration>(
+    //     `/api/admin/notification/notification-configuration/${session.data?.user.employee_id}`,
+    //     fetcher
+    // );
 
     // State for notification configuration
     const [notificationConfiguration, setNotificationConfiguration] = useState<NotificationConfiguration>(defaultNotificationConfig);
 
     // Update state when data is fetched
-    useEffect(() => {
-        if (data) {
-            setNotificationConfiguration(data);
-        }
-    }, [data]);
+    // useEffect(() => {
+    //     if (data) {
+    //         setNotificationConfiguration(data);
+    //     }
+    // }, [data]);
 
     // Notification sound options
     const notifications = [

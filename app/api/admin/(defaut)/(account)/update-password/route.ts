@@ -7,6 +7,7 @@ import SimpleAES from "@/lib/cryptography/3des";
 import {hasContentType} from "@/helper/content-type/content-type-check";
 
 const passwordSchema = z.object({
+    username: z.string().min(4, "Username must be at least 4 characters long"),
     current_password: z.string().min(8, "Password must be at least 8 characters long"),
     new_password: z.string().min(8, "Password must be at least 8 characters long"),
     confirm_password: z.string().min(8, "Password must be at least 8 characters long")
@@ -19,12 +20,17 @@ export async function PUT(req: NextRequest) {
 
         // Get the session ID
         const sessionId = await auth();
-        const userId = Number(sessionId?.user.id);
+        const userId = sessionId?.user;
 
         // Retrieve the user's current password from the database
-        const dbPassword = await prisma.sys_accounts.findFirst({
+        const dbPassword = await prisma.account.findUnique({
             select: { password: true },
-            where: { id: userId }
+            where: {
+                provider_providerAccountId: {
+                    provider: "credential", // Ensure this matches your Prisma schema
+                    providerAccountId: userId?.id!
+                }
+            }
         });
 
         if (!dbPassword) {
@@ -57,9 +63,17 @@ export async function PUT(req: NextRequest) {
 
         // Encrypt the new password and update it in the database
         const encryptedPassword = await des.encryptData(parsedData.new_password);
-        const updateResult = await prisma.sys_accounts.update({
-            where: { id: userId },
-            data: { password: encryptedPassword }
+        const updateResult = await prisma.account.update({
+            where: {
+                provider_providerAccountId: {
+                    provider: "credential", // Ensure this matches your Prisma schema
+                    providerAccountId: userId?.id!
+                }
+            },
+            data: {
+                username: parsedData.username,
+                password: encryptedPassword
+            }
         });
 
         if (!updateResult) {

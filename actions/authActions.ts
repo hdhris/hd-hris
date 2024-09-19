@@ -53,6 +53,9 @@ export async function login({ username, password }: Login) {
     }
 }
 
+export async function doSocialLogin(){
+    await signIn("google", {redirectTo: "/dashboard"});
+}
 
 
 export async function logout() {
