@@ -100,7 +100,9 @@ const Page: React.FC = () => {
       { uid: "position", name: "Position", sortable: false },
       { uid: "department", name: "Department", sortable: false },
       { uid: "contact", name: "Contact", sortable: false },
+      // { uid: "hiredate", name: "Hiredate", sortable: false },
       { uid: "actions", name: "Actions", sortable: false },
+
     ],
     rowCell: (item, columnKey) => {
       switch (columnKey) {
@@ -147,7 +149,13 @@ const Page: React.FC = () => {
               <div>{item.contact_no || "N/A"}</div>
             </div>
           );
-
+          // case "hiredate":
+          //   return (
+          //     <div>
+          //       <div>{item.hired_at || "N/A"}</div>
+          //     </div>
+          //   );
+  
         case "actions":
           return (
             <TableActionButton
