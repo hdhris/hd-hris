@@ -16,6 +16,7 @@ import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 
+
 interface EditEmployeeProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,6 +29,8 @@ interface EmployeeFormData {
   first_name: string;
   middle_name: string;
   last_name: string;
+  suffix: string;
+  extension: string;
   gender: string;
   email: string;
   contact_no: string;
@@ -123,6 +126,8 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         first_name: employeeData.first_name || "",
         middle_name: employeeData.middle_name || "",
         last_name: employeeData.last_name || "",
+        suffix: employeeData.suffix || "",
+        extension: employeeData.extension || "",
         gender: employeeData.gender || "",
         email: employeeData.email || "",
         contact_no: employeeData.contact_no || "",

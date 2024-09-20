@@ -231,7 +231,7 @@ const JobInformationForm: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-5">
+      {/* <div className="mt-5">
         <h3 className="text-lg font-semibold mb-4">Work Days</h3>
         <div className="flex flex-wrap gap-4">
           {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
@@ -244,7 +244,7 @@ const JobInformationForm: React.FC = () => {
             </Checkbox>
           ))}
         </div>
-      </div>
+      </div> */}
     </form>
   );
 };
