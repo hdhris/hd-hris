@@ -1,69 +1,11 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-}
-
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime? @updatedAt
-  username          String?   @unique
-  password          String?
-  banned_till       DateTime? @db.Timestamptz(6)
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
-}
-
-model Session {
-  sessionToken String    @unique
-  userId       String
-  expires      DateTime
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime? @updatedAt
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime? @updatedAt
-  privilege_id  Int?
-  employee_id   Int?      @unique
-  Account       Account[]
-  Session       Session[]
-
-  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sys_privileges  sys_privileges?  @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sys_devices     sys_devices[]
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@id([identifier, token])
 }
 
 model dim_employee_benefits {
@@ -362,7 +304,7 @@ model sys_devices {
   login_count   Int
   platform_type String?   @db.VarChar(45)
   user_id       String?
-  sys_users     User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User          user?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model sys_notifications {
@@ -384,7 +326,7 @@ model sys_privileges {
   created_at    DateTime  @db.Timestamp(6)
   updated_at    DateTime  @db.Timestamp(6)
   deleted_at    DateTime? @db.Timestamp(6)
-  user          User[]
+  user          user[]
 }
 
 model sys_variables {
@@ -504,7 +446,6 @@ model trans_employees {
   suspension_json                                                        Json?                          @db.Json
   resignation_json                                                       Json?                          @db.Json
   termination_json                                                       Json?                          @db.Json
-  user                                                                   User?
   dim_employee_benefits                                                  dim_employee_benefits[]
   dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
   dim_incident_reports_dim_incident_reports_reported_byTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_reported_byTotrans_employees")
@@ -531,6 +472,7 @@ model trans_employees {
   trans_overtimes_trans_overtimes_employee_idTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_employee_idTotrans_employees")
   trans_overtimes_trans_overtimes_approved_byTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_approved_byTotrans_employees")
   trans_payrolls                                                         trans_payrolls[]
+  user                                                                   user?
 }
 
 model trans_leaves {
@@ -607,4 +549,60 @@ model trans_payrolls {
   trans_payhead_breakdowns trans_payhead_breakdowns[]
   trans_employees          trans_employees            @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payroll_employees")
   trans_payroll_date       trans_payroll_date?        @relation(fields: [date_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payrolls_trans_payroll_date_2")
+}
+
+model account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime
+  username          String?   @unique(map: "Account_username_key")
+  password          String?
+  banned_till       DateTime? @db.Timestamptz(6)
+  user              user      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Account_userId_fkey")
+
+  @@id([provider, providerAccountId], map: "Account_pkey")
+}
+
+model session {
+  sessionToken String   @unique(map: "Session_sessionToken_key")
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Session_userId_fkey")
+}
+
+model user {
+  id              String           @id(map: "User_pkey")
+  name            String?
+  email           String           @unique(map: "User_email_key")
+  emailVerified   DateTime?
+  image           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime
+  privilege_id    Int?
+  employee_id     Int?             @unique(map: "User_employee_id_key")
+  account         account[]
+  session         session[]
+  sys_devices     sys_devices[]
+  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "User_employee_id_fkey")
+  sys_privileges  sys_privileges?  @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "User_privilege_id_fkey")
+}
+
+model verificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token], map: "VerificationToken_pkey")
 }

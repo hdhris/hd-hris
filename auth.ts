@@ -78,6 +78,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                                     expires_at: account.expires_at,
                                     token_type: account.token_type,
                                     scope: account.scope,
+                                    updatedAt: new Date(),
                                 },
                             });
                         }
