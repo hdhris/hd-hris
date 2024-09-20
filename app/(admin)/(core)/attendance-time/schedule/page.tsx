@@ -22,10 +22,11 @@ import { Time } from "@internationalized/date";
 import { axiosInstance } from "@/services/fetcher";
 import { useIsClient } from "@/hooks/ClientRendering";
 import axios, { AxiosResponse } from "axios";
-import { BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
+import { BatchSchedule, EmployeeSchedule, Schedules } from "@/types/attendance-time/AttendanceTypes";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { toast } from "@/components/ui/use-toast";
 import { Pencil } from "lucide-react";
+import { useSchedule } from "@/services/queries";
 
 
 const getRandomColor = (index: number) => {
@@ -126,34 +127,25 @@ export default function Page() {
       });
 
       toast({title:"Add Schedule",description:"Schedule added successfully!",variant:"success"})
-      setBatchData(null);
+      // setBatchData(null);
       onOpenChange(); // Close the modal on success
     } catch (error) {
       console.error("Error adding batch schedule", error);
     }
   };
 
+  const {data,isLoading} = useSchedule();
   useEffect(()=>{
-    if(!batchData) getSchedules();
-  },[batchData]);
-
-  // const colorMap = useRef<Map<number, number>>(new Map());
-  const getSchedules = async () => {
-    try {
-      const response: AxiosResponse<{ batch: BatchSchedule[]; emp_sched: EmployeeSchedule[] }> =
-        await axiosInstance.get("/api/admin/attendance-time/schedule");
-      setBatchData(response.data.batch);
+    setBatchData(data?.batch!);
       const newColorMap = new Map<number, number>();
-      response.data.batch.forEach((item, index) => {
+      data?.batch!.forEach((item, index) => {
         newColorMap.set(item.id, index);
       });
       console.log(newColorMap);
       setColorMap(newColorMap);
-      setEmpScheduleData(response.data.emp_sched);
-    } catch (error) {
-      console.error("Error fetching schedules:", error);
-    }
-  };
+      setEmpScheduleData(data?.emp_sched!);
+  },[data]);
+
   // Batch Card (with default gray border and hover effect for color change)
   const BatchCard = ({ item, index }: { item: BatchSchedule; index: number }) => {
     return (
@@ -227,10 +219,6 @@ export default function Page() {
     }
     return null;
   };
-
-  useEffect(() => {
-    getSchedules();
-  }, []);
 
   const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 

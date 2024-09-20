@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Avatar,
   Calendar,
@@ -21,31 +21,29 @@ import { parseDate } from "@internationalized/date";
 import { AxiosResponse } from "axios";
 import { axiosInstance } from "@/services/fetcher";
 import { CalendarDate } from "@nextui-org/react";
-import { AttendanceLog, EmployeeSchedule, BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
+import {
+  AttendanceLog,
+  EmployeeSchedule,
+  BatchSchedule,
+} from "@/types/attendance-time/AttendanceTypes";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 
 const convertTo12HourFormat = (isoString: string): string => {
-  // Replace space with 'T' to convert to ISO format
   const isoFormattedString = isoString.replace(" ", "T");
   const date = new Date(isoFormattedString);
 
-  // Check if the date is valid
   if (isNaN(date.getTime())) {
     console.error("Invalid date string:", isoFormattedString);
-    return isoString; // Return the original string if invalid
+    return isoString;
   }
 
-  // Get the UTC hours and minutes
   const hours = date.getUTCHours();
   const minutes = date.getUTCMinutes();
 
-  // Format hours to 12-hour format
-  const formattedHours = hours % 12 || 12; // Convert 0 to 12
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  
-  // Pad minutes with leading zero if needed
-  const formattedMinutes = minutes.toString().padStart(2, '0');
+  const formattedHours = hours % 12 || 12;
+  const ampm = hours >= 12 ? "PM" : "AM";
+  const formattedMinutes = minutes.toString().padStart(2, "0");
 
   return `${formattedHours}:${formattedMinutes} ${ampm}`;
 };
@@ -60,20 +58,12 @@ const calculateStatus = (
   punchType: "IN" | "OUT"
 ): string => {
   const punchTime = new Date(timestamp);
-  
-  // Extracting date from punchTime
-  const datePart = punchTime.toISOString().split('T')[0]; // YYYY-MM-DD format
-  
-  // Construct full date for scheduled times
-  const scheduledIn = new Date(`${datePart}T${clock_in.split('T')[1]}`); // Append seconds for valid Date
-  const scheduledOut = new Date(`${datePart}T${clock_out.split('T')[1]}`); // Append seconds for valid Date
+  const datePart = punchTime.toISOString().split("T")[0];
 
-  // Debugging: Output the parsed dates
-  console.log(`Punch Time: ${punchTime}`);
-  console.log(`Scheduled In: ${scheduledIn}`);
-  console.log(`Scheduled Out: ${scheduledOut}`);
+  const scheduledIn = new Date(`${datePart}T${clock_in.split("T")[1]}`);
+  const scheduledOut = new Date(`${datePart}T${clock_out.split("T")[1]}`);
 
-  const gracePeriod = 5 * 60 * 1000; // 5 minutes in milliseconds
+  const gracePeriod = 5 * 60 * 1000;
 
   if (punchType === "IN") {
     if (punchTime < scheduledIn) return "EARLY-IN";
@@ -96,48 +86,53 @@ export default function Page() {
   const [attendanceLog, setAttendanceLog] = useState<AttendanceLog[]>([]);
   const [scheduleData, setScheduleData] = useState<EmployeeSchedule[]>([]);
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
-  const [date, setDate] = React.useState(
+  const [date, setDate] = useState(
     parseDate(
-      `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`
+      `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
+        today.getDate()
+      ).padStart(2, "0")}`
     )
   );
 
-  useEffect(() => {
-    fetchAttendance(date.day, date.month, date.year);
-  }, [date.day, date.month, date.year]);
+  const fetchAttendance = useCallback(
+    async (day: number, month: number, year: number) => {
+      setIsLoading(true);
+      try {
+        const formattedDate = `${year}-${String(month).padStart(2, "0")}-${String(
+          day
+        ).padStart(2, "0")}`;
+        const response: AxiosResponse<AttendanceLog[]> = await axiosInstance.get(
+          `/api/admin/attendance-time/records/${formattedDate}`,
+          {
+            params: { date },
+          }
+        );
+        setAttendanceLog(response.data);
 
-  const handleDateChange = (newDate: CalendarDate) => {
-    setDate(newDate);
-    fetchAttendance(newDate.day, newDate.month, newDate.year);
-  };
+        const response2: AxiosResponse<{
+          batch: BatchSchedule[];
+          emp_sched: EmployeeSchedule[];
+        }> = await axiosInstance.get("/api/admin/attendance-time/schedule");
+        setBatchSchedules(response2.data.batch);
+        setScheduleData(response2.data.emp_sched);
+      } catch (error) {
+        console.error("Error fetching schedules:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [date] // Depend on 'date' as it's used in the function
+  );
 
-  const fetchAttendance = async (day: number, month: number, year: number) => {
-    setIsLoading(true);
-    try {
-      const formattedDate = `${year}-${String(month).padStart(2, "0")}-${String(
-        day
-      ).padStart(2, "0")}`;
-      const response: AxiosResponse<AttendanceLog[]> = await axiosInstance.get(
-        `/api/admin/attendance-time/records/${formattedDate}`,
-        {
-          params: { date },
-        }
-      );
-      setAttendanceLog(response.data);
+  const handleDateChange = useCallback(
+    (newDate: CalendarDate) => {
+      setDate(newDate);
+      fetchAttendance(newDate.day, newDate.month, newDate.year);
+    },
+    [fetchAttendance]
+  );
 
-
-      const response2: AxiosResponse<{ batch: BatchSchedule[]; emp_sched: EmployeeSchedule[] }> =
-        await axiosInstance.get("/api/admin/attendance-time/schedule");
-      setBatchSchedules(response2.data.batch);
-      setScheduleData(response2.data.emp_sched);
-    } catch (error) {
-      console.error("Error fetching schedules:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const [selectedKey, setSelectedKey] = React.useState<any>("");
+  const [selectedKey, setSelectedKey] = useState<any>("");
 
   const config: TableConfigProps<AttendanceLog> = {
     columns: [
