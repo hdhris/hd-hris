@@ -1,5 +1,16 @@
+APP_NAME="HRiS"
+BASE_URL="http://localhost:3000"
+DEBUG="true"
+EDGE_STORE_ACCESS_KEY="inYt4z0ceZdriLMHKFjDf9W9nn7WJYFJ"
+EDGE_STORE_SECRET_KEY="SIvMM7frJQFM4UVyRfMsX1C5nlscckNz5sRqbAzRyUTZrgdh"
+AUTH_SECRET="WR6YyW08UCAZMN+5AfJItBcg3pZhpmKej8s2VXtCrtA=" # Added by npx auth. Read more: https://cli.authjs.dev
+NEXTAUTH_URL="http://localhost:3000"
+AES_SECRET="YqInW40lvArO9n/eKIjXLEBmyTMatszyz1P95IPOukOPROKjvv+u8K75NXBJXm65oKEDHHFoSXjPBPkX220+RA=="
+
 # Connect to Supabase via connection pooling with Supavisor.
 DATABASE_URL="postgresql://postgres.ddtaaanrmhacnsxjntih:FraJohNizCin_24022615@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
 
 # Direct connection to the database. Used for migrations.
 DIRECT_URL="postgresql://postgres.ddtaaanrmhacnsxjntih:FraJohNizCin_24022615@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+# DATABASE_URL="postgresql://postgres:root@localhost:5432/hd_db?pgbouncer=true"
+# DIRECT_URL="postgresql://postgres:root@localhost:5432/hd_db"

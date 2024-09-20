@@ -21,12 +21,15 @@ import dayjs from "dayjs";
 import { Time } from "@internationalized/date";
 import { axiosInstance } from "@/services/fetcher";
 import { useIsClient } from "@/hooks/ClientRendering";
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
+import { calculateShiftLength } from "@/lib/utils/timeFormatter";
+import { toast } from "@/components/ui/use-toast";
+import { Pencil } from "lucide-react";
 
 
 const getRandomColor = (index: number) => {
-  const colors = ["teal", "pink", "violet", "orange"];
+  const colors = ["teal", "pink", "violet", "orange","green","brown","red","yellow","blue"];
   const color = colors[index % colors.length];
   // return {
   //   border: `border-${color}-500`,
@@ -39,18 +42,33 @@ const getRandomColor = (index: number) => {
       "border-pink-500",
       "border-violet-500",
       "border-orange-500",
+      "border-green-500",
+      "border-brown-500",
+      "border-red-500",
+      "border-yellow-500",
+      "border-blue-500",
     ][index % colors.length],
     hover_border: [
       "hover:border-teal-500",
       "hover:border-pink-500",
       "hover:border-violet-500",
       "hover:border-orange-500",
+      "hover:border-green-500",
+      "hover:border-brown-500",
+      "hover:border-red-500",
+      "hover:border-yellow-500",
+      "hover:border-blue-500",
     ][index % colors.length],
     text: [
       "text-teal-500",
       "text-pink-500",
       "text-violet-500",
       "text-orange-500",
+      "text-green-500",
+      "text-brown-500",
+      "text-red-500",
+      "text-yellow-500",
+      "text-blue-500",
     ][index % colors.length],
     bg: ["bg-teal-100", "bg-pink-100", "bg-violet-100", "bg-orange-100"][
       index % colors.length
@@ -81,35 +99,43 @@ const formatTime = (time: string) => {
   );
 };
 
-const calculateShiftLength = (
-  clockIn: string,
-  clockOut: string,
-  breaks: number
-) => {
-  const [inHour, inMinute] = getShortTime(clockIn).split(":").map(Number);
-  const [outHour, outMinute] = getShortTime(clockOut).split(":").map(Number);
-
-  const clockInMinutes = inHour * 60 + inMinute;
-  const clockOutMinutes = outHour * 60 + outMinute;
-
-  const shiftLengthMinutes = clockOutMinutes - clockInMinutes - breaks;
-
-  const hours = Math.floor(shiftLengthMinutes / 60);
-  const minutes = shiftLengthMinutes % 60;
-
-  return `${hours} hr${hours !== 1 ? "s" : ""} ${
-    minutes > 0 ? `and ${minutes} min${minutes !== 1 ? "s" : ""}` : ""
-  }`;
-};
 
 export default function Page() {
   const [hoveredBatchId, setHoveredBatchId] = useState<number | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const [colorMap, setColorMap] = useState<Map<number, number>>(new Map());
   const isClient = useIsClient();
-  const [batchData, setBatchData] = useState<BatchSchedule[]>([]);
+  const [batchData, setBatchData] = useState<BatchSchedule[]|null>([]);
   const [empScheduleData, setEmpScheduleData] = useState<EmployeeSchedule[]>([]);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+  // Form state
+  const [name, setName] = useState("");
+  const [clockIn, setClockIn] = useState(new Time(8));
+  const [clockOut, setClockOut] = useState(new Time(17));
+  const [breakMin, setBreakMin] = useState<any>("60");
+
+  const handleSubmit = async () => {
+    try {
+      // Make the POST request
+      const response = await axios.post("/api/admin/attendance-time/schedule/add-schedule", {
+        name,
+        clock_in: clockIn.toString(), // or format the time as needed
+        clock_out: clockOut.toString(),
+        break_min: breakMin.toString()
+      });
+
+      toast({title:"Add Schedule",description:"Schedule added successfully!",variant:"success"})
+      setBatchData(null);
+      onOpenChange(); // Close the modal on success
+    } catch (error) {
+      console.error("Error adding batch schedule", error);
+    }
+  };
+
+  useEffect(()=>{
+    if(!batchData) getSchedules();
+  },[batchData]);
 
   // const colorMap = useRef<Map<number, number>>(new Map());
   const getSchedules = async () => {
@@ -134,7 +160,7 @@ export default function Page() {
       <Card
         key={item.id}
         shadow="none"
-        className={`w-full border-2 
+        className={`border-2 w-[200px] min-h-36
           ${
             (hoveredBatchId === item.id || hoveredRowId === empScheduleData.find(
               (emp) => item.id === emp.batch_id
@@ -147,6 +173,7 @@ export default function Page() {
       >
         <CardHeader>
           <h5 className="font-semibold">{item.name}</h5>
+          <Pencil className={`cursor-pointer text-default-800 ms-auto ${hoveredBatchId === item.id? 'visible':'invisible'}`} width={15} height={15}/>
         </CardHeader>
         <CardBody className="flex justify-center items-center py-0">
           <div className="w-fit flex gap-2">
@@ -209,19 +236,21 @@ export default function Page() {
 
   return (
     <div className="flex p-1 min-w-[1230px]">
-      <div className="flex flex-col gap-2 w-52">
-        {isClient && batchData ? (
-          <>
-            {batchData.map((item, index) => (
-              <BatchCard key={item.id} item={item} index={index} />
-            ))}
-            <Button onPress={onOpen}>Add Schedule</Button>
-          </>
-        ) : (
-          <Spinner className="m-10" />
-        )}
+      <div className="flex flex-col w-[250px] h-[calc(100vh-9.5rem)]">
+        <div className="flex flex-col gap-2 pb-2 overflow-auto flex-1">
+          {isClient && batchData ? (
+            <>
+              {batchData.map((item, index) => (
+                <BatchCard key={item.id} item={item} index={index} />
+              ))}
+            </>
+          ) : (
+            <Spinner className="m-10" />
+          )}
+        </div>
+        <Button onPress={onOpen}>Add Schedule</Button>
       </div>
-      <div className="w-full h-[calc(100vh-9.5rem)] overflow-auto relative mx-2">
+      <div className="w-full overflow-auto relative h-[calc(100vh-9.5rem)] mx-2">
         {isClient && empScheduleData ? (
           <table className="w-full table-fixed divide-y divide-gray-200">
             <thead className="text-xs text-gray-500">
@@ -255,10 +284,10 @@ export default function Page() {
                       key={day}
                       className={`p-2 text-center text-sm font-semibold`}
                     >
-                      {batchData.some(
+                      {batchData?.some(
                         (batch) =>
                           batch.id === employee.batch_id &&
-                          employee.days_json.includes(day.toLowerCase())
+                          Array.isArray(employee.days_json) && employee.days_json.includes(day.toLowerCase())
                       )
                         ? getScheduleCard(
                             batchData.find(
@@ -284,32 +313,40 @@ export default function Page() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                Add Schedule
+                Add Batch Schedule
               </ModalHeader>
               <ModalBody>
                 <div className="flex flex-wrap gap-4">
                   <Input
-                    type="file"
-                    label="File"
-                    labelPlacement="outside-left"
+                    isRequired={true}
+                    type="text"
+                    label="Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                   />
                   <TimeInput
-                    label="Start"
-                    defaultValue={new Time(8)}
-                    labelPlacement="outside-left"
+                    label="Clock In"
+                    defaultValue={clockIn}
+                    onChange={setClockIn} // Update start time
                   />
                   <TimeInput
-                    label="End"
-                    defaultValue={new Time(17)}
-                    labelPlacement="outside-left"
+                    label="Clock Out"
+                    defaultValue={clockOut}
+                    onChange={setClockOut} // Update end time
                   />
+                  <Input
+                   isRequired={true}
+                   label="Break Duration"
+                   defaultValue={breakMin}
+                   onChange={setBreakMin}
+                   type="number"/>
                 </div>
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" onPress={onClose}>
+                <Button color="primary" onPress={handleSubmit}>
                   Add
                 </Button>
               </ModalFooter>

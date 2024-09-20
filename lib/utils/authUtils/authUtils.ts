@@ -1,4 +1,6 @@
 // authUtils.ts
+import axios from 'axios';
+import { parse } from 'next-useragent';
 import prisma from '@/prisma/prisma';
 import {LoginValidation} from '@/helper/zodValidation/LoginValidation';
 
@@ -72,7 +74,7 @@ export const handleAuthorization = async (credentials: { username: string; passw
     }
 
     // Validate credentials
-    const {username, password} = await LoginValidation.parseAsync(credentials);
+    const { username, password } = await LoginValidation.parseAsync(credentials);
 
     // Get IP and User-Agent
     // const ipResponse = await fetch('https://ipapi.co/json').then(data => data.json());

@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn, signOut } from '@/auth';
+import {auth, signIn, signOut} from '@/auth';
 import { AuthError } from "next-auth";
 import { ZodError } from "zod";
 
@@ -8,6 +8,8 @@ type Login = {
     username: string;
     password: string;
 };
+
+
 
 export async function login({ username, password }: Login) {
     try {
@@ -51,6 +53,10 @@ export async function login({ username, password }: Login) {
         console.error("Unexpected error:", e);
         return { error: { message: "An error occurred while processing your request. Please try again." } };
     }
+}
+
+export async function doSocialLogin(){
+    await signIn("google", {redirectTo: "/dashboard"});
 }
 
 export async function doSocialLogin(){
