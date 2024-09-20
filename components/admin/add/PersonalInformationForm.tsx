@@ -220,6 +220,42 @@ const PersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
+         {/* Suffix */}
+         <Controller
+          name="suffix"
+          control={control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Suffix</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Enter Suffix"
+                  variant="bordered"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+         {/* Extension */}
+         <Controller
+          name="extension"
+          control={control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Extension</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Enter Extension"
+                  variant="bordered"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Controller
           name="gender"
