@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, clock_in, clock_out, break_min } = await req.json();
+    const { name, clock_in, clock_out, is_active, break_min } = await req.json();
 
      // Extract hours and minutes from clock_in and clock_out
      const [clockInHour, clockInMinute] = clock_in.split(":").map(Number);
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
         clock_in: clockInDateTime.toDate(),
         clock_out: clockOutDateTime.toDate(),
         break_min: parseInt(break_min),
-        is_active: true,
+        is_active: is_active,
         created_at: new Date(new Date().setHours(new Date().getHours()+8)),
         updated_at: new Date(new Date().setHours(new Date().getHours()+8)),
       },
