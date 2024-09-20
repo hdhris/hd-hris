@@ -8,15 +8,6 @@ import {
   CardHeader,
   Chip,
 } from "@nextui-org/react";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableColumn,
-  TableRow,
-  TableCell,
-  getKeyValue,
-} from "@nextui-org/react";
 import { parseDate } from "@internationalized/date";
 import { AxiosResponse } from "axios";
 import { axiosInstance } from "@/services/fetcher";
