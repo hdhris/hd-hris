@@ -7,7 +7,7 @@ import {
   ModalFooter,
   Button,
 } from "@nextui-org/react";
-import ReactDOM from "react-dom";
+import ReactDOM from 'react-dom/client';
 
 type DialogResponse = 'yes' | 'no' | 'cancel';
 
@@ -77,8 +77,10 @@ const showDialog = async (
 
     const dialogJSX = <Dialog />;
     const renderDialog = () => {
-      ReactDOM.render(dialogJSX, modalContainer);
+      const root = ReactDOM.createRoot(modalContainer);
+      root.render(dialogJSX);
     };
+    
 
     renderDialog();
 
