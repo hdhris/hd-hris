@@ -1,17 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 
-const prisma = new PrismaClient();
+declare global {
+  var prisma: PrismaClient | undefined;
+}
 
-// Employee schema for validation
+// Singleton Prisma Client Initialization
+const prisma = globalThis.prisma || new PrismaClient();
+if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
+
+// Zod schema for employee validation
 const employeeSchema = z.object({
   branch_id: z.number().optional(),
   picture: z.string().optional(),
   first_name: z.string().max(45),
   last_name: z.string().max(45),
   middle_name: z.string().max(45).optional(),
-  suffix: z.string().max(10).optional(),
+  suffix: z.string().max(10).optional(),  
   extension: z.string().max(10).optional(),
   email: z.string().email().max(45).optional(),
   contact_no: z.string().max(45).optional(),
@@ -46,13 +52,7 @@ const employeeSchema = z.object({
     .optional(),
 });
 
-// Helper function to log database operations
-function logDatabaseOperation(operation: string, result: any) {
-  console.log(`Database operation: ${operation}`);
-  console.log("Result:", JSON.stringify(result, null, 2));
-}
-
-// Error handling
+// Error Handling Helper
 function handleError(error: unknown, operation: string) {
   console.error(`Error during ${operation} operation:`, error);
   if (error instanceof z.ZodError) {
@@ -61,54 +61,138 @@ function handleError(error: unknown, operation: string) {
       { status: 400 }
     );
   }
-  if (error instanceof Error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
   return NextResponse.json(
-    { error: `Failed to ${operation} employee` },
+    { error: `Failed to ${operation} employee`, message: (error as Error).message },
     { status: 500 }
   );
 }
 
-// GET - Fetch all employees or a single employee by ID
-export async function GET(req: Request) {
+// Log Operations for Debugging
+function logDatabaseOperation(operation: string, result: any) {
+  console.log(`Database operation: ${operation}`);
+  console.log("Result:", JSON.stringify(result, null, 2));
+}
+
+
+// POST: Create a new employee
+export async function POST(req: NextRequest) {
+  try {
+    const data = await req.json();
+    console.log("Incoming data:", data);
+
+    // Validate the incoming data against the schema
+    const validatedData = employeeSchema.parse(data);
+    console.log("Validated data:", validatedData);
+
+    // Handle creation of employee with related records
+    const employee = await createEmployee(validatedData);
+    
+    // Return the created employee
+    return NextResponse.json(employee, { status: 201 });
+  } catch (error) {
+    return handleError(error, "create");
+  }
+}
+
+// Function to create an employee
+async function createEmployee(data: z.infer<typeof employeeSchema>) {
+  const { schedules, job_id, department_id, ...rest } = data;
+
+  try {
+    // 1. Create the employee record
+    const employee = await prisma.trans_employees.create({
+      data: {
+        ...rest,
+        hired_at: data.hired_at ? new Date(data.hired_at) : null,
+        birthdate: data.birthdate ? new Date(data.birthdate) : null,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      include: {
+        ref_departments: true,
+        ref_job_classes: true,
+        dim_schedules: { include: { ref_batch_schedules: true } },
+      },
+    });
+
+    // 2. Connect job_class relation (if job_id exists)
+    if (job_id) {
+      await prisma.trans_employees.update({
+        where: { id: employee.id },
+        data: {
+          ref_job_classes: { connect: { id: job_id } },
+        },
+      });
+    }
+
+    // 3. Connect department relation (if department_id exists)
+    if (department_id) {
+      await prisma.trans_employees.update({
+        where: { id: employee.id },
+        data: {
+          ref_departments: { connect: { id: department_id } },
+        },
+      });
+    }
+
+    // 4. Handle creation of dim_schedules (if schedules exist)
+    if (schedules) {
+      await prisma.dim_schedules.createMany({
+        data: schedules.map((schedule) => ({
+          employee_id: employee.id, // Link schedules to the newly created employee
+          batch_id: schedule.batch_id,
+          days_json: schedule.days_json,
+          created_at: new Date(),
+          updated_at: new Date(),
+        })),
+      });
+    }
+
+    logDatabaseOperation("CREATE employee", employee);
+    return employee;
+  } catch (error) {
+    console.error("Error creating employee:", error);
+    throw error;  // Re-throw to be handled in the outer catch
+  }
+}
+
+
+// GET: Fetch employees
+export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
-  const daysJson = url.searchParams.get("days_json"); // Get days_json from the query string
+  const daysJson = url.searchParams.get("days_json");
 
   let parsedDaysJson;
   if (daysJson) {
     try {
-      parsedDaysJson = JSON.parse(daysJson); // Parse days_json back into an object
+      parsedDaysJson = JSON.parse(daysJson);
     } catch (error) {
       return NextResponse.json({ error: "Invalid days_json format" }, { status: 400 });
     }
   }
 
   try {
-    let result;
-    if (id) {
-      result = await getEmployeeById(parseInt(id), parsedDaysJson);
-    } else {
-      result = await getAllEmployees(parsedDaysJson);
-    }
+    const result = id
+      ? await getEmployeeById(parseInt(id), parsedDaysJson)
+      : await getAllEmployees(parsedDaysJson);
     return NextResponse.json(result);
   } catch (error) {
     return handleError(error, "fetch");
   }
 }
 
-// Fetch a single employee by ID, with optional days_json filter
+// Fetch employee by ID
 async function getEmployeeById(id: number, daysJson?: Record<string, boolean>) {
   const employee = await prisma.trans_employees.findFirst({
     where: {
       id,
-      deleted_at: null, // Exclude employees marked as deleted
+      deleted_at: null,
       dim_schedules: daysJson
         ? {
             some: {
               days_json: {
-                equals: daysJson, // Filter by days_json if provided
+                equals: daysJson,
               },
             },
           }
@@ -117,31 +201,25 @@ async function getEmployeeById(id: number, daysJson?: Record<string, boolean>) {
     include: {
       ref_departments: true,
       ref_job_classes: true,
-      ref_addresses_trans_employees_addr_regionToref_addresses: true,
-      ref_addresses_trans_employees_addr_provinceToref_addresses: true,
-      ref_addresses_trans_employees_addr_municipalToref_addresses: true,
-      ref_addresses_trans_employees_addr_baranggayToref_addresses: true,
       dim_schedules: { include: { ref_batch_schedules: true } },
     },
   });
 
   logDatabaseOperation("GET employee by ID", employee);
-  if (!employee) {
-    throw new Error("Employee not found");
-  }
+  if (!employee) throw new Error("Employee not found");
   return employee;
 }
 
-// Fetch all employees, with optional days_json filter
+// Fetch all employees
 async function getAllEmployees(daysJson?: Record<string, boolean>) {
   const employees = await prisma.trans_employees.findMany({
     where: {
-      deleted_at: null, // Exclude employees marked as deleted
+      deleted_at: null,
       dim_schedules: daysJson
         ? {
             some: {
               days_json: {
-                equals: daysJson, // Filter by days_json if provided
+                equals: daysJson,
               },
             },
           }
@@ -161,57 +239,13 @@ async function getAllEmployees(daysJson?: Record<string, boolean>) {
   logDatabaseOperation("GET all employees", employees);
   return employees;
 }
-// POST - Create a new employee
-export async function POST(req: Request) {
-  try {
-    const data = await req.json();
-    const validatedData = employeeSchema.parse(data);
-    const employee = await createEmployee({
-      ...validatedData,
-      picture: validatedData.picture, // This should now be the URL from EdgeStore
-    });
-    return NextResponse.json(employee, { status: 201 });
-  } catch (error) {
-    return handleError(error, "create");
-  }
-}
 
-async function createEmployee(data: z.infer<typeof employeeSchema>) {
-  const {schedules} = data;
-  const employee = await prisma.trans_employees.create({
-    data: {
-      ...data,
-      hired_at: data.hired_at ? new Date(data.hired_at) : undefined,
-      birthdate: data.birthdate ? new Date(data.birthdate) : undefined,
-      created_at: new Date(),
-      updated_at: new Date(),
-      dim_schedules: schedules
-      
-      ? {
-          create: schedules.map((schedule) => ({
-            batch_id: schedule.batch_id,
-            days_json: schedule.days_json,
-            created_at: new Date(),
-            updated_at: new Date(),
-          })),
-        }
-      : undefined,
-    },
-  });
-  logDatabaseOperation("CREATE employee", employee);
-  return employee;
-}
-
-// PUT - Update an existing employee
-export async function PUT(req: Request) {
+// PUT: Update employee
+export async function PUT(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
-  if (!id) {
-    return NextResponse.json(
-      { error: "Employee ID is required" },
-      { status: 400 }
-    );
-  }
+
+  if (!id) return NextResponse.json({ error: "Employee ID is required" }, { status: 400 });
 
   try {
     const data = await req.json();
@@ -223,13 +257,9 @@ export async function PUT(req: Request) {
   }
 }
 
-async function updateEmployee(
-  id: number,
-  data: Partial<z.infer<typeof employeeSchema>>
-) {
+async function updateEmployee(id: number, data: Partial<z.infer<typeof employeeSchema>>) {
   const { schedules, job_id, ...otherData } = data;
 
-  // 1. Update non-relational fields first
   const employee = await prisma.trans_employees.update({
     where: { id },
     data: {
@@ -239,21 +269,15 @@ async function updateEmployee(
     },
   });
 
-  // 2. Update ref_job_classes relation separately (if job_id exists)
   if (job_id) {
     await prisma.trans_employees.update({
       where: { id },
-      data: {
-        ref_job_classes: { connect: { id: job_id } }, // Connect the job class
-      },
+      data: { ref_job_classes: { connect: { id: job_id } } },
     });
   }
 
-  // 3. Update dim_schedules relation separately (if schedules exist)
   if (schedules) {
-    await prisma.dim_schedules.deleteMany({
-      where: { employee_id: id }, // Delete existing schedules
-    });
+    await prisma.dim_schedules.deleteMany({ where: { employee_id: id } });
 
     await prisma.dim_schedules.createMany({
       data: schedules.map((schedule) => ({
@@ -270,29 +294,21 @@ async function updateEmployee(
   return employee;
 }
 
-// DELETE - Mark an employee as deleted
-export async function DELETE(req: Request) {
+// DELETE: Soft delete an employee
+export async function DELETE(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
-  if (!id) {
-    return NextResponse.json(
-      { error: "Employee ID is required" },
-      { status: 400 }
-    );
-  }
+
+  if (!id) return NextResponse.json({ error: "Employee ID is required" }, { status: 400 });
 
   try {
-    await softDeleteEmployee(parseInt(id));
-    return NextResponse.json({ message: "Employee marked as deleted" });
+    const employee = await prisma.trans_employees.update({
+      where: { id: parseInt(id) },
+      data: { deleted_at: new Date() },
+    });
+    logDatabaseOperation("DELETE employee", employee);
+    return NextResponse.json({ message: "Employee deleted successfully" });
   } catch (error) {
     return handleError(error, "delete");
   }
-}
-
-async function softDeleteEmployee(id: number) {
-  const result = await prisma.trans_employees.update({
-    where: { id },
-    data: { deleted_at: new Date() }, // Set deleted_at to mark as deleted
-  });
-  logDatabaseOperation("SOFT DELETE employee", result);
 }

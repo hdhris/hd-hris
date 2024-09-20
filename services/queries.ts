@@ -4,6 +4,7 @@ import {ApiResponse} from "@/types/dashboard/reportStat";
 import {Employee} from "@/types/employeee/EmployeeType";
 import {Signatory} from "@/types/audit/types";
 import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
+import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
 
 export function useDashboard() {
@@ -46,6 +47,19 @@ export function useBackupLogs() {
         revalidateOnFocus: true
     })
 }
+
+export function useEmployeesData() {
+    return useSWR<Employee[]>('/api/employeemanagement/employees', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
+export function useDepartmentsData() {
+    return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
 
 export function useSchedule() {
     return useSWR<Schedules>('/api/admin/attendance-time/schedule', fetcher, {

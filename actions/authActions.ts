@@ -59,11 +59,6 @@ export async function doSocialLogin(){
     await signIn("google", {redirectTo: "/dashboard"});
 }
 
-export async function doSocialLogin(){
-    await signIn("google", {redirectTo: "/dashboard"});
-}
-
-
 export async function logout() {
     await signOut({redirectTo: "/"});
 }

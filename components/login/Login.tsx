@@ -134,7 +134,7 @@ function Userlogin() {
                 <ForgotButton className="text-sm self-center w-full mt-5 underline"/>
             </CardBody>
         </Card>
-    </section>);
+    </section>)
 }
 
 function Login() {
