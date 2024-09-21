@@ -10,18 +10,13 @@ type TabKeys = "employees" | "suspend" | "resign" | "department";
 const RootLayout = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState<TabKeys>("employees");
-
-  useEffect(() => {
-    const tab = pathname.includes("suspend")
-      ? "suspend"
-      : pathname.includes("resign")
-      ? "resign"
-      : pathname.includes("department")
-      ? "department"
-      : "employees";
-    setActiveTab(tab);
-  }, [pathname]);
+  const activeTab = pathname.includes("suspend")
+    ? "suspend"
+    : pathname.includes("resign")
+    ? "resign"
+    : pathname.includes("department")
+    ? "department"
+    : "employees";
 
   const handleTabChange = (key: TabKeys) => {
     router.push(`/employeemanagement/${key}`);

@@ -4,7 +4,11 @@ import prisma from '@/prisma/prisma';
 export const dynamic = "force-dynamic"
 export async function GET() {
   try {
-    const batchData = await prisma.ref_batch_schedules.findMany();
+    const batchData = await prisma.ref_batch_schedules.findMany({
+      where : {
+        deleted_at : null
+      }
+    });
     const employeeSchedule = await prisma.dim_schedules.findMany({
       include:{
         trans_employees:{
@@ -13,6 +17,11 @@ export async function GET() {
             first_name: true,
             middle_name: true,
           }
+        }
+      },
+      where: {
+        trans_employees:{
+          deleted_at:null
         }
       }
     })

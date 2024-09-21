@@ -22,15 +22,30 @@ import { Time } from "@internationalized/date";
 import { axiosInstance } from "@/services/fetcher";
 import { useIsClient } from "@/hooks/ClientRendering";
 import axios, { AxiosResponse } from "axios";
-import { BatchSchedule, EmployeeSchedule, Schedules } from "@/types/attendance-time/AttendanceTypes";
+import {
+  BatchSchedule,
+  EmployeeSchedule,
+  Schedules,
+} from "@/types/attendance-time/AttendanceTypes";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { toast } from "@/components/ui/use-toast";
 import { Pencil } from "lucide-react";
 import { useSchedule } from "@/services/queries";
-
+import ScheduleModal from "@/components/attendance-time/schedule/create-edit-modal";
+import showDialog from "@/lib/utils/confirmDialog";
 
 const getRandomColor = (index: number) => {
-  const colors = ["teal", "pink", "violet", "orange","green","brown","red","yellow","blue"];
+  const colors = [
+    "teal",
+    "pink",
+    "violet",
+    "orange",
+    "green",
+    "amber",
+    "red",
+    "yellow",
+    "blue",
+  ];
   const color = colors[index % colors.length];
   // return {
   //   border: `border-${color}-500`,
@@ -44,7 +59,7 @@ const getRandomColor = (index: number) => {
       "border-violet-500",
       "border-orange-500",
       "border-green-500",
-      "border-brown-500",
+      "border-amber-500",
       "border-red-500",
       "border-yellow-500",
       "border-blue-500",
@@ -55,7 +70,7 @@ const getRandomColor = (index: number) => {
       "hover:border-violet-500",
       "hover:border-orange-500",
       "hover:border-green-500",
-      "hover:border-brown-500",
+      "hover:border-amber-500",
       "hover:border-red-500",
       "hover:border-yellow-500",
       "hover:border-blue-500",
@@ -66,14 +81,22 @@ const getRandomColor = (index: number) => {
       "text-violet-500",
       "text-orange-500",
       "text-green-500",
-      "text-brown-500",
+      "text-amber-500",
       "text-red-500",
       "text-yellow-500",
       "text-blue-500",
     ][index % colors.length],
-    bg: ["bg-teal-100", "bg-pink-100", "bg-violet-100", "bg-orange-100"][
-      index % colors.length
-    ],
+    bg: [
+      "bg-teal-100",
+      "bg-pink-100",
+      "bg-violet-100",
+      "bg-orange-100",
+      "bg-green-100",
+      "bg-amber-100",
+      "bg-red-100",
+      "bg-yellow-100",
+      "bg-blue-100",
+    ][index % colors.length],
   };
 };
 
@@ -100,64 +123,126 @@ const formatTime = (time: string) => {
   );
 };
 
-
 export default function Page() {
   const [hoveredBatchId, setHoveredBatchId] = useState<number | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const [colorMap, setColorMap] = useState<Map<number, number>>(new Map());
   const isClient = useIsClient();
-  const [batchData, setBatchData] = useState<BatchSchedule[]|null>([]);
-  const [empScheduleData, setEmpScheduleData] = useState<EmployeeSchedule[]>([]);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+  const [batchData, setBatchData] = useState<BatchSchedule[] | null>([]);
+  const [empScheduleData, setEmpScheduleData] = useState<EmployeeSchedule[]>(
+    []
+  );
+  // const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isVisible, setVisible] = useState<boolean>(false);
+  const [selectedBatch, setSelectedBatch] = useState<BatchSchedule | null>(
+    null
+  );
   // Form state
-  const [name, setName] = useState("");
-  const [clockIn, setClockIn] = useState(new Time(8));
-  const [clockOut, setClockOut] = useState(new Time(17));
-  const [breakMin, setBreakMin] = useState<any>("60");
 
-  const handleSubmit = async () => {
+  const handleDelete = async (id: Number | undefined) => {
     try {
-      // Make the POST request
-      const response = await axios.post("/api/admin/attendance-time/schedule/add-schedule", {
-        name,
-        clock_in: clockIn.toString(), // or format the time as needed
-        clock_out: clockOut.toString(),
-        break_min: breakMin.toString()
-      });
+      const result = await showDialog(
+        "Confirm Delete",
+        `Are you sure you want to delete schedule?`,
+        false
+      );
+      if (result === "yes") {
+        await axios.post(
+          "/api/admin/attendance-time/schedule/delete-schedule",
+          {
+            id: id,
+          }
+        );
+        toast({
+          title: "Delete Schedule",
+          description: "Schedule deleted successfully!",
+          variant: "primary",
+        });
 
-      toast({title:"Add Schedule",description:"Schedule added successfully!",variant:"success"})
-      // setBatchData(null);
-      onOpenChange(); // Close the modal on success
+        setSelectedBatch(null);
+        setVisible(false);
+      }
     } catch (error) {
-      console.error("Error adding batch schedule", error);
+      toast({
+        title: "Delete Schedule",
+        description: "Error deleteing schedule: " + error,
+        variant: "danger",
+      });
+    }
+  };
+  const handleSubmit = async (batch: BatchSchedule) => {
+    try {
+      if (batch.id > 0) {
+        // Edit
+        await axios.post("/api/admin/attendance-time/schedule/edit-schedule", {
+          id: batch.id,
+          name: batch.name,
+          clock_in: batch.clock_in,
+          clock_out: batch.clock_out,
+          is_active: batch.is_active,
+          break_min: batch.break_min,
+        });
+        toast({
+          title: "Edit Schedule",
+          description: "Schedule edited successfully!",
+          variant: "primary",
+        });
+      } else {
+        // Create
+        await axios.post("/api/admin/attendance-time/schedule/add-schedule", {
+          name: batch.name,
+          clock_in: batch.clock_in,
+          clock_out: batch.clock_out,
+          is_active: batch.is_active,
+          break_min: batch.break_min,
+        });
+        toast({
+          title: "Add Schedule",
+          description: "Schedule added successfully!",
+          variant: "success",
+        });
+      }
+      setVisible(false);
+    } catch (error) {
+      const type: string = batch.id > 0 ? "Edit" : "Add";
+      toast({
+        title: type + " Schedule",
+        description: "Error " + type + " schedule: " + error,
+        variant: "danger",
+      });
     }
   };
 
-  const {data,isLoading} = useSchedule();
-  useEffect(()=>{
+  const { data, isLoading } = useSchedule();
+  useEffect(() => {
     setBatchData(data?.batch!);
-      const newColorMap = new Map<number, number>();
-      data?.batch!.forEach((item, index) => {
-        newColorMap.set(item.id, index);
-      });
-      console.log(newColorMap);
-      setColorMap(newColorMap);
-      setEmpScheduleData(data?.emp_sched!);
-  },[data]);
+    const newColorMap = new Map<number, number>();
+    data?.batch!.forEach((item, index) => {
+      newColorMap.set(item.id, index);
+    });
+    console.log(newColorMap);
+    setColorMap(newColorMap);
+    setEmpScheduleData(data?.emp_sched!);
+  }, [data]);
 
   // Batch Card (with default gray border and hover effect for color change)
-  const BatchCard = ({ item, index }: { item: BatchSchedule; index: number }) => {
+  const BatchCard = ({
+    item,
+    index,
+  }: {
+    item: BatchSchedule;
+    index: number;
+  }) => {
     return (
       <Card
         key={item.id}
         shadow="none"
         className={`border-2 w-[200px] min-h-36
           ${
-            (hoveredBatchId === item.id || hoveredRowId === empScheduleData.find(
-              (emp) => item.id === emp.batch_id
-            )?.id)
-              ? getRandomColor(colorMap.get(item.id) as number).border
+            hoveredBatchId === item.id ||
+            hoveredRowId ===
+              empScheduleData.find((emp) => item.id === emp.batch_id)?.id
+              ? getRandomColor(index).border
               : "border-gray-400"
           } transition-all duration-300`}
         onMouseEnter={() => setHoveredBatchId(item.id)}
@@ -165,7 +250,17 @@ export default function Page() {
       >
         <CardHeader>
           <h5 className="font-semibold">{item.name}</h5>
-          <Pencil className={`cursor-pointer text-default-800 ms-auto ${hoveredBatchId === item.id? 'visible':'invisible'}`} width={15} height={15}/>
+          <div
+            onClick={() => {
+              setSelectedBatch(item);
+              setVisible(true);
+            }}
+            className={`${
+              hoveredBatchId === item.id ? "visible" : "invisible"
+            } rounded-full cursor-pointer ms-auto w-7 h-7 hover:bg-slate-300 flex justify-center items-center`}
+          >
+            <Pencil className="text-default-800" width={15} height={15} />
+          </div>
         </CardHeader>
         <CardBody className="flex justify-center items-center py-0">
           <div className="w-fit flex gap-2">
@@ -190,7 +285,10 @@ export default function Page() {
   };
 
   // Card for Schedule Time (no border initially, but adds on hover)
-  const getScheduleCard = (scheduleItem: BatchSchedule | undefined, id: number) => {
+  const getScheduleCard = (
+    scheduleItem: BatchSchedule | undefined,
+    id: number
+  ) => {
     if (scheduleItem) {
       let startTime = dayjs(`${getShortTime(scheduleItem.clock_in)}`, "HH:mm")
         .format("h:mma")
@@ -207,7 +305,9 @@ export default function Page() {
         <div className="h-16">
           <Card
             className={`${
-              (hoveredBatchId === scheduleItem.id) || (hoveredRowId === id) ? "border-2" : "border-0"
+              hoveredBatchId === scheduleItem.id || hoveredRowId === id
+                ? "border-2"
+                : "border-0"
             } ${bg} flex justify-center items-center h-full shadow-none transition-all duration-300 ${border}`}
           >
             <p className={text}>
@@ -236,7 +336,14 @@ export default function Page() {
             <Spinner className="m-10" />
           )}
         </div>
-        <Button onPress={onOpen}>Add Schedule</Button>
+        <Button
+          onPress={() => {
+            setSelectedBatch(null);
+            setVisible(true);
+          }}
+        >
+          Add Schedule
+        </Button>
       </div>
       <div className="w-full overflow-auto relative h-[calc(100vh-9.5rem)] mx-2">
         {isClient && empScheduleData ? (
@@ -275,7 +382,8 @@ export default function Page() {
                       {batchData?.some(
                         (batch) =>
                           batch.id === employee.batch_id &&
-                          Array.isArray(employee.days_json) && employee.days_json.includes(day.toLowerCase())
+                          Array.isArray(employee.days_json) &&
+                          employee.days_json.includes(day.toLowerCase())
                       )
                         ? getScheduleCard(
                             batchData.find(
@@ -296,52 +404,13 @@ export default function Page() {
           </div>
         )}
       </div>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Add Batch Schedule
-              </ModalHeader>
-              <ModalBody>
-                <div className="flex flex-wrap gap-4">
-                  <Input
-                    isRequired={true}
-                    type="text"
-                    label="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                  <TimeInput
-                    label="Clock In"
-                    defaultValue={clockIn}
-                    onChange={setClockIn} // Update start time
-                  />
-                  <TimeInput
-                    label="Clock Out"
-                    defaultValue={clockOut}
-                    onChange={setClockOut} // Update end time
-                  />
-                  <Input
-                   isRequired={true}
-                   label="Break Duration"
-                   defaultValue={breakMin}
-                   onChange={setBreakMin}
-                   type="number"/>
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-                <Button color="primary" onPress={handleSubmit}>
-                  Add
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <ScheduleModal
+        onSave={handleSubmit}
+        selectedSchedule={selectedBatch}
+        visible={isVisible}
+        onClose={() => setVisible(false)}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }

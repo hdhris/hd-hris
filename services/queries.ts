@@ -63,6 +63,6 @@ export function useDepartmentsData() {
 
 export function useSchedule() {
     return useSWR<Schedules>('/api/admin/attendance-time/schedule', fetcher, {
-        revalidateOnFocus: true
+        revalidateOnFocus: false, refreshInterval: 3000
     })
 }
