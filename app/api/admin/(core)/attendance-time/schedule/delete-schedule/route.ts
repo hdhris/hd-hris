@@ -1,4 +1,4 @@
-// /pages/api/batch-schedule.ts
+import { toGMT8 } from "@/lib/utils/toGMT8";
 import prisma from "@/prisma/prisma";
 import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
         id: id,
       },
       data: {
-        deleted_at: new Date(new Date().setHours(new Date().getHours() + 8)),
+        deleted_at: toGMT8(new Date()),
       },
     });
 

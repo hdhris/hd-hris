@@ -12,6 +12,7 @@ import {
 } from "@nextui-org/react";
 import { BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
 import { Time } from "@internationalized/date";
+import { dateToTime } from "@/lib/utils/dateToTime";
 
 interface ScheduleModalProps {
   visible: boolean;
@@ -37,12 +38,10 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
   // Effect to populate modal fields if editing
   useEffect(() => {
     if (selectedSchedule) {
-      const clockInParts = (selectedSchedule.clock_in.split('T')[1]).split(":").map(Number);
-      const clockOutParts = (selectedSchedule.clock_out.split('T')[1]).split(":").map(Number);
       setName(selectedSchedule.name);
       console.log(selectedSchedule);
-      setClockIn(new Time(clockInParts[0], clockInParts[1], clockInParts[2]));
-      setClockOut(new Time(clockOutParts[0], clockOutParts[1], clockOutParts[2]));
+      setClockIn(dateToTime(new Date(selectedSchedule.clock_in)));
+      setClockOut(dateToTime(new Date(selectedSchedule.clock_out)));
       setBreakMin(selectedSchedule.break_min);
       setIsActive(selectedSchedule.is_active);
     } else {

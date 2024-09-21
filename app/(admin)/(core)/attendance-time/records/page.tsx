@@ -19,6 +19,7 @@ import {
 } from "@/types/attendance-time/AttendanceTypes";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 const convertTo12HourFormat = (isoString: string): string => {
   const isoFormattedString = isoString.replace(" ", "T");
@@ -58,13 +59,15 @@ const calculateStatus = (
 
   if (punchType === "IN") {
     if (punchTime < scheduledIn) return "EARLY-IN";
-    if (punchTime.getTime() - scheduledIn.getTime() <= gracePeriod) return "ON-TIME";
+    if (punchTime.getTime() - scheduledIn.getTime() <= gracePeriod)
+      return "ON-TIME";
     return "LATE";
   }
 
   if (punchType === "OUT") {
     if (punchTime < scheduledOut) return "EARLY-OUT";
-    if (punchTime.getTime() - scheduledOut.getTime() <= gracePeriod) return "ON-TIME";
+    if (punchTime.getTime() - scheduledOut.getTime() <= gracePeriod)
+      return "ON-TIME";
     return "OVERTIME";
   }
 
@@ -78,26 +81,25 @@ export default function Page() {
   const [scheduleData, setScheduleData] = useState<EmployeeSchedule[]>([]);
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
   const [date, setDate] = useState(
-    parseDate(
-      `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
-        today.getDate()
-      ).padStart(2, "0")}`
-    )
+    parseDate(toGMT8(new Date().toString()).toISOString().split("T")[0])
   );
 
   const fetchAttendance = useCallback(
-    async (day: number, month: number, year: number) => {
+    async () => {
+      console.log("FLAG");
       setIsLoading(true);
       try {
-        const formattedDate = `${year}-${String(month).padStart(2, "0")}-${String(
-          day
-        ).padStart(2, "0")}`;
-        const response: AxiosResponse<AttendanceLog[]> = await axiosInstance.get(
-          `/api/admin/attendance-time/records/${formattedDate}`,
-          {
-            params: { date },
-          }
-        );
+        const formattedDate = `${date?.year}-${String(date?.month).padStart(
+          2,
+          "0"
+        )}-${String(date?.day).padStart(2, "0")}`;
+        const response: AxiosResponse<AttendanceLog[]> =
+          await axiosInstance.get(
+            `/api/admin/attendance-time/records/${formattedDate}`,
+            {
+              params: { date },
+            }
+          );
         setAttendanceLog(response.data);
 
         const response2: AxiosResponse<{
@@ -115,13 +117,9 @@ export default function Page() {
     [date] // Depend on 'date' as it's used in the function
   );
 
-  const handleDateChange = useCallback(
-    (newDate: CalendarDate) => {
-      setDate(newDate);
-      fetchAttendance(newDate.day, newDate.month, newDate.year);
-    },
-    [fetchAttendance]
-  );
+  useEffect(() => {
+    fetchAttendance();
+  }, [fetchAttendance]);
 
   const [selectedKey, setSelectedKey] = useState<any>("");
 
@@ -142,8 +140,18 @@ export default function Page() {
       );
       const status =
         item.punch === 0
-          ? calculateStatus(item.timestamp, batchSchedule?.clock_in || "", batchSchedule?.clock_out || "", "IN")
-          : calculateStatus(item.timestamp, batchSchedule?.clock_in || "", batchSchedule?.clock_out || "", "OUT");
+          ? calculateStatus(
+              item.timestamp,
+              batchSchedule?.clock_in || "",
+              batchSchedule?.clock_out || "",
+              "IN"
+            )
+          : calculateStatus(
+              item.timestamp,
+              batchSchedule?.clock_in || "",
+              batchSchedule?.clock_out || "",
+              "OUT"
+            );
 
       switch (columnKey) {
         case "name":
@@ -207,7 +215,7 @@ export default function Page() {
           aria-label="Date (Controlled)"
           showMonthAndYearPickers
           value={date}
-          onChange={handleDateChange}
+          onChange={setDate}
         />
         <Card shadow="none" className="border">
           <CardHeader className="flex gap-1">
@@ -215,9 +223,7 @@ export default function Page() {
               <p className="text-md">Selected Employee</p>
             </div>
           </CardHeader>
-          <CardBody className="-mt-6">
-            {/* ... */}
-          </CardBody>
+          <CardBody className="-mt-6">{/* ... */}</CardBody>
         </Card>
       </div>
     </div>

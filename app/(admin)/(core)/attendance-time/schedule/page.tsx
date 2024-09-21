@@ -139,34 +139,37 @@ export default function Page() {
   );
   // Form state
 
-  const handleDelete = async (id: Number|undefined)=>{
-    try { 
+  const handleDelete = async (id: Number | undefined) => {
+    try {
       const result = await showDialog(
         "Confirm Delete",
         `Are you sure you want to delete schedule?`,
         false
       );
-      if (result === 'yes') {
-        await axios.post("/api/admin/attendance-time/schedule/delete-schedule", {
-          id: id
-        });
+      if (result === "yes") {
+        await axios.post(
+          "/api/admin/attendance-time/schedule/delete-schedule",
+          {
+            id: id,
+          }
+        );
         toast({
           title: "Delete Schedule",
           description: "Schedule deleted successfully!",
           variant: "primary",
         });
 
-        setSelectedBatch(null)
-        setVisible(false)
+        setSelectedBatch(null);
+        setVisible(false);
       }
-    } catch (error){
+    } catch (error) {
       toast({
         title: "Delete Schedule",
         description: "Error deleteing schedule: " + error,
         variant: "danger",
       });
     }
-  }
+  };
   const handleSubmit = async (batch: BatchSchedule) => {
     try {
       if (batch.id > 0) {
@@ -200,13 +203,13 @@ export default function Page() {
         });
       }
       setVisible(false);
-    } catch (error){
-      const type:string = batch.id >0? "Edit":"Add"
-        toast({
-          title: type + " Schedule",
-          description: "Error "+type+" schedule: " + error,
-          variant: "danger",
-        });
+    } catch (error) {
+      const type: string = batch.id > 0 ? "Edit" : "Add";
+      toast({
+        title: type + " Schedule",
+        description: "Error " + type + " schedule: " + error,
+        variant: "danger",
+      });
     }
   };
 
@@ -247,17 +250,17 @@ export default function Page() {
       >
         <CardHeader>
           <h5 className="font-semibold">{item.name}</h5>
-          <Pencil
-            className={`cursor-pointer text-default-800 ms-auto ${
-              hoveredBatchId === item.id ? "visible" : "invisible"
-            }`}
-            width={15}
-            height={15}
+          <div
             onClick={() => {
               setSelectedBatch(item);
               setVisible(true);
             }}
-          />
+            className={`${
+              hoveredBatchId === item.id ? "visible" : "invisible"
+            } rounded-full cursor-pointer ms-auto w-7 h-7 hover:bg-slate-300 flex justify-center items-center`}
+          >
+            <Pencil className="text-default-800" width={15} height={15} />
+          </div>
         </CardHeader>
         <CardBody className="flex justify-center items-center py-0">
           <div className="w-fit flex gap-2">
