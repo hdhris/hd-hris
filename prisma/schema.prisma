@@ -8,6 +8,28 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime
+  username          String?   @unique(map: "Account_username_key")
+  password          String?
+  banned_till       DateTime? @db.Timestamptz(6)
+  user              user      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Account_userId_fkey")
+
+  @@id([provider, providerAccountId], map: "Account_pkey")
+}
+
 model dim_employee_benefits {
   id                          Int                           @id @default(autoincrement())
   employee_id                 Int?
@@ -288,6 +310,15 @@ model ref_training_programs {
   dim_training_schedules    dim_training_schedules[]
 }
 
+model session {
+  sessionToken String   @unique(map: "Session_sessionToken_key")
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Session_userId_fkey")
+}
+
 model sys_devices {
   id            Int       @id @default(autoincrement())
   ip_address    String?   @db.Inet
@@ -304,7 +335,7 @@ model sys_devices {
   login_count   Int
   platform_type String?   @db.VarChar(45)
   user_id       String?
-  User          user?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user          user?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model sys_notifications {
@@ -549,37 +580,6 @@ model trans_payrolls {
   trans_payhead_breakdowns trans_payhead_breakdowns[]
   trans_employees          trans_employees            @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payroll_employees")
   trans_payroll_date       trans_payroll_date?        @relation(fields: [date_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payrolls_trans_payroll_date_2")
-}
-
-model account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime
-  username          String?   @unique(map: "Account_username_key")
-  password          String?
-  banned_till       DateTime? @db.Timestamptz(6)
-  user              user      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Account_userId_fkey")
-
-  @@id([provider, providerAccountId], map: "Account_pkey")
-}
-
-model session {
-  sessionToken String   @unique(map: "Session_sessionToken_key")
-  userId       String
-  expires      DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime
-  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Session_userId_fkey")
 }
 
 model user {
