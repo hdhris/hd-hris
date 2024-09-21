@@ -7,17 +7,11 @@ import { ScrollShadow } from "@nextui-org/scroll-shadow";
 function RootLayout({ children }: { children: ReactNode }) {
   const router = useRouter(); // Use the router from next/navigation
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState<string>("records");
-
-  useEffect(() => {
-    const tab = pathname.includes("overtime")
-      ? "overtime"
-      : pathname.includes("schedule")
-      ? "schedule"
-      : "records";
-    setActiveTab(tab);
-  }, [pathname]);
-
+  const activeTab = pathname.includes("overtime")
+    ? "overtime"
+    : pathname.includes("schedule")
+    ? "schedule"
+    : "records";
   const handleTabChange = (key: string) => {
     router.push(`/attendance-time/${key}`); // Use router.push for navigation
   };
