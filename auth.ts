@@ -36,62 +36,59 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
     })], callbacks: {
         async signIn({ account, user }) {
             try {
-                if (account?.provider === 'google') {
+                if (account?.provider === "google") {
                     // Check if user email exists in the employees table
-                    const employee_email = await prisma.trans_employees.findFirst({
+                    const employeeEmail = await prisma.trans_employees.findFirst({
                         where: {
-                            email: user.email || undefined, // Handle nullable email
+                            email: user.email || undefined,
                         },
                     });
 
-                    if (!employee_email) {
+                    if (!employeeEmail) {
                         console.error("Unauthorized login attempt.");
                         return false; // User is not authorized
                     }
-
-                    // Check if the user exists in the 'users' table
-                    const existingUser = await prisma.user.findUnique({
-                        where: { email: user.email! },
-                    });
-
-                    if (existingUser) {
-                        // If user exists but hasn't linked Google, link the account
-                        const accountExists = await prisma.account.findUnique({
-                            where: {
-                                provider_providerAccountId: {
-                                    provider: account.provider,
-                                    providerAccountId: account.providerAccountId,
-                                },
-                            },
-                        });
-
-                        if (!accountExists) {
-                            // Link the new provider to the existing user
-                            await prisma.account.create({
-                                data: {
-                                    userId: existingUser.id,
-                                    provider: account.provider,
-                                    providerAccountId: account.providerAccountId,
-                                    type: account.type,
-                                    access_token: account.access_token,
-                                    refresh_token: account.refresh_token,
-                                    expires_at: account.expires_at,
-                                    token_type: account.token_type,
-                                    scope: account.scope,
-                                    updatedAt: new Date(),
-                                },
-                            });
-                        }
+                    //
+                    // // Check if the user exists in the 'User' table
+                    // const existingUser = await prisma.user.findUnique({
+                    //     where: { email: user.email! },
+                    // });
+                    //
+                    // if (existingUser) {
+                    //     // If user exists but hasn't linked Google, link the account
+                    //     const accountExists = await prisma.account.findUnique({
+                    //         where: {
+                    //             provider_providerAccountId: {
+                    //                 provider: account.provider,
+                    //                 providerAccountId: account.providerAccountId,
+                    //             },
+                    //         },
+                    //     });
+                    //
+                    //     if (!accountExists) {
+                    //         // Link the new provider to the existing user
+                    //         await prisma.account.create({
+                    //             data: {
+                    //                 userId: existingUser.id,
+                    //                 provider: account.provider,
+                    //                 providerAccountId: account.providerAccountId,
+                    //                 type: account.type,
+                    //                 access_token: account.access_token,
+                    //                 refresh_token: account.refresh_token,
+                    //                 expires_at: account.expires_at,
+                    //                 token_type: account.token_type,
+                    //                 scope: account.scope,
+                    //                 updatedAt: new Date(),
+                    //             },
+                    //         });
+                    //     }
                         return true;
-                    }
-
-                    return true; // User is authorized and logged in
+                    // }
                 }
-
                 return true; // Handle other providers
             } catch (error) {
                 console.error("Login error:", error);
-                return false; // Stop the login process
+                return false; // Stop the login process on error
             }
         },
         authorized({request: {nextUrl}, auth}) {
