@@ -9,8 +9,7 @@ import GoogleProvider from "next-auth/providers/google";
 
 
 export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
-    adapter: PrismaAdapter(prisma),
-    providers: [Credentials({
+    adapter: PrismaAdapter(prisma), providers: [Credentials({
         credentials: {
             username: {}, password: {},
         }, authorize: async (credentials) => {
@@ -20,21 +19,22 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
             }
 
             // Validate credentials
-            const { username, password } = await LoginValidation.parseAsync(credentials as { username: string; password: string });
+            const {username, password} = await LoginValidation.parseAsync(credentials as {
+                username: string;
+                password: string
+            });
 
             // Get user data
             return await handleAuthorization({username, password});
         },
-    }),  GoogleProvider({
-        clientId: process.env.AUTH_GOOGLE_ID,
-        clientSecret: process.env.AUTH_GOOGLE_SECRET,
-        authorization: {
+    }), GoogleProvider({
+        clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET, authorization: {
             params: {
                 prompt: "consent", access_type: "offline", response_type: "code",
             },
         },
     })], callbacks: {
-        async signIn({ account, user }) {
+        async signIn({account, user}) {
             try {
                 if (account?.provider === "google") {
                     // Check if user email exists in the employees table
@@ -48,50 +48,17 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                         console.error("Unauthorized login attempt.");
                         return false; // User is not authorized
                     }
-                    //
-                    // // Check if the user exists in the 'User' table
-                    // const existingUser = await prisma.user.findUnique({
-                    //     where: { email: user.email! },
-                    // });
-                    //
-                    // if (existingUser) {
-                    //     // If user exists but hasn't linked Google, link the account
-                    //     const accountExists = await prisma.account.findUnique({
-                    //         where: {
-                    //             provider_providerAccountId: {
-                    //                 provider: account.provider,
-                    //                 providerAccountId: account.providerAccountId,
-                    //             },
-                    //         },
-                    //     });
-                    //
-                    //     if (!accountExists) {
-                    //         // Link the new provider to the existing user
-                    //         await prisma.account.create({
-                    //             data: {
-                    //                 userId: existingUser.id,
-                    //                 provider: account.provider,
-                    //                 providerAccountId: account.providerAccountId,
-                    //                 type: account.type,
-                    //                 access_token: account.access_token,
-                    //                 refresh_token: account.refresh_token,
-                    //                 expires_at: account.expires_at,
-                    //                 token_type: account.token_type,
-                    //                 scope: account.scope,
-                    //                 updatedAt: new Date(),
-                    //             },
-                    //         });
-                    //     }
-                        return true;
-                    // }
+
+                    return true;
+
                 }
+
                 return true; // Handle other providers
             } catch (error) {
                 console.error("Login error:", error);
                 return false; // Stop the login process on error
             }
-        },
-        authorized({request: {nextUrl}, auth}) {
+        }, authorized({request: {nextUrl}, auth}) {
             const isLoggedIn = !!auth?.user;
             const {pathname} = nextUrl;
             if (pathname.startsWith('/api/auth/signin') && isLoggedIn) {
@@ -117,10 +84,8 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
             return session;
         },
     }, pages: {
-        signIn: "/",
-        error: "/"
-    }, secret: process.env.AUTH_SECRET,
-    session: {
+        signIn: "/", error: "/"
+    }, secret: process.env.AUTH_SECRET, session: {
         strategy: "jwt"
     }
 })
