@@ -6,6 +6,9 @@ import prisma from "@/prisma/prisma";
 import {handleAuthorization} from "@/lib/utils/authUtils/authUtils";
 import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
 import GoogleProvider from "next-auth/providers/google";
+import {processJsonObject} from "@/lib/utils/parser/JsonObject";
+import {UserPrivileges} from "@/types/JSON/user-privileges";
+import {devices} from "@/defaults_configurations/devices";
 
 
 export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
@@ -20,8 +23,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
 
             // Validate credentials
             const {username, password} = await LoginValidation.parseAsync(credentials as {
-                username: string;
-                password: string
+                username: string; password: string
             });
 
             // Get user data
@@ -37,6 +39,21 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
         async signIn({account, user}) {
             try {
                 if (account?.provider === "google") {
+                    const privilege = await prisma.user.findUnique({
+                        where: {
+                            id: user.id,
+                        }, include: {
+                            sys_privileges: true
+                        }
+                    })
+
+                    const accessibility = processJsonObject<UserPrivileges>(privilege?.sys_privileges?.accessibility);
+                    const role = !accessibility?.web_access;
+
+                    if(role) {
+                        console.log("Only admin can login")
+                        return false;
+                    }
                     // Check if user email exists in the employees table
                     const employeeEmail = await prisma.trans_employees.findFirst({
                         where: {
@@ -45,13 +62,17 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     });
 
                     if (!employeeEmail) {
+                        new Error("Unauthorized login attempt.")
                         console.error("Unauthorized login attempt.");
                         return false; // User is not authorized
                     }
 
+                    await devices();
                     return true;
 
                 }
+
+                await devices();
 
                 return true; // Handle other providers
             } catch (error) {

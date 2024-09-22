@@ -1,6 +1,6 @@
 "use server";
 
-import {auth, signIn, signOut} from '@/auth';
+import {signIn, signOut} from '@/auth';
 import { AuthError } from "next-auth";
 import { ZodError } from "zod";
 
@@ -56,7 +56,7 @@ export async function login({ username, password }: Login) {
 }
 
 export async function doSocialLogin(){
-    await signIn("google", {redirectTo: "/dashboard"});
+    await signIn("google", {redirectTo: "/dashboard"}, );
 }
 
 export async function logout() {

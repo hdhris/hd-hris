@@ -42,13 +42,16 @@ function Userlogin() {
 
 
     useEffect(() => {
+        const errorMessages: Record<string, string> = {
+            CredentialsSignin: "Invalid username or password.",
+            GoogleSignin: "Google authentication failed.",
+            Configuration: "Configuration error.",
+            AccessDenied: "Access denied.",
+            default: "An unknown error occurred. Please try again.",
+        };
         const errorParam = searchParams.get('error');
         if (errorParam) {
-            if(errorParam === "AccessDenied"){
-                setError("Email not registered. Please contact admin.");
-            } else {
-                setError("Server Error. Please try again later.");
-            }
+            setError(errorMessages[errorParam] || errorMessages.default);
             // alert(errorParam)
             router.push('/');
         }
