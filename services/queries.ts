@@ -6,6 +6,7 @@ import {Signatory} from "@/types/audit/types";
 import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
 import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
+import { Payhead } from "@/types/payroll/payrollType";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -60,9 +61,14 @@ export function useDepartmentsData() {
     })
 }
 
-
 export function useSchedule() {
     return useSWR<Schedules>('/api/admin/attendance-time/schedule', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
+export function useEarnings() {
+    return useSWR<Payhead[]>('/api/admin/payroll/earnings', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 5000
     })
 }

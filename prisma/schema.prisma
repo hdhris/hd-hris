@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-
 }
 
 datasource db {
@@ -21,41 +20,40 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime? @updatedAt
   username          String?   @unique
   password          String?
   banned_till       DateTime? @db.Timestamptz(6)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
 }
 
 model Session {
-  sessionToken String    @unique
+  sessionToken String   @unique
   userId       String
   expires      DateTime
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime? @updatedAt
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime? @updatedAt
-  privilege_id  Int?
-  employee_id   Int?      @unique
-  Account       Account[]
-  Session       Session[]
-
+  id              String           @id @default(cuid())
+  name            String?
+  email           String           @unique
+  emailVerified   DateTime?
+  image           String?
+  privilege_id    Int?
+  employee_id     Int?             @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  Account         Account[]
+  Session         Session[]
   trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   sys_privileges  sys_privileges?  @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sys_devices     sys_devices[]
+  sys_devices     sys_devices?
 }
 
 model VerificationToken {
@@ -275,6 +273,7 @@ model ref_departments {
   created_at      DateTime?         @db.Timestamp(6)
   updated_at      DateTime?         @db.Timestamp(6)
   deleted_at      DateTime?         @db.Timestamp(6)
+  ref_job_classes ref_job_classes[]
   trans_employees trans_employees[]
 }
 
@@ -286,6 +285,9 @@ model ref_job_classes {
   created_at      DateTime          @db.Timestamp(6)
   updated_at      DateTime          @db.Timestamp(6)
   deleted_at      DateTime?         @db.Timestamp(6)
+  department_id   Int?
+  pay_rate        Decimal?          @db.Decimal(10, 2)
+  ref_departments ref_departments?  @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
   trans_employees trans_employees[]
 }
 
@@ -303,15 +305,15 @@ model ref_leave_types {
 }
 
 model ref_payheads {
-  payhead_name             String?                    @db.VarChar(45)
-  payhead_type_id          Int?
   calculation              Json?                      @db.Json
-  created_at               DateTime                   @db.Timestamp(6)
-  updated_at               DateTime                   @db.Timestamp(6)
+  created_at               DateTime?                  @db.Timestamp(6)
+  updated_at               DateTime?                  @db.Timestamp(6)
   deleted_at               DateTime?                  @db.Timestamp(6)
   id                       Int                        @id @default(autoincrement())
   is_active                Boolean?
   is_mandatory             Boolean?
+  name                     String?                    @db.VarChar(45)
+  type                     String?                    @db.VarChar(10)
   dim_payhead_affecteds    dim_payhead_affecteds[]
   trans_payhead_breakdowns trans_payhead_breakdowns[]
 }
@@ -361,7 +363,7 @@ model sys_devices {
   os_version    Int?
   login_count   Int
   platform_type String?   @db.VarChar(45)
-  user_id       String?
+  user_id       String?   @unique
   sys_users     User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
