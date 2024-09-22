@@ -17,7 +17,7 @@ const employeeSchema = z.object({
   first_name: z.string().max(45),
   last_name: z.string().max(45),
   middle_name: z.string().max(45).optional(),
-  suffix: z.string().max(10).optional(),  
+  suffix: z.string().max(10).optional(),
   extension: z.string().max(10).optional(),
   email: z.string().email().max(45).optional(),
   contact_no: z.string().max(45).optional(),
@@ -52,6 +52,13 @@ const employeeSchema = z.object({
     .optional(),
 });
 
+const statusUpdateSchema = z.object({
+  status: z.enum(["active", "suspended", "resigned", "terminated"]),
+  suspension_json: z.string().optional(),
+  resignation_json: z.string().optional(),
+  termination_json: z.string().optional(),
+});
+
 // Error Handling Helper
 function handleError(error: unknown, operation: string) {
   console.error(`Error during ${operation} operation:`, error);
@@ -62,7 +69,10 @@ function handleError(error: unknown, operation: string) {
     );
   }
   return NextResponse.json(
-    { error: `Failed to ${operation} employee`, message: (error as Error).message },
+    {
+      error: `Failed to ${operation} employee`,
+      message: (error as Error).message,
+    },
     { status: 500 }
   );
 }
@@ -72,7 +82,6 @@ function logDatabaseOperation(operation: string, result: any) {
   console.log(`Database operation: ${operation}`);
   console.log("Result:", JSON.stringify(result, null, 2));
 }
-
 
 // POST: Create a new employee
 export async function POST(req: NextRequest) {
@@ -86,7 +95,7 @@ export async function POST(req: NextRequest) {
 
     // Handle creation of employee with related records
     const employee = await createEmployee(validatedData);
-    
+
     // Return the created employee
     return NextResponse.json(employee, { status: 201 });
   } catch (error) {
@@ -152,10 +161,9 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
     return employee;
   } catch (error) {
     console.error("Error creating employee:", error);
-    throw error;  // Re-throw to be handled in the outer catch
+    throw error; // Re-throw to be handled in the outer catch
   }
 }
-
 
 // GET: Fetch employees
 export async function GET(req: NextRequest) {
@@ -168,7 +176,10 @@ export async function GET(req: NextRequest) {
     try {
       parsedDaysJson = JSON.parse(daysJson);
     } catch (error) {
-      return NextResponse.json({ error: "Invalid days_json format" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid days_json format" },
+        { status: 400 }
+      );
     }
   }
 
@@ -244,27 +255,77 @@ async function getAllEmployees(daysJson?: Record<string, boolean>) {
 export async function PUT(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
+  const isStatusUpdate = url.searchParams.get("type") === "status";
 
-  if (!id) return NextResponse.json({ error: "Employee ID is required" }, { status: 400 });
+  if (!id)
+    return NextResponse.json(
+      { error: "Employee ID is required" },
+      { status: 400 }
+    );
 
   try {
     const data = await req.json();
-    const validatedData = employeeSchema.partial().parse(data);
-    const employee = await updateEmployee(parseInt(id), validatedData);
-    return NextResponse.json(employee);
+
+    if (isStatusUpdate) {
+      // Handle status update
+      const validatedData = statusUpdateSchema.parse(data);
+      const employee = await updateEmployeeStatus(parseInt(id), validatedData);
+      return NextResponse.json(employee);
+    } else {
+      // Handle general update (existing code)
+      const validatedData = employeeSchema.partial().parse(data);
+      const employee = await updateEmployee(parseInt(id), validatedData);
+      return NextResponse.json(employee);
+    }
   } catch (error) {
     return handleError(error, "update");
   }
 }
 
-async function updateEmployee(id: number, data: Partial<z.infer<typeof employeeSchema>>) {
+async function updateEmployeeStatus(id: number, data: z.infer<typeof statusUpdateSchema>) {
+  const { status, ...jsonFields } = data;
+  
+  const updateData: {
+    status: string;
+    updated_at: Date;
+    suspension_json?: string;
+    resignation_json?: string;
+    termination_json?: string;
+  } = {
+    status,
+    updated_at: new Date(),
+  };
+
+  // Only set the relevant JSON field based on the status
+  if (status !== 'active') {
+    const jsonKey = `${status}_json` as 'suspension_json' | 'resignation_json' | 'termination_json';
+    if (jsonKey in jsonFields) {
+      updateData[jsonKey] = jsonFields[jsonKey];
+    }
+  }
+
+  const employee = await prisma.trans_employees.update({
+    where: { id },
+    data: updateData,
+  });
+
+  logDatabaseOperation("UPDATE employee status", employee);
+  return employee;
+}
+
+async function updateEmployee(
+  id: number,
+  data: Partial<z.infer<typeof employeeSchema>>
+) {
   const { schedules, job_id, ...otherData } = data;
 
   const employee = await prisma.trans_employees.update({
     where: { id },
     data: {
       ...otherData,
-      birthdate: otherData.birthdate ? new Date(otherData.birthdate) : undefined,
+      birthdate: otherData.birthdate
+        ? new Date(otherData.birthdate)
+        : undefined,
       updated_at: new Date(),
     },
   });
@@ -299,7 +360,11 @@ export async function DELETE(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
 
-  if (!id) return NextResponse.json({ error: "Employee ID is required" }, { status: 400 });
+  if (!id)
+    return NextResponse.json(
+      { error: "Employee ID is required" },
+      { status: 400 }
+    );
 
   try {
     const employee = await prisma.trans_employees.update({

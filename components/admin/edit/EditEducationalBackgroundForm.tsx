@@ -405,7 +405,7 @@ const EditEducationalBackgroundForm = () => {
           )}
         />
 
-        {certificates.length > 0 && (
+        {/* {certificates.length > 0 && (
           <div className="space-y-2">
             {certificates.map((certificate, index) => (
               <div key={index} className="flex justify-between items-center">
@@ -431,7 +431,7 @@ const EditEducationalBackgroundForm = () => {
               </div>
             ))}
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
