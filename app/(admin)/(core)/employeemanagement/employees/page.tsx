@@ -1,36 +1,25 @@
-"use client";
+"use client"
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import TableData from "@/components/tabledata/TableData";
-import {
-  Avatar,
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  useDisclosure,
-} from "@nextui-org/react";
-import { TableActionButton } from "@/components/actions/ActionButton";
-import { TableConfigProps } from "@/types/table/TableDataTypes";
-import { toast } from "@/components/ui/use-toast";
 import { useEmployeesData } from "@/services/queries";
+import TableData from "@/components/tabledata/TableData";
+import { TableConfigProps } from "@/types/table/TableDataTypes";
+import { Employee } from "@/types/employeee/EmployeeType";
+import { Avatar, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { TableActionButton } from "@/components/actions/ActionButton";
+import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/add/AddEmployees";
 import EditEmployee from "@/components/admin/edit/EditEmployee";
-import { Employee } from "@/types/employeee/EmployeeType";
+import EmployeeModal from "@/components/admin/add/EmployeeModal";; // Make sure this path is correct
+import axios from "axios";
 
 const Page: React.FC = () => {
   const { data: employees, mutate, error } = useEmployeesData();
   const [loading, setLoading] = useState(true);
-  const [deleteSuccess, setDeleteSuccess] = useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(
-    null
-  );
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [size, setSize] = React.useState("md");
+  const { isOpen: isDeleteModalOpen, onOpen: onOpenDeleteModal, onClose: onCloseDeleteModal } = useDisclosure();
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
   useEffect(() => {
     if (employees) {
@@ -49,29 +38,27 @@ const Page: React.FC = () => {
     }
   }, [error]);
 
-  const handleEdit = async (employee: Employee) => {
-    try {
-      setSelectedEmployeeId(employee.id);
-      setIsEditModalOpen(true);
-    } catch (error) {
-      console.error("Error fetching employee details:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch employee details. Please try again.",
-        duration: 3000,
-      });
-    }
+  const handleStatusAction = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setIsStatusModalOpen(true);
+  };
+
+  const handleEdit = (employee: Employee) => {
+    setSelectedEmployeeId(employee.id);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = async () => {
     if (selectedEmployeeId !== null) {
       try {
-        await axios.delete(
-          `/api/employeemanagement/employees?id=${selectedEmployeeId}`
-        );
-        setDeleteSuccess(true);
-        await mutate(); // Use mutate to refresh data
-        onClose(); // Close the confirmation modal
+        await axios.delete(`/api/employeemanagement/employees?id=${selectedEmployeeId}`);
+        toast({
+          title: "Success",
+          description: "Employee successfully deleted!",
+          duration: 3000,
+        });
+        await mutate();
+        onCloseDeleteModal();
       } catch (error) {
         console.error("Error deleting employee:", error);
         toast({
@@ -83,26 +70,23 @@ const Page: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (!loading && deleteSuccess) {
-      toast({
-        title: "Success",
-        description: "Employee successfully deleted!",
-        duration: 3000,
-      });
-      setDeleteSuccess(false);
+  const handleEmployeeUpdated = async () => {
+    try {
+      await mutate();
+    } catch (error) {
+      console.error("Error updating employee data:", error);
     }
-  }, [loading, deleteSuccess]);
+  };
 
   const config: TableConfigProps<Employee> = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "position", name: "Position", sortable: false },
       { uid: "department", name: "Department", sortable: false },
+      { uid: "position", name: "Position", sortable: false },
       { uid: "contact", name: "Contact", sortable: false },
-      // { uid: "hiredate", name: "Hiredate", sortable: false },
+      { uid: "hiredate", name: "Hired Date", sortable: false },
+      { uid: "status", name: "Status", sortable: false },
       { uid: "actions", name: "Actions", sortable: false },
-
     ],
     rowCell: (item, columnKey) => {
       switch (columnKey) {
@@ -116,32 +100,15 @@ const Page: React.FC = () => {
               />
               <span>
                 {item.first_name} {item.last_name}
-                {item.suffix && item.suffix.length > 0
-                  ? `, ${item.suffix}`
-                  : ""}
-                {item.suffix && item.extension
-                  ? `, ${item.extension}`
-                  : item.extension
-                  ? ` ${item.extension}`
-                  : ""}
+                {item.suffix && item.suffix.length > 0 ? `, ${item.suffix}` : ""}
+                {item.suffix && item.extension ? `, ${item.extension}` : item.extension ? ` ${item.extension}` : ""}
               </span>
             </div>
           );
-
         case "position":
-          return (
-            <div>
-              <div>{item.ref_job_classes?.name || "N/A"}</div>
-            </div>
-          );
-
+          return <div>{item.ref_job_classes?.name || "N/A"}</div>;
         case "department":
-          return (
-            <div>
-              <div>{item.ref_departments?.name || "N/A"}</div>
-            </div>
-          );
-
+          return <div>{item.ref_departments?.name || "N/A"}</div>;
         case "contact":
           return (
             <div className="flex flex-col items-start">
@@ -149,25 +116,36 @@ const Page: React.FC = () => {
               <div>{item.contact_no || "N/A"}</div>
             </div>
           );
-          // case "hiredate":
-          //   return (
-          //     <div>
-          //       <div>{item.hired_at || "N/A"}</div>
-          //     </div>
-          //   );
-  
+        case "hiredate":
+          return (
+            <div>
+              {item.hired_at
+                ? new Date(item.hired_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })
+                : "N/A"}
+            </div>
+          );
+        case "status":
+          return <div>{item.status || "Active"}</div>;
         case "actions":
           return (
-            <TableActionButton
-              name={`${item.first_name} ${item.last_name}`}
-              onEdit={() => handleEdit(item)}
-              onDelete={() => {
-                setSelectedEmployeeId(item.id);
-                onOpen(); // Open the confirmation modal
-              }}
-            />
+            <div className="flex space-x-2">
+              <TableActionButton
+                name={`${item.first_name} ${item.last_name}`}
+                onEdit={() => handleEdit(item)}
+                onDelete={() => {
+                  setSelectedEmployeeId(item.id);
+                  onOpenDeleteModal();
+                }}
+              />
+              {/* <Button onClick={() => handleStatusAction(item)}>
+                Change Status
+              </Button> */}
+            </div>
           );
-
         default:
           return <></>;
       }
@@ -180,16 +158,6 @@ const Page: React.FC = () => {
     "email",
     "contact_no",
   ];
-
-  // Wrapper function for onEmployeeUpdated
-  const handleEmployeeUpdated = async () => {
-    try {
-      await mutate(); // Ensure mutate resolves to void
-    } catch (error) {
-      console.error("Error updating employee:", error);
-      // Optionally handle the error here
-    }
-  };
 
   return (
     <div id="employee-page" className="mt-2">
@@ -215,30 +183,36 @@ const Page: React.FC = () => {
         }
       />
 
+      <EmployeeModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        employee={selectedEmployee}
+        onEmployeeUpdated={handleEmployeeUpdated}
+      />
+
       {selectedEmployeeId !== null && (
         <EditEmployee
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           employeeId={selectedEmployeeId}
-          onEmployeeUpdated={handleEmployeeUpdated} // Use the wrapper function
+          onEmployeeUpdated={handleEmployeeUpdated}
         />
       )}
 
-      <Modal size="xs" isOpen={isOpen} onClose={onClose}>
+      <Modal size="xs" isOpen={isDeleteModalOpen} onClose={onCloseDeleteModal}>
         <ModalContent>
-          <ModalHeader>Hey!</ModalHeader>
+          <ModalHeader>Confirm Deletion</ModalHeader>
           <ModalBody>
             <p>
-              Are you sure you want to delete this employee?
-              <br />
-              This action cannot be undone.
+              Are you sure you want to delete this employee? This action
+              cannot be undone.
             </p>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose}>
+            <Button color="danger" variant="light" onClick={onCloseDeleteModal}>
               Cancel
             </Button>
-            <Button color="primary" onPress={handleDelete}>
+            <Button color="primary" onClick={handleDelete}>
               Confirm
             </Button>
           </ModalFooter>

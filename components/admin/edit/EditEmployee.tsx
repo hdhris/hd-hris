@@ -16,7 +16,6 @@ import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 
-
 interface EditEmployeeProps {
   isOpen: boolean;
   onClose: () => void;
@@ -155,16 +154,15 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         batch_id:
           employeeData.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() ||
           "", // Adjusted to batch_id
-          days_json: employeeData.schedules?.[0]?.days_json || {
-            Monday: false,
-            Tuesday: false,
-            Wednesday: false,
-            Thursday: false,
-            Friday: false,
-            Saturday: false,
-            Sunday: false,
-          },
-          
+        days_json: employeeData.schedules?.[0]?.days_json || {
+          Monday: false,
+          Tuesday: false,
+          Wednesday: false,
+          Thursday: false,
+          Friday: false,
+          Saturday: false,
+          Sunday: false,
+        },
       });
 
       toast({
@@ -186,10 +184,42 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
   }, [employeeId, methods, toast, onClose]);
 
   useEffect(() => {
-    if (isOpen && employeeId) {
-      fetchEmployeeData();
-    }
-  }, [isOpen, employeeId, fetchEmployeeData]);
+    let isMounted = true; // Track whether the component is mounted
+
+    const fetchData = async () => {
+      if (isOpen && employeeId) {
+        setIsLoading(true);
+        try {
+          const response = await axios.get(
+            `/api/employeemanagement/employees?id=${employeeId}`
+          );
+          const employeeData = response.data;
+
+          if (isMounted) {
+            // Only update state if the component is still mounted
+            methods.reset({ /* your reset data */ });
+            toast({ /* success toast */ });
+          }
+        } catch (error) {
+          if (isMounted) {
+            toast({ /* error toast */ });
+            onClose();
+          }
+        } finally {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false; // Cleanup to avoid setting state on unmounted component
+    };
+  }, [isOpen, employeeId, methods, toast, onClose]);
+
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
@@ -213,7 +243,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
             const result = await edgestore.publicFiles.upload({
               file: cert.url,
             });
-            return {  fileUrl: result.url };
+            return { fileUrl: result.url };
           }
           return { fileUrl: cert.url };
         })
@@ -313,7 +343,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
                 Cancel
               </Button>
               <Button
-                variant ="solid"
+                variant="solid"
                 type="submit"
                 isDisabled={isSubmitting || isLoading}
               >
