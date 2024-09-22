@@ -11,12 +11,14 @@ import {LuShieldCheck} from "react-icons/lu";
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
 import {PiCloudArrowDown} from "react-icons/pi";
-import {getSession, useSession} from "next-auth/react";
+import {getSession} from "next-auth/react";
 import {MdOutlinePrivacyTip} from "react-icons/md";
 import {IoApps} from "react-icons/io5";
 import {Button} from "@nextui-org/button";
 import {UserRound} from "lucide-react";
 import {logout} from "@/actions/authActions";
+import {useCredentials} from "@/hooks/Credentials";
+import {useUser} from "@/services/queries";
 
 interface UserProfile {
     name: string;
@@ -27,31 +29,26 @@ interface UserProfile {
 
 export default function UserMenu() {
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-
-    // const sessionData = React.useCallback(async () => {
-    //     return await getSession()
-    // }, [])
-
-    async function session() {
-        const sessionData = await getSession()
-        if (sessionData) {
-            const user = sessionData.user;
-            const name = user?.name ?? "-----";
-            const email = user?.email ?? "-----";
-            const pic = user?.image ?? null;
-            const privilege = user?.privilege ?? null;
-            setUserProfile({
-                name,
-                email,
-                pic,
-                privilege
-            });
-        }
-    }
+    const isCredentials = useCredentials();
+    const {data} = useUser()
 
     useEffect(() => {
+        async function session() {
+            const sessionData = await getSession()
+            if (sessionData) {
+                const user = sessionData.user;
+                const name = user?.name ?? "-----";
+                const email = user?.email ?? "-----";
+                const pic = user?.image ?? null;
+                const privilege =  isCredentials ? user?.privilege : data?.privilege!;
+                console.log("Privilege: ", privilege)
+                setUserProfile({
+                    name, email, pic, privilege
+                });
+            }
+        }
         session()
-    }, []);
+    }, [data?.privilege, isCredentials]);
 
 
     return (<Dropdown radius="sm">

@@ -12,13 +12,15 @@ export async function GET() {
     const user_data = await prisma.user.findUnique({
        where: {
            id: token_id?.user.id
-       },
+       }, include: {
+           sys_privileges: true
+       }
     })
 
     const provider = await prisma.account.findFirst({
         select: {
             provider: true,
-            username: true
+            username: true,
         },
         where: {
             userId: token_id?.user.id
@@ -30,7 +32,8 @@ export async function GET() {
         display_name: user_data?.name || "",
         image: user_data?.image || "",
         provider: provider?.provider || "",
-        username: provider?.username || ""
+        username: provider?.username || "",
+        privilege: user_data?.sys_privileges?.name || ""
     }
     return NextResponse.json(users)
 

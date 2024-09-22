@@ -46,7 +46,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
         }),
     ],
     callbacks: {
-        async signIn({ account, user }) {
+        async signIn({ account, user, credentials }) {
             try {
                 if (account?.provider === "google") {
                     const privilege = await prisma.user.findUnique({
@@ -119,6 +119,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
             return token;
         },
         async session({ session, token }: { session: Session; token: JWT; user: User }) {
+
             session.user = token;
             return session;
         },
