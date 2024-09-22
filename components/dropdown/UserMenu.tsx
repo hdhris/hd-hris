@@ -40,7 +40,7 @@ export default function UserMenu() {
                 const name = user?.name ?? "-----";
                 const email = user?.email ?? "-----";
                 const pic = user?.image ?? null;
-                const privilege =  isCredentials ? user?.privilege : data?.privilege!;
+                const privilege =  data?.privilege!;
                 console.log("Privilege: ", privilege)
                 setUserProfile({
                     name, email, pic, privilege

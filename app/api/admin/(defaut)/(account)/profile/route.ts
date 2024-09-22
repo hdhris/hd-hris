@@ -1,10 +1,9 @@
 import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
 import {auth} from "@/auth";
-import dayjs from "dayjs";
 import {UserProfile} from "@/types/routes/default/types";
-import {undefined} from "zod";
 
+export const dynamic = "force-dynamic"
 export async function GET() {
     //get the user id from the token
     const token_id = await auth()
