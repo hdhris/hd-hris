@@ -8,6 +8,7 @@ export function toGMT8(value: string | Date): Date {
         const now = new Date(); // Get the current date
         const [hours, minutes, seconds] = value.split(":").map(Number);
         date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, seconds);
+        // date = new Date(`1970-01-01T${value}:00Z`)
       } else {
         date = new Date(value); // Assume it's an ISO date string
       }
@@ -17,6 +18,8 @@ export function toGMT8(value: string | Date): Date {
   
     const offset = 8 * 60; // GMT+8 in minutes
     const gmt8Time = new Date(date.getTime() + offset * 60 * 1000);
-    return gmt8Time;
+
+    return new Date(Date.UTC(gmt8Time.getUTCFullYear(), gmt8Time.getUTCMonth(), gmt8Time.getUTCDate(), gmt8Time.getUTCHours(), gmt8Time.getUTCMinutes(), gmt8Time.getUTCSeconds()));
   }
+
   
