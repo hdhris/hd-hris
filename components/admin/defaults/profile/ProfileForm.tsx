@@ -94,7 +94,7 @@ export default function ProfileForm() {
 
 
     const upperInput: FormInputProps[] = [{
-        name: "picture", Component: () => {
+        name: "picture", Component: (field) => {
             return (<div className='grid grid-cols-2 relative mb-2'>
                 <div className='flex items-center gap-2'>
                     <div className="w-fit">
@@ -227,7 +227,9 @@ export default function ProfileForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2 h-full overflow-hidden'>
             <FormFields items={upperInput}/>
             <div className="grid grid-cols-2 gap-4">
-                <FormFields items={[{name: "display_name", label: "Display Name"}, {name: "username", label: "Username", inputDisabled: isCredential}, ]}/>
+                <FormFields items={[{name: "display_name", label: "Display Name"},
+                    {name: "username", label: "Username", inputDisabled: isCredential}, ]}
+                />
             </div>
             <div className='flex justify-end gap-2'>
                 <Button type='submit' isLoading={loading} isDisabled={isLoading || uploadingProgress.status === 'Uploading'} size='sm' radius='sm' color='primary'>
