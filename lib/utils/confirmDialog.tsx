@@ -10,13 +10,11 @@ import {
 } from "@nextui-org/react";
 import ReactDOM from 'react-dom/client';
 
-type DialogResponse = 'yes' | 'no' | 'cancel';
-
 const showDialog = async (
   title: string,
   message: string,
   withCancel?: boolean
-): Promise<DialogResponse> => {
+): Promise< 'yes'|'no'|'cancel' > => {
   return new Promise((resolve) => {
     const Dialog = () => {
       const [isOpen, setIsOpen] = useState(true);

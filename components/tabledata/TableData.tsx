@@ -246,8 +246,8 @@ function DataTable<T extends { id: string | number }>({
                                         </DropdownSection>))}
                                 </DropdownMenu>
                             </Dropdown>
-                            {endContent && endContent()}
                         </div>)}
+                        {endContent && endContent()}
                     </div>
                     <div className='flex justify-between items-center'>
                         {counterName &&

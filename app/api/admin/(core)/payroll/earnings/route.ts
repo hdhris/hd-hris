@@ -10,6 +10,9 @@ export async function GET() {
                 type: "earning",
                 deleted_at: null
             }
+        },
+        include : {
+          dim_payhead_affecteds : true
         }
     })
     return NextResponse.json(earning);
