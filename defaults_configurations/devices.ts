@@ -1,5 +1,5 @@
-import { headers } from "next/headers";
-import { parse } from 'next-useragent';
+import {headers} from "next/headers";
+import {parse} from 'next-useragent';
 import prisma from "@/prisma/prisma";
 
 export async function devices(user_id: string) {
