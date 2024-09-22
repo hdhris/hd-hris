@@ -35,13 +35,13 @@ export default function UserMenu() {
     useEffect(() => {
         async function session() {
             const sessionData = await getSession()
+            console.log("Session Data: ", sessionData)
             if (sessionData) {
                 const user = sessionData.user;
                 const name = user?.name ?? "-----";
                 const email = user?.email ?? "-----";
                 const pic = user?.image ?? null;
-                const privilege =  data?.privilege!;
-                console.log("Privilege: ", privilege)
+                const privilege =  data?.privilege ?? "-----";
                 setUserProfile({
                     name, email, pic, privilege
                 });
