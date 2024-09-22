@@ -85,7 +85,7 @@ const Page: React.FC = () => {
       { uid: "position", name: "Position", sortable: false },
       { uid: "contact", name: "Contact", sortable: false },
       { uid: "hiredate", name: "Hired Date", sortable: false },
-      { uid: "status", name: "Status", sortable: false },
+      // { uid: "status", name: "Status", sortable: false },
       { uid: "actions", name: "Actions", sortable: false },
     ],
     rowCell: (item, columnKey) => {
@@ -128,8 +128,8 @@ const Page: React.FC = () => {
                 : "N/A"}
             </div>
           );
-        case "status":
-          return <div>{item.status || "Active"}</div>;
+        // case "status":
+        //   return <div>{item.status || "Active"}</div>;
         case "actions":
           return (
             <div className="flex space-x-2">
