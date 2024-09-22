@@ -8,7 +8,7 @@ import { LoginValidation } from "@/helper/zodValidation/LoginValidation";
 import GoogleProvider from "next-auth/providers/google";
 import { processJsonObject } from "@/lib/utils/parser/JsonObject";
 import { UserPrivileges } from "@/types/JSON/user-privileges";
-import { devices } from "@/defaults_configurations/devices";  // Ensure this imports your devices function
+import { devices } from "@/defaults_configurations/devices";
 
 export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
     adapter: PrismaAdapter(prisma),
@@ -87,7 +87,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
                     // Handle credentials provider or other login methods
 
                     // Save device information for other providers
-                    // await devices();  // Call the devices function to store IP and device data
+                    await devices(user.id!);  // Call the devices function to store IP and device data
 
                     return true;
                 }
