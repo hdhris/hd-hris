@@ -49,22 +49,22 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
         async signIn({ account, user, credentials }) {
             try {
                 if (account?.provider === "google") {
-                    const privilege = await prisma.user.findUnique({
-                        where: {
-                            id: user.id,
-                        },
-                        include: {
-                            sys_privileges: true,
-                        },
-                    });
-
-                    const accessibility = processJsonObject<UserPrivileges>(privilege?.sys_privileges?.accessibility);
-                    const role = !accessibility?.web_access;
-
-                    if (role) {
-                        console.log("Only admin can login");
-                        return false;
-                    }
+                    // const privilege = await prisma.user.findUnique({
+                    //     where: {
+                    //         id: user.id,
+                    //     },
+                    //     include: {
+                    //         sys_privileges: true,
+                    //     },
+                    // });
+                    //
+                    // const accessibility = processJsonObject<UserPrivileges>(privilege?.sys_privileges?.accessibility);
+                    // const role = !accessibility?.web_access;
+                    //
+                    // if (role) {
+                    //     console.log("Only admin can login");
+                    //     return false;
+                    // }
 
                     // Check if user email exists in the employees table
                     const employeeEmail = await prisma.trans_employees.findFirst({
