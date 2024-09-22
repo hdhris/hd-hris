@@ -1,3 +1,4 @@
+'use client'
 import { TableActionButton } from '@/components/actions/ActionButton';
 import TableData from '@/components/tabledata/TableData';
 import { toast } from '@/components/ui/use-toast';
@@ -31,7 +32,7 @@ const handleDelete = async (id: Number, name: string) => {
     }
   };
 
-function page() {
+function Page() {
   const { data, isLoading } = useEarnings();
   const config: TableConfigProps<Payhead> = {
     columns: [
@@ -85,4 +86,4 @@ function page() {
   )
 }
 
-export default page
+export default Page

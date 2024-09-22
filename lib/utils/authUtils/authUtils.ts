@@ -7,6 +7,7 @@ import SimpleAES from "@/lib/cryptography/3des";
 import dayjs from "dayjs";
 import {calculateRemainingDays} from "@/lib/utils/dateFormatter";
 import {UserPrivileges} from "@/types/JSON/user-privileges";
+import {devices} from "@/defaults_configurations/devices";
 
 
 export const getUserData = async (username: string, password: string) => {
@@ -52,7 +53,7 @@ export const getUserData = async (username: string, password: string) => {
     const role = !accessibility?.web_access
 
     if (role) throw new Error('Only admin can login');
-
+    await devices(user.userId);
     return {
         id: user.userId,
         name: user.user.name || 'No Name', // Use actual user name if available
@@ -81,6 +82,8 @@ export const handleAuthorization = async (credentials: { username: string; passw
     if (user?.error) {
         throw new Error(user.error.message);
     }
+
+
 
     // // Check user role
     // if (user.role !== 'admin') {

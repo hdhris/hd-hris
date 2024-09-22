@@ -21,6 +21,7 @@ import {login} from "@/actions/authActions";
 import {useRouter, useSearchParams} from "next/navigation";
 import {Divider} from "@nextui-org/divider";
 import OAthLogin from "@/components/login/OAthLogin";
+import {useSession} from "next-auth/react";
 
 const loginSchema = z.object({
     username: z.string().min(1, {message: "Username is required."}),
@@ -29,6 +30,7 @@ const loginSchema = z.object({
 
 function Userlogin() {
     const router = useRouter();
+    const session = useSession();
     const searchParams = useSearchParams();
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema), defaultValues: {
@@ -46,7 +48,7 @@ function Userlogin() {
             CredentialsSignin: "Invalid username or password.",
             GoogleSignin: "Google authentication failed.",
             Configuration: "Configuration error.",
-            AccessDenied: "Access denied.",
+            AccessDenied: "Access denied. Please contact your admin.",
             default: "An unknown error occurred. Please try again.",
         };
         const errorParam = searchParams.get('error');
@@ -55,7 +57,8 @@ function Userlogin() {
             // alert(errorParam)
             router.push('/');
         }
-        console.log("Error: ", errorParam)
+
+
     }, [router, searchParams]);
 
     const handlePasswordVisibility = (e: { preventDefault: () => void }) => {
@@ -72,28 +75,30 @@ function Userlogin() {
         startContent: <FaLock className={icon_color}/>,
         endContent: (<Button variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
                              onClick={handlePasswordVisibility}>
-                {isVisible ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
-            </Button>)
+            {isVisible ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
+        </Button>)
     }];
 
     async function onSubmit(values: z.infer<typeof loginSchema>) {
-
         setError("");
         setLoading(true);
+
         try {
             const loginResponse = await login(values);
 
             if (loginResponse.success) {
+
                 // Redirect to dashboard
                 router.push("/dashboard");
 
+
             } else if (loginResponse.error) {
                 // Display error message
+                console.error(loginResponse.error);
                 setError(loginResponse.error.message);
             }
-
         } catch (error) {
-            console.log(error);
+            console.error("Unexpected error:", error);
             setError("Error signing in. Please try again.");
         } finally {
             setLoading(false);
@@ -141,11 +146,9 @@ function Userlogin() {
 }
 
 function Login() {
-    return(
-        <Suspense>
-            <Userlogin/>
-        </Suspense>
-    )
+    return (<Suspense>
+        <Userlogin/>
+    </Suspense>)
 }
 
 export default Login;
