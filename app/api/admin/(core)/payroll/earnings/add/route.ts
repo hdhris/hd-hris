@@ -51,32 +51,35 @@ export async function POST(req: NextRequest) {
     console.log(affected);
 
     // Create the payhead record
-    const payhead = await prisma.ref_payheads.create({
-      data: {
-        name: data.name,
-        calculation: data.calculation,
-        is_mandatory: data.is_mandatory,
-        is_active: data.is_active,
-        type: "earning",
-        created_at: toGMT8(new Date()),
-        updated_at: toGMT8(new Date()),
-      },
-    });
 
-    // Use Promise.all to handle multiple asynchronous operations
-    const createAffectedPromises = affected.map(async (item: number) => {
-      return prisma.dim_payhead_affecteds.create({
+    await prisma.$transaction(async (pm)=>{
+      const payhead = await pm.ref_payheads.create({
         data: {
-          payhead_id: payhead.id,
-          employee_id: item,
+          name: data.name,
+          calculation: data.calculation,
+          is_mandatory: data.is_mandatory,
+          is_active: data.is_active,
+          type: "earning",
           created_at: toGMT8(new Date()),
           updated_at: toGMT8(new Date()),
         },
       });
-    });
-
-    // Wait for all affected records to be created
-    await Promise.all(createAffectedPromises);
+  
+      // Use Promise.all to handle multiple asynchronous operations
+      const createAffectedPromises = affected.map(async (item: number) => {
+        return pm.dim_payhead_affecteds.create({
+          data: {
+            payhead_id: payhead.id,
+            employee_id: item,
+            created_at: toGMT8(new Date()),
+            updated_at: toGMT8(new Date()),
+          },
+        });
+      });
+  
+      // Wait for all affected records to be created
+      await Promise.all(createAffectedPromises);
+    })
 
     return NextResponse.json({ status: 200 });
   } catch (error) {
