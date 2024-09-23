@@ -26,7 +26,7 @@ function RootLayout({ children }: { children: ReactNode }) {
       >
         <Tab key="records" title="Records" />
         <Tab key="schedule" title="Schedule" />
-        <Tab key="overtime" title="Overtime" />
+        {/* <Tab key="overtime" title="Overtime" /> */}
       </Tabs>
       <ScrollShadow>{children}</ScrollShadow>
     </div>
