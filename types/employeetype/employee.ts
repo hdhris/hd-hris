@@ -1,4 +1,5 @@
 
+
 export interface EmployeeType {
   id: number;
   first_name: string;
@@ -25,5 +26,7 @@ export interface EmployeeType {
   email: string;
   contact_no: string;
   picture: string;
+  suspension_json: { reason: string; date: string } | null;
+  resignation_json: { reason: string; date: string } | null;
+  termination_json: { reason: string; date: string } | null;
 }
-
