@@ -150,7 +150,8 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
         data: schedules.map((schedule) => ({
           employee_id: employee.id, // Link schedules to the newly created employee
           batch_id: schedule.batch_id,
-          days_json: schedule.days_json,
+          days_json: ["mon","tue","wed","thu","fri","sat"],
+          // days_json: schedule.days_json,
           created_at: new Date(),
           updated_at: new Date(),
         })),
