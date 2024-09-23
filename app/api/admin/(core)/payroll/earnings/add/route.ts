@@ -5,8 +5,7 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 
 export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
-  //   const { id } = await req.json();
-  const id = 2;
+  const id = 0;
   try {
     const affected = await prisma.dim_payhead_affecteds.findMany({
       where: {
@@ -19,6 +18,7 @@ export async function GET(req: NextRequest) {
       },
       select: {
         id: true,
+        picture: true,
         last_name: true,
         first_name: true,
         middle_name: true,

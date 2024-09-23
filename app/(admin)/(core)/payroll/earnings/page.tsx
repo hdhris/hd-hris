@@ -7,6 +7,7 @@ import { useEarnings } from '@/services/queries';
 import { Payhead } from '@/types/payroll/payrollType';
 import { TableConfigProps } from '@/types/table/TableDataTypes';
 import { Button } from '@nextui-org/react';
+import axios from 'axios';
 import { useRouter } from 'next/dist/client/components/navigation';
 import React, { useState } from 'react'
 
@@ -18,6 +19,12 @@ const handleDelete = async (id: Number, name: string) => {
         false
       );
       if (result === "yes") {
+        await axios.post(
+          "/api/admin/payroll/delete-payhead",
+          {
+            id: id,
+          }
+        );
         toast({
           title: "Delete Earning",
           description: "Earning deleted successfully!",
@@ -40,7 +47,7 @@ function Page() {
     columns: [
       { uid: "name", name: "Name", sortable: true },
       { uid: "affected", name: "Affected", sortable: true },
-      { uid: "action", name: "Action", sortable: true },
+      { uid: "action", name: "Action", sortable: false },
     ],
     rowCell: (item, columnKey) => {
       switch (columnKey) {

@@ -81,7 +81,7 @@ export default function Page() {
   const [scheduleData, setScheduleData] = useState<EmployeeSchedule[]>([]);
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
   const [date, setDate] = useState(
-    parseDate(toGMT8(new Date().toString()).toISOString().split("T")[0])
+    parseDate((toGMT8(new Date().toString()) as Date).toISOString().split("T")[0])
   );
 
   const fetchAttendance = useCallback(

@@ -227,7 +227,7 @@ export default function Page() {
       <Card
         key={item.id}
         shadow="none"
-        className={`border-2 w-[200px] min-h-36
+        className={`border-2 w-[200px] min-h-36 ${getRandomColor(index).bg} 
           ${
             hoveredBatchId === item.id ||
             hoveredRowId ===
@@ -239,7 +239,7 @@ export default function Page() {
         onMouseLeave={() => setHoveredBatchId(null)}
       >
         <CardHeader>
-          <h5 className="font-semibold">{item.name}</h5>
+          <h5 className={`font-semibold ${getRandomColor(index).text}`}>{item.name}</h5>
           <div
             onClick={() => {
               setSelectedBatch(item);
@@ -253,14 +253,14 @@ export default function Page() {
           </div>
         </CardHeader>
         <CardBody className="flex justify-center items-center py-0">
-          <div className="w-fit flex gap-2">
+          <div className={`w-fit flex gap-2 ${getRandomColor(index).text}`}>
             {formatTime(item.clock_in)}
             <p>-</p>
             {formatTime(item.clock_out)}
           </div>
         </CardBody>
         <CardFooter className="flex flex-col items-start">
-          <p className="text-sm">
+          <p className={`text-sm ${getRandomColor(index).text}`}>
             {calculateShiftLength(
               item.clock_in,
               item.clock_out,
@@ -268,7 +268,7 @@ export default function Page() {
             )}{" "}
             shift
           </p>
-          <p className="text-sm">{`${item.break_min} mins break`}</p>
+          <p className={`text-sm ${getRandomColor(index).text}`}>{`${item.break_min} mins break`}</p>
         </CardFooter>
       </Card>
     );

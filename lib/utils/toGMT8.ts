@@ -5,7 +5,7 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export function toGMT8(value: string | Date): Date {
+export function toGMT8(value: string | Date): Date | string {
     let date: Date;
   
     if (typeof value === "string") {
@@ -15,9 +15,10 @@ export function toGMT8(value: string | Date): Date {
         // const now = new Date(); // Get the current date
         // const [hours, minutes, seconds] = value.split(":").map(Number);
         // date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, seconds);
-        // date = new Date(`1970-01-01T${value}.921Z`)
-        let dayDate: dayjs.Dayjs = dayjs(`1970-01-01T${value}`).tz('Asia/Manila');
-        date = new Date(dayDate.format());
+        // date = new Date(`1970-01-01T${value}.000Z`)
+        // let dayDate: dayjs.Dayjs = dayjs(`1970-01-01T${value}`).tz('Asia/Manila');
+        // date = new Date(dayDate.format());
+        return `1970-01-01T${value}.000Z`;
       } else {
         date = new Date(value); // Assume it's an ISO date string
       }
