@@ -17,28 +17,22 @@ import {ToastAction} from "@/components/ui/toast"
 import {NewPasswordValidation} from "@/helper/zodValidation/NewPasswordValidation";
 import {useUser} from "@/services/queries";
 import {cn} from "@nextui-org/react";
+import {useCredentials} from "@/hooks/Credentials";
 
 
-const ChangePasswordSchema = NewPasswordValidation.extend({username: z.string().min(4, {message: "Username is required"})}).refine(data => data.new_password === data.confirm_password, {
+const ChangePasswordSchema = NewPasswordValidation.refine(data => data.new_password === data.confirm_password, {
     message: "Passwords do not match", path: ["confirm_password"],
 })
 
 function AccountSecurity() {
     const {toast} = useToast()
-    const {data} = useUser();
-    const [isCredential, setIsCredential] = useState<boolean>(false)
+    const isCredential = !useCredentials()
     const form = useForm<z.infer<typeof ChangePasswordSchema>>({
         resolver: zodResolver(ChangePasswordSchema), defaultValues: {
             current_password: "", new_password: "", confirm_password: ""
         },
     })
 
-    useEffect(() => {
-        if (data) {
-            form.reset(data.username ? { username: data.username } : undefined);
-            setIsCredential(data?.provider !== "credential")
-        }
-    }, [form, data])
 
     const [loading, setLoading] = useState(false)
     const [isVisibleCurrent, setIsVisibleCurrent] = useState(false)
@@ -60,7 +54,7 @@ function AccountSecurity() {
     } //handlePasswordVisibility
 
 
-    const currentPassword: FormInputProps[] = [{name: "username", label: "Username", inputDisabled: isCredential}, {
+    const currentPassword: FormInputProps[] = [{
         name: "current_password",
         label: "Current Password",
         inputDisabled: isCredential,
@@ -133,8 +127,8 @@ function AccountSecurity() {
         {/*<div className='ms-5 space-y-5'>*/}
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className={cn('ms-16 space-y-5 flex flex-col p-2')}>
+                <FormFields items={currentPassword}/>
                 <div className={cn('grid grid-cols-2 gap-4', isCredential && 'opacity-50 pointer-events-none cursor-not-allowed')}>
-                    <FormFields items={currentPassword}/>
                     <FormFields items={changePassword}/>
                 </div>
                 <div className='self-end !mt-2'>

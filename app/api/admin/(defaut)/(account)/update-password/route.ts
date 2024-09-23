@@ -7,7 +7,6 @@ import SimpleAES from "@/lib/cryptography/3des";
 import {hasContentType} from "@/helper/content-type/content-type-check";
 
 const passwordSchema = z.object({
-    username: z.string().min(4, "Username must be at least 4 characters long"),
     current_password: z.string().min(8, "Password must be at least 8 characters long"),
     new_password: z.string().min(8, "Password must be at least 8 characters long"),
     confirm_password: z.string().min(8, "Password must be at least 8 characters long")
@@ -71,7 +70,6 @@ export async function PUT(req: NextRequest) {
                 }
             },
             data: {
-                username: parsedData.username,
                 password: encryptedPassword
             }
         });

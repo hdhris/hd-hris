@@ -90,6 +90,7 @@ function RootLayout({children}: { children: ReactNode }) {
     </main>);
 }
 
+
 const NavContent = () => {
     return (<NavbarItem className="flex gap-10 items-center justify-center mt-2">
         {/*<AuditSignatories/>*/}

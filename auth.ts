@@ -1,106 +1,90 @@
-import NextAuth, {Session, User} from "next-auth";
+import NextAuth, { Session, User } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import {JWT} from "next-auth/jwt";
-import {PrismaAdapter} from "@auth/prisma-adapter";
+import { JWT } from "next-auth/jwt";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/prisma/prisma";
-import {handleAuthorization} from "@/lib/utils/authUtils/authUtils";
-import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
+import { handleAuthorization } from "@/lib/utils/authUtils/authUtils";
+import { LoginValidation } from "@/helper/zodValidation/LoginValidation";
 import GoogleProvider from "next-auth/providers/google";
+import { processJsonObject } from "@/lib/utils/parser/JsonObject";
+import { UserPrivileges } from "@/types/JSON/user-privileges";
+import { devices } from "@/defaults_configurations/devices";
 
-
-export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
+export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
     adapter: PrismaAdapter(prisma),
-    providers: [Credentials({
-        credentials: {
-            username: {}, password: {},
-        }, authorize: async (credentials) => {
-            // Type assertion to ensure correct type
-            if (!credentials.username || !credentials.password) {
-                throw new Error('Fields cannot be empty');
-            }
-
-            // Validate credentials
-            const { username, password } = await LoginValidation.parseAsync(credentials as { username: string; password: string });
-
-            // Get user data
-            return await handleAuthorization({username, password});
-        },
-    }),  GoogleProvider({
-        clientId: process.env.AUTH_GOOGLE_ID,
-        clientSecret: process.env.AUTH_GOOGLE_SECRET,
-        authorization: {
-            params: {
-                prompt: "consent", access_type: "offline", response_type: "code",
+    providers: [
+        Credentials({
+            credentials: {
+                username: {},
+                password: {},
             },
-        },
-    })], callbacks: {
-        async signIn({ account, user }) {
-            try {
-                if (account?.provider === 'google') {
-                    // Check if user email exists in the employees table
-                    const employee_email = await prisma.trans_employees.findFirst({
-                        where: {
-                            email: user.email || undefined, // Handle nullable email
-                        },
-                    });
-
-                    if (!employee_email) {
-                        console.error("Unauthorized login attempt.");
-                        return false; // User is not authorized
-                    }
-
-                    // Check if the user exists in the 'users' table
-                    const existingUser = await prisma.user.findUnique({
-                        where: { email: user.email! },
-                    });
-
-                    if (existingUser) {
-                        // If user exists but hasn't linked Google, link the account
-                        const accountExists = await prisma.account.findUnique({
-                            where: {
-                                provider_providerAccountId: {
-                                    provider: account.provider,
-                                    providerAccountId: account.providerAccountId,
-                                },
-                            },
-                        });
-
-                        if (!accountExists) {
-                            // Link the new provider to the existing user
-                            await prisma.account.create({
-                                data: {
-                                    userId: existingUser.id,
-                                    provider: account.provider,
-                                    providerAccountId: account.providerAccountId,
-                                    type: account.type,
-                                    access_token: account.access_token,
-                                    refresh_token: account.refresh_token,
-                                    expires_at: account.expires_at,
-                                    token_type: account.token_type,
-                                    scope: account.scope,
-                                },
-                            });
-                        }
-                        return true;
-                    }
-
-                    return true; // User is authorized and logged in
+            authorize: async (credentials) => {
+                if (!credentials.username || !credentials.password) {
+                    throw new Error('Fields cannot be empty');
                 }
 
-                return true; // Handle other providers
+                // Validate credentials
+                const { username, password } = await LoginValidation.parseAsync(credentials as {
+                    username: string;
+                    password: string;
+                });
+
+                // Handle user authorization
+                return await handleAuthorization({ username, password });
+            },
+        }),
+        GoogleProvider({
+            clientId: process.env.AUTH_GOOGLE_ID,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET,
+            authorization: {
+                params: {
+                    prompt: "consent",
+                    access_type: "offline",
+                    response_type: "code",
+                },
+            },
+        }),
+    ],
+    callbacks: {
+        async signIn({ account, user }) {
+            try {
+                if (account?.provider === "google") {
+                    // Check if user email exists in the employees table
+                    console.time("Employee Email Lookup");
+                    const employeeEmail = await prisma.trans_employees.findFirst({
+                        where: {
+                            email: user.email || undefined,
+                        },
+                    });
+                    console.timeEnd("Employee Email Lookup");
+
+                    if (!employeeEmail) {
+                        console.error("Unauthorized login attempt.");
+                        return false;
+                    }
+
+                    return true;
+
+                } else {
+                    // Handle credentials provider or other login methods
+
+                    // Save device information asynchronously for other providers
+                    return true;
+                }
             } catch (error) {
                 console.error("Login error:", error);
-                return false; // Stop the login process
+                return false; // Stop the login process on error
             }
         },
-        authorized({request: {nextUrl}, auth}) {
-            const isLoggedIn = !!auth?.user;
-            const {pathname} = nextUrl;
-            if (pathname.startsWith('/api/auth/signin') && isLoggedIn) {
-                return Response.redirect(new URL('/dashboard', nextUrl))
-            }
-            return !!auth
-        }, async jwt({token, user}) {
+        authorized({ request: {nextUrl}, auth }) {
+           const isLoggedIn = !!auth?.user
+           const {pathname} = nextUrl
+           if(pathname.startsWith('/auth/signin') && isLoggedIn) {
+               return Response.redirect(new URL('/', nextUrl))
+           }
+           return !!auth
+       },
+        async jwt({ token, user }) {
             if (user) {
                 return {
                     ...token,
@@ -109,22 +93,23 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     name: user.name,
                     email: user.email,
                     privilege: user.privilege,
-                    isDefaultAccount: user.isDefaultAccount
+                    isDefaultAccount: user.isDefaultAccount,
                 } as JWT;
             }
             return token;
-        }, async session({session, token}: { session: Session, token: JWT, user: User }) {
+        },
+        async session({ session, token }: { session: Session; token: JWT; user: User }) {
 
             session.user = token;
             return session;
         },
-    }, pages: {
-        signIn: "/",
-        error: "/"
-    }, secret: process.env.AUTH_SECRET,
+    },
+    pages: {
+        signIn: "/", // Sign-in page route
+        error: "/",  // Error page route
+    },
+    secret: process.env.AUTH_SECRET,
     session: {
-        strategy: "jwt"
-    }
-})
-
-
+        strategy: "jwt", // Using JWT for session strategy
+    },
+});

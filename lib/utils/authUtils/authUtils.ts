@@ -1,6 +1,4 @@
 // authUtils.ts
-import axios from 'axios';
-import { parse } from 'next-useragent';
 import prisma from '@/prisma/prisma';
 import {LoginValidation} from '@/helper/zodValidation/LoginValidation';
 
@@ -8,11 +6,8 @@ import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 import SimpleAES from "@/lib/cryptography/3des";
 import dayjs from "dayjs";
 import {calculateRemainingDays} from "@/lib/utils/dateFormatter";
-
-interface UserPrivileges {
-    web_access?: boolean;
-    admin_panel?: boolean;
-}
+import {UserPrivileges} from "@/types/JSON/user-privileges";
+import {devices} from "@/defaults_configurations/devices";
 
 
 export const getUserData = async (username: string, password: string) => {
@@ -55,8 +50,10 @@ export const getUserData = async (username: string, password: string) => {
     // Process user role and return user data
     const privileges = user.user.sys_privileges;
     const accessibility = processJsonObject<UserPrivileges>(privileges?.accessibility);
-    const role = !accessibility?.web_access ? 'user' : 'admin';
+    const role = !accessibility?.web_access
 
+    if (role) throw new Error('Only admin can login');
+    await devices(user.userId);
     return {
         id: user.userId,
         name: user.user.name || 'No Name', // Use actual user name if available
@@ -74,7 +71,7 @@ export const handleAuthorization = async (credentials: { username: string; passw
     }
 
     // Validate credentials
-    const { username, password } = await LoginValidation.parseAsync(credentials);
+    const {username, password} = await LoginValidation.parseAsync(credentials);
 
     // Get IP and User-Agent
     // const ipResponse = await fetch('https://ipapi.co/json').then(data => data.json());
@@ -86,10 +83,12 @@ export const handleAuthorization = async (credentials: { username: string; passw
         throw new Error(user.error.message);
     }
 
-    // Check user role
-    if (user.role !== 'admin') {
-        throw new Error('Only admin can login');
-    }
+
+
+    // // Check user role
+    // if (user.role !== 'admin') {
+    //     throw new Error('Only admin can login');
+    // }
 
     return JSON.parse(JSON.stringify(user));
 };

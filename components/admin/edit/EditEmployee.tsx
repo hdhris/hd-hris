@@ -23,7 +23,11 @@ interface EditEmployeeProps {
   employeeId: number;
   onEmployeeUpdated: () => Promise<void>;
 }
-
+interface Certificate {
+  name: string;
+  url: string | File;
+  fileName: string;
+}
 interface EmployeeFormData {
   picture: File | string;
   first_name: string;
@@ -47,14 +51,14 @@ interface EmployeeFormData {
   universityCollege: string;
   course: string;
   highestDegree: string;
-  certificates: Array<{ name: string; url: string | File }>;
   hired_at: string;
   department_id: string;
   job_id: string;
   batch_id: string; // batch_schedule_id -> batch_id
   days_json: Record<string, boolean>;
+  certificates: Certificate[];
+  
 }
-
 const EditEmployee: React.FC<EditEmployeeProps> = ({
   isOpen,
   onClose,
@@ -118,6 +122,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         (cert: { fileName: string; fileUrl: string }) => ({
           name: cert.fileName,
           url: cert.fileUrl,
+          fileName: cert.fileName, // Preserve the original file name
         })
       );
 
@@ -198,6 +203,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       description: "Updating employee information...",
     });
 
+
     try {
       let pictureUrl = typeof data.picture === "string" ? data.picture : "";
       if (data.picture instanceof File) {
@@ -212,14 +218,18 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           if (cert.url instanceof File) {
             const result = await edgestore.publicFiles.upload({
               file: cert.url,
+              options: {
+                temporary: false,
+              },
             });
-            return {  fileUrl: result.url };
+            return { fileName: cert.fileName, fileUrl: result.url };
           }
-          return { fileUrl: cert.url };
+          return { fileName: cert.fileName, fileUrl: cert.url as string };
         })
       );
 
       const educationalBackground = {
+        
         elementary: data.elementary,
         highSchool: data.highSchool,
         seniorHighSchool: data.seniorHighSchool,

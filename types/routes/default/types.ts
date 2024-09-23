@@ -19,6 +19,7 @@ export interface UserProfile {
     username?: string;
     display_name: string;
     image: string;
+    privilege: string;
 }
 
 

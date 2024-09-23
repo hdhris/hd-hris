@@ -39,23 +39,6 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-  id              String           @id @default(cuid())
-  name            String?
-  email           String           @unique
-  emailVerified   DateTime?
-  image           String?
-  privilege_id    Int?
-  employee_id     Int?             @unique
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  Account         Account[]
-  Session         Session[]
-  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sys_privileges  sys_privileges?  @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sys_devices     sys_devices?
-}
-
 model VerificationToken {
   identifier String
   token      String
@@ -364,7 +347,7 @@ model sys_devices {
   login_count   Int
   platform_type String?   @db.VarChar(45)
   user_id       String?   @unique
-  sys_users     User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user          User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model sys_notifications {
@@ -609,4 +592,21 @@ model trans_payrolls {
   trans_payhead_breakdowns trans_payhead_breakdowns[]
   trans_employees          trans_employees            @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payroll_employees")
   trans_payroll_date       trans_payroll_date?        @relation(fields: [date_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payrolls_trans_payroll_date_2")
+}
+
+model User {
+  id              String           @id @default(cuid())
+  name            String?
+  email           String           @unique
+  emailVerified   DateTime?
+  image           String?
+  privilege_id    Int?
+  employee_id     Int?             @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  accounts        Account[]
+  sessions        Session[]
+  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "User_employee_id_fkey")
+  sys_privileges  sys_privileges?  @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "User_privilege_id_fkey")
+  sys_devices     sys_devices?
 }

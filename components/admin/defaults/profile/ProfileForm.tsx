@@ -16,9 +16,11 @@ import {toast} from "@/components/ui/use-toast";
 import {useEdgeStore} from "@/lib/edgestore/edgestore";
 import {signOut} from "next-auth/react";
 import {ToastAction} from "@/components/ui/toast";
+import {useCredentials} from "@/hooks/Credentials";
 
 export default function ProfileForm() {
     const {edgestore} = useEdgeStore();
+    const isCredential = !useCredentials()
     const [loading, setLoading] = useState(false);
     const [image, setImage] = useState<string | null>(null);
     const [prevImage, setPrevImage] = useState<string | null>(null);
@@ -30,8 +32,10 @@ export default function ProfileForm() {
     }>({
         progress: 0, status: null
     })
-    const form = useForm<z.infer<typeof updateProfileSchema>>({
-        resolver: zodResolver(updateProfileSchema),
+
+    const profileschema = isCredential ? updateProfileSchema.omit({username: true}) : updateProfileSchema
+    const form = useForm<z.infer<typeof profileschema>>({
+        resolver: zodResolver(profileschema),
         defaultValues: {
             display_name: "",
         }
@@ -39,7 +43,6 @@ export default function ProfileForm() {
 
     useEffect(() => {
         if (profile) {
-            console.log(profile)
             form.reset(profile);
             setImage(profile.image);
             setPrevImage(profile.image);
@@ -91,7 +94,7 @@ export default function ProfileForm() {
 
 
     const upperInput: FormInputProps[] = [{
-        name: "picture", Component: () => {
+        name: "picture", Component: (field) => {
             return (<div className='grid grid-cols-2 relative mb-2'>
                 <div className='flex items-center gap-2'>
                     <div className="w-fit">
@@ -134,55 +137,57 @@ export default function ProfileForm() {
                     </div>
 
                 </div>
-                <FormFields items={[{name: "display_name", label: "Display Name"}]}/>
             </div>);
         },
     }];
 
-    async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
+    async function onSubmit(values: z.infer<typeof profileschema>) {
         setLoading(true);
         let avatarImage = image;
+        // console.log("Is Match: ", prevImage === image);
         try {
-            if (avatar) {
-                // Check if there is a previous image to replace
-                if (prevImage) {
-                    // Replace existing image
-                    const res = await edgestore.publicFiles.upload({
-                        file: avatar, options: {
-                            replaceTargetUrl: prevImage, // Use replaceTargetUrl for replacement
-                        }, onProgressChange: async (progress) => {
-                            setUploadingProgress({progress, status: "Uploading"});
-                            if (progress === 100) {
-                                await new Promise((resolve) => setTimeout(resolve, 1000));
-                                setUploadingProgress({progress: 100, status: "Complete"});
-                            }
-                        },
-                    });
+           if(prevImage !== image) {
+               if (avatar) {
+                   // Check if there is a previous image to replace
+                   if (prevImage) {
+                       // Replace existing image
+                       const res = await edgestore.publicFiles.upload({
+                           file: avatar, options: {
+                               replaceTargetUrl: prevImage, // Use replaceTargetUrl for replacement
+                           }, onProgressChange: async (progress) => {
+                               setUploadingProgress({progress, status: "Uploading"});
+                               if (progress === 100) {
+                                   await new Promise((resolve) => setTimeout(resolve, 1000));
+                                   setUploadingProgress({progress: 100, status: "Complete"});
+                               }
+                           },
+                       });
 
-                    avatarImage = res.url;
-                    setImage(res.url);
-                    console.log("Replacing: ", res);
-                } else {
-                    // Upload new image (no previous image to replace)
-                    const res = await edgestore.publicFiles.upload({
-                        file: avatar, onProgressChange: async (progress) => {
-                            setUploadingProgress({progress, status: "Uploading"});
-                            if (progress === 100) {
-                                await new Promise((resolve) => setTimeout(resolve, 1000));
-                                setUploadingProgress({progress: 100, status: "Complete"});
-                            }
-                        },
-                    });
+                       avatarImage = res.url;
+                       setImage(res.url);
+                       // console.log("Replacing: ", res);
+                   } else {
+                       // Upload new image (no previous image to replace)
+                       const res = await edgestore.publicFiles.upload({
+                           file: avatar, onProgressChange: async (progress) => {
+                               setUploadingProgress({progress, status: "Uploading"});
+                               if (progress === 100) {
+                                   await new Promise((resolve) => setTimeout(resolve, 1000));
+                                   setUploadingProgress({progress: 100, status: "Complete"});
+                               }
+                           },
+                       });
 
-                    avatarImage = res.url;
-                    setImage(res.url);
-                    console.log("Uploading: ", res);
-                }
-            } else {
-                if (prevImage) {
-                    await edgestore.publicFiles.delete({url: prevImage});
-                }
-            }
+                       avatarImage = res.url;
+                       setImage(res.url);
+                       // console.log("Uploading: ", res);
+                   }
+               } else {
+                   if (prevImage) {
+                       await edgestore.publicFiles.delete({url: prevImage});
+                   }
+               }
+           }
         } catch (error) {
             console.log("Error uploading image:", error);
             throw error;
@@ -221,8 +226,13 @@ export default function ProfileForm() {
     return (<Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2 h-full overflow-hidden'>
             <FormFields items={upperInput}/>
+            <div className="grid grid-cols-2 gap-4">
+                <FormFields items={[{name: "display_name", label: "Display Name"},
+                    {name: "username", label: "Username", inputDisabled: isCredential}, ]}
+                />
+            </div>
             <div className='flex justify-end gap-2'>
-                <Button type='submit' isLoading={loading} isDisabled={isLoading || uploadingProgress.status === 'Uploading'} size='sm' radius='md' color='primary'>
+                <Button type='submit' isLoading={loading} isDisabled={isLoading || uploadingProgress.status === 'Uploading'} size='sm' radius='sm' color='primary'>
                     Save
                 </Button>
             </div>

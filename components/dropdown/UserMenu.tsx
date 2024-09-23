@@ -11,37 +11,45 @@ import {LuShieldCheck} from "react-icons/lu";
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
 import {PiCloudArrowDown} from "react-icons/pi";
-import {useSession} from "next-auth/react";
+import {getSession} from "next-auth/react";
 import {MdOutlinePrivacyTip} from "react-icons/md";
 import {IoApps} from "react-icons/io5";
-import {logout} from "@/actions/authActions";
 import {Button} from "@nextui-org/button";
 import {UserRound} from "lucide-react";
+import {logout} from "@/actions/authActions";
+import {useCredentials} from "@/hooks/Credentials";
+import {useUser} from "@/services/queries";
 
 interface UserProfile {
-    name: string
-    email: string
-    pic: string | null
-    privilege: string | null
+    name: string;
+    email: string;
+    pic: string | null;
+    privilege: string | null;
 }
 
-const UserMenu: React.FC = () => {
-    const {data: sessionData, status} = useSession();
-    const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+export default function UserMenu() {
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+    const isCredentials = useCredentials();
+    const {data} = useUser()
+
     useEffect(() => {
-        if (sessionData) {
-            const user = sessionData?.user;
-
-            const name = user?.name ?? "-----";
-            const email = user?.email ?? "-----";
-            const pic = user?.image ?? null;
-            const privilege = user?.privilege ?? null;
-            setUserProfile({
-                name, email, pic, privilege
-            })
+        async function session() {
+            const sessionData = await getSession()
+            console.log("Session Data: ", sessionData)
+            if (sessionData) {
+                const user = sessionData.user;
+                const name = user?.name ?? "-----";
+                const email = user?.email ?? "-----";
+                const pic = user?.image ?? null;
+                const privilege =  data?.privilege ?? "-----";
+                setUserProfile({
+                    name, email, pic, privilege
+                });
+            }
         }
+        session()
+    }, [data?.privilege, isCredentials]);
 
-    }, [sessionData, sessionData?.user, status]);
 
     return (<Dropdown radius="sm">
         <DropdownTrigger>
@@ -168,4 +176,3 @@ const UserMenu: React.FC = () => {
     </Dropdown>);
 };
 
-export default UserMenu;

@@ -19,11 +19,15 @@ export type EmployeeAll = {
   seniorHighStrand: string;
   universityCollege: string;
   course: string;
+  suspension_json?: string;
+  resignation_json?: string;
+  termination_json?: string;
   highestDegree: string;
   certificates: Array<{ name: string; url: string }>;
   hired_at: string;
   department_id: string;
   job_id: string;
+  status:string;
   workSchedules: Record<string, unknown>;
   email: string;
   contact_no: string;

@@ -39,7 +39,7 @@ const handleDelete = async (id: Number, name: string) => {
       });
     }
   };
-  
+
 function Page() {
   const { data, isLoading } = useEarnings();
   const router = useRouter();

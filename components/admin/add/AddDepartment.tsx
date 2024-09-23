@@ -48,8 +48,8 @@ const AddDepartment: React.FC<AddDepartmentProps> = ({ onDepartmentAdded }) => {
 
     try {
       const response = await axios.post(
-        "/api/employeemanagement/departments",
-        data
+        "/api/employeemanagement/department",
+        data  
       );
 
       if (response.status === 201) {
