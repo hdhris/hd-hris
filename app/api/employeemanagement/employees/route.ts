@@ -337,28 +337,29 @@ async function updateEmployeeStatus(
 
   let updateData: any = {
     updated_at: new Date(),
+    suspension_json: null,
+    resignation_json: null,
+    termination_json: null,
   };
 
-  // Ensure that the JSON fields are either { reason, date } or null
-  const statusData = reason && formattedDate 
-    ? { reason, date: formattedDate }
-    : null;
+  if (status !== "active") {
+    const statusData = reason && formattedDate 
+      ? { reason, date: formattedDate }
+      : null;
 
-  switch (status) {
-    case "suspended":
-      updateData.suspension_json = statusData;
-      break;
-    case "resigned":
-      updateData.resignation_json = statusData;
-      break;
-    case "terminated":
-      updateData.termination_json = statusData;
-      break;
-    case "active":
-      // Do nothing for active, leave suspension, resignation, and termination JSONs unchanged.
-      break;
-    default:
-      throw new Error(`Unexpected employee status: ${status}`);
+    switch (status) {
+      case "suspended":
+        updateData.suspension_json = statusData;
+        break;
+      case "resigned":
+        updateData.resignation_json = statusData;
+        break;
+      case "terminated":
+        updateData.termination_json = statusData;
+        break;
+      default:
+        throw new Error(`Unexpected employee status: ${status}`);
+    }
   }
 
   try {
