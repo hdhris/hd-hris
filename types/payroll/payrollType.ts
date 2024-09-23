@@ -20,6 +20,7 @@ export interface Payhead {
   
   export interface AffectedEmployee {
     id: number,
+    picture: string;
     last_name: string;
     first_name: string;
     middle_name: string;
@@ -34,6 +35,7 @@ export interface Payhead {
   export interface PayheadAffected {
     affected: Affected[];
     employees: AffectedEmployee[];
+    payhead: Payhead;
   }
   
   

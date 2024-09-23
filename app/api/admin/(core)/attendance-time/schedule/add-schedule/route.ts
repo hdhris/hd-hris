@@ -9,9 +9,9 @@ export async function POST(req: NextRequest) {
     const { name, clock_in, clock_out, is_active, break_min } =
       await req.json();
 
-    // console.log(clock_in);
-    //  console.log("Clock In:", toGMT8(clock_in));
-    //  console.log("Clock Out:", toGMT8(clock_out));
+    console.log(clock_in);
+     console.log("Clock In:", toGMT8(clock_in));
+     console.log("Clock Out:", toGMT8(clock_out));
     const batchSchedule = await prisma.ref_batch_schedules.create({
       data: {
         name: name,
