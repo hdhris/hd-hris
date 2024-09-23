@@ -1,3 +1,6 @@
+import prisma from "@/prisma/prisma";
+import {headers} from "next/headers";
+import {parse} from "next-useragent";
 export async function devices(user_id: string) {
     try {
         // Ensure user exists
