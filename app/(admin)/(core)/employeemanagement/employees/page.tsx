@@ -9,7 +9,7 @@ import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/add/AddEmployees";
 import EditEmployee from "@/components/admin/edit/EditEmployee";
-import EmployeeModal from "@/components/admin/add/EmployeeModal";; // Make sure this path is correct
+import EmployeeModal from "@/components/admin/add/EmployeeModal";
 import axios from "axios";
 
 const Page: React.FC = () => {
@@ -73,9 +73,17 @@ const Page: React.FC = () => {
   const handleEmployeeUpdated = async () => {
     try {
       await mutate();
+      console.log("Employee data updated");
     } catch (error) {
       console.error("Error updating employee data:", error);
     }
+  };
+
+  const getEmployeeStatus = (employee: Employee): string => {
+    if (employee.termination_json) return "Terminated";
+    if (employee.resignation_json) return "Resigned";
+    if (employee.suspension_json) return "Suspended";
+    return "Active";
   };
 
   const config: TableConfigProps<Employee> = {
@@ -85,7 +93,7 @@ const Page: React.FC = () => {
       { uid: "position", name: "Position", sortable: false },
       { uid: "contact", name: "Contact", sortable: false },
       { uid: "hiredate", name: "Hired Date", sortable: false },
-      // { uid: "status", name: "Status", sortable: false },
+      { uid: "status", name: "Status", sortable: false },
       { uid: "actions", name: "Actions", sortable: false },
     ],
     rowCell: (item, columnKey) => {
@@ -128,8 +136,8 @@ const Page: React.FC = () => {
                 : "N/A"}
             </div>
           );
-        // case "status":
-        //   return <div>{item.status || "Active"}</div>;
+        case "status":
+          return <div>{getEmployeeStatus(item)}</div>;
         case "actions":
           return (
             <div className="flex space-x-2">
@@ -141,9 +149,9 @@ const Page: React.FC = () => {
                   onOpenDeleteModal();
                 }}
               />
-              {/* <Button onClick={() => handleStatusAction(item)}>
+              <Button onClick={() => handleStatusAction(item)}>
                 Change Status
-              </Button> */}
+              </Button>
             </div>
           );
         default:
@@ -167,7 +175,6 @@ const Page: React.FC = () => {
         items={employees || []}
         searchingItemKey={searchingItemKey}
         counterName="Employees"
-        selectionMode="multiple"
         isLoading={loading}
         isHeaderSticky={true}
         classNames={{
@@ -222,4 +229,4 @@ const Page: React.FC = () => {
   );
 };
 
-export default Page;
+export default Page

@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import {
   Button,
+  DatePicker,
   Input,
   Modal,
   ModalBody,
@@ -21,12 +22,26 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  parseDate,
+  CalendarDate as CalendarDateType,
+} from "@internationalized/date";
 
 interface StatusFormData {
-  status: string;
+  status: "active" | "suspended" | "resigned" | "terminated";
   reason: string;
   date: string;
 }
+
+const safeParseDate = (dateString: string) => {
+  try {
+    const datePart = dateString.split("T")[0];
+    return parseDate(datePart);
+  } catch (error) {
+    console.error("Date parsing error:", error);
+    return null;
+  }
+};
 
 interface EmployeeModalProps {
   isOpen: boolean;
@@ -34,6 +49,33 @@ interface EmployeeModalProps {
   employee: Employee | null;
   onEmployeeUpdated: () => Promise<void>;
 }
+
+const getEmployeeStatus = (employee: Employee): StatusFormData["status"] => {
+  if (employee.termination_json) return "terminated";
+  if (employee.resignation_json) return "resigned";
+  if (employee.suspension_json) return "suspended";
+  return "active";
+};
+
+// Type guard to validate JSON shape
+const isValidStatusJson = (json: any): json is { reason: string; date: string } =>
+  json && typeof json === "object" && "reason" in json && "date" in json;
+
+const getStatusJson = (
+  employee: Employee,
+  status: StatusFormData["status"]
+): { reason: string; date: string } | null => {
+  switch (status) {
+    case "terminated":
+      return isValidStatusJson(employee.termination_json) ? employee.termination_json : null;
+    case "resigned":
+      return isValidStatusJson(employee.resignation_json) ? employee.resignation_json : null;
+    case "suspended":
+      return isValidStatusJson(employee.suspension_json) ? employee.suspension_json : null;
+    default:
+      return null; // For "active", there's no JSON data.
+  }
+};
 
 const EmployeeModal: React.FC<EmployeeModalProps> = ({
   isOpen,
@@ -43,7 +85,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
 }) => {
   const methods = useForm<StatusFormData>({
     defaultValues: {
-      status: employee?.status || "active",
+      status: "active",
       reason: "",
       date: "",
     },
@@ -51,13 +93,14 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
 
   const { handleSubmit, watch, reset, control } = methods;
 
-  // Reset form when modal opens or employee prop changes
   useEffect(() => {
     if (employee) {
+      const status = getEmployeeStatus(employee);
+      const statusJson = getStatusJson(employee, status);
       reset({
-        status: employee.status || "active",
-        reason: "",
-        date: "",
+        status,
+        reason: statusJson?.reason || "",
+        date: statusJson?.date || "",
       });
     }
   }, [employee, reset]);
@@ -65,17 +108,10 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
   const onSubmit: SubmitHandler<StatusFormData> = async (data) => {
     if (!employee) return;
 
-    const { status, reason, date } = data;
-    const statusData = status !== "active" ? { reason, date } : null;
-
     const url = `/api/employeemanagement/employees?id=${employee.id}&type=status`;
-    const payload = {
-      status,
-      [`${status}_json`]: statusData ? JSON.stringify(statusData) : undefined, // Ensuring correct type
-    };
 
     try {
-      const response = await axios.put(url, payload);
+      const response = await axios.put(url, data);
 
       if (response.status === 200) {
         reset();
@@ -92,13 +128,16 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
     } catch (error) {
       let errorMessage = "Failed to update status. Please try again.";
       if (axios.isAxiosError(error)) {
+        console.error("Error response data:", error.response?.data);
         errorMessage =
-          error.response?.data?.message || "No response received from server.";
+          error.response?.data?.error ||
+          error.message ||
+          "No response received from server.";
       }
       toast({
         title: "Error",
         description: errorMessage,
-        duration: 3000,
+        duration: 5000,
       });
     }
   };
@@ -125,19 +164,12 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                           onSelectionChange={(keys) =>
                             field.onChange(Array.from(keys)[0])
                           }
+                          variant="bordered"
                         >
-                          <SelectItem key="active" value="active">
-                            Active
-                          </SelectItem>
-                          <SelectItem key="suspended" value="suspended">
-                            Suspended
-                          </SelectItem>
-                          <SelectItem key="resigned" value="resigned">
-                            Resigned
-                          </SelectItem>
-                          <SelectItem key="terminated" value="terminated">
-                            Terminated
-                          </SelectItem>
+                          <SelectItem key="active" value="active">Active</SelectItem>
+                          <SelectItem key="suspended" value="suspended">Suspended</SelectItem>
+                          <SelectItem key="resigned" value="resigned">Resigned</SelectItem>
+                          <SelectItem key="terminated" value="terminated">Terminated</SelectItem>
                         </Select>
                       </FormControl>
                       <FormMessage />
@@ -154,7 +186,11 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                         <FormItem>
                           <FormLabel>Reason:</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="Enter reason" />
+                            <Input
+                              {...field}
+                              placeholder="Enter reason"
+                              variant="bordered"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -163,15 +199,29 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                     <FormField
                       control={control}
                       name="date"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Date:</FormLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      render={({ field }) => {
+                        const parsedValue = field.value
+                          ? safeParseDate(field.value)
+                          : null;
+                        return (
+                          <FormItem>
+                            <FormLabel>Date:</FormLabel>
+                            <FormControl>
+                              <DatePicker
+                                value={parsedValue}
+                                onChange={(date: CalendarDateType | null) => {
+                                  field.onChange(date ? date.toString() : "");
+                                }}
+                                aria-label="Status Change Date"
+                                variant="bordered"
+                                className="border rounded"
+                                showMonthAndYearPickers
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }}
                     />
                   </>
                 )}

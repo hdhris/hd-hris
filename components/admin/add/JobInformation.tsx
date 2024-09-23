@@ -233,9 +233,9 @@ const JobInformationForm: React.FC = () => {
 
       {/* <div className="mt-5">
         <h3 className="text-lg font-semibold mb-4">Work Days</h3>
-        <div className="flex flex-wrap gap-4">
           {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-            <Checkbox
+         <div className="flex flex-wrap gap-4">
+           <Checkbox
               key={day}
               isSelected={daysJson?.[day] || false}
               onValueChange={(checked) => handleDayChange(day, checked)}

@@ -52,11 +52,11 @@ const employeeSchema = z.object({
     .optional(),
 });
 
+
 const statusUpdateSchema = z.object({
   status: z.enum(["active", "suspended", "resigned", "terminated"]),
-  suspension_json: z.string().optional(),
-  resignation_json: z.string().optional(),
-  termination_json: z.string().optional(),
+  reason: z.string().optional(),
+  date: z.string().optional(),
 });
 
 // Error Handling Helper
@@ -257,17 +257,17 @@ export async function PUT(req: NextRequest) {
   const id = url.searchParams.get("id");
   const isStatusUpdate = url.searchParams.get("type") === "status";
 
-  if (!id)
+  if (!id) {
     return NextResponse.json(
       { error: "Employee ID is required" },
       { status: 400 }
     );
+  }
 
   try {
     const data = await req.json();
 
     if (isStatusUpdate) {
-      // Handle status update
       const validatedData = statusUpdateSchema.parse(data);
       const employee = await updateEmployeeStatus(parseInt(id), validatedData);
       return NextResponse.json(employee);
@@ -278,40 +278,14 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json(employee);
     }
   } catch (error) {
-    return handleError(error, "update");
+    console.error("Error updating employee:", error);
+    return NextResponse.json(
+      { error: "Failed to update employee" },
+      { status: 500 }
+    );
   }
 }
 
-async function updateEmployeeStatus(id: number, data: z.infer<typeof statusUpdateSchema>) {
-  const { status, ...jsonFields } = data;
-  
-  const updateData: {
-    status: string;
-    updated_at: Date;
-    suspension_json?: string;
-    resignation_json?: string;
-    termination_json?: string;
-  } = {
-    status,
-    updated_at: new Date(),
-  };
-
-  // Only set the relevant JSON field based on the status
-  if (status !== 'active') {
-    const jsonKey = `${status}_json` as 'suspension_json' | 'resignation_json' | 'termination_json';
-    if (jsonKey in jsonFields) {
-      updateData[jsonKey] = jsonFields[jsonKey];
-    }
-  }
-
-  const employee = await prisma.trans_employees.update({
-    where: { id },
-    data: updateData,
-  });
-
-  logDatabaseOperation("UPDATE employee status", employee);
-  return employee;
-}
 
 async function updateEmployee(
   id: number,
@@ -354,6 +328,52 @@ async function updateEmployee(
   logDatabaseOperation("UPDATE employee", employee);
   return employee;
 }
+async function updateEmployeeStatus(
+  id: number,
+  data: z.infer<typeof statusUpdateSchema>
+) {
+  const { status, reason, date } = data;
+  const formattedDate = date ? new Date(date).toISOString().split('T')[0] : null;
+
+  let updateData: any = {
+    updated_at: new Date(),
+  };
+
+  // Ensure that the JSON fields are either { reason, date } or null
+  const statusData = reason && formattedDate 
+    ? { reason, date: formattedDate }
+    : null;
+
+  switch (status) {
+    case "suspended":
+      updateData.suspension_json = statusData;
+      break;
+    case "resigned":
+      updateData.resignation_json = statusData;
+      break;
+    case "terminated":
+      updateData.termination_json = statusData;
+      break;
+    case "active":
+      // Do nothing for active, leave suspension, resignation, and termination JSONs unchanged.
+      break;
+    default:
+      throw new Error(`Unexpected employee status: ${status}`);
+  }
+
+  try {
+    const employee = await prisma.trans_employees.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return employee;
+  } catch (error) {
+    console.error("Error updating employee status:", error);
+    throw new Error("Failed to update employee status: " + error);
+  }
+}
+
 
 // DELETE: Soft delete an employee
 export async function DELETE(req: NextRequest) {
