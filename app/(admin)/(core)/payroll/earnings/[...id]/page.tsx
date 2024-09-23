@@ -25,7 +25,7 @@ import {
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { AffectedEmployee, PayheadAffected } from "@/types/payroll/payrollType";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/dist/client/components/navigation";
 import fetcher from "@/services/fetcher";

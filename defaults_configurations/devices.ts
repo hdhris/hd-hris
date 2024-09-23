@@ -1,17 +1,14 @@
-import { headers } from "next/headers";
-import { parse } from 'next-useragent';
-import prisma from "@/prisma/prisma";
-
 export async function devices(user_id: string) {
     try {
-        // Check if the user exists in the users table
-        const existingUser = await prisma.user.findUnique({
-            where: { id: user_id }
+        // Ensure user exists
+        const user = await prisma.user.findUnique({
+            where: { id: user_id },
         });
 
-        // if (!existingUser) {
-        //     throw new Error(`User with ID ${user_id} does not exist.`);
-        // }
+        if (!user) {
+            console.error(`User with ID ${user_id} does not exist.`);
+            return; // Stop further execution if user doesn't exist
+        }
 
         // Fetch IP and user-agent details concurrently
         const [ipResponse, userAgent] = await Promise.all([
@@ -19,7 +16,6 @@ export async function devices(user_id: string) {
             Promise.resolve(headers().get('user-agent') || '')
         ]);
 
-        // Parse the user agent details
         const ua = parse(userAgent);
         const ip_address = ipResponse.ip;
         const created_at = new Date();
@@ -32,7 +28,7 @@ export async function devices(user_id: string) {
         const os = ua.os;
         const os_version = ua.osVersion;
 
-        // Check if a record exists for this user and device by both user_id and ip_address
+        // Check if a record exists for this user and device
         const existingDevice = await prisma.sys_devices.findFirst({
             where: { user_id, ip_address }
         });
@@ -57,7 +53,7 @@ export async function devices(user_id: string) {
                 },
             });
         } else {
-            // If a record exists, update the login count and the updated_at timestamp
+            // Update the login count and the updated_at timestamp
             await prisma.sys_devices.update({
                 where: { id: existingDevice.id },
                 data: {

@@ -49,46 +49,26 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
         async signIn({ account, user }) {
             try {
                 if (account?.provider === "google") {
-                    // const privilege = await prisma.user.findUnique({
-                    //     where: {
-                    //         id: user.id,
-                    //     },
-                    //     include: {
-                    //         sys_privileges: true,
-                    //     },
-                    // });
-                    //
-                    // const accessibility = processJsonObject<UserPrivileges>(privilege?.sys_privileges?.accessibility);
-                    // const role = !accessibility?.web_access;
-                    //
-                    // if (role) {
-                    //     console.log("Only admin can login");
-                    //     return false;
-                    // }
-
                     // Check if user email exists in the employees table
+                    console.time("Employee Email Lookup");
                     const employeeEmail = await prisma.trans_employees.findFirst({
                         where: {
                             email: user.email || undefined,
                         },
                     });
+                    console.timeEnd("Employee Email Lookup");
 
                     if (!employeeEmail) {
                         console.error("Unauthorized login attempt.");
                         return false;
                     }
 
-                    // Save device information for Google login
-                    await devices(user.id!);  // Ensure this function is called to save device data
-
                     return true;
 
                 } else {
                     // Handle credentials provider or other login methods
 
-                    // Save device information for other providers
-                    await devices(user.id!);  // Call the devices function to store IP and device data
-
+                    // Save device information asynchronously for other providers
                     return true;
                 }
             } catch (error) {
@@ -96,7 +76,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
                 return false; // Stop the login process on error
             }
         },
-       authorized({ request: {nextUrl}, auth }) {
+        authorized({ request: {nextUrl}, auth }) {
            const isLoggedIn = !!auth?.user
            const {pathname} = nextUrl
            if(pathname.startsWith('/auth/signin') && isLoggedIn) {
