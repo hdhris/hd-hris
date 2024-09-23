@@ -49,6 +49,7 @@ function Userlogin() {
             GoogleSignin: "Google authentication failed.",
             Configuration: "Configuration error.",
             AccessDenied: "Access denied. Please contact your admin.",
+            OAuthAccountNotLinked: " Another account already exists with the same e-mail address.",
             default: "An unknown error occurred. Please try again.",
         };
         const errorParam = searchParams.get('error');

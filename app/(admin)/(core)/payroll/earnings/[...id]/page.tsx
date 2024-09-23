@@ -73,7 +73,7 @@ function Page() {
         is_active: data.payhead.is_active,
       });
     }
-  }, [data]);
+  }, [data, form]);
   useEffect(() => {
     setData();
   }, [setData]);
