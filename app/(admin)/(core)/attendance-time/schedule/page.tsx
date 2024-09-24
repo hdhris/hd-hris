@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Card,
   CardHeader,
@@ -15,14 +14,13 @@ import axios, { AxiosResponse } from "axios";
 import {
   BatchSchedule,
   EmployeeSchedule,
-  Schedules,
 } from "@/types/attendance-time/AttendanceTypes";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { toast } from "@/components/ui/use-toast";
 import { Pencil } from "lucide-react";
 import { useSchedule } from "@/services/queries";
-import ScheduleModal from "@/components/attendance-time/schedule/create-edit-modal";
 import showDialog from "@/lib/utils/confirmDialog";
+import ScheduleModal from "@/components/admin/attendance-time/schedule/create-edit-modal";
 
 const getRandomColor = (index: number) => {
   const colors = [
@@ -117,7 +115,6 @@ export default function Page() {
   const [hoveredBatchId, setHoveredBatchId] = useState<number | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const [colorMap, setColorMap] = useState<Map<number, number>>(new Map());
-  const isClient = useIsClient();
   const [batchData, setBatchData] = useState<BatchSchedule[] | null>([]);
   const [empScheduleData, setEmpScheduleData] = useState<EmployeeSchedule[]>(
     []
@@ -144,9 +141,9 @@ export default function Page() {
           }
         );
         toast({
-          title: "Delete Schedule",
+          title: "Deleted",
           description: "Schedule deleted successfully!",
-          variant: "primary",
+          variant: "warning",
         });
 
         setSelectedBatch(null);
@@ -154,8 +151,8 @@ export default function Page() {
       }
     } catch (error) {
       toast({
-        title: "Delete Schedule",
-        description: "Error deleteing schedule: " + error,
+        title: "Error",
+        description: "Error: " + error,
         variant: "danger",
       });
     }
@@ -173,9 +170,9 @@ export default function Page() {
           break_min: batch.break_min,
         });
         toast({
-          title: "Edit Schedule",
-          description: "Schedule edited successfully!",
-          variant: "primary",
+          title: "Updated",
+          description: "Schedule updated successfully!",
+          variant: "success",
         });
       } else {
         // Create
@@ -187,17 +184,16 @@ export default function Page() {
           break_min: batch.break_min,
         });
         toast({
-          title: "Add Schedule",
-          description: "Schedule added successfully!",
+          title: "Created",
+          description: "Schedule created successfully!",
           variant: "success",
         });
       }
       setVisible(false);
     } catch (error) {
-      const type: string = batch.id > 0 ? "Edit" : "Add";
       toast({
-        title: type + " Schedule",
-        description: "Error " + type + " schedule: " + error,
+        title: "Error " + (batch.id > 0 ? "updating" : "creating"),
+        description: "Error: " + error,
         variant: "danger",
       });
     }
@@ -215,7 +211,6 @@ export default function Page() {
     setEmpScheduleData(data?.emp_sched!);
   }, [data]);
 
-  // Batch Card (with default gray border and hover effect for color change)
   const BatchCard = ({
     item,
     index,
@@ -239,7 +234,9 @@ export default function Page() {
         onMouseLeave={() => setHoveredBatchId(null)}
       >
         <CardHeader>
-          <h5 className={`font-semibold ${getRandomColor(index).text}`}>{item.name}</h5>
+          <h5 className={`font-semibold ${getRandomColor(index).text}`}>
+            {item.name}
+          </h5>
           <div
             onClick={() => {
               setSelectedBatch(item);
@@ -268,7 +265,9 @@ export default function Page() {
             )}{" "}
             shift
           </p>
-          <p className={`text-sm ${getRandomColor(index).text}`}>{`${item.break_min} mins break`}</p>
+          <p
+            className={`text-sm ${getRandomColor(index).text}`}
+          >{`${item.break_min} mins break`}</p>
         </CardFooter>
       </Card>
     );
@@ -309,22 +308,25 @@ export default function Page() {
     }
     return null;
   };
-
   const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+
+  if (isLoading || !data) {
+    return (
+      <Spinner
+        className="w-full h-[calc(100vh-9.5rem)]"
+        label="Please wait..."
+        color="primary"
+      />
+    );
+  }
 
   return (
     <div className="flex p-1 min-w-[1230px]">
       <div className="flex flex-col w-[250px] h-[calc(100vh-9.5rem)]">
         <div className="flex flex-col gap-2 pb-2 overflow-auto flex-1">
-          {isClient && batchData ? (
-            <>
-              {batchData.map((item, index) => (
-                <BatchCard key={item.id} item={item} index={index} />
-              ))}
-            </>
-          ) : (
-            <Spinner className="m-10" />
-          )}
+          {batchData?.map((item, index) => (
+            <BatchCard key={item.id} item={item} index={index} />
+          ))}
         </div>
         <Button
           onPress={() => {
@@ -336,63 +338,57 @@ export default function Page() {
         </Button>
       </div>
       <div className="w-full overflow-auto relative h-[calc(100vh-9.5rem)] mx-2">
-        {isClient && empScheduleData ? (
-          <table className="w-full table-fixed divide-y divide-gray-200">
-            <thead className="text-xs text-gray-500">
-              <tr className="divide-x divide-gray-200">
-                <th className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-left w-[200px] max-w-[200px] z-50">
-                  NAME
+        <table className="w-full table-fixed divide-y divide-gray-200">
+          <thead className="text-xs text-gray-500">
+            <tr className="divide-x divide-gray-200">
+              <th className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-left w-[200px] max-w-[200px] z-50">
+                NAME
+              </th>
+              {days.map((day) => (
+                <th
+                  key={day}
+                  className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-center capitalize z-50"
+                >
+                  {day.toUpperCase()}
                 </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {empScheduleData?.map((employee) => (
+              <tr
+                key={employee.id}
+                className="h-16 divide-x divide-gray-200 transition-all duration-100 hover:bg-gray-200"
+                onMouseEnter={() => setHoveredRowId(employee.id)}
+                onMouseLeave={() => setHoveredRowId(null)}
+              >
+                <td className="px-4 py-2 truncate text-sm font-semibold w-[200px] max-w-[200px]">
+                  {`${employee.trans_employees.first_name} ${employee.trans_employees.last_name}`}
+                </td>
                 {days.map((day) => (
-                  <th
+                  <td
                     key={day}
-                    className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-center capitalize z-50"
+                    className={`p-2 text-center text-sm font-semibold`}
                   >
-                    {day.toUpperCase()}
-                  </th>
+                    {batchData?.some(
+                      (batch) =>
+                        batch.id === employee.batch_id &&
+                        Array.isArray(employee.days_json) &&
+                        employee.days_json.includes(day.toLowerCase())
+                    )
+                      ? getScheduleCard(
+                          batchData.find(
+                            (item) => item.id === employee.batch_id
+                          ),
+                          employee.id
+                        )
+                      : ""}
+                  </td>
                 ))}
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {empScheduleData.map((employee) => (
-                <tr
-                  key={employee.id}
-                  className="h-16 divide-x divide-gray-200 transition-all duration-100 hover:bg-gray-200"
-                  onMouseEnter={() => setHoveredRowId(employee.id)}
-                  onMouseLeave={() => setHoveredRowId(null)}
-                >
-                  <td className="px-4 py-2 truncate text-sm font-semibold w-[200px] max-w-[200px]">
-                    {`${employee.trans_employees.first_name} ${employee.trans_employees.last_name}`}
-                  </td>
-                  {days.map((day) => (
-                    <td
-                      key={day}
-                      className={`p-2 text-center text-sm font-semibold`}
-                    >
-                      {batchData?.some(
-                        (batch) =>
-                          batch.id === employee.batch_id &&
-                          Array.isArray(employee.days_json) &&
-                          employee.days_json.includes(day.toLowerCase())
-                      )
-                        ? getScheduleCard(
-                            batchData.find(
-                              (item) => item.id === employee.batch_id
-                            ),
-                            employee.id
-                          )
-                        : ""}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="w-full h-full flex justify-center items-center">
-            <Spinner label="Loading..." />
-          </div>
-        )}
+            ))}
+          </tbody>
+        </table>
       </div>
       <ScheduleModal
         onSave={handleSubmit}

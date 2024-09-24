@@ -118,9 +118,17 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
           </Switch>
         </ModalBody>
         <ModalFooter>
-          <Button color="warning" className="me-auto" onClick={()=>{onDelete(selectedSchedule?.id)}}>
-            Delete
-          </Button>
+          {selectedSchedule && (
+            <Button
+              color="warning"
+              className="me-auto"
+              onClick={() => {
+                onDelete(selectedSchedule?.id);
+              }}
+            >
+              Delete
+            </Button>
+          )}
           <Button color="danger" variant="light" onClick={onClose}>
             Cancel
           </Button>

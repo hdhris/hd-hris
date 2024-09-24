@@ -1,37 +1,27 @@
 "use client";
 import { z } from "zod";
-import { useParams } from "next/navigation";
-import { PayheadAffected } from "@/types/payroll/payrollType";
+import { useState } from "react";
+import { useNewPayhead } from "@/services/queries";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/dist/client/components/navigation";
 import { formSchema, PayheadForm } from "@/components/admin/payroll/PayheadUI";
-import fetcher from "@/services/fetcher";
-import useSWR from "swr";import React, { useState } from "react";
 import axios from "axios";
-
 
 function Page() {
   const [selectedKeys, setSelectedKeys] = useState<any>([]);
-  const { id } = useParams();
-  const { data, isLoading } = useSWR<PayheadAffected>(
-    `/api/admin/payroll/payhead/read?id=${id}`,
-    fetcher
-  );
+  const { data, isLoading } = useNewPayhead();
   const router = useRouter();
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log([values, selectedKeys.map(Number)]);
     try {
-      await axios.post(
-        `/api/admin/payroll/payhead/update?id=${id}`,
-        {
-          data: values,
-          affected: values.is_mandatory? []:selectedKeys.map(Number),
-        }
-      );
+      await axios.post("/api/admin/payroll/payhead/create", {
+        data: values,
+        affected: values.is_mandatory? []:selectedKeys.map(Number),
+        type: "earning",
+      });
       toast({
-        title: "Updated",
-        description: "Earning updated successfully!",
+        title: "Created",
+        description: "Earning created successfully!",
         variant: "success",
       });
       setTimeout(() => {
@@ -40,7 +30,7 @@ function Page() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Error updating: " + error,
+        description: "Error creating: " + error,
         variant: "danger",
       });
     }
@@ -48,7 +38,7 @@ function Page() {
 
   return (
     <PayheadForm
-        label="Update Earning"
+        label="Create Earning"
         type="earning"
         onSubmit={onSubmit}
         selectedKeys={selectedKeys}

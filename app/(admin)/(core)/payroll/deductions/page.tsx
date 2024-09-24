@@ -24,7 +24,7 @@ const handleDelete = async (id: Number, name: string) => {
       });
       toast({
         title: "Deleted",
-        description: "Earning deleted successfully!",
+        description: "Deduction deleted successfully!",
         variant: "warning",
       });
     }
@@ -38,7 +38,7 @@ const handleDelete = async (id: Number, name: string) => {
 };
 
 function Page() {
-  const { data, isLoading } = usePayheads("earning");
+  const { data, isLoading } = usePayheads("deduction");
   const router = useRouter();
   const config: TableConfigProps<Payhead> = {
     columns: [
@@ -60,7 +60,7 @@ function Page() {
           return (
             <TableActionButton
               name={item.name}
-              onEdit={() => router.push(`/payroll/earnings/${item.id}`)}
+              onEdit={() => router.push(`/payroll/deductions/${item.id}`)}
               onDelete={() => {
                 handleDelete(item.id, item.name);
               }}
@@ -78,19 +78,19 @@ function Page() {
         items={data!}
         isLoading={isLoading}
         searchingItemKey={["name"]}
-        counterName="Earnings"
+        counterName="Deductions"
         className="flex-1 h-[calc(100vh-9.5rem)] overflow-y-auto"
         removeWrapper
         isHeaderSticky
         color={"primary"}
         selectionMode="single"
-        aria-label="Earnings"
+        aria-label="Deductions"
         endContent={() => (
           <Button
             className=" w-fit"
-            onClick={() => router.push("/payroll/earnings/create")}
+            onClick={() => router.push("/payroll/deductions/create")}
           >
-            Create Earning
+            Create Deduction
           </Button>
         )}
       />

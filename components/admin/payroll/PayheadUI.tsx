@@ -1,35 +1,39 @@
-"use client";
-import { z } from "zod";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import {
-  Avatar,
-  Button,
   Card,
-  CardBody,
   CardHeader,
+  CardBody,
+  Button,
   Input,
-  Switch,
+  Avatar,
+  Spinner,
 } from "@nextui-org/react";
-import TableData from "@/components/tabledata/TableData";
-import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { AffectedEmployee, PayheadAffected } from "@/types/payroll/payrollType";
-import { useNewPayhead } from "@/services/queries";
-import axios from "axios";
-import { toast } from "@/components/ui/use-toast";
-import { useRouter } from "next/dist/client/components/navigation";
+import { TableConfigProps } from "@/types/table/TableDataTypes";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import BorderedSwitch from "@/components/common/BorderedSwitch";
+import TableData from "@/components/tabledata/TableData";
 
-const formSchema = z.object({
+interface PayheadFormProps {
+  label: string;
+  onSubmit: (values: any) => void;
+  type: "earning" | "deduction";
+  allData: { data: PayheadAffected; isLoading: boolean };
+  selectedKeys: string[];
+  setSelectedKeys: (keys: string[]) => void;
+}
+
+export const formSchema = z.object({
   name: z
     .string()
     .min(3, { message: "Name must be at least 3 characters." })
@@ -39,10 +43,17 @@ const formSchema = z.object({
   is_active: z.boolean(),
 });
 
-function Page() {
-  const [selectedKeys, setSelectedKeys] = useState<any>();
-  const { data, isLoading } = useNewPayhead();
-  const router = useRouter();
+export const PayheadForm: React.FC<PayheadFormProps> = ({
+  label,
+  type,
+  onSubmit,
+  allData,
+  selectedKeys,
+  setSelectedKeys,
+}) => {
+  const { data, isLoading } = allData || { data: null, isLoading: true }; // Ensure `data` has a fallback
+  const [disabledKeys, setDisabledKeys] = useState<any>([]);
+  const [isMandatory, setIsMandatory] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,29 +64,6 @@ function Page() {
       is_active: true,
     },
   });
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log([values, selectedKeys.map(Number)]);
-    try {
-      await axios.post("/api/admin/payroll/earnings/add", {
-        data: values,
-        affected: selectedKeys.map(Number),
-      });
-      toast({
-        title: "Create Earning",
-        description: "Earning created successfully!",
-        variant: "primary",
-      });
-      setTimeout(() => {
-        router.push(`/payroll/earnings`);
-      }, 1000);
-    } catch (error) {
-      toast({
-        title: "Error Adding",
-        description: "Error adding: " + error,
-        variant: "danger",
-      });
-    }
-  };
 
   const config: TableConfigProps<AffectedEmployee> = {
     columns: [
@@ -112,17 +100,58 @@ function Page() {
         String(employee.id)
       );
       setSelectedKeys(employeeIds);
-      console.log(employeeIds);
     } else {
-      const keysArray = Array.from(keys);
+      const keysArray: string[] = Array.from(keys);
       setSelectedKeys(keysArray);
-      console.log(keysArray);
     }
   }
+
+  function handleMandatory(selected: boolean) {
+    setIsMandatory(selected);
+    if (selected) {
+      const employeeIds = data?.employees.map((employee) =>
+        String(employee.id)
+      );
+      setDisabledKeys(employeeIds);
+    } else {
+      setDisabledKeys([]);
+    }
+  }
+
+  const setData = useCallback(() => {
+    if (data?.payhead) {
+      const employeeIds = data.affected.map((affected) =>
+        String(affected.employee_id)
+      );
+      setSelectedKeys(employeeIds);
+      form.reset({
+        name: data.payhead.name,
+        calculation: data.payhead.calculation,
+        is_mandatory: data.payhead.is_mandatory,
+        is_active: data.payhead.is_active,
+      });
+      handleMandatory(data.payhead.is_mandatory);
+    }
+  }, [data, form]);
+
+  useEffect(() => {
+    setData();
+  }, [setData]);
+
+  if (isLoading || !data) {
+    return (
+      <Spinner
+        className="w-full h-[calc(100vh-9.5rem)]"
+        label="Please wait..."
+        color="primary"
+      />
+    );
+  }
+
   return (
     <div className="flex flex-row gap-2 pt-2">
       <Card className="h-fit m-2">
-        <CardHeader>Create Earning</CardHeader>
+        <CardHeader>{label}</CardHeader>
         <CardBody>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -131,9 +160,9 @@ function Page() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Earning Name</FormLabel>
+                    <FormLabel className="capitalize">{type} Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter earning name" {...field} />
+                      <Input placeholder={`Enter ${type} name`} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -161,19 +190,15 @@ function Page() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row-reverse items-center justify-between">
                     <FormControl>
-                      <Switch
-                        className="mt-2"
+                      <BorderedSwitch
+                        label="Mandatory"
+                        description={`Apply ${type} to every employee`}
                         isSelected={field.value}
                         onValueChange={field.onChange}
+                        onChange={handleMandatory}
                         color="success"
                       />
                     </FormControl>
-                    <div className="space-y-1">
-                      <FormLabel>Mandatory</FormLabel>
-                      <FormDescription>
-                        Apply earning to every employees.
-                      </FormDescription>
-                    </div>
                   </FormItem>
                 )}
               />
@@ -183,19 +208,14 @@ function Page() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row-reverse items-center justify-between">
                     <FormControl>
-                      <Switch
-                        className="mt-2"
+                      <BorderedSwitch
+                        label="is Active"
+                        description="Effective on next payroll process."
                         isSelected={field.value}
                         onValueChange={field.onChange}
                         color="success"
                       />
                     </FormControl>
-                    <div className="space-y-1">
-                      <FormLabel>Active</FormLabel>
-                      <FormDescription>
-                        Effective on next payroll process.
-                      </FormDescription>
-                    </div>
                   </FormItem>
                 )}
               />
@@ -209,9 +229,10 @@ function Page() {
       <div className="w-full">
         <TableData
           config={config}
-          items={data?.employees!}
+          items={data.employees!}
           isLoading={isLoading}
-          selectedKeys={selectedKeys}
+          selectedKeys={isMandatory ? [] : selectedKeys}
+          disabledKeys={disabledKeys}
           searchingItemKey={["first_name", "middle_name", "last_name"]}
           onSelectionChange={(keys) => handleSelection(keys)}
           counterName="Employees"
@@ -219,12 +240,10 @@ function Page() {
           removeWrapper
           isHeaderSticky
           color={"primary"}
-          selectionMode="multiple"
+          selectionMode={isMandatory ? "single" : "multiple"}
           aria-label="Employees"
         />
       </div>
     </div>
   );
-}
-
-export default Page;
+};

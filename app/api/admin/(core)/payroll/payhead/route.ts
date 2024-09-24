@@ -1,13 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/prisma/prisma';
 
 export const dynamic = "force-dynamic";
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const type = searchParams.get("type");
   try {
-    const earning = await prisma.ref_payheads.findMany({
+    const payheads = await prisma.ref_payheads.findMany({
         where : {
             AND:{
-                type: "earning",
+                type: type,
                 deleted_at: null
             }
         },
@@ -15,7 +17,7 @@ export async function GET() {
           dim_payhead_affecteds : true
         }
     })
-    return NextResponse.json(earning);
+    return NextResponse.json(payheads);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
   }

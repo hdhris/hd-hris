@@ -2,57 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 
-export const dynamic = "force-dynamic";
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = Number(searchParams.get("id"));
-    const payhead = await prisma.ref_payheads.findFirst({
-      where: {
-        id: id,
-        deleted_at: null,
-      },
-    });
-    const affected = await prisma.dim_payhead_affecteds.findMany({
-      where: {
-        payhead_id: id,
-      },
-    });
-    const employees = await prisma.trans_employees.findMany({
-      where: {
-        deleted_at: null,
-      },
-      select: {
-        id: true,
-        picture: true,
-        last_name: true,
-        first_name: true,
-        middle_name: true,
-        ref_departments: {
-          select: {
-            name: true,
-          },
-        },
-        ref_job_classes: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-    return NextResponse.json({ payhead, affected, employees });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to fetch data:" + error },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest) {
   const { data, affected } = await req.json();
   const { searchParams } = new URL(req.url);
   const id = Number(searchParams.get("id"));
@@ -71,7 +21,6 @@ export async function POST(
           calculation: data.calculation,
           is_mandatory: data.is_mandatory,
           is_active: data.is_active,
-          created_at: toGMT8(new Date()),
           updated_at: toGMT8(new Date()),
         },
       });
@@ -124,7 +73,7 @@ export async function POST(
   } catch (error) {
     console.error("Error:", error); // Log the error for debugging
     return NextResponse.json(
-      { error: "Failed to fetch data: " + error },
+      { error: "Failed to post data: " + error },
       { status: 500 }
     );
   }
