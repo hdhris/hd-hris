@@ -120,7 +120,8 @@ export default function Page() {
     []
   );
   // const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [isVisible, setVisible] = useState<boolean>(false);
+  const [isVisible, setVisible] = useState(false);
+  const [isPending, setPending] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<BatchSchedule | null>(
     null
   );
@@ -158,6 +159,7 @@ export default function Page() {
     }
   };
   const handleSubmit = async (batch: BatchSchedule) => {
+    setPending(true);
     try {
       if (batch.id > 0) {
         // Edit
@@ -197,6 +199,7 @@ export default function Page() {
         variant: "danger",
       });
     }
+    setPending(false);
   };
 
   const { data, isLoading } = useSchedule();
@@ -218,17 +221,17 @@ export default function Page() {
     item: BatchSchedule;
     index: number;
   }) => {
+    // console.log("Found: "+empScheduleData.find((emp) => emp.id === hoveredRowId)?.batch_id)
     return (
       <Card
         key={item.id}
         shadow="none"
-        className={`border-2 w-[200px] min-h-36 ${getRandomColor(index).bg} 
+        className={`border-2 w-[200px] me-2 min-h-36 ${getRandomColor(index).bg} 
           ${
             hoveredBatchId === item.id ||
-            hoveredRowId ===
-              empScheduleData.find((emp) => item.id === emp.batch_id)?.id
+            empScheduleData.find((emp) => emp.id === hoveredRowId)?.batch_id === item.id
               ? getRandomColor(index).border
-              : "border-gray-400"
+              : "border-gray-300"
           } transition-all duration-300`}
         onMouseEnter={() => setHoveredBatchId(item.id)}
         onMouseLeave={() => setHoveredBatchId(null)}
@@ -276,7 +279,7 @@ export default function Page() {
   // Card for Schedule Time (no border initially, but adds on hover)
   const getScheduleCard = (
     scheduleItem: BatchSchedule | undefined,
-    id: number
+    employeeId: number
   ) => {
     if (scheduleItem) {
       let startTime = dayjs(`${getShortTime(scheduleItem.clock_in)}`, "HH:mm")
@@ -294,7 +297,7 @@ export default function Page() {
         <div className="h-16">
           <Card
             className={`${
-              hoveredBatchId === scheduleItem.id || hoveredRowId === id
+              hoveredBatchId === scheduleItem.id || hoveredRowId === employeeId
                 ? "border-2"
                 : "border-0"
             } ${bg} flex justify-center items-center h-full shadow-none transition-all duration-300 ${border}`}
@@ -322,7 +325,7 @@ export default function Page() {
 
   return (
     <div className="flex p-1 min-w-[1230px]">
-      <div className="flex flex-col w-[250px] h-[calc(100vh-9.5rem)]">
+      <div className="flex flex-col w-[260px] h-[calc(100vh-9.5rem)]">
         <div className="flex flex-col gap-2 pb-2 overflow-auto flex-1">
           {batchData?.map((item, index) => (
             <BatchCard key={item.id} item={item} index={index} />
@@ -394,6 +397,7 @@ export default function Page() {
         onSave={handleSubmit}
         selectedSchedule={selectedBatch}
         visible={isVisible}
+        pending={isPending}
         onClose={() => setVisible(false)}
         onDelete={handleDelete}
       />

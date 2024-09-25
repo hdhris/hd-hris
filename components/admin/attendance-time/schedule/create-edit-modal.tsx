@@ -16,6 +16,7 @@ import { dateToTime } from "@/lib/utils/dateToTime";
 
 interface ScheduleModalProps {
   visible: boolean;
+  pending: boolean;
   onClose: () => void;
   onSave: (schedule: BatchSchedule) => void;
   onDelete: (id: Number | undefined) => void;
@@ -24,6 +25,7 @@ interface ScheduleModalProps {
 
 const ScheduleModal: React.FC<ScheduleModalProps> = ({
   visible,
+  pending,
   onClose,
   onSave,
   onDelete,
@@ -70,7 +72,6 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
     };
 
     onSave(newSchedule);
-    onClose();
   };
 
   return (
@@ -132,7 +133,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
           <Button color="danger" variant="light" onClick={onClose}>
             Cancel
           </Button>
-          <Button color="primary" onClick={handleSave}>
+          <Button isLoading={pending} color="primary" onClick={handleSave}>
             {selectedSchedule ? "Update" : "Add"}
           </Button>
         </ModalFooter>

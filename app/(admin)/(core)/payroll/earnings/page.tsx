@@ -1,14 +1,15 @@
 "use client";
 import { TableActionButton } from "@/components/actions/ActionButton";
-import TableData from "@/components/tabledata/TableData";
 import { toast } from "@/components/ui/use-toast";
-import showDialog from "@/lib/utils/confirmDialog";
 import { usePayheads } from "@/services/queries";
 import { Payhead } from "@/types/payroll/payrollType";
+import { FilterProps } from "@/types/table/default_config";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
-import { Button, Chip } from "@nextui-org/react";
-import axios from "axios";
+import { Button, Chip, Selection } from "@nextui-org/react";
 import { useRouter } from "next/dist/client/components/navigation";
+import axios from "axios";
+import TableData from "@/components/tabledata/TableData";
+import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
 
 const handleDelete = async (id: Number, name: string) => {
@@ -44,6 +45,7 @@ function Page() {
     columns: [
       { uid: "name", name: "Name", sortable: true },
       { uid: "affected", name: "Affected", sortable: true },
+      { uid: "status", name: "Status", sortable: true },
       { uid: "action", name: "Action", sortable: false },
     ],
     rowCell: (item, columnKey) => {
@@ -52,9 +54,26 @@ function Page() {
           return <p className="capitalize">{item.name}</p>;
         case "affected":
           return item.is_mandatory ? (
-            <Chip color="primary">Mandatory</Chip>
+            <Chip color="primary" variant="bordered">
+              Mandatory
+            </Chip>
           ) : (
-            <Chip color="default">{item.dim_payhead_affecteds?.length} employees</Chip>
+            <Chip color="default" variant="bordered">
+              <strong>{item.dim_payhead_affecteds?.length}</strong>{" "}
+              {item.dim_payhead_affecteds?.length >= 2
+                ? "Employees"
+                : "Employee"}
+            </Chip>
+          );
+        case "status":
+          return item.is_active ? (
+            <Chip color="success" variant="dot">
+              Active
+            </Chip>
+          ) : (
+            <Chip color="danger" variant="dot">
+              In-active
+            </Chip>
           );
         case "action":
           return (
@@ -71,6 +90,41 @@ function Page() {
       }
     },
   };
+  const filterItems: FilterProps[] = [
+    {
+      filtered: [
+        { name: "Active", uid: "active_true" },
+        { name: "Inactive", uid: "active_false" },
+      ],
+      category: "Status",
+    },
+    {
+      filtered: [
+        { name: "Yes", uid: "mandatory_true" },
+        { name: "No", uid: "mandatory_false" },
+      ],
+      category: "Mandatory",
+    },
+  ];
+  const filterConfig = (keys: Selection) => {
+    let filteredItems: Payhead[] = [...data!];
+
+    if (keys !== "all" && keys.size > 0) {
+      console.log(Array.from(keys));
+      Array.from(keys).forEach((key) => {
+        const [uid, value] = (key as string).split("_");
+        filteredItems = filteredItems.filter((items) => {
+          if (uid.includes("active")) {
+            return items.is_active === (value === "true");
+          } else if (uid.includes("mandatory")) {
+            return items.is_mandatory === (value === "true");
+          }
+        });
+      });
+    }
+
+    return filteredItems;
+  };
   return (
     <>
       <TableData
@@ -78,6 +132,8 @@ function Page() {
         items={data!}
         isLoading={isLoading}
         searchingItemKey={["name"]}
+        filterItems={filterItems}
+        filterConfig={filterConfig}
         counterName="Earnings"
         className="flex-1 h-[calc(100vh-9.5rem)] overflow-y-auto"
         removeWrapper
@@ -87,6 +143,7 @@ function Page() {
         aria-label="Earnings"
         endContent={() => (
           <Button
+            color="primary"
             className=" w-fit"
             onClick={() => router.push("/payroll/earnings/create")}
           >

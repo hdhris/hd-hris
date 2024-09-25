@@ -54,6 +54,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
   const { data, isLoading } = allData || { data: null, isLoading: true }; // Ensure `data` has a fallback
   const [disabledKeys, setDisabledKeys] = useState<any>([]);
   const [isMandatory, setIsMandatory] = useState(false);
+  const [isPending, setPending] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -118,6 +119,12 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
     }
   }
 
+  async function handleSubmit(value: any){
+    setPending(true);
+    await onSubmit(value);
+    setPending(false);
+  }
+
   const setData = useCallback(() => {
     if (data?.payhead) {
       const employeeIds = data.affected.map((affected) =>
@@ -154,7 +161,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
         <CardHeader>{label}</CardHeader>
         <CardBody>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -219,7 +226,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                   </FormItem>
                 )}
               />
-              <Button className="w-full" type="submit">
+              <Button isLoading={isPending} color="primary" className="w-full" type="submit">
                 Submit
               </Button>
             </form>

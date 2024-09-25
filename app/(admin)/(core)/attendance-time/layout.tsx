@@ -25,7 +25,7 @@ function RootLayout({ children }: { children: ReactNode }) {
         onSelectionChange={(key) => handleTabChange(key as string)}
       >
         <Tab key="records" title="Records" />
-        <Tab key="schedule" title="Schedule" />
+        <Tab key="schedule" title="Work Schedule" />
         {/* <Tab key="overtime" title="Overtime" /> */}
       </Tabs>
       <ScrollShadow>{children}</ScrollShadow>

@@ -169,14 +169,15 @@ function DataTable<T extends { id: string | number }>({
 
     const onSearchChange = React.useCallback((value?: string) => {
         if (value) {
-            router.push(`${getCurrentPath}?search=${value}`);
+            // router.push(`${getCurrentPath}?search=${value}`);
+            router.push(`${getCurrentPath}?search=${value}${filter !== "all" && filter.size > 0 ? `&filter=${Array.from(filter).join(',')}` : ''}`);
             setFilterValue(value);
-
         } else {
             setFilterValue("");
-            router.push(`${getCurrentPath}`);
+            router.push(`${getCurrentPath}${filter !== "all" && filter.size > 0 ? `?filter=${Array.from(filter).join(',')}` : ''}`);
+            // router.push(`${getCurrentPath}`);
         }
-    }, [getCurrentPath, router]);
+    }, [getCurrentPath, router, filter]);
 
     const onClear = React.useCallback(() => {
         setFilterValue("");
@@ -192,7 +193,7 @@ function DataTable<T extends { id: string | number }>({
     const topContent = React.useMemo(() => {
         return (<Suspense fallback={<Spinner/>}>
                 <div className="flex flex-col gap-4">
-                    <div className="flex justify-between gap-3 items-end">
+                    <div className="flex justify-between">
                         {
                             searchingItemKey && (
                                 <Input
@@ -209,12 +210,23 @@ function DataTable<T extends { id: string | number }>({
                                 />
                             )
                         }
+                        <div className='flex flex-row gap-3'>
                         {filterItems && (<div className="flex gap-3 items-center">
                             <Dropdown classNames={{content: 'rounded'}}>
                                 <DropdownTrigger className="hidden sm:flex">
                                     <Button radius="sm" endContent={<ChevronDownIcon
                                         className={cn('text-small', icon_color, icon_size)}/>} variant="bordered">
-                                        {filter !== "all" && filter.size > 0 ? capitalize(Array.from(filter)[0] as string) : "Filter..."}
+                                        {filter !== "all" && filter.size > 0
+                                            ? Array.from(filterItems)
+                                                .filter((item) => 
+                                                    item.filtered.some((filteredItem) => 
+                                                        Array.from(filter).some((f) => String(f) === filteredItem.uid)
+                                                    )
+                                                )
+                                                .map((item) => item.category)  // Return the `category` for each item that matches
+                                                .join(", ")                    // Join them with commas
+                                            : "Filter..."}
+
                                     </Button>
                                 </DropdownTrigger>
                                 <DropdownMenu
@@ -222,20 +234,43 @@ function DataTable<T extends { id: string | number }>({
                                     className="max-h-96 overflow-y-auto"
                                     closeOnSelect={false}
                                     selectedKeys={filter}
-                                    selectionMode="single"
+                                    selectionMode="multiple"
                                     onSelectionChange={(keys) => {
-                                        setFilter(keys as Selection);
+                                        const newFilter = new Set(filter); // Clone current filter
+                                        const selectedKeys = Array.from(keys) as string[];
+                                  
+                                        // Ensure one selection per section
+                                        filterItems.forEach((item) => {
+                                            const sectionSelected = selectedKeys.filter((key) =>
+                                              item.filtered.some((data) => data.uid === key)
+                                            );
+                                          
+                                            // Clear old selections from the section by iterating over the section items
+                                            item.filtered.forEach((data) => {
+                                              newFilter.delete(data.uid); // Remove all previously selected keys from this section
+                                            });
+                                          
+                                            // Add only the new selection
+                                            if (sectionSelected.length > 0) {
+                                              newFilter.add(sectionSelected[sectionSelected.length - 1]); // Add the latest selected item
+                                            }
+                                          });
+                                          
+                                  
+                                        setFilter(newFilter);
+                                  
+                                        // Handle URL params
                                         const newSearchParams = new URLSearchParams(searchParams.toString());
-                                        if (keys !== "all" && keys.size > 0) {
-                                            newSearchParams.set('filter', Array.from(keys).join(','));
+                                        if (newFilter.size > 0) {
+                                          newSearchParams.set('filter', Array.from(newFilter).join(','));
                                         } else {
-                                            newSearchParams.delete('filter');
+                                          newSearchParams.delete('filter');
                                         }
                                         if (filterValue) {
-                                            newSearchParams.set('search', filterValue);
+                                          newSearchParams.set('search', filterValue);
                                         }
                                         router.push(`${getCurrentPath}?${newSearchParams.toString()}`);
-                                    }}
+                                      }}
                                 >
                                     {filterItems.map((item) => (
                                         <DropdownSection key={item.category} title={item.category} showDivider>
@@ -248,6 +283,7 @@ function DataTable<T extends { id: string | number }>({
                             </Dropdown>
                         </div>)}
                         {endContent && endContent()}
+                        </div>
                     </div>
                     <div className='flex justify-between items-center'>
                         {counterName &&
