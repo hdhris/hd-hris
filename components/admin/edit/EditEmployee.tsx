@@ -96,7 +96,9 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       department_id: "",
       job_id: "",
       batch_id: "",
-      days_json: {},
+      days_json: {
+        
+      },
     },
     mode: "onChange",
   });

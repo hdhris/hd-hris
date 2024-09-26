@@ -319,7 +319,7 @@ async function updateEmployee(
       data: schedules.map((schedule) => ({
         employee_id: id,
         batch_id: schedule.batch_id,
-        days_json: schedule.days_json,
+        days_json: ["mon","tue","wed","thu","fri","sat"],
         created_at: new Date(),
         updated_at: new Date(),
       })),
