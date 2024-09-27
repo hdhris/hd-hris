@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn, signOut } from '@/auth';
+import {signIn, signOut} from '@/auth';
 import { AuthError } from "next-auth";
 import { ZodError } from "zod";
 
@@ -9,18 +9,19 @@ type Login = {
     password: string;
 };
 
+
 export async function login({ username, password }: Login) {
     try {
         // Perform the sign-in
         const result = await signIn("credentials", { username, password, redirect: false });
 
-        // Check if the signIn was successful
-        if (result?.error) {
-            // If signIn fails, return a user-friendly error message
+        // Check if the sign-in was successful
+        if (!result || result.error) {
+            // If sign-in fails, return a user-friendly error message
             return { error: { message: "Invalid username or password. Please try again." } };
         }
 
-        // If signIn is successful, redirect to dashboard or other handling logic
+        // If sign-in is successful, handle the redirect
         return { success: true };
 
     } catch (e) {
@@ -54,7 +55,10 @@ export async function login({ username, password }: Login) {
 }
 
 
+export async function doSocialLogin(){
+    await signIn("google", {redirectTo: "/dashboard"}, );
+}
 
 export async function logout() {
-    await signOut({redirectTo: "/"});
+    await signOut();
 }

@@ -129,7 +129,7 @@ const DeactivateAccount: React.FC = () => {
                 });
 
                 await signOut({redirect: false});
-                deleteCookie('next-auth.session-token');
+                deleteCookie('next-auth.user-session-token');
                 deleteCookie('next-auth.csrf-token');
                 router.push('/');
                 router.refresh();
@@ -192,7 +192,7 @@ const DeleteAccount: React.FC = () => {
                 });
 
                 await signOut({redirect: false});
-                deleteCookie('next-auth.session-token');
+                deleteCookie('next-auth.user-session-token');
                 deleteCookie('next-auth.csrf-token');
                 router.push('/');
                 router.refresh();

@@ -39,3 +39,9 @@ export interface EmployeeSchedule {
     updated_at: string;
     deleted_at: string | null;
   }
+
+
+  export interface Schedules {
+    batch: BatchSchedule[];
+    emp_sched: EmployeeSchedule[]
+  }

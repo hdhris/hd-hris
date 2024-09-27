@@ -1,55 +1,72 @@
 import {hasContentType} from "@/helper/content-type/content-type-check";
 import {NextRequest, NextResponse} from "next/server";
 import {ChangeCredentialSchema} from "@/helper/zodValidation/ChangeCredentialValidation";
-import {getUserData} from "@/lib/utils/authUtils/authUtils";
 import prisma from "@/prisma/prisma";
-import {auth, signIn} from "@/auth";
 import SimpleAES from "@/lib/cryptography/3des";
 import {ZodError} from "zod";
-import {login} from "@/actions/authActions";
+import {auth, signIn} from "@/auth";
 
 export async function PUT(request: NextRequest) {
     try {
         hasContentType(request);
 
-        const encrypt = new SimpleAES()
+        const encrypt = new SimpleAES();
 
+        // Parse and validate the request body
         const data = await request.json();
         const validateCredentials = ChangeCredentialSchema.parse(data);
-        const session = await auth()
-        const account_id = Number(session?.user?.id)
 
-        const password_encrypt = await encrypt.encryptData(validateCredentials.new_password)
-        const account = await prisma.sys_accounts.findFirst({
-            where: {
-                username: data.username,
-            }
-        })
+        // Get the current user session
+        const session = await auth();
+        const account_id = session?.user?.id;
 
-        const password_check = await encrypt.compare(validateCredentials.new_password, account?.password!)
-
-        if(password_check){ return NextResponse.json({message: "Please enter different credential"},{status: 400})}
-        if(!account){
-            await prisma.sys_accounts.update({
-                where: {
-                    id: account_id
-                },
-                data: {
-                    username: validateCredentials.username,
-                    password: password_encrypt
-                }
-            })
-
-            return NextResponse.json({message: "Account updated successfully"},{status: 200})
+        if (!account_id) {
+            return NextResponse.json({message: "User not authenticated"}, {status: 401});
         }
 
-        return NextResponse.json({message: "Username already exist"}, {status: 400})
+        // Encrypt the new password
+        const password_encrypt = await encrypt.encryptData(validateCredentials.new_password);
+
+        // Find account by username
+        const existingAccount = await prisma.account.findUnique({
+            where: {
+                provider_providerAccountId: {
+                    provider: "credential", // Ensure this matches your Prisma schema
+                    providerAccountId: account_id
+                }
+            }
+        });
+
+        // if username does not already exist
+        if (existingAccount?.username === validateCredentials.username) {
+            // If the username already exists
+            return NextResponse.json({message: "Username already exists"}, {status: 400});
+        }
+
+        // Check if the current password matches
+        const currentPasswordMatches = await encrypt.compare(validateCredentials.new_password, existingAccount?.password!);
+        if (currentPasswordMatches) {
+            return NextResponse.json({message: "Please enter a different password"}, {status: 400});
+        }
+
+        await prisma.account.update({
+            where: {
+                provider_providerAccountId: {
+                    provider: "credential", // Ensure this matches your Prisma schema
+                    providerAccountId: account_id
+                }
+            }, data: {
+                username: validateCredentials.username, password: password_encrypt
+            }
+        });
+
+        return NextResponse.json({message: "Account updated successfully"}, {status: 200});
 
     } catch (error) {
-        console.log(error)
-        if(error instanceof ZodError){
-            return NextResponse.json({message: error.message}, {status: 500})
+        console.error(error);
+        if (error instanceof ZodError) {
+            return NextResponse.json({message: error.message}, {status: 400});
         }
-        return NextResponse.json({message: "Something went wrong"}, {status: 500})
+        return NextResponse.json({message: "Something went wrong"}, {status: 500});
     }
 }

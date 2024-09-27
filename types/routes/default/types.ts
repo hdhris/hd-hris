@@ -15,21 +15,11 @@ export interface Address {
 //     users : UserProfile;
 // }
 export interface UserProfile {
-    username: string;
-    picture: string;
-    prefix: string | null;
-    first_name: string;
-    last_name: string;
-    suffix?: string | null;
-    extension: string | null;
-    email: string;
-    birthdate: string; // ISO 8601 date string
-    gender: string; // Assuming gender is limited to 'M' or 'F'
-    contact_no: string;
-    addr_baranggay: string;
-    addr_municipal: string;
-    addr_province: string;
-    addr_region: string;
+    provider: string
+    username?: string;
+    display_name: string;
+    image: string;
+    privilege: string;
 }
 
 

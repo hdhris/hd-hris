@@ -2,10 +2,12 @@ import {DefaultSession, DefaultUser} from "next-auth";
 
 declare module "next-auth" {
     interface Session {
+        accessToken: string;
         user: {
-            id: string; name: string
-            role: string; picture: string
-            privilege: string; employee_id: number | null
+            id: string;
+            name: string
+            role: string; image: string
+            privilege: string;
             isDefaultAccount: boolean
         } & DefaultSession["user"];
 
@@ -15,9 +17,8 @@ declare module "next-auth" {
         id: string;
         name: string
         role: string;
-        picture: string
+        image: string
         privilege: string;
-        employee_id: number | null
         isDefaultAccount: boolean
     }
 
@@ -25,9 +26,8 @@ declare module "next-auth" {
         id: string;
         name: string
         role: string;
-        picture: string
+        image: string
         privilege: string;
-        employee_id: number | null
         isDefaultAccount: boolean
     }
 
@@ -35,9 +35,8 @@ declare module "next-auth" {
         id: string;
         name: string
         role: string;
-        picture: string
+        image: string
         privilege: string;
-        employee_id: number | null
         isDefaultAccount: boolean
     }
 }
@@ -47,9 +46,8 @@ declare module "next-auth/jwt" {
         id: string;
         name: string
         role: string;
-        picture: string;
+        image: string;
         privilege: string;
-        employee_id: number | null
         isDefaultAccount: boolean
     }
 }

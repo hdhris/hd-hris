@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
-import prisma from "@/prisma/prisma";
+import prisma from '@/prisma/prisma';
 
+export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest, {params}: {params : {date: string }}) {
   try {
 
@@ -24,6 +25,9 @@ export async function GET(req: NextRequest, {params}: {params : {date: string }}
           gte: isoDateStart,
           lt: isoDateEnd, // Matches records within the day
         },
+        trans_employees: {
+          deleted_at: null
+        }
       },
     });
     return NextResponse.json(attendances);
