@@ -15,7 +15,7 @@ export interface Address {
 //     users : UserProfile;
 // }
 export interface UserProfile {
-    provider: string
+    hasCredential: boolean
     username?: string;
     display_name: string;
     image: string;

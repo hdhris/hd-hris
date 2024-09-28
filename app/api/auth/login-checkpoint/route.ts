@@ -28,12 +28,9 @@ export async function PUT(request: NextRequest) {
         const password_encrypt = await encrypt.encryptData(validateCredentials.new_password);
 
         // Find account by username
-        const existingAccount = await prisma.account.findUnique({
+        const existingAccount = await prisma.auth_credentials.findUnique({
             where: {
-                provider_providerAccountId: {
-                    provider: "credential", // Ensure this matches your Prisma schema
-                    providerAccountId: account_id
-                }
+               user_id: account_id
             }
         });
 
@@ -42,19 +39,16 @@ export async function PUT(request: NextRequest) {
             // If the username already exists
             return NextResponse.json({message: "Username already exists"}, {status: 400});
         }
-
-        // Check if the current password matches
+        //
+        // // Check if the current password matches
         const currentPasswordMatches = await encrypt.compare(validateCredentials.new_password, existingAccount?.password!);
         if (currentPasswordMatches) {
             return NextResponse.json({message: "Please enter a different password"}, {status: 400});
         }
 
-        await prisma.account.update({
+        await prisma.auth_credentials.update({
             where: {
-                provider_providerAccountId: {
-                    provider: "credential", // Ensure this matches your Prisma schema
-                    providerAccountId: account_id
-                }
+                user_id: account_id
             }, data: {
                 username: validateCredentials.username, password: password_encrypt
             }

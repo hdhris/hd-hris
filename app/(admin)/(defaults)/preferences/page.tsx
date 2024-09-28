@@ -17,18 +17,7 @@ const AccountSettings: React.FC = () => (<div className='space-y-4 pr-4'>
 function Page() {
     return (<section className='h-full flex flex-col gap-4'>
         <Heading as='h1' className='text-3xl font-bold'>Preferences</Heading>
-        {/*<div className='grid grid-cols-2 gap-4 w-full overflow-hidden'>*/}
 
-        {/*    <div className='pl-4 space-y-4'>*/}
-        {/*        <AccountSettings/>*/}
-        {/*        <Divider/>*/}
-        {/*        <div>*/}
-        {/*            <AccountSecurity/>*/}
-        {/*        </div>*/}
-        {/*        /!*<AccountControl/>*!/*/}
-        {/*    </div>*/}
-        {/*    <NotificationSettings/>*/}
-        {/*</div>*/}
         <div className='grid grid-cols-2 gap-4 w-full overflow-hidden'>
             <div className="space-y-2">
                 <AccountSettings/>

@@ -4,8 +4,11 @@ import {parse} from "next-useragent";
 export async function devices(user_id: string) {
     try {
         // Ensure user exists
-        const user = await prisma.user.findUnique({
+        const user = await prisma.trans_users.findUnique({
             where: { id: user_id },
+            include: {
+                acl_user_access_control: true
+            }
         });
 
         if (!user) {
@@ -29,23 +32,30 @@ export async function devices(user_id: string) {
         const type = 'Browser';
         const platform = ua.browser;
         const os = ua.os;
-        const os_version = ua.osVersion;
+        const os_version = String(ua.osVersion);
 
         // Check if a record exists for this user and device
-        const existingDevice = await prisma.sys_devices.findFirst({
-            where: { user_id, ip_address }
+        const existingDevice = await prisma.acl_user_access_control.findFirst({
+            where: {
+                user_id,
+                sec_devices: {
+                    some: {
+                        ip_address,
+                    },
+                }
+            }
         });
 
         if (!existingDevice) {
             // If no record exists, create a new one
-            await prisma.sys_devices.create({
+            await prisma.sec_devices.create({
+
                 data: {
-                    user_id,
                     ip_address,
                     created_at,
                     updated_at: null,
-                    countrycode,
-                    countryname,
+                    country_code: countrycode,
+                    country_name: countryname,
                     region,
                     city,
                     platform_type: type,
@@ -53,11 +63,12 @@ export async function devices(user_id: string) {
                     os,
                     os_version,
                     login_count: 1,
+                    acl_user_access_control_id: user.acl_user_access_control?.id!,
                 },
             });
         } else {
             // Update the login count and the updated_at timestamp
-            await prisma.sys_devices.update({
+            await prisma.sec_devices.update({
                 where: { id: existingDevice.id },
                 data: {
                     updated_at: new Date(),
