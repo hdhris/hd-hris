@@ -9,6 +9,7 @@ import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 import {UserPrivileges} from "@/types/JSON/user-privileges";
 import dayjs from "dayjs";
 import {toGMT8} from "@/lib/utils/toGMT8";
+import {devices} from "@/defaults_configurations/devices";
 
 export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
     providers: [Credentials({
@@ -139,11 +140,14 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                         user.name = existingUser.name;
                         user.image = existingUser.image;
                     }
+                    await devices(id.userId)
 
                     return !role;
 
                 } else {
+
                     // Handle other providers
+                    await devices(user.id!)
                     return true;
                 }
             } catch (error) {
