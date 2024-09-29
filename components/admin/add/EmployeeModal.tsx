@@ -1,32 +1,19 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Button,
-  Input,
   Modal,
-  ModalBody,
   ModalContent,
-  ModalFooter,
   ModalHeader,
+  ModalBody,
+  ModalFooter,
   Select,
   SelectItem,
+  Input,
 } from "@nextui-org/react";
-import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import { Employee } from "@/types/employeee/EmployeeType";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-
-interface StatusFormData {
-  status: string;
-  reason: string;
-  date: string;
-}
 
 interface EmployeeModalProps {
   isOpen: boolean;
@@ -41,155 +28,112 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
   employee,
   onEmployeeUpdated,
 }) => {
-  const methods = useForm<StatusFormData>({
+  const { control, handleSubmit, watch } = useForm({
     defaultValues: {
-      status: employee?.status || "active",
+      status: "active",
       reason: "",
       date: "",
     },
   });
 
-  const { handleSubmit, watch, reset, control } = methods;
-
-  // Reset form when modal opens or employee prop changes
-  useEffect(() => {
-    if (employee) {
-      reset({
-        status: employee.status || "active",
-        reason: "",
-        date: "",
-      });
-    }
-  }, [employee, reset]);
-
-  const onSubmit: SubmitHandler<StatusFormData> = async (data) => {
+  const onSubmit = async (data: {
+    status: string;
+    reason?: string;
+    date?: string;
+  }) => {
     if (!employee) return;
 
-    const { status, reason, date } = data;
-    const statusData = status !== "active" ? { reason, date } : null;
-
-    const url = `/api/employeemanagement/employees?id=${employee.id}&type=status`;
-    const payload = {
-      status,
-      [`${status}_json`]: statusData ? JSON.stringify(statusData) : undefined, // Ensuring correct type
-    };
-
     try {
-      const response = await axios.put(url, payload);
+      const response = await axios.put(
+        `/api/employeemanagement/employees?id=${employee.id}&type=status`,
+        data
+      );
 
       if (response.status === 200) {
-        reset();
-        onClose();
         toast({
           title: "Success",
           description: "Employee status updated successfully",
           duration: 3000,
         });
+        onClose();
         await onEmployeeUpdated();
       } else {
         throw new Error(`Unexpected response status: ${response.status}`);
       }
     } catch (error) {
-      let errorMessage = "Failed to update status. Please try again.";
-      if (axios.isAxiosError(error)) {
-        errorMessage =
-          error.response?.data?.message || "No response received from server.";
-      }
+      console.error("Error updating employee status:", error);
       toast({
         title: "Error",
-        description: errorMessage,
-        duration: 3000,
+        description: "Failed to update status. Please try again.",
+        duration: 5000,
       });
     }
   };
 
+  const status = watch("status");
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalContent>
-        <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <ModalHeader>Change Employee Status</ModalHeader>
-            <ModalBody>
-              <div className="space-y-4">
-                <FormField
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <ModalHeader>Change Employee Status</ModalHeader>
+          <ModalBody>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select label="Status" placeholder="Select status" {...field}>
+                  <SelectItem key="active" value="active">
+                    Active
+                  </SelectItem>
+                  <SelectItem key="suspended" value="suspended">
+                    Suspended
+                  </SelectItem>
+                  <SelectItem key="resigned" value="resigned">
+                    Resigned
+                  </SelectItem>
+                  <SelectItem key="terminated" value="terminated">
+                    Terminated
+                  </SelectItem>
+                </Select>
+              )}
+            />
+            {status !== "active" && (
+              <>
+                <Controller
+                  name="reason"
                   control={control}
-                  name="status"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status:</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          placeholder="Select Status"
-                          selectedKeys={[field.value]}
-                          onSelectionChange={(keys) =>
-                            field.onChange(Array.from(keys)[0])
-                          }
-                        >
-                          <SelectItem key="active" value="active">
-                            Active
-                          </SelectItem>
-                          <SelectItem key="suspended" value="suspended">
-                            Suspended
-                          </SelectItem>
-                          <SelectItem key="resigned" value="resigned">
-                            Resigned
-                          </SelectItem>
-                          <SelectItem key="terminated" value="terminated">
-                            Terminated
-                          </SelectItem>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                    <Input
+                      label="Reason"
+                      placeholder="Enter reason"
+                      {...field}
+                    />
                   )}
                 />
-
-                {watch("status") !== "active" && (
-                  <>
-                    <FormField
-                      control={control}
-                      name="reason"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Reason:</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter reason" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={control}
-                      name="date"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Date:</FormLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-              </div>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="danger" variant="light" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button color="primary" type="submit">
-                Save
-              </Button>
-            </ModalFooter>
-          </form>
-        </FormProvider>
+                <Controller
+                  name="date"
+                  control={control}
+                  render={({ field }) => (
+                    <Input type="date" label="Date" {...field} />
+                  )}
+                />
+              </>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="light" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button color="primary" type="submit">
+              Save
+            </Button>
+          </ModalFooter>
+        </form>
       </ModalContent>
     </Modal>
   );
 };
 
 export default EmployeeModal;
+  
