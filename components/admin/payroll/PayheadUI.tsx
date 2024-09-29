@@ -93,7 +93,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
     },
   };
 
-  
+
 
   function handleMandatory(selected: boolean) {
     setIsMandatory(selected);
@@ -132,7 +132,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
       });
       handleMandatory(data.payhead.is_mandatory);
     }
-  }, [data, form]);
+  }, [data, form, handleMandatory]);
 
   useEffect(() => {
     setData();

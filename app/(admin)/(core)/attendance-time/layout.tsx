@@ -16,6 +16,10 @@ function RootLayout({ children }: { children: ReactNode }) {
     router.push(`/attendance-time/${key}`); // Use router.push for navigation
   };
 
+  const tabs : TabItem[] = {
+    
+  }
+
   return (
     <div className="flex flex-col -mt-2">
       <Tabs
