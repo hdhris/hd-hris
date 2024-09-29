@@ -14,10 +14,12 @@ export function useDashboard() {
     })
 }
 
-export function useEmployees() {
-    return useSWR<Employee[]>('/api/admin/employees', fetcher, {
+export function useEmployeesListData({currentPage, limit}: {currentPage: number, limit: number}) {
+    return useSWR<any>(`/api/admin/employees?page=${currentPage}&limit=${limit}`, fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
+
+
 }
 
 export function useAudit() {

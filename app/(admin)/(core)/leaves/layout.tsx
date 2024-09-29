@@ -4,9 +4,9 @@ import NavigationTabs, {TabItem} from "@/components/common/tabs/NavigationTabs";
 function RootLayout({children}: { children: React.ReactNode }) {
     const tabs: TabItem[] = [
         {
-            key: 'leave-approvals',
+            key: 'leave-requests',
             title: 'Leave Approvals',
-            path: 'leave-approvals'
+            path: 'leave-requests'
         }, {
             key: 'leave-types',
             title: 'Leave Types',

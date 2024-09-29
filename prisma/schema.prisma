@@ -400,7 +400,7 @@ model trans_employees {
   branch_id                                                              Int?
   picture                                                                String?
   first_name                                                             String                         @db.VarChar(45)
-  last_name                                                              String?                        @db.VarChar(45)
+  last_name                                                              String                         @db.VarChar(45)
   middle_name                                                            String?                        @db.VarChar(45)
   suffix                                                                 String?                        @db.VarChar(10)
   extension                                                              String?                        @db.VarChar(10)
@@ -460,43 +460,43 @@ model trans_employees {
 }
 
 model trans_leaves {
-  employee_id                                               Int?
-  start_date                                                DateTime?        @db.Date
-  end_date                                                  DateTime?        @db.Date
-  comment                                                   String?
-  status                                                    String?          @db.VarChar(10)
-  created_at                                                DateTime         @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
-  updated_at                                                DateTime         @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
-  id                                                        Int              @id @default(autoincrement())
-  type_id                                                   Int?
-  reason                                                    String?
-  approved_by                                               Int?
-  approval_at                                               DateTime?        @db.Timestamp(6)
-  deleted_at                                                DateTime?        @db.Timestamp(6)
-  trans_employees_trans_leaves_employee_idTotrans_employees trans_employees? @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
-  ref_leave_types                                           ref_leave_types? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
-  trans_employees_trans_leaves_approved_byTotrans_employees trans_employees? @relation("trans_leaves_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
+  employee_id                       Int?
+  start_date                        DateTime?        @db.Date
+  end_date                          DateTime?        @db.Date
+  comment                           String?
+  status                            String?          @db.VarChar(10)
+  created_at                        DateTime         @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
+  updated_at                        DateTime         @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  id                                Int              @id @default(autoincrement())
+  type_id                           Int?
+  reason                            String?
+  approved_by                       Int?
+  approval_at                       DateTime?        @db.Timestamp(6)
+  deleted_at                        DateTime?        @db.Timestamp(6)
+  trans_employees_leaves            trans_employees? @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
+  ref_leave_types                   ref_leave_types? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
+  trans_employees_leaves_approvedBy trans_employees? @relation("trans_leaves_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
 }
 
 model trans_overtimes {
-  employee_id                                                  Int?
-  status                                                       String?          @db.VarChar(10)
-  created_at                                                   DateTime         @db.Timestamp(6)
-  updated_at                                                   DateTime         @db.Timestamp(6)
-  id                                                           Int              @id @default(autoincrement())
-  date                                                         DateTime?        @db.Date
-  clock_in                                                     DateTime?        @db.Time(6)
-  clock_out                                                    DateTime?        @db.Time(6)
-  requested_mins                                               Int?
-  reason                                                       String?
-  approved_by                                                  Int?
-  approved_at                                                  DateTime?        @db.Timestamp(6)
-  rate_per_hour                                                Decimal?         @db.Decimal(10, 2)
-  comment                                                      String?
-  rendered_mins                                                Int?
-  deleted_at                                                   DateTime?        @db.Timestamp(6)
-  trans_employees_trans_overtimes_employee_idTotrans_employees trans_employees? @relation("trans_overtimes_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_overtime_employee_employee_id")
-  trans_employees_trans_overtimes_approved_byTotrans_employees trans_employees? @relation("trans_overtimes_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_overtimes_trans_employees_2")
+  employee_id                          Int?
+  status                               String?          @db.VarChar(10)
+  created_at                           DateTime         @db.Timestamp(6)
+  updated_at                           DateTime         @db.Timestamp(6)
+  id                                   Int              @id @default(autoincrement())
+  date                                 DateTime?        @db.Date
+  clock_in                             DateTime?        @db.Time(6)
+  clock_out                            DateTime?        @db.Time(6)
+  requested_mins                       Int?
+  reason                               String?
+  approved_by                          Int?
+  approved_at                          DateTime?        @db.Timestamp(6)
+  rate_per_hour                        Decimal?         @db.Decimal(10, 2)
+  comment                              String?
+  rendered_mins                        Int?
+  deleted_at                           DateTime?        @db.Timestamp(6)
+  trans_employees_overtimes            trans_employees? @relation("trans_overtimes_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_overtime_employee_employee_id")
+  trans_employees_overtimes_approvedBy trans_employees? @relation("trans_overtimes_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_overtimes_trans_employees_2")
 }
 
 model trans_payhead_breakdowns {
