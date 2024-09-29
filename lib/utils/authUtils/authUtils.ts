@@ -7,63 +7,65 @@ import SimpleAES from "@/lib/cryptography/3des";
 import dayjs from "dayjs";
 import {calculateRemainingDays} from "@/lib/utils/dateFormatter";
 import {UserPrivileges} from "@/types/JSON/user-privileges";
-import {devices} from "@/defaults_configurations/devices";
+import {toGMT8} from "@/lib/utils/toGMT8";
 
 
 export const getUserData = async (username: string, password: string) => {
     const encrypt = new SimpleAES();
 
-
-    // Query the user by username
-    const user = await prisma.account.findUnique({
+    const auth = await prisma.auth_credentials.findUnique({
         where: {
             username
         }, include: {
-            user: {
-                include: {
-                    sys_privileges: true
-                }
-            }
+            trans_users: true
         }
-    });
-    // Return error if user not found
-    if (!user) {
-        return {error: {message: "User not found. Please check your credentials and try again."}};
-    }
-    if (user.banned_till) {
-        const isBanned = dayjs(user.banned_till).isAfter(dayjs())
-        if (isBanned) {
-            return {
-                error: {
-                    message: `You are banned for ${calculateRemainingDays(user.banned_till.toDateString())}`
-                }
-            }
-        }
-    }
+    })
 
-    // Compare password
-    const passwordMatches = await encrypt.compare(password, user.password!);
+
+    if (!auth) return {error: {message: "Invalid username or password"}}
+// Compare password
+    const passwordMatches = await encrypt.compare(password, auth.password!);
     if (!passwordMatches) {
         return {error: {message: "Invalid username or password. Please try again."}};
     }
+    const access_control = await prisma.acl_user_access_control.findFirst({
+        where: {
+            user_id: auth.trans_users.id
+        }, include: {
+            sys_privileges: true
+        }
+    })
 
-    // Process user role and return user data
-    const privileges = user.user.sys_privileges;
+    if (!access_control) return {error: {message: "You are not authorized"}}
+    if (access_control.banned_til) {
+        const isBanned = dayjs(toGMT8(access_control?.banned_til)).isAfter(dayjs())
+        if (isBanned) {
+            return {
+                error: {
+                    message: `You are banned for ${calculateRemainingDays(toGMT8(access_control?.banned_til).toString())} days.`
+                }
+            }
+        }
+    }
+
+// Process user role and return user data
+    const privileges = access_control.sys_privileges;
     const accessibility = processJsonObject<UserPrivileges>(privileges?.accessibility);
     const role = !accessibility?.web_access
 
     if (role) throw new Error('Only admin can login');
-    await devices(user.userId);
+
     return {
-        id: user.userId,
-        name: user.user.name || 'No Name', // Use actual user name if available
+        id: auth.user_id,
+        name: auth.trans_users.name, // Use actual user name if available
         role,
-        image: user.user.image || '',
-        email: user.user.email || '',
+        image: auth.trans_users.image || '',
+        email: auth.trans_users.email || '',
         privilege: privileges?.name || 'N/A',
-        isDefaultAccount: user.username === 'admin'
+        isDefaultAccount: auth.username.toLowerCase() === 'admin'
     };
-};
+}
+
 
 export const handleAuthorization = async (credentials: { username: string; password: string }) => {
     if (!credentials?.username || !credentials?.password) {
@@ -80,9 +82,9 @@ export const handleAuthorization = async (credentials: { username: string; passw
     // Get user data
     const user = await getUserData(username, password);
     if (user?.error) {
+        console.log("Error: ", user.error.message);
         throw new Error(user.error.message);
     }
-
 
 
     // // Check user role

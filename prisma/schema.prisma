@@ -8,45 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  username          String?   @unique
-  password          String?
-  banned_till       DateTime? @db.Timestamptz(6)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
-}
-
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@id([identifier, token])
-}
-
 model dim_employee_benefits {
   id                          Int                           @id @default(autoincrement())
   employee_id                 Int?
@@ -331,25 +292,6 @@ model ref_training_programs {
   dim_training_schedules    dim_training_schedules[]
 }
 
-model sys_devices {
-  id            Int       @id @default(autoincrement())
-  ip_address    String?   @db.Inet
-  isLoggedOut   Boolean   @default(false)
-  created_at    DateTime  @db.Timestamp(6)
-  updated_at    DateTime? @db.Timestamp(6)
-  countrycode   String?   @db.VarChar(4)
-  countryname   String?   @db.VarChar(45)
-  region        String?   @db.VarChar(45)
-  city          String?   @db.VarChar(45)
-  platform      String?   @db.VarChar(45)
-  os            String?   @db.VarChar(45)
-  os_version    Int?
-  login_count   Int
-  platform_type String?   @db.VarChar(45)
-  user_id       String?   @unique
-  user          User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
 model sys_notifications {
   id              Int              @id @default(autoincrement())
   employee_id     Int?
@@ -363,13 +305,12 @@ model sys_notifications {
 }
 
 model sys_privileges {
-  id            Int       @id @default(autoincrement())
-  accessibility Json?
-  name          String?   @db.VarChar(45)
-  created_at    DateTime  @db.Timestamp(6)
-  updated_at    DateTime  @db.Timestamp(6)
-  deleted_at    DateTime? @db.Timestamp(6)
-  user          User[]
+  id                      Int                       @id @default(autoincrement())
+  accessibility           Json?
+  name                    String?                   @db.VarChar(45)
+  created_at              DateTime                  @db.Timestamp(6)
+  updated_at              DateTime                  @db.Timestamp(6)
+  acl_user_access_control acl_user_access_control[]
 }
 
 model sys_variables {
@@ -459,7 +400,7 @@ model trans_employees {
   branch_id                                                              Int?
   picture                                                                String?
   first_name                                                             String                         @db.VarChar(45)
-  last_name                                                              String                         @db.VarChar(45)
+  last_name                                                              String?                        @db.VarChar(45)
   middle_name                                                            String?                        @db.VarChar(45)
   suffix                                                                 String?                        @db.VarChar(10)
   extension                                                              String?                        @db.VarChar(10)
@@ -489,7 +430,7 @@ model trans_employees {
   suspension_json                                                        Json?                          @db.Json
   resignation_json                                                       Json?                          @db.Json
   termination_json                                                       Json?                          @db.Json
-  user                                                                   User?
+  acl_user_access_control                                                acl_user_access_control[]
   dim_employee_benefits                                                  dim_employee_benefits[]
   dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
   dim_incident_reports_dim_incident_reports_reported_byTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_reported_byTotrans_employees")
@@ -594,19 +535,91 @@ model trans_payrolls {
   trans_payroll_date       trans_payroll_date?        @relation(fields: [date_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payrolls_trans_payroll_date_2")
 }
 
-model User {
-  id              String           @id @default(cuid())
-  name            String?
-  email           String           @unique
-  emailVerified   DateTime?
-  image           String?
-  privilege_id    Int?
-  employee_id     Int?             @unique
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  accounts        Account[]
-  sessions        Session[]
-  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "User_employee_id_fkey")
-  sys_privileges  sys_privileges?  @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "User_privilege_id_fkey")
-  sys_devices     sys_devices?
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model auth_credentials {
+  id          Int         @id @default(autoincrement())
+  username    String      @unique
+  password    String
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime?   @db.Timestamptz(6)
+  user_id     String      @unique
+  trans_users trans_users @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model acl_user_access_control {
+  id              Int              @id @default(autoincrement())
+  employee_id     Int?
+  privilege_id    Int
+  banned_til      DateTime?        @db.Timestamptz(6)
+  created_at      DateTime         @default(now()) @db.Timestamptz(6)
+  update_at       DateTime?        @db.Timestamptz(6)
+  user_id         String?          @unique
+  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sys_privileges  sys_privileges   @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  trans_users     trans_users?     @relation(fields: [user_id], references: [id], onDelete: NoAction)
+  sec_devices     sec_devices[]
+}
+
+model sec_devices {
+  id                         Int                     @id(map: "sys_devices_pkey") @default(autoincrement())
+  ip_address                 String?                 @db.Inet
+  is_logged_out              Boolean                 @default(false)
+  created_at                 DateTime                @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime?               @default(now()) @db.Timestamp(6)
+  country_code               String?                 @db.VarChar(4)
+  country_name               String?                 @db.VarChar(45)
+  region                     String?                 @db.VarChar(45)
+  city                       String?                 @db.VarChar(45)
+  platform                   String?                 @db.VarChar(45)
+  os                         String?                 @db.VarChar(45)
+  os_version                 String?                 @db.VarChar(20)
+  login_count                Int
+  platform_type              String?                 @db.VarChar(45)
+  acl_user_access_control_id Int
+  acl_user_access_control    acl_user_access_control @relation(fields: [acl_user_access_control_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([ip_address], map: "idx_ip_address")
+}
+
+model auth_accounts {
+  userId              String
+  provider            String
+  provider_account_id String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime
+  scope               String?
+  token_type          String?     @db.VarChar
+  id_token            String?
+  type                String?     @db.VarChar
+  trans_users         trans_users @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Account_userId_fkey")
+
+  @@id([provider, provider_account_id])
+}
+
+model sec_sessions {
+  sessionToken String      @unique(map: "Session_sessionToken_key")
+  userId       String
+  expires      DateTime
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime
+  id           Int         @id @default(autoincrement())
+  trans_users  trans_users @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Session_userId_fkey")
+}
+
+model trans_users {
+  id                      String                   @id(map: "User_pkey") @default(dbgenerated("gen_random_uuid()"))
+  name                    String
+  email                   String                   @unique(map: "User_email_key")
+  emailVerified           DateTime?
+  image                   String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime?
+  acl_user_access_control acl_user_access_control?
+  auth_accounts           auth_accounts[]
+  auth_credentials        auth_credentials?
+  sec_sessions            sec_sessions[]
 }

@@ -321,7 +321,7 @@ function DataTable<T extends { id: string | number }>({
                 </Tooltip>)}
             </div>
         </section>);
-    }, [isActionable, onSelectToDelete, selectedKeys, sortedItems.length]);
+    }, [counterName, isActionable, onSelectToDelete, selectedKeys, sortedItems.length]);
 
     const loadingState = isLoading ? "loading" : "idle";
     const emptyContent = sortedItems.length === 0 && !isLoading && 'No data found. Try to refresh';

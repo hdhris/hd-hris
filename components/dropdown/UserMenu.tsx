@@ -35,7 +35,6 @@ export default function UserMenu() {
     useEffect(() => {
         async function session() {
             const sessionData = await getSession()
-            console.log("Session Data: ", sessionData)
             if (sessionData) {
                 const user = sessionData.user;
                 const name = user?.name ?? "-----";

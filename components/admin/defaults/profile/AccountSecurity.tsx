@@ -126,7 +126,7 @@ function AccountSecurity() {
         <Section title='Account Security' subtitle='Protect your account by updating your credentials.'/>
         {/*<div className='ms-5 space-y-5'>*/}
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className={cn('ms-16 space-y-5 flex flex-col p-2')}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className={cn('ms-16 space-y-5 flex flex-col p-2', isCredential && 'opacity-50 pointer-events-none cursor-not-allowed')}>
                 <FormFields items={currentPassword}/>
                 <div className={cn('grid grid-cols-2 gap-4', isCredential && 'opacity-50 pointer-events-none cursor-not-allowed')}>
                     <FormFields items={changePassword}/>

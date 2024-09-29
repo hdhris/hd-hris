@@ -5,6 +5,6 @@ export function useCredentials() {
     const { data } = useUser();
 
     return useMemo(() => {
-        return data ? data.provider === "credential" : false;
+        return data && data.hasCredential
     }, [data]);
 }

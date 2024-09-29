@@ -10,20 +10,12 @@ export async function PUT(req: NextRequest) {
         hasContentType(req)
 
         const data = await req.json();
+        console.log("Update Data: ", data);
         // Step 1: Retrieve the user ID from the session
         const session = await auth();
         const userId = session?.user.id; // Corrected userId reference
-        const provider = await prisma.account.findUnique({
-            where: {
-                provider_providerAccountId: {
-                    provider: "credential",
-                    providerAccountId: userId!
-                }
-            },
-            select: {
-                provider: true
-            }
-        })
+        console.log("Update Id: ", userId);
+
         // const updateSchema = provider?.provider === "credential" ? updateProfileSchema.omit({username: true}) : updateProfileSchema;
         const parsedData = updateProfileSchema.omit({username: true}).parse(data);
 
@@ -32,6 +24,11 @@ export async function PUT(req: NextRequest) {
             return NextResponse.json({message: 'Validation error'}, {status: 400});
         }
 
+        const provider = await prisma.auth_accounts.findFirst({
+            where: {
+                userId
+            }
+        })
 
 
         if (!userId) {
@@ -39,7 +36,7 @@ export async function PUT(req: NextRequest) {
         }
 
         // Step 2: Retrieve the account associated with the user
-        const account = await prisma.user.findUnique({
+        const account = await prisma.trans_users.findUnique({
             where: {
                 id: userId
             },
@@ -50,14 +47,11 @@ export async function PUT(req: NextRequest) {
                 // Step 3: Update the user account in the database
                 await prisma.$transaction(async (tx) => {
                     // Update the account information
-                    if(provider?.provider === "credential") {
+                    if(!provider) {
                         const usernameData = updateProfileSchema.omit({display_name: true}).parse(data)
-                        await tx.account.update({
+                        await tx.auth_credentials.update({
                             where: {
-                                provider_providerAccountId: {
-                                    provider: "credential",
-                                    providerAccountId: userId,
-                                },
+                               user_id: userId
                             },
                             data: {
                                 username: usernameData.username,
@@ -67,7 +61,7 @@ export async function PUT(req: NextRequest) {
 
 
                     // Update the user information
-                    await tx.user.update({
+                    await tx.trans_users.update({
                         where: {
                             id: userId,
                         },
@@ -79,13 +73,6 @@ export async function PUT(req: NextRequest) {
 
                 });
 
-                // Step 4: Update the session with the new user data
-                // await unstable_update({
-                //     user: {
-                //         name: parsedData.display_name,
-                //         image: data.picture
-                //     }
-                // });
 
                 return NextResponse.json({message: 'Account updated successfully'});
             } catch (error) {
