@@ -1,14 +1,25 @@
+interface AffectedJson {
+  status : {
+    probationary : boolean;
+    regular : boolean;
+  }
+  department : number[];
+  job_classes : number[];
+}
+
+
 export interface Payhead {
-  calculation: string; // Assuming calculation will be a string (like "1000")
-  created_at: string; // ISO 8601 formatted date string
-  updated_at: string; // ISO 8601 formatted date string
-  deleted_at: string | null; // Nullable ISO 8601 formatted date string
-  id: number; // Unique identifier for the payhead
-  is_active: boolean; // Indicates if the payhead is active
-  is_mandatory: boolean; // Indicates if the payhead is mandatory
-  name: string; // Name of the payhead
-  type: 'earning' | 'deduction'; // Restricts to "earning" or "deduction"
-  dim_payhead_affecteds: Affected[]; // Array of affected entries
+  calculation: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string;
+  id: number;
+  is_active: boolean;
+  is_mandatory: boolean;
+  name: string;
+  type: 'earning' | 'deduction';
+  affected_json: AffectedJson;
+  dim_payhead_affecteds: Affected[];
 }
   export interface Affected {
     id: number;

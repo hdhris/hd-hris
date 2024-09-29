@@ -150,7 +150,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
 
   return (
     <div className="flex flex-row gap-2 pt-2">
-      <Card className="h-fit m-2">
+      <Card className="h-fit mx-2">
         <CardHeader>{label}</CardHeader>
         <CardBody>
           <Form {...form}>
