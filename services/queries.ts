@@ -67,14 +67,14 @@ export function useSchedule() {
     })
 }
 
-export function useEarnings() {
-    return useSWR<Payhead[]>('/api/admin/payroll/earnings', fetcher, {
-        revalidateOnFocus: false, refreshInterval: 5000
+export function usePayheads(type: string) {
+    return useSWR<Payhead[]>(`/api/admin/payroll/payhead?type=${type}`, fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
 export function useNewPayhead() {
-    return useSWR<PayheadAffected>('/api/admin/payroll/earnings/add', fetcher, {
+    return useSWR<PayheadAffected>('/api/admin/payroll/payhead/read', fetcher, {
         revalidateOnFocus: false
     })
 }

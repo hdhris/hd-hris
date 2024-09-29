@@ -5,7 +5,7 @@ import {FilterProps} from "@/types/table/default_config";
 import {getRandomInt} from "@/lib/utils/numberFormat";
 
 const departments: DepartmentInfo[] = [{
-    id: 1, department: "Human Resources", department_status: "Active", heads: {
+    id: 1, department: "Human Resources", department_status: "Inactive", heads: {
         job: "Head of HR",
         fullName: "Jane Smith",
         picture: `https://avatar.iran.liara.run/public/${getRandomInt(1, 100)}`
@@ -34,7 +34,7 @@ const departments: DepartmentInfo[] = [{
         picture: `https://avatar.iran.liara.run/public/${getRandomInt(1, 100)}`
     }], total_employees: 5
 }, {
-    id: 2, department: "Finance", department_status: "Active", heads: {
+    id: 2, department: "Finance", department_status: "Inactive", heads: {
         job: "Chief Financial Officer",
         fullName: "William Turner",
         picture: `https://avatar.iran.liara.run/public/${getRandomInt(1, 100)}`
@@ -94,7 +94,7 @@ const departments: DepartmentInfo[] = [{
         picture: `https://avatar.iran.liara.run/public/${getRandomInt(1, 100)}`
     }], total_employees: 4
 }, {
-    id: 5, department: "Sales", department_status: "Active", heads: {
+    id: 5, department: "Sales", department_status: "Inactive", heads: {
         job: "Head of Sales",
         fullName: "Victor Stone",
         picture: `https://avatar.iran.liara.run/public/${getRandomInt(1, 100)}`

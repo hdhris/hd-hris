@@ -30,11 +30,11 @@ function Page() {
       );
       toast({
         title: "Updated",
-        description: "Earning updated successfully!",
+        description: "Deduction updated successfully!",
         variant: "success",
       });
       setTimeout(() => {
-        router.push(`/payroll/earnings`);
+        router.push(`/payroll/deductions`);
       }, 1000);
     } catch (error) {
       toast({
@@ -47,8 +47,8 @@ function Page() {
 
   return (
     <PayheadForm
-        label="Update Earning"
-        type="earning"
+        label="Update Deduction"
+        type="deduction"
         onSubmit={onSubmit}
         allData={{data:data!, isLoading:isLoading}}
       />

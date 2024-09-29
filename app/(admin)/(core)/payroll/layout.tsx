@@ -29,7 +29,7 @@ function RootLayout({ children }: { children: ReactNode }) {
         onSelectionChange={(key) => handleTabChange(key as string)}
       >
         <Tab key="earnings" title="Earnings" />
-        <Tab key="deductions" title="Deduction" />
+        <Tab key="deductions" title="Deductions" />
         <Tab key="advance" title="Cash Advance" />
         <Tab key="process" title="Payroll Process" />
         <Tab key="payslip" title="Pay slip" />
