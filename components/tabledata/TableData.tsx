@@ -40,7 +40,7 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
     filterConfig?: (key: Selection) => T[];
     items: T[];
     sort?: SortDescriptor;
-    endContent?: () => React.ReactNode;
+    endContent?: React.ReactNode | (() => React.ReactNode);
     counterName?: string;
     isLoading?: boolean;
     contentTop?: React.JSX.Element;
@@ -291,7 +291,7 @@ function DataTable<T extends { id: string | number }>({
                                 </DropdownMenu>
                             </Dropdown>
                         </div>)}
-                        {endContent && <div className='ms-auto'>{endContent()}</div>}
+                            <div className='ms-auto self-center'>{typeof endContent === 'function' ? endContent() : endContent}</div>
                         </div>
                     </div>
                     <div className='flex justify-between items-center'>
@@ -362,7 +362,7 @@ function DataTable<T extends { id: string | number }>({
                         />) : null}
                         loadingState={loadingState}
                     >
-                        {(item: T) => (<TableRow key={item.id} className='cursor-pointer '>
+                        {(item: T) => (<TableRow key={item.id} className='cursor-pointer'>
                             {(columnKey: React.Key) => (<TableCell key={String(columnKey)} className='py-3'>
                                 {config.rowCell(item, columnKey)}
                             </TableCell>)}
