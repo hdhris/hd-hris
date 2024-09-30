@@ -1,4 +1,6 @@
 import BinaryTree from "@/components/binarytree/BinaryTree";
+import PrivilegePage from "@/lib/utils/privilege/exampleData";
+import PrivilegeCheckboxes from "@/lib/utils/privilege/privilegeTree";
 import React from "react";
 
 const treeData = [
@@ -19,8 +21,11 @@ const treeData = [
 export default function page() {
   return (
     <>
-      <div>Privileges</div>
-      <BinaryTree data={treeData} />
+      {/* <div>Privileges</div> */}
+      {/* <BinaryTree data={treeData} /> */}
+      
+      <PrivilegePage/>
+      {/* <PrivilegeCheckboxes/> */}
     </>
   );
 }

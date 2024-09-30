@@ -9,7 +9,7 @@ export interface SelectionItems {
 }
 export interface SelectionProp{
     placeholder?: string,
-    items: SelectionItems[] |string[],
+    items: SelectionItems[] | string[],
     className?: string
     onChange?:(...event: any[]) => void
     isDisabled?: boolean

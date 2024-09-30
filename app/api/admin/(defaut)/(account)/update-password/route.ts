@@ -22,13 +22,10 @@ export async function PUT(req: NextRequest) {
         const userId = sessionId?.user;
 
         // Retrieve the user's current password from the database
-        const dbPassword = await prisma.account.findUnique({
+        const dbPassword = await prisma.auth_credentials.findUnique({
             select: { password: true },
             where: {
-                provider_providerAccountId: {
-                    provider: "credential", // Ensure this matches your Prisma schema
-                    providerAccountId: userId?.id!
-                }
+                user_id: userId?.id
             }
         });
 
@@ -62,15 +59,13 @@ export async function PUT(req: NextRequest) {
 
         // Encrypt the new password and update it in the database
         const encryptedPassword = await des.encryptData(parsedData.new_password);
-        const updateResult = await prisma.account.update({
+        const updateResult = await prisma.auth_credentials.update({
             where: {
-                provider_providerAccountId: {
-                    provider: "credential", // Ensure this matches your Prisma schema
-                    providerAccountId: userId?.id!
-                }
+                user_id: userId?.id
             },
             data: {
-                password: encryptedPassword
+                // password: encryptedPassword
+                password: encryptedPassword!
             }
         });
 

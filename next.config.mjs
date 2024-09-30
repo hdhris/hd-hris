@@ -3,7 +3,7 @@ const nextConfig = {
   env: {
     APP_NAME: process.env.APP_NAME,
     AES_SECRET: process.env.AES_SECRET,
-    VISITORAPI: process.env.VISITORAPI,
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
   },
   async redirects() {
     return [

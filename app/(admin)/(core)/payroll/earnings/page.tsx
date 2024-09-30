@@ -11,6 +11,7 @@ import axios from "axios";
 import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
+import { parseBoolean } from "@/lib/utils/parser/parseClass";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
@@ -100,10 +101,10 @@ function Page() {
     },
     {
       filtered: [
-        { name: "Yes", uid: "mandatory_true" },
-        { name: "No", uid: "mandatory_false" },
+        { name: "Mandatory", uid: "mandatory_true" },
+        { name: "Non-mandatory", uid: "mandatory_false" },
       ],
-      category: "Mandatory",
+      category: "Affected",
     },
   ];
   const filterConfig = (keys: Selection) => {
@@ -115,9 +116,9 @@ function Page() {
         const [uid, value] = (key as string).split("_");
         filteredItems = filteredItems.filter((items) => {
           if (uid.includes("active")) {
-            return items.is_active === (value === "true");
+            return items.is_active === parseBoolean(value);
           } else if (uid.includes("mandatory")) {
-            return items.is_mandatory === (value === "true");
+            return items.is_mandatory === parseBoolean(value);
           }
         });
       });

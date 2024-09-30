@@ -11,7 +11,6 @@ import axios from "axios";
 
 
 function Page() {
-  const [selectedKeys, setSelectedKeys] = useState<any>([]);
   const { id } = useParams();
   const { data, isLoading } = useSWR<PayheadAffected>(
     `/api/admin/payroll/payhead/read?id=${id}`,
@@ -19,14 +18,14 @@ function Page() {
   );
   const router = useRouter();
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log([values, selectedKeys.map(Number)]);
+  const onSubmit = async (values: z.infer<typeof formSchema>, keys: number[]) => {
+    console.log([values, keys]);
     try {
       await axios.post(
         `/api/admin/payroll/payhead/update?id=${id}`,
         {
           data: values,
-          affected: values.is_mandatory? []:selectedKeys.map(Number),
+          affected: values.is_mandatory? []:keys,
         }
       );
       toast({
@@ -51,8 +50,6 @@ function Page() {
         label="Update Deduction"
         type="deduction"
         onSubmit={onSubmit}
-        selectedKeys={selectedKeys}
-        setSelectedKeys={setSelectedKeys}
         allData={{data:data!, isLoading:isLoading}}
       />
   );

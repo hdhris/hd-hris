@@ -40,11 +40,13 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
     filterConfig?: (key: Selection) => T[];
     items: T[];
     sort?: SortDescriptor;
-    endContent?: () => React.ReactNode;
+    endContent?: React.ReactNode | (() => React.ReactNode);
     counterName?: string;
     isLoading?: boolean;
     contentTop?: React.JSX.Element;
     onSelectToDelete?: boolean
+    selectedKeys?: Selection;
+    setSelectedKeys?: (keys: Selection) => void;
 }
 
 interface SearchProps<T> {
@@ -78,6 +80,8 @@ function DataTable<T extends { id: string | number }>({
                                                           isLoading,
                                                           selectionMode,
                                                           contentTop,
+                                                          selectedKeys : selKeys,
+                                                          setSelectedKeys : setSelKeys,
                                                           ...props
                                                       }: TableProp<T> & SearchProps<T>) {
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>(sort ? sort : {
@@ -88,9 +92,14 @@ function DataTable<T extends { id: string | number }>({
     const router = useRouter();
     const searchParams = useSearchParams();
     const searchValueFromParams = searchParams.get('search') || '';
-    const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
+    const filterValueFromParams = searchParams.get('filter') || '';
+    const [get, set] = React.useState<Selection>(new Set([]));
+    const [selectedKeys, setSelectedKeys] = [selKeys||get , setSelKeys||set];
     const [filterValue, setFilterValue] = React.useState(searchValueFromParams);
-    const [filter, setFilter] = React.useState<Selection>(new Set([]));
+    const [filter, setFilter] = React.useState<Selection>(() => {
+        const values = filterValueFromParams.split(',');
+        return values.length === 1 && values[0] === '' ? new Set([]) : new Set(values);
+      });
     const hasSearchFilter = Boolean(filterValue);
     const isActionable = selectedKeys === 'all' || selectedKeys.size >= 2;
 
@@ -193,7 +202,7 @@ function DataTable<T extends { id: string | number }>({
     const topContent = React.useMemo(() => {
         return (<Suspense fallback={<Spinner/>}>
                 <div className="flex flex-col gap-4">
-                    <div className="flex justify-between">
+                    <div className="flex gap-3">
                         {
                             searchingItemKey && (
                                 <Input
@@ -210,22 +219,22 @@ function DataTable<T extends { id: string | number }>({
                                 />
                             )
                         }
-                        <div className='flex flex-row gap-3'>
+                        <div className='flex w-full flex-row gap-3 justify-end'>
                         {filterItems && (<div className="flex gap-3 items-center">
                             <Dropdown classNames={{content: 'rounded'}}>
                                 <DropdownTrigger className="hidden sm:flex">
                                     <Button radius="sm" endContent={<ChevronDownIcon
                                         className={cn('text-small', icon_color, icon_size)}/>} variant="bordered">
                                         {filter !== "all" && filter.size > 0
-                                            ? Array.from(filterItems)
+                                            ? `Filter by: ${Array.from(filterItems)
                                                 .filter((item) => 
                                                     item.filtered.some((filteredItem) => 
                                                         Array.from(filter).some((f) => String(f) === filteredItem.uid)
                                                     )
                                                 )
                                                 .map((item) => item.category)  // Return the `category` for each item that matches
-                                                .join(", ")                    // Join them with commas
-                                            : "Filter..."}
+                                                .join(", ")   }`                 // Join them with commas
+                                            : "Filter options"}
 
                                     </Button>
                                 </DropdownTrigger>
@@ -237,11 +246,11 @@ function DataTable<T extends { id: string | number }>({
                                     selectionMode="multiple"
                                     onSelectionChange={(keys) => {
                                         const newFilter = new Set(filter); // Clone current filter
-                                        const selectedKeys = Array.from(keys) as string[];
+                                        const selectedFilter = Array.from(keys) as string[];
                                   
                                         // Ensure one selection per section
                                         filterItems.forEach((item) => {
-                                            const sectionSelected = selectedKeys.filter((key) =>
+                                            const sectionSelected = selectedFilter.filter((key) =>
                                               item.filtered.some((data) => data.uid === key)
                                             );
                                           
@@ -282,7 +291,7 @@ function DataTable<T extends { id: string | number }>({
                                 </DropdownMenu>
                             </Dropdown>
                         </div>)}
-                        {endContent && endContent()}
+                            <div className='ms-auto self-center'>{typeof endContent === 'function' ? endContent() : endContent}</div>
                         </div>
                     </div>
                     <div className='flex justify-between items-center'>
@@ -302,7 +311,7 @@ function DataTable<T extends { id: string | number }>({
         return (<section className="py-2 px-2 flex justify-between items-center">
             <div className='flex gap-4 items-center'>
                 <Text className="text-small font-semibold opacity-50">
-                    {selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${sortedItems.length} selected`}
+                    {selectedKeys === "all" || selectedKeys.size===sortedItems.length ? `All ${counterName?.toLocaleLowerCase()} selected` : `${selectedKeys.size} of ${sortedItems.length} selected`}
                 </Text>
                 {onSelectToDelete && isActionable && (<Tooltip color="danger"
                                                                content={`Delete ${selectedKeys === "all" ? "all users selected" : `${selectedKeys.size} users`}`}>
@@ -312,7 +321,7 @@ function DataTable<T extends { id: string | number }>({
                 </Tooltip>)}
             </div>
         </section>);
-    }, [isActionable, onSelectToDelete, selectedKeys, sortedItems.length]);
+    }, [counterName, isActionable, onSelectToDelete, selectedKeys, sortedItems.length]);
 
     const loadingState = isLoading ? "loading" : "idle";
     const emptyContent = sortedItems.length === 0 && !isLoading && 'No data found. Try to refresh';
@@ -353,7 +362,7 @@ function DataTable<T extends { id: string | number }>({
                         />) : null}
                         loadingState={loadingState}
                     >
-                        {(item: T) => (<TableRow key={item.id} className='cursor-pointer '>
+                        {(item: T) => (<TableRow key={item.id} className='cursor-pointer'>
                             {(columnKey: React.Key) => (<TableCell key={String(columnKey)} className='py-3'>
                                 {config.rowCell(item, columnKey)}
                             </TableCell>)}

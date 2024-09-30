@@ -8,15 +8,14 @@ import { formSchema, PayheadForm } from "@/components/admin/payroll/PayheadUI";
 import axios from "axios";
 
 function Page() {
-  const [selectedKeys, setSelectedKeys] = useState<any>([]);
   const { data, isLoading } = useNewPayhead();
   const router = useRouter();
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log([values, selectedKeys.map(Number)]);
+  const onSubmit = async (values: z.infer<typeof formSchema>, keys: number[]) => {
+    console.log([values, keys]);
     try {
       await axios.post("/api/admin/payroll/payhead/create", {
         data: values,
-        affected: values.is_mandatory? []:selectedKeys.map(Number),
+        affected: values.is_mandatory? []:keys,
         type: "earning",
       });
       toast({
@@ -41,8 +40,6 @@ function Page() {
         label="Create Earning"
         type="earning"
         onSubmit={onSubmit}
-        selectedKeys={selectedKeys}
-        setSelectedKeys={setSelectedKeys}
         allData={{data:data!, isLoading:isLoading}}
       />
   );

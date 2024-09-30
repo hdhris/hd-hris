@@ -14,6 +14,7 @@ import {
   Input,
   Avatar,
   Spinner,
+  Selection,
 } from "@nextui-org/react";
 import { AffectedEmployee, PayheadAffected } from "@/types/payroll/payrollType";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
@@ -26,11 +27,9 @@ import TableData from "@/components/tabledata/TableData";
 
 interface PayheadFormProps {
   label: string;
-  onSubmit: (values: any) => void;
+  onSubmit: (values: any, keys: number[]) => void;
   type: "earning" | "deduction";
   allData: { data: PayheadAffected; isLoading: boolean };
-  selectedKeys: string[];
-  setSelectedKeys: (keys: string[]) => void;
 }
 
 export const formSchema = z.object({
@@ -48,9 +47,8 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
   type,
   onSubmit,
   allData,
-  selectedKeys,
-  setSelectedKeys,
 }) => {
+  const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
   const { data, isLoading } = allData || { data: null, isLoading: true }; // Ensure `data` has a fallback
   const [disabledKeys, setDisabledKeys] = useState<any>([]);
   const [isMandatory, setIsMandatory] = useState(false);
@@ -95,17 +93,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
     },
   };
 
-  function handleSelection(keys: any) {
-    if (keys === "all") {
-      const employeeIds = data?.employees.map((employee) =>
-        String(employee.id)
-      );
-      setSelectedKeys(employeeIds);
-    } else {
-      const keysArray: string[] = Array.from(keys);
-      setSelectedKeys(keysArray);
-    }
-  }
+  
 
   function handleMandatory(selected: boolean) {
     setIsMandatory(selected);
@@ -119,9 +107,14 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
     }
   }
 
-  async function handleSubmit(value: any){
+  async function handleSubmit(value: any) {
     setPending(true);
-    await onSubmit(value);
+    await onSubmit(
+      value,
+      selectedKeys === "all"
+        ? data.employees.map((employee) => employee.id)
+        : Array.from(selectedKeys).map(Number)
+    );
     setPending(false);
   }
 
@@ -130,7 +123,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
       const employeeIds = data.affected.map((affected) =>
         String(affected.employee_id)
       );
-      setSelectedKeys(employeeIds);
+      setSelectedKeys(new Set(employeeIds));
       form.reset({
         name: data.payhead.name,
         calculation: data.payhead.calculation,
@@ -161,7 +154,10 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
         <CardHeader>{label}</CardHeader>
         <CardBody>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4"
+            >
               <FormField
                 control={form.control}
                 name="name"
@@ -226,7 +222,12 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                   </FormItem>
                 )}
               />
-              <Button isLoading={isPending} color="primary" className="w-full" type="submit">
+              <Button
+                isLoading={isPending}
+                color="primary"
+                className="w-full"
+                type="submit"
+              >
                 Submit
               </Button>
             </form>
@@ -236,12 +237,12 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
       <div className="w-full">
         <TableData
           config={config}
-          items={data.employees!}
+          items={data.employees || []}
           isLoading={isLoading}
-          selectedKeys={isMandatory ? [] : selectedKeys}
+          selectedKeys={isMandatory ? new Set([]) : selectedKeys}
           disabledKeys={disabledKeys}
           searchingItemKey={["first_name", "middle_name", "last_name"]}
-          onSelectionChange={(keys) => handleSelection(keys)}
+          onSelectionChange={setSelectedKeys}
           counterName="Employees"
           className="flex-1 h-[calc(100vh-9.5rem)] overflow-y-auto w-full"
           removeWrapper

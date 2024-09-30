@@ -33,7 +33,7 @@ const renderFormItem = (item: FormInputProps, control: any, index: number, size:
     control={control}
     name={item.name}
     render={({field}) => (<FormItem>
-        {item.label && (<FormLabel htmlFor={item.name}>
+        {item.label && (<FormLabel htmlFor={item.name}  className={item.inputClassName}>
             {item.label}
             {item.isRequired && <span className="text-destructive text-medium"> *</span>}
         </FormLabel>)}
@@ -48,7 +48,6 @@ const renderFormItem = (item: FormInputProps, control: any, index: number, size:
                 color="success"
                 placeholder={item.placeholder}
                 size={size}
-                className={item.inputClassName}
                 {...field}
                 classNames={InputStyle}
                 endContent={item.endContent}
