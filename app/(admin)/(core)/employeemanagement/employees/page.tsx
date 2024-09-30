@@ -11,6 +11,7 @@ import AddEmployee from "@/components/admin/add/AddEmployees";
 import EditEmployee from "@/components/admin/edit/EditEmployee";
 import EmployeeModal from "@/components/admin/add/EmployeeModal";
 import axios from "axios";
+import showDialog from "@/lib/utils/confirmDialog";
 
 const Page: React.FC = () => {
   const { data: employees, mutate, error } = useEmployeesData();
@@ -48,27 +49,52 @@ const Page: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = async () => {
-    if (selectedEmployeeId !== null) {
-      try {
-        await axios.delete(`/api/employeemanagement/employees?id=${selectedEmployeeId}`);
-        toast({
-          title: "Success",
-          description: "Employee successfully deleted!",
-          duration: 3000,
+  const handleDelete = async (id: Number, name: string) => {
+    try {
+      const result = await showDialog(
+        "Confirm Delete",
+        `Are you sure you want to delete '${name}' ?`,
+        false
+      );
+      if (result === "yes") {
+        await axios.post("/api/admin/payroll/payhead/delete", {
+          id: id,
         });
-        await mutate();
-        onCloseDeleteModal();
-      } catch (error) {
-        console.error("Error deleting employee:", error);
         toast({
-          title: "Error",
-          description: "Failed to delete employee. Please try again.",
-          duration: 3000,
+          title: "Deleted",
+          description: "Earning deleted successfully!",
+          variant: "warning",
         });
       }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error: " + error,
+        variant: "danger",
+      });
     }
   };
+  // const handleDelete = async () => {
+  //   if (selectedEmployeeId !== null) {
+  //     try {
+  //       await axios.delete(`/api/employeemanagement/employees?id=${selectedEmployeeId}`);
+  //       toast({
+  //         title: "Success",
+  //         description: "Employee successfully deleted!",
+  //         duration: 3000,
+  //       });
+  //       await mutate();
+  //       onCloseDeleteModal();
+  //     } catch (error) {
+  //       console.error("Error deleting employee:", error);
+  //       toast({
+  //         title: "Error",
+  //         description: "Failed to delete employee. Please try again.",
+  //         duration: 3000,
+  //       });
+  //     }
+  //   }
+  // };
 
   const handleEmployeeUpdated = async () => {
     try {
@@ -206,7 +232,7 @@ const Page: React.FC = () => {
         />
       )}
 
-      <Modal size="xs" isOpen={isDeleteModalOpen} onClose={onCloseDeleteModal}>
+      {/* <Modal size="xs" isOpen={isDeleteModalOpen} onClose={onCloseDeleteModal}>
         <ModalContent>
           <ModalHeader>Confirm Deletion</ModalHeader>
           <ModalBody>
@@ -224,7 +250,7 @@ const Page: React.FC = () => {
             </Button>
           </ModalFooter>
         </ModalContent>
-      </Modal>
+      </Modal> */}
     </div>
   );
 };
