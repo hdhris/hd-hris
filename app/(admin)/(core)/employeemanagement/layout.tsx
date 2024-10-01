@@ -25,7 +25,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
   const breadcrumbPaths: Record<TabKeys, { title: string; link: string }[]> = {
     employees: [
       { title: "Employee Management", link: "/employeemanagement" },
-      { title: "Employees", link: "/employeemanagement/employees" },
+      { title: "Employees", link: "/employeemanagement/employees-leaves-status" },
     ],
     suspend: [
       { title: "Employee Management", link: "/employeemanagement" },

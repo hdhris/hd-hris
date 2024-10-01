@@ -1,57 +1,93 @@
-"use client";
+"use client"
 import React from 'react';
-import {Autocomplete, AutocompleteItem, User} from "@nextui-org/react";
+import { Controller, useFormContext } from "react-hook-form";
+import { Autocomplete, AutocompleteItem, cn, User } from "@nextui-org/react";
+import { LuChevronsUpDown } from "react-icons/lu";
 import Typography from "@/components/common/typography/Typography";
-import {Controller, useFormContext} from "react-hook-form";
-import {useEmployeeList} from "@/hooks/useEmployeeList";
-import {useInfiniteScroll} from "@nextui-org/use-infinite-scroll";
 
-function EmployeeListForm() {
-    const {control} = useFormContext();
-    const [isOpen, setIsOpen] = React.useState(false);
-    const { hasMore, onLoadMore, isLoading, items } = useEmployeeList({fetchDelay: 500});
-    const [, scrollerRef] = useInfiniteScroll({
-        hasMore,
-        isEnabled: isOpen,
-        shouldUseLoader: false, // Disable loader display at the bottom
-        onLoadMore,
-    });
+export type Employee = {
+    id: number;
+    name: string;
+    picture: string;
+    department: string;
+};
+
+interface EmployeeListForm {
+    employees: Employee[],
+    isLoading?: boolean
+}
+
+function EmployeeListForm({employees, isLoading}: EmployeeListForm) {
+    const user = React.useMemo(() => {
+        if(employees) return employees.sort((a, b) => a.name.localeCompare(b.name));
+        return [];
+    }, [employees])
+    const { control, setValue, formState: { errors } } = useFormContext();
     return (
-        <Controller
-            control={control}
-            name="employee_name"
-            render={({ field }) => (
-                <Autocomplete
-                    label={
-                        <Typography className="text-sm font-medium inline-flex">Pick an Employee</Typography>
-                    }
-                    isRequired
-                    radius="sm"
-                    placeholder="Select an Employee"
-                    defaultItems={items}
-                    labelPlacement="outside"
-                    className="max-w-xs"
-                    variant="bordered"
-                    isLoading={isLoading}
-                    scrollRef={scrollerRef}
-                    onOpenChange={setIsOpen}
+        <div>
+            <Controller
+                control={control}
+                name="employee_id"
+                render={({ field }) => (
+                    <>
+                        <Autocomplete
+                            label={
+                                <Typography
+                                    className={cn(
+                                        "text-sm font-medium inline-flex",
+                                        errors.employee_id ? "text-red-500" : ""
+                                    )}
+                                >
+                                    Pick an Employee
+                                </Typography>
+                            }
+                            isClearable={false}
+                            isRequired
+                            radius="sm"
+                            placeholder="Select an Employee"
+                            defaultItems={user}
+                            labelPlacement="outside"
+                            className="w-full"
+                            variant="bordered"
+                            isLoading={isLoading}
+                            selectedKey={field.value ? String(field.value) : null}
+                            disableSelectorIconRotation
+                            selectorIcon={<LuChevronsUpDown />}
+                            onSelectionChange={(e) => {
+                                const selectedItem = user.find(item => String(item.id) === String(e));
+                                if (selectedItem) {
+                                    setValue('employee_id', selectedItem.id);
+                                    field.onChange(selectedItem.id);
+                                } else{
+                                    setValue('employee_id', "");
+                                    field.onChange("");
+                                }
+                            }}
+                            {...field}
+                        >
+                            {(item) => (
+                                <AutocompleteItem textValue={item.name} key={item.id}>
+                                    <User
+                                        name={item.name}
+                                        description={item.department}
+                                        avatarProps={{
+                                            src: item.picture,
+                                        }}
+                                    />
+                                </AutocompleteItem>
+                            )}
+                        </Autocomplete>
 
-                    {...field}
-                >
-                    {(item) => (
-                        <AutocompleteItem textValue={item.name} key={item.id} className="capitalize"> {/* Use item.id here */}
-                            <User
-                                name={item.name}
-                                description={item.department}
-                                avatarProps={{
-                                    src: item.picture
-                                }}
-                            />
-                        </AutocompleteItem>
-                    )}
-                </Autocomplete>
-            )}
-        />
+                        {/* Display error message if employee_id has validation issues */}
+                        {errors.employee_id && (
+                            <Typography className="text-[0.8rem] font-medium text-red-500 mt-2">
+                                {errors.employee_id.message as string}
+                            </Typography>
+                        )}
+                    </>
+                )}
+            />
+        </div>
     );
 }
 

@@ -19,7 +19,7 @@ const nextConfig = {
       },
       {
         source: "/employeemanagement",
-        destination: "/employeemanagement/employees",
+        destination: "/employeemanagement/employees-leaves-status",
         permanent: true,
       },
     ];

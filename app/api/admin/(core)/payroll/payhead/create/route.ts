@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         },
       });
   
-      // Create new affected employees
+      // Create new affected employees-leaves-status
       if (affected.length > 0) {
         await pm.dim_payhead_affecteds.createMany({
           data: affected.map((employeeId: number) => ({

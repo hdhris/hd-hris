@@ -38,7 +38,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
         async signIn({ account, user }) {
             try {
                 if (account?.provider === "google") {
-                    // Check if user email exists in the employees table
+                    // Check if user email exists in the employees-leaves-status table
                     const googleAuth = await prisma.trans_employees.findUnique({
                         where: {
                             email: user.email || undefined,

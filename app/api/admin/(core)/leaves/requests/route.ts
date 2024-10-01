@@ -6,7 +6,6 @@ import dayjs from "dayjs";
 
 
 export async function GET() {
-
     const data = await prisma.trans_leaves.findMany({
         where: {
             end_date: {

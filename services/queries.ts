@@ -7,6 +7,7 @@ import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/rou
 import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
 import { Payhead, PayheadAffected } from "@/types/payroll/payrollType";
+import {EmployeeLeavesStatus} from "@/types/leaves/LeaveRequestTypes";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -14,13 +15,30 @@ export function useDashboard() {
     })
 }
 
-export function useEmployeesListData({currentPage, limit}: {currentPage: number, limit: number}) {
-    return useSWR<any>(`/api/admin/employees?page=${currentPage}&limit=${limit}`, fetcher, {
+export function useEmployeesLeaveStatus() {
+    return useSWR<EmployeeLeavesStatus>('/api/admin/leaves/employees-leaves-status', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
-
-
 }
+
+// export function useEmployeesLeaveStatus() {
+//     const { data, error } = useSWR<EmployeeLeavesStatus>(
+//         "/api/admin/leaves/employees-leaves-status",
+//         fetcher,
+//         {
+//             revalidateOnFocus: true,
+//             refreshInterval: 3000
+//         }
+//     );
+//
+//     console.log("Data: ", data);
+//     console.log("Error: ", error);
+//
+//     if (error) return { error };
+//     if (!data) return { loading: true }; // Return loading state
+//
+//     return data; // Return the actual data
+// }
 
 export function useAudit() {
     return useSWR<Signatory[]>('/api/admin/audit/signatories', fetcher, {
@@ -52,7 +70,7 @@ export function useBackupLogs() {
 }
 
 export function useEmployeesData() {
-    return useSWR<Employee[]>('/api/employeemanagement/employees', fetcher, {
+    return useSWR<Employee[]>('/api/employeemanagement/employees-leaves-status', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import TableData from "@/components/tabledata/TableData";
-import {FilterItems, TableConfigurations} from "@/components/admin/leaves/approval-tables-configuration";
+import {FilterItems, TableConfigurations} from "@/components/admin/leaves/table-config/approval-tables-configuration";
 import {LeaveRequestTypes} from "@/types/leaves/LeaveRequestTypes";
 import prisma from "@/prisma/prisma";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";

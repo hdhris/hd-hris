@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Step 1: Fetch existing affected employees for this payhead
+      // Step 1: Fetch existing affected employees-leaves-status for this payhead
       const existingAffected = await pm.dim_payhead_affecteds.findMany({
         where: { payhead_id: id },
         select: { employee_id: true },
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       );
       const newEmployeeIds = affected.map((employeeId: number) => employeeId);
 
-      // Step 2: Find employees to delete and to create
+      // Step 2: Find employees-leaves-status to delete and to create
       const employeesToDelete = existingEmployeeIds.filter(
         (employeeId) => !newEmployeeIds.includes(employeeId)
       ) as number[];
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         (employeeId: number) => !existingEmployeeIds.includes(employeeId)
       );
 
-      // Step 3: Delete employees that are no longer affected
+      // Step 3: Delete employees-leaves-status that are no longer affected
       if (employeesToDelete.length > 0) {
         await pm.dim_payhead_affecteds.deleteMany({
           where: {
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Step 4: Create new affected employees
+      // Step 4: Create new affected employees-leaves-status
       if (employeesToCreate.length > 0) {
         await pm.dim_payhead_affecteds.createMany({
           data: employeesToCreate.map((employeeId: number) => ({
