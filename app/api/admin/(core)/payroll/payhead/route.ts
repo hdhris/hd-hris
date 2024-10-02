@@ -8,10 +8,8 @@ export async function GET(req: NextRequest) {
   try {
     const payheads = await prisma.ref_payheads.findMany({
         where : {
-            AND:{
-                type: type,
-                deleted_at: null
-            }
+          type: type,
+          deleted_at: null,
         },
         include : {
           dim_payhead_affecteds : true

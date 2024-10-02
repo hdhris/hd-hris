@@ -5,18 +5,19 @@ import { Selection } from "@nextui-org/react";
 import { useNewPayhead } from "@/services/queries";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/dist/client/components/navigation";
-import { formSchema, PayheadForm } from "@/components/admin/payroll/PayheadUI";
+import { PayheadForm } from "@/components/admin/payroll/PayheadUI";
 import axios from "axios";
+import { AffectedJson } from "@/types/payroll/payrollType";
 
 function Page() {
   const { data, isLoading } = useNewPayhead();
   const router = useRouter();
-  const onSubmit = async (values: z.infer<typeof formSchema>, keys: number[]) => {
-    console.log([values, keys]);
+  const onSubmit = async (values: z.infer<any>, employees: number[], affectedJson: AffectedJson) => {
     try {
       await axios.post("/api/admin/payroll/payhead/create", {
         data: values,
-        affected: values.is_mandatory? []:keys,
+        affected: employees,
+        affectedJson: affectedJson,
         type: "deduction",
       });
       toast({

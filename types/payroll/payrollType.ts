@@ -1,5 +1,5 @@
-interface AffectedJson {
-  status : {
+export interface AffectedJson {
+  mandatory : {
     probationary : boolean;
     regular : boolean;
   }
@@ -15,7 +15,6 @@ export interface Payhead {
   deleted_at?: string;
   id: number;
   is_active: boolean;
-  is_mandatory: boolean;
   name: string;
   type: 'earning' | 'deduction';
   affected_json: AffectedJson;
@@ -25,8 +24,8 @@ export interface Payhead {
     id: number;
     payhead_id: number;
     employee_id: number;
-    created_at: string; // ISO 8601 formatted date string
-    updated_at: string; // ISO 8601 formatted date string
+    created_at: string;
+    updated_at: string;
   }
   
   export interface AffectedEmployee {
@@ -36,10 +35,13 @@ export interface Payhead {
     first_name: string;
     middle_name: string;
     ref_departments: {
-      name : string
+      id : number;
+      name : string;
     };
     ref_job_classes: {
-      name : string
+      id : number;
+      department_id: number;
+      name : string;
     };
   }
   
@@ -47,6 +49,15 @@ export interface Payhead {
     affected: Affected[];
     employees: AffectedEmployee[];
     payhead: Payhead;
+    departments : {
+      id: number;
+      name : string;
+    }[],
+    job_classes : {
+      id : number;
+      name : string;
+      department_id : number;
+    }[],
   }
   
   

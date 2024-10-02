@@ -1,5 +1,6 @@
 import {nextui} from '@nextui-org/theme';
 import type { Config } from "tailwindcss"
+import plugin from 'tailwindcss/plugin';
 
 const config = {
   darkMode: ["class"],
@@ -111,7 +112,15 @@ const config = {
       },
 
     }
-  }), require("tailwindcss-animate")],
+  }), require("tailwindcss-animate"),
+  plugin(function ({ addUtilities }) {
+    addUtilities({
+      '.h-fit-navlayout': {
+        height: 'calc(100vh - 10.5rem)',
+        overflowY: 'auto',
+      },
+    });
+  }),],
 } satisfies Config
 
 export default config
