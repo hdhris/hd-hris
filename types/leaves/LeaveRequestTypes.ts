@@ -22,11 +22,10 @@ export interface RequestFormTableType extends Omit<LeaveRequestTypes, "status" |
     comment: string;
     reason: string;
     leave_id: number;
-    leave_duration: number
 }
 
 export interface RequestFormWithMethod {
-    method: "Add" | "Edit" | "Delete"
+    method: "Add" | "Edit" | "Delete" | "Reset"
     data: RequestFormTableType
 }
 

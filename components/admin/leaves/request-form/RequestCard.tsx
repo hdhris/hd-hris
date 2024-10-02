@@ -24,7 +24,6 @@ interface RequestCardProps {
 
 const Cards = memo(function Cards({items, onDelete}: RequestCardProps) {
     const {setFormData} = useFormTable<RequestFormWithMethod>();
-    const [editId, setEditId] = useState<number | null>(null)
     const itemsWithKey = useMemo(() => {
         return items.map(({id, ...item}) => ({key: id, ...item}));
     }, [items]);
@@ -46,19 +45,17 @@ const Cards = memo(function Cards({items, onDelete}: RequestCardProps) {
     };
 
     const handleEdit = (id: number) => {
-
         const editedItem = itemsWithKey
-            .map(({ key, ...item }) => ({ id: key, ...item }))
+            .map(({key, ...item}) => ({id: key, ...item}))
             .find(item => item.id === id);
 
-        if (editedItem && editId !== id) {
+        if (editedItem) {
             // Call setFormData only once if the item is found
             setFormData({
-                method: "Edit",
-                data: editedItem,
+                method: "Edit", data: editedItem,
             });
         }
-        setEditId(id)
+        // setEditId(id)
     };
 
     return (<RenderList
@@ -82,7 +79,8 @@ const Cards = memo(function Cards({items, onDelete}: RequestCardProps) {
                         />
                     </div>
                 </CardHeader>
-                <CardBody className="px-3 py-0 text-small text-default-400 w-full space-y-2" onClick={() => handleEdit(Number(key))}>
+                <CardBody className="px-3 py-0 text-small text-default-400 w-full space-y-2"
+                          onClick={() => handleEdit(Number(key))}>
                     <div className="flex">
                         <div className="border-2 border-r-0 w-full shadow-small flex justify-between">
                             <Typography className="text-medium font-medium m-4">{data.leave_type}</Typography>
@@ -152,7 +150,7 @@ const CommentModal = ({comment}: { comment: string }) => {
 };
 
 const RequestCard = () => {
-    const {formData} = useFormTable<RequestFormWithMethod>();
+    const {formData, setFormData} = useFormTable<RequestFormWithMethod>();
     const isClient = useIsClient();
     const [items, setItems] = useState<RequestFormTableType[]>(() => {
         if (typeof window !== "undefined") {
@@ -177,6 +175,17 @@ const RequestCard = () => {
                 }
                 return prevItems;
             });
+        } else if (formData?.method === "Edit") {
+            setItems(prevItems => {
+                const updatedItems = prevItems.map(item => {
+                    if (item.id === formData.data.id) {
+                        return formData.data;
+                    }
+                    return item;
+                });
+                localStorage.setItem('requestItems', JSON.stringify(updatedItems));
+                return updatedItems;
+            });
         }
     }, [formData]);
 
@@ -189,6 +198,26 @@ const RequestCard = () => {
 
     // Handle clear items
     const handleClear = () => {
+        setFormData({
+            method: "Reset",
+            data: {
+                department: '',
+                created_by: {
+                    name: '',
+                    picture: ''
+                },
+                comment: '',
+                reason: '',
+                leave_id: 0,
+                id: 0,
+                name: '',
+                picture: '',
+                leave_type: '',
+                start_date: '',
+                end_date: '',
+                total_days: 0
+            }
+        })
         localStorage.removeItem('requestItems');
         setItems([]);
     };
@@ -212,7 +241,7 @@ const RequestCard = () => {
         <Switch expression={String(items.length)}>
             <Case of="0">
                 <div className="grid place-items-center">
-                    <Typography className="font-semibold text-default-400/75">No Requests</Typography>
+                    <Typography className="font-semibold text-default-400/50">No Requests</Typography>
                 </div>
             </Case>
             <Default>

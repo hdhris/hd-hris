@@ -3,40 +3,22 @@ import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 
 
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const page = Number(searchParams.get('page') || 1);
-    const limit = Number(searchParams.get('limit') || 10);
+export async function GET() {
 
-    const skip = (page - 1) * limit;
 
-    const [emp, totalLeavesType] = await Promise.all([
-        await prisma.ref_leave_types.findMany({
-            where: {
-                is_active: true
-            },
-            select: {
-                id: true,
-                name: true,
-                duration_days: true
-            },
-            skip,
-            take: limit,
-        }),
-        await prisma.ref_leave_types.count({
-            where: {
-                is_active: true
-            },
-        })
-    ])
-
-    const totalPages = Math.ceil(totalLeavesType / limit);
-
-    return NextResponse.json({
-        data: emp,
-        meta: {
-            currentPage: page,
-            totalPages
+    const data = await prisma.ref_leave_types.findMany({
+        where: {
+            deleted_at: null
+        }, select: {
+            duration_days: true,
+            id: true,
+            name: true,
+            code: true,
+            is_active: true,
+            is_carry_forward: true
         }
     });
+
+
+    return NextResponse.json(data)
 }

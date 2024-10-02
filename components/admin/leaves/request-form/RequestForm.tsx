@@ -1,9 +1,9 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Card, CardBody, CardHeader, cn, DateRangePicker, RangeValue, Textarea} from "@nextui-org/react";
 import {Form} from "@/components/ui/form";
-import {useForm} from "react-hook-form";
+import {useForm, useFormState} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {z} from "zod";
 import {LeaveRequestFormValidation} from "@/helper/zodValidation/leaves/request-form/LeaveRequestFormValidation";
@@ -31,33 +31,37 @@ function RequestForm() {
     const {data, isLoading} = useEmployeesLeaveStatus()
     const [user, setUser] = useState<EmployeeLeavesStatus | null>(null)
     const [isAdd, setIsAdd] = useState<boolean>(true)
-
-    const dataFetch = React.useCallback(() => {
-        const storedEmployees = localStorage.getItem("requestItems");
-        if (data) {
-            if (storedEmployees) {
-                const addedEmployees: RequestFormTableType[] = JSON.parse(storedEmployees);
-                // Filter out added employees from the original employee list
-                const filteredEmployees = data.employees.filter((employee) => !addedEmployees.some((addedEmp) => addedEmp.id === employee.id));
+    const [maxLeaveApplied, setMaxLeaveApplied] = useState<number>(0)
 
 
-                // Update user state with filtered employees
-                setUser(() => ({
-                    availableLeaves: data.availableLeaves,  // Retain previous data
-                    employees: filteredEmployees,
-                }));
-            } else {
-                // If no added employees, set user to the original data
-                setUser(data);
-            }
-        } else {
-            // If no data is present, set user to null
-            setUser(null);
-        }
-    }, [data])
     useEffect(() => {
+        const dataFetch = () => {
+            const storedEmployees = localStorage.getItem("requestItems");
+            if (data) {
+                if (storedEmployees) {
+                    const addedEmployees: RequestFormTableType[] = JSON.parse(storedEmployees);
+                    // Filter out added employees from the original employee list
+                    const filteredEmployees = data.employees.filter((employee) => !addedEmployees.some((addedEmp) => addedEmp.id === employee.id));
+
+
+                    // Update user state with filtered employees
+                    setUser(() => ({
+                        availableLeaves: data.availableLeaves,  // Retain previous data
+                        employees: filteredEmployees.sort((a, b) => a.name.localeCompare(b.name)),
+                    }));
+                } else {
+                    // If no added employees, set user to the original data
+                    setUser(data);
+                }
+            } else {
+                // If no data is present, set user to null
+                setUser(null);
+            }
+        }
+
         dataFetch()
-    }, [dataFetch]);
+
+    }, [data]);
 
     const {formData, setFormData} = useFormTable<RequestFormWithMethod>()
     const [leaveTypeDuration, setLeaveTypeDuration] = useState<number | null>(null)
@@ -71,83 +75,96 @@ function RequestForm() {
         }
     });
 
-    useEffect(() => {
+    const {isDirty, isValid} = useFormState(form)
+    const reset = () => {
+        form.reset({
+            employee_id: 0, leave_type_id: 0, comment: "", reason: "",
+        });
+        setLeaveTypeDuration(null);
+        setLeaveDate(null);
+        setIsAdd(true);
+    }
+
+// Your other code...
+    const handleClear = () => {
+        reset()
+        setUser((prevState) => {
+            return {
+                availableLeaves: prevState?.availableLeaves!,
+                employees: prevState?.employees.filter(item => item.id !== currentUser?.id)!,
+            };
+        });
+
+    };
+
+    const handleFormDataChange = useCallback(() => {
         if (formData?.method === "Delete") {
-            const newUser = formData?.data.id;
+            const newUser = formData.data.id;
             const addNew = data?.employees.find((emp) => emp.id === newUser)!;
             if (newUser) {
-                setUser((prevData) => ({
-                    availableLeaves: prevData?.availableLeaves!, employees: [...prevData?.employees!, addNew],
-                }));
-            }
-        }
-    }, [formData?.method, formData?.data, data?.employees, form]);
+                reset()
+                setUser((prevData) => {
+                    const updatedEmployees = prevData?.employees.filter(emp => emp.id !== currentUser.id) || [];
+                    return {
+                        availableLeaves: prevData?.availableLeaves || [], employees: [addNew, ...updatedEmployees],
+                    };
+                });
 
-    useEffect(() => {
-        if (formData?.method === "Edit") {
+            }
+        } else if (formData?.method === "Edit") {
             const editUser = formData.data;
             const addNew = data?.employees.find((emp) => emp.id === editUser.id)!;
+            const leave_duration_available = data?.availableLeaves.find((leave) => leave.id === editUser.leave_id)?.duration_days;
+
             if (editUser) {
-                // Check if the current user is different from the edited user
-                if (!currentUser || currentUser.id !== editUser.id) {
-                    // Clear previous data and set the new user
-                    form.reset(); // Reset the form fields
-                    setCurrentUser(editUser); // Set the current user to the edited user
-                    // Reset the form fields with the new user's data
-                    form.reset({
-                        employee_id: editUser.id,
-                        leave_type_id: editUser.leave_id,
-                        comment: editUser.comment,
-                        reason: editUser.reason,
-                    });
+                setCurrentUser(editUser);
+                form.reset({
+                    employee_id: editUser.id,
+                    leave_type_id: editUser.leave_id,
+                    comment: editUser.comment,
+                    reason: editUser.reason,
+                });
 
-                    // Update user state, replacing the old `addNew` with the current one
-                    setUser((prevData) => {
-                        // Create a new array of employees without editUser and currentUser
-                        const updatedEmployees = prevData?.employees.filter(emp => emp.id !== editUser.id && (!currentUser || emp.id !== currentUser.id)) || []; // Default to an empty array if prevData.employees is null
-
-                        return {
-                            availableLeaves: prevData?.availableLeaves!, employees: [...updatedEmployees, addNew], // Add the new user
-                        };
-                    });
-                } else {
-                    // If the user is the same, just update the leave type duration and other fields
-                    form.setValue('leave_type_id', editUser.leave_id);
-                    form.setValue('comment', editUser.comment);
-                    form.setValue('reason', editUser.reason);
-                }
+                setUser((prevData) => {
+                    return {
+                        availableLeaves: prevData?.availableLeaves || [], employees: [addNew],
+                    };
+                });
 
                 const startDate = dayjs(editUser.start_date);
                 const endDate = dayjs(editUser.end_date);
-                console.log(editUser.leave_duration)
-                // setLeaveTypeDuration(editUser.leave_duration)
-                // if (user?.employees) {
-                //     const selectedEmployee = user.employees.find((emp) => emp.id === editUser.id);
-                //     const remainingDays = selectedEmployee?.leave_balances?.remaining_days ?? null;
-                //     const days = data?.availableLeaves.find((item: any) => String(item.id) === String(selectedEmployee?.id))?.duration_days!;
-                //     if (remainingDays) {
-                //         if (remainingDays < days!) {
-                //             setLeaveTypeDuration(remainingDays);
-                //         } else {
-                //             setLeaveTypeDuration(days);
-                //         }
-                //     }
-                // }
 
                 if (startDate.isValid() && endDate.isValid()) {
                     const start = parseAbsoluteToLocal(startDate.toISOString());
                     const end = parseAbsoluteToLocal(endDate.toISOString());
 
-                    setLeaveDate({
-                        start, end,
-                    });
+                    setLeaveDate({start, end});
                 } else {
                     console.error("Invalid start or end date in formData", {startDate, endDate});
                 }
+
+                const credit = addNew.leave_balances.remaining_days;
+                const leaveDuration = leave_duration_available ?? 0; // Provide a default value if leave_duration_available is undefined
+                setLeaveTypeDuration(credit < leaveDuration ? credit : leaveDuration);
             }
-            setIsAdd(false)
+            setIsAdd(false);
+        } else if(formData?.method === "Reset") {
+            console.log("Reset...")
+
+            console.log("Data: ", data)
+            setUser((prevData) => {
+                return {
+                    availableLeaves: prevData?.availableLeaves || [],
+                    employees: data?.employees!,
+                };
+            });
         }
-    }, [formData?.method, formData?.data, data?.employees, form, currentUser, data?.availableLeaves, user?.employees]);
+    }, [formData, data, currentUser, form, setUser]);
+
+// Use an effect to handle the form data change
+    useEffect(() => {
+        handleFormDataChange();
+    }, [formData, handleFormDataChange]);
 
 
     useEffect(() => {
@@ -170,6 +187,7 @@ function RequestForm() {
 
         // Cleanup subscription on unmount
         return () => subscription.unsubscribe();
+
     }, [form, user?.employees]);
 
 
@@ -196,10 +214,9 @@ function RequestForm() {
                     end_date: dayjs(leaveDate.end.toDate(getLocalTimeZone())).format("YYYY-MM-DD hh:mm A"),
                     total_days: duration,
                     leave_id: leaveTypeApplied.id,
-                    leave_duration: leaveTypeDuration!
                 }
 
-
+                console.log("Max Available Days (Submit): ", leaveTypeDuration)
                 setFormData({
                     method: "Add", data: employee_leave_requests
                 })
@@ -216,30 +233,60 @@ function RequestForm() {
             }
 
         } else {
+            setIsDatePickerError(true)
             return
         }
 
     }
 
-    const handleClear = () => {
-        form.reset()
-        setLeaveTypeDuration(null)
-        setLeaveDate(null)
-        setIsAdd(true)
-        setUser((prevState) => {
-            return {
-                availableLeaves: prevState?.availableLeaves!, employees: prevState?.employees.filter(item => item.id !== currentUser?.id)! }
+    const handleOnEdit = () => {
+        const comment = form.getValues("comment")
+        const reason = form.getValues("reason")
+        const employee_id = form.getValues("employee_id");
+        const leave_type_id = form.getValues("leave_type_id");
+        const start_date = dayjs(leaveDate?.start.toDate(getLocalTimeZone())).format("YYYY-MM-DD hh:mm A")
+        const end_date = dayjs(leaveDate?.end.toDate(getLocalTimeZone())).format("YYYY-MM-DD hh:mm A")
+        const leaveTypeApplied = user?.availableLeaves.find((e: any) => e.id === leave_type_id)!
+        const employee = user?.employees.find((e: any) => e.id === employee_id)!
+        const duration = dayjs(end_date).diff(dayjs(start_date), 'day')
 
+        setFormData({
+            method: "Edit",
+            data: {
+                comment: comment || "", // Ensures comment is always a string
+                reason: reason || "", // Provide fallback for reason
+                id: employee_id, // Provide fallback for employee_id
+                leave_type: leaveTypeApplied.name, // Provide fallback for leave_type_id
+                start_date: start_date || "", // Provide fallback for start_date
+                end_date: end_date || "" // Provide fallback for end_date
+                ,
+
+                created_by: {
+                    name: '',
+                    picture: ''
+                },
+                total_days: duration,
+                leave_id: leaveTypeApplied.id,
+                department: employee?.department,
+                name: employee.name,
+                picture: employee.picture,
+            }
+        });
+
+        console.log("Edit: ", {
+            comment, reason, employee_id, leave_type_id, start_date, end_date
         })
     }
+
+
     const LeaveRequestForm: FormInputProps[] = [{
         name: "leave_date_range",
         label: "Leave Date Range",
-        inputClassName: (isDatePickerError ? "text-red-500" : ""),
+        inputClassName: isDatePickerError ? "text-destructive" : "",
         isRequired: true,
         Component: () => {
             return (<div
-                className={cn("w-full flex flex-row gap-4", leaveTypeDuration === null ? 'opacity-50 pointer-events-none cursor-not-allowed' : "")}>
+                    className={cn("w-full flex flex-row gap-4", leaveTypeDuration === null ? 'opacity-50 pointer-events-none cursor-not-allowed' : "")}>
                 <DateRangePicker
                     granularity="hour"
                     aria-label="Leave Date Range"
@@ -249,21 +296,28 @@ function RequestForm() {
                     isDisabled={leaveTypeDuration === null}
                     value={leaveDate} // LeaveDate is used directly here
                     isRequired
+                    errorMessage={(value) => {
+                        if(value.isInvalid) {
+                            setIsDatePickerError(true)
+                            return value.validationErrors
+                        }
+                    }}
                     minValue={today(getLocalTimeZone())}
-                    maxValue={today(getLocalTimeZone()).add({days: leaveTypeDuration!})}
+                    maxValue={today(getLocalTimeZone()).add({ days: leaveTypeDuration! })}
                     onChange={(value) => {
+                        // Check if the selected value is null
 
                         // Define the allowed date range
                         const startDate = dayjs(today(getLocalTimeZone()).toString());
-                        const endDate = dayjs(today(getLocalTimeZone()).add({days: leaveTypeDuration!}).toString());
+                        const endDate = dayjs(today(getLocalTimeZone()).add({ days: leaveTypeDuration! }).toString());
 
                         // Convert the input dates (start and end) to Day.js objects
                         const startDayJs = dayjs(value?.start?.toDate(getLocalTimeZone())); // Example input: 2024-09-29 00:00:00
                         const endDayJs = dayjs(value?.end?.toDate(getLocalTimeZone()));     // Example input: 2024-10-03 00:00:00
 
                         // Check if the selected start and end dates are within the specified range
-                        const isStartInRange = startDayJs.isSameOrAfter(startDate); // Start date should be on or after 2024-09-30
-                        const isEndInRange = endDayJs.isSameOrBefore(endDate);      // End date should be on or before 2024-10-10
+                        const isStartInRange = startDayJs.isSameOrAfter(startDate); // Start date should be on or after today
+                        const isEndInRange = endDayJs.isSameOrBefore(endDate);      // End date should be on or before max allowed date
 
                         const isDateRangeValid = isStartInRange && isEndInRange;
 
@@ -274,13 +328,11 @@ function RequestForm() {
                             setIsDatePickerError(false);
                             setLeaveDate(value);
                         }
-
                     }}
                 />
 
 
-            </div>)
-
+            </div>);
         }
     }, {
         name: "reason", label: "Reason for Leave", isRequired: true, Component: (field) => {
@@ -324,17 +376,17 @@ function RequestForm() {
                                         const selectedEmployee = user.employees.find((emp) => emp.id === form.getValues("employee_id"));
 
                                         const remainingDays = selectedEmployee?.leave_balances?.remaining_days ?? null;
-
+                                        console.log("Days: ", days)
+                                        console.log("Remaining Days: ", remainingDays)
                                         if (remainingDays) {
                                             if (remainingDays < days!) {
                                                 setLeaveTypeDuration(remainingDays);
-                                                console.log("remainingDays: ", leaveTypeDuration)
                                             } else {
                                                 setLeaveTypeDuration(days);
-                                                console.log("Days: ", days)
                                             }
                                         }
                                     }
+
                                     // setLeaveTypeDuration(days)
                                 }}
                                                     leaveTypes={user?.availableLeaves!} isLoading={isLoading}/>
@@ -358,10 +410,10 @@ function RequestForm() {
                                 <Button variant="light" radius="sm" size="sm" onClick={handleClear}>Clear</Button>
                                 <Switch expression={isAdd}>
                                     <Case of={true}>
-                                        <Button color="primary" radius="sm" size="sm" type="submit">Add</Button>
+                                        <Button color="primary" isDisabled={!isDirty || !isValid || isDatePickerError} radius="sm" size="sm" type="submit">Add</Button>
                                     </Case>
                                     <Default>
-                                        <Button color="primary" radius="sm" size="sm" type="submit">Update</Button>
+                                        <Button color="primary" isDisabled={isDatePickerError} radius="sm" size="sm" onClick={handleOnEdit}>Update</Button>
                                     </Default>
                                 </Switch>
 

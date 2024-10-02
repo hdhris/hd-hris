@@ -4,8 +4,7 @@ import { Autocomplete, AutocompleteItem, cn } from "@nextui-org/react";
 import Typography from "@/components/common/typography/Typography";
 import { Controller, useFormContext } from "react-hook-form";
 import { LuChevronsUpDown } from "react-icons/lu";
-import {LeaveType} from "@/types/leaves/LeaveRequestTypes";
-
+import { LeaveType } from "@/types/leaves/LeaveRequestTypes";
 
 interface LeaveTypeSelectionProps {
     leaveTypes: LeaveType[];
@@ -15,7 +14,16 @@ interface LeaveTypeSelectionProps {
 
 function LeaveTypeSelection({ duration, leaveTypes, isLoading }: LeaveTypeSelectionProps) {
     const { control, setValue, formState: { errors } } = useFormContext();
-    const availableLeavesTypes = React.useMemo(() => leaveTypes || [], [leaveTypes]);
+    const [searchTerm, setSearchTerm] = React.useState('');  // Add state for searchTerm
+
+    // Memoize the leave types and normalize for searching
+    const availableLeavesTypes = React.useMemo(() => {
+        if (!leaveTypes || leaveTypes.length === 0) return [];
+        return leaveTypes.map(type => ({
+            ...type,
+            textValue: type.name.toLowerCase(),  // Normalize for search
+        }));
+    }, [leaveTypes]);
 
     return (
         <Controller
@@ -28,11 +36,12 @@ function LeaveTypeSelection({ duration, leaveTypes, isLoading }: LeaveTypeSelect
                             className={cn("text-sm font-medium inline-flex", errors.leave_type_id ? "text-red-500" : "")}>
                             Pick a Leave Type
                         </Typography>}
+                        isClearable={false}
                         aria-hidden="false"
                         isRequired
                         radius="sm"
                         placeholder="Select a Leave Type"
-                        items={availableLeavesTypes}
+                        items={availableLeavesTypes.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))}  // Filter based on searchTerm
                         labelPlacement="outside"
                         className="w-full"
                         variant="bordered"
@@ -40,6 +49,7 @@ function LeaveTypeSelection({ duration, leaveTypes, isLoading }: LeaveTypeSelect
                         disableSelectorIconRotation
                         selectorIcon={<LuChevronsUpDown />}
                         selectedKey={field.value ? String(field.value) : null}
+                        onInputChange={(e) => setSearchTerm(e)}  // Update searchTerm on input change
                         onSelectionChange={(e) => {
                             const selectedItem = availableLeavesTypes.find(item => String(item.id) === String(e));
                             if (selectedItem) {

@@ -19,7 +19,8 @@ interface EmployeeListForm {
 
 function EmployeeListForm({employees, isLoading}: EmployeeListForm) {
     const user = React.useMemo(() => {
-        if(employees) return employees.sort((a, b) => a.name.localeCompare(b.name));
+        // if(employees) return employees.sort((a, b) => a.name.localeCompare(b.name));
+        if(employees) return employees;
         return [];
     }, [employees])
     const { control, setValue, formState: { errors } } = useFormContext();

@@ -13,9 +13,21 @@ export async function GET() {
                 equals: Prisma.DbNull
             }, dim_leave_balances: {
                 some: {
-                    allocated_days: {
+                    remaining_days: {
                         gt: 0
                     }, deleted_at: null
+                }
+            }, trans_leaves_trans_leaves_employee_idTotrans_employees: {
+                some: {
+                    start_date: {
+                        lte: new Date()
+                    },
+                    end_date: {
+                        gte: new Date()
+                    },
+                    status: {
+                        not: "Approved"
+                    }
                 }
             }
         }, select: {
@@ -32,7 +44,8 @@ export async function GET() {
                     name: true
                 }
             },
-            dim_leave_balances: true
+            dim_leave_balances: true,
+            trans_leaves_trans_leaves_employee_idTotrans_employees: true
         }
     }), await prisma.ref_leave_types.findMany({
         where: {
@@ -51,7 +64,7 @@ export async function GET() {
             year: emp.dim_leave_balances[0].year,
             remaining_days: emp.dim_leave_balances[0].remaining_days,
             carry_forward_days: emp.dim_leave_balances[0].carry_forward_days
-        }
+        }, trans_leaves: emp.trans_leaves_trans_leaves_employee_idTotrans_employees
     }));
 
     const availableLeaves: LeaveType[] = leaveTypes.map((leave: any) => ({
