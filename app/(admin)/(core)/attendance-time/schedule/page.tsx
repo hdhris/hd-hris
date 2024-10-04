@@ -226,31 +226,36 @@ export default function Page() {
       <Card
         key={item.id}
         shadow="none"
-        className={`border-2 w-[200px] me-2 min-h-36 ${getRandomColor(index).bg} 
+        className={`border-2 w-[200px] me-2 min-h-36 ${
+          getRandomColor(index).bg
+        } 
           ${
             hoveredBatchId === item.id ||
-            empScheduleData.find((emp) => emp.id === hoveredRowId)?.batch_id === item.id
+            empScheduleData.find((emp) => emp.id === hoveredRowId)?.batch_id ===
+              item.id
               ? getRandomColor(index).border
               : "border-gray-300"
           } transition-all duration-300`}
+        isPressable
+        isHoverable
         onMouseEnter={() => setHoveredBatchId(item.id)}
         onMouseLeave={() => setHoveredBatchId(null)}
+        onClick={() => {
+          setSelectedBatch(item);
+          setVisible(true);
+        }}
       >
         <CardHeader>
           <h5 className={`font-semibold ${getRandomColor(index).text}`}>
             {item.name}
           </h5>
-          <div
-            onClick={() => {
-              setSelectedBatch(item);
-              setVisible(true);
-            }}
-            className={`${
+          <Pencil
+            className={`text-default-800 ms-auto ${
               hoveredBatchId === item.id ? "visible" : "invisible"
-            } rounded-full cursor-pointer ms-auto w-7 h-7 hover:bg-slate-300 flex justify-center items-center`}
-          >
-            <Pencil className="text-default-800" width={15} height={15} />
-          </div>
+            }`}
+            width={15}
+            height={15}
+          />
         </CardHeader>
         <CardBody className="flex justify-center items-center py-0">
           <div className={`w-fit flex gap-2 ${getRandomColor(index).text}`}>

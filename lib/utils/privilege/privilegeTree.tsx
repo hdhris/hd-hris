@@ -7,7 +7,8 @@ import {
   ListboxItem,
   Button,
 } from "@nextui-org/react";
-import { Privilege, privilegeData } from "./exampleData";
+import { privilegeData } from "./exampleData";
+import { Privilege, usePrivilege } from "./privilegeReader";
 
 // Recursive Component to Render the Checkboxes
 const PrivilegeTree: React.FC<{
@@ -72,39 +73,8 @@ const PrivilegeTree: React.FC<{
 // Main Component
 export const PrivilegeCheckboxes = () => {
   const [privileges, setPrivileges] = useState<Privilege>(privilegeData);
-
-  function createProxy<T extends object>(target: T): T {
-    return new Proxy(target, {
-      get(obj, prop: string | symbol) {
-        // If the property exists in the object
-        if (typeof prop === "string" && prop in obj) {
-          const value = obj[prop as keyof T];
-
-          // If the value is an object, check if it has 'access'
-          if (
-            typeof value === "object" &&
-            value !== null &&
-            "access" in value
-          ) {
-            // If access is true, recursively proxy the nested object
-            return (value as any).access ? createProxy(value) : false;
-          }
-
-          // Otherwise, return the value as it is
-          return value;
-        }
-        return undefined;
-      },
-    });
-  }
-
-  // Custom hook to fetch privileges
-  function usePrivilege(): Privilege["web"] {
-    return createProxy(privileges.web);
-  }
-
   function PrivilegePage() {
-    const privilege = usePrivilege().payroll; // Get web privileges
+    const privilege = usePrivilege(privilegeData).payroll; // Get web privileges
 
     // Check if the payroll access
     if (privilege) {
@@ -152,7 +122,7 @@ export const PrivilegeCheckboxes = () => {
 
   // Update function to handle checkbox changes
   const handleCheckboxChange = (path: string[], value: boolean) => {
-    setPrivileges((prevPrivileges) => {
+    setPrivileges((prevPrivileges: any) => {
       const newPrivileges = { ...prevPrivileges };
       let obj: any = newPrivileges;
 

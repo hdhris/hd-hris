@@ -65,11 +65,10 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
     <Dropdown backdrop="blur" className={className} {...dropdownProps}>
       <DropdownTrigger>
         <Button
-          className="w-full"
           variant="light"
           endContent={
             triggerProps?.endContent || (
-              <div className="ms-auto flex gap-2">
+              <div className="flex gap-2">
                 <Chip size="sm">
                   {items.length === 0
                     ? "No items"
@@ -77,11 +76,12 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
                     ? "All"
                     : `${Array.from(selectedKeys).length} / ${items.length}`}
                 </Chip>
-                <ChevronRightIcon />
+                {/* <ChevronRightIcon /> */}
               </div>
             )
           }
           {...triggerProps}
+          className={`w-full flex justify-between ${triggerProps?.className && triggerProps.className}`}
         >
           {triggerName}
         </Button>
