@@ -13,6 +13,14 @@ import {
 import { BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
 import { Time } from "@internationalized/date";
 import { dateToTime } from "@/lib/utils/dateToTime";
+import { Form } from "@/components/ui/form";
+import FormFields from "@/components/common/forms/FormFields";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import BorderedSwitch from "@/components/common/BorderedSwitch";
+import dayjs from "dayjs";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 interface ScheduleModalProps {
   visible: boolean;
@@ -31,44 +39,61 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
   onDelete,
   selectedSchedule,
 }) => {
-  const [name, setName] = useState("");
-  const [clockIn, setClockIn] = useState(new Time(8));
-  const [clockOut, setClockOut] = useState(new Time(17));
-  const [breakMin, setBreakMin] = useState<number>(0);
-  const [isActive, setIsActive] = useState(true);
+  const formSchema = z.object({
+    id: z.number().optional(),
+    name: z
+      .string()
+      .min(1, { message: "Schedule name is required." })
+      .max(20, { message: "Character limit reached." }),
+    clock_in: z.string(),
+    clock_out: z.string(),
+    break_min: z.number(),
+    is_active: z.boolean(),
+  });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      id: -1,
+      name: "",
+      clock_in: "",
+      clock_out: "",
+      break_min: 60,
+      is_active: true,
+    },
+  });
 
   // Effect to populate modal fields if editing
   useEffect(() => {
     if (selectedSchedule) {
-      setName(selectedSchedule.name);
-      console.log(selectedSchedule);
-      setClockIn(dateToTime(new Date(selectedSchedule.clock_in)));
-      setClockOut(dateToTime(new Date(selectedSchedule.clock_out)));
-      setBreakMin(selectedSchedule.break_min);
-      setIsActive(selectedSchedule.is_active);
+      form.reset({
+        id: selectedSchedule.id,
+        name: selectedSchedule.name,
+        clock_in:  dayjs(toGMT8(selectedSchedule.clock_in)).format('HH:mm'),
+        clock_out: dayjs(toGMT8(selectedSchedule.clock_out)).format('HH:mm'),
+        break_min: selectedSchedule.break_min,
+        is_active: selectedSchedule.is_active,
+      })
     } else {
       // Reset form if adding a new schedule
-      setName("");
-      setClockIn(new Time(8));
-      setClockOut(new Time(17));
-      setBreakMin(0);
-      setIsActive(true);
+      form.reset({
+        id: -1,
+        name: "",
+        clock_in: "",
+        clock_out: "",
+        break_min: 60,
+        is_active: true,
+      })
     }
   }, [selectedSchedule]);
 
-  const handleSave = () => {
+  const handleSave = (value: any) => {
     const newSchedule: BatchSchedule = {
-      id: selectedSchedule ? selectedSchedule.id : -1,
-      name: name,
-      clock_in: clockIn.toString(),
-      clock_out: clockOut.toString(),
-      break_min: breakMin,
-      is_active: isActive,
       created_at: selectedSchedule
         ? selectedSchedule.created_at
         : new Date().toISOString(),
       updated_at: new Date().toISOString(),
       deleted_at: null,
+      ...value,
     };
 
     onSave(newSchedule);
@@ -81,42 +106,48 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
           {selectedSchedule ? "Edit Schedule" : "Add Schedule"}
         </ModalHeader>
         <ModalBody>
-          <Input
-            isClearable={true}
-            label="Schedule Name"
-            placeholder="Enter schedule name"
-            fullWidth
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <TimeInput
-            label="Clock In Time"
-            fullWidth
-            value={clockIn}
-            onChange={setClockIn}
-          />
-          <TimeInput
-            label="Clock Out Time"
-            fullWidth
-            value={clockOut}
-            onChange={setClockOut}
-          />
-          <Input
-            isClearable={true}
-            label="Break Minutes"
-            placeholder="Enter break time in minutes"
-            fullWidth
-            type="number"
-            value={breakMin.toString()}
-            onChange={(e) => setBreakMin(parseInt(e.target.value))}
-          />
-          <Switch
-            isSelected={isActive}
-            onValueChange={setIsActive}
-            color="success"
-          >
-            {isActive ? "Active" : "Inactive"}
-          </Switch>
+          <Form {...form}>
+            <form id="schedule-form" onSubmit={form.handleSubmit(handleSave)}>
+              <FormFields items={[
+                {
+                  name: "name",
+                  label: "Schedule Name",
+                  isRequired: true,
+                },
+                {
+                  name: "clock_in",
+                  label: "Clock In",
+                  isRequired: true,
+                  type: "time",
+                },
+                {
+                  name: "clock_out",
+                  label: "Clock Out",
+                  isRequired: true,
+                  type: "time",
+                },
+                {
+                  name: "break_min",
+                  label: "Break Minutes",
+                  isRequired: true,
+                },
+                {
+                  name: "is_active",
+                  isRequired: true,
+                  Component: (field) => {
+                    return (
+                      <BorderedSwitch
+                        label="Active"
+                        description="Available for employees during registration and updates."
+                        isSelected={field.value}
+                        onValueChange={field.onChange}
+                      />
+                    );
+                  },
+                },
+              ]}/>
+            </form>
+          </Form>
         </ModalBody>
         <ModalFooter>
           {selectedSchedule && (
@@ -133,7 +164,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
           <Button color="danger" variant="light" onClick={onClose}>
             Cancel
           </Button>
-          <Button isLoading={pending} color="primary" onClick={handleSave}>
+          <Button isLoading={pending} color="primary" type="submit" form="schedule-form">
             {selectedSchedule ? "Update" : "Add"}
           </Button>
         </ModalFooter>

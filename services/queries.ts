@@ -8,6 +8,7 @@ import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
 import { Payhead, PayheadAffected } from "@/types/payroll/payrollType";
 import {EmployeeLeavesStatus} from "@/types/leaves/LeaveRequestTypes";
+import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -96,5 +97,11 @@ export function usePayheads(type: string) {
 export function useNewPayhead() {
     return useSWR<PayheadAffected>('/api/admin/payroll/payhead/read', fetcher, {
         revalidateOnFocus: false
+    })
+}
+
+export function useOvertimes(){
+    return useSWR<OvertimeEntry[]>('/api/admin/attendance-time/overtime', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
     })
 }

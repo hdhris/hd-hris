@@ -56,13 +56,13 @@ const pulseColorMap = {
     },
 } as const;  // <--- This makes the object readonly, inferring literal types.
 
-type PulseColorType = keyof typeof pulseColorMap; // This restricts the color to the keys of pulseColorMap
+export type PulseColorType = keyof typeof pulseColorMap; // This restricts the color to the keys of pulseColorMap
 
 function Pulse({ color }: { color?: PulseColorType }) {
     const pulseColor = color ? pulseColorMap[color] : pulseColorMap["gray"];
 
     return (
-        <div className="relative m-2">
+    <div className="relative m-2">
       <span className="absolute -top-3 -right-2 size-3">
         <span
             className={cn(
@@ -77,7 +77,7 @@ function Pulse({ color }: { color?: PulseColorType }) {
             )}
         ></span>
       </span>
-        </div>
+    </div>
     );
 }
 

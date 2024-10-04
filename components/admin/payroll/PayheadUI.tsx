@@ -1,21 +1,14 @@
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import {
   Card,
   CardHeader,
   CardBody,
   Button,
-  Input,
   Avatar,
   Spinner,
   Selection,
-  Switch,
+  CardFooter,
+  ScrollShadow,
 } from "@nextui-org/react";
 import {
   AffectedEmployee,
@@ -32,6 +25,8 @@ import { ChevronRightIcon } from "lucide-react";
 import { ListDropDown } from "./ListBoxDropDown";
 import showDialog from "@/lib/utils/confirmDialog";
 import { toast } from "@/components/ui/use-toast";
+import BorderedSwitch from "@/components/common/BorderedSwitch";
+import FormFields from "@/components/common/forms/FormFields";
 
 interface PayheadFormProps {
   label: string;
@@ -51,7 +46,6 @@ const formSchema = z.object({
 
 export const PayheadForm: React.FC<PayheadFormProps> = ({
   label,
-  type,
   onSubmit,
   allData,
 }) => {
@@ -110,13 +104,14 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
   };
 
   async function handleSubmit(value: any) {
-    if (!isFiltered && Array.from(selectedEmployees).length === 0){
+    if (!isFiltered && Array.from(selectedEmployees).length === 0) {
       toast({
         title: "Employee Selection",
-        description: "Payhead is not mandatory to any status.\n\nSelecting an employee(s) is required.",
+        description:
+          "Payhead is not mandatory to any status.\n\nSelecting an employee(s) is required.",
         variant: "warning",
-      })
-      return
+      });
+      return;
     }
     if (Array.from(selectedDepartment).length === 0) {
       const response = await showDialog(
@@ -253,149 +248,132 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
   }
 
   return (
-    <div className="flex flex-row gap-2 pt-2">
-      <Card className="h-fit mx-2 sticky top-0">
+    <div className="flex flex-row gap-2 pb-2">
+      <Card className="h-fit mx-2 h-fit-navlayout min-w-80 shadow-sm">
         <CardHeader>{label}</CardHeader>
-        <CardBody>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)}>
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="capitalize">{type} Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder={`Enter ${type} name`} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="calculation"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Calculation</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter mathematical calculation"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Button
-                        onClick={() => field.onChange(!field.value)}
-                        variant="light"
-                        className="w-full mt-2"
-                      >
-                        <p>Active</p>
-                        <Switch
-                          size="sm"
-                          color="primary"
-                          className="ms-auto"
-                          isSelected={field.value}
-                          onValueChange={field.onChange}
-                        />
-                      </Button>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <ListDropDown
-                items={[
-                  { name: "Probationary", id: 1 },
-                  { name: "Regular", id: 2 },
-                ]}
-                triggerName="Mandatory Status"
-                selectedKeys={
-                  new Set(
-                    [
-                      mandatory?.probationary ? "1" : undefined,
-                      mandatory?.regular ? "2" : undefined,
-                    ].filter((key): key is string => key !== undefined)
-                  )
-                }
-                onSelectionChange={(keys) => {
-                  const values = Array.from(keys);
-                  setMandatory({
-                    probationary: values.includes("1"),
-                    regular: values.includes("2"),
-                  });
-                }}
-                triggerProps={{ className: "mt-2 w-full" }}
-                togglable={true}
-                reversable={true}
-              />
-              <ListDropDown
-                items={data.departments || []}
-                triggerName="Departments"
-                selectedKeys={selectedDepartment}
-                onSelectionChange={(keys) => {
-                  setSelectedDepartment(keys);
-                  setSelectedJobs(
-                    new Set(
-                      data.job_classes
-                        .filter((job) =>
-                          Array.from(keys).includes(String(job.department_id))
-                        )
-                        .map((job) => String(job.id))
-                    )
-                  );
-                }}
-                triggerProps={{ className: "mt-2 w-full" }}
-                togglable={true}
-                reversable={true}
-              />
-              <ListDropDown
-                items={
-                  data.job_classes.filter((job) => {
-                    return Array.from(selectedDepartment).includes(
-                      String(job.department_id)
-                    );
-                  }) || []
-                }
-                triggerName="Roles"
-                selectedKeys={selectedJobs}
-                onSelectionChange={setSelectedJobs}
-                triggerProps={{ className: "my-2 w-full" }}
-                togglable={true}
-                reversable={true}
-                sectionConfig={data.departments
-                  .map((dep) => {
-                    return {
-                      name: dep.name,
-                      key: "department_id",
-                      id: dep.id,
-                    };
-                  })
-                  .filter((dep) => {
-                    return Array.from(selectedDepartment).includes(
-                      String(dep.id)
-                    );
-                  })}
-              />
-              <Button
-                isLoading={isPending}
-                color="primary"
-                className="w-full"
-                type="submit"
+        <CardBody className="pt-0">
+          <ScrollShadow>
+            <Form {...form}>
+              <form
+                id="payhead-form"
+                onSubmit={form.handleSubmit(handleSubmit)}
               >
-                Submit
-              </Button>
-            </form>
-          </Form>
+                <div className="space-y-4">
+                  <FormFields
+                    items={[
+                      {
+                        name: "name",
+                        label: "Name",
+                        isRequired: true,
+                      },
+                      {
+                        name: "calculation",
+                        label: "Calculation",
+                        isRequired: true,
+                      },
+                      {
+                        name: "is_active",
+                        Component: (field) => {
+                          return (
+                            <BorderedSwitch
+                              label="Active"
+                              description="Effective on next Payroll"
+                              isSelected={field.value}
+                              onValueChange={field.onChange}
+                            />
+                          );
+                        },
+                      },
+                    ]}
+                  />
+                  <ListDropDown
+                    items={[
+                      { name: "Probationary", id: 1 },
+                      { name: "Regular", id: 2 },
+                    ]}
+                    triggerName="Mandatory Status"
+                    selectedKeys={
+                      new Set(
+                        [
+                          mandatory?.probationary ? "1" : undefined,
+                          mandatory?.regular ? "2" : undefined,
+                        ].filter((key): key is string => key !== undefined)
+                      )
+                    }
+                    onSelectionChange={(keys) => {
+                      const values = Array.from(keys);
+                      setMandatory({
+                        probationary: values.includes("1"),
+                        regular: values.includes("2"),
+                      });
+                    }}
+                    togglable={true}
+                    reversable={true}
+                  />
+                  <ListDropDown
+                    items={data.departments || []}
+                    triggerName="Departments"
+                    selectedKeys={selectedDepartment}
+                    onSelectionChange={(keys) => {
+                      setSelectedDepartment(keys);
+                      setSelectedJobs(
+                        new Set(
+                          data.job_classes
+                            .filter((job) =>
+                              Array.from(keys).includes(
+                                String(job.department_id)
+                              )
+                            )
+                            .map((job) => String(job.id))
+                        )
+                      );
+                    }}
+                    togglable={true}
+                    reversable={true}
+                  />
+                  <ListDropDown
+                    items={
+                      data.job_classes.filter((job) => {
+                        return Array.from(selectedDepartment).includes(
+                          String(job.department_id)
+                        );
+                      }) || []
+                    }
+                    triggerName="Roles"
+                    selectedKeys={selectedJobs}
+                    onSelectionChange={setSelectedJobs}
+                    togglable={true}
+                    reversable={true}
+                    sectionConfig={data.departments
+                      .map((dep) => {
+                        return {
+                          name: dep.name,
+                          key: "department_id",
+                          id: dep.id,
+                        };
+                      })
+                      .filter((dep) => {
+                        return Array.from(selectedDepartment).includes(
+                          String(dep.id)
+                        );
+                      })}
+                  />
+                </div>
+              </form>
+            </Form>
+          </ScrollShadow>
         </CardBody>
+        <CardFooter>
+          <Button
+            isLoading={isPending}
+            color="primary"
+            className="w-full"
+            type="submit"
+            form="payhead-form"
+          >
+            Submit
+          </Button>
+        </CardFooter>
       </Card>
       <div className="w-full h-fit-navlayout">
         <TableData
