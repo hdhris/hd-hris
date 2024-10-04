@@ -15,7 +15,8 @@ const bgGradient = (name: string) => {
     }
 }
 
-interface LeaveTypeProps {
+export interface LeaveTypeProps {
+    key?: number | string
     name: string
     duration: string
     code: string
@@ -23,11 +24,11 @@ interface LeaveTypeProps {
     isActive: boolean
 }
 
-export default function GridCard({name, duration, code, carryForward, isActive}: LeaveTypeProps = {
+export default function GridCard({name, duration, code, carryForward, isActive, key}: LeaveTypeProps = {
     name: "Annual Leave", duration: "20 days", code: "AL", carryForward: true, isActive: true
 }) {
     const isLight = uniqolor(name).isLight;
-    return (<Card className="w-[270px] h-fit" isHoverable>
+    return (<Card className="w-[270px] h-fit" isHoverable key={key}>
             <CardHeader className="p-0">
                 <div {...bgGradient(name)}
                      className={cn("relative flex w-full h-28 rounded-b-sm rounded-r-sm", !isLight ? "shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)]" : "shadow-[inset_-1px_-121px_75px_-52px_rgba(255,255,255,0.49)]")}> {/* shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)] */}
