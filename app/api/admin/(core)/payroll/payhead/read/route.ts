@@ -17,6 +17,9 @@ export async function GET(req: NextRequest) {
     const affected = await prisma.dim_payhead_affecteds.findMany({
       where: {
         payhead_id: id,
+        trans_employees : {
+          deleted_at : null
+        }
       },
     });
     const employees = await prisma.trans_employees.findMany({
@@ -31,21 +34,48 @@ export async function GET(req: NextRequest) {
         middle_name: true,
         ref_departments: {
           select: {
+            id: true,
             name: true,
           },
         },
         ref_job_classes: {
           select: {
+            id: true,
             name: true,
           },
         },
       },
     });
 
+    const departments = await prisma.ref_departments.findMany({
+      where : {
+        deleted_at : null,
+      },
+      select : {
+        id: true,
+        name : true,
+      }
+    });
+
+    const job_classes = await prisma.ref_job_classes.findMany({
+      where: {
+        deleted_at: null,
+        ref_departments: {
+          deleted_at: null,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        department_id: true,
+      },
+    });
+    
+
     if (payhead){
-      return NextResponse.json({ payhead, affected, employees });
+      return NextResponse.json({ payhead, affected, employees, departments, job_classes });
     } else {
-      return NextResponse.json({ affected, employees });
+      return NextResponse.json({ affected, employees, departments, job_classes });
     }
   } catch (error) {
     return NextResponse.json(

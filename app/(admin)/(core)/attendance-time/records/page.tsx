@@ -198,7 +198,7 @@ export default function Page() {
         config={config}
         items={attendanceLog}
         isLoading={isLoading}
-        className="flex-1 h-[calc(100vh-9.5rem)] overflow-y-auto"
+        className="flex-1 h-fit-navlayout"
         removeWrapper
         isHeaderSticky
         color={"primary"}

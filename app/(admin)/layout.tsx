@@ -83,7 +83,7 @@ function RootLayout({children}: { children: ReactNode }) {
         </section>
 
 
-        <ScrollShadow className="p-4 mt-16 mb-4 w-full min-w-[980px]">
+        <ScrollShadow className="p-4 mt-14 mb-4 w-full min-w-[980px]">
             {children}
         </ScrollShadow>
 

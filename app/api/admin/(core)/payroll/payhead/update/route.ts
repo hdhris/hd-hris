@@ -3,12 +3,13 @@ import prisma from "@/prisma/prisma";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 
 export async function POST(req: NextRequest) {
-  const { data, affected } = await req.json();
+  const { data, affected, affectedJson } = await req.json();
   const { searchParams } = new URL(req.url);
   const id = Number(searchParams.get("id"));
   try {
     console.log(data);
     console.log(affected);
+    console.log(affectedJson);
 
     await prisma.$transaction(async (pm) => {
       // Update the payhead record
@@ -19,8 +20,7 @@ export async function POST(req: NextRequest) {
         data: {
           name: data.name,
           calculation: data.calculation,
-          is_mandatory: data.is_mandatory,
-          is_active: data.is_active,
+          affected_json: affectedJson,
           updated_at: toGMT8(new Date()),
         },
       });

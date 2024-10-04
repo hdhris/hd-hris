@@ -316,7 +316,7 @@ export default function Page() {
   if (isLoading || !data) {
     return (
       <Spinner
-        className="w-full h-[calc(100vh-9.5rem)]"
+        className="w-full h-fit-navlayout"
         label="Please wait..."
         color="primary"
       />
@@ -325,7 +325,7 @@ export default function Page() {
 
   return (
     <div className="flex p-1 min-w-[1230px]">
-      <div className="flex flex-col w-[260px] h-[calc(100vh-9.5rem)]">
+      <div className="flex flex-col w-[260px] h-fit-navlayout">
         <div className="flex flex-col gap-2 pb-2 overflow-auto flex-1">
           {batchData?.map((item, index) => (
             <BatchCard key={item.id} item={item} index={index} />
@@ -340,7 +340,7 @@ export default function Page() {
           Add Schedule
         </Button>
       </div>
-      <div className="w-full overflow-auto relative h-[calc(100vh-9.5rem)] mx-2">
+      <div className="w-full relative mx-2 h-fit-navlayout">
         <table className="w-full table-fixed divide-y divide-gray-200">
           <thead className="text-xs text-gray-500">
             <tr className="divide-x divide-gray-200">
