@@ -20,9 +20,9 @@ function Page() {
     // </div>
     return (
         <div className="grid grid-cols-[repeat(5,1fr)] gap-4 h-full">
+            <GridCard name={"Muhammad Nizam Datumanong"} duration={"20 Days"} code={"SL"} carryForward={true} isActive={true}/>
             <GridCard name={"Sick Leave"} duration={"20 Days"} code={"SL"} carryForward={true} isActive={true}/>
             <GridCard name={"Sick Leave"} duration={"20 Days"} code={"SL"} carryForward={true} isActive={true}/>
-            <GridCard name={"Sick jhjhjksjjskghghdghgdjdjdhhdghghs"} duration={"20 Days"} code={"SL"} carryForward={true} isActive={true}/>
             <GridCard name={"Sick Leave"} duration={"20 Days"} code={"SL"} carryForward={true} isActive={true}/>
             <GridCard name={"Sick Leave"} duration={"20 Days"} code={"SL"} carryForward={true} isActive={true}/>
         </div>

@@ -18,19 +18,19 @@ export async function GET() {
                     }, deleted_at: null
                 }
             },
-            trans_leaves_trans_leaves_employee_idTotrans_employees: {
-                some: {
-                    start_date: {
-                        lte: new Date()
-                    },
-                    end_date: {
-                        gte: new Date()
-                    },
-                    // status: {
-                    //     not: "Approved"
-                    // }
-                }
-            }
+            // trans_leaves_trans_leaves_employee_idTotrans_employees: {
+            //     some: {
+            //         start_date: {
+            //             lte: new Date()
+            //         },
+            //         end_date: {
+            //             gte: new Date()
+            //         },
+            //         // status: {
+            //         //     not: "Approved"
+            //         // }
+            //     }
+            // }
         }, select: {
             id: true,
             prefix: true,

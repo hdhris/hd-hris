@@ -6,7 +6,7 @@ import {
     Avatar, Button, Card, CardFooter, cn, Modal, ModalBody, ModalContent, ModalHeader, useDisclosure
 } from "@nextui-org/react";
 import {LuDownload, LuMessagesSquare, LuTrash2} from "react-icons/lu";
-import {icon_color, icon_size_sm} from "@/lib/utils";
+import {icon_color, icon_size_sm, text_truncated} from "@/lib/utils";
 import Typography from "@/components/common/typography/Typography";
 import {Chip} from "@nextui-org/chip";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
@@ -64,10 +64,10 @@ const Cards = memo(function Cards({items, onDelete}: RequestCardProps) {
             const data = item as unknown as RequestFormTableType;
             return (<Card className="w-[310px] h-[280px]" radius="sm" key={data.id} isHoverable isPressable isBlurred>
                 <CardHeader className="justify-between">
-                    <div className="flex gap-5">
+                    <div className="flex gap-2">
                         <Avatar isBordered radius="full" size="md" src={data.picture}/>
-                        <div className="flex flex-col gap-1 items-start justify-center">
-                            <h4 className="text-small font-semibold leading-none text-default-600">{data.name}</h4>
+                        <div className="flex flex-col items-start justify-center">
+                            <h4 className={cn("text-small h-fit font-semibold text-default-600 w-48", text_truncated)}>{data.name}</h4>
                             <h5 className="text-small tracking-tight text-default-400">{data.department}</h5>
                         </div>
                     </div>
