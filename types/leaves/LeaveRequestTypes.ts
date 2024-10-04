@@ -16,50 +16,42 @@ export type LeaveRequestTypes = {
     approvedBy: ApprovedBy;
 }
 
-// export const leaveApprovals: LeaveRequestTypes[] = [
-//     {
-//         id: 1,
-//         name: "John Doe",
-//         leave_type: "Vacation",
-//         start_date: "2024-09-30",
-//         end_date: "2024-10-05",
-//         total_days: 6,
-//         status: "Pending" // Pending
-//     },
-//     {
-//         id: 2,
-//         name: "Jane Smith",
-//         leave_type: "Sick Leave",
-//         start_date: "2024-09-25",
-//         end_date: "2024-09-28",
-//         total_days: 4,
-//         status: "Approved" // Approved
-//     },
-//     {
-//         id: 3,
-//         name: "Michael Johnson",
-//         leave_type: "Personal Leave",
-//         start_date: "2024-09-15",
-//         end_date: "2024-09-18",
-//         total_days: 4,
-//         status: "Rejected" // Rejected
-//     },
-//     {
-//         id: 4,
-//         name: "Emily Davis",
-//         leave_type: "Maternity Leave",
-//         start_date: "2024-10-01",
-//         end_date: "2024-12-01",
-//         total_days: 62,
-//         status: "Approved" // Approved
-//     },
-//     {
-//         id: 5,
-//         name: "Chris Lee",
-//         leave_type: "Vacation",
-//         start_date: "2024-11-01",
-//         end_date: "2024-11-10",
-//         total_days: 10,
-//         status: "Pending" // Pending
-//     }
-// ];
+export interface RequestFormTableType extends Omit<LeaveRequestTypes, "status" | "approvedBy" | "email">{
+    department: string;
+    created_by: ApprovedBy;
+    comment: string;
+    reason: string;
+    leave_id: number;
+}
+
+export interface RequestFormWithMethod {
+    method: "Add" | "Edit" | "Delete" | "Reset"
+    data: RequestFormTableType
+}
+
+
+
+export interface EmployeeLeavesStatus{
+    employees: EmployeeLeave[]
+    availableLeaves: LeaveType[]
+}
+
+export interface LeaveBalance {
+    year: number;
+    remaining_days: number;
+    carry_forward_days: number;
+}
+
+export interface EmployeeLeave {
+    id: number;
+    name: string;
+    picture: string;
+    department: string;
+    leave_balances: LeaveBalance;
+}
+
+export interface LeaveType {
+    id: number;
+    name: string;
+    duration_days: number;
+}

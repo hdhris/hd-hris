@@ -1,5 +1,5 @@
 'use client'
-import React from "react";
+import React, {HTMLInputTypeAttribute, Ref} from "react";
 import {FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {ControllerRenderProps, FieldValues, useFormContext} from "react-hook-form";
 import InputStyle from "@/lib/custom/styles/InputStyle";
@@ -8,12 +8,38 @@ import {Input, InputProps} from "@nextui-org/input";
 import {Select, SelectItem} from "@nextui-org/select";
 import {SelectProps} from "@nextui-org/react";
 
+type InputType =
+    "button"
+    | "checkbox"
+    | "color"
+    | "date"
+    | "datetime-local"
+    | "email"
+    | "file"
+    | "hidden"
+    | "image"
+    | "month"
+    | "number"
+    | "password"
+    | "radio"
+    | "range"
+    | "reset"
+    | "search"
+    | "submit"
+    | "tel"
+    | "text"
+    | "time"
+    | "url"
+    | "week"
+
+// Usage example
+
 export interface FormInputProps {
     placeholder?: string;
     name: string;
     label?: string;
     isFocus?: boolean;
-    type?: string;
+    type?:  InputType;
     inputDisabled?: boolean;
     inputClassName?: string;
     isRequired?: boolean;
@@ -38,12 +64,13 @@ const renderFormItem = (item: FormInputProps, control: any, index: number, size:
             {item.isRequired && <span className="text-destructive text-medium"> *</span>}
         </FormLabel>)}
         <FormControl>
-            {item.Component ? (item.Component(field)) : (<Input
+            {item.Component ? (item.Component(field)) : (
+                <Input
                 id={item.name}
                 aria-label={item.name}
                 disabled={item.inputDisabled}
                 autoFocus={item.isFocus}
-                type={item.type || "text"}
+                type={String(item.type)}
                 variant="bordered"
                 color="success"
                 placeholder={item.placeholder}

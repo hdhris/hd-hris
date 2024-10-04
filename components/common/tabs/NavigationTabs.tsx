@@ -28,7 +28,7 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
     };
 
     return (
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-4 h-full">
             <Tabs
                 aria-label="Navigation Tabs"
                 disableAnimation
@@ -39,7 +39,7 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
                     <Tab key={tab.key} title={tab.title}/>
                 ))}
             </Tabs>
-            <ScrollShadow>{children}</ScrollShadow>
+            <div className="h-full p-4 overflow-hidden">{children}</div>
         </div>
 
     );

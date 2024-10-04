@@ -110,7 +110,6 @@ const config = {
         medium: 'var(--font-size-base)', // text-medium
         large: 'var(--font-size-lg)', // text-large
       },
-
     }
   }), require("tailwindcss-animate"),
   plugin(function ({ addUtilities }) {
@@ -119,6 +118,10 @@ const config = {
         height: 'calc(100vh - 10.5rem)',
         overflowY: 'auto',
       },
+      '.variant-blue': {
+        backgroundColor: 'rgba(59, 130, 246)',
+        foregroundColor: 'rgb(255,255,255)',
+      }
     });
   }),],
 } satisfies Config
