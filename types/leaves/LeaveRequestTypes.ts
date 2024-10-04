@@ -1,3 +1,5 @@
+import React from "react";
+
 type ApprovedBy = {
     name: string;
     picture: string;
@@ -54,4 +56,14 @@ export interface LeaveType {
     id: number;
     name: string;
     duration_days: number;
+}
+
+
+export interface LeaveTypesItems {
+    key: React.Key;
+    name: string;
+    duration_days: number;
+    code: string;
+    is_carry_forward: boolean;
+    is_active: boolean;
 }
