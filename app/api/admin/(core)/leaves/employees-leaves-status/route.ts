@@ -17,7 +17,8 @@ export async function GET() {
                         gt: 0
                     }, deleted_at: null
                 }
-            }, trans_leaves_trans_leaves_employee_idTotrans_employees: {
+            },
+            trans_leaves_trans_leaves_employee_idTotrans_employees: {
                 some: {
                     start_date: {
                         lte: new Date()
@@ -25,9 +26,9 @@ export async function GET() {
                     end_date: {
                         gte: new Date()
                     },
-                    status: {
-                        not: "Approved"
-                    }
+                    // status: {
+                    //     not: "Approved"
+                    // }
                 }
             }
         }, select: {

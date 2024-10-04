@@ -8,8 +8,15 @@ import {LeaveTypeFormSchema} from "@/helper/zodValidation/leaves/leave-types-for
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useForm} from "react-hook-form";
 import {z} from "zod";
+import {cn, Switch, SwitchProps} from "@nextui-org/react";
 
-function LeaveTypesForm() {
+
+
+interface Props {
+    label?: string
+    name?: string
+}
+function LeaveTypesForm({label, name, ...props}: Props & SwitchProps) {
 
     const form = useForm({
         resolver: zodResolver(LeaveTypeFormSchema),
@@ -27,11 +34,38 @@ function LeaveTypesForm() {
     }
 
     const leaveTypeForm: FormInputProps[] = [
-        {label: 'Name', name: 'name', type: 'text', isRequired: true},
+        {label: 'Name', name: 'name', type: 'date', isRequired: true},
         {label: "Code", name: "code", type: "text", isRequired: true},
         {label: "Duration Days", name: "duration_days", type: "number", isRequired: true},
-        {label: "Is Active", name: "is_active", isRequired: true, Component: (field) => (
-                <input type="checkbox" {...field} />
+        {name: "is_active", isRequired: true, Component: (field) => (
+                <Switch
+                    {...props}
+                    checked={field.value}
+                    classNames={{
+                        base: cn(
+                            "inline-flex flex-row-reverse w-full max-w-md bg-content1 hover:bg-content2 items-center",
+                            "justify-between cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent",
+                            "data-[selected=true]:border-primary",
+                            "rounded-2xl",
+                        ),
+                        wrapper: "p-0 h-4 overflow-visible",
+                        thumb: cn("w-6 h-6 border-2 shadow-lg",
+                            "group-data-[hover=true]:border-primary",
+                            //selected
+                            "group-data-[selected=true]:ml-6",
+                            // pressed
+                            "group-data-[pressed=true]:w-7",
+                            "group-data-[selected]:group-data-[pressed]:ml-4",
+                        ),
+                    }}
+                >
+                    <div className="flex flex-col gap-1">
+                        <p className="text-medium">Is Active</p>
+                        <p className="text-tiny text-default-400">
+                            Get access to new features before they are released.
+                        </p>
+                    </div>
+                </Switch>
             )
         },
         {label: "Is Carry Forward", name: "is_carry_forward", isRequired: true, Component: (field) => (

@@ -109,7 +109,6 @@ const config = {
         medium: 'var(--font-size-base)', // text-medium
         large: 'var(--font-size-lg)', // text-large
       },
-
     }
   }), require("tailwindcss-animate")],
 } satisfies Config
