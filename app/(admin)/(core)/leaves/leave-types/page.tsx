@@ -41,7 +41,7 @@ async function Page() {
     );
 
     return (
-        <div className="grid grid-cols-[repeat(5,1fr)] gap-4 h-full">
+        <div className="flex flex-wrap gap-2 h-full overflow-auto">
             <RenderList
                 items={data}
                 map={(item, key) => {
