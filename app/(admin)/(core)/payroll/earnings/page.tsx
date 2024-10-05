@@ -27,7 +27,7 @@ const handleDelete = async (id: Number, name: string) => {
       toast({
         title: "Deleted",
         description: "Earning deleted successfully!",
-        variant: "warning",
+        variant: "success",
       });
     }
   } catch (error) {
