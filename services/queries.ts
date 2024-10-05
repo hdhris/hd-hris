@@ -7,7 +7,7 @@ import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/rou
 import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
 import { Payhead, PayheadAffected } from "@/types/payroll/payrollType";
-import {EmployeeLeavesStatus} from "@/types/leaves/LeaveRequestTypes";
+import {EmployeeLeavesStatus, LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
 
 export function useDashboard() {
@@ -102,6 +102,12 @@ export function useNewPayhead() {
 
 export function useOvertimes(){
     return useSWR<OvertimeEntry[]>('/api/admin/attendance-time/overtime', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
+export function useLeaveRequest(){
+    return useSWR<LeaveRequest[]>('/api/admin/leaves/requests', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }

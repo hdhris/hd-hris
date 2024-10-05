@@ -1,13 +1,16 @@
 'use client'
 import {ColumnsProps, TableConfigProps} from "@/types/table/TableDataTypes";
-import {DepartmentInfo} from "@/types/employeee/DepartmentType";
 import React from "react";
 import {LeaveRequestTypes} from "@/types/leaves/LeaveRequestTypes";
 import {Case, Default, Switch} from "@/components/common/Switch";
 import Typography from "@/components/common/typography/Typography";
-import {Avatar, BadgeProps, Tooltip, User} from "@nextui-org/react";
+import {Avatar, BadgeProps, cn, Tooltip, User} from "@nextui-org/react";
 import {Status} from "@/components/status/Status";
 import {FilterProps} from "@/types/table/default_config";
+import {Button} from "@nextui-org/button";
+import {LuThumbsDown, LuThumbsUp} from "react-icons/lu";
+import {icon_color, icon_size, icon_size_sm} from "@/lib/utils";
+import {axiosInstance} from "@/services/fetcher";
 
 const ApprovalColumns: ColumnsProps[] = [
     {
@@ -35,9 +38,11 @@ const ApprovalColumns: ColumnsProps[] = [
         uid: 'status',
         sortable: true
     }, {
-        name: 'Approved By',
-        uid: 'approved_by',
-        sortable: false
+        name: 'Action',
+        uid: 'action',
+    }, {
+        name: 'Reviewed By',
+        uid: 'reviewed_by',
     }
 ]
 
@@ -47,6 +52,18 @@ const approval_status_color_map: Record<string, BadgeProps["color"]> = {
 export const TableConfigurations: TableConfigProps<LeaveRequestTypes> = {
     columns: ApprovalColumns,
     rowCell: (item: LeaveRequestTypes, columnKey: React.Key) => {
+
+        const handleReview = async (key: React.Key, method: "Approved" | "Rejected") => {
+            const res = await axiosInstance.post("/api/admin/leaves/requests/reviewed", {
+                id: key,
+                method
+            })
+            if (res.status === 200) {
+                alert("Success")
+            } else {
+                alert("Failed")
+            }
+        }
         const cellValue = item[columnKey as keyof LeaveRequestTypes];
         return (
             <Switch expression={columnKey as string}>
@@ -68,13 +85,28 @@ export const TableConfigurations: TableConfigProps<LeaveRequestTypes> = {
                         {cellValue as string}
                     </Status>
                 </Case>
-                <Case of="approved_by">
-                    <Tooltip className="pointer-events-auto" content={item.approvedBy?.name}>
-                        <Avatar
-                            size="sm"
-                            src={item.approvedBy?.picture}
-                        />
-                    </Tooltip>
+                <Case of="action">
+                    {item.status === "Pending" ? <div className="flex gap-2">
+                        <Button size="sm" radius="full" isIconOnly variant="light"
+                                onClick={handleReview.bind(null, item.id, "Approved")}>
+                            <LuThumbsUp className={cn("text-success", icon_size_sm)}/>
+                        </Button>
+                        <Button size="sm" radius="full" isIconOnly variant="light"
+                                onClick={handleReview.bind(null, item.id, "Rejected")}>
+                            <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>
+                        </Button>
+                    </div> : ""}
+
+                </Case>
+                <Case of="reviewed_by">
+                    {item.status !== "Pending" ?
+                        <Tooltip className="pointer-events-auto" content={item.approvedBy?.name}>
+                            <Avatar
+                                size="sm"
+                                src={item.approvedBy?.picture}
+                            />
+                        </Tooltip> : ""
+                    }
                 </Case>
                 <Default>
                     <Typography>{cellValue as string}</Typography>

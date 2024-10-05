@@ -25,8 +25,7 @@ export default function GridCard<T extends { key: React.Key }>({ data, header, b
     return (<RenderList
             items={dataWithKey}
             map={(item, key) => {
-                const isLight = uniqolor(key).isLight;
-                return (<Card className="w-[270px] h-fit" isHoverable key={key}>
+                return (<Card className="w-[250px] h-fit" isHoverable key={key}>
                         <CardHeader className="p-0">
                             {header(item)}
                         </CardHeader>

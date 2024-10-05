@@ -4,6 +4,7 @@ import uniqolor from "uniqolor";
 import Pulse, { PulseColorType } from "../effects/Pulse";
 import Typography from "../typography/Typography";
 import { CheckCircle2, XCircle } from "lucide-react";
+import RenderList from "@/components/util/RenderList";
 
 const bgGradient = (name: string) => {
   return {

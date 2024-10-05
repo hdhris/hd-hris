@@ -10,6 +10,9 @@ import Pulse from "@/components/common/effects/Pulse";
 import uniqolor from "uniqolor";
 import {Key} from "@react-types/shared";
 import {LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
+import {axiosInstance} from "@/services/fetcher";
+import {useToast} from "@/components/ui/use-toast";
+import showDialog from "@/lib/utils/confirmDialog";
 
 
 
@@ -26,19 +29,63 @@ const bgGradient = (name: string) => {
 
 
 
-function LeaveTypesCard({ data }: LeaveCard) {
+ function LeaveTypesCard({ data }: LeaveCard) {
+    const {toast} =useToast()
     const [leaveTypes, setLeaveTypes] = useState<LeaveTypesItems[]>(data)
 
-    const handleDelete = (key: React.Key) => {
-        setLeaveTypes(prev => prev.filter(item => item.key !== key))
-    };
+     const handleDelete = async (key: React.Key) => {
+         // Find the item to delete and store it in case we need to restore it
+         const deleteItem = leaveTypes.find(item => item.key === key);
 
-    const handleEdit = (key: Key) => {
+         if (!deleteItem) return; // Exit if the item is not found
+
+
+         try {
+             // Confirm deletion with a dialog
+             const result = await showDialog(
+                 "Confirm Delete",
+                 `Are you sure you want to delete ${deleteItem.name}?`,
+                 false
+             );
+
+             // Remove the item from the state immediately
+             setLeaveTypes(prev => prev.filter(item => item.key !== key));
+             if (result === "yes") {
+                 // Send the delete request to the API
+                 const x  = await axiosInstance.post(
+                     "/api/admin/leaves/leave-types/delete", Number(key)  // Ensure you pass the key properly
+                 );
+
+
+                 toast({
+                     title: "Deleted",
+                     description: "Schedule deleted successfully!",
+                     variant: "success",
+                 });
+             } else {
+                 // If the user cancels, restore the item back to the list
+                 setLeaveTypes(prev => [...prev, deleteItem]);
+             }
+         } catch (error: any) {
+             // If an error occurs, show an error toast and restore the deleted item
+             toast({
+                 title: "Error",
+                 description: "Error: " + error.message,
+                 variant: "danger",
+             });
+
+             // Restore the item back to the list
+             setLeaveTypes(prev => [...prev, deleteItem]);
+         }
+     };
+
+
+     const handleEdit = (key: Key) => {
         alert("Edited: " + key);
     }
     return (
         <GridCard
-            data={leaveTypes}
+            data={leaveTypes.sort((a, b) => a.name.localeCompare(b.name))}
             header={({key, name, is_active}) => {
                 const isLight = uniqolor(name).isLight;
                 return (

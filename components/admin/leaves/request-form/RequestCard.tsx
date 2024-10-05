@@ -15,6 +15,7 @@ import {Case, Default, Switch} from '@/components/common/Switch';
 import {useFormTable} from "@/components/providers/FormTableProvider";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
+import {axiosInstance} from "@/services/fetcher";
 
 interface RequestCardProps {
     items: RequestFormTableType[];
@@ -152,6 +153,7 @@ const CommentModal = ({comment}: { comment: string }) => {
 const RequestCard = () => {
     const {formData, setFormData} = useFormTable<RequestFormWithMethod>();
     const isClient = useIsClient();
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const [items, setItems] = useState<RequestFormTableType[]>(() => {
         if (typeof window !== "undefined") {
             const savedItems = localStorage.getItem('requestItems');
@@ -231,6 +233,22 @@ const RequestCard = () => {
         });
     }
 
+    const handleSubmit = async () => {
+        setIsLoading(true)
+        try {
+            const res = await axiosInstance.post("/api/admin/leaves/requests/create", items)
+            if(res.status === 200){
+                handleClear()
+            } else{
+                alert("failed")
+            }
+        } catch (err: any){
+            console.log(err)
+        }
+
+        setIsLoading(false)
+    }
+
     const CardsMemo = useMemo(() => {
         return <Cards items={items} onDelete={handleDelete}/>; // Pass handleDelete as the onDelete prop
     }, [items]);
@@ -266,6 +284,8 @@ const RequestCard = () => {
                 radius="sm"
                 size="sm"
                 color="primary"
+                onClick={handleSubmit}
+                isLoading={isLoading}
             >
                 Submit
             </Button>

@@ -67,3 +67,29 @@ export interface LeaveTypesItems {
     is_carry_forward: boolean;
     is_active: boolean;
 }
+
+interface EmployeeLeaveRequest {
+    id: number;
+    email: string;
+    prefix: string | null;
+    first_name: string;
+    last_name: string;
+    middle_name: string;
+    suffix: string | null;
+    extension: string | null;
+    picture: string;
+}
+export interface LeaveRequest {
+    id: number;
+    name: string;
+    email: string;
+    picture: string;
+    leave_type: string;
+    start_date: string | Date;
+    end_date: string | Date;
+    total_days: number;
+    trans_employees_leaves: EmployeeLeaveRequest;
+    status: "Pending" | "Approved" | "Rejected";
+    trans_employees_leaves_approvedBy: EmployeeLeaveRequest;
+    ref_leave_types: LeaveType
+}

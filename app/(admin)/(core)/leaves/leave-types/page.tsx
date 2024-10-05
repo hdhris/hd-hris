@@ -38,11 +38,11 @@ async function Page() {
         });
     });
 
-    return (<div className="grid grid-rows-[repeat(1,1fr)] gap-4 w-full h-full overflow-hidden">
-        <ScrollShadow className="h-full grid grid-cols-4 gap-4 p-4 pb-5 justify-evenly overflow-y-auto">
-            <LeaveTypesCard data={data}/>
-        </ScrollShadow>
-    </div>);
+    return (
+            <ScrollShadow className="flex flex-wrap gap-6 justify-center h-full pb-3 overflow-auto">
+                <LeaveTypesCard data={data}/>
+            </ScrollShadow>
+        );
 }
 
 export default Page;
