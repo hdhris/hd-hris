@@ -2,42 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { number } from "zod";
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import dayjs from "dayjs";
 
 export async function POST(req: NextRequest) {
-  const { data, affected, affectedJson, type } = await req.json();
+  const { data, empId } = await req.json();
 
   try {
-    console.log(data);
-    console.log(affected);
-    console.log(affectedJson)
-
-    // Create the payhead record
-
-    await prisma.$transaction(async (pm)=>{
-      const payhead = await pm.ref_payheads.create({
-        data: {
-          name: data.name,
-          calculation: data.calculation,
-          is_active: data.is_active,
-          affected_json: affectedJson,
-          type: type,
-          created_at: toGMT8(new Date()),
-          updated_at: toGMT8(new Date()),
-        },
-      });
-  
-      // Create new affected employees
-      if (affected.length > 0) {
-        await pm.dim_payhead_affecteds.createMany({
-          data: affected.map((employeeId: number) => ({
-            payhead_id: payhead.id,
-            employee_id: employeeId,
-            created_at: toGMT8(new Date()),
-            updated_at: toGMT8(new Date()),
-          })),
-        });
-      }
-    })
+    console.log(data,empId);
+    const overtime = await prisma.trans_overtimes.create({
+      data: {
+        employee_id: empId,
+        clock_out: toGMT8(data.clock_out),
+        clock_in: toGMT8(data.clock_in),
+        comment: data.comment,
+        date: toGMT8(dayjs(data.date,'YYYY-mm-dd').toISOString()),
+        created_at: toGMT8(new Date()),
+        updated_at: toGMT8(new Date()),
+      },
+    });
+    console.log(overtime);
 
     return NextResponse.json({ status: 200 });
   } catch (error) {

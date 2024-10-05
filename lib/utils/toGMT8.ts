@@ -3,9 +3,12 @@ export function toGMT8(value: string | Date): Date | string {
   
     if (typeof value === "string") {
       // Check if the input is a time string in the format "HH:mm:ss"
-      const timeRegex = /^\d{2}:\d{2}:\d{2}$/;
-      if (timeRegex.test(value)) {
+      const timeSecRegex = /^\d{2}:\d{2}:\d{2}$/;
+      const timeRegex = /^\d{2}:\d{2}$/;
+      if (timeSecRegex.test(value)) {
         return `1970-01-01T${value}.000Z`;
+      } else if(timeRegex.test(value)){
+        return `1970-01-01T${value}:00.000Z`;
       } else {
         date = new Date(value); // Assume it's an ISO date string
       }
