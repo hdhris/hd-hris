@@ -25,7 +25,7 @@ const employeeSchema = z.object({
   hired_at: z.string().optional(),
   gender: z.string().max(10).optional(),
   job_id: z.number().optional(),
-  department_id: z.number().optional(),
+  department_id: z.number(),
   addr_region: z.number().optional(),
   addr_province: z.number().optional(),
   addr_municipal: z.number().optional(),
@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     console.log("Incoming data:", data);
+    console.log("Incoming data:", JSON.stringify(data, null, 2));
 
     // Validate the incoming data against the schema
     const validatedData = employeeSchema.parse(data);
@@ -106,17 +107,35 @@ export async function POST(req: NextRequest) {
 // Function to create an employee
 async function createEmployee(data: z.infer<typeof employeeSchema>) {
   const { schedules, job_id, department_id, ...rest } = data;
+  console.log("Creating employee with data:", JSON.stringify({ schedules, job_id, department_id, ...rest }, null, 2));
 
   try {
+    // Create the base employee data object
+    const employeeData: any = {
+      ...rest,
+      hired_at: data.hired_at ? new Date(data.hired_at) : null,
+      birthdate: data.birthdate ? new Date(data.birthdate) : null,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    // Only add department relation if department_id is provided and not null
+    if (department_id) {
+      employeeData.ref_departments = {
+        connect: { id: department_id }
+      };
+    }
+
+    // Only add job relation if job_id is provided and not null
+    if (job_id) {
+      employeeData.ref_job_classes = {
+        connect: { id: job_id }
+      };
+    }
+
     // 1. Create the employee record
     const employee = await prisma.trans_employees.create({
-      data: {
-        ...rest,
-        hired_at: data.hired_at ? new Date(data.hired_at) : null,
-        birthdate: data.birthdate ? new Date(data.birthdate) : null,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
+      data: employeeData,
       include: {
         ref_departments: true,
         ref_job_classes: true,
@@ -124,45 +143,37 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
       },
     });
 
-    // 2. Connect job_class relation (if job_id exists)
-    if (job_id) {
-      await prisma.trans_employees.update({
-        where: { id: employee.id },
-        data: {
-          ref_job_classes: { connect: { id: job_id } },
-        },
-      });
-    }
-
-    // 3. Connect department relation (if department_id exists)
-    if (department_id) {
-      await prisma.trans_employees.update({
-        where: { id: employee.id },
-        data: {
-          ref_departments: { connect: { id: department_id } },
-        },
-      });
-    }
-
-    // 4. Handle creation of dim_schedules (if schedules exist)
-    if (schedules) {
+    // 2. Handle schedules creation
+    if (schedules && schedules.length > 0) {
       await prisma.dim_schedules.createMany({
         data: schedules.map((schedule) => ({
-          employee_id: employee.id, // Link schedules to the newly created employee
+          employee_id: employee.id,
           batch_id: schedule.batch_id,
-          days_json: ["mon","tue","wed","thu","fri","sat"],
-          // days_json: schedule.days_json,
+          days_json: schedule.days_json,
           created_at: new Date(),
           updated_at: new Date(),
         })),
       });
     }
 
-    logDatabaseOperation("CREATE employee", employee);
-    return employee;
+    // 3. Fetch the updated employee with all relations
+    const updatedEmployee = await prisma.trans_employees.findUnique({
+      where: { id: employee.id },
+      include: {
+        ref_departments: true,
+        ref_job_classes: true,
+        dim_schedules: { include: { ref_batch_schedules: true } },
+      },
+    });
+
+    if (!updatedEmployee) {
+      throw new Error('Failed to fetch updated employee');
+    }
+
+    return updatedEmployee;
   } catch (error) {
     console.error("Error creating employee:", error);
-    throw error; // Re-throw to be handled in the outer catch
+    throw error;
   }
 }
 

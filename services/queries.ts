@@ -63,6 +63,12 @@ export function useDepartmentsData() {
     })
 }
 
+export function useJobpositionData() {
+    return useSWR<Department[]>('/api/employeemanagement/jobposition', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
 export function useSchedule() {
     return useSWR<Schedules>('/api/admin/attendance-time/schedule', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000

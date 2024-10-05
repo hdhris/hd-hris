@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { Input } from '@nextui-org/input';
-import { Select, SelectItem } from '@nextui-org/select';
+import React, { useState, useEffect } from "react";
+import { useFormContext } from "react-hook-form";
+import { Input } from "@nextui-org/input";
+import { Select, SelectItem } from "@nextui-org/select";
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormField,
   FormMessage,
-} from '@/components/ui/form';
+} from "@/components/ui/form";
 import { FileState, FileDropzone } from "@/components/ui/fileupload/file";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
-import { SharedSelection } from '@nextui-org/react'; 
+import { SharedSelection } from "@nextui-org/react";
 
 const EducationalBackgroundForm = () => {
   const { control, watch, setValue } = useFormContext();
@@ -21,13 +21,13 @@ const EducationalBackgroundForm = () => {
   const [showCourse, setShowCourse] = useState(false);
   const [fileStates, setFileStates] = useState<FileState[]>([]);
   const { edgestore } = useEdgeStore();
-  const [select,setSelect]= useState<string>('')
+  const [select, setSelect] = useState<string>("");
 
   // Watch form fields
-  const elementary = watch('elementary');
-  const highSchool = watch('highSchool');
-  const seniorHighSchool = watch('seniorHighSchool');
-  const universityCollege = watch('universityCollege');
+  const elementary = watch("elementary");
+  const highSchool = watch("highSchool");
+  const seniorHighSchool = watch("seniorHighSchool");
+  const universityCollege = watch("universityCollege");
 
   // Show Strand field when Senior High School is entered
   useEffect(() => {
@@ -41,18 +41,18 @@ const EducationalBackgroundForm = () => {
 
   // Determine the highest degree based on entered fields
   useEffect(() => {
-    let highestDegree = 'Elementary School';
-    if (highSchool) highestDegree = 'High School';
-    if (seniorHighSchool) highestDegree = 'Senior High School';
-    if (universityCollege) highestDegree = 'University/College';
-    setValue('highestDegree', highestDegree);
+    let highestDegree = "Elementary School";
+    if (highSchool) highestDegree = "High School";
+    if (seniorHighSchool) highestDegree = "Senior High School";
+    if (universityCollege) highestDegree = "University/College";
+    setValue("highestDegree", highestDegree);
   }, [elementary, highSchool, seniorHighSchool, universityCollege, setValue]);
 
-  function updateFileProgress(key: string, progress: FileState['progress']) {
+  function updateFileProgress(key: string, progress: FileState["progress"]) {
     setFileStates((fileStates) => {
       const newFileStates = structuredClone(fileStates);
       const fileState = newFileStates.find(
-        (fileState) => fileState.key === key,
+        (fileState) => fileState.key === key
       );
       if (fileState) {
         fileState.progress = progress;
@@ -61,15 +61,14 @@ const EducationalBackgroundForm = () => {
     });
   }
 
-  const handleSelect =(key:SharedSelection) => {
-    if(key.anchorKey === 'tvl'){
-      setSelect(key as string)
+  const handleSelect = (key: SharedSelection) => {
+    if (key.anchorKey === "tvl") {
+      setSelect(key as string);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Elementary School */}
         <FormField
@@ -77,14 +76,15 @@ const EducationalBackgroundForm = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Elementary School</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                 
+                  label={<span className="font-semibold">Elementary</span>}
                   placeholder="Enter Elementary School"
+                  labelPlacement="outside"
                   variant="bordered"
                   className="border rounded"
-                  isRequired
                 />
               </FormControl>
               <FormMessage />
@@ -98,14 +98,15 @@ const EducationalBackgroundForm = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>High School</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  label={<span className="font-semibold">High School</span>}
                   placeholder="Enter High School"
                   variant="bordered"
+                  labelPlacement="outside"
                   className="border rounded"
-                  isRequired
+                  
                 />
               </FormControl>
               <FormMessage />
@@ -119,14 +120,17 @@ const EducationalBackgroundForm = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Senior High School</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  
+                  label={
+                    <span className="font-semibold">Senior High School</span>
+                  }
                   placeholder="Enter Senior High School"
                   variant="bordered"
+                  labelPlacement="outside"
                   className="border rounded"
-                  isRequired
                 />
               </FormControl>
               <FormMessage />
@@ -141,20 +145,34 @@ const EducationalBackgroundForm = () => {
             control={control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Senior High School Strand</FormLabel>
                 <FormControl>
                   <Select
                     {...field}
+                    
+                    label={
+                      <span className="font-semibold">Senior High School</span>
+                    }
                     placeholder="Select Strand"
+                    labelPlacement="outside"
                     variant="bordered"
                     className="border rounded"
                     onSelectionChange={handleSelect}
                   >
-                    <SelectItem key="humss" value="HUMSS">HUMSS</SelectItem>
-                    <SelectItem key="abm" value="ABM">ABM</SelectItem>
-                    <SelectItem key="stem" value="STEM">STEM</SelectItem>
-                    <SelectItem key="gas" value="GAS">GAS</SelectItem>
-                    <SelectItem key="tvl" value="TVL">TVL</SelectItem>
+                    <SelectItem key="humss" value="HUMSS">
+                      HUMSS
+                    </SelectItem>
+                    <SelectItem key="abm" value="ABM">
+                      ABM
+                    </SelectItem>
+                    <SelectItem key="stem" value="STEM">
+                      STEM
+                    </SelectItem>
+                    <SelectItem key="gas" value="GAS">
+                      GAS
+                    </SelectItem>
+                    <SelectItem key="tvl" value="TVL">
+                      TVL
+                    </SelectItem>
                   </Select>
                 </FormControl>
                 <FormMessage />
@@ -163,21 +181,23 @@ const EducationalBackgroundForm = () => {
           />
         )}
 
-         {/* TVL Course - TVL is entered */}
-         {select && (
+        {/* TVL Course - TVL is entered */}
+        {select && (
           <FormField
             name="tvlCourse"
             control={control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>TVL Course</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
+                    
+                    label={
+                      <span className="font-semibold">TVL COURSE</span>
+                    }
                     placeholder="Enter TVL Course"
                     variant="bordered"
                     className="border rounded"
-                    isRequired
                   />
                 </FormControl>
                 <FormMessage />
@@ -192,14 +212,16 @@ const EducationalBackgroundForm = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>University/College</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                
+                  label={<span className="font-semibold">University/College</span>}
                   placeholder="Enter University/College"
+                  labelPlacement="outside"
                   variant="bordered"
                   className="border rounded"
-                  isRequired
+                  
                 />
               </FormControl>
               <FormMessage />
@@ -221,7 +243,7 @@ const EducationalBackgroundForm = () => {
                     placeholder="Enter Course"
                     variant="bordered"
                     className="border rounded"
-                    isRequired
+                   
                   />
                 </FormControl>
                 <FormMessage />
@@ -263,7 +285,7 @@ const EducationalBackgroundForm = () => {
                   value={fileStates}
                   onChange={(files) => {
                     setFileStates(files);
-                    field.onChange(files.map(f => f.file));
+                    field.onChange(files.map((f) => f.file));
                   }}
                   onFilesAdded={async (addedFiles) => {
                     setFileStates([...fileStates, ...addedFiles]);
@@ -275,17 +297,22 @@ const EducationalBackgroundForm = () => {
                             onProgressChange: async (progress) => {
                               updateFileProgress(addedFileState.key, progress);
                               if (progress === 100) {
-                                await new Promise((resolve) => setTimeout(resolve, 1000));
-                                updateFileProgress(addedFileState.key, 'COMPLETE');
+                                await new Promise((resolve) =>
+                                  setTimeout(resolve, 1000)
+                                );
+                                updateFileProgress(
+                                  addedFileState.key,
+                                  "COMPLETE"
+                                );
                               }
                             },
                           });
                           console.log(res);
                         } catch (err) {
                           console.error(err);
-                          updateFileProgress(addedFileState.key, 'ERROR');
+                          updateFileProgress(addedFileState.key, "ERROR");
                         }
-                      }),
+                      })
                     );
                   }}
                 />

@@ -292,7 +292,7 @@ const EditEducationalBackgroundForm = () => {
               </FormControl>
               <FormMessage />
             </FormItem>
-          )}
+          )} 
         />
 
         {/* Course */}
