@@ -93,3 +93,13 @@ export interface LeaveRequest {
     trans_employees_leaves_approvedBy: EmployeeLeaveRequest;
     ref_leave_types: LeaveType
 }
+
+
+// export interface LeaveTypeForm {
+//     id: number;
+//     name: string;
+//     duration: number
+//     code: string
+//     is_carry_forward: boolean
+//     is_active: boolean
+// }

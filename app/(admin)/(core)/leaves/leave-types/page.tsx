@@ -2,8 +2,9 @@ import React from 'react';
 import gradient from 'random-gradient'
 import {unstable_cache} from "next/cache";
 import prisma from "@/prisma/prisma";
-import LeaveTypesCard from "@/components/admin/leaves/leave-types/LeaveTypesCard";
+import LeaveTypesCard from "@/components/admin/leaves/leave-types/display/LeaveTypesCard";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
+import LeaveTypes from "@/components/admin/leaves/leave-types/LeaveTypes";
 
 const getLeaveTypes = unstable_cache(async () => {
     return prisma.ref_leave_types.findMany({
@@ -39,9 +40,7 @@ async function Page() {
     });
 
     return (
-            <ScrollShadow className="flex flex-wrap gap-6 justify-center h-full pb-3 overflow-auto">
-                <LeaveTypesCard data={data}/>
-            </ScrollShadow>
+        <LeaveTypes/>
         );
 }
 

@@ -7,7 +7,7 @@ import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/rou
 import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
 import { Payhead, PayheadAffected } from "@/types/payroll/payrollType";
-import {EmployeeLeavesStatus, LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
+import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
 
 export function useDashboard() {
@@ -108,6 +108,12 @@ export function useOvertimes(){
 
 export function useLeaveRequest(){
     return useSWR<LeaveRequest[]>('/api/admin/leaves/requests', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
+export function useLeaveTypes(){
+    return useSWR<LeaveTypesItems[]>('/api/admin/leaves/leave-types', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }

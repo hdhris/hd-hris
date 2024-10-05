@@ -4,8 +4,6 @@ import prisma from "@/prisma/prisma";
 
 
 export async function GET() {
-
-
     const data = await prisma.ref_leave_types.findMany({
         where: {
             deleted_at: null

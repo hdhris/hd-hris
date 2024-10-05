@@ -16,6 +16,7 @@ import {useFormTable} from "@/components/providers/FormTableProvider";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
 import {axiosInstance} from "@/services/fetcher";
+import {useToast} from "@/components/ui/use-toast";
 
 interface RequestCardProps {
     items: RequestFormTableType[];
@@ -25,6 +26,7 @@ interface RequestCardProps {
 
 const Cards = memo(function Cards({items, onDelete}: RequestCardProps) {
     const {setFormData} = useFormTable<RequestFormWithMethod>();
+
     const itemsWithKey = useMemo(() => {
         return items.map(({id, ...item}) => ({key: id, ...item}));
     }, [items]);
@@ -134,6 +136,7 @@ const Cards = memo(function Cards({items, onDelete}: RequestCardProps) {
 
 const CommentModal = ({comment}: { comment: string }) => {
     const {isOpen, onOpen, onClose} = useDisclosure();
+
     return (<>
         <LuMessagesSquare
             className={cn("cursor-pointer", icon_color, icon_size_sm)}
@@ -154,6 +157,7 @@ const RequestCard = () => {
     const {formData, setFormData} = useFormTable<RequestFormWithMethod>();
     const isClient = useIsClient();
     const [isLoading, setIsLoading] = useState<boolean>(false)
+    const {toast} = useToast()
     const [items, setItems] = useState<RequestFormTableType[]>(() => {
         if (typeof window !== "undefined") {
             const savedItems = localStorage.getItem('requestItems');
@@ -239,8 +243,18 @@ const RequestCard = () => {
             const res = await axiosInstance.post("/api/admin/leaves/requests/create", items)
             if(res.status === 200){
                 handleClear()
+                toast({
+                    title: "Success",
+                    description: "Request submitted successfully",
+                    variant: "success",
+                })
             } else{
-                alert("failed")
+                toast({
+                    title: "Error",
+                    description: "Something went wrong",
+                    duration: 9000,
+                    variant: "danger",
+                })
             }
         } catch (err: any){
             console.log(err)
