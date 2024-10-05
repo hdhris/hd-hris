@@ -86,16 +86,23 @@ const EditJobInformationForm: React.FC = () => {
   const selectedBatchId = watch("batch_id");
   const daysJson = watch("days_json");
 
+  // Fetch department_id from form and update departmentID when form loads
+  useEffect(() => {
+    const initialDepartmentId = watch("department_id");
+    if (initialDepartmentId) {
+      setDepartmentID(initialDepartmentId); // Initialize departmentID with the form value
+    }
+  }, [watch]);
+
   useEffect(() => {
     fetchDepartments();
     fetchJobTitles();
     fetchBatchSchedules();
   }, []);
 
-  useEffect(() => { 
+  useEffect(() => {
     // Populate default values for days_json
     const defaultDaysJson = {};
-
     setValue("days_json", { ...defaultDaysJson, ...daysJson });
   }, [daysJson, setValue]);
 
@@ -155,7 +162,7 @@ const EditJobInformationForm: React.FC = () => {
                   placeholder="Select Department"
                   isRequired
                   label={<span className="font-semibold">Department</span>}
-                  labelPlacement ="outside"
+                  labelPlacement="outside"
                   variant="bordered"
                 >
                   {departments.map((dept) => (
@@ -273,30 +280,6 @@ const EditJobInformationForm: React.FC = () => {
           ))}
         </div>
       </div>
-
-      {/* Work Days
-      <div className="mt-5">
-        <h3 className="text-lg font-semibold mb-4">Work Days</h3>
-        <div className="flex flex-wrap gap-4">
-          {[
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
-          ].map((day) => (
-            <Checkbox
-              key={day}
-              isSelected={daysJson?.[day] || false}
-              onValueChange={(checked) => handleDayChange(day, checked)}
-            >
-              {day}
-            </Checkbox>
-          ))}
-        </div>
-      </div> */}
     </form>
   );
 };

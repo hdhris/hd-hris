@@ -262,7 +262,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           {
             batch_id: parseInt(data.batch_id, 10),
             days_json: data.days_json,
-          },
+          }, 
         ],
       };
 

@@ -91,7 +91,7 @@ const JobInformationForm: React.FC = () => {
   >([]);
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
   const [departmentID, setDepartmentID] = useState("");
-
+  const formDepartmentID = watch("department_id");
   const selectedBatchId = watch("batch_id");
   const daysJson = watch("days_json");
 
@@ -100,6 +100,12 @@ const JobInformationForm: React.FC = () => {
     fetchJobTitles();
     fetchBatchSchedules();
   }, []);
+
+  useEffect(() => {
+    if (formDepartmentID && formDepartmentID !== departmentID) {
+      setDepartmentID(formDepartmentID);
+    }
+  }, [formDepartmentID]);
 
   const fetchDepartments = async () => {
     try {
@@ -150,11 +156,16 @@ const JobInformationForm: React.FC = () => {
                   placeholder="Select Department"
                   isRequired
                   label={<span className="font-semibold">Department</span>}
-                  labelPlacement ="outside"
+                  labelPlacement="outside"
                   variant="bordered"
-                  onChange={(e) => setDepartmentID(e.target.value)}
-                  onSelectionChange={field.onChange}
-                  selectedKeys={field.value}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setDepartmentID(value);
+                    setValue("department_id", value);
+                    // Clear job_id when department changes
+                    setValue("job_id", "");
+                  }}
+                  selectedKeys={field.value ? [field.value] : []}
                 >
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id.toString()}>
@@ -209,25 +220,18 @@ const JobInformationForm: React.FC = () => {
                   variant="bordered"
                   labelPlacement="outside"
                   isRequired
-                  onSelectionChange={field.onChange}
-                  selectedKeys={field.value}
-                  items={jobTitles.filter(
-                    (j) => j.department_id === Number(departmentID)
-                  )} // Filter job titles by department ID
+                  selectedKeys={field.value ? [field.value] : []}
+                  onChange={(e) => {
+                    setValue("job_id", e.target.value);
+                  }}
                 >
-                  {jobTitles.filter(
-                    (j) => j.department_id === Number(departmentID)
-                  ).length > 0 ? (
-                    (item: { id: number; name: string }) => (
-                      <SelectItem key={item.id} value={item.id.toString()}>
-                        {item.name}
+                  {jobTitles
+                    .filter((j) => j.department_id === Number(departmentID))
+                    .map((job) => (
+                      <SelectItem key={job.id} value={job.id.toString()}>
+                        {job.name}
                       </SelectItem>
-                    )
-                  ) : (
-                    <SelectItem key={""} value={""} isReadOnly>
-                      No Job Position Available in this deparment
-                    </SelectItem>
-                  )}
+                    ))}
                 </Select>
               </FormControl>
               <FormMessage />

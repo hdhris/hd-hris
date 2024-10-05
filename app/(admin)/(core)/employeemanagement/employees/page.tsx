@@ -1,10 +1,10 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
 import { useEmployeesData } from "@/services/queries";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Employee } from "@/types/employeee/EmployeeType";
-import { Avatar, Button, useDisclosure, Selection } from "@nextui-org/react";
+import { Avatar, Button, useDisclosure, Selection, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/add/AddEmployees";
@@ -112,8 +112,8 @@ const Page: React.FC = () => {
               />
               <span>
                 {item.first_name} {item.last_name}
-                {item.suffix && item.suffix.length > 0 ? `, ${item.suffix}` : ""}
-                {item.suffix && item.extension ? `, ${item.extension}` : item.extension ? ` ${item.extension}` : ""}
+                {item.suffix ? `, ${item.suffix}` : ""}
+                {item.extension ? ` ${item.extension}` : ""}
               </span>
             </div>
           );
@@ -141,7 +141,25 @@ const Page: React.FC = () => {
             </div>
           );
         case "status":
-          return <div>{getEmployeeStatus(item)}</div>;
+          const status = getEmployeeStatus(item);
+          let statusColorClass:"success"|"danger"|"warning"|"default" = "default";
+          switch (status) {
+            case "Terminated":
+              statusColorClass = "danger";
+              break;
+            case "Resigned":
+              statusColorClass = "default";
+              break;
+            case "Suspended":
+              statusColorClass = "warning";
+              break;
+            case "Active":
+            default:
+              statusColorClass = "success";
+          }
+          return <Chip className="capitalize" color={statusColorClass} size="sm" variant="flat">
+          {status}
+        </Chip>;
         case "actions":
           return (
             <div className="flex space-x-2">
