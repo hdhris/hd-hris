@@ -22,7 +22,6 @@ import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { parseDate } from "@internationalized/date";
 import AddressInput from "@/components/common/forms/address/AddressInput";
 
-
 const safeParseDate = (dateString: string) => {
   try {
     return parseDate(dateString);
@@ -43,14 +42,13 @@ const PersonalInformationForm: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | undefined>(
     undefined
   );
-  const { edgestore } = useEdgeStore();
+  // const { edgestore } = useEdgeStore();
 
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
- 
 
   // Handle image change
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 1024 * 1024 * 5) {
@@ -58,48 +56,34 @@ const PersonalInformationForm: React.FC = () => {
         return;
       }
 
-      try {
-        // Upload file to EdgeStore
-        const res = await edgestore.publicFiles.upload({
-          file,
-          onProgressChange: (progress) => {
-            // Handle upload progress if needed
-            console.log(`Upload progress: ${progress}%`);
-          },
-        });
-
-        console.log("File uploaded successfully:", res.url);
-
-        // Set the URL of the uploaded file
-        setImagePreview(res.url);
-        setValue("picture", res.url); // Assuming 'picture' is the field name in your form
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        setFileError("Failed to upload image");
-      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+        setValue("picture", file); // Store the File object, not the URL
+      };
+      reader.readAsDataURL(file);
+      setFileError("");
     }
   };
 
-  useEffect(() => {
-    console.log("Image preview updated:", imagePreview);
-  }, [imagePreview]);
-
-  // Handle avatar click
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
 
-  // Handle removing photo
   const handleRemovePhoto = useCallback(() => {
     setImagePreview(undefined);
-    fileInputRef.current!.value = "";
-  }, []);
+    setValue("picture", ""); // Clear the stored File object
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }, [setValue]);
+
 
   return (
     <div className="space-y-6">
       {/* Profile Section */}
       <div className="grid grid-cols-2 gap-4">
-        <Controller
+      <Controller
           name="picture"
           control={control}
           render={({ field }) => (
@@ -171,30 +155,48 @@ const PersonalInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>First Name</FormLabel>
               <FormControl>
                 <Input
+                  isRequired
+                  label={<span className="font-semibold">First Name</span>}
+                  type="text"
+                  labelPlacement="outside"
                   {...field}
                   placeholder="Enter first name"
                   variant="bordered"
+                  isInvalid={(() => {
+                    const value = field.value;
+                    const validateText = (value: string) =>
+                      /^[a-zA-Z\s]+$/.test(value); // Regex for alphabets only
+                    return value === "" ? false : !validateText(value);
+                  })()}
+                  errorMessage="First name should contain only alphabets"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        {/* First Name */}
+        {/* Middle Name */}
         <Controller
           name="middle_name"
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Middle Name</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  label={<span className="font-semibold">Middle Name</span>}
+                  labelPlacement="outside"
                   placeholder="Enter middle name"
                   variant="bordered"
+                  isInvalid={(() => {
+                    const value = field.value;
+                    const validateText = (value: string) =>
+                      /^[a-zA-Z]*$/.test(value); // Optional field, alphabets only
+                    return value === "" ? false : !validateText(value);
+                  })()}
+                  errorMessage="Middle name should contain only alphabets"
                 />
               </FormControl>
               <FormMessage />
@@ -208,48 +210,77 @@ const PersonalInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Last Name</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  isRequired
+                  label={<span className="font-semibold">Last Name</span>}
+                  type="text"
+                  labelPlacement="outside"
                   placeholder="Enter last name"
                   variant="bordered"
+                  isInvalid={(() => {
+                    const value = field.value;
+                    const validateText = (value: string) =>
+                      /^[a-zA-Z]+$/.test(value); // Regex for alphabets only
+                    return value === "" ? false : !validateText(value);
+                  })()}
+                  errorMessage="Last name should contain only alphabets"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-         {/* Suffix */}
-         <Controller
+
+        {/* Suffix */}
+        <Controller
           name="suffix"
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Suffix</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  label={<span className="font-semibold">Suffix</span>}
+                  type="text"
+                  labelPlacement="outside"
                   placeholder="Enter Suffix"
                   variant="bordered"
+                  isInvalid={(() => {
+                    const value = field.value;
+                    const validateText = (value: string) =>
+                      /^[a-zA-Z]*$/.test(value); // Optional field, alphabets only
+                    return value === "" ? false : !validateText(value);
+                  })()}
+                  errorMessage="Suffix should contain only alphabets"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-         {/* Extension */}
-         <Controller
+        {/* Extension */}
+        <Controller
           name="extension"
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Extension</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  label={<span className="font-semibold">Extension</span>}
+                  type="text"
+                  labelPlacement="outside"
                   placeholder="Enter Extension"
                   variant="bordered"
+                  isInvalid={(() => {
+                    const value = field.value;
+                    const validateText = (value: string) =>
+                      /^[a-zA-Z]*$/.test(value); // Optional field, alphabets only
+                    return value === "" ? false : !validateText(value);
+                  })()}
+                  errorMessage="Extension should contain only alphabets"
                 />
               </FormControl>
               <FormMessage />
@@ -262,10 +293,12 @@ const PersonalInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Gender</FormLabel>
               <FormControl>
                 <Select
                   {...field}
+                  isRequired
+                  label={<span className="font-semibold">Gender</span>}
+                  labelPlacement="outside"
                   placeholder="Select gender"
                   variant="bordered"
                 >
@@ -289,7 +322,6 @@ const PersonalInformationForm: React.FC = () => {
 
             return (
               <FormItem>
-                <FormLabel> Birthdate</FormLabel>
                 <FormControl>
                   <DatePicker
                     value={parsedValue}
@@ -298,7 +330,9 @@ const PersonalInformationForm: React.FC = () => {
                     }}
                     aria-label="Birthdate"
                     variant="bordered"
-                    className="border rounded"
+                    isRequired
+                    label={<span className="font-semibold">Birthdate</span>}
+                    labelPlacement="outside"
                     showMonthAndYearPickers
                   />
                 </FormControl>
@@ -319,11 +353,25 @@ const PersonalInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  isRequired
+                  label={<span className="font-semibold">Email</span>}
+                  labelPlacement="outside"
+                  type="email"
+                  isInvalid={(() => {
+                    const value = field.value;
+
+                    // Correct regex for email validation, made case-insensitive
+                    const validateEmail = (value: string) =>
+                      /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value);
+
+                    // Check if value is empty, return false. Otherwise, check if it's a valid email
+                    return value === "" ? false : !validateEmail(value);
+                  })()}
                   placeholder="Enter email"
+                  errorMessage="Please enter a valid email"
                   variant="bordered"
                 />
               </FormControl>
@@ -338,12 +386,27 @@ const PersonalInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone No.</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   placeholder="Enter phone number"
                   variant="bordered"
+                  isRequired
+                  label={<span className="font-semibold">Phone Number</span>}
+                  labelPlacement="outside"
+                  type="text"
+                  value={field.value ? `+63${field.value}` : ""}
+                  onChange={(e) => {
+                    const rawPhone = e.target.value.replace(/^\+63/, "");
+                    field.onChange(rawPhone);
+                  }}
+                  isInvalid={(() => {
+                    const value = field.value;
+                    const validatePhone = (value: string) =>
+                      /^9\d{9}$/.test(value);
+                    return value === "" ? false : !validatePhone(value);
+                  })()}
+                  errorMessage="Please enter a valid phone number"
                 />
               </FormControl>
               <FormMessage />
@@ -356,7 +419,7 @@ const PersonalInformationForm: React.FC = () => {
       <Text className="text-medium font-semibold">Address</Text>
 
       <div className="grid grid-cols-2 gap-4">
-      <AddressInput />
+        <AddressInput />
       </div>
     </div>
   );

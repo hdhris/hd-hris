@@ -1,5 +1,8 @@
 
 export type Department = {
+    trans_employees: never[];
+    department_id: number | undefined;
+    ref_departments: any;
     id: number;
     name: string;
     color?: string;

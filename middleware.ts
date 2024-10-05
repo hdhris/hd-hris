@@ -16,34 +16,34 @@ export default auth((req: any) => {
         return NextResponse.next();
     }
 
-    // Redirect unauthenticated users to the login page (root)
-    if (!req.auth) {
-        if (pathname === '/') {
-            return NextResponse.next();
-        }
-        return NextResponse.redirect(new URL("/", req.nextUrl.origin));
-    }
+    // // Redirect unauthenticated users to the login page (root)
+    // if (!req.auth) {
+    //     if (pathname === '/') {
+    //         return NextResponse.next();
+    //     }
+    //     return NextResponse.redirect(new URL("/", req.nextUrl.origin));
+    // }
 
-    // Check if the isDefaultAccount value is null or undefined
-    if (req.auth.user.isDefaultAccount == null) {
-        if (pathname === '/auth/login-checkpoint') {
-            // Prevent access to login-checkpoint if isDefaultAccount is null or undefined
-            return NextResponse.redirect(new URL("/", req.nextUrl.origin));
-        }
-        return NextResponse.next();
-    }
+    // // Check if the isDefaultAccount value is null or undefined
+    // if (req.auth.user.isDefaultAccount == null) {
+    //     if (pathname === '/auth/login-checkpoint') {
+    //         // Prevent access to login-checkpoint if isDefaultAccount is null or undefined
+    //         return NextResponse.redirect(new URL("/", req.nextUrl.origin));
+    //     }
+    //     return NextResponse.next();
+    // }
 
-    // If the user has a default account, force them to /auth/login-checkpoint and prevent access to other routes
-    if (req.auth.user.isDefaultAccount) {
-        if (pathname !== '/auth/login-checkpoint') {
-            // Block access to any other page and redirect to /auth/login-checkpoint
-            return NextResponse.redirect(new URL("/auth/login-checkpoint", req.nextUrl.origin));
-        }
-        // Allow access to /auth/login-checkpoint if the user is already there
-        return NextResponse.next();
-    }
+    // // If the user has a default account, force them to /auth/login-checkpoint and prevent access to other routes
+    // if (req.auth.user.isDefaultAccount) {
+    //     if (pathname !== '/auth/login-checkpoint') {
+    //         // Block access to any other page and redirect to /auth/login-checkpoint
+    //         return NextResponse.redirect(new URL("/auth/login-checkpoint", req.nextUrl.origin));
+    //     }
+    //     // Allow access to /auth/login-checkpoint if the user is already there
+    //     return NextResponse.next();
+    // }
 
-    // If user is authenticated and does not have a default account, allow access
+    // // If user is authenticated and does not have a default account, allow access
     return NextResponse.next();
 });
 

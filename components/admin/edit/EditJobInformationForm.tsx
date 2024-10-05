@@ -79,12 +79,20 @@ const EditJobInformationForm: React.FC = () => {
     Array<{ id: number; name: string }>
   >([]);
   const [jobTitles, setJobTitles] = useState<
-    Array<{ id: number; name: string }>
+    Array<{ id: number; name: string; department_id: number }>
   >([]);
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
-
+  const [departmentID, setDepartmentID] = useState("");
   const selectedBatchId = watch("batch_id");
   const daysJson = watch("days_json");
+
+  // Fetch department_id from form and update departmentID when form loads
+  useEffect(() => {
+    const initialDepartmentId = watch("department_id");
+    if (initialDepartmentId) {
+      setDepartmentID(initialDepartmentId); // Initialize departmentID with the form value
+    }
+  }, [watch]);
 
   useEffect(() => {
     fetchDepartments();
@@ -94,16 +102,7 @@ const EditJobInformationForm: React.FC = () => {
 
   useEffect(() => {
     // Populate default values for days_json
-    const defaultDaysJson = {
-      Monday: false,
-      Tuesday: false,
-      Wednesday: false,
-      Thursday: false,
-      Friday: false,
-      Saturday: false,
-      Sunday: false,
-    };
-
+    const defaultDaysJson = {};
     setValue("days_json", { ...defaultDaysJson, ...daysJson });
   }, [daysJson, setValue]);
 
@@ -119,7 +118,7 @@ const EditJobInformationForm: React.FC = () => {
 
   const fetchJobTitles = async () => {
     try {
-      const response = await fetch("/api/employeemanagement/jobclasses");
+      const response = await fetch("/api/employeemanagement/jobposition");
       const data = await response.json();
       setJobTitles(data);
     } catch (error) {
@@ -150,18 +149,21 @@ const EditJobInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Department</FormLabel>
               <FormControl>
                 <Select
                   selectedKeys={field.value ? [field.value] : []}
                   onSelectionChange={(keys) => {
                     const value = Array.from(keys)[0] as string;
                     field.onChange(value);
-                    setValue("department_id", value); // Explicitly set the value
+                    setDepartmentID(value); // Update department ID when a department is selected
+                    setValue("department_id", value);
                   }}
+                  aria-label="Department"
                   placeholder="Select Department"
+                  isRequired
+                  label={<span className="font-semibold">Department</span>}
+                  labelPlacement="outside"
                   variant="bordered"
-                  className="border rounded"
                 >
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id.toString()}>
@@ -184,16 +186,17 @@ const EditJobInformationForm: React.FC = () => {
 
             return (
               <FormItem>
-                <FormLabel>Hire Date</FormLabel>
                 <FormControl>
                   <DatePicker
                     value={parsedValue}
                     onChange={(date: CalendarDate | null) => {
                       field.onChange(date ? date.toString() : "");
                     }}
-                    aria-label="Hiredate"
+                    aria-label="Hire Date"
                     variant="bordered"
-                    className="border rounded"
+                    labelPlacement="outside"
+                    label={<span className="font-semibold">Hired Date</span>}
+                    isRequired
                     showMonthAndYearPickers
                   />
                 </FormControl>
@@ -209,25 +212,39 @@ const EditJobInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Job Title</FormLabel>
               <FormControl>
                 <Select
                   selectedKeys={field.value ? [field.value] : []}
                   onSelectionChange={(keys) => {
                     const value = Array.from(keys)[0] as string;
                     field.onChange(value);
-                    setValue("job_id", value); // Explicitly set the value
+                    setValue("job_id", value); // Explicitly set the value for job_id
                   }}
                   aria-label="Job Title"
                   placeholder="Select Job Title"
+                  label={<span className="font-semibold">Job Position</span>}
                   variant="bordered"
-                  className="border rounded"
+                  labelPlacement="outside"
+                  isRequired
                 >
-                  {jobTitles.map((job) => (
-                    <SelectItem key={job.id} value={job.id.toString()}>
-                      {job.name}
+                  {/* Filter job titles based on selected department */}
+                  {jobTitles.filter(
+                    (job) => job.department_id === Number(departmentID)
+                  ).length > 0 ? (
+                    jobTitles
+                      .filter(
+                        (job) => job.department_id === Number(departmentID)
+                      )
+                      .map((job) => (
+                        <SelectItem key={job.id} value={job.id.toString()}>
+                          {job.name}
+                        </SelectItem>
+                      ))
+                  ) : (
+                    <SelectItem key={""} value={""} isReadOnly>
+                      No Job Position Available in this department
                     </SelectItem>
-                  ))}
+                  )}
                 </Select>
               </FormControl>
               <FormMessage />
@@ -263,30 +280,6 @@ const EditJobInformationForm: React.FC = () => {
           ))}
         </div>
       </div>
-
-      {/* Work Days
-      <div className="mt-5">
-        <h3 className="text-lg font-semibold mb-4">Work Days</h3>
-        <div className="flex flex-wrap gap-4">
-          {[
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
-          ].map((day) => (
-            <Checkbox
-              key={day}
-              isSelected={daysJson?.[day] || false}
-              onValueChange={(checked) => handleDayChange(day, checked)}
-            >
-              {day}
-            </Checkbox>
-          ))}
-        </div>
-      </div> */}
     </form>
   );
 };

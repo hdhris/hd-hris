@@ -54,6 +54,10 @@ async function getJobById(id: number) {
       id,
       deleted_at: null, // Only fetch jobs not marked as deleted
     },
+    include: {
+      ref_departments: true,  // Include related department
+      trans_employees: true,  // Include related employees
+    },
   });
   
   logDatabaseOperation('GET job by ID', job);
@@ -69,6 +73,10 @@ async function getJobById(id: number) {
 async function getAllJobs() {
   const jobs = await prisma.ref_job_classes.findMany({
     where: { deleted_at: null }, // Exclude jobs marked as deleted
+    include: {
+      ref_departments: true,  // Include related departments
+      trans_employees: true,  // Include related employees
+    },
   });
   
   logDatabaseOperation('GET all jobs', jobs);

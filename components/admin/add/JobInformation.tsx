@@ -83,10 +83,15 @@ const formatTimeTo12Hour = (time: string) => {
 
 const JobInformationForm: React.FC = () => {
   const { control, setValue, watch } = useFormContext<FormValues>();
-  const [departments, setDepartments] = useState<Array<{ id: number; name: string }>>([]);
-  const [jobTitles, setJobTitles] = useState<Array<{ id: number; name: string }>>([]);
+  const [departments, setDepartments] = useState<
+    Array<{ id: number; name: string }>
+  >([]);
+  const [jobTitles, setJobTitles] = useState<
+    Array<{ id: number; name: string; department_id: number }>
+  >([]);
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
-
+  const [departmentID, setDepartmentID] = useState("");
+  const formDepartmentID = watch("department_id");
   const selectedBatchId = watch("batch_id");
   const daysJson = watch("days_json");
 
@@ -95,6 +100,12 @@ const JobInformationForm: React.FC = () => {
     fetchJobTitles();
     fetchBatchSchedules();
   }, []);
+
+  useEffect(() => {
+    if (formDepartmentID && formDepartmentID !== departmentID) {
+      setDepartmentID(formDepartmentID);
+    }
+  }, [formDepartmentID]);
 
   const fetchDepartments = async () => {
     try {
@@ -108,7 +119,7 @@ const JobInformationForm: React.FC = () => {
 
   const fetchJobTitles = async () => {
     try {
-      const response = await fetch("/api/employeemanagement/jobclasses");
+      const response = await fetch("/api/employeemanagement/jobposition");
       const data = await response.json();
       setJobTitles(data);
     } catch (error) {
@@ -138,13 +149,23 @@ const JobInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Department</FormLabel>
               <FormControl>
                 <Select
                   {...field}
                   aria-label="Department"
                   placeholder="Select Department"
+                  isRequired
+                  label={<span className="font-semibold">Department</span>}
+                  labelPlacement="outside"
                   variant="bordered"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setDepartmentID(value);
+                    setValue("department_id", value);
+                    // Clear job_id when department changes
+                    setValue("job_id", "");
+                  }}
+                  selectedKeys={field.value ? [field.value] : []}
                 >
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id.toString()}>
@@ -165,7 +186,6 @@ const JobInformationForm: React.FC = () => {
             const parsedValue = field.value ? safeParseDate(field.value) : null;
             return (
               <FormItem>
-                <FormLabel>Hire Date</FormLabel>
                 <FormControl>
                   <DatePicker
                     value={parsedValue}
@@ -174,7 +194,9 @@ const JobInformationForm: React.FC = () => {
                     }}
                     aria-label="Hire Date"
                     variant="bordered"
-                    className="border rounded"
+                    labelPlacement="outside"
+                    label={<span className="font-semibold">Hired Date</span>}
+                    isRequired
                     showMonthAndYearPickers
                   />
                 </FormControl>
@@ -189,19 +211,27 @@ const JobInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Job Title</FormLabel>
               <FormControl>
                 <Select
                   {...field}
                   aria-label="Job Title"
                   placeholder="Select Job Title"
+                  label={<span className="font-semibold">Job Position</span>}
                   variant="bordered"
+                  labelPlacement="outside"
+                  isRequired
+                  selectedKeys={field.value ? [field.value] : []}
+                  onChange={(e) => {
+                    setValue("job_id", e.target.value);
+                  }}
                 >
-                  {jobTitles.map((job) => (
-                    <SelectItem key={job.id} value={job.id.toString()}>
-                      {job.name}
-                    </SelectItem>
-                  ))}
+                  {jobTitles
+                    .filter((j) => j.department_id === Number(departmentID))
+                    .map((job) => (
+                      <SelectItem key={job.id} value={job.id.toString()}>
+                        {job.name}
+                      </SelectItem>
+                    ))}
                 </Select>
               </FormControl>
               <FormMessage />
@@ -218,11 +248,18 @@ const JobInformationForm: React.FC = () => {
               key={schedule.id}
               isPressable
               onPress={() => setValue("batch_id", schedule.id.toString())}
-              className={selectedBatchId === schedule.id.toString() ? "border-2 border-green-500" : ""}
+              className={
+                selectedBatchId === schedule.id.toString()
+                  ? "border-2 border-green-500"
+                  : ""
+              }
             >
               <CardHeader className="font-bold">{schedule.name}</CardHeader>
               <CardBody>
-                <p>{formatTimeTo12Hour(schedule.clock_in)} - {formatTimeTo12Hour(schedule.clock_out)}</p>
+                <p>
+                  {formatTimeTo12Hour(schedule.clock_in)} -{" "}
+                  {formatTimeTo12Hour(schedule.clock_out)}
+                </p>
                 <p>{schedule.shift_hours} hrs shift</p>
                 <p>{schedule.break_minutes} mins break</p>
               </CardBody>

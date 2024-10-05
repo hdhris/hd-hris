@@ -1,23 +1,24 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
 import { useEmployeesData } from "@/services/queries";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Employee } from "@/types/employeee/EmployeeType";
-import { Avatar, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Avatar, Button, useDisclosure, Selection, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/add/AddEmployees";
 import EditEmployee from "@/components/admin/edit/EditEmployee";
 import EmployeeModal from "@/components/admin/add/EmployeeModal";
 import axios from "axios";
+import showDialog from "@/lib/utils/confirmDialog";
+import { FilterProps } from "@/types/table/default_config";
 
 const Page: React.FC = () => {
   const { data: employees, mutate, error } = useEmployeesData();
   const [loading, setLoading] = useState(true);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { isOpen: isDeleteModalOpen, onOpen: onOpenDeleteModal, onClose: onCloseDeleteModal } = useDisclosure();
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
@@ -48,25 +49,28 @@ const Page: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = async () => {
-    if (selectedEmployeeId !== null) {
-      try {
-        await axios.delete(`/api/employeemanagement/employees?id=${selectedEmployeeId}`);
+  const handleDelete = async (id: number, name: string) => {
+    try {
+      const result = await showDialog(
+        "Confirm Delete",
+        `Are you sure you want to delete '${name}' ?`,
+        false
+      );
+      if (result === "yes") {
+        await axios.delete(`/api/employeemanagement/employees?id=${id}`);
         toast({
-          title: "Success",
-          description: "Employee successfully deleted!",
-          duration: 3000,
+          title: "Deleted",
+          description: "Employee deleted successfully!",
+          variant: "warning",
         });
         await mutate();
-        onCloseDeleteModal();
-      } catch (error) {
-        console.error("Error deleting employee:", error);
-        toast({
-          title: "Error",
-          description: "Failed to delete employee. Please try again.",
-          duration: 3000,
-        });
       }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error: " + error,
+        variant: "danger",
+      });
     }
   };
 
@@ -108,8 +112,8 @@ const Page: React.FC = () => {
               />
               <span>
                 {item.first_name} {item.last_name}
-                {item.suffix && item.suffix.length > 0 ? `, ${item.suffix}` : ""}
-                {item.suffix && item.extension ? `, ${item.extension}` : item.extension ? ` ${item.extension}` : ""}
+                {item.suffix ? `, ${item.suffix}` : ""}
+                {item.extension ? ` ${item.extension}` : ""}
               </span>
             </div>
           );
@@ -137,17 +141,32 @@ const Page: React.FC = () => {
             </div>
           );
         case "status":
-          return <div>{getEmployeeStatus(item)}</div>;
+          const status = getEmployeeStatus(item);
+          let statusColorClass:"success"|"danger"|"warning"|"default" = "default";
+          switch (status) {
+            case "Terminated":
+              statusColorClass = "danger";
+              break;
+            case "Resigned":
+              statusColorClass = "default";
+              break;
+            case "Suspended":
+              statusColorClass = "warning";
+              break;
+            case "Active":
+            default:
+              statusColorClass = "success";
+          }
+          return <Chip className="capitalize" color={statusColorClass} size="sm" variant="flat">
+          {status}
+        </Chip>;
         case "actions":
           return (
             <div className="flex space-x-2">
               <TableActionButton
                 name={`${item.first_name} ${item.last_name}`}
                 onEdit={() => handleEdit(item)}
-                onDelete={() => {
-                  setSelectedEmployeeId(item.id);
-                  onOpenDeleteModal();
-                }}
+                onDelete={() => handleDelete(item.id, `${item.first_name} ${item.last_name}`)}
               />
               <Button onClick={() => handleStatusAction(item)}>
                 Change Status
@@ -167,6 +186,29 @@ const Page: React.FC = () => {
     "contact_no",
   ];
 
+  const filterItems: FilterProps[] = [
+    {
+      filtered: employees
+        ? Array.from(new Set(employees.map(e => e.ref_departments?.name)))
+          .filter(Boolean)
+          .map(dept => ({ name: dept as string, uid: dept as string }))
+        : [],
+      category: "Department",
+    },
+  ];
+
+  const filterConfig = (keys: Selection) => {
+    let filteredItems: Employee[] = [...(employees || [])];
+
+    if (keys !== "all" && keys.size > 0) {
+      filteredItems = filteredItems.filter((employee) => 
+        keys.has(employee.ref_departments?.name || "")
+      );
+    }
+
+    return filteredItems;
+  };
+
   return (
     <div id="employee-page" className="mt-2">
       <TableData
@@ -174,6 +216,8 @@ const Page: React.FC = () => {
         config={config}
         items={employees || []}
         searchingItemKey={searchingItemKey}
+        filterItems={filterItems}
+        filterConfig={filterConfig}
         counterName="Employees"
         isLoading={loading}
         isHeaderSticky={true}
@@ -205,28 +249,8 @@ const Page: React.FC = () => {
           onEmployeeUpdated={handleEmployeeUpdated}
         />
       )}
-
-      <Modal size="xs" isOpen={isDeleteModalOpen} onClose={onCloseDeleteModal}>
-        <ModalContent>
-          <ModalHeader>Confirm Deletion</ModalHeader>
-          <ModalBody>
-            <p>
-              Are you sure you want to delete this employee? This action
-              cannot be undone.
-            </p>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="light" onClick={onCloseDeleteModal}>
-              Cancel
-            </Button>
-            <Button color="primary" onClick={handleDelete}>
-              Confirm
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </div>
   );
 };
 
-export default Page
+export default Page;
