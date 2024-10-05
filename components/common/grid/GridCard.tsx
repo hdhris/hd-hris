@@ -125,9 +125,9 @@ function GridCard<T extends GridItemProps>({
             size == "sm" ? "" : size == "md" ? "gap-1" : "gap-2"
           }`}
         >
-          {items.map((item) => {
+          {items.map((item,key) => {
             return (
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center" key={key}>
                 <span className="font-medium text-medium">{item.label}:</span>
                 <span className="font-semibold text-medium ">
                   {typeof item.value === "boolean" ? ( // Boolean
