@@ -58,7 +58,7 @@ const pulseColorMap = {
 
 export type PulseColorType = keyof typeof pulseColorMap; // This restricts the color to the keys of pulseColorMap
 
-function Pulse({ color }: { color?: PulseColorType }) {
+function Pulse({ color,isDead }: { color?: PulseColorType; isDead?: boolean }) {
     const pulseColor = color ? pulseColorMap[color] : pulseColorMap["gray"];
 
     return (
@@ -67,7 +67,8 @@ function Pulse({ color }: { color?: PulseColorType }) {
         <span
             className={cn(
                 "animate-ping absolute -right-1 -top-0 inline-flex h-5 w-5 rounded-full opacity-75",
-                pulseColor.child
+                pulseColor.child,
+                isDead ? 'invisible' : '',
             )}
         ></span>
         <span

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   Button,
@@ -63,7 +63,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
   });
 
   // Effect to populate modal fields if editing
-  useEffect(() => {
+  const load = useCallback(()=>{
     if (selectedSchedule) {
       form.reset({
         id: selectedSchedule.id,
@@ -84,6 +84,9 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
         is_active: true,
       })
     }
+  },[selectedSchedule, form])
+  useEffect(() => {
+    load();
   }, [selectedSchedule]);
 
   const handleSave = (value: any) => {

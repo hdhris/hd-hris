@@ -39,7 +39,7 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
                     <Tab key={tab.key} title={tab.title}/>
                 ))}
             </Tabs>
-            <div className="h-full p-4 overflow-hidden">{children}</div>
+            <div className="h-full overflow-hidden">{children}</div>
         </div>
 
     );

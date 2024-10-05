@@ -199,18 +199,18 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
 
   useEffect(() => {
     if (data) setDataAtLoad();
-  }, [data]);
+  }, [data,setDataAtLoad]);
 
-  const validateMandatory = (value: {
+  const validateMandatory = useCallback((value: {
     probationary: boolean;
     regular: boolean;
-  }) => {
-    return (
-      (value.probationary === true && value.regular === false) ||
-      (value.probationary === false && value.regular === true) ||
-      (value.probationary === true && value.regular === true)
-    );
-  };
+  })=>{
+      return (
+        (value.probationary === true && value.regular === false) ||
+        (value.probationary === false && value.regular === true) ||
+        (value.probationary === true && value.regular === true)
+      );
+  },[]);
 
   const filteredDeptAndJobsOrIsMandatory = useCallback(() => {
     if (selectedDepartment && selectedJobs && data) {
@@ -235,7 +235,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
 
   useEffect(() => {
     filteredDeptAndJobsOrIsMandatory();
-  }, [selectedDepartment, selectedJobs, mandatory]);
+  }, [selectedDepartment, selectedJobs, mandatory, filteredDeptAndJobsOrIsMandatory]);
 
   if (isLoading || !data) {
     return (

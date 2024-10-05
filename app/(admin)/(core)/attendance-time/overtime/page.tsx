@@ -1,27 +1,16 @@
 "use client";
-import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import { useOvertimes } from "@/services/queries";
-import { FilterProps } from "@/types/table/default_config";
-import { TableConfigProps } from "@/types/table/TableDataTypes";
-import {
-  Button,
-  Chip,
-  cn,
-  DropdownProps,
-  Selection,
-  User,
-} from "@nextui-org/react";
-import { useRouter } from "next/dist/client/components/navigation";
 import axios from "axios";
-import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
 import React, { useEffect, useState } from "react";
 import { parseBoolean } from "@/lib/utils/parser/parseClass";
 import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
 import dayjs from "dayjs";
 import GridList from "@/components/common/grid/GridList";
-import GridCard from "@/components/common/grid/GridCard";
+import GridCard, { GridItemProps } from "@/components/common/grid/GridCard";
+import { Button, Link } from "@nextui-org/react";
+import { Time } from "@/helper/timeParse/timeParse";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
@@ -49,59 +38,68 @@ const handleDelete = async (id: Number, name: string) => {
   }
 };
 
-// const statusColorMap: Record<string, "danger" | "success" | "warning"> = {
-//   pending: "danger",
-//   approved: "success",
-//   denied: "danger",
-// };
-const statusColorMap = {
-  pending: "text-danger-500",
-  approved: "text-success-500",
-  denied: "text-danger-500",
+const statusColorMap: Record<string, "danger" | "success" | "gray"> = {
+  pending: "gray",
+  approved: "success",
+  denied: "danger",
 };
+// const statusColorMap = {
+//   pending: "text-danger-500",
+//   approved: "text-success-500",
+//   denied: "text-danger-500",
+// };
+
+function items(item: OvertimeEntry): GridItemProps[] {
+  return [
+    {
+      column: "date",
+      label: "Date",
+      value: new Date(item.date),
+    },
+    {
+      column: "clock_in",
+      label: "Time In",
+      value: new Time(item.clock_in),
+    },
+    {
+      column: "clock_in",
+      label: "Time Out",
+      value: new Time(item.clock_out),
+    },
+    {
+      column: "minutes",
+      label: "Requested",
+      value: item.rendered_mins,
+    },
+    {
+      column: "checkbox",
+      label: "Greater than 40 mins",
+      value: item.rendered_mins  > 30,
+    },
+  ];
+}
 
 function Page() {
   const { data, isLoading } = useOvertimes();
   return (
-    <GridList items={data || []}>
+    <div className="h-full overflow-auto flex flex-col">
+      <Link href="/attendance-time/overtime/create" className="ms-auto mb-2">
+        <Button radius="lg" color="primary" size="sm">File Overtime</Button>
+      </Link>
+      <GridList items={data || []}>
       {(item: OvertimeEntry) => (
         <GridCard
           name={item.full_name}
-          titleSize="md"
-          items={[
-            {
-              column: 'date',
-              label: "Date",
-              value: dayjs(item.date).format('YYYY-MM-DD'),
-            },
-            {
-              column: 'clock_in',
-              label: "Time In",
-              value: dayjs(item.clock_in).format("h:mm a"),
-            },
-            {
-              column: 'clock_in',
-              label: "Time Out",
-              value: dayjs(item.clock_out).format("h:mm a"),
-            },
-            {
-              column: 'minutes',
-              label: "Requested",
-              value: dayjs(item.requested_mins).format("h:mm a"),
-            },
-            {
-              column: 'status',
-              label: 'Status',
-              value: <span className={cn('capitalize',statusColorMap[item.status])}>{item.status}</span>,
-            }
-          ]}
-          pulseVariant={
-            item.status === "pending" ? "gray" :
-            item.status === "approved" ? "success" : "danger"
-           }
+          size="sm"
+          items={items(item)}
+          avatarProps={{ src: item.trans_employees_overtimes.picture }}
+          status={{ label: item.status, color: statusColorMap[item.status] }}
+          deadPulse={["denied","pending"].includes(item.status)}
+          bottomShadow={false}
         />
       )}
     </GridList>
+    </div>
   );
 }
 

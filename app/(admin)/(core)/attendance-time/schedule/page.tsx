@@ -144,7 +144,7 @@ export default function Page() {
         toast({
           title: "Deleted",
           description: "Schedule deleted successfully!",
-          variant: "warning",
+          variant: "success",
         });
 
         setSelectedBatch(null);

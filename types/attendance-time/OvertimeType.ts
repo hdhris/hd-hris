@@ -27,6 +27,22 @@ interface Approver {
   picture: string;
 }
 
+interface Employee {
+  id: number;
+  picture: string;
+  last_name: string;
+  first_name: string;
+  middle_name: string;
+  ref_departments: {
+    id: number;
+    name: string;
+  };
+  ref_job_classes: {
+    id: number;
+    name: string;
+  };
+}
+
 export interface OvertimeEntry {
   employee_id: number;
   status: "pending" | "approved" | "denied";
@@ -49,3 +65,8 @@ export interface OvertimeEntry {
   full_name: string;
   approvedBy_full_name: string;
 };
+
+export interface OvertimeResponse {
+  overtime: OvertimeEntry;
+  employees: Employee[];
+}
