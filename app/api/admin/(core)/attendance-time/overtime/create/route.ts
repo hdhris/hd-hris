@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
         date: toGMT8(dayjs(data.date,'YYYY-mm-dd').toISOString()),
         created_at: toGMT8(new Date()),
         updated_at: toGMT8(new Date()),
+        status: "approved",
       },
     });
     console.log(overtime);
