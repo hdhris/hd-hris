@@ -3,6 +3,7 @@ import {headers} from "next/headers";
 import {parse} from "next-useragent";
 export async function devices(user_id: string) {
     try {
+
         // Ensure user exists
         const user = await prisma.trans_users.findUnique({
             where: { id: user_id },

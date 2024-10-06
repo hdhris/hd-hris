@@ -5,7 +5,6 @@ import {useLeaveTypes} from "@/services/queries";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import LeaveTypesCard from "@/components/admin/leaves/leave-types/display/LeaveTypesCard";
 import Loading from "@/components/spinner/Loading";
-import LeaveTypeProvider from "@/app/api/admin/(core)/leaves/leave-types/provider/LeaveTypeProvider";
 
 function LeaveTypes() {
     const {data, isLoading} = useLeaveTypes()
@@ -25,7 +24,7 @@ function LeaveTypes() {
 
         return []
     }, [data])
-    return (<LeaveTypeProvider>
+    return (
         <div className="grid grid-cols-[auto_1fr] gap-4 h-full">
             <LeaveTypesForm/>
             {isLoading ? <Loading/> :
@@ -33,8 +32,7 @@ function LeaveTypes() {
                     <LeaveTypesCard data={leave_types}/>
                 </ScrollShadow>}
 
-        </div>
-    </LeaveTypeProvider>);
+        </div>);
 }
 
 export default LeaveTypes;

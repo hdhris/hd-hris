@@ -7,7 +7,7 @@ import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/rou
 import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
 import { Payhead, PayheadAffected } from "@/types/payroll/payrollType";
-import {EmployeeLeavesStatus} from "@/types/leaves/LeaveRequestTypes";
+import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import { OvertimeEntry, OvertimeResponse } from "@/types/attendance-time/OvertimeType";
 
 export function useDashboard() {

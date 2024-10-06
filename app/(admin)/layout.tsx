@@ -15,9 +15,12 @@ import NavBar from "@/components/navbar/NavBar";
 import UserMenu from "@/components/dropdown/UserMenu";
 import Notification from '@/components/functions/notifications/Notification'
 import {LiaUsersSolid} from "react-icons/lia";
+import {useIsClient} from "@/hooks/ClientRendering";
+import Loading from "@/components/spinner/Loading";
 
 function RootLayout({children}: { children: ReactNode }) {
     // Use a function to lazily initialize the state
+    const isClient = useIsClient();
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
         if (typeof window !== "undefined") {
             // Check localStorage for the initial value if on the client side
@@ -39,6 +42,8 @@ function RootLayout({children}: { children: ReactNode }) {
         setIsSidebarOpen(newSidebarState);
         localStorage.setItem("isSidebarOpen", JSON.stringify(newSidebarState));
     };
+
+    if(!isClient) return <div className="h-screen w-screen"><Loading/></div>
 
     return (<main
         className="h-full w-full fixed top-0 left-0 flex bg-[#FAFAFA] overflow-x-auto overflow-y-hidden">

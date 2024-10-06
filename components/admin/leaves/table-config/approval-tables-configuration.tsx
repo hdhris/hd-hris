@@ -11,6 +11,7 @@ import {Button} from "@nextui-org/button";
 import {LuThumbsDown, LuThumbsUp} from "react-icons/lu";
 import {icon_color, icon_size, icon_size_sm} from "@/lib/utils";
 import {axiosInstance} from "@/services/fetcher";
+import {useToast} from "@/components/ui/use-toast";
 
 const ApprovalColumns: ColumnsProps[] = [
     {
@@ -52,7 +53,6 @@ const approval_status_color_map: Record<string, BadgeProps["color"]> = {
 export const TableConfigurations: TableConfigProps<LeaveRequestTypes> = {
     columns: ApprovalColumns,
     rowCell: (item: LeaveRequestTypes, columnKey: React.Key) => {
-
         const handleReview = async (key: React.Key, method: "Approved" | "Rejected") => {
             const res = await axiosInstance.post("/api/admin/leaves/requests/reviewed", {
                 id: key,
