@@ -22,6 +22,7 @@ import {useFormTable} from "@/components/providers/FormTableProvider";
 import {EmployeeLeavesStatus, RequestFormTableType, RequestFormWithMethod} from "@/types/leaves/LeaveRequestTypes";
 import {useEmployeesLeaveStatus} from "@/services/queries";
 import {Case, Default, Switch} from '@/components/common/Switch';
+import {useEmployeeId} from "@/hooks/employeeIdHook";
 
 dayjs.extend(isSameOrAfter)
 dayjs.extend(isSameOrBefore);
@@ -33,9 +34,11 @@ function RequestForm() {
     const [isAdd, setIsAdd] = useState<boolean>(true)
     const [maxLeaveApplied, setMaxLeaveApplied] = useState<number>(0)
 
+    const employeeId = useEmployeeId()
+    console.log("Employee Id: ", employeeId)
 
     useEffect(() => {
-        const dataFetch = () => {
+        const dataFetch = async () => {
             const storedEmployees = localStorage.getItem("requestItems");
             if (data) {
                 if (storedEmployees) {
@@ -60,7 +63,6 @@ function RequestForm() {
         }
 
         dataFetch()
-
     }, [data]);
 
     const {formData, setFormData} = useFormTable<RequestFormWithMethod>()
