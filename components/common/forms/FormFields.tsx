@@ -4,7 +4,7 @@ import {FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessag
 import {ControllerRenderProps, FieldValues, useFormContext} from "react-hook-form";
 import InputStyle, {DateStyle} from "@/lib/custom/styles/InputStyle";
 import {SelectionProp} from "./types/SelectionProp";
-import {Input, InputProps} from "@nextui-org/input";
+import {Input, InputProps, TextAreaProps} from "@nextui-org/input";
 import {Select, SelectItem} from "@nextui-org/select";
 import {
     Checkbox,
@@ -22,7 +22,7 @@ import {
     RadioProps,
     RangeValue,
     SelectedItems,
-    SelectProps, Switch, SwitchProps, TimeInput, TimeInputProps, TimeInputValue,
+    SelectProps, Switch, SwitchProps, Textarea, TimeInput, TimeInputProps, TimeInputValue,
 } from "@nextui-org/react";
 import {Case, Default, Switch as SwitchCase} from "@/components/common/Switch";
 import {DateValue, parseAbsoluteToLocal, parseDate, today} from "@internationalized/date";
@@ -47,6 +47,7 @@ type InputType =
     | "select"
     | "switch"
     | "time-input"
+    | "text-area"
     | "color"
     | "date"
     | "datetime-local"
@@ -90,6 +91,7 @@ interface InputOptions {
     select?: Omit<SelectProps, "label">,
     "switch": SwitchProps,
     "time-input": Omit<TimeInputProps, "label">
+    "text-area": Omit<TextAreaProps, "label">
 }
 
 // Define InputVariant, dynamically applying input-specific options or generic string-based props
@@ -147,7 +149,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                     {item.label}
                 </FormLabel>)}
             {item.isRequired && <span className="ml-2 inline-flex text-destructive text-medium"> *</span>}
-            <FormControl>
+            <FormControl className="space-y-2">
                 {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
                     <Case of="checkbox">
                         <Checkbox
@@ -232,6 +234,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                             isDisabled={item.inputDisabled}
                             autoFocus={item.isFocus}
                             variant="bordered"
+                            radius="sm"
                             value={dateRangePickerInput} // LeaveDate is used directly here
                             isRequired
                             onChange={(value) => {
@@ -271,6 +274,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                             autoFocus={item.isFocus}
                             color="primary"
                             variant="bordered"
+                            radius="sm"
                             selectedKeys={new Set<Key>([field.value as Key]) || "all"} // Cast field.value to Key
                             {...field}
                             {...(item.config as Omit<SelectProps, "label">)}
@@ -308,10 +312,23 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                             variant="bordered"
                             radius="sm"
                             value={timeInput}
+                            {...(item.config as TimeInputProps)}
                             onChange={(value) => {
                                 setTimeInput(value);
                                 field.onChange(value.toString());
                             }}
+                        />
+                    </Case>
+                    <Case of="text-area">
+                        <Textarea
+                            id={item.name}
+                            aria-label={item.name}
+                            isDisabled={item.inputDisabled}
+                            autoFocus={item.isFocus}
+                            radius="sm"
+                            variant="bordered"
+                            {...field}
+                            {...(item.config as TextAreaProps)}
                         />
                     </Case>
 

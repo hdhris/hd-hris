@@ -26,6 +26,7 @@ const schema = z.object({
     list: z.string(),
     isAirplaneMode: z.boolean(),
     event_time: z.string().time(),
+    comment: z.string()
     // Ensure groupCheckbox is defined as an array of strings
 });
 
@@ -42,6 +43,7 @@ function Page() {
             list: "",
             isAirplaneMode: false,
             event_time: "",
+            comment: "",
             // Initialize as an empty array
         }
     });
@@ -64,6 +66,7 @@ function Page() {
             list: "",
             isAirplaneMode: false,
             event_time: "",
+            comment: "",
         })
     }
 
@@ -79,6 +82,7 @@ function Page() {
             list: "option2",
             isAirplaneMode: true,
             event_time: "10:00:00",
+            comment: "Test comment",
         })
     }
     return (<Form {...form}>
@@ -163,6 +167,8 @@ function Page() {
                         }
                     }, {
                         name: "event_time", type: "time-input", label: "Event Time",
+                    }, {
+                        name: "comment", type: "text-area", label: "Comment",
                     }]}
                 />
             </div>
