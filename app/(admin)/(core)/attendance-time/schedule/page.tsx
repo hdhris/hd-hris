@@ -265,8 +265,8 @@ export default function Page() {
   return (
     <div className="flex min-w-[1230px] h-full"> {/* content */}
       <div className="flex flex-col w-[260px] h-full"> {/* left side */}
-        <div className="flex flex-col gap-2 pb-2 overflow-auto flex-1"> {/* container for the overflowing listbody */}
-          <div className="w-full h-full"> {/* overflowing list body */}
+        <div className="flex flex-col gap-2 overflow-auto flex-1"> {/* container for the overflowing listbody */}
+          <div className="w-full h-full flex flex-col space-y-2 pb-2"> {/* overflowing list body */}
           {batchData?.map((item, index) => (
             <BatchCard
               key={item.id}

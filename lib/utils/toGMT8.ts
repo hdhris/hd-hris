@@ -1,19 +1,34 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
 dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
-export function toGMT8(value: string | Date): dayjs.Dayjs {
+export function toGMT8(value: string | Date | undefined): dayjs.Dayjs {
+  if(value === undefined) {
+    return dayjs.utc(new Date(new Date().getTime() + 8 * 60 * 60 * 1000))
+  }
+
   if (value instanceof Date) {
-    return dayjs(value).utcOffset(8);
+    return dayjs.utc(new Date(value.getTime() + 8 * 60 * 60 * 1000));
   }
 
-  const dateTimeString = typeof value === 'string' ? value : '';
+  const dateTimeString = typeof value === 'string' ? value.trim() : '';
 
-  const parsedDate = dayjs(dateTimeString);
 
-  if (parsedDate.isValid()) {
+  if (dayjs(dateTimeString).isValid()) {
     return dayjs.utc(dateTimeString);
-  }
+
+  } else if (dayjs(dateTimeString,'HH:mm',true).isValid()){
+    return dayjs.utc(dateTimeString,'HH:mm',true);
+
+  } else if (dayjs(dateTimeString,'HH:mm:ss',true).isValid()){
+    return dayjs.utc(dateTimeString,'HH:mm:ss',true);
+
+  } // else if (dayjs(dateTimeString,'YYYY-MM-DD').isValid()){
+  //   return dayjs.utc(dateTimeString,'YYYY-MM-DD');
+  // }
   throw new Error('Invalid input: Expected a date string or time string, or Date object.');
-  
+
 }

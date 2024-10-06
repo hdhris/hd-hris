@@ -68,8 +68,8 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
       form.reset({
         id: selectedSchedule.id,
         name: selectedSchedule.name,
-        clock_in: dayjs(toGMT8(selectedSchedule.clock_in)).format("HH:mm"),
-        clock_out: dayjs(toGMT8(selectedSchedule.clock_out)).format("HH:mm"),
+        clock_in: toGMT8(selectedSchedule.clock_in).format("HH:mm"),
+        clock_out: toGMT8(selectedSchedule.clock_out).format("HH:mm"),
         break_min: selectedSchedule.break_min,
         is_active: selectedSchedule.is_active,
       });

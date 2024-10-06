@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
           name: data.name,
           calculation: data.calculation,
           affected_json: affectedJson,
-          updated_at: toGMT8(new Date()),
+          updated_at: toGMT8(new Date()).toISOString(),
         },
       });
 

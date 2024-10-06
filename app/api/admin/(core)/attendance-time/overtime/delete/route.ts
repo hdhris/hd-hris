@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
         id: id,
       },
       data: {
-        deleted_at: toGMT8(new Date()),
+        deleted_at: toGMT8(new Date()).toISOString(),
       },
     });
 

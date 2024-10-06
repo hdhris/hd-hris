@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
           is_active: data.is_active,
           affected_json: affectedJson,
           type: type,
-          created_at: toGMT8(new Date()),
-          updated_at: toGMT8(new Date()),
+          created_at: toGMT8(new Date()).toISOString(),
+          updated_at: toGMT8(new Date()).toISOString(),
         },
       });
   

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     console.log(body);
 
     // console.log(clock_in);
-     console.log("Clock In:", toGMT8(clock_in+":00").toISOString());
+     console.log("Clock In:", toGMT8(clock_in).toISOString());
      console.log("Clock Out:", toGMT8(clock_out).toISOString());
     const batchSchedule = await prisma.ref_batch_schedules.create({
       data: {
