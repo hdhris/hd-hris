@@ -4,7 +4,6 @@ import {auth} from "@/auth";
 
 export async function getEmployeeId() {
     const session = await auth()
-
     if (!session) {
         return null
     }

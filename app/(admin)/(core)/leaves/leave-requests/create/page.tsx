@@ -5,7 +5,7 @@ import RequestCard from "@/components/admin/leaves/request-form/RequestCard";
 import {auth} from "@/auth";
 import {getEmployeeId} from "@/server/getEmployeeId";
 
-function Page() {
+async function Page() {
 
     return (<div className="h-full">
         <RequestFormTable>

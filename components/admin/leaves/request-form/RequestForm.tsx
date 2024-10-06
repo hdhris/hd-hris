@@ -32,10 +32,6 @@ function RequestForm() {
     const {data, isLoading} = useEmployeesLeaveStatus()
     const [user, setUser] = useState<EmployeeLeavesStatus | null>(null)
     const [isAdd, setIsAdd] = useState<boolean>(true)
-    const [maxLeaveApplied, setMaxLeaveApplied] = useState<number>(0)
-
-    const employeeId = useEmployeeId()
-    console.log("Employee Id: ", employeeId)
 
     useEffect(() => {
         const dataFetch = async () => {
