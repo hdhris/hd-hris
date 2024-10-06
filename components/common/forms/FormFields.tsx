@@ -1,5 +1,5 @@
 'use client'
-import React, {HTMLInputTypeAttribute, Ref} from "react";
+import React from "react";
 import {FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {ControllerRenderProps, FieldValues, useFormContext} from "react-hook-form";
 import InputStyle from "@/lib/custom/styles/InputStyle";
@@ -7,40 +7,13 @@ import {SelectionProp} from "./types/SelectionProp";
 import {Input, InputProps} from "@nextui-org/input";
 import {Select, SelectItem} from "@nextui-org/select";
 import {SelectProps} from "@nextui-org/react";
-import BorderedSwitch from "../BorderedSwitch";
-
-type InputType =
-    "button"
-    | "checkbox"
-    | "color"
-    | "date"
-    | "datetime-local"
-    | "email"
-    | "file"
-    | "hidden"
-    | "image"
-    | "month"
-    | "number"
-    | "password"
-    | "radio"
-    | "range"
-    | "reset"
-    | "search"
-    | "submit"
-    | "tel"
-    | "text"
-    | "time"
-    | "url"
-    | "week"
-
-// Usage example
 
 export interface FormInputProps {
     placeholder?: string;
     name: string;
     label?: string;
     isFocus?: boolean;
-    type?:  InputType;
+    type?: string;
     inputDisabled?: boolean;
     inputClassName?: string;
     isRequired?: boolean;
@@ -60,31 +33,22 @@ const renderFormItem = (item: FormInputProps, control: any, index: number, size:
     control={control}
     name={item.name}
     render={({field}) => (<FormItem>
-        {item.label &&!(item.type?.toString()==="checkbox") && (<FormLabel htmlFor={item.name}  className={item.inputClassName}>
+        {item.label && (<FormLabel htmlFor={item.name}>
             {item.label}
             {item.isRequired && <span className="text-destructive text-medium"> *</span>}
         </FormLabel>)}
         <FormControl>
-            {item.Component ? (item.Component(field)) 
-            : item.type && item.type==="checkbox" ? (
-                <BorderedSwitch
-                    className="my-2"
-                    label={item.label || item.name}
-                    description={item.description || undefined}
-                    isSelected={field.value}
-                    onValueChange={field.onChange}
-                />
-            ): (
-                <Input
+            {item.Component ? (item.Component(field)) : (<Input
                 id={item.name}
                 aria-label={item.name}
                 disabled={item.inputDisabled}
                 autoFocus={item.isFocus}
-                type={String(item.type)}
+                type={item.type || "text"}
                 variant="bordered"
                 color="success"
                 placeholder={item.placeholder}
                 size={size}
+                className={item.inputClassName}
                 {...field}
                 classNames={InputStyle}
                 endContent={item.endContent}
@@ -92,7 +56,7 @@ const renderFormItem = (item: FormInputProps, control: any, index: number, size:
             />)}
         </FormControl>
         <FormMessage/>
-        {item.description &&!(item.type?.toString()==="checkbox") && <FormDescription>{item.description}</FormDescription>}
+        {item.description && <FormDescription>{item.description}</FormDescription>}
     </FormItem>)}
 />);
 
