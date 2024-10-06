@@ -111,39 +111,41 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
         <ModalBody>
           <Form {...form}>
             <form id="schedule-form" onSubmit={form.handleSubmit(handleSave)}>
-                <FormFields
-                  items={[
-                    {
-                      name: "name",
-                      label: "Schedule Name",
-                      isRequired: true,
+              <FormFields
+                items={[
+                  {
+                    name: "name",
+                    label: "Schedule Name",
+                    isRequired: true,
+                  },
+                  {
+                    name: "clock_in",
+                    label: "Clock In",
+                    isRequired: true,
+                    type: "time",
+                  },
+                  {
+                    name: "clock_out",
+                    label: "Clock Out",
+                    isRequired: true,
+                    type: "time",
+                  },
+                  {
+                    name: "break_min",
+                    label: "Break Minutes",
+                    isRequired: true,
+                  },
+                  {
+                    name: "is_active",
+                    type: "checkbox",
+                    label: "Active",
+                    config: {
+                      defaultSelected: true,
+                      description: 'test',
                     },
-                    {
-                      name: "clock_in",
-                      label: "Clock In",
-                      isRequired: true,
-                      type: "time",
-                    },
-                    {
-                      name: "clock_out",
-                      label: "Clock Out",
-                      isRequired: true,
-                      type: "time",
-                    },
-                    {
-                      name: "break_min",
-                      label: "Break Minutes",
-                      isRequired: true,
-                    },
-                    {
-                      name: "is_active",
-                      type: "checkbox",
-                      label: "Active",
-                      description:
-                        "Available for employees during registration and updates.",
-                    },
-                  ]}
-                />
+                  },
+                ]}
+              />
             </form>
           </Form>
         </ModalBody>

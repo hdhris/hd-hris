@@ -1,20 +1,36 @@
-export const calculateShiftLength = (
-    clockIn: string,
-    clockOut: string,
-    breaks: number
-  ) => {
-    const [inHour, inMinute] = (clockIn.slice(11, 16) as string).split(":").map(Number);
-    const [outHour, outMinute] = (clockOut.slice(11, 16) as string).split(":").map(Number);
-  
-    const clockInMinutes = inHour * 60 + inMinute;
-    const clockOutMinutes = outHour * 60 + outMinute;
-  
-    const shiftLengthMinutes = clockOutMinutes - clockInMinutes - breaks;
-  
-    const hours = Math.floor(shiftLengthMinutes / 60);
-    const minutes = shiftLengthMinutes % 60;
-  
-    return `${hours} hr${hours !== 1 ? "s" : ""} ${
-      minutes > 0 ? `and ${minutes} min${minutes !== 1 ? "s" : ""}` : ""
-    }`;
-  };
+import { toGMT8 } from "./toGMT8";
+
+export function calculateShiftLength(
+  clockIn: string,
+  clockOut: string,
+  breakMinutes: number
+): string {
+
+  // Parse the start and end times
+  const start = toGMT8(clockIn);
+  let end = toGMT8(clockOut);
+
+  // If the end time is before the start time, add one day to end
+  if (end.isBefore(start)) {
+    end = end.add(1, 'day');
+  }
+
+  // Calculate the total shift length in minutes
+  const totalMinutes = end.diff(start, 'minute');
+
+  // Subtract break minutes
+  const shiftLengthInMinutes = totalMinutes - breakMinutes;
+
+  // Calculate hours and minutes
+  const hours = Math.floor(shiftLengthInMinutes / 60);
+  const minutes = shiftLengthInMinutes % 60;
+
+  // Format the result
+  const hoursPart = hours > 0 ? `${hours} hour${hours !== 1 ? 's' : ''}` : '';
+  const minutesPart = minutes > 0 ? `${minutes} minute${minutes !== 1 ? 's' : ''}` : '';
+
+  // Combine parts
+  const result = [hoursPart, minutesPart].filter(Boolean).join(' and ');
+
+  return result || '0 minutes'; // If there are no hours or minutes, return '0 minutes'
+}

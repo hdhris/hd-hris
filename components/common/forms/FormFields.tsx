@@ -147,6 +147,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                         autoFocus={item.isFocus}
                                         size={size}
                                         {...field}
+                                        isSelected={field.value} //<=
                                     >
                                         {item.label}
                                     </Checkbox>

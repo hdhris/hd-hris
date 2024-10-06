@@ -41,9 +41,7 @@ function CardForm<T extends object>({
         <ScrollShadow>
           <Form {...form}>
             <form id="card-form" onSubmit={form.handleSubmit(handleSubmit)}>
-              <div className="space-y-4">
-                {children}
-              </div>
+              {children}
             </form>
           </Form>
         </ScrollShadow>
