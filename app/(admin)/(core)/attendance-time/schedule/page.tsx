@@ -21,6 +21,7 @@ import { Pencil } from "lucide-react";
 import { useSchedule } from "@/services/queries";
 import showDialog from "@/lib/utils/confirmDialog";
 import ScheduleModal from "@/components/admin/attendance-time/schedule/create-edit-modal";
+import { BatchCard } from "@/components/admin/attendance-time/schedule/batchCard";
 
 const getRandomColor = (index: number) => {
   const colors = [
@@ -214,73 +215,6 @@ export default function Page() {
     setEmpScheduleData(data?.emp_sched!);
   }, [data]);
 
-  const BatchCard = ({
-    item,
-    index,
-  }: {
-    item: BatchSchedule;
-    index: number;
-  }) => {
-    // console.log("Found: "+empScheduleData.find((emp) => emp.id === hoveredRowId)?.batch_id)
-    return (
-      <Card
-        key={item.id}
-        shadow="none"
-        className={`border-2 w-[200px] me-2 min-h-36 ${
-          getRandomColor(index).bg
-        } 
-          ${
-            hoveredBatchId === item.id ||
-            empScheduleData.find((emp) => emp.id === hoveredRowId)?.batch_id ===
-              item.id
-              ? getRandomColor(index).border
-              : "border-gray-300"
-          } transition-all duration-300`}
-        isPressable
-        isHoverable
-        onMouseEnter={() => setHoveredBatchId(item.id)}
-        onMouseLeave={() => setHoveredBatchId(null)}
-        onClick={() => {
-          setSelectedBatch(item);
-          setVisible(true);
-        }}
-      >
-        <CardHeader>
-          <h5 className={`font-semibold ${getRandomColor(index).text}`}>
-            {item.name}
-          </h5>
-          <Pencil
-            className={`text-default-800 ms-auto ${
-              hoveredBatchId === item.id ? "visible" : "invisible"
-            }`}
-            width={15}
-            height={15}
-          />
-        </CardHeader>
-        <CardBody className="flex justify-center items-center py-0">
-          <div className={`w-fit flex gap-2 ${getRandomColor(index).text}`}>
-            {formatTime(item.clock_in)}
-            <p>-</p>
-            {formatTime(item.clock_out)}
-          </div>
-        </CardBody>
-        <CardFooter className="flex flex-col items-start">
-          <p className={`text-sm ${getRandomColor(index).text}`}>
-            {calculateShiftLength(
-              item.clock_in,
-              item.clock_out,
-              item.break_min
-            )}{" "}
-            shift
-          </p>
-          <p
-            className={`text-sm ${getRandomColor(index).text}`}
-          >{`${item.break_min} mins break`}</p>
-        </CardFooter>
-      </Card>
-    );
-  };
-
   // Card for Schedule Time (no border initially, but adds on hover)
   const getScheduleCard = (
     scheduleItem: BatchSchedule | undefined,
@@ -329,12 +263,26 @@ export default function Page() {
   }
 
   return (
-    <div className="flex p-1 min-w-[1230px]">
-      <div className="flex flex-col w-[260px] h-fit-navlayout">
-        <div className="flex flex-col gap-2 pb-2 overflow-auto flex-1">
+    <div className="flex min-w-[1230px] h-full"> {/* content */}
+      <div className="flex flex-col w-[260px] h-full"> {/* left side */}
+        <div className="flex flex-col gap-2 pb-2 overflow-auto flex-1"> {/* container for the overflowing listbody */}
+          <div className="w-full h-full"> {/* overflowing list body */}
           {batchData?.map((item, index) => (
-            <BatchCard key={item.id} item={item} index={index} />
+            <BatchCard
+              key={item.id}
+              item={item}
+              color={getRandomColor(index)}
+              isHovered={hoveredBatchId === item.id}
+              isSelected={
+                empScheduleData.find((emp) => emp.id === hoveredRowId)
+                  ?.batch_id === item.id
+              }
+              setHoveredBatchId={setHoveredBatchId}
+              setSelectedBatch={setSelectedBatch}
+              setVisible={setVisible}
+            />
           ))}
+          </div>
         </div>
         <Button
           onPress={() => {
@@ -345,8 +293,8 @@ export default function Page() {
           Add Schedule
         </Button>
       </div>
-      <div className="w-full relative mx-2 h-fit-navlayout">
-        <table className="w-full table-fixed divide-y divide-gray-200">
+      
+        <table className="w-full h-full table-fixed divide-y divide-gray-200">
           <thead className="text-xs text-gray-500">
             <tr className="divide-x divide-gray-200">
               <th className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-left w-[200px] max-w-[200px] z-50">
@@ -397,7 +345,7 @@ export default function Page() {
             ))}
           </tbody>
         </table>
-      </div>
+      
       <ScheduleModal
         onSave={handleSubmit}
         selectedSchedule={selectedBatch}

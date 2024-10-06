@@ -44,8 +44,8 @@ function Page() {
           empId: selectedEmployee,
         });
         toast({
-          title: "Created",
-          description: "Earning created successfully!",
+          title: "Filed",
+          description: "Overtime filed successfully!",
           variant: "success",
         });
         setTimeout(() => {

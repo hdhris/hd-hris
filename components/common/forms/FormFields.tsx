@@ -7,6 +7,7 @@ import {SelectionProp} from "./types/SelectionProp";
 import {Input, InputProps} from "@nextui-org/input";
 import {Select, SelectItem} from "@nextui-org/select";
 import {SelectProps} from "@nextui-org/react";
+import BorderedSwitch from "../BorderedSwitch";
 
 type InputType =
     "button"
@@ -59,12 +60,21 @@ const renderFormItem = (item: FormInputProps, control: any, index: number, size:
     control={control}
     name={item.name}
     render={({field}) => (<FormItem>
-        {item.label && (<FormLabel htmlFor={item.name}  className={item.inputClassName}>
+        {item.label &&!(item.type?.toString()==="checkbox") && (<FormLabel htmlFor={item.name}  className={item.inputClassName}>
             {item.label}
             {item.isRequired && <span className="text-destructive text-medium"> *</span>}
         </FormLabel>)}
         <FormControl>
-            {item.Component ? (item.Component(field)) : (
+            {item.Component ? (item.Component(field)) 
+            : item.type && item.type==="checkbox" ? (
+                <BorderedSwitch
+                    className="my-2"
+                    label={item.label || item.name}
+                    description={item.description || undefined}
+                    isSelected={field.value}
+                    onValueChange={field.onChange}
+                />
+            ): (
                 <Input
                 id={item.name}
                 aria-label={item.name}
@@ -82,7 +92,7 @@ const renderFormItem = (item: FormInputProps, control: any, index: number, size:
             />)}
         </FormControl>
         <FormMessage/>
-        {item.description && <FormDescription>{item.description}</FormDescription>}
+        {item.description &&!(item.type?.toString()==="checkbox") && <FormDescription>{item.description}</FormDescription>}
     </FormItem>)}
 />);
 

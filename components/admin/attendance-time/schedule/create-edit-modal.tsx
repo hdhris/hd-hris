@@ -63,16 +63,16 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
   });
 
   // Effect to populate modal fields if editing
-  const load = useCallback(()=>{
+  const load = useCallback(() => {
     if (selectedSchedule) {
       form.reset({
         id: selectedSchedule.id,
         name: selectedSchedule.name,
-        clock_in:  dayjs(toGMT8(selectedSchedule.clock_in)).format('HH:mm'),
-        clock_out: dayjs(toGMT8(selectedSchedule.clock_out)).format('HH:mm'),
+        clock_in: dayjs(toGMT8(selectedSchedule.clock_in)).format("HH:mm"),
+        clock_out: dayjs(toGMT8(selectedSchedule.clock_out)).format("HH:mm"),
         break_min: selectedSchedule.break_min,
         is_active: selectedSchedule.is_active,
-      })
+      });
     } else {
       // Reset form if adding a new schedule
       form.reset({
@@ -82,9 +82,9 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
         clock_out: "",
         break_min: 60,
         is_active: true,
-      })
+      });
     }
-  },[selectedSchedule, form])
+  }, [selectedSchedule, form]);
   useEffect(() => {
     load();
   }, [selectedSchedule]);
@@ -111,44 +111,39 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
         <ModalBody>
           <Form {...form}>
             <form id="schedule-form" onSubmit={form.handleSubmit(handleSave)}>
-              <FormFields items={[
-                {
-                  name: "name",
-                  label: "Schedule Name",
-                  isRequired: true,
-                },
-                {
-                  name: "clock_in",
-                  label: "Clock In",
-                  isRequired: true,
-                  type: "time",
-                },
-                {
-                  name: "clock_out",
-                  label: "Clock Out",
-                  isRequired: true,
-                  type: "time",
-                },
-                {
-                  name: "break_min",
-                  label: "Break Minutes",
-                  isRequired: true,
-                },
-                {
-                  name: "is_active",
-                  isRequired: true,
-                  Component: (field) => {
-                    return (
-                      <BorderedSwitch
-                        label="Active"
-                        description="Available for employees during registration and updates."
-                        isSelected={field.value}
-                        onValueChange={field.onChange}
-                      />
-                    );
-                  },
-                },
-              ]}/>
+                <FormFields
+                  items={[
+                    {
+                      name: "name",
+                      label: "Schedule Name",
+                      isRequired: true,
+                    },
+                    {
+                      name: "clock_in",
+                      label: "Clock In",
+                      isRequired: true,
+                      type: "time",
+                    },
+                    {
+                      name: "clock_out",
+                      label: "Clock Out",
+                      isRequired: true,
+                      type: "time",
+                    },
+                    {
+                      name: "break_min",
+                      label: "Break Minutes",
+                      isRequired: true,
+                    },
+                    {
+                      name: "is_active",
+                      type: "checkbox",
+                      label: "Active",
+                      description:
+                        "Available for employees during registration and updates.",
+                    },
+                  ]}
+                />
             </form>
           </Form>
         </ModalBody>
@@ -167,7 +162,12 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
           <Button color="danger" variant="light" onClick={onClose}>
             Cancel
           </Button>
-          <Button isLoading={pending} color="primary" type="submit" form="schedule-form">
+          <Button
+            isLoading={pending}
+            color="primary"
+            type="submit"
+            form="schedule-form"
+          >
             {selectedSchedule ? "Update" : "Add"}
           </Button>
         </ModalFooter>

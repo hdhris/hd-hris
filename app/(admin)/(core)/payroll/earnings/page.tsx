@@ -12,6 +12,7 @@ import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
 import React, { useEffect, useState } from "react";
 import { parseBoolean } from "@/lib/utils/parser/parseClass";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
@@ -159,32 +160,29 @@ function Page() {
     return filteredItems;
   };
   return (
-    <div className="h-fit-navlayout">
-      <TableData
-        config={config}
-        items={data!}
-        isLoading={isLoading}
-        searchingItemKey={["name"]}
-        filterItems={filterItems}
-        filterConfig={filterConfig}
-        counterName="Earnings"
-        className="flex-1 h-full"
-        removeWrapper
-        isHeaderSticky
-        color={"primary"}
-        selectionMode="single"
-        aria-label="Earnings"
-        endContent={() => (
-          <Button
-            color="primary"
-            className=" w-fit"
-            onClick={() => router.push("/payroll/earnings/create")}
-          >
-            Create Earning
-          </Button>
-        )}
-      />
-    </div>
+    <TableData
+      config={config}
+      items={data!}
+      isLoading={isLoading}
+      searchingItemKey={["name"]}
+      filterItems={filterItems}
+      filterConfig={filterConfig}
+      counterName="Earnings"
+      className="flex-1 h-full"
+      isHeaderSticky
+      removeWrapper
+      selectionMode="single"
+      aria-label="Earnings"
+      endContent={() => (
+        <Button
+          {...uniformStyle()}
+          className=" w-fit"
+          onClick={() => router.push("/payroll/earnings/create")}
+        >
+          Create Earning
+        </Button>
+      )}
+    />
   );
 }
 

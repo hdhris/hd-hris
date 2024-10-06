@@ -248,8 +248,8 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
   }
 
   return (
-    <div className="flex flex-row gap-2 pb-2">
-      <Card className="h-fit mx-2 h-fit-navlayout min-w-80 shadow-sm">
+    <div className="flex flex-row gap-2 pb-2 h-full">
+      <Card className="h-full mx-2 min-w-80 shadow-sm">
         <CardHeader>{label}</CardHeader>
         <CardBody className="pt-0">
           <ScrollShadow>
@@ -258,7 +258,6 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                 id="payhead-form"
                 onSubmit={form.handleSubmit(handleSubmit)}
               >
-                <div className="space-y-4">
                   <FormFields
                     items={[
                       {
@@ -273,16 +272,9 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                       },
                       {
                         name: "is_active",
-                        Component: (field) => {
-                          return (
-                            <BorderedSwitch
-                              label="Active"
-                              description="Effective on next Payroll"
-                              isSelected={field.value}
-                              onValueChange={field.onChange}
-                            />
-                          );
-                        },
+                        type: "checkbox",
+                        label: "Active",
+                        description: "Effective on next payroll",
                       },
                     ]}
                   />
@@ -358,7 +350,6 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                         );
                       })}
                   />
-                </div>
               </form>
             </Form>
           </ScrollShadow>
@@ -375,8 +366,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
           </Button>
         </CardFooter>
       </Card>
-      <div className="w-full h-fit-navlayout">
-        <TableData
+      <TableData
           config={config}
           items={data.employees || []}
           isLoading={isLoading}
@@ -435,7 +425,6 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
             return filteredItems;
           }}
         />
-      </div>
     </div>
   );
 };

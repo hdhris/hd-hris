@@ -12,7 +12,8 @@ import Pulse, { PulseColorType } from "../effects/Pulse";
 import Typography from "../typography/Typography";
 import { CheckCircle2, XCircle } from "lucide-react";
 import dayjs from "dayjs";
-import { Time } from "@/helper/timeParse/timeParse";
+import { Time } from "@/helper/timeParse/datetimeParse";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 const bgGradient = (name: string) => {
   return {
@@ -44,11 +45,21 @@ const widthSize = {
   md: "w-[250px]",
   sm: "w-[230px]",
 };
+const wideWidthSize = {
+  lg: "w-[300px]",
+  md: "w-[280px]",
+  sm: "w-[260px]",
+};
 
 const heightSize = {
   lg: "h-[112px]",
   md: "h-[98px]",
   sm: "h-[90px]",
+};
+const wideHeightSize = {
+  lg: "h-[100px]",
+  md: "h-[88px]",
+  sm: "h-[78px]",
 };
 
 export interface GridItemProps {
@@ -67,6 +78,7 @@ interface GridCardProps<T extends object> {
   avatarProps?: AvatarProps;
   status?: { label: string; color: PulseColorType };
   bottomShadow?: boolean;
+  wide?: boolean;
 }
 
 function GridCard<T extends GridItemProps>({
@@ -79,16 +91,17 @@ function GridCard<T extends GridItemProps>({
   size = "lg",
   status,
   bottomShadow,
+  wide,
 }: GridCardProps<T>) {
   const isLight = uniqolor(name).isLight;
   return (
-    <Card className={cn("h-fit", widthSize[size])} isHoverable>
-      <CardHeader className="p-0">
+    <Card className={cn("h-auto", wide? wideWidthSize[size]: widthSize[size])} isHoverable>
+      <CardHeader className="p-0 -z-1">
         <div
           {...(!background ? bgGradient(name) : coverPhoto(background))}
           className={cn(
             "relative flex w-full rounded h-2-b-sm rounded-r-sm",
-            heightSize[size],
+            wide? wideHeightSize[size] :heightSize[size],
             isLight && "brightness-110",
             !bottomShadow
               ? ""
@@ -128,7 +141,7 @@ function GridCard<T extends GridItemProps>({
           {items.map((item,key) => {
             return (
               <div className="flex justify-between items-center" key={key}>
-                <span className="font-medium text-medium">{item.label}:</span>
+                <span className="text-medium">{item.label}:</span>
                 <span className="font-semibold text-medium ">
                   {typeof item.value === "boolean" ? ( // Boolean
                     item.value ? (
@@ -138,10 +151,10 @@ function GridCard<T extends GridItemProps>({
                     )
                   ) : typeof item.value === "object" &&
                     item.value instanceof Date ? (
-                    dayjs(item.value).format("MMM D, YYYY") // Date
+                    toGMT8(item.value).format("MMM D, YYYY") // Date
                   ) : typeof item.value === "object" &&
                     item.value instanceof Time ? (
-                    item.value.format("h:mm a")
+                    toGMT8(new Date).format('h:mm a')
                   ) : (
                     // Any
                     item.value

@@ -33,6 +33,7 @@ import {cn} from '@nextui-org/react'
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
+import { uniformStyle } from '@/lib/custom/styles/SizeRadius';
 
 interface TableProp<T extends { id: string | number }> extends TableProps {
     config: TableConfigProps<T>;
@@ -202,28 +203,27 @@ function DataTable<T extends { id: string | number }>({
     const topContent = React.useMemo(() => {
         return (<Suspense fallback={<Spinner/>}>
                 <div className="flex flex-col gap-4">
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 items-center">
                         {
                             searchingItemKey && (
                                 <Input
                                     isClearable
                                     variant="bordered"
-                                    radius="sm"
                                     className="max-w-sm"
-                                    color="primary"
                                     placeholder={`Search by ${searchingItemKey.map((item) => item.toString().replace(/[,_]+/g, ' ')).join(", ").toUpperCase()}`}
                                     startContent={<SearchIcon className={cn("text-small", icon_color, icon_size)}/>}
                                     value={filterValue} // Set the value of the input
                                     onClear={() => onClear()}
                                     onValueChange={onSearchChange}
+                                    {...uniformStyle()}
                                 />
                             )
                         }
-                        <div className='flex w-full flex-row gap-3 justify-end'>
+                        <div className='flex w-full flex-row gap-3 justify-end items-center'>
                         {filterItems && (<div className="flex gap-3 items-center">
                             <Dropdown classNames={{content: 'rounded'}}>
                                 <DropdownTrigger className="hidden sm:flex">
-                                    <Button radius="sm" endContent={<ChevronDownIcon
+                                    <Button {...uniformStyle({color:"default"})} endContent={<ChevronDownIcon
                                         className={cn('text-small', icon_color, icon_size)}/>} variant="bordered">
                                         {filter !== "all" && filter.size > 0
                                             ? `Filter by: ${Array.from(filterItems)
@@ -328,7 +328,7 @@ function DataTable<T extends { id: string | number }>({
 
     return (<div className="grid grid-rows-[auto,1fr,auto] h-full w-full">
         {/* Show section if either one is not null */}
-        {(counterName ||contentTop || endContent || filterItems || searchingItemKey) && <section className='pb-3'>
+        {(counterName ||contentTop || endContent || filterItems || searchingItemKey) && <section>
             {topContent}
         </section>}
         <div className='flex flex-col h-full overflow-y-hidden'>
