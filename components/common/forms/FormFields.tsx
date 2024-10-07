@@ -1,5 +1,5 @@
 'use client';
-import React, {FC, ReactNode, useState} from "react";
+import React, {FC, ReactNode} from "react";
 import {FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
 import {ControllerRenderProps, FieldValues, useFormContext} from "react-hook-form";
 import InputStyle, {DateStyle} from "@/lib/custom/styles/InputStyle";
@@ -8,7 +8,8 @@ import {Input, InputProps, TextAreaProps} from "@nextui-org/input";
 import {Select, SelectItem} from "@nextui-org/select";
 import {
     Autocomplete,
-    AutocompleteItem, AutocompleteItemProps,
+    AutocompleteItem,
+    AutocompleteItemProps,
     AutocompleteProps,
     Checkbox,
     CheckboxGroup,
@@ -23,7 +24,6 @@ import {
     RadioGroup,
     RadioGroupProps,
     RadioProps,
-    RangeValue,
     SelectedItems,
     SelectProps,
     Switch,
@@ -31,10 +31,9 @@ import {
     Textarea,
     TimeInput,
     TimeInputProps,
-    TimeInputValue,
 } from "@nextui-org/react";
 import {Case, Default, Switch as SwitchCase} from "@/components/common/Switch";
-import {DateValue, parseAbsoluteToLocal} from "@internationalized/date";
+import {parseAbsoluteToLocal} from "@internationalized/date";
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -179,10 +178,10 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                             >
                                 {(item.config as any)?.options?.map((option: GroupInputOptions) => (
                                     <AutocompleteItem key={option.value}
-                                              {...((item.config as any)?.autocompleteItem as Omit<AutocompleteItemProps, "key">)}
+                                                      {...((item.config as any)?.autocompleteItem as Omit<AutocompleteItemProps, "key">)}
                                     >
                                         {option.label}
-                                    </AutocompleteItem >))}
+                                    </AutocompleteItem>))}
                             </Autocomplete>
                         </Case>
                         <Case of="checkbox">
