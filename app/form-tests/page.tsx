@@ -8,7 +8,6 @@ import {Form} from '@/components/ui/form';
 import FormFields from '@/components/common/forms/FormFields';
 import {Button} from '@nextui-org/button';
 import {cn} from "@nextui-org/react";
-import {parseDate} from "@internationalized/date";
 
 // Define the Zod schema
 const schema = z.object({
@@ -97,12 +96,9 @@ function Page() {
                     items={[{
                         name: "first_name", label: "First Name", isRequired: true,
 
-                    },{
+                    }, {
                         name: "assign", label: "Assign to", type: "auto-complete", isRequired: true, config: {
-                            options: [
-                                {label: "John", value: "john"},
-                                {label: "Jane", value: "jane"}
-                            ]
+                            options: [{label: "John", value: "john"}, {label: "Jane", value: "jane"}]
                         }
 
                     }, {
@@ -122,10 +118,7 @@ function Page() {
                             hideTimeZone: true
                         }
                     }, {
-                        isRequired: true,
-                        name: "birth_date_picker",
-                        type: "date-picker",
-                        label: "Birth Date Picker",
+                        isRequired: true, name: "birth_date_picker", type: "date-picker", label: "Birth Date Picker",
 
                     }, {
                         isRequired: true, name: "holiday", type: "date-range-picker", label: "Holiday",
