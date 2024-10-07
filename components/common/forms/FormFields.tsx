@@ -7,6 +7,9 @@ import {SelectionProp} from "./types/SelectionProp";
 import {Input, InputProps, TextAreaProps} from "@nextui-org/input";
 import {Select, SelectItem} from "@nextui-org/select";
 import {
+    Autocomplete,
+    AutocompleteItem, AutocompleteItemProps,
+    AutocompleteProps,
     Checkbox,
     CheckboxGroup,
     CheckboxGroupProps,
@@ -37,13 +40,14 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import {Radio} from "@nextui-org/radio";
 import {Key} from "@react-types/shared";
-import {Granularity, TimeValue} from "@react-types/datepicker";
+import {Granularity} from "@react-types/datepicker";
 
 // Load plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 type InputType =
+    | "auto-complete"
     | "button"
     | "checkbox"
     | "group-checkbox"
@@ -83,6 +87,7 @@ export interface GroupInputOptions {
 
 // Input options for specific input types
 interface InputOptions {
+    "auto-complete"?: Omit<AutocompleteProps, "label">;
     checkbox?: CheckboxProps;
     "group-checkbox"?: Omit<CheckboxGroupProps, "label"> & {
         defaultValue?: string[]; // defaultValue is now part of the custom options
@@ -157,6 +162,29 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                 {item.isRequired && <span className="ml-2 inline-flex text-destructive text-medium"> *</span>}
                 <FormControl className="space-y-2">
                     {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
+                        <Case of="auto-complete">
+                            <Autocomplete
+                                {...(item.config as AutocompleteProps)}
+                                id={item.name}
+                                aria-label={item.name}
+                                disabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                {...field}
+                                variant="bordered"
+                                radius="sm"
+                                selectedKey={field.value ? String(field.value) : null}
+                                onSelectionChange={(value) => {
+                                    field.onChange(value)
+                                }}
+                            >
+                                {(item.config as any)?.options?.map((option: GroupInputOptions) => (
+                                    <AutocompleteItem key={option.value}
+                                              {...((item.config as any)?.autocompleteItem as Omit<AutocompleteItemProps, "key">)}
+                                    >
+                                        {option.label}
+                                    </AutocompleteItem >))}
+                            </Autocomplete>
+                        </Case>
                         <Case of="checkbox">
                             <Checkbox
                                 {...(item.config as CheckboxProps)}
@@ -354,6 +382,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 type={String(item.type)}
                                 variant="bordered"
                                 color="success"
+                                radius="sm"
                                 placeholder={item.placeholder}
                                 size={size}
                                 {...field}

@@ -12,6 +12,7 @@ import {parseDate} from "@internationalized/date";
 
 // Define the Zod schema
 const schema = z.object({
+    assign: z.string(),
     isActive: z.boolean(),
     first_name: z.string(),
     groupCheckbox: z.array(z.string()),
@@ -33,6 +34,7 @@ const schema = z.object({
 function Page() {
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema), defaultValues: {
+            assign: "",
             isActive: false,
             groupCheckbox: [],
             first_name: "",
@@ -54,6 +56,7 @@ function Page() {
 
     const handleClear = () => {
         form.reset({
+            assign: "",
             isActive: false,
             groupCheckbox: [],
             first_name: "",
@@ -70,6 +73,7 @@ function Page() {
 
     const handlePopulate = () => {
         form.reset({
+            assign: "john",
             isActive: true,
             groupCheckbox: ["option1"],
             first_name: "John",
@@ -92,6 +96,14 @@ function Page() {
                 <FormFields
                     items={[{
                         name: "first_name", label: "First Name", isRequired: true,
+
+                    },{
+                        name: "assign", label: "Assign to", type: "auto-complete", isRequired: true, config: {
+                            options: [
+                                {label: "John", value: "john"},
+                                {label: "Jane", value: "jane"}
+                            ]
+                        }
 
                     }, {
                         name: 'isActive', type: 'checkbox', label: 'Checkbox', config: {
@@ -163,9 +175,12 @@ function Page() {
                 />
             </div>
 
-            <Button type="submit">Submit</Button>
-            <Button onClick={handleClear}>Clear</Button>
-            <Button onClick={handlePopulate}>Populate</Button>
+            <div className="flex gap-4">
+                <Button type="submit">Submit</Button>
+                <Button onClick={handleClear}>Clear</Button>
+                <Button onClick={handlePopulate}>Populate</Button>
+            </div>
+
         </form>
     </Form>);
 }

@@ -6,7 +6,6 @@ const InputStyle:SlotsToClasses<InputSlots> = {
     innerWrapper: "bg-transparent",
     inputWrapper: [
         "h-10",
-        'rounded',
         "group-data-[focus=true]:border-primary"
         // 'group-data-[focus=true]:border-amber-500'
         // "group-data-[focus=true]:border-blue-700",
