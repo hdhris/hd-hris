@@ -143,11 +143,11 @@ interface FormInputOptions {
 
 
 const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
-    const [dateInput, setDateInput] = useState<DateValue | null>(parseAbsoluteToLocal("2021-04-07T18:45:22Z"))
-    const [datePickerInput, setDatePickerInput] = useState<DateValue | null>(null)
-    const [timeInput, setTimeInput] = useState<TimeInputValue | null>(null)
-
-    const [dateRangePickerInput, setDateRangePickerInput] = React.useState<RangeValue<DateValue> | null>(null);
+    // const [dateInput, setDateInput] = useState<DateValue | null>(parseAbsoluteToLocal("2021-04-07T18:45:22Z"))
+    // const [datePickerInput, setDatePickerInput] = useState<DateValue | null>(null)
+    // const [timeInput, setTimeInput] = useState<TimeInputValue | null>(null)
+    //
+    // const [dateRangePickerInput, setDateRangePickerInput] = React.useState<RangeValue<DateValue> | null>(null);
 
 
     return (<FormField
@@ -233,7 +233,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 autoFocus={item.isFocus}
                                 onChange={(value) => {
                                     if (value) {
-                                        setDateInput(value)
+
                                         field.onChange(value.toString())
                                     }
                                 }}
@@ -255,7 +255,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 autoFocus={item.isFocus}
                                 onChange={(value) => {
                                     if (value) {
-                                        setDatePickerInput(value)
+
                                         field.onChange(value.toString());
                                     }
                                 }}
@@ -276,9 +276,6 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 granularity={(item.config as any)?.granularity as Granularity || "day"}
                                 isRequired
                                 onChange={(value) => {
-                                    setDateRangePickerInput(value);
-
-                                    console.log("Date Range: ", value)
                                     field.onChange({
                                         start: value?.start.toString(), end: value?.end.toString(),
                                     })
@@ -354,7 +351,6 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 radius="sm"
                                 {...(item.config as TimeInputProps)}
                                 onChange={(value) => {
-                                    setTimeInput(value);
                                     field.onChange(value.toString());
                                 }}
                             />
