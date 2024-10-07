@@ -22,15 +22,22 @@ import {
     RadioProps,
     RangeValue,
     SelectedItems,
-    SelectProps, Switch, SwitchProps, Textarea, TimeInput, TimeInputProps, TimeInputValue,
+    SelectProps,
+    Switch,
+    SwitchProps,
+    Textarea,
+    TimeInput,
+    TimeInputProps,
+    TimeInputValue,
 } from "@nextui-org/react";
 import {Case, Default, Switch as SwitchCase} from "@/components/common/Switch";
-import {DateValue, parseAbsoluteToLocal, parseDate, today} from "@internationalized/date";
+import {DateValue, parseAbsoluteToLocal} from "@internationalized/date";
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import {Radio} from "@nextui-org/radio";
 import {Key} from "@react-types/shared";
+import {Granularity, TimeValue} from "@react-types/datepicker";
 
 // Load plugins
 dayjs.extend(utc);
@@ -131,230 +138,236 @@ interface FormInputOptions {
 
 
 const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
-    const [dateInput, setDateInput] = useState<DateValue | null>(null)
+    const [dateInput, setDateInput] = useState<DateValue | null>(parseAbsoluteToLocal("2021-04-07T18:45:22Z"))
     const [datePickerInput, setDatePickerInput] = useState<DateValue | null>(null)
     const [timeInput, setTimeInput] = useState<TimeInputValue | null>(null)
-    // const [dateRangePickerInput, setDateRangePickerInput] = React.useState<RangeValue<DateValue>>({
-    //     start: today(getLocalTimeZone()),
-    //     end: today(getLocalTimeZone())
-    // });
 
     const [dateRangePickerInput, setDateRangePickerInput] = React.useState<RangeValue<DateValue> | null>(null);
+
+
     return (<FormField
         control={control}
         name={item.name}
-        render={({field}) => (<FormItem>
-            {item.label && item.type !== "checkbox" && item.type !== "group-checkbox" && item.type !== "radio-group" && item.type !== "switch" && (
-                <FormLabel htmlFor={item.name} className={item.inputClassName}>
-                    {item.label}
-                </FormLabel>)}
-            {item.isRequired && <span className="ml-2 inline-flex text-destructive text-medium"> *</span>}
-            <FormControl className="space-y-2">
-                {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
-                    <Case of="checkbox">
-                        <Checkbox
-                            {...(item.config as CheckboxProps)}
-                            id={item.name}
-                            aria-label={item.name}
-                            disabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            size={size}
-                            isSelected={field.value}
-                            {...field}
-                        >
-                            {item.label}
-                        </Checkbox>
-                    </Case>
-                    <Case of="group-checkbox">
-                        <CheckboxGroup
-                            {...(item.config as CheckboxGroupProps)}
-                            label={item.label}
-                            id={item.name}
-                            aria-label={item.name}
-                            disabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            isSelected={field.value}
-                            {...field}
-                        >
-                            {(item.config as any)?.options?.map((option: GroupInputOptions) => (
-                                <Checkbox key={option.value} value={option.value}
-                                          {...((item.config as any)?.checkboxes as CheckboxProps)}
-                                >
-                                    {option.label}
-                                </Checkbox>))}
-                        </CheckboxGroup>
-                    </Case>
-                    <Case of="date-input">
-                        <DateInput
-                            // granularity="second"
-                            variant="bordered"
-                            radius="sm"
-                            classNames={DateStyle}
-                            {...field}
-                            {...(item.config as DateInputProps)}
-                            value={dateInput}
-                            id={item.name}
-                            aria-label={item.name}
-                            isDisabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            onChange={(value) => {
+        render={({field}) => {
+            return (<FormItem>
+                {item.label && item.type !== "checkbox" && item.type !== "group-checkbox" && item.type !== "radio-group" && item.type !== "switch" && (
+                    <FormLabel htmlFor={item.name} className={item.inputClassName}>
+                        {item.label}
+                    </FormLabel>)}
+                {item.isRequired && <span className="ml-2 inline-flex text-destructive text-medium"> *</span>}
+                <FormControl className="space-y-2">
+                    {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
+                        <Case of="checkbox">
+                            <Checkbox
+                                {...(item.config as CheckboxProps)}
+                                id={item.name}
+                                aria-label={item.name}
+                                disabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                size={size}
+                                isSelected={field.value}
+                                {...field}
+                            >
+                                {item.label}
+                            </Checkbox>
+                        </Case>
+                        <Case of="group-checkbox">
+                            <CheckboxGroup
+                                {...(item.config as CheckboxGroupProps)}
+                                label={item.label}
+                                id={item.name}
+                                aria-label={item.name}
+                                disabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                isSelected={field.value}
+                                {...field}
+                            >
+                                {(item.config as any)?.options?.map((option: GroupInputOptions) => (
+                                    <Checkbox key={option.value} value={option.value}
+                                              {...((item.config as any)?.checkboxes as CheckboxProps)}
+                                    >
+                                        {option.label}
+                                    </Checkbox>))}
+                            </CheckboxGroup>
+                        </Case>
+                        <Case of="date-input">
+                            <DateInput
+                                variant="bordered"
+                                radius="sm"
+                                classNames={DateStyle}
+                                {...field}
+                                {...(item.config as DateInputProps)}
+                                id={item.name}
+                                value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
+                                granularity={(item.config as any)?.granularity as Granularity || "day"}
+                                aria-label={item.name}
+                                isDisabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                onChange={(value) => {
+                                    if (value) {
+                                        setDateInput(value)
+                                        field.onChange(value.toString())
+                                    }
+                                }}
+                            />
 
-                                // console.log("DateInput: ", parseDate(new Date(value.toString()).toISOString()));
-                                if (value) {
-                                    setDateInput(value)
-                                    field.onChange(new Date(value.toString()));
-                                }
-                            }}
-                        />
-                    </Case>
-                    <Case of="date-picker">
-                        <DatePicker
-                            variant="bordered"
-                            radius="sm"
-                            classNames={DateStyle}
-                            {...field}
-                            {...(item.config as DatePickerProps)}
-                            value={datePickerInput}
-                            id={item.name}
-                            aria-label={item.name}
-                            isDisabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            onChange={(value) => {
-                                if (value) {
-                                    setDatePickerInput(value)
-                                    field.onChange(new Date(value.toString()));
-                                }
-                            }}
-                        />
-                    </Case>
-                    <Case of="date-range-picker">
-                        <DateRangePicker
-                            id={item.name}
-                            aria-label={item.name}
-                            isDisabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            variant="bordered"
-                            radius="sm"
-                            value={dateRangePickerInput} // LeaveDate is used directly here
-                            isRequired
-                            onChange={(value) => {
-                                setDateRangePickerInput(value);
-                                console.log("Date Picker: ", value)
-                                field.onChange({
-                                    start: new Date(value?.start.toString()), end: new Date(value?.end.toString()),
-                                })
-                            }}
-                        />
+                        </Case>
+                        <Case of="date-picker">
+                            <DatePicker
+                                variant="bordered"
+                                radius="sm"
+                                classNames={DateStyle}
+                                {...field}
+                                {...(item.config as DatePickerProps)}
+                                value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
+                                id={item.name}
+                                granularity={(item.config as any)?.granularity as Granularity || "day"}
+                                aria-label={item.name}
+                                isDisabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                onChange={(value) => {
+                                    if (value) {
+                                        setDatePickerInput(value)
+                                        field.onChange(value.toString());
+                                    }
+                                }}
+                            />
+                        </Case>
+                        <Case of="date-range-picker">
+                            <DateRangePicker
+                                id={item.name}
+                                aria-label={item.name}
+                                isDisabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                variant="bordered"
+                                radius="sm"
+                                value={field.value?.start && field.value?.end && dayjs(field.value?.start).isValid() && dayjs(field.value?.end).isValid() ? {
+                                    start: parseAbsoluteToLocal(dayjs(field.value?.start).toISOString()),
+                                    end: parseAbsoluteToLocal(dayjs(field.value?.end).toISOString()),
+                                } : null}
+                                granularity={(item.config as any)?.granularity as Granularity || "day"}
+                                isRequired
+                                onChange={(value) => {
+                                    setDateRangePickerInput(value);
 
-                    </Case>
-                    <Case of="radio-group">
-                        <RadioGroup
-                            label={item.label}
-                            id={item.name}
-                            aria-label={item.name}
-                            disabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            {...field}
-                            {...(item.config as RadioGroupProps)}
-                        >
-                            {/*<Radio value="buenos-aires">Buenos Aires</Radio>*/}
-                            {(item.config as any)?.options?.map((option: GroupInputOptions) => (
-                                <Radio key={option.value} value={option.value}
-                                       {...((item.config as any)?.radios as Omit<RadioProps, "value">)}
-                                >
-                                    {option.label}
-                                </Radio>))}
-                        </RadioGroup>
-                    </Case>
-                    <Case of="select">
-                        <Select
-                            id={item.name}
-                            aria-label={item.name}
-                            disabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            color="primary"
-                            variant="bordered"
-                            radius="sm"
-                            selectedKeys={new Set<Key>([field.value as Key]) || "all"} // Cast field.value to Key
-                            {...field}
-                            {...(item.config as Omit<SelectProps, "label">)}
+                                    console.log("Date Range: ", value)
+                                    field.onChange({
+                                        start: value?.start.toString(), end: value?.end.toString(),
+                                    })
+                                }}
+                            />
 
-                        >
-                            {/*<Radio value="buenos-aires">Buenos Aires</Radio>*/}
-                            {(item.config as any)?.options?.map((option: GroupInputOptions) => (
-                                <SelectItem key={option.value}
-                                            {...((item.config as any)?.selected as SelectedItems)}
-                                >
-                                    {option.label}
-                                </SelectItem>))}
-                        </Select>
-                    </Case>
-                    <Case of="switch">
-                        <Switch
-                            {...(item.config as SwitchProps)}
-                            id={item.name}
-                            aria-label={item.name}
-                            disabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            size={size}
-                            {...field}
-                            isSelected={field.value}
-                        >
-                            {item.label}
-                        </Switch>
-                    </Case>
-                    <Case of="time-input">
-                        <TimeInput
-                            id={item.name}
-                            aria-label={item.name}
-                            isDisabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            variant="bordered"
-                            radius="sm"
-                            value={timeInput}
-                            {...(item.config as TimeInputProps)}
-                            onChange={(value) => {
-                                setTimeInput(value);
-                                field.onChange(value.toString());
-                            }}
-                        />
-                    </Case>
-                    <Case of="text-area">
-                        <Textarea
-                            id={item.name}
-                            aria-label={item.name}
-                            isDisabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            radius="sm"
-                            variant="bordered"
-                            {...field}
-                            {...(item.config as TextAreaProps)}
-                        />
-                    </Case>
+                        </Case>
+                        <Case of="radio-group">
+                            <RadioGroup
+                                label={item.label}
+                                id={item.name}
+                                aria-label={item.name}
+                                disabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                {...field}
+                                {...(item.config as RadioGroupProps)}
+                            >
+                                {/*<Radio value="buenos-aires">Buenos Aires</Radio>*/}
+                                {(item.config as any)?.options?.map((option: GroupInputOptions) => (
+                                    <Radio key={option.value} value={option.value}
+                                           {...((item.config as any)?.radios as Omit<RadioProps, "value">)}
+                                    >
+                                        {option.label}
+                                    </Radio>))}
+                            </RadioGroup>
+                        </Case>
+                        <Case of="select">
+                            <Select
+                                id={item.name}
+                                aria-label={item.name}
+                                disabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                color="primary"
+                                variant="bordered"
+                                radius="sm"
+                                selectedKeys={new Set<Key>([field.value as Key]) || "all"} // Cast field.value to Key
+                                {...field}
+                                {...(item.config as Omit<SelectProps, "label">)}
+
+                            >
+                                {/*<Radio value="buenos-aires">Buenos Aires</Radio>*/}
+                                {(item.config as any)?.options?.map((option: GroupInputOptions) => (
+                                    <SelectItem key={option.value}
+                                                {...((item.config as any)?.selected as SelectedItems)}
+                                    >
+                                        {option.label}
+                                    </SelectItem>))}
+                            </Select>
+                        </Case>
+                        <Case of="switch">
+                            <Switch
+                                {...(item.config as SwitchProps)}
+                                id={item.name}
+                                aria-label={item.name}
+                                disabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                size={size}
+                                {...field}
+                                isSelected={field.value}
+                            >
+                                {item.label}
+                            </Switch>
+                        </Case>
+                        <Case of="time-input">
+                            <TimeInput
+                                value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
+                                granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || "hour"}
+                                id={item.name}
+                                aria-label={item.name}
+                                isDisabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                variant="bordered"
+                                radius="sm"
+                                {...(item.config as TimeInputProps)}
+                                onChange={(value) => {
+                                    setTimeInput(value);
+                                    field.onChange(value.toString());
+                                }}
+                            />
+                        </Case>
+                        <Case of="text-area">
+                            <Textarea
+                                id={item.name}
+                                aria-label={item.name}
+                                isDisabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                radius="sm"
+                                variant="bordered"
+                                {...field}
+                                {...(item.config as TextAreaProps)}
+                            />
+                        </Case>
 
 
-                    <Default>
-                        <Input
-                            id={item.name}
-                            aria-label={item.name}
-                            disabled={item.inputDisabled}
-                            autoFocus={item.isFocus}
-                            type={String(item.type)}
-                            variant="bordered"
-                            color="success"
-                            placeholder={item.placeholder}
-                            size={size}
-                            {...field}
-                            classNames={InputStyle}
-                            endContent={item.endContent}
-                            startContent={item.startContent}
-                        />
-                    </Default>
-                </SwitchCase>)}
-            </FormControl>
-            <FormMessage/>
-            {item.description && <FormDescription>{item.description}</FormDescription>}
-        </FormItem>)}
+                        <Default>
+                            <Input
+                                id={item.name}
+                                aria-label={item.name}
+                                disabled={item.inputDisabled}
+                                autoFocus={item.isFocus}
+                                type={String(item.type)}
+                                variant="bordered"
+                                color="success"
+                                placeholder={item.placeholder}
+                                size={size}
+                                {...field}
+                                classNames={InputStyle}
+                                endContent={item.endContent}
+                                startContent={item.startContent}
+                            />
+                        </Default>
+                    </SwitchCase>)}
+                </FormControl>
+                <FormMessage/>
+                {item.description && <FormDescription>{item.description}</FormDescription>}
+            </FormItem>)
+        }}
     />);
 };
 
