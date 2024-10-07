@@ -3,7 +3,6 @@ import {Avatar, cn} from "@nextui-org/react";
 import {Form} from "@/components/ui/form";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {z} from "zod";
-import {UserRound} from "lucide-react";
 import Text from "@/components/Text";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -17,6 +16,7 @@ import {useEdgeStore} from "@/lib/edgestore/edgestore";
 import {signOut} from "next-auth/react";
 import {ToastAction} from "@/components/ui/toast";
 import {useCredentials} from "@/hooks/Credentials";
+import { LuUserCircle2 } from "react-icons/lu";
 
 export default function ProfileForm() {
     const {edgestore} = useEdgeStore();
@@ -104,7 +104,7 @@ export default function ProfileForm() {
                             isBordered={!!fileError}
                             color={fileError ? 'danger' : 'default'}
                             className='w-16 h-16'
-                            fallback={<UserRound className="w-10 h-10 text-default-500" size={20}/>}
+                            fallback={<LuUserCircle2 className="w-10 h-10 text-default-500" size={20}/>}
                         />
 
                     </div>

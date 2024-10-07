@@ -4,7 +4,7 @@ import { useEmployeesData } from "@/services/queries";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Employee } from "@/types/employeee/EmployeeType";
-import { Avatar, Button, useDisclosure, Selection, Chip } from "@nextui-org/react";
+import { Avatar, Button, Selection, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/add/AddEmployees";

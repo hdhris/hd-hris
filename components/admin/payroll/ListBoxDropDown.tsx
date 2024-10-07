@@ -14,7 +14,6 @@ import {
   ListboxProps,
   ListboxSection,
 } from "@nextui-org/react";
-import { ChevronRightIcon } from "lucide-react";
 import { ReactNode, useState } from "react";
 
 type ListDropDownProps<T extends object> = {

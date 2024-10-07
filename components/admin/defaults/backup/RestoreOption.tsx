@@ -1,11 +1,10 @@
 'use client'
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback} from 'react';
 import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure} from "@nextui-org/react";
 import {Button} from "@nextui-org/button";
 import {Section} from "@/components/common/typography/Typography";
 import {ActionButtons} from "@/components/actions/ActionButton";
 import FileUpload from "@/components/common/forms/FileUpload";
-import {Parser} from "sql-ddl-to-json-schema";
 
 
 function RestoreOption() {
@@ -15,8 +14,8 @@ function RestoreOption() {
     }, [])
 
 
-
     return (<>
+
         <Button size='sm' variant='faded' onPress={onOpen}>Restore Options</Button>
         <Modal
             placement='center'

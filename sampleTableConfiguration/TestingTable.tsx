@@ -6,14 +6,18 @@ import TableData from "@/components/tabledata/TableData";
 import {TableConfigProps} from "@/types/table/TableDataTypes";
 import {DepartmentInfo} from "@/types/employeee/DepartmentType";
 import {departmentColumns, departmentFilter, departments} from "@/sampleData/admin/employees/Department";
-import {CircleCheck, CircleX} from "lucide-react";
 import {Switch as Switch2} from "@nextui-org/switch";
 import {Case, Default, Switch} from "@/components/common/Switch";
 import BorderCard from "@/components/common/BorderCard";
+import {LuXCircle} from "react-icons/lu";
 
 
 const department_status_color_map: Record<string, BadgeProps["color"]> = {
     active: "success", inactive: "danger",
+}
+
+function LuCheckCircle2(props: { className: string }) {
+    return null;
 }
 
 function DepartmentTable() {
@@ -80,9 +84,9 @@ function DepartmentTable() {
                         size="sm"
                         color={department_status_color_map[item.department_status.toLowerCase()]}
                         thumbIcon={() => isActive ? (<Tooltip color='danger' content={'Deactivate ' + item.department}>
-                            <CircleCheck className="stroke-success-500"/>
+                            <LuCheckCircle2 className="stroke-success-500"/>
                         </Tooltip>) : (<Tooltip color='success' content={'Activate ' + item.department}>
-                            <CircleX className='stroke-danger-500'/>
+                            <LuXCircle className='stroke-danger-500'/>
                         </Tooltip>)}
                     />
                     {/*<Status color={department_status_color_map[item.department_status.toLowerCase()]}*/}
