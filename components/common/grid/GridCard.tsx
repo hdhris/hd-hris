@@ -10,9 +10,9 @@ import React, { ReactNode } from "react";
 import uniqolor from "uniqolor";
 import Pulse, { PulseColorType } from "../effects/Pulse";
 import Typography from "../typography/Typography";
-import { CheckCircle2, XCircle } from "lucide-react";
 import dayjs from "dayjs";
 import { Time } from "@/helper/timeParse/timeParse";
+import {LuCheckCircle2, LuXCircle} from "react-icons/lu";
 
 const bgGradient = (name: string) => {
   return {
@@ -132,9 +132,9 @@ function GridCard<T extends GridItemProps>({
                 <span className="font-semibold text-medium ">
                   {typeof item.value === "boolean" ? ( // Boolean
                     item.value ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      <LuCheckCircle2 className="h-5 w-5 text-green-500" />
                     ) : (
-                      <XCircle className="h-5 w-5 text-red-500" />
+                      <LuXCircle className="h-5 w-5 text-red-500" />
                     )
                   ) : typeof item.value === "object" &&
                     item.value instanceof Date ? (

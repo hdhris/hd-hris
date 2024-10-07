@@ -11,7 +11,6 @@ import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import {parseAbsoluteToLocal, ZonedDateTime} from "@internationalized/date";
 import dayjs from "dayjs";
-import {Case, Switch} from "@/components/common/Switch";
 
 
 function BackupFrequency() {

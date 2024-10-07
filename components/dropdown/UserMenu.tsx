@@ -3,11 +3,11 @@ import React, {useEffect, useState} from 'react';
 import {
     Badge, cn, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Tooltip, User
 } from "@nextui-org/react";
-import {Handshake, Lifebuoy, SignOut, Sliders} from "@phosphor-icons/react";
+
 import {Avatar} from "@nextui-org/avatar";
 import {icon_theme, text_icon, text_truncated} from "@/lib/utils";
 import Typography from "@/components/common/typography/Typography";
-import {LuShieldCheck} from "react-icons/lu";
+import {LuHeartHandshake, LuLifeBuoy, LuLogOut, LuShieldCheck, LuSliders, LuUserCircle2} from "react-icons/lu";
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
 import {PiCloudArrowDown} from "react-icons/pi";
@@ -15,7 +15,7 @@ import {getSession} from "next-auth/react";
 import {MdOutlinePrivacyTip} from "react-icons/md";
 import {IoApps} from "react-icons/io5";
 import {Button} from "@nextui-org/button";
-import {UserRound} from "lucide-react";
+
 import {logout} from "@/actions/authActions";
 import {useCredentials} from "@/hooks/Credentials";
 import {useUser} from "@/services/queries";
@@ -58,7 +58,7 @@ export default function UserMenu() {
                             src={userProfile?.pic!}
                             size="sm"
                             showFallback
-                            fallback={!userProfile?.pic && <UserRound className="w-6 h-6 text-default-500" size={20}/>}
+                            fallback={!userProfile?.pic && <LuUserCircle2 className="w-6 h-6 text-default-500" size={20}/>}
                         />
                     </Badge>
                 </span>
@@ -84,7 +84,7 @@ export default function UserMenu() {
                                 src: userProfile?.pic!,
                                 showFallback: true,
                                 fallback: !userProfile?.pic &&
-                                    <UserRound className="w-6 h-6 text-default-500" size={20}/>
+                                    <LuUserCircle2 className="w-6 h-6 text-default-500" size={20}/>
                             }}
                         />
                     </Tooltip>
@@ -94,7 +94,7 @@ export default function UserMenu() {
                     key="preferences"
                     as={Link}
                     href='/preferences'
-                    startContent={<Sliders className={cn("", icon_theme)}/>}
+                    startContent={<LuSliders className={cn("", icon_theme)}/>}
                 >
                     <Typography className={text_icon}>Preferences</Typography>
                 </DropdownItem>
@@ -146,7 +146,7 @@ export default function UserMenu() {
                     key="terms_and_condition"
                     as={Link}
                     href='/terms&condition'
-                    startContent={<Handshake className={cn("", icon_theme)}/>}
+                    startContent={<LuHeartHandshake className={cn("", icon_theme)}/>}
                 >
                     <Typography className={text_icon}>Terms and Condition</Typography>
                 </DropdownItem>
@@ -155,7 +155,7 @@ export default function UserMenu() {
                     key="help_and_support"
                     as={Link}
                     href='/help&support'
-                    startContent={<Lifebuoy className={cn("", icon_theme)}/>}
+                    startContent={<LuLifeBuoy className={cn("", icon_theme)}/>}
                 >
                     <Typography className={text_icon}>Help and Support</Typography>
                 </DropdownItem>
@@ -164,7 +164,7 @@ export default function UserMenu() {
                 <DropdownItem textValue="Log Out" key="logout" className='px-0 py-0'>
                     <form action={logout}>
                         <Button size='sm' variant='light' type='submit' className='w-full justify-start text-sm'
-                                startContent={<SignOut className={cn("", icon_theme)}/>}
+                                startContent={<LuLogOut className={cn("", icon_theme)}/>}
                         >
                             <Typography className={text_icon}>Log out</Typography>
                         </Button>

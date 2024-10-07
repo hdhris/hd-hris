@@ -1,11 +1,11 @@
 'use client';
 
 import {formatFileSize} from '@edgestore/react/utils';
-import {CheckCircleIcon, FileIcon, LucideFileWarning, Trash2Icon, UploadCloudIcon, XIcon,} from 'lucide-react';
 import * as React from 'react';
 import {type DropzoneOptions, useDropzone} from 'react-dropzone';
 import {twMerge} from 'tailwind-merge';
 import {cn} from "@nextui-org/react";
+import {LuCheckCircle, LuFile, LuFileWarning, LuUploadCloud, LuX} from "react-icons/lu";
 
 const variants = {
     base: 'relative rounded-md p-4 w-full flex justify-center items-center flex-col cursor-pointer border border-dashed border-gray-400 dark:border-gray-300 transition-colors duration-200 ease-in-out',
@@ -41,6 +41,10 @@ const ERROR_MESSAGES = {
         return 'The file is not supported.';
     },
 };
+
+function LuTrash2(props: { className: string }) {
+    return null;
+}
 
 const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
                                                                          dropzoneOptions,
@@ -106,7 +110,7 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
                 >
                     <input ref={ref} {...getInputProps()} />
                     <div className="flex flex-col items-center justify-center text-xs text-gray-400">
-                        <UploadCloudIcon className="mb-1 h-7 w-7"/>
+                        <LuUploadCloud className="mb-1 h-7 w-7"/>
                         <div className="text-gray-400">
                             drag & drop or click to upload
                         </div>
@@ -125,7 +129,7 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
                 className="flex h-16 w-full flex-col justify-center rounded border border-gray-300 px-4 py-2"
             >
                 <div className="flex items-center gap-2 text-gray-500 dark:text-white">
-                    <FileIcon size="30" className="shrink-0"/>
+                    <LuFile size="30" className="shrink-0"/>
                     <div className="min-w-0 text-sm">
                         <div className="overflow-hidden overflow-ellipsis whitespace-nowrap">
                         {file?.name}
@@ -143,8 +147,8 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
                                     void onChange?.(value.filter((_, index) => index !== i),);
                                 }}
                             >
-                                <Trash2Icon className="shrink-0"/>
-                            </button>) : progress === 'ERROR' ? (<LucideFileWarning
+                                <LuTrash2 className="shrink-0"/>
+                            </button>) : progress === 'ERROR' ? (<LuFileWarning
                             className="shrink-0 text-red-600 dark:text-red-400"/>) : progress !== 'COMPLETE' ? (
                             <div className="flex flex-col items-end gap-0.5">
                                 {abortController && (<button
@@ -155,11 +159,11 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
                                         abortController.abort();
                                     }}
                                 >
-                                    <XIcon
+                                    <LuX
                                         className="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-400"/>
                                 </button>)}
 
-                            </div>) : (<CheckCircleIcon className="shrink-0 text-green-600 dark:text-gray-400"/>)}
+                            </div>) : (<LuCheckCircle className="shrink-0 text-green-600 dark:text-gray-400"/>)}
                     </div>
                 </div>
                 {/* Progress Bar */}

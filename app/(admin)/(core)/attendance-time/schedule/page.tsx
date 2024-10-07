@@ -17,10 +17,11 @@ import {
 } from "@/types/attendance-time/AttendanceTypes";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { toast } from "@/components/ui/use-toast";
-import { Pencil } from "lucide-react";
+// import { Pencil } from "lucide-react";
 import { useSchedule } from "@/services/queries";
 import showDialog from "@/lib/utils/confirmDialog";
 import ScheduleModal from "@/components/admin/attendance-time/schedule/create-edit-modal";
+import {LuPencil} from "react-icons/lu";
 
 const getRandomColor = (index: number) => {
   const colors = [
@@ -249,7 +250,7 @@ export default function Page() {
           <h5 className={`font-semibold ${getRandomColor(index).text}`}>
             {item.name}
           </h5>
-          <Pencil
+          <LuPencil
             className={`text-default-800 ms-auto ${
               hoveredBatchId === item.id ? "visible" : "invisible"
             }`}
