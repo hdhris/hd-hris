@@ -1,8 +1,9 @@
 'use client'
-import React from 'react';
-import {Tab, Tabs} from "@nextui-org/react";
+import React, { ReactElement, ReactNode, useEffect, useMemo } from 'react';
+import {Button, Tab, Tabs} from "@nextui-org/react";
 import {usePathname, useRouter} from "next/navigation";
-import {ScrollShadow} from "@nextui-org/scroll-shadow";
+import { NavEndContext } from '@/contexts/common/tabs/NavigationContext';
+import { IoIosArrowRoundBack } from 'react-icons/io';
 
 export interface TabItem {
     key: string;
@@ -17,8 +18,10 @@ export interface NavigationTabsProps {
 }
 
 function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
+    const [endContent, setEndContent] = React.useState(<div/>)
     const router = useRouter();
     const pathname = usePathname();
+    const pathPart = pathname.split('/');
 
     // Determine the active tab based on the current pathname
     const activeTab = tabs.find(tab => pathname.includes(tab.key))?.key || tabs[0].key;
@@ -29,20 +32,53 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
 
     return (
         <div className="flex flex-col space-y-4 h-full">
-            <Tabs
-                aria-label="Navigation Tabs"
-                disableAnimation
-                selectedKey={activeTab}
-                onSelectionChange={(key) => handleTabChange(key as string)}
-            >
-                {tabs.map(tab => (
-                    <Tab key={tab.key} title={tab.title}/>
-                ))}
-            </Tabs>
-            <div className="h-full overflow-hidden">{children}</div>
+            <div className='flex justify-between items-center'>
+                <div className='flex gap-1'>
+                    {pathPart.length > 3 &&
+                    <Button isIconOnly className='border-1 bg-white m-1' radius='md' size='sm' onClick={()=>{handleTabChange(pathPart[2])}}>
+                        <IoIosArrowRoundBack size={20} />
+                    </Button>
+                    }
+                    <Tabs
+                        classNames={{ tab:'data-[selected=true]:bg-white data-[selected=true]:border-1'}}
+                        radius='lg'
+                        aria-label="Navigation Tabs"
+                        disableAnimation
+                        selectedKey={activeTab}
+                        onSelectionChange={(key) => handleTabChange(key as string)}
+                    >
+                        {tabs.map(tab => (
+                            <Tab key={tab.key} title={tab.title}/>
+                        ))}
+                    </Tabs>
+                </div>
+                {endContent}
+            </div>
+            <NavEndContext.Provider value={setEndContent}>
+                <div className="h-full overflow-auto">{children}</div>
+            </NavEndContext.Provider>
         </div>
 
     );
 }
 
 export default NavigationTabs;
+
+// export function setNavEndContent(children: ReactNode){
+//     const setEndContent = React.useContext(NavEndContext);
+//     React.useEffect(() => {
+//         setEndContent(<>{children}</>);
+
+//         return () => setEndContent(<div/>);
+//     }, [setEndContent]);
+// }
+export function setNavEndContent(contentCallback: (router: ReturnType<typeof useRouter>) => ReactElement) {
+    const router = useRouter();
+    const setEndContent = React.useContext(NavEndContext);
+  
+    React.useEffect(() => {
+      setEndContent(contentCallback(router)); // Pass the router to the callback
+  
+      return () => setEndContent(<div />); // Clean up on unmount
+    }, [setEndContent, router, contentCallback]);
+  }

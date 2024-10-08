@@ -16,11 +16,11 @@ export async function POST(req: NextRequest) {
       },
       data: {
         name: name,
-        clock_in: toGMT8(clock_in),
-        clock_out: toGMT8(clock_out),
+        clock_in: toGMT8(clock_in).toISOString(),
+        clock_out: toGMT8(clock_out).toISOString(),
         break_min: parseInt(break_min),
         is_active: is_active,
-        updated_at: toGMT8(new Date()),
+        updated_at: toGMT8(new Date()).toISOString(),
       },
     });
     console.log(batchSchedule);

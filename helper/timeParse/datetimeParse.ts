@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
-
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 export class Time {
   private _time: string;
 
@@ -22,13 +23,7 @@ export class Time {
 
   // Getter for the ISO string
   get isoString(): string {
+    // return this._time;
     return this._time;
-  }
-
-  // Getter for formatted time
-  get format(): (format: string) => string {
-    return (format: string) => {
-      return dayjs(this._time).format(format);
-    };
   }
 }

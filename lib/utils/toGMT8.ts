@@ -1,22 +1,34 @@
-export function toGMT8(value: string | Date): Date | string {
-    let date: Date;
-  
-    if (typeof value === "string") {
-      // Check if the input is a time string in the format "HH:mm:ss"
-      const timeSecRegex = /^\d{2}:\d{2}:\d{2}$/;
-      const timeRegex = /^\d{2}:\d{2}$/;
-      if (timeSecRegex.test(value)) {
-        return `1970-01-01T${value}.000Z`;
-      } else if(timeRegex.test(value)){
-        return `1970-01-01T${value}:00.000Z`;
-      } else {
-        date = new Date(value); // Assume it's an ISO date string
-      }
-    } else {
-      date = value; // Directly use the Date object
-    }
-  
-    const offset = 8 * 60; // GMT+8 in minutes
-    return new Date(date.getTime() + offset * 60 * 1000);
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
+
+export function toGMT8(value: string | Date | undefined): dayjs.Dayjs {
+  if(value === undefined) {
+    return dayjs.utc(new Date(new Date().getTime() + 8 * 60 * 60 * 1000))
   }
-  
+
+  if (value instanceof Date) {
+    return dayjs.utc(new Date(value.getTime() + 8 * 60 * 60 * 1000));
+  }
+
+  const dateTimeString = typeof value === 'string' ? value.trim() : '';
+
+
+  if (dayjs(dateTimeString).isValid()) {
+    return dayjs.utc(dateTimeString);
+
+  } else if (dayjs(dateTimeString,'HH:mm',true).isValid()){
+    return dayjs.utc(dateTimeString,'HH:mm',true);
+
+  } else if (dayjs(dateTimeString,'HH:mm:ss',true).isValid()){
+    return dayjs.utc(dateTimeString,'HH:mm:ss',true);
+
+  } // else if (dayjs(dateTimeString,'YYYY-MM-DD').isValid()){
+  //   return dayjs.utc(dateTimeString,'YYYY-MM-DD');
+  // }
+  throw new Error('Invalid input: Expected a date string or time string, or Date object.');
+
+}

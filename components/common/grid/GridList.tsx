@@ -8,7 +8,7 @@ type GridListProps<T> = {
 
 function GridList<T>({ items, children }: GridListProps<T>) {
     return (
-        <div className="flex flex-wrap gap-5 justify-evenly h-full overflow-auto pb-3">
+        <div className="flex flex-wrap gap-5 h-full overflow-auto pb-3">
             {items.map((item, index) => (
                 <React.Fragment key={index}>
                     {children(item)}

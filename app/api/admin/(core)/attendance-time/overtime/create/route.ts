@@ -12,12 +12,12 @@ export async function POST(req: NextRequest) {
     const overtime = await prisma.trans_overtimes.create({
       data: {
         employee_id: empId,
-        clock_out: toGMT8(data.clock_out),
-        clock_in: toGMT8(data.clock_in),
+        clock_out: toGMT8(data.clock_out).toISOString(),
+        clock_in: toGMT8(data.clock_in).toISOString(),
         comment: data.comment,
-        date: toGMT8(dayjs(data.date,'YYYY-mm-dd').toISOString()),
-        created_at: toGMT8(new Date()),
-        updated_at: toGMT8(new Date()),
+        date: toGMT8(data.date).toISOString(),
+        created_at: toGMT8(new Date()).toISOString(),
+        updated_at: toGMT8(new Date()).toISOString(),
         status: "approved",
       },
     });

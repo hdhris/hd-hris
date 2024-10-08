@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
-import { toGMT8 } from "@/lib/utils/toGMT8";
 
 export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {

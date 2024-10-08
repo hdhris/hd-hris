@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
         last_name: true,
         first_name: true,
         middle_name: true,
+        email: true,
         ref_departments: {
           select: {
             id: true,

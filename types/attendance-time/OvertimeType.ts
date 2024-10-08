@@ -33,6 +33,7 @@ interface Employee {
   last_name: string;
   first_name: string;
   middle_name: string;
+  email: string;
   ref_departments: {
     id: number;
     name: string;
@@ -45,7 +46,7 @@ interface Employee {
 
 export interface OvertimeEntry {
   employee_id: number;
-  status: "pending" | "approved" | "denied";
+  status: "pending" | "approved" | "rejected";
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
   id: number;

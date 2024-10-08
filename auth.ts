@@ -67,7 +67,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     }
 
                     if (access_control.banned_til) {
-                        const isBanned = dayjs(toGMT8(access_control.banned_til)).isAfter(dayjs());
+                        const isBanned = toGMT8(access_control.banned_til).isAfter(new Date());
                         console.log("You are banned");
                         return !isBanned;
                     }

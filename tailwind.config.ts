@@ -115,7 +115,7 @@ const config = {
   plugin(function ({ addUtilities }) {
     addUtilities({
       '.h-fit-navlayout': {
-        height: 'calc(100vh - 10.5rem)',
+        height: 'calc(100vh - 165px)',
         overflowY: 'auto',
       },
       '.variant-blue': {

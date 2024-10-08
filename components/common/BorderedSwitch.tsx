@@ -2,7 +2,7 @@ import {Switch, SwitchProps, cn} from "@nextui-org/react";
 
 interface BorderedSwitchProps {
   label: string;
-  description: string;
+  description?: string;
 }
 
 export default function BorderedSwitch({
@@ -14,7 +14,7 @@ export default function BorderedSwitch({
     <Switch
       classNames={{
         base: cn(
-          "inline-flex flex-row-reverse w-full max-w-md bg-content1 hover:bg-content2 items-center",
+          "inline-flex flex-row-reverse w-full min-w-full bg-content1 hover:bg-content2 items-center",
           "justify-between cursor-pointer rounded-lg gap-2 py-2 px-3 border-2 border-transparent",
           "data-[selected=true]:border-primary",
           "rounded-xl",
@@ -31,11 +31,11 @@ export default function BorderedSwitch({
       }}
       {...props}
     >
-      <div className="flex flex-col mb-1">
-        <p className="text-medium">{label}</p>
-        <p className="text-tiny text-default-400">
+      <div className="flex flex-col justify-center">
+        <p className="text-sm font-semibold">{label}</p>
+        {description && <p className="text-tiny text-default-400">
           {description}
-        </p>
+        </p>}
       </div>
     </Switch>
   );

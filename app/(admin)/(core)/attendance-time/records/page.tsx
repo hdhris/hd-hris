@@ -11,7 +11,6 @@ import {
 import { parseDate } from "@internationalized/date";
 import { AxiosResponse } from "axios";
 import { axiosInstance } from "@/services/fetcher";
-import { CalendarDate } from "@nextui-org/react";
 import {
   AttendanceLog,
   EmployeeSchedule,
@@ -20,25 +19,7 @@ import {
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-
-const convertTo12HourFormat = (isoString: string): string => {
-  const isoFormattedString = isoString.replace(" ", "T");
-  const date = new Date(isoFormattedString);
-
-  if (isNaN(date.getTime())) {
-    console.error("Invalid date string:", isoFormattedString);
-    return isoString;
-  }
-
-  const hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
-
-  const formattedHours = hours % 12 || 12;
-  const ampm = hours >= 12 ? "PM" : "AM";
-  const formattedMinutes = minutes.toString().padStart(2, "0");
-
-  return `${formattedHours}:${formattedMinutes} ${ampm}`;
-};
+import { getEmpFullName } from "@/lib/utils/nameFormatter";
 
 const modeType = ["Password", "Fingerprint", "Card", "Face ID", "Other"];
 const punchType = ["IN", "OUT"];
@@ -81,7 +62,7 @@ export default function Page() {
   const [scheduleData, setScheduleData] = useState<EmployeeSchedule[]>([]);
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
   const [date, setDate] = useState(
-    parseDate((toGMT8(new Date().toString()) as Date).toISOString().split("T")[0])
+    parseDate((toGMT8(new Date()).format('YYYY-MM-DD')))
   );
 
   const fetchAttendance = useCallback(
@@ -89,16 +70,10 @@ export default function Page() {
       console.log("FLAG");
       setIsLoading(true);
       try {
-        const formattedDate = `${date?.year}-${String(date?.month).padStart(
-          2,
-          "0"
-        )}-${String(date?.day).padStart(2, "0")}`;
+        const formattedDate = toGMT8(date.toString()).format("YYYY-MM-DD");
         const response: AxiosResponse<AttendanceLog[]> =
           await axiosInstance.get(
-            `/api/admin/attendance-time/records/${formattedDate}`,
-            {
-              params: { date },
-            }
+            `/api/admin/attendance-time/records/${formattedDate}`
           );
         setAttendanceLog(response.data);
 
@@ -158,7 +133,7 @@ export default function Page() {
           return (
             <div className="flex items-center space-x-2">
               <Avatar src={item.trans_employees.picture} />
-              <p>{`${item.trans_employees.last_name}, ${item.trans_employees.first_name} ${item.trans_employees.middle_name[0]}`}</p>
+              <p>{getEmpFullName(item.trans_employees)}</p>
             </div>
           );
         case "mode":
@@ -185,7 +160,7 @@ export default function Page() {
         case "status":
           return <span>{status}</span>;
         case "timestamp":
-          return <span>{convertTo12HourFormat(item.timestamp)}</span>;
+          return <span>{toGMT8(item.timestamp).format('hh:mm a')}</span>;
         default:
           return <></>;
       }
@@ -193,15 +168,15 @@ export default function Page() {
   };
 
   return (
-    <div className="flex flex-row p-1 gap-1">
+    <div className="flex flex-row gap-1 h-full">
       <TableData
         config={config}
         items={attendanceLog}
         isLoading={isLoading}
-        className="flex-1 h-fit-navlayout"
-        removeWrapper
+        classNames={{
+          wrapper: 'h-fit-navlayout',
+        }}
         isHeaderSticky
-        color={"primary"}
         selectionMode="single"
         aria-label="Attendance Records"
         onRowAction={(key) => {

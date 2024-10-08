@@ -328,7 +328,7 @@ function DataTable<T extends { id: string | number }>({
 
     return (<div className="grid grid-rows-[auto,1fr,auto] h-full w-full">
         {/* Show section if either one is not null */}
-        {(counterName ||contentTop || endContent || filterItems || searchingItemKey) && <section className='pb-3'>
+        {(counterName ||contentTop || endContent || filterItems || searchingItemKey) && <section>
             {topContent}
         </section>}
         <div className='flex flex-col h-full overflow-y-hidden'>
@@ -357,7 +357,7 @@ function DataTable<T extends { id: string | number }>({
                             color="primary"
                             label="Loading..."
                             classNames={{
-                                base: 'h-screen mt-52', // wrapper: "" // Uncomment and specify if needed
+                                base: 'h-96 mt-52', // wrapper: "" // Uncomment and specify if needed
                             }}
                         />) : null}
                         loadingState={loadingState}
