@@ -2,24 +2,17 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   Button,
-  Input,
-  Switch,
   ModalContent,
   ModalBody,
   ModalFooter,
   ModalHeader,
-  TimeInput,
 } from "@nextui-org/react";
 import { BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
-import { Time } from "@internationalized/date";
-import { dateToTime } from "@/lib/utils/dateToTime";
 import { Form } from "@/components/ui/form";
 import FormFields from "@/components/common/forms/FormFields";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import BorderedSwitch from "@/components/common/BorderedSwitch";
-import dayjs from "dayjs";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 
 interface ScheduleModalProps {

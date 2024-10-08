@@ -1,11 +1,13 @@
 "use client";
+import UserMail from "@/components/common/avatar/user-info-mail";
 import CardForm from "@/components/common/forms/CardForm";
 import FormFields from "@/components/common/forms/FormFields";
 import Loading from "@/components/spinner/Loading";
 import TableData from "@/components/tabledata/TableData";
 import { toast } from "@/components/ui/use-toast";
 import { useIsClient } from "@/hooks/ClientRendering";
-import { useNewOvertimes } from "@/services/queries";
+import { getEmpFullName } from "@/lib/utils/nameFormatter";
+import { useQuery } from "@/services/queries";
 import { OvertimeResponse } from "@/types/attendance-time/OvertimeType";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, Link, Selection, Textarea, User } from "@nextui-org/react";
@@ -26,7 +28,8 @@ const formSchema = z.object({
 function Page() {
   const router = useRouter();
   const [selectedEmployee, setSelectedEmployees] = useState(-1);
-  const { data, isLoading } = useNewOvertimes();
+  const { data, isLoading } = useQuery<OvertimeResponse>('/api/admin/attendance-time/overtime/read');
+  const [isFocused, setIsFocused] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,6 +42,7 @@ function Page() {
   });
 
   async function handleSubmit(value: any) {
+    setIsFocused(true);
     console.log(value, selectedEmployee);
     try {
       await axios.post("/api/admin/attendance-time/overtime/create", {
@@ -60,6 +64,7 @@ function Page() {
         variant: "danger",
       });
     }
+    setIsFocused(false);
   }
 
   if (!useIsClient()) {
@@ -68,39 +73,24 @@ function Page() {
 
   return (
     <div className="flex gap-4 h-full">
-      <CardForm label="File Leave" form={form} onSubmit={handleSubmit}>
+      <CardForm
+        label="File Leave"
+        form={form}
+        onSubmit={handleSubmit}
+      >
         {/* Fetch employee once */}
         {(() => {
           const employee = data?.employees.find(
             (e) => e.id === selectedEmployee
           );
           return employee ? (
-            <User
-              name={employee.last_name}
-              description={
-                <Link
-                  href="#"
-                  size="sm"
-                  className="text-blue-500"
-                  onClick={(e) => {
-                    e.preventDefault(); // Prevent default link behavior
-                    window.open(
-                      `https://mail.google.com/mail/u/0/?fs=1&to=${employee.email}&su=Leave%20Request&body=Shrek+wants+to+have+a+time+with+you+alone+&tf=cm`,
-                      "emailWindow",
-                      "width=600,height=400,top=100,left=100"
-                    );
-                  }}
-                  isExternal
-                >
-                  {employee.email}
-                </Link>
-              }
-              avatarProps={{
-                src: employee.picture,
-              }}
+            <UserMail
+              name={getEmpFullName(employee)}
+              email={employee.email}
+              picture={employee.picture}
             />
           ) : (
-            <h1 className="font-semibold h-11">No employee selected</h1>
+            <h1 className="font-semibold h-12">No employee selected</h1>
           );
         })()}
 
@@ -139,11 +129,16 @@ function Page() {
           ]}
         />
       </CardForm>
-
       <TableData
-        className="h-full"
         isHeaderSticky
         isLoading={isLoading}
+        disabledKeys={
+          isFocused
+            ? new Set(
+                Array.from(data?.employees.map((emp) => String(emp.id)) || [])
+              )
+            : new Set([])
+        }
         config={{
           columns: [
             { uid: "name", name: "Name", sortable: true },

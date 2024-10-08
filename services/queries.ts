@@ -106,15 +106,9 @@ export function useNewPayhead() {
     })
 }
 
-export function useOvertimes(){
-    return useSWR<OvertimeEntry[]>('/api/admin/attendance-time/overtime', fetcher, {
-        revalidateOnFocus: false, refreshInterval: 3000
-    })
-}
-
-export function useNewOvertimes(){
-    return useSWR<OvertimeResponse>('/api/admin/attendance-time/overtime/read', fetcher, {
-        revalidateOnFocus: false, refreshInterval: 3000
+export function useQuery<T extends object>(api: string, refreshInterval?: number){
+    return useSWR<T>(api, fetcher, {
+        revalidateOnFocus: false, refreshInterval: refreshInterval
     })
 }
 

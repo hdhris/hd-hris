@@ -168,11 +168,10 @@ function Page() {
       filterItems={filterItems}
       filterConfig={filterConfig}
       counterName="Earnings"
-      className="flex-1 h-full"
       isHeaderSticky
-      removeWrapper
       selectionMode="single"
       aria-label="Earnings"
+      className="h-full"
       endContent={() => (
         <Button
           {...uniformStyle()}
