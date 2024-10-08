@@ -12,6 +12,8 @@ import {useDisclosure} from "@nextui-org/react";
 import LeaveTypeUpdate from "@/components/admin/leaves/leave-types/update/LeaveTypeUpdate";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {Button} from "@nextui-org/button";
+import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
+import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 
 function LeaveTypesCard() {
     const {data, isLoading} = useLeaveTypes()
@@ -36,26 +38,34 @@ function LeaveTypesCard() {
     }, [data, isLoading])
 
     useEffect(() => {
-        if (formData?.methods === "Delete") {
+        if (formData?.method === "Delete") {
             // alert("Delete: " + formData?.data?.key)
             setLeaveTypes((prev) => prev.filter((item) => item.key !== formData?.data?.key))
-        } else if (formData?.methods === "Edit") {
+        } else if (formData?.method === "Edit") {
             alert("Edit: " + formData?.data?.key)
             onOpen()
         }
     }, [formData, onOpen])
 
+    SetNavEndContent(() => (
+        <Button {...uniformStyle({ color: "primary" })} onPress={onOpen}>
+            Add Leave Type
+        </Button>
+    ));
     if (isLoading) return <Loading/>
+
+    // Effect for setting nav end content
+
     return (<>
-        <div className="flex justify-end">
-            <Button
-                radius="sm"
-                color="primary"
-                size="sm"
-            >
-                Add Leave Type
-            </Button>
-        </div>
+        {/*<div className="flex justify-end">*/}
+        {/*    <Button*/}
+        {/*        radius="sm"*/}
+        {/*        color="primary"*/}
+        {/*        size="sm"*/}
+        {/*    >*/}
+        {/*        Add Leave Type*/}
+        {/*    </Button>*/}
+        {/*</div>*/}
         <ScrollShadow className="w-full h-full p-5 overflow-auto">
             <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] place-items-center gap-5">
                 <GridCard

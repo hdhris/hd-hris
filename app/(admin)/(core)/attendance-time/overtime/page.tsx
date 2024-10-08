@@ -6,7 +6,7 @@ import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
 import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
 import { Button, Chip, User } from "@nextui-org/react";
-import { setNavEndContent } from "@/components/common/tabs/NavigationTabs";
+import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { toGMT8 } from "@/lib/utils/toGMT8";
@@ -90,10 +90,10 @@ const statusColorMap: Record<string, "danger" | "success" | "default"> = {
 // }
 
 function Page() {
-  setNavEndContent((router) => (
+  SetNavEndContent((router) => (
     <Button
       {...uniformStyle()}
-      onClick={() => router.push("/attendance-time/overtime/create")}
+      onClick={() => router?.push("/attendance-time/overtime/create")}
     >
       File Overtime
     </Button>

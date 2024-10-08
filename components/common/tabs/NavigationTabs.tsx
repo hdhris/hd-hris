@@ -1,5 +1,5 @@
 'use client'
-import React, { ReactElement, ReactNode, useEffect, useMemo } from 'react';
+import React, {ReactElement, ReactNode, useContext, useEffect, useMemo} from 'react';
 import {Button, Tab, Tabs} from "@nextui-org/react";
 import {usePathname, useRouter} from "next/navigation";
 import { NavEndContext } from '@/contexts/common/tabs/NavigationContext';
@@ -43,7 +43,6 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
                         classNames={{ tab:'data-[selected=true]:bg-white data-[selected=true]:border-1'}}
                         radius='lg'
                         aria-label="Navigation Tabs"
-                        disableAnimation
                         selectedKey={activeTab}
                         onSelectionChange={(key) => handleTabChange(key as string)}
                     >
@@ -72,13 +71,14 @@ export default NavigationTabs;
 //         return () => setEndContent(<div/>);
 //     }, [setEndContent]);
 // }
-export function setNavEndContent(contentCallback: (router: ReturnType<typeof useRouter>) => ReactElement) {
+
+export function SetNavEndContent(contentCallback: (router?: ReturnType<typeof useRouter>) => ReactElement) {
     const router = useRouter();
-    const setEndContent = React.useContext(NavEndContext);
-  
-    React.useEffect(() => {
-      setEndContent(contentCallback(router)); // Pass the router to the callback
-  
-      return () => setEndContent(<div />); // Clean up on unmount
+    const setEndContent = useContext(NavEndContext);
+
+    useEffect(() => {
+        setEndContent(contentCallback(router || undefined)); // Pass the router or undefined to the callback
+
+        return () => setEndContent(<div />); // Clean up on unmount
     }, [setEndContent, router, contentCallback]);
-  }
+}

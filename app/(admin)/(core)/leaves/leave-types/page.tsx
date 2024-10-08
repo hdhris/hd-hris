@@ -2,7 +2,6 @@ import React from 'react';
 import {unstable_cache} from "next/cache";
 import prisma from "@/prisma/prisma";
 import LeaveTypesCard from "@/components/admin/leaves/leave-types/display/LeaveTypesCard";
-import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import LeaveTypesProvider from "@/components/admin/leaves/leave-types/provider/LeaveTypesProvider";
 
 const getLeaveTypes = unstable_cache(async () => {
@@ -31,10 +30,9 @@ async function Page() {
         });
     });
 
-    return (
-            <LeaveTypesProvider>
-                <LeaveTypesCard/>
-            </LeaveTypesProvider>
+    return (<LeaveTypesProvider>
+            <LeaveTypesCard/>
+        </LeaveTypesProvider>
 
     );
 

@@ -2,7 +2,7 @@ import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
 import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/react";
-import { Pencil } from "lucide-react";
+import {LuPencil} from "react-icons/lu";
 export const BatchCard = ({
     item,
     color,
@@ -50,7 +50,7 @@ export const BatchCard = ({
           <h5 className={`font-semibold ${color.text}`}>
             {item.name}
           </h5>
-          <Pencil
+          <LuPencil
             className={`text-default-800 ms-auto ${
               isHovered ? "visible" : "invisible"
             }`}
