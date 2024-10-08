@@ -29,7 +29,7 @@ function Header({id, name , is_active}: HeaderProps) {
 
     const handleDelete = (key: React.Key) => {
         setFormData({
-            methods: "Delete",
+            method: "Delete",
             data: {
                 key,
             }
@@ -38,7 +38,7 @@ function Header({id, name , is_active}: HeaderProps) {
 
     const handleEdit = (key: Key) => {
         setFormData({
-            methods: "Edit",
+            method: "Edit",
             data: {
                 key,
             }

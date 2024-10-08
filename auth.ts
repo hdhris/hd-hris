@@ -136,7 +136,6 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
 
                     //Update the user in the session
                     if(existingUser) {
-
                         user.email = existingUser.email;
                         user.name = existingUser.name;
                         user.image = existingUser.image;
