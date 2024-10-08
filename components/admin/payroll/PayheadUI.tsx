@@ -21,7 +21,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { string, z } from "zod";
 import TableData from "@/components/tabledata/TableData";
-import { ChevronRightIcon } from "lucide-react";
 import { ListDropDown } from "./ListBoxDropDown";
 import showDialog from "@/lib/utils/confirmDialog";
 import { toast } from "@/components/ui/use-toast";

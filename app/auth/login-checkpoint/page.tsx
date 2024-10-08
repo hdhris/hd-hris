@@ -7,7 +7,6 @@ import {Chip} from "@nextui-org/chip";
 import {Form} from "@/components/ui/form";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {Button} from "@nextui-org/button";
-import {AlertCircle, CheckCircle2} from "lucide-react";
 import {RiEyeCloseLine, RiEyeLine} from "react-icons/ri";
 import {icon_color} from "@/lib/utils";
 import {useForm, useFormState} from "react-hook-form";
@@ -18,6 +17,7 @@ import {axiosInstance} from "@/services/fetcher";
 import {useRouter} from "next/navigation";
 import {AxiosError} from "axios";
 import {login} from "@/actions/authActions";
+import {LuAlertCircle, LuCheckCircle2} from "react-icons/lu";
 
 function Page() {
     const [isVisibleNew, setIsVisibleNew] = useState(false)
@@ -113,7 +113,7 @@ function Page() {
             <CardBody>
                 {error && <Chip classNames={{
                     base: 'p-5 max-w-full'
-                }} variant='flat' startContent={<AlertCircle/>} color='danger' radius="sm">{error}</Chip>}
+                }} variant='flat' startContent={<LuAlertCircle />} color='danger' radius="sm">{error}</Chip>}
                 <Form {...credential}>
                     <form onSubmit={credential.handleSubmit(onSubmit)} className="space-y-4">
                         <div className="space-y-2">
@@ -128,7 +128,7 @@ function Page() {
                     </form>
                 </Form>
                 <CardFooter className="text-sm text-muted-foreground flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 mr-2"/>
+                    <LuCheckCircle2 className="w-4 h-4 mr-2"/>
                     Updating your credentials helps ensure your account security.
                 </CardFooter>
             </CardBody>

@@ -9,7 +9,6 @@ import {
   DatePicker,
   Divider,
 } from "@nextui-org/react";
-import { UserRound } from "lucide-react";
 import Text from "@/components/Text";
 import {
   FormControl,
@@ -21,6 +20,7 @@ import axios from "axios";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { parseDate } from "@internationalized/date";
 import AddressInput from "@/components/common/forms/address/AddressInput";
+import {LuUserCircle2} from "react-icons/lu";
 
 const safeParseDate = (dateString: string) => {
   try {
@@ -97,7 +97,7 @@ const PersonalInformationForm: React.FC = () => {
                     onClick={handleAvatarClick}
                     showFallback
                     fallback={
-                      <UserRound className="w-12 h-12 text-default-500" />
+                      <LuUserCircle2 className="w-12 h-12 text-default-500" />
                     }
                     isBordered={!!fileError}
                     color={fileError ? "danger" : "default"}

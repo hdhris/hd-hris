@@ -1,11 +1,11 @@
 'use client';
 
 import { formatFileSize } from '@edgestore/react/utils';
-import { UploadCloudIcon, X } from 'lucide-react';
 import * as React from 'react';
 import { useDropzone, type DropzoneOptions } from 'react-dropzone';
 import { twMerge } from 'tailwind-merge';
 import Image from 'next/image';
+import {LuUploadCloud, LuX} from "react-icons/lu";
 
 const variants = {
     base: 'relative rounded-md flex justify-center items-center flex-col cursor-pointer min-h-[150px] min-w-[200px] border border-dashed border-gray-400 dark:border-gray-300 transition-colors duration-200 ease-in-out',
@@ -145,7 +145,7 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
                     ) : (
                         // Upload Icon
                         <div className="flex flex-col items-center justify-center text-xs text-gray-400">
-                            <UploadCloudIcon className="mb-2 h-7 w-7" />
+                            <LuUploadCloud className="mb-2 h-7 w-7" />
                             <div className="text-gray-400">drag & drop to upload</div>
                             <div className="mt-3">
                                 <Button type="button" disabled={disabled}>
@@ -165,7 +165,7 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
                             }}
                         >
                             <div className="flex h-5 w-5 items-center justify-center rounded-md border border-solid border-gray-500 bg-white transition-all duration-300 hover:h-6 hover:w-6 dark:border-gray-400 dark:bg-black">
-                                <X
+                                <LuX
                                     className="text-gray-500 dark:text-gray-400"
                                     width={16}
                                     height={16}

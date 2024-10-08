@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect} from 'react';
+import React from 'react';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -8,10 +8,10 @@ import {Form} from '@/components/ui/form';
 import FormFields from '@/components/common/forms/FormFields';
 import {Button} from '@nextui-org/button';
 import {cn} from "@nextui-org/react";
-import {parseDate} from "@internationalized/date";
 
 // Define the Zod schema
 const schema = z.object({
+    assign: z.string(),
     isActive: z.boolean(),
     first_name: z.string(),
     groupCheckbox: z.array(z.string()),
@@ -25,13 +25,15 @@ const schema = z.object({
     price: z.string(),
     list: z.string(),
     isAirplaneMode: z.boolean(),
-    event_time: z.string().time(),
+    event_time: z.date(),
+    comment: z.string()
     // Ensure groupCheckbox is defined as an array of strings
 });
 
 function Page() {
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema), defaultValues: {
+            assign: "",
             isActive: false,
             groupCheckbox: [],
             first_name: "",
@@ -41,11 +43,10 @@ function Page() {
             price: "",
             list: "",
             isAirplaneMode: false,
-            event_time: "",
-            // Initialize as an empty array
+            event_time: undefined,
+            comment: "", // Initialize as an empty array
         }
     });
-
 
 
     const onSubmit = (values: z.infer<typeof schema>) => {
@@ -54,6 +55,7 @@ function Page() {
 
     const handleClear = () => {
         form.reset({
+            assign: "",
             isActive: false,
             groupCheckbox: [],
             first_name: "",
@@ -63,12 +65,14 @@ function Page() {
             price: "",
             list: "",
             isAirplaneMode: false,
-            event_time: "",
+            event_time: undefined,
+            comment: "",
         })
     }
 
     const handlePopulate = () => {
         form.reset({
+            assign: "john",
             isActive: true,
             groupCheckbox: ["option1"],
             first_name: "John",
@@ -78,7 +82,8 @@ function Page() {
             price: "option3",
             list: "option2",
             isAirplaneMode: true,
-            event_time: "10:00:00",
+            event_time: new Date(),
+            comment: "Test comment",
         })
     }
     return (<Form {...form}>
@@ -90,6 +95,11 @@ function Page() {
                 <FormFields
                     items={[{
                         name: "first_name", label: "First Name", isRequired: true,
+
+                    }, {
+                        name: "assign", label: "Assign to", type: "auto-complete", isRequired: true, config: {
+                            options: [{label: "John", value: "john"}, {label: "Jane", value: "jane"}]
+                        }
 
                     }, {
                         name: 'isActive', type: 'checkbox', label: 'Checkbox', config: {
@@ -105,13 +115,11 @@ function Page() {
                         }
                     }, {
                         isRequired: true, name: "birth_date", type: "date-input", label: "Birth date", config: {
-
+                            hideTimeZone: true
                         }
                     }, {
                         isRequired: true, name: "birth_date_picker", type: "date-picker", label: "Birth Date Picker",
-                        config: {
-                            defaultValue: parseDate("2024-09-29"),
-                        }
+
                     }, {
                         isRequired: true, name: "holiday", type: "date-range-picker", label: "Holiday",
                     }, {
@@ -136,40 +144,36 @@ function Page() {
                             }]
                         }
                     }, {
-                        name: "isAirplaneMode", type: "switch", label: (
-                            <div className="flex flex-col gap-1">
-                                <p className="text-medium">Enable early access</p>
-                                <p className="text-tiny text-default-400">
-                                    Get access to new features before they are released.
-                                </p>
-                            </div>),
-                        config: {
+                        name: "isAirplaneMode", type: "switch", label: (<div className="flex flex-col gap-1">
+                            <p className="text-medium">Enable early access</p>
+                            <p className="text-tiny text-default-400">
+                                Get access to new features before they are released.
+                            </p>
+                        </div>), config: {
                             classNames: {
-                                base: cn(
-                                    "inline-flex flex-row-reverse w-full max-w-md bg-content1 hover:bg-content2 items-center",
-                                    "justify-between cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent",
-                                    "data-[selected=true]:border-primary",
-                                ),
+                                base: cn("inline-flex flex-row-reverse w-full max-w-md bg-content1 hover:bg-content2 items-center", "justify-between cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent", "data-[selected=true]:border-primary",),
                                 wrapper: "p-0 h-4 overflow-visible",
-                                thumb: cn("w-6 h-6 border-2 shadow-lg",
-                                    "group-data-[hover=true]:border-primary",
-                                    //selected
-                                    "group-data-[selected=true]:ml-6",
-                                    // pressed
-                                    "group-data-[pressed=true]:w-7",
-                                    "group-data-[selected]:group-data-[pressed]:ml-4",
-                                ),
+                                thumb: cn("w-6 h-6 border-2 shadow-lg", "group-data-[hover=true]:border-primary", //selected
+                                    "group-data-[selected=true]:ml-6", // pressed
+                                    "group-data-[pressed=true]:w-7", "group-data-[selected]:group-data-[pressed]:ml-4",),
                             }
                         }
                     }, {
-                        name: "event_time", type: "time-input", label: "Event Time",
+                        name: "event_time", type: "time-input", label: "Event Time", config: {
+                            hideTimeZone: true
+                        }
+                    }, {
+                        name: "comment", type: "text-area", label: "Comment",
                     }]}
                 />
             </div>
 
-            <Button type="submit">Submit</Button>
-            <Button onClick={handleClear}>Clear</Button>
-            <Button onClick={handlePopulate}>Populate</Button>
+            <div className="flex gap-4">
+                <Button type="submit">Submit</Button>
+                <Button onClick={handleClear}>Clear</Button>
+                <Button onClick={handlePopulate}>Populate</Button>
+            </div>
+
         </form>
     </Form>);
 }

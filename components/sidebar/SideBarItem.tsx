@@ -59,9 +59,10 @@ export default function SideBarItem({
         {showLabel ? (
             linkContent
         ) : (
-            <Tooltip content={label} placement="left">
-              {linkContent}
-            </Tooltip>
+            <>
+                {linkContent}
+            </>
+
         )}
       </li>
   );

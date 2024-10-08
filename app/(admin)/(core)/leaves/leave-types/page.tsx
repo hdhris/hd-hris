@@ -1,10 +1,8 @@
 import React from 'react';
-import gradient from 'random-gradient'
 import {unstable_cache} from "next/cache";
 import prisma from "@/prisma/prisma";
 import LeaveTypesCard from "@/components/admin/leaves/leave-types/display/LeaveTypesCard";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
-import LeaveTypes from "@/components/admin/leaves/leave-types/LeaveTypes";
 
 const getLeaveTypes = unstable_cache(async () => {
     return prisma.ref_leave_types.findMany({
@@ -17,14 +15,7 @@ const getLeaveTypes = unstable_cache(async () => {
 }, ['leaveTypes'], {revalidate: 3, tags: ['leaveTypes']})
 
 async function Page() {
-    // const bgGradient = { background: gradient("Sick Leave") }
-    const bgGradient = (name: string) => {
-        return {
-            style: {
-                background: gradient(name)
-            }
-        }
-    }
+
 
     const data = await getLeaveTypes().then((res) => {
         return res.map((item) => {
@@ -40,8 +31,12 @@ async function Page() {
     });
 
     return (
-        <LeaveTypes/>
-        );
+        <ScrollShadow className="w-full h-full p-5">
+            <LeaveTypesCard/>
+        </ScrollShadow>
+
+    );
+
 }
 
 export default Page;
