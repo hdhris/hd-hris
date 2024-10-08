@@ -86,7 +86,7 @@ export interface GroupInputOptions {
 
 // Input options for specific input types
 interface InputOptions {
-    "auto-complete"?: Omit<AutocompleteProps, "label">;
+    "auto-complete"?: Omit<AutocompleteProps, "children">;
     checkbox?: CheckboxProps;
     "group-checkbox"?: Omit<CheckboxGroupProps, "label"> & {
         defaultValue?: string[]; // defaultValue is now part of the custom options

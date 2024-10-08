@@ -34,7 +34,7 @@ export default function DateComponent({ onClockShow }: Props) {
         () => (
             <>
                 {onClockShow ? (
-                    <div className="flex flex-col gap-3 p-2 mb-20 ml-2">
+                    <div className="flex flex-col gap-3 p-2 mb-20 ml-2 whitespace-nowrap">
                         <div className="flex flex-row gap-2 items-center">
                             <Typography className="text-6xl font-semibold">{date[0]}</Typography>
                             <div className="flex flex-col">
