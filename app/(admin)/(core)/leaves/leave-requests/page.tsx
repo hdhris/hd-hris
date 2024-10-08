@@ -50,7 +50,7 @@ import {useLeaveRequest} from "@/services/queries";
 //
 
 function Page() {
-    const {data} = useLeaveRequest()
+    const {data, isLoading} = useLeaveRequest()
 
     const allRequests = useMemo(() => {
         if(data) return data.map((item) => {
@@ -72,25 +72,9 @@ function Page() {
                 }
         })
     }, [data])
-    // const allRequests = await getRequests().then((res) => res.map((item) => {
-    //     const approvedBy = {
-    //         name: getEmpFullName(item.trans_employees_leaves_approvedBy),
-    //         picture: item.trans_employees_leaves_approvedBy?.picture
-    //     }
-    //     return {
-    //         id: item.id,
-    //         picture: item.trans_employees_leaves?.picture,
-    //         email: item.trans_employees_leaves?.email || "N/A",
-    //         name: getEmpFullName(item.trans_employees_leaves!),
-    //         leave_type: item.ref_leave_types?.name!,
-    //         start_date: dayjs(item.start_date).format('YYYY-MM-DD'), // Format date here
-    //         end_date: dayjs(item.end_date).format('YYYY-MM-DD'),     // Format date here
-    //         total_days: dayjs(item.end_date).diff(item.start_date, 'day'),
-    //         status: item.status as "Pending" | "Approved" | "Rejected",
-    //         approvedBy
-    //     }
-    // }) as LeaveRequestTypes[]);
+
     return (<TableData
+            isLoading={isLoading}
             config={TableConfigurations}
             items={allRequests!}
             isStriped

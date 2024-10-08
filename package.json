@@ -14,7 +14,7 @@
     "@edgestore/server": "^0.2.2",
     "@hookform/resolvers": "^3.3.4",
     "@internationalized/date": "^3.5.5",
-    "@nextui-org/react": "^2.3.6",
+    "@nextui-org/react": "^2.4.8",
     "@nextui-org/use-infinite-scroll": "^2.1.5",
     "@prisma/client": "^5.20.0",
     "@radix-ui/react-dialog": "^1.0.5",

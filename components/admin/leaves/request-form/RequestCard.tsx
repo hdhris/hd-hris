@@ -1,6 +1,6 @@
 "use client";
 import React, {memo, useEffect, useMemo, useState} from 'react';
-import {RequestFormTableType, RequestFormWithMethod} from "@/types/leaves/LeaveRequestTypes";
+import {RequestFormTableType} from "@/types/leaves/LeaveRequestTypes";
 import {CardBody, CardHeader} from "@nextui-org/card";
 import {
     Avatar, Button, Card, CardFooter, cn, Modal, ModalBody, ModalContent, ModalHeader, useDisclosure
@@ -25,7 +25,7 @@ interface RequestCardProps {
 
 
 const Cards = memo(function Cards({items, onDelete}: RequestCardProps) {
-    const {setFormData} = useFormTable<RequestFormWithMethod>();
+    const {setFormData} = useFormTable<RequestFormTableType>();
 
     const itemsWithKey = useMemo(() => {
         return items.map(({id, ...item}) => ({key: id, ...item}));
@@ -154,7 +154,7 @@ const CommentModal = ({comment}: { comment: string }) => {
 };
 
 const RequestCard = () => {
-    const {formData, setFormData} = useFormTable<RequestFormWithMethod>();
+    const {formData, setFormData} = useFormTable<RequestFormTableType>();
     const isClient = useIsClient();
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const {toast} = useToast()

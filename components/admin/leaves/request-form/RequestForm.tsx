@@ -19,10 +19,9 @@ import dayjs from "dayjs";
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import {useFormTable} from "@/components/providers/FormTableProvider";
-import {EmployeeLeavesStatus, RequestFormTableType, RequestFormWithMethod} from "@/types/leaves/LeaveRequestTypes";
+import {EmployeeLeavesStatus, RequestFormTableType} from "@/types/leaves/LeaveRequestTypes";
 import {useEmployeesLeaveStatus} from "@/services/queries";
 import {Case, Default, Switch} from '@/components/common/Switch';
-import {useEmployeeId} from "@/hooks/employeeIdHook";
 
 dayjs.extend(isSameOrAfter)
 dayjs.extend(isSameOrBefore);
@@ -61,7 +60,7 @@ function RequestForm() {
         dataFetch()
     }, [data]);
 
-    const {formData, setFormData} = useFormTable<RequestFormWithMethod>()
+    const {formData, setFormData} = useFormTable<RequestFormTableType>()
     const [leaveTypeDuration, setLeaveTypeDuration] = useState<number | null>(null)
     const [isDatePickerError, setIsDatePickerError] = useState<boolean>(false)
     const [leaveDate, setLeaveDate] = React.useState<RangeValue<DateValue> | null>(null);
@@ -146,14 +145,13 @@ function RequestForm() {
                 setLeaveTypeDuration(credit < leaveDuration ? credit : leaveDuration);
             }
             setIsAdd(false);
-        } else if(formData?.method === "Reset") {
+        } else if (formData?.method === "Reset") {
             console.log("Reset...")
 
             console.log("Data: ", data)
             setUser((prevData) => {
                 return {
-                    availableLeaves: prevData?.availableLeaves || [],
-                    employees: data?.employees!,
+                    availableLeaves: prevData?.availableLeaves || [], employees: data?.employees!,
                 };
             });
         }
@@ -216,7 +214,7 @@ function RequestForm() {
 
                 console.log("Max Available Days (Submit): ", leaveTypeDuration)
                 setFormData({
-                    method: "Add", data: employee_leave_requests
+                    method: 'Add', data: employee_leave_requests
                 })
                 const newUser = user?.employees.filter((e: any) => e.id !== values.employee_id)!
 
@@ -249,8 +247,7 @@ function RequestForm() {
         const duration = dayjs(end_date).diff(dayjs(start_date), 'day')
 
         setFormData({
-            method: "Edit",
-            data: {
+            method: "Edit", data: {
                 comment: comment || "", // Ensures comment is always a string
                 reason: reason || "", // Provide fallback for reason
                 id: employee_id, // Provide fallback for employee_id
@@ -260,8 +257,7 @@ function RequestForm() {
                 ,
 
                 created_by: {
-                    name: '',
-                    picture: ''
+                    name: '', picture: ''
                 },
                 total_days: duration,
                 leave_id: leaveTypeApplied.id,
@@ -284,7 +280,7 @@ function RequestForm() {
         isRequired: true,
         Component: () => {
             return (<div
-                    className={cn("w-full flex flex-row gap-4", leaveTypeDuration === null ? 'opacity-50 pointer-events-none cursor-not-allowed' : "")}>
+                className={cn("w-full flex flex-row gap-4", leaveTypeDuration === null ? 'opacity-50 pointer-events-none cursor-not-allowed' : "")}>
                 <DateRangePicker
                     granularity="hour"
                     aria-label="Leave Date Range"
@@ -295,19 +291,19 @@ function RequestForm() {
                     value={leaveDate} // LeaveDate is used directly here
                     isRequired
                     errorMessage={(value) => {
-                        if(value.isInvalid) {
+                        if (value.isInvalid) {
                             setIsDatePickerError(true)
                             return value.validationErrors
                         }
                     }}
                     minValue={today(getLocalTimeZone())}
-                    maxValue={today(getLocalTimeZone()).add({ days: leaveTypeDuration! })}
+                    maxValue={today(getLocalTimeZone()).add({days: leaveTypeDuration!})}
                     onChange={(value) => {
                         // Check if the selected value is null
 
                         // Define the allowed date range
                         const startDate = dayjs(today(getLocalTimeZone()).toString());
-                        const endDate = dayjs(today(getLocalTimeZone()).add({ days: leaveTypeDuration! }).toString());
+                        const endDate = dayjs(today(getLocalTimeZone()).add({days: leaveTypeDuration!}).toString());
 
                         // Convert the input dates (start and end) to Day.js objects
                         const startDayJs = dayjs(value?.start?.toDate(getLocalTimeZone())); // Example input: 2024-09-29 00:00:00
@@ -408,10 +404,12 @@ function RequestForm() {
                                 <Button variant="light" radius="sm" size="sm" onClick={handleClear}>Clear</Button>
                                 <Switch expression={isAdd}>
                                     <Case of={true}>
-                                        <Button color="primary" isDisabled={!isDirty || !isValid || isDatePickerError} radius="sm" size="sm" type="submit">Add</Button>
+                                        <Button color="primary" isDisabled={!isDirty || !isValid || isDatePickerError}
+                                                radius="sm" size="sm" type="submit">Add</Button>
                                     </Case>
                                     <Default>
-                                        <Button color="primary" isDisabled={isDatePickerError} radius="sm" size="sm" onClick={handleOnEdit}>Update</Button>
+                                        <Button color="primary" isDisabled={isDatePickerError} radius="sm" size="sm"
+                                                onClick={handleOnEdit}>Update</Button>
                                     </Default>
                                 </Switch>
 

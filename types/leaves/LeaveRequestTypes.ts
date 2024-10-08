@@ -26,11 +26,6 @@ export interface RequestFormTableType extends Omit<LeaveRequestTypes, "status" |
     leave_id: number;
 }
 
-export interface RequestFormWithMethod {
-    method: "Add" | "Edit" | "Delete" | "Reset"
-    data: RequestFormTableType
-}
-
 
 
 export interface EmployeeLeavesStatus{
@@ -62,6 +57,7 @@ export interface LeaveType {
 export interface LeaveTypesItems {
     key: React.Key;
     name: string;
+    employee_count: number;
     duration_days: number;
     code: string;
     is_carry_forward: boolean;
@@ -94,12 +90,3 @@ export interface LeaveRequest {
     ref_leave_types: LeaveType
 }
 
-
-// export interface LeaveTypeForm {
-//     id: number;
-//     name: string;
-//     duration: number
-//     code: string
-//     is_carry_forward: boolean
-//     is_active: boolean
-// }

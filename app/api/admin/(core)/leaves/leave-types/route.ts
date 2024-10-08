@@ -18,5 +18,28 @@ export async function GET() {
     });
 
 
-    return NextResponse.json(data)
+    const employee_count_leaves_types = await prisma.trans_leaves.groupBy({
+        by: ["type_id"],
+        where: {
+            employee_id: {
+                not: null
+            }
+        },
+        _count: {
+            employee_id: true  // Counting distinct employee_id for each type
+        }
+    })
+    const result = data.map(leaveType => {
+        const countData = employee_count_leaves_types.find(
+            (leave) => leave.type_id === leaveType.id
+        );
+
+        return {
+            key: leaveType.id,
+            ...leaveType,
+            employee_count: countData ? countData._count.employee_id : 0  // Attach employee count
+        };
+    });
+
+    return NextResponse.json(result)
 }

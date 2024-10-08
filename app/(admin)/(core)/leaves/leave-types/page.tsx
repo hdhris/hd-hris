@@ -3,6 +3,7 @@ import {unstable_cache} from "next/cache";
 import prisma from "@/prisma/prisma";
 import LeaveTypesCard from "@/components/admin/leaves/leave-types/display/LeaveTypesCard";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
+import LeaveTypesProvider from "@/components/admin/leaves/leave-types/provider/LeaveTypesProvider";
 
 const getLeaveTypes = unstable_cache(async () => {
     return prisma.ref_leave_types.findMany({
@@ -31,9 +32,9 @@ async function Page() {
     });
 
     return (
-        <ScrollShadow className="w-full h-full p-5">
-            <LeaveTypesCard/>
-        </ScrollShadow>
+            <LeaveTypesProvider>
+                <LeaveTypesCard/>
+            </LeaveTypesProvider>
 
     );
 

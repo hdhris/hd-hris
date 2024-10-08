@@ -1,9 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
+interface FormData<T> {
+    method: "Add" | "Edit" | "View" | "Delete" | "Reset";
+    data: T
+}
 // Define a generic context type
 interface FormTableContextType<T> {
-    formData: T | null;
-    setFormData: (data: T) => void;
+    formData: FormData<T> | null;
+    setFormData: (data: FormData<T>) => void;
 }
 
 // Create the context with default values
@@ -11,7 +15,7 @@ const FormTableContext = createContext<FormTableContextType<any> | undefined>(un
 
 // Create a generic provider component
 export const FormTableProvider = <T,>({ children }: { children: ReactNode }) => {
-    const [formData, setFormData] = useState<T | null>(null);
+    const [formData, setFormData] = useState<FormData<T> | null>(null);
 
     return (
         <FormTableContext.Provider value={{ formData, setFormData }}>

@@ -69,7 +69,7 @@ function RootLayout({children}: { children: ReactNode }) {
                                  showLabel={isSidebarOpen}/>
                     <SideBarItem label="Attendance & Time" href="/attendance-time" icon={<FiClock/>}
                                  showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Leaves Application" href="/leaves/leave-requests" icon={<LuPlane/>}
+                    <SideBarItem label="Leaves Application" href="/leaves" icon={<LuPlane/>}
                                  showLabel={isSidebarOpen}/>
                     <SideBarItem label="Payroll" href="/payroll" icon={<LuTicket/>} showLabel={isSidebarOpen}/>
                     <SideBarItem label="Benefits" href="/benefits" icon={<LuHeartHandshake/>}
@@ -89,7 +89,7 @@ function RootLayout({children}: { children: ReactNode }) {
         </section>
 
 
-        <ScrollShadow className="absolute p-4 mt-14 left-14 mb-4 w-[calc(100%-56px)] h-full min-w-[980px] -z-10">
+        <ScrollShadow className="absolute p-4 mt-14 left-14 w-[calc(100%-56px)] h-full min-w-[980px] -z-10 pb-[70px]">
             {children}
         </ScrollShadow>
 

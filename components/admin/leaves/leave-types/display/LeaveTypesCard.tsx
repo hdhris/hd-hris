@@ -1,41 +1,29 @@
 "use client";
-
 import React, {useEffect, useState} from 'react';
 import GridCard from "@/components/common/cards/GridCard";
-import Typography from "@/components/common/typography/Typography";
-import {LuCheck, LuX} from "react-icons/lu";
-import {cn} from "@nextui-org/react";
-import ActionControlDropdown from "@/components/common/action-controls/ActionControlDropdown";
-import Pulse from "@/components/common/effects/Pulse";
-import uniqolor from "uniqolor";
-import {Key} from "@react-types/shared";
 import {LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
-import {axiosInstance} from "@/services/fetcher";
-import {useToast} from "@/components/ui/use-toast";
-import showDialog from "@/lib/utils/confirmDialog";
 import {useLeaveTypes} from "@/services/queries";
 import Loading from "@/components/spinner/Loading";
+import Header from "@/components/admin/leaves/leave-types/display/action-control/Header";
+import Body from "@/components/admin/leaves/leave-types/display/action-control/Body";
+import {useFormTable} from "@/components/providers/FormTableProvider";
+import {LeaveTypesKey} from "@/types/leaves/LeaveTypes";
+import {useDisclosure} from "@nextui-org/react";
+import LeaveTypeUpdate from "@/components/admin/leaves/leave-types/update/LeaveTypeUpdate";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
-
-
-const bgGradient = (name: string) => {
-    return {
-        style: {
-            background: uniqolor(name).color
-        }
-    }
-}
-
+import {Button} from "@nextui-org/button";
 
 function LeaveTypesCard() {
-    const {toast} = useToast()
     const {data, isLoading} = useLeaveTypes()
+    const {formData} = useFormTable<LeaveTypesKey>()
     const [leaveTypes, setLeaveTypes] = useState<LeaveTypesItems[]>([])
+    const {isOpen, onOpen, onOpenChange} = useDisclosure();
     useEffect(() => {
         if (data && !isLoading) {
             const leaves_types = data.map((item) => {
                 return {
                     key: item.key,
+                    employee_count: item.employee_count,
                     duration_days: item.duration_days ?? 0,
                     name: item.name,
                     code: item.code || "N/A",
@@ -47,91 +35,39 @@ function LeaveTypesCard() {
         }
     }, [data, isLoading])
 
-    const handleDelete = async (key: React.Key) => {
-        // Find the item to delete and store it in case we need to restore it
-        const deleteItem = leaveTypes?.find(item => item.key === key);
-
-        if (!deleteItem) return; // Exit if the item is not found
-
-        try {
-            // Confirm deletion with a dialog
-            const result = await showDialog("Confirm Delete", `Are you sure you want to delete ${deleteItem.name}?`, false);
-
-            // Remove the item from the state immediately
-            setLeaveTypes(prev => prev?.filter(item => item.key !== key)!);
-            if (result === "yes") {
-                // Send the delete request to the API
-                const x = await axiosInstance.post("/api/admin/leaves/leave-types/delete", Number(key)  // Ensure you pass the key properly
-                );
-
-
-                toast({
-                    title: "Deleted", description: "Schedule deleted successfully!", variant: "success",
-                });
-            } else {
-                // If the user cancels, restore the item back to the list
-                setLeaveTypes(prev => [...prev!, deleteItem]);
-            }
-        } catch (error: any) {
-            // If an error occurs, show an error toast and restore the deleted item
-            toast({
-                title: "Error", description: "Error: " + error.message, variant: "danger",
-            });
-
-            // Restore the item back to the list
-            setLeaveTypes(prev => [...prev!, deleteItem]);
+    useEffect(() => {
+        if (formData?.methods === "Delete") {
+            // alert("Delete: " + formData?.data?.key)
+            setLeaveTypes((prev) => prev.filter((item) => item.key !== formData?.data?.key))
+        } else if (formData?.methods === "Edit") {
+            alert("Edit: " + formData?.data?.key)
+            onOpen()
         }
-    };
-
-
-    const handleEdit = (key: Key) => {
-        alert("Edited: " + key);
-    }
+    }, [formData, onOpen])
 
     if (isLoading) return <Loading/>
-    return (<div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] justify-evenly">
-        <GridCard
-            data={leaveTypes?.sort((a, b) => a.name.localeCompare(b.name))}
-            header={({key, name, is_active}) => {
-                const isLight = uniqolor(name).isLight;
-                return (<div {...bgGradient(name)}
-                             className={cn("relative flex w-full h-28 rounded-b-sm rounded-r-sm", !isLight ? "shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)]" : "shadow-[inset_-1px_-121px_75px_-52px_rgba(255,255,255,0.49)]")}> {/* shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)] */}
-                    {/* Name positioned bottom-left */}
-                    <div className="absolute top-2 right-0 pr-2">
-                        <ActionControlDropdown
-                            className="text-default-200"
-                            onDelete={handleDelete.bind(null, key as Key)}
-                            onEdit={handleEdit.bind(null, key as Key)}
-                        />
-                    </div>
-
-                    <div className="flex items-end p-2 gap-4 w-full h-full">
-                        <Pulse color={is_active ? "success" : "danger"}/>
-                        <Typography
-                            className={cn("w-full text-2xl font-extrabold break-words overflow-hidden text-pretty", isLight ? "text-black" : "text-white")}>
-                            {name}
-                        </Typography>
-                    </div>
-                </div>)
-            }}
-            body={({duration_days, code, is_carry_forward}) => {
-                return (<div className="grid gap-2">
-                    <div className="flex justify-between">
-                        <Typography className="font-medium text-medium">Duration:</Typography>
-                        <Typography className="font-semibold text-medium ">{duration_days}</Typography>
-                    </div>
-                    <div className="flex justify-between">
-                        <Typography className="font-medium text-medium">Code:</Typography>
-                        <Typography className="font-semibold text-medium">{code}</Typography>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <Typography className="font-medium text-medium">Carry Forward:</Typography>
-                        {is_carry_forward ? (<LuCheck className="h-5 w-5 text-success-500"/>) : (
-                            <LuX className="h-5 w-5 text-danger-500"/>)}
-                    </div>
-                </div>)
-            }}/>
-    </div>);
+    return (<>
+        <div className="flex justify-end">
+            <Button
+                radius="sm"
+                color="primary"
+                size="sm"
+            >
+                Add Leave Type
+            </Button>
+        </div>
+        <ScrollShadow className="w-full h-full p-5 overflow-auto">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] place-items-center gap-5">
+                <GridCard
+                    data={leaveTypes?.sort((a, b) => a.name.localeCompare(b.name))}
+                    header={({key, name, is_active}) => (<Header id={key} name={name} is_active={is_active}/>)}
+                    body={({employee_count, duration_days, code, is_carry_forward}) => (
+                        <Body employee_count={employee_count} duration_days={duration_days} code={code}
+                              is_carry_forward={is_carry_forward}/>)}/>
+            </div>
+            <LeaveTypeUpdate isOpen={isOpen} onOpenChange={onOpenChange}/>
+        </ScrollShadow>
+    </>);
 }
 
 export default LeaveTypesCard;
