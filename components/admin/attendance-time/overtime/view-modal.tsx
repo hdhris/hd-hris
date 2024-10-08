@@ -8,9 +8,6 @@ import {
   ModalHeader,
   Textarea,
   Avatar,
-  Card,
-  CardBody,
-  Divider,
   Chip,
   Spinner,
   cn,
@@ -28,7 +25,7 @@ import { FaRegClock } from "react-icons/fa6";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { TbClock, TbClockCancel, TbClockCheck } from "react-icons/tb";
 import TableData from "@/components/tabledata/TableData";
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { axiosInstance } from "@/services/fetcher";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { FaCheckCircle } from "react-icons/fa";
@@ -36,13 +33,15 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { PiClockCountdownFill } from "react-icons/pi";
 import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
+import { toast } from "@/components/ui/use-toast";
+import showDialog from "@/lib/utils/confirmDialog";
+import { objectIncludes } from "@/helper/filterObject/filterObject";
 
 interface ScheduleModalProps {
   visible: boolean;
   pending: boolean;
   onClose: () => void;
-  onSave: (data: OvertimeEntry) => void;
-  onDelete?: (id: Number | undefined) => void;
+  onUpdate: (data: OvertimeEntry) => void;
   overtimeData?: OvertimeEntry;
 }
 
@@ -56,8 +55,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   visible,
   pending,
   onClose,
-  onSave,
-  onDelete,
+  onUpdate,
   overtimeData: data,
 }) => {
   // Effect to populate modal fields if editing
@@ -114,18 +112,6 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   useEffect(() => {
     fetchEmployeeOvertimeRecords();
   }, [fetchEmployeeOvertimeRecords]);
-
-  const handleSave = (value: any) => {
-    const newOvertime: OvertimeEntry = {
-      created_at: overtimeData
-        ? overtimeData.created_at
-        : new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      ...value,
-    };
-
-    onSave(newOvertime);
-  };
 
   const config: TableConfigProps<OvertimeEntry> = {
     columns: [
@@ -189,7 +175,10 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
           </div>
           <div>
             <p className="text-small me-4 font-normal">
-                Requested on: <span className="font-semibold">{toGMT8(overtimeData?.created_at).format('ddd, MMM DD YYYY')}</span>
+              Requested on:{" "}
+              <span className="font-semibold">
+                {toGMT8(overtimeData?.created_at).format("ddd, MMM DD YYYY")}
+              </span>
             </p>
           </div>
           {/* {overtimeData ? "Review Overtime" : "File Overtime"} */}
@@ -292,23 +281,17 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
               <p className="text-small font-semibold text-default-600">
                 Reason:
               </p>
-              <Card className="min-h-20 max-h-28 max bg-gray-100" shadow="none">
-                <CardBody>
-                  <p className="text-small">{overtimeData?.reason}</p>
-                </CardBody>
-              </Card>
+              <Textarea value={overtimeData?.reason} isReadOnly />
             </div>
             <div>
               <p className="text-small font-semibold text-default-600">
                 Comment:
               </p>
               <Textarea
-                value={
-                  comment ||
-                  "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsum voluptate tempore harum laboriosam quasi minima architecto dolorem blanditiis nobis soluta neque sequi, dolores ea, asperiores exercitationem perferendis laborum maxime earum!"
-                }
+                value={comment}
                 onValueChange={setComment}
                 isReadOnly={overtimeData?.status != "pending"}
+                placeholder="Add comment"
                 classNames={{
                   inputWrapper: cn(
                     "border-2",
@@ -358,7 +341,16 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
             <>
               <Button
                 variant="flat"
-                onClick={onClose}
+                onClick={() => {
+                  onUpdate({
+                    ...overtimeData,
+                    comment: comment,
+                    approved_at: toGMT8().toISOString(),
+                    updated_at: toGMT8().toISOString(),
+                    approved_by: userID!,
+                    status: "rejected",
+                  });
+                }}
                 {...uniformStyle({ color: "danger" })}
                 startContent={
                   <IoCloseSharp className="size-5 text-danger-500" />
@@ -376,12 +368,12 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
                   <IoCheckmarkSharp className="size-5 text-white" />
                 }
                 onClick={() => {
-                  onSave({
+                  onUpdate({
                     ...overtimeData,
                     comment: comment,
                     approved_at: toGMT8().toISOString(),
                     updated_at: toGMT8().toISOString(),
-                    // approved_by: userID!,
+                    approved_by: userID!,
                     status: "approved",
                   });
                 }}

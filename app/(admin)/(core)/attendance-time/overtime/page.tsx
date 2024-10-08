@@ -18,6 +18,8 @@ import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import OvertimeModal from "@/components/admin/attendance-time/overtime/view-modal";
 import { useRouter } from "next/router";
+import { objectIncludes } from "@/helper/filterObject/filterObject";
+import { useEmployeeId } from "@/hooks/employeeIdHook";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
@@ -88,6 +90,7 @@ const statusColorMap: Record<string, "danger" | "success" | "default"> = {
 // }
 
 function Page() {
+  const userID = useEmployeeId();
   SetNavEndContent((router) => (
     <Button
       {...uniformStyle()}
@@ -146,6 +149,16 @@ function Page() {
                 isIconOnly
                 variant="flat"
                 {...uniformStyle({ color: "danger" })}
+                onClick={()=>{
+                  onUpdate({
+                    ...data?.find(v=> v.id === item.id)!,
+                    id: item.id,
+                    approved_at: toGMT8().toISOString(),
+                    updated_at: toGMT8().toISOString(),
+                    approved_by: userID!,
+                    status: "rejected",
+                  });
+                }}
               >
                 <IoCloseSharp className="size-5 text-danger-500" />
               </Button>
@@ -155,6 +168,16 @@ function Page() {
                   <IoCheckmarkSharp className="size-5 text-white" />
                 }
                 className="text-white"
+                onClick={()=>{
+                  onUpdate({
+                    ...data?.find(v=> v.id === item.id)!,
+                    id: item.id,
+                    approved_at: toGMT8().toISOString(),
+                    updated_at: toGMT8().toISOString(),
+                    approved_by: userID!,
+                    status: "approved",
+                  });
+                }}
               >
                 Approve
               </Button>
@@ -179,6 +202,50 @@ function Page() {
           return <></>;
       }
     },
+  };
+
+  const onUpdate = async (value: OvertimeEntry) => {
+    console.log(
+      objectIncludes(value, [
+        "id",
+        "comment",
+        "approved_at",
+        "updated_at",
+        "approved_by",
+        "status",
+      ])
+    );
+    const isApproved = value.status === "approved";
+    const response = await showDialog(
+      `${isApproved ? "Appoval" : "Rejection"}`,
+      `Confirm ${isApproved ? "approval" : "rejection"}...`,
+      false
+    );
+    if (response === "yes") {
+      try {
+        await axios.post(
+          "/api/admin/attendance-time/overtime/update",
+          objectIncludes(value, [
+            "comment",
+            "approved_at",
+            "updated_at",
+            "approved_by",
+            "status",
+          ])
+        );
+        toast({
+          title: isApproved ? "Approved" : "Rejected",
+          description: "Overtime has been " + value.status,
+          variant: isApproved ? "success" : "default",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Error: " + error,
+          variant: "danger",
+        });
+      }
+    }
   };
 
   return (
@@ -207,7 +274,7 @@ function Page() {
         pending={isPending}
         overtimeData={selectedOvertime}
         onClose={() => setVisible(false)}
-        onSave={console.log}
+        onUpdate={onUpdate}
       />
     </>
     // <div className="h-full overflow-auto flex flex-col bg-blue-500">
