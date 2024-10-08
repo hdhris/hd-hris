@@ -35,6 +35,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import { PiClockCountdownFill } from "react-icons/pi";
 import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
+import { useEmployeeId } from "@/hooks/employeeIdHook";
 
 interface ScheduleModalProps {
   visible: boolean;
@@ -87,11 +88,12 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [recordData, setRecordData] = useState<OvertimeEntry[]>([]);
   const [comment, setComment] = useState("");
+  const userID = useEmployeeId();
   const fetchEmployeeOvertimeRecords = useCallback(
     async () => {
       console.log("FLAG");
       setOvertimeData(data);
-      setComment(data?.comment || "")
+      setComment(data?.comment || "");
       setIsLoading(true);
       try {
         const response: AxiosResponse<OvertimeEntry[]> =
@@ -100,7 +102,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
           );
         setRecordData(response.data);
         setSelectedKey(new Set([String(data?.id)]));
-    } catch (error) {
+      } catch (error) {
         console.error("Error fetching schedules:", error);
       } finally {
         setIsLoading(false);
@@ -173,27 +175,27 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   return (
     <Modal isOpen={visible} onClose={onClose} size="4xl">
       <ModalContent>
-        <ModalHeader>
-          {overtimeData ? "Review Overtime" : "File Overtime"}
+        <ModalHeader className="flex justify-between items-center">
+          <div className="flex gap-4 items-center">
+            <Avatar
+              isBordered
+              radius="full"
+              size="md"
+              src={overtimeData?.trans_employees_overtimes?.picture ?? ""}
+            />
+            <p className="semi-bold">
+              {getEmpFullName(overtimeData?.trans_employees_overtimes!)}
+            </p>
+          </div>
+          <div>
+            <p className="text-small me-4 font-normal">
+                Requested on: <span className="font-semibold">{toGMT8(overtimeData?.created_at).format('ddd, MMM DD YYYY')}</span>
+            </p>
+          </div>
+          {/* {overtimeData ? "Review Overtime" : "File Overtime"} */}
         </ModalHeader>
         <ModalBody className="flex flex-row gap-4">
           <div className="flex flex-col gap-4 w-[440px]">
-            <div className="flex gap-5">
-              <Avatar
-                isBordered
-                radius="full"
-                size="md"
-                src={overtimeData?.trans_employees_overtimes?.picture ?? ""}
-              />
-              <div className="text-small flex flex-col gap-1 items-start justify-center">
-                <h4 className="font-semibold leading-none text-default-600">
-                  {getEmpFullName(overtimeData?.trans_employees_overtimes!)}
-                </h4>
-                <h5 className="text-small tracking-tight text-default-400">
-                  {overtimeData?.trans_employees_overtimes?.email ?? ""}
-                </h5>
-              </div>
-            </div>
             <div className="flex w-full">
               <div className="flex-1">
                 {/* {left} */}
@@ -334,8 +336,8 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
               selectedKeys={selectedKey}
               onSelectionChange={(keys) => {
                 const record = recordData.find(
-                    (item) => String(item.id) === Array.from(keys)[0]
-                  )
+                  (item) => String(item.id) === Array.from(keys)[0]
+                );
                 setSelectedKey(new Set(Array.from(keys).map(String)));
                 setOvertimeData(record);
                 setComment(record?.comment || "");
@@ -373,6 +375,16 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
                 startContent={
                   <IoCheckmarkSharp className="size-5 text-white" />
                 }
+                onClick={() => {
+                  onSave({
+                    ...overtimeData,
+                    comment: comment,
+                    approved_at: toGMT8().toISOString(),
+                    updated_at: toGMT8().toISOString(),
+                    // approved_by: userID!,
+                    status: "approved",
+                  });
+                }}
               >
                 Approve
               </Button>{" "}

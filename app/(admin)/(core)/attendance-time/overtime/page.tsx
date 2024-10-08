@@ -18,8 +18,6 @@ import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import OvertimeModal from "@/components/admin/attendance-time/overtime/view-modal";
 import { useRouter } from "next/router";
-import Link from "next/link";
-import LinkButton from "@/components/common/button/LinkButton";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
@@ -146,8 +144,8 @@ function Page() {
             <div className="flex gap-1 items-center mx-auto">
               <Button
                 isIconOnly
-                variant="bordered"
-                {...uniformStyle({ color: "default" })}
+                variant="flat"
+                {...uniformStyle({ color: "danger" })}
               >
                 <IoCloseSharp className="size-5 text-danger-500" />
               </Button>
@@ -172,7 +170,7 @@ function Page() {
               }
               variant="flat"
               color={statusColorMap[item.status]}
-              className="capitalize mx-auto"
+              className="capitalize"
             >
               {item.status}
             </Chip>

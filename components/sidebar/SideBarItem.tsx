@@ -44,7 +44,7 @@ export default function SideBarItem({
         {showLabel && (
             <Typography
                 className={cn(
-                    "ms-3 text-sm text-nowrap",
+                    "ms-3 text-sm text-nowrap whitespace-nowrap",
                     isActive ? "text-white" : "group-hover:text-primary"
                 )}
             >

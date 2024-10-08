@@ -5,7 +5,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(utc);
 dayjs.extend(customParseFormat);
 
-export function toGMT8(value: string | Date | undefined): dayjs.Dayjs {
+export function toGMT8(value?: string | Date ): dayjs.Dayjs {
   if(value === undefined) {
     return dayjs.utc(new Date(new Date().getTime() + 8 * 60 * 60 * 1000))
   }
