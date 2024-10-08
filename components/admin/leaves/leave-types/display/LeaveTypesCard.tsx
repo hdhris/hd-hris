@@ -13,12 +13,10 @@ import {LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import showDialog from "@/lib/utils/confirmDialog";
-import {useFormTable} from "@/components/providers/FormTableProvider";
+import {useLeaveTypes} from "@/services/queries";
+import Loading from "@/components/spinner/Loading";
+import {ScrollShadow} from "@nextui-org/scroll-shadow";
 
-
-interface LeaveCard {
-    data: LeaveTypesItems[];
-}
 
 const bgGradient = (name: string) => {
     return {
@@ -29,20 +27,26 @@ const bgGradient = (name: string) => {
 }
 
 
-function LeaveTypesCard({data}: LeaveCard) {
-    // const {formData} = useFormTable<LeaveTypesItems>()
+function LeaveTypesCard() {
     const {toast} = useToast()
-    const [leaveTypes, setLeaveTypes] = useState<LeaveTypesItems[]>(data)
-    
-    // useEffect(() => {
-    //     if(formData) {
-    //         setLeaveTypes((prevState) => {
-    //             return [formData!, ...prevState!]
-    //         })
-    //     } else{
-    //         setLeaveTypes(data)
-    //     }
-    // }, [data, formData])
+    const {data, isLoading} = useLeaveTypes()
+    const [leaveTypes, setLeaveTypes] = useState<LeaveTypesItems[]>([])
+    useEffect(() => {
+        if (data && !isLoading) {
+            const leaves_types = data.map((item) => {
+                return {
+                    key: item.key,
+                    duration_days: item.duration_days ?? 0,
+                    name: item.name,
+                    code: item.code || "N/A",
+                    is_carry_forward: item.is_carry_forward!,
+                    is_active: item.is_active!,
+                }
+            })
+            setLeaveTypes(leaves_types)
+        }
+    }, [data, isLoading])
+
     const handleDelete = async (key: React.Key) => {
         // Find the item to delete and store it in case we need to restore it
         const deleteItem = leaveTypes?.find(item => item.key === key);
@@ -54,7 +58,7 @@ function LeaveTypesCard({data}: LeaveCard) {
             const result = await showDialog("Confirm Delete", `Are you sure you want to delete ${deleteItem.name}?`, false);
 
             // Remove the item from the state immediately
-            setLeaveTypes(prev => prev?.filter(item => item.key !== key));
+            setLeaveTypes(prev => prev?.filter(item => item.key !== key)!);
             if (result === "yes") {
                 // Send the delete request to the API
                 const x = await axiosInstance.post("/api/admin/leaves/leave-types/delete", Number(key)  // Ensure you pass the key properly
@@ -83,29 +87,32 @@ function LeaveTypesCard({data}: LeaveCard) {
     const handleEdit = (key: Key) => {
         alert("Edited: " + key);
     }
-    return (<GridCard
-            data={leaveTypes?.sort((a, b) => a.name.localeCompare(b.name))!}
+
+    if (isLoading) return <Loading/>
+    return (<div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] justify-evenly">
+        <GridCard
+            data={leaveTypes?.sort((a, b) => a.name.localeCompare(b.name))}
             header={({key, name, is_active}) => {
                 const isLight = uniqolor(name).isLight;
                 return (<div {...bgGradient(name)}
                              className={cn("relative flex w-full h-28 rounded-b-sm rounded-r-sm", !isLight ? "shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)]" : "shadow-[inset_-1px_-121px_75px_-52px_rgba(255,255,255,0.49)]")}> {/* shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)] */}
-                        {/* Name positioned bottom-left */}
-                        <div className="absolute top-2 right-0 pr-2">
-                            <ActionControlDropdown
-                                className={isLight ? "text-black" : "text-white"}
-                                onDelete={handleDelete.bind(null, key as Key)}
-                                onEdit={handleEdit.bind(null, key as Key)}
-                            />
-                        </div>
+                    {/* Name positioned bottom-left */}
+                    <div className="absolute top-2 right-0 pr-2">
+                        <ActionControlDropdown
+                            className="text-default-200"
+                            onDelete={handleDelete.bind(null, key as Key)}
+                            onEdit={handleEdit.bind(null, key as Key)}
+                        />
+                    </div>
 
-                        <div className="flex items-end p-2 gap-4 w-full h-full">
-                            <Pulse color={is_active ? "success" : "danger"}/>
-                            <Typography
-                                className={cn("w-full text-2xl font-extrabold break-words overflow-hidden text-pretty", isLight ? "text-black" : "text-white")}>
-                                {name}
-                            </Typography>
-                        </div>
-                    </div>)
+                    <div className="flex items-end p-2 gap-4 w-full h-full">
+                        <Pulse color={is_active ? "success" : "danger"}/>
+                        <Typography
+                            className={cn("w-full text-2xl font-extrabold break-words overflow-hidden text-pretty", isLight ? "text-black" : "text-white")}>
+                            {name}
+                        </Typography>
+                    </div>
+                </div>)
             }}
             body={({duration_days, code, is_carry_forward}) => {
                 return (<div className="grid gap-2">
@@ -123,7 +130,8 @@ function LeaveTypesCard({data}: LeaveCard) {
                             <LuX className="h-5 w-5 text-danger-500"/>)}
                     </div>
                 </div>)
-            }}/>);
+            }}/>
+    </div>);
 }
 
 export default LeaveTypesCard;

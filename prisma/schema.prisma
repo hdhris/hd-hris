@@ -245,6 +245,7 @@ model ref_leave_types {
   code             String?        @db.VarChar(45)
   is_carry_forward Boolean?
   is_active        Boolean?
+  is_paid          Boolean        @default(false)
   trans_leaves     trans_leaves[]
 }
 

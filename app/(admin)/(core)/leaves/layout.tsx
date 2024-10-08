@@ -18,7 +18,9 @@ function RootLayout({children}: { children: React.ReactNode }) {
         }
     ]
     return (
-        <NavigationTabs tabs={tabs} basePath="leaves">{children}</NavigationTabs>
+        <NavigationTabs tabs={tabs} basePath="leaves">
+            {children}
+        </NavigationTabs>
     );
 }
 
