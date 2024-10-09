@@ -248,6 +248,7 @@ function Page() {
             "updated_at",
             "approved_by",
             "status",
+            "rate_per_hour",
           ])
         );
         toast({

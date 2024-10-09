@@ -105,7 +105,7 @@ const JobInformationForm: React.FC = () => {
     if (formDepartmentID && formDepartmentID !== departmentID) {
       setDepartmentID(formDepartmentID);
     }
-  }, [formDepartmentID]);
+  }, [formDepartmentID,departmentID]);
 
   const fetchDepartments = async () => {
     try {

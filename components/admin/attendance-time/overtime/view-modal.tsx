@@ -118,7 +118,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
     if (data) {
       fetchEmployeeOvertimeRecords(data);
     }
-  }, [data]);
+  }, [data,fetchEmployeeOvertimeRecords]);
 
   useEffect(() => {
     if (overtimeData) {
@@ -372,7 +372,11 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
                 setSelectedKey(new Set(Array.from(keys).map(String)));
                 setOvertimeData(record);
                 setComment(record?.comment || "");
-                setRatePH(record?.rate_per_hour || "0.0");
+                setRatePH(
+                  record?.rate_per_hour ||
+                    String(record?.trans_employees_overtimes.ref_job_classes?.pay_rate) ||
+                    "0"
+                );
               }}
             />
           )}

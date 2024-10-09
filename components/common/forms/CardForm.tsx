@@ -18,6 +18,14 @@ type CardFormProps<T extends object> = {
   children?: ReactNode;
   form: UseFormReturn<T>;
   className?: string;
+  classNames?: {
+    header?: string;
+    body?: {
+      wrapper?: string;
+      form?: string;
+    }
+    footer?: string;
+  }
   startButton?: {
     name: string;
     onClick: ()=> void;
@@ -31,6 +39,7 @@ function CardForm<T extends object>({
   form,
   onSubmit,
   className,
+  classNames,
   startButton,
 }: CardFormProps<T>) {
   const [isPending, setIsPending] = useState(false);
@@ -44,19 +53,19 @@ function CardForm<T extends object>({
 
   return (
     <Card
-      className={cn("h-full max-h-full mx-2 min-w-80 shadow-sm", className)}
+      className={cn("h-full max-h-full mx-2 w-full min-w-80 shadow-sm", className)}
     >
-      <CardHeader>{label}</CardHeader>
-      <CardBody className="pt-0 h-full">
+      <CardHeader className={classNames?.header}>{label}</CardHeader>
+      <CardBody className={cn('pt-0 h-full', classNames?.body?.wrapper)}>
         <ScrollShadow>
           <Form {...form}>
-            <form id="card-form" onSubmit={form.handleSubmit(handleSubmit)}>
+            <form id="card-form" onSubmit={form.handleSubmit(handleSubmit)} className={classNames?.body?.form}>
               {children}
             </form>
           </Form>
         </ScrollShadow>
       </CardBody>
-      <CardFooter className="flex gap-2">
+      <CardFooter className={cn("flex gap-2", classNames?.footer)}>
         {startButton && <Button variant="light" onClick={startButton.onClick}>
           {startButton.name}
           </Button>}

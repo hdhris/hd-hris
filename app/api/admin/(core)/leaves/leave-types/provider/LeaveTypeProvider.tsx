@@ -1,6 +1,6 @@
 import React from 'react';
 import {FormTableProvider} from "@/components/providers/FormTableProvider";
-import {LeaveTypesItems, RequestFormWithMethod} from "@/types/leaves/LeaveRequestTypes";
+import {LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 
 
 interface LeaveTypeProviderType {

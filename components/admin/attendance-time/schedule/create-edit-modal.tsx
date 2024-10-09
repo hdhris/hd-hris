@@ -80,7 +80,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
   }, [selectedSchedule, form]);
   useEffect(() => {
     load();
-  }, [selectedSchedule]);
+  }, [selectedSchedule,load]);
 
   const handleSave = (value: any) => {
     const newSchedule: BatchSchedule = {

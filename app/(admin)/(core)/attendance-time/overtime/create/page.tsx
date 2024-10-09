@@ -25,12 +25,15 @@ const formSchema = z.object({
   date: z.string(),
   rate_per_hour: z.string(),
   comment: z.string(),
+  reason: z.string(),
 });
 
 function Page() {
   const router = useRouter();
   const [selectedEmployee, setSelectedEmployees] = useState(-1);
-  const { data, isLoading } = useQuery<OvertimeResponse>('/api/admin/attendance-time/overtime/read');
+  const { data, isLoading } = useQuery<OvertimeResponse>(
+    "/api/admin/attendance-time/overtime/read"
+  );
   const [isFocused, setIsFocused] = useState(false);
   const userID = useEmployeeId();
 
@@ -42,6 +45,7 @@ function Page() {
       date: "",
       rate_per_hour: "",
       comment: "",
+      reason: "",
     },
   });
 
@@ -71,13 +75,14 @@ function Page() {
     setIsFocused(false);
   }
 
-  const fetchedEmployee: OvertimeResponse["employees"][0] | null = useMemo(() => {
-    const employee = data?.employees?.find((e) => e.id === selectedEmployee);
-    form.reset({
-      rate_per_hour: String(employee?.ref_job_classes.pay_rate),
-    })
-    return employee || null; // Return null if no employee is found
-  }, [selectedEmployee, data, form]);
+  const fetchedEmployee: OvertimeResponse["employees"][0] | null =
+    useMemo(() => {
+      const employee = data?.employees?.find((e) => e.id === selectedEmployee);
+      form.reset({
+        rate_per_hour: String(employee?.ref_job_classes.pay_rate),
+      });
+      return employee || null; // Return null if no employee is found
+    }, [selectedEmployee, data, form]);
 
   if (!useIsClient()) {
     return <Loading />;
@@ -89,16 +94,24 @@ function Page() {
         label="File Leave"
         form={form}
         onSubmit={handleSubmit}
+        classNames={{
+          body: {
+            form: "grid grid-cols-2 gap-2",
+          },
+          footer: 'w-fit ms-auto'
+        }}
       >
-        {fetchedEmployee ? (
+        <div className="col-span-2">
+          {fetchedEmployee ? (
             <UserMail
               name={getEmpFullName(fetchedEmployee)}
               email={fetchedEmployee.email}
               picture={fetchedEmployee.picture}
             />
           ) : (
-            <h1 className="font-semibold h-12">No employee selected</h1>
+            <h1 className="font-semibold h-11">No employee selected</h1>
           )}
+        </div>
 
         <FormFields
           items={[
@@ -127,16 +140,14 @@ function Page() {
               isRequired: true,
             },
             {
+              name: "reason",
+              label: "Reason",
+              type: "text-area",
+            },
+            {
               name: "comment",
               label: "Comment",
-              Component: (field) => {
-                return (
-                  <Textarea
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  />
-                );
-              },
+              type: "text-area",
             },
           ]}
         />

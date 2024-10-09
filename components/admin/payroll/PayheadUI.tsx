@@ -194,7 +194,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
       );
       setSelectedJobs(new Set(data.job_classes.map((job) => String(job.id))));
     }
-  }, [data, form.reset]);
+  }, [data, form]);
 
   useEffect(() => {
     if (data) setDataAtLoad();

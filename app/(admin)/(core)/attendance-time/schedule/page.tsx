@@ -131,8 +131,8 @@ export default function Page() {
   const handleDelete = async (id: Number | undefined) => {
     try {
       const result = await showDialog({
-        title:"Confirm Delete",
-        message:`Are you sure you want to delete schedule?`,
+        title: "Confirm Delete",
+        message: `Are you sure you want to delete schedule?`,
       });
       if (result === "yes") {
         await axios.post(
@@ -262,25 +262,29 @@ export default function Page() {
   }
 
   return (
-    <div className="flex min-w-[1230px] h-full"> {/* content */}
-      <div className="flex flex-col w-[260px] h-full"> {/* left side */}
-        <div className="flex flex-col gap-2 overflow-auto flex-1"> {/* container for the overflowing listbody */}
-          <div className="w-full h-full flex flex-col space-y-2 pb-2"> {/* overflowing list body */}
-          {batchData?.map((item, index) => (
-            <BatchCard
-              key={item.id}
-              item={item}
-              color={getRandomColor(index)}
-              isHovered={hoveredBatchId === item.id}
-              isSelected={
-                empScheduleData.find((emp) => emp.id === hoveredRowId)
-                  ?.batch_id === item.id
-              }
-              setHoveredBatchId={setHoveredBatchId}
-              setSelectedBatch={setSelectedBatch}
-              setVisible={setVisible}
-            />
-          ))}
+    <div className="flex min-w-[1230px] h-full">
+      {/* content */}
+      <div className="flex flex-col w-[260px] h-full">
+        {/* left side */}
+        <div className="flex flex-col gap-2 overflow-auto flex-1">
+          {/* container for the overflowing listbody */}
+          <div className="w-full h-full flex flex-col space-y-2 pb-2">
+            {/* overflowing list body */}
+            {batchData?.map((item, index) => (
+              <BatchCard
+                key={item.id}
+                item={item}
+                color={getRandomColor(index)}
+                isHovered={hoveredBatchId === item.id}
+                isSelected={
+                  empScheduleData.find((emp) => emp.id === hoveredRowId)
+                    ?.batch_id === item.id
+                }
+                setHoveredBatchId={setHoveredBatchId}
+                setSelectedBatch={setSelectedBatch}
+                setVisible={setVisible}
+              />
+            ))}
           </div>
         </div>
         <Button
@@ -292,59 +296,57 @@ export default function Page() {
           Add Schedule
         </Button>
       </div>
-      
-        <table className="w-full h-full table-fixed divide-y divide-gray-200">
-          <thead className="text-xs text-gray-500">
-            <tr className="divide-x divide-gray-200">
-              <th className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-left w-[200px] max-w-[200px] z-50">
-                NAME
+      <div className="h-full overflow-auto">
+      <table className="w-full h-full overflow-hidden table-fixed divide-y divide-gray-200">
+        <thead className="text-xs text-gray-500 sticky top-0">
+          <tr className="divide-x divide-gray-200">
+            <th className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-left w-[200px] max-w-[200px] z-50">
+              NAME
+            </th>
+            {days.map((day) => (
+              <th
+                key={day}
+                className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-center capitalize z-50"
+              >
+                {day.toUpperCase()}
               </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200 h-fit-navlayout overflow-auto">
+          {empScheduleData?.map((employee) => (
+            <tr
+              key={employee.id}
+              className="h-16 divide-x divide-gray-200 transition-all duration-100 hover:bg-gray-200"
+              onMouseEnter={() => setHoveredRowId(employee.id)}
+              onMouseLeave={() => setHoveredRowId(null)}
+            >
+              <td className="px-4 py-2 truncate text-sm font-semibold w-[200px] max-w-[200px]">
+                {`${employee.trans_employees.first_name} ${employee.trans_employees.last_name}`}
+              </td>
               {days.map((day) => (
-                <th
+                <td
                   key={day}
-                  className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-center capitalize z-50"
+                  className={`p-2 text-center text-sm font-semibold`}
                 >
-                  {day.toUpperCase()}
-                </th>
+                  {batchData?.some(
+                    (batch) =>
+                      batch.id === employee.batch_id &&
+                      Array.isArray(employee.days_json) &&
+                      employee.days_json.includes(day.toLowerCase())
+                  )
+                    ? getScheduleCard(
+                        batchData.find((item) => item.id === employee.batch_id),
+                        employee.id
+                      )
+                    : ""}
+                </td>
               ))}
             </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {empScheduleData?.map((employee) => (
-              <tr
-                key={employee.id}
-                className="h-16 divide-x divide-gray-200 transition-all duration-100 hover:bg-gray-200"
-                onMouseEnter={() => setHoveredRowId(employee.id)}
-                onMouseLeave={() => setHoveredRowId(null)}
-              >
-                <td className="px-4 py-2 truncate text-sm font-semibold w-[200px] max-w-[200px]">
-                  {`${employee.trans_employees.first_name} ${employee.trans_employees.last_name}`}
-                </td>
-                {days.map((day) => (
-                  <td
-                    key={day}
-                    className={`p-2 text-center text-sm font-semibold`}
-                  >
-                    {batchData?.some(
-                      (batch) =>
-                        batch.id === employee.batch_id &&
-                        Array.isArray(employee.days_json) &&
-                        employee.days_json.includes(day.toLowerCase())
-                    )
-                      ? getScheduleCard(
-                          batchData.find(
-                            (item) => item.id === employee.batch_id
-                          ),
-                          employee.id
-                        )
-                      : ""}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      
+          ))}
+        </tbody>
+      </table>
+      </div>
       <ScheduleModal
         onSave={handleSubmit}
         selectedSchedule={selectedBatch}

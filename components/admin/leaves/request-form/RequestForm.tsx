@@ -155,7 +155,7 @@ function RequestForm() {
                 };
             });
         }
-    }, [formData, data, currentUser, form, setUser]);
+    }, [formData, data, currentUser, form, form.reset, setUser]);
 
 // Use an effect to handle the form data change
     useEffect(() => {

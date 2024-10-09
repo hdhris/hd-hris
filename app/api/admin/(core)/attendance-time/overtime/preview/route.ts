@@ -24,6 +24,13 @@ export async function GET(req: NextRequest) {
             extension: true,
             picture: true,
             email: true,
+            ref_job_classes : {
+              select : {
+                id: true,
+                name: true,
+                pay_rate: true,
+              }
+            }
           },
         },
         trans_employees_overtimes_approvedBy : {
