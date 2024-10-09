@@ -15,11 +15,10 @@ import { parseBoolean } from "@/lib/utils/parser/parseClass";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
-    const result = await showDialog(
-      "Confirm Delete",
-      `Are you sure you want to delete '${name}' ?`,
-      false
-    );
+    const result = await showDialog({
+      title: "Confirm Delete",
+      message: `Are you sure you want to delete '${name}' ?`,
+    });
     if (result === "yes") {
       await axios.post("/api/admin/payroll/payhead/delete", {
         id: id,

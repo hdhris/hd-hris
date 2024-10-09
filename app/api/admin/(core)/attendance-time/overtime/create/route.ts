@@ -5,7 +5,7 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 import dayjs from "dayjs";
 
 export async function POST(req: NextRequest) {
-  const { data, empId } = await req.json();
+  const { data, empId, approverId } = await req.json();
 
   try {
     console.log(data,empId);
@@ -16,8 +16,10 @@ export async function POST(req: NextRequest) {
         clock_in: toGMT8(data.clock_in).toISOString(),
         comment: data.comment,
         date: toGMT8(data.date).toISOString(),
-        created_at: toGMT8(new Date()).toISOString(),
-        updated_at: toGMT8(new Date()).toISOString(),
+        created_at: toGMT8().toISOString(),
+        updated_at: toGMT8().toISOString(),
+        approved_by: approverId,
+        approved_at: toGMT8().toISOString(),
         status: "approved",
       },
     });

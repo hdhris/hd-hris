@@ -26,6 +26,15 @@ export async function GET(req: NextRequest) {
             email: true,
           },
         },
+        trans_employees_overtimes_approvedBy : {
+            select : {
+              last_name: true,
+              middle_name: true,
+              first_name: true,
+              picture: true,
+              email: true,
+            }
+          }
       },
     });
 

@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
           select: {
             id: true,
             name: true,
+            pay_rate: true,
           },
         },
       },

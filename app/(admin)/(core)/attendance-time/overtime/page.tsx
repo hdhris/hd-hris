@@ -5,8 +5,8 @@ import axios from "axios";
 import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
 import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
-import { Button, Chip, User } from "@nextui-org/react";
-import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
+import { Avatar, Button, Chip, Tooltip, User } from "@nextui-org/react";
+import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { toGMT8 } from "@/lib/utils/toGMT8";
@@ -23,11 +23,10 @@ import { useEmployeeId } from "@/hooks/employeeIdHook";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
-    const result = await showDialog(
-      "Confirm Delete",
-      `Are you sure you want to delete '${name}' ?`,
-      false
-    );
+    const result = await showDialog({
+      title: "Confirm Delete",
+      message: `Are you sure you want to delete '${name}' ?`,
+    });
     if (result === "yes") {
       await axios.post("/api/admin/payroll/payhead/delete", {
         id: id,
@@ -100,7 +99,7 @@ function Page() {
     </Button>
   ));
   const [isVisible, setVisible] = useState(false);
-  const [isPending, setPending] = useState(false);
+  const [isPending, setPending] = useState({ id: 0, method: "approved" });
   const [selectedOvertime, setSelectedOvertime] = useState<
     OvertimeEntry | undefined
   >();
@@ -144,19 +143,22 @@ function Page() {
           );
         case "action":
           return item.status === "pending" ? (
-            <div className="flex gap-1 items-center mx-auto">
+            <div className="flex gap-1 items-center">
               <Button
                 isIconOnly
                 variant="flat"
+                isLoading={
+                  isPending.id === item.id && isPending.method === "rejected"
+                }
                 {...uniformStyle({ color: "danger" })}
-                onClick={()=>{
-                  onUpdate({
-                    ...data?.find(v=> v.id === item.id)!,
-                    id: item.id,
+                onClick={async () => {
+                  const result = await onUpdate({
+                    ...item,
                     approved_at: toGMT8().toISOString(),
                     updated_at: toGMT8().toISOString(),
                     approved_by: userID!,
                     status: "rejected",
+                    rate_per_hour: "0",
                   });
                 }}
               >
@@ -164,18 +166,23 @@ function Page() {
               </Button>
               <Button
                 {...uniformStyle({ color: "success" })}
+                isLoading={
+                  isPending.id === item.id && isPending.method === "approved"
+                }
                 startContent={
                   <IoCheckmarkSharp className="size-5 text-white" />
                 }
                 className="text-white"
-                onClick={()=>{
-                  onUpdate({
-                    ...data?.find(v=> v.id === item.id)!,
-                    id: item.id,
+                onClick={async () => {
+                  const result = await onUpdate({
+                    ...item,
                     approved_at: toGMT8().toISOString(),
                     updated_at: toGMT8().toISOString(),
                     approved_by: userID!,
                     status: "approved",
+                    rate_per_hour: String(
+                      item.trans_employees_overtimes.ref_job_classes.pay_rate
+                    ),
                   });
                 }}
               >
@@ -183,20 +190,34 @@ function Page() {
               </Button>
             </div>
           ) : (
-            <Chip
-              startContent={
-                item.status === "approved" ? (
-                  <FaCheckCircle size={18} />
-                ) : (
-                  <IoMdCloseCircle size={18} />
-                )
-              }
-              variant="flat"
-              color={statusColorMap[item.status]}
-              className="capitalize"
-            >
-              {item.status}
-            </Chip>
+            <div className="flex justify-between w-36 items-center">
+              <Chip
+                startContent={
+                  item.status === "approved" ? (
+                    <FaCheckCircle size={18} />
+                  ) : (
+                    <IoMdCloseCircle size={18} />
+                  )
+                }
+                variant="flat"
+                color={statusColorMap[item.status]}
+                className="capitalize"
+              >
+                {item.status}
+              </Chip>
+              {item.trans_employees_overtimes_approvedBy && (
+                <Tooltip className="pointer-events-auto" content={item.approvedBy_full_name}>
+                  <Avatar
+                  isBordered
+                  radius="full"
+                  size="sm"
+                  src={
+                    item?.trans_employees_overtimes_approvedBy?.picture ?? ""
+                  }
+                />
+                </Tooltip>
+              )}
+            </div>
           );
         default:
           return <></>;
@@ -204,28 +225,24 @@ function Page() {
     },
   };
 
-  const onUpdate = async (value: OvertimeEntry) => {
-    console.log(
-      objectIncludes(value, [
-        "id",
-        "comment",
-        "approved_at",
-        "updated_at",
-        "approved_by",
-        "status",
-      ])
-    );
+  const onUpdate = async (
+    value: OvertimeEntry
+  ): Promise<OvertimeEntry | null> => {
+    setPending({ id: value.id, method: value.status });
     const isApproved = value.status === "approved";
-    const response = await showDialog(
-      `${isApproved ? "Appoval" : "Rejection"}`,
-      `Confirm ${isApproved ? "approval" : "rejection"}...`,
-      false
-    );
+    const response = await showDialog({
+      title: `${isApproved ? "Appoval" : "Rejection"}`,
+      message: `Do you confirm to ${isApproved ? "approve" : "reject"} ${
+        value.trans_employees_overtimes.last_name
+      }'s overtime application?`,
+      preferredAnswer: isApproved ? "yes" : "no",
+    });
     if (response === "yes") {
       try {
         await axios.post(
           "/api/admin/attendance-time/overtime/update",
           objectIncludes(value, [
+            "id",
             "comment",
             "approved_at",
             "updated_at",
@@ -238,6 +255,7 @@ function Page() {
           description: "Overtime has been " + value.status,
           variant: isApproved ? "success" : "default",
         });
+        return value;
       } catch (error) {
         toast({
           title: "Error",
@@ -246,6 +264,8 @@ function Page() {
         });
       }
     }
+    setPending({ id: 0, method: value.status });
+    return null;
   };
 
   return (
@@ -256,6 +276,7 @@ function Page() {
         isLoading={isLoading}
         isHeaderSticky
         isStriped
+        selectionMode="single"
         aria-label="Overtime entries"
         onRowAction={(key) => {
           // alert(`Opening item ${key}...`);
@@ -271,10 +292,10 @@ function Page() {
       />
       <OvertimeModal
         visible={isVisible}
-        pending={isPending}
         overtimeData={selectedOvertime}
         onClose={() => setVisible(false)}
         onUpdate={onUpdate}
+        isPending={isPending}
       />
     </>
     // <div className="h-full overflow-auto flex flex-col bg-blue-500">

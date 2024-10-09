@@ -6,6 +6,7 @@ import Loading from "@/components/spinner/Loading";
 import TableData from "@/components/tabledata/TableData";
 import { toast } from "@/components/ui/use-toast";
 import { useIsClient } from "@/hooks/ClientRendering";
+import { useEmployeeId } from "@/hooks/employeeIdHook";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { useQuery } from "@/services/queries";
 import { OvertimeResponse } from "@/types/attendance-time/OvertimeType";
@@ -14,7 +15,7 @@ import { Avatar, Link, Selection, Textarea, User } from "@nextui-org/react";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -22,6 +23,7 @@ const formSchema = z.object({
   clock_in: z.string(),
   clock_out: z.string(),
   date: z.string(),
+  rate_per_hour: z.string(),
   comment: z.string(),
 });
 
@@ -30,6 +32,7 @@ function Page() {
   const [selectedEmployee, setSelectedEmployees] = useState(-1);
   const { data, isLoading } = useQuery<OvertimeResponse>('/api/admin/attendance-time/overtime/read');
   const [isFocused, setIsFocused] = useState(false);
+  const userID = useEmployeeId();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -37,17 +40,18 @@ function Page() {
       clock_in: "",
       clock_out: "",
       date: "",
+      rate_per_hour: "",
       comment: "",
     },
   });
 
   async function handleSubmit(value: any) {
     setIsFocused(true);
-    console.log(value, selectedEmployee);
     try {
       await axios.post("/api/admin/attendance-time/overtime/create", {
         data: value,
         empId: selectedEmployee,
+        approverId: userID,
       });
       toast({
         title: "Filed",
@@ -67,6 +71,14 @@ function Page() {
     setIsFocused(false);
   }
 
+  const fetchedEmployee: OvertimeResponse["employees"][0] | null = useMemo(() => {
+    const employee = data?.employees?.find((e) => e.id === selectedEmployee);
+    form.reset({
+      rate_per_hour: String(employee?.ref_job_classes.pay_rate),
+    })
+    return employee || null; // Return null if no employee is found
+  }, [selectedEmployee, data, form]);
+
   if (!useIsClient()) {
     return <Loading />;
   }
@@ -78,21 +90,15 @@ function Page() {
         form={form}
         onSubmit={handleSubmit}
       >
-        {/* Fetch employee once */}
-        {(() => {
-          const employee = data?.employees.find(
-            (e) => e.id === selectedEmployee
-          );
-          return employee ? (
+        {fetchedEmployee ? (
             <UserMail
-              name={getEmpFullName(employee)}
-              email={employee.email}
-              picture={employee.picture}
+              name={getEmpFullName(fetchedEmployee)}
+              email={fetchedEmployee.email}
+              picture={fetchedEmployee.picture}
             />
           ) : (
             <h1 className="font-semibold h-12">No employee selected</h1>
-          );
-        })()}
+          )}
 
         <FormFields
           items={[
@@ -112,6 +118,12 @@ function Page() {
               name: "date",
               label: "Date",
               type: "date",
+              isRequired: true,
+            },
+            {
+              name: "rate_per_hour",
+              label: "Rate Per Hour",
+              type: "number",
               isRequired: true,
             },
             {
@@ -175,6 +187,7 @@ function Page() {
         }}
         items={data?.employees || []}
         selectionMode="single"
+        disallowEmptySelection
         selectedKeys={new Set([String(selectedEmployee)])}
         onSelectionChange={(keys) =>
           setSelectedEmployees(Number(Array.from(keys)[0]))

@@ -11,6 +11,7 @@ import {
   Chip,
   Spinner,
   cn,
+  Input,
 } from "@nextui-org/react";
 import { Form } from "@/components/ui/form";
 import FormFields from "@/components/common/forms/FormFields";
@@ -33,16 +34,14 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { PiClockCountdownFill } from "react-icons/pi";
 import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
-import { toast } from "@/components/ui/use-toast";
-import showDialog from "@/lib/utils/confirmDialog";
-import { objectIncludes } from "@/helper/filterObject/filterObject";
+import UserMail from "@/components/common/avatar/user-info-mail";
 
 interface ScheduleModalProps {
   visible: boolean;
-  pending: boolean;
   onClose: () => void;
-  onUpdate: (data: OvertimeEntry) => void;
+  onUpdate: (data: OvertimeEntry) => Promise<OvertimeEntry | null>;
   overtimeData?: OvertimeEntry;
+  isPending: { id: number; method: string };
 }
 
 const statusColorMap: Record<string, "danger" | "success" | "warning"> = {
@@ -53,10 +52,10 @@ const statusColorMap: Record<string, "danger" | "success" | "warning"> = {
 
 const OvertimeModal: React.FC<ScheduleModalProps> = ({
   visible,
-  pending,
   onClose,
   onUpdate,
   overtimeData: data,
+  isPending,
 }) => {
   // Effect to populate modal fields if editing
   //   const load = useCallback(() => {
@@ -86,32 +85,46 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [recordData, setRecordData] = useState<OvertimeEntry[]>([]);
   const [comment, setComment] = useState("");
+  const [ratePH, setRatePH] = useState("0.0");
   const userID = useEmployeeId();
   const fetchEmployeeOvertimeRecords = useCallback(
-    async () => {
+    async (entry: OvertimeEntry) => {
       console.log("FLAG");
-      setOvertimeData(data);
-      setComment(data?.comment || "");
+      setOvertimeData(entry);
+      setComment(entry?.comment || "");
+      setRatePH(
+        entry?.rate_per_hour ||
+          String(entry.trans_employees_overtimes.ref_job_classes.pay_rate) ||
+          "0"
+      );
       setIsLoading(true);
       try {
         const response: AxiosResponse<OvertimeEntry[]> =
           await axiosInstance.get(
-            `/api/admin/attendance-time/overtime/preview?id=${data?.employee_id}`
+            `/api/admin/attendance-time/overtime/preview?id=${entry?.employee_id}`
           );
         setRecordData(response.data);
-        setSelectedKey(new Set([String(data?.id)]));
+        setSelectedKey(new Set([String(entry?.id)]));
       } catch (error) {
         console.error("Error fetching schedules:", error);
       } finally {
         setIsLoading(false);
       }
     },
-    [data] // Depend on 'date' as it's used in the function
+    [] // Depend on 'date' as it's used in the function
   );
 
   useEffect(() => {
-    fetchEmployeeOvertimeRecords();
-  }, [fetchEmployeeOvertimeRecords]);
+    if (data) {
+      fetchEmployeeOvertimeRecords(data);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (overtimeData) {
+      console.log(overtimeData);
+    }
+  }, [overtimeData]);
 
   const config: TableConfigProps<OvertimeEntry> = {
     columns: [
@@ -173,13 +186,28 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
               {getEmpFullName(overtimeData?.trans_employees_overtimes!)}
             </p>
           </div>
-          <div>
-            <p className="text-small me-4 font-normal">
+          <div className="flex gap-2 items-center me-4">
+            <p className="text-small font-normal">
               Requested on:{" "}
               <span className="font-semibold">
                 {toGMT8(overtimeData?.created_at).format("ddd, MMM DD YYYY")}
               </span>
             </p>
+            {overtimeData?.trans_employees_overtimes_approvedBy && (
+              <UserMail
+                name={`${
+                  overtimeData.trans_employees_overtimes_approvedBy.last_name
+                }, ${overtimeData.trans_employees_overtimes_approvedBy.first_name.slice(
+                  0,
+                  1
+                )}.`}
+                picture={
+                  overtimeData?.trans_employees_overtimes_approvedBy.picture
+                }
+                description="Reviewer"
+                size="sm"
+              />
+            )}
           </div>
           {/* {overtimeData ? "Review Overtime" : "File Overtime"} */}
         </ModalHeader>
@@ -296,7 +324,27 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
                   inputWrapper: cn(
                     "border-2",
                     overtimeData?.status === "pending"
-                      ? "border-gray-400"
+                      ? "border-primary"
+                      : "border-gray-100"
+                  ),
+                }}
+              />
+            </div>
+            <div>
+              <p className="text-small font-semibold text-default-600">
+                Rate Per Hour:
+              </p>
+              <Input
+                value={ratePH}
+                onValueChange={setRatePH}
+                isReadOnly={overtimeData?.status != "pending"}
+                type="number"
+                placeholder="0.0"
+                classNames={{
+                  inputWrapper: cn(
+                    "border-2 h-fit",
+                    overtimeData?.status === "pending"
+                      ? "border-primary"
                       : "border-gray-100"
                   ),
                 }}
@@ -324,6 +372,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
                 setSelectedKey(new Set(Array.from(keys).map(String)));
                 setOvertimeData(record);
                 setComment(record?.comment || "");
+                setRatePH(record?.rate_per_hour || "0.0");
               }}
             />
           )}
@@ -341,41 +390,58 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
             <>
               <Button
                 variant="flat"
-                onClick={() => {
-                  onUpdate({
+                isLoading={
+                  isPending.id === overtimeData.id &&
+                  isPending.method === "rejected"
+                }
+                onClick={async () => {
+                  const result = await onUpdate({
                     ...overtimeData,
                     comment: comment,
+                    rate_per_hour: "0",
                     approved_at: toGMT8().toISOString(),
                     updated_at: toGMT8().toISOString(),
                     approved_by: userID!,
                     status: "rejected",
                   });
+                  if (result) fetchEmployeeOvertimeRecords(result);
                 }}
                 {...uniformStyle({ color: "danger" })}
                 startContent={
-                  <IoCloseSharp className="size-5 text-danger-500" />
+                  !(
+                    isPending.id === overtimeData.id &&
+                    isPending.method === "rejected"
+                  ) && <IoCloseSharp className="size-5 text-danger-500" />
                 }
               >
                 Reject
               </Button>
               <Button
-                isLoading={pending}
                 type="submit"
                 form="schedule-form"
+                isLoading={
+                  isPending.id === overtimeData.id &&
+                  isPending.method === "approved"
+                }
                 {...uniformStyle({ color: "success" })}
                 className="text-white"
                 startContent={
-                  <IoCheckmarkSharp className="size-5 text-white" />
+                  !(
+                    isPending.id === overtimeData.id &&
+                    isPending.method === "approved"
+                  ) && <IoCheckmarkSharp className="size-5 text-white" />
                 }
-                onClick={() => {
-                  onUpdate({
+                onClick={async () => {
+                  const result = await onUpdate({
                     ...overtimeData,
                     comment: comment,
+                    rate_per_hour: ratePH,
                     approved_at: toGMT8().toISOString(),
                     updated_at: toGMT8().toISOString(),
                     approved_by: userID!,
                     status: "approved",
                   });
+                  if (result) fetchEmployeeOvertimeRecords(result);
                 }}
               >
                 Approve

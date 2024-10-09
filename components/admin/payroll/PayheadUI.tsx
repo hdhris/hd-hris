@@ -113,19 +113,19 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
       return;
     }
     if (Array.from(selectedDepartment).length === 0) {
-      const response = await showDialog(
-        "Department Selection",
-        "No department is selected. The payhead will be applied to all departments automatically.\n\nWould you like to proceed?"
-      );
+      const response = await showDialog({
+        title: "Department Selection",
+        message: "No department is selected. The payhead will be applied to all departments automatically.\n\nWould you like to proceed?",
+      });
       if (response === "no") {
         return;
       }
     }
     if (Array.from(selectedJobs).length === 0) {
-      const response = await showDialog(
-        "Role Selection",
-        "No role is selected. The payhead will be applied to all roles automatically.\n\nWould you like to proceed?"
-      );
+      const response = await showDialog({
+        title: "Role Selection",
+        message: "No role is selected. The payhead will be applied to all roles automatically.\n\nWould you like to proceed?",
+      });
       if (response === "no") {
         return;
       }

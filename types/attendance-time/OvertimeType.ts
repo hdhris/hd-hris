@@ -17,6 +17,7 @@ interface Employee {
   ref_job_classes: {
     id: number;
     name: string;
+    pay_rate: string;
   };
 }
 
@@ -25,24 +26,26 @@ interface Approver {
   middle_name: string;
   last_name: string;
   picture: string;
+  email: string;
 }
 
-interface Employee {
-  id: number;
-  picture: string;
-  last_name: string;
-  first_name: string;
-  middle_name: string;
-  email: string;
-  ref_departments: {
-    id: number;
-    name: string;
-  };
-  ref_job_classes: {
-    id: number;
-    name: string;
-  };
-}
+// interface Employee {
+//   id: number;
+//   picture: string;
+//   last_name: string;
+//   first_name: string;
+//   middle_name: string;
+//   email: string;
+//   ref_departments: {
+//     id: number;
+//     name: string;
+//   };
+//   ref_job_classes: {
+//     id: number;
+//     name: string;
+//     pay_rate: number;
+//   };
+// }
 
 export interface OvertimeEntry {
   employee_id: number;

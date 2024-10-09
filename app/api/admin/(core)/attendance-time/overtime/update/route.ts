@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
-import { toGMT8 } from "@/lib/utils/toGMT8";
-import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
 
 export async function POST(req: NextRequest) {
   const data = await req.json();

@@ -130,11 +130,10 @@ export default function Page() {
 
   const handleDelete = async (id: Number | undefined) => {
     try {
-      const result = await showDialog(
-        "Confirm Delete",
-        `Are you sure you want to delete schedule?`,
-        false
-      );
+      const result = await showDialog({
+        title:"Confirm Delete",
+        message:`Are you sure you want to delete schedule?`,
+      });
       if (result === "yes") {
         await axios.post(
           "/api/admin/attendance-time/schedule/delete-schedule",

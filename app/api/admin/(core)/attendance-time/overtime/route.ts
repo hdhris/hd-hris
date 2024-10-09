@@ -38,6 +38,7 @@ export async function GET() {
               select: {
                 id: true,
                 name: true,
+                pay_rate: true,
               },
             },
           },
@@ -48,6 +49,7 @@ export async function GET() {
             middle_name: true,
             first_name: true,
             picture: true,
+            email: true,
           }
         }
       }

@@ -51,11 +51,10 @@ const Page: React.FC = () => {
 
   const handleDelete = async (id: number, name: string) => {
     try {
-      const result = await showDialog(
-        "Confirm Delete",
-        `Are you sure you want to delete '${name}' ?`,
-        false
-      );
+      const result = await showDialog({
+        title: "Confirm Delete",
+        message: `Are you sure you want to delete '${name}' ?`,
+      });
       if (result === "yes") {
         await axios.delete(`/api/employeemanagement/employees?id=${id}`);
         toast({
