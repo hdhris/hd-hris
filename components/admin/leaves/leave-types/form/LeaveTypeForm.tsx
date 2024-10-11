@@ -2,52 +2,19 @@ import {z} from "zod";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
-import {Autocomplete, AutocompleteItem, cn} from "@nextui-org/react";
-import React from "react";
-import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
-import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
+import {cn} from "@nextui-org/react";
+import React, {useState} from "react";
+import Drawer from "@/components/common/Drawer";
 import {Button} from "@nextui-org/button";
+import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {Form} from "@/components/ui/form";
-import Typography from "@/components/common/typography/Typography";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import {Title} from "@/components/common/typography/Typography";
 
 const LeaveTypeSchema = z.object({
     leave_type_name: z.string().min(1, {message: "Name is required"}),
 })
 const LeaveTypeForm = () => {
-    const animals = [
-        {label: "Cat", value: "cat", description: "The second most popular pet in the world"},
-        {label: "Dog", value: "dog", description: "The most popular pet in the world"},
-        {label: "Elephant", value: "elephant", description: "The largest land animal"},
-        {label: "Lion", value: "lion", description: "The king of the jungle"},
-        {label: "Tiger", value: "tiger", description: "The largest cat species"},
-        {label: "Giraffe", value: "giraffe", description: "The tallest land animal"},
-        {
-            label: "Dolphin",
-            value: "dolphin",
-            description: "A widely distributed and diverse group of aquatic mammals",
-        },
-        {label: "Penguin", value: "penguin", description: "A group of aquatic flightless birds"},
-        {label: "Zebra", value: "zebra", description: "A several species of African equids"},
-        {
-            label: "Shark",
-            value: "shark",
-            description: "A group of elasmobranch fish characterized by a cartilaginous skeleton",
-        },
-        {
-            label: "Whale",
-            value: "whale",
-            description: "Diverse group of fully aquatic placental marine mammals",
-        },
-        {label: "Otter", value: "otter", description: "A carnivorous mammal in the subfamily Lutrinae"},
-        {label: "Crocodile", value: "crocodile", description: "A large semiaquatic reptile"},
-    ];
+    const [isOpen, setIsOpen] = useState(false)
     const form = useForm<z.infer<typeof LeaveTypeSchema>>({
         resolver: zodResolver(LeaveTypeSchema), defaultValues: {
             leave_type_name: "",
@@ -98,58 +65,33 @@ const LeaveTypeForm = () => {
     const onSubmit = (data: z.infer<typeof LeaveTypeSchema>) => {
         console.log(data)
     }
-    return (<Sheet>
-        <SheetTrigger asChild>
-            <Button {...uniformStyle({color: "primary"})}>
+    return (
+        <>
+            <Button {...uniformStyle()} onClick={() => setIsOpen(true)}>
                 Add Leave Type
             </Button>
-        </SheetTrigger>
-        <SheetContent className="w-[700px] sm:w-[540px]" autoFocus>
-            <SheetHeader>
-                <SheetTitle>Add Leave Type</SheetTitle>
-                <SheetDescription>
-                    <Typography as="span">
-                        Please provide the necessary information to create a new leave type.
-                    </Typography>
-                </SheetDescription>
-            </SheetHeader>
-            {/*<Form {...form}>*/}
-            {/*    */}
-            {/*    /!*<form onSubmit={form.handleSubmit(onSubmit)}>*!/*/}
-            {/*    /!*    <div className="space-y-4">*!/*/}
-            {/*    /!*        <FormFields items={leave_type_fields}/>*!/*/}
-            {/*    /!*    </div>*!/*/}
-            {/*    */}
-            {/*    /!*</form>*!/*/}
-            {/*</Form>*/}
-            <Select>
-                <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Theme" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
-                </SelectContent>
-            </Select>
-            <Autocomplete
-                label="Select an animal"
-                className="max-w-xs"
-                onFocus={(e) => {
-                    e.stopPropagation(); // Ensure the Autocomplete gets focus properly
-                }}
-                onClick={(e) => {
-                    e.stopPropagation(); // Prevent Sheet from overriding click events
-                }}
-            >
-                {animals.map((animal) => (
-                    <AutocompleteItem key={animal.value} value={animal.value}>
-                        {animal.label}
-                    </AutocompleteItem>
-                ))}
-            </Autocomplete>
-        </SheetContent>
-    </Sheet>)
+            <Drawer isOpen={isOpen} onClose={setIsOpen} title={
+                <Title
+                    className="ms-1"
+                    heading="Add Leave Types"
+                    subHeading="Define the details for the new leave type below."
+                    classNames={{
+                        heading: "text-lg",
+                        subHeading: "font-normal"
+                    }}
+                />
+            }>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)}>
+                        <div className="space-y-4">
+                            <FormFields items={leave_type_fields}/>
+                        </div>
+
+                    </form>
+                </Form>
+            </Drawer>
+        </>
+    )
 }
 
 

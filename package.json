@@ -13,6 +13,7 @@
     "@axe-core/react": "^4.9.0",
     "@edgestore/react": "^0.2.2",
     "@edgestore/server": "^0.2.2",
+    "@headlessui/react": "^2.1.10",
     "@hookform/resolvers": "^3.3.4",
     "@internationalized/date": "^3.5.5",
     "@nextui-org/react": "^2.3.6",
