@@ -15,8 +15,6 @@ const getLeaveTypes = unstable_cache(async () => {
 }, ['leaveTypes'], {revalidate: 3, tags: ['leaveTypes']})
 
 async function Page() {
-
-
     const data = await getLeaveTypes().then((res) => {
         return res.map((item) => {
             return {

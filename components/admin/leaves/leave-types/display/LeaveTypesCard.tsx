@@ -15,6 +15,8 @@ import {Button} from "@nextui-org/button";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {useEmployeeId} from "@/hooks/employeeIdHook";
+import LeaveTypeForm from "@/components/admin/leaves/leave-types/form/LeaveTypeForm";
+import {SheetTrigger} from "@/components/ui/sheet";
 
 function LeaveTypesCard() {
     const {data, isLoading} = useLeaveTypes()
@@ -49,9 +51,9 @@ function LeaveTypesCard() {
         }
     }, [formData, onOpen])
 
-    SetNavEndContent(() => (<Button {...uniformStyle({color: "primary"})} onPress={onOpen}>
-            Add Leave Type
-        </Button>));
+    SetNavEndContent(() => (
+        <LeaveTypeForm/>
+        ));
     if (isLoading) return <Loading/>
 
     // Effect for setting nav end content
@@ -66,7 +68,6 @@ function LeaveTypesCard() {
                         <Body employee_count={employee_count} duration_days={duration_days} code={code}
                               is_carry_forward={is_carry_forward}/>)}/>
             </div>
-            <LeaveTypeModalForm isOpen={isOpen} onOpenChange={onOpenChange} onClose={onClose}/>
         </ScrollShadow>
     </>);
 }
