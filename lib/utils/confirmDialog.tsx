@@ -51,6 +51,9 @@ const showDialog = async ({
           isKeyboardDismissDisabled={true}
           size="sm"
           closeButton={false}
+          style={{
+            zIndex: '9999 !important'
+          }}
         >
           <ModalContent>
             {(onClose) => (
@@ -61,7 +64,7 @@ const showDialog = async ({
                 <ModalBody>
                   <p>{message}</p>
                 </ModalBody>
-                <ModalFooter>
+                <ModalFooter className="z-[9999]">
                   {withCancel && (
                     <Button
                       color="primary"
