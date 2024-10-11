@@ -39,7 +39,7 @@ const Drawer = ({isOpen, onClose, children, title, isDismissible}: DrawerProps) 
                                 </div>
 
                                 <div className="relative mt-6 flex-1 overflow-hidden px-4 sm:px-6">
-                                    <ScrollShadow className="h-full overflow-y-auto pr-4">
+                                    <ScrollShadow className="h-full overflow-y-auto pr-4 pb-6">
                                         {children}
                                     </ScrollShadow>
                                 </div>
