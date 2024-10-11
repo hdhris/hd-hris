@@ -173,6 +173,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 radius="sm"
                                 selectedKey={field.value ? String(field.value) : null}
                                 onSelectionChange={(value) => {
+                                    console.log("Value: ", value)
                                     field.onChange(value)
                                 }}
                             >

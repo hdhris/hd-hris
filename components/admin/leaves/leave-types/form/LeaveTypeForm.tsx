@@ -3,16 +3,18 @@ import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {cn} from "@nextui-org/react";
-import React from "react";
-import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
-import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
+import React, {useState} from "react";
+import Drawer from "@/components/common/Drawer";
 import {Button} from "@nextui-org/button";
+import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {Form} from "@/components/ui/form";
+import {Title} from "@/components/common/typography/Typography";
 
 const LeaveTypeSchema = z.object({
     leave_type_name: z.string().min(1, {message: "Name is required"}),
 })
 const LeaveTypeForm = () => {
+    const [isOpen, setIsOpen] = useState(false)
     const form = useForm<z.infer<typeof LeaveTypeSchema>>({
         resolver: zodResolver(LeaveTypeSchema), defaultValues: {
             leave_type_name: "",
@@ -20,7 +22,13 @@ const LeaveTypeForm = () => {
     })
 
     const leave_type_fields: FormInputProps[] = [{
-        name: 'leave_type_name', type: "auto-complete", label: 'Name', isRequired: true, config: {
+        name: 'leave_type_name',
+        type: "auto-complete",
+        label: 'Name',
+        placeholder: "e.g., Vacation, Sick Leave",
+        description: "The name of the leave type.",
+        isRequired: true,
+        config: {
             allowsCustomValue: true, options: [{
                 value: "sick_leave", label: "Sick Leave"
             }]
@@ -28,7 +36,21 @@ const LeaveTypeForm = () => {
     }, {
         name: 'code', type: "text", label: 'Code', isRequired: true,
     }, {
-        name: 'duration_days', type: "number", label: 'Duration (Days)', isRequired: true,
+        name: 'description', type: "text-area", label: 'Description', description: "Provide additional details about this leave type.", isRequired: true, config: {
+            placeholder: "Brief description of the leave type"
+        }
+    }, {
+        name: 'accrualRate', type: "number", label: 'Accrual Rate', description: "Rate at which leave is accrued.", isRequired: true
+    }, {
+        name: "list", type: "select", label: "List", config: {
+            options: [{
+                label: "Option 1", value: "option1",
+            }, {
+                label: "Option 2", value: "option2",
+            }, {
+                label: "Option 3", value: "option3",
+            }]
+        }
     }, switchToggle({
         name: 'is_active', label: 'Active', description: "Defines if the leave type is marked as active or inactive."
     }), switchToggle({
@@ -43,28 +65,33 @@ const LeaveTypeForm = () => {
     const onSubmit = (data: z.infer<typeof LeaveTypeSchema>) => {
         console.log(data)
     }
-    return (<Sheet>
-        <SheetTrigger asChild>
-            <Button {...uniformStyle({color: "primary"})}>
+    return (
+        <>
+            <Button {...uniformStyle()} onClick={() => setIsOpen(true)}>
                 Add Leave Type
             </Button>
-        </SheetTrigger>
-        <SheetContent>
-            <SheetHeader>
-                <SheetTitle>Add Leave Type</SheetTitle>
-                <SheetDescription>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)}>
-                            <div className="space-y-4">
-                                <FormFields items={leave_type_fields}/>
-                            </div>
+            <Drawer isOpen={isOpen} onClose={setIsOpen} title={
+                <Title
+                    className="ms-1"
+                    heading="Add Leave Types"
+                    subHeading="Define the details for the new leave type below."
+                    classNames={{
+                        heading: "text-lg",
+                        subHeading: "font-normal"
+                    }}
+                />
+            }>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)}>
+                        <div className="space-y-4">
+                            <FormFields items={leave_type_fields}/>
+                        </div>
 
-                        </form>
-                    </Form>
-                </SheetDescription>
-            </SheetHeader>
-        </SheetContent>
-    </Sheet>)
+                    </form>
+                </Form>
+            </Drawer>
+        </>
+    )
 }
 
 
