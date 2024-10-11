@@ -35,6 +35,7 @@ import { PiClockCountdownFill } from "react-icons/pi";
 import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
 import UserMail from "@/components/common/avatar/user-info-mail";
+import { SheetModal } from "@/components/common/sheets/Sheets";
 
 interface ScheduleModalProps {
   visible: boolean;
@@ -118,7 +119,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
     if (data) {
       fetchEmployeeOvertimeRecords(data);
     }
-  }, [data,fetchEmployeeOvertimeRecords]);
+  }, [data, fetchEmployeeOvertimeRecords]);
 
   useEffect(() => {
     if (overtimeData) {
@@ -172,216 +173,11 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   };
 
   return (
-    <Modal isOpen={visible} onClose={onClose} size="4xl">
-      <ModalContent>
-        <ModalHeader className="flex justify-between items-center">
-          <div className="flex gap-4 items-center">
-            <Avatar
-              isBordered
-              radius="full"
-              size="md"
-              src={overtimeData?.trans_employees_overtimes?.picture ?? ""}
-            />
-            <p className="semi-bold">
-              {getEmpFullName(overtimeData?.trans_employees_overtimes!)}
-            </p>
-          </div>
-          <div className="flex gap-2 items-center me-4">
-            <p className="text-small font-normal">
-              Requested on:{" "}
-              <span className="font-semibold">
-                {toGMT8(overtimeData?.created_at).format("ddd, MMM DD YYYY")}
-              </span>
-            </p>
-            {overtimeData?.trans_employees_overtimes_approvedBy && (
-              <UserMail
-                name={`${
-                  overtimeData.trans_employees_overtimes_approvedBy.last_name
-                }, ${overtimeData.trans_employees_overtimes_approvedBy.first_name.slice(
-                  0,
-                  1
-                )}.`}
-                picture={
-                  overtimeData?.trans_employees_overtimes_approvedBy.picture
-                }
-                description="Reviewer"
-                size="sm"
-              />
-            )}
-          </div>
-          {/* {overtimeData ? "Review Overtime" : "File Overtime"} */}
-        </ModalHeader>
-        <ModalBody className="flex flex-row gap-4">
-          <div className="flex flex-col gap-4 w-[440px]">
-            <div className="flex w-full">
-              <div className="flex-1">
-                {/* {left} */}
-                <p className="text-small font-semibold text-default-600">
-                  Requested:
-                </p>
-                <div>
-                  <Info
-                    icon={<TbClock size={20} className="text-default-600" />}
-                    content={calculateShiftLength(
-                      new Date().toISOString(),
-                      new Date().toISOString(),
-                      -Number(overtimeData?.requested_mins)
-                    )
-                      .replace(" h", "h")
-                      .replace("ou", "")
-                      .replace(" and ", " ")
-                      .replace(" m", "m")
-                      .replace("ute", "")}
-                  />
-                  <Info
-                    icon={
-                      <TbClockCheck size={20} className="text-default-600" />
-                    }
-                    content={
-                      overtimeData?.clock_in
-                        ? toGMT8(overtimeData.clock_in).format("hh:mm a")
-                        : "N/A"
-                    }
-                    label="Clock In"
-                  />
-                  <Info
-                    icon={
-                      <TbClockCancel size={20} className="text-default-600" />
-                    }
-                    content={
-                      overtimeData?.clock_out
-                        ? toGMT8(overtimeData.clock_out).format("hh:mm a")
-                        : "N/A"
-                    }
-                    label="Clock Out"
-                  />
-                </div>
-              </div>
-              <div className="flex-1">
-                {/* {left} */}
-                <p className="text-small font-semibold text-default-600">
-                  Rendered:
-                </p>
-                <div>
-                  <Info
-                    icon={<TbClock size={20} className="text-default-600" />}
-                    content={
-                      overtimeData?.clock_in && overtimeData.clock_out
-                        ? calculateShiftLength(
-                            overtimeData.clock_in,
-                            overtimeData.clock_out,
-                            0
-                          )
-                            .replace(" h", "h")
-                            .replace("ou", "")
-                            .replace(" and ", " ")
-                            .replace(" m", "m")
-                            .replace("ute", "")
-                        : "N/A"
-                    }
-                  />
-                  <Info
-                    icon={
-                      <TbClockCheck size={20} className="text-default-600" />
-                    }
-                    content={
-                      overtimeData?.clock_in
-                        ? toGMT8(overtimeData.clock_in).format("hh:mm a")
-                        : "N/A"
-                    }
-                    label="Clock In"
-                  />
-                  <Info
-                    icon={
-                      <TbClockCancel size={20} className="text-default-600" />
-                    }
-                    content={
-                      overtimeData?.clock_out
-                        ? toGMT8(overtimeData.clock_out).format("hh:mm a")
-                        : "N/A"
-                    }
-                    label="Clock Out"
-                  />
-                </div>
-              </div>
-            </div>
-            <div>
-              <p className="text-small font-semibold text-default-600">
-                Reason:
-              </p>
-              <Textarea value={overtimeData?.reason} isReadOnly />
-            </div>
-            <div>
-              <p className="text-small font-semibold text-default-600">
-                Comment:
-              </p>
-              <Textarea
-                value={comment}
-                onValueChange={setComment}
-                isReadOnly={overtimeData?.status != "pending"}
-                placeholder="Add comment"
-                classNames={{
-                  inputWrapper: cn(
-                    "border-2",
-                    overtimeData?.status === "pending"
-                      ? "border-primary"
-                      : "border-gray-100"
-                  ),
-                }}
-              />
-            </div>
-            <div>
-              <p className="text-small font-semibold text-default-600">
-                Rate Per Hour:
-              </p>
-              <Input
-                value={ratePH}
-                onValueChange={setRatePH}
-                isReadOnly={overtimeData?.status != "pending"}
-                type="number"
-                placeholder="0.0"
-                classNames={{
-                  inputWrapper: cn(
-                    "border-2 h-fit",
-                    overtimeData?.status === "pending"
-                      ? "border-primary"
-                      : "border-gray-100"
-                  ),
-                }}
-              />
-            </div>
-          </div>
-          {isLoading ? (
-            <Spinner label="Loading..." color="primary" className="w-full" />
-          ) : (
-            <TableData
-              items={recordData}
-              config={config}
-              isHeaderSticky
-              className="h-full"
-              shadow="none"
-              counterName="History"
-              selectionMode="single"
-              aria-label="History"
-              disallowEmptySelection
-              selectedKeys={selectedKey}
-              onSelectionChange={(keys) => {
-                const record = recordData.find(
-                  (item) => String(item.id) === Array.from(keys)[0]
-                );
-                setSelectedKey(new Set(Array.from(keys).map(String)));
-                setOvertimeData(record);
-                setComment(record?.comment || "");
-                setRatePH(
-                  record?.rate_per_hour ||
-                    String(record?.trans_employees_overtimes.ref_job_classes?.pay_rate) ||
-                    "0"
-                );
-              }}
-            />
-          )}
-        </ModalBody>
-        <ModalFooter>
+    <SheetModal
+      size="lg"
+      title="Review Overtime"
+      footer={
+        <div className="flex gap-2 items-center w-full">
           <Button
             className="me-auto"
             variant="light"
@@ -452,9 +248,218 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
               </Button>{" "}
             </>
           )}
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </div>
+      }
+      props={{
+        onOpenChange() {
+          onClose();
+        },
+        open: visible,
+      }}
+    >
+      <div className="w-full flex justify-between items-center">
+        <div className="flex gap-4 items-center">
+          <Avatar
+            isBordered
+            radius="full"
+            size="md"
+            src={overtimeData?.trans_employees_overtimes?.picture ?? ""}
+          />
+          <div>
+            <p className="text-small font-semibold">
+              {getEmpFullName(overtimeData?.trans_employees_overtimes!)}
+            </p>
+            <p className="text-tiny font-normal">
+              {toGMT8(overtimeData?.created_at).format("ddd, MMM DD YYYY")}
+            </p>
+          </div>
+        </div>
+
+        {overtimeData?.trans_employees_overtimes_approvedBy && (
+          <div className="me-4">
+            <UserMail
+              name={`${
+                overtimeData.trans_employees_overtimes_approvedBy.last_name
+              }, ${overtimeData.trans_employees_overtimes_approvedBy.first_name.slice(
+                0,
+                1
+              )}.`}
+              picture={
+                overtimeData?.trans_employees_overtimes_approvedBy.picture
+              }
+              description="Reviewer"
+              size="sm"
+            />
+          </div>
+        )}
+      </div>
+      <div className="flex gap-4">
+        <div className="flex flex-col gap-4 w-[440px]">
+          <div className="flex w-full">
+            <div className="flex-1">
+              {/* {left} */}
+              <p className="text-small font-semibold text-default-600">
+                Requested:
+              </p>
+              <div>
+                <Info
+                  icon={<TbClock size={20} className="text-default-600" />}
+                  content={calculateShiftLength(
+                    new Date().toISOString(),
+                    new Date().toISOString(),
+                    -Number(overtimeData?.requested_mins)
+                  )
+                    .replace(" h", "h")
+                    .replace("ou", "")
+                    .replace(" and ", " ")
+                    .replace(" m", "m")
+                    .replace("ute", "")}
+                />
+                <Info
+                  icon={<TbClockCheck size={20} className="text-default-600" />}
+                  content={
+                    overtimeData?.clock_in
+                      ? toGMT8(overtimeData.clock_in).format("hh:mm a")
+                      : "N/A"
+                  }
+                  label="Clock In"
+                />
+                <Info
+                  icon={
+                    <TbClockCancel size={20} className="text-default-600" />
+                  }
+                  content={
+                    overtimeData?.clock_out
+                      ? toGMT8(overtimeData.clock_out).format("hh:mm a")
+                      : "N/A"
+                  }
+                  label="Clock Out"
+                />
+              </div>
+            </div>
+            <div className="flex-1">
+              {/* {left} */}
+              <p className="text-small font-semibold text-default-600">
+                Rendered:
+              </p>
+              <div>
+                <Info
+                  icon={<TbClock size={20} className="text-default-600" />}
+                  content={
+                    overtimeData?.clock_in && overtimeData.clock_out
+                      ? calculateShiftLength(
+                          overtimeData.clock_in,
+                          overtimeData.clock_out,
+                          0
+                        )
+                          .replace(" h", "h")
+                          .replace("ou", "")
+                          .replace(" and ", " ")
+                          .replace(" m", "m")
+                          .replace("ute", "")
+                      : "N/A"
+                  }
+                />
+                <Info
+                  icon={<TbClockCheck size={20} className="text-default-600" />}
+                  content={
+                    overtimeData?.clock_in
+                      ? toGMT8(overtimeData.clock_in).format("hh:mm a")
+                      : "N/A"
+                  }
+                  label="Clock In"
+                />
+                <Info
+                  icon={
+                    <TbClockCancel size={20} className="text-default-600" />
+                  }
+                  content={
+                    overtimeData?.clock_out
+                      ? toGMT8(overtimeData.clock_out).format("hh:mm a")
+                      : "N/A"
+                  }
+                  label="Clock Out"
+                />
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="text-small font-semibold text-default-600">Reason:</p>
+            <Textarea value={overtimeData?.reason} isReadOnly />
+          </div>
+          <div>
+            <p className="text-small font-semibold text-default-600">
+              Comment:
+            </p>
+            <Textarea
+              value={comment}
+              onValueChange={setComment}
+              isReadOnly={overtimeData?.status != "pending"}
+              placeholder="Add comment"
+              classNames={{
+                inputWrapper: cn(
+                  "border-2",
+                  overtimeData?.status === "pending"
+                    ? "border-primary"
+                    : "border-gray-100"
+                ),
+              }}
+            />
+          </div>
+          <div>
+            <p className="text-small font-semibold text-default-600">
+              Rate Per Hour:
+            </p>
+            <Input
+              value={ratePH}
+              onValueChange={setRatePH}
+              isReadOnly={overtimeData?.status != "pending"}
+              type="number"
+              placeholder="0.0"
+              classNames={{
+                inputWrapper: cn(
+                  "border-2 h-fit",
+                  overtimeData?.status === "pending"
+                    ? "border-primary"
+                    : "border-gray-100"
+                ),
+              }}
+            />
+          </div>
+        </div>
+        {isLoading ? (
+          <Spinner label="Loading..." color="primary" className="w-full" />
+        ) : (
+          <TableData
+            items={recordData}
+            config={config}
+            isHeaderSticky
+            className="h-full"
+            shadow="none"
+            counterName="History"
+            selectionMode="single"
+            aria-label="History"
+            disallowEmptySelection
+            selectedKeys={selectedKey}
+            onSelectionChange={(keys) => {
+              const record = recordData.find(
+                (item) => String(item.id) === Array.from(keys)[0]
+              );
+              setSelectedKey(new Set(Array.from(keys).map(String)));
+              setOvertimeData(record);
+              setComment(record?.comment || "");
+              setRatePH(
+                record?.rate_per_hour ||
+                  String(
+                    record?.trans_employees_overtimes.ref_job_classes?.pay_rate
+                  ) ||
+                  "0"
+              );
+            }}
+          />
+        )}
+      </div>
+    </SheetModal>
   );
 };
 
