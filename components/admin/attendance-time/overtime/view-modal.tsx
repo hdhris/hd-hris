@@ -36,6 +36,7 @@ import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import { SheetModal } from "@/components/common/sheets/Sheets";
+import Drawer from "@/components/common/Drawer";
 
 interface ScheduleModalProps {
   visible: boolean;
@@ -173,7 +174,9 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   };
 
   return (
-    <SheetModal
+    <Drawer
+      isOpen={visible}
+      onClose={onClose}
       size="lg"
       title="Review Overtime"
       footer={
@@ -250,12 +253,6 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
           )}
         </div>
       }
-      props={{
-        onOpenChange() {
-          onClose();
-        },
-        open: visible,
-      }}
     >
       <div className="w-full flex justify-between items-center">
         <div className="flex gap-4 items-center">
@@ -264,6 +261,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
             radius="full"
             size="md"
             src={overtimeData?.trans_employees_overtimes?.picture ?? ""}
+            className="m-2"
           />
           <div>
             <p className="text-small font-semibold">
@@ -459,7 +457,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
           />
         )}
       </div>
-    </SheetModal>
+    </Drawer>
   );
 };
 
