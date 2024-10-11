@@ -8,23 +8,14 @@ import Header from "@/components/admin/leaves/leave-types/display/action-control
 import Body from "@/components/admin/leaves/leave-types/display/action-control/Body";
 import {useFormTable} from "@/components/providers/FormTableProvider";
 import {LeaveTypesKey} from "@/types/leaves/LeaveTypes";
-import {useDisclosure} from "@nextui-org/react";
-import LeaveTypeModalForm from "@/components/admin/leaves/leave-types/form/LeaveTypeUpdateModalForm";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
-import {Button} from "@nextui-org/button";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
-import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
-import {useEmployeeId} from "@/hooks/employeeIdHook";
 import LeaveTypeForm from "@/components/admin/leaves/leave-types/form/LeaveTypeForm";
-import {SheetTrigger} from "@/components/ui/sheet";
 
 function LeaveTypesCard() {
     const {data, isLoading} = useLeaveTypes()
     const {formData} = useFormTable<LeaveTypesKey>()
     const [leaveTypes, setLeaveTypes] = useState<LeaveTypesItems[]>([])
-    const {isOpen, onOpen, onOpenChange, onClose} = useDisclosure();
-    const employee_id = useEmployeeId()
-    console.log("Employee Id: ", employee_id)
     useEffect(() => {
         if (data && !isLoading) {
             const leaves_types = data.map((item) => {
@@ -47,13 +38,11 @@ function LeaveTypesCard() {
             // alert("Delete: " + formData?.data?.key)
             setLeaveTypes((prev) => prev.filter((item) => item.key !== formData?.data?.key))
         } else if (formData?.method === "Edit") {
-            onOpen()
-        }
-    }, [formData, onOpen])
 
-    SetNavEndContent(() => (
-        <LeaveTypeForm/>
-        ));
+        }
+    }, [formData])
+
+    SetNavEndContent(() => (<LeaveTypeForm/>));
     if (isLoading) return <Loading/>
 
     // Effect for setting nav end content
