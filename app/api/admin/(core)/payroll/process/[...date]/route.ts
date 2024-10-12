@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { start } from "repl";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -8,16 +9,18 @@ export async function GET(
   { params }: { params: { date: string } }
 ) {
   try {
+    // console.log("Params: ",params)
     const date = {
-      start: params.date.split(",")[0],
-      end: params.date.split(",")[1],
+      start: params.date[0].split(",")[0],
+      end: params.date[0].split(",")[1],
     };
+    console.log("Date: ",date)
     const payroll = await prisma.trans_payroll_date.findMany({
       where: {
         deleted_at: null,
         start_date: {
-          gte: date.start,
-          lt: date.end,
+          gte: toGMT8(date.start).toDate(),
+          lte: toGMT8(date.end).toDate(),
         },
       },
     });
