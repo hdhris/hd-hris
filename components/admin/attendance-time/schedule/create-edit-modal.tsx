@@ -14,6 +14,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import Drawer from "@/components/common/Drawer";
 
 interface ScheduleModalProps {
   visible: boolean;
@@ -80,7 +81,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
   }, [selectedSchedule, form]);
   useEffect(() => {
     load();
-  }, [selectedSchedule,load]);
+  }, [selectedSchedule, load]);
 
   const handleSave = (value: any) => {
     const newSchedule: BatchSchedule = {
@@ -96,57 +97,12 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
   };
 
   return (
-    <Modal isOpen={visible} onClose={onClose} size="lg">
-      <ModalContent>
-        <ModalHeader>
-          {selectedSchedule ? "Edit Schedule" : "Add Schedule"}
-        </ModalHeader>
-        <ModalBody>
-          <Form {...form}>
-            <form id="schedule-form" onSubmit={form.handleSubmit(handleSave)}>
-              <FormFields
-                items={[
-                  {
-                    name: "name",
-                    label: "Schedule Name",
-                    isRequired: true,
-                  },
-                  {
-                    name: "clock_in",
-                    label: "Clock In",
-                    isRequired: true,
-                    type: "time",
-                  },
-                  {
-                    name: "clock_out",
-                    label: "Clock Out",
-                    isRequired: true,
-                    type: "time",
-                  },
-                  {
-                    name: "break_min",
-                    label: "Break Minutes",
-                    isRequired: true,
-                  },
-                  {
-                    name: "is_active",
-                    type: "checkbox",
-                    label: "Active",
-                    config: {
-                      defaultSelected: true,
-                      description: 'test',
-                    },
-                  },
-                ]}
-              />
-            </form>
-          </Form>
-        </ModalBody>
-        <ModalFooter>
+    <Drawer
+      footer={
+        <>
           {selectedSchedule && (
             <Button
               color="warning"
-              className="me-auto"
               onClick={() => {
                 onDelete(selectedSchedule?.id);
               }}
@@ -154,20 +110,61 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
               Delete
             </Button>
           )}
-          <Button color="danger" variant="light" onClick={onClose}>
-            Cancel
-          </Button>
           <Button
             isLoading={pending}
             color="primary"
             type="submit"
             form="schedule-form"
+            className="ms-auto"
           >
             {selectedSchedule ? "Update" : "Add"}
           </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </>
+      }
+      title={selectedSchedule ? "Edit Schedule" : "Add Schedule"}
+      isOpen={visible}
+      onClose={onClose}
+    >
+      <Form {...form}>
+        <form id="schedule-form" onSubmit={form.handleSubmit(handleSave)}>
+          <FormFields
+            items={[
+              {
+                name: "name",
+                label: "Schedule Name",
+                isRequired: true,
+              },
+              {
+                name: "clock_in",
+                label: "Clock In",
+                isRequired: true,
+                type: "time",
+              },
+              {
+                name: "clock_out",
+                label: "Clock Out",
+                isRequired: true,
+                type: "time",
+              },
+              {
+                name: "break_min",
+                label: "Break Minutes",
+                isRequired: true,
+              },
+              {
+                name: "is_active",
+                type: "checkbox",
+                label: "Active",
+                config: {
+                  defaultSelected: true,
+                  description: "test",
+                },
+              },
+            ]}
+          />
+        </form>
+      </Form>
+    </Drawer>
   );
 };
 

@@ -16,7 +16,7 @@ interface uniformProps {
 
 export const uniformStyle = ({
   size = "sm",
-  radius = "md",
+  radius = "sm",
   color = "primary",
 }: uniformProps = {}) => {
   return {

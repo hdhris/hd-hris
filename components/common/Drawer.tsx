@@ -13,6 +13,8 @@ import { Button } from "@nextui-org/button";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { cn } from "@nextui-org/react";
+import { FieldValues, UseFormReturn } from "react-hook-form";
+import { Form } from "../ui/form";
 
 interface DrawerProps {
   isOpen: boolean;
@@ -25,10 +27,10 @@ interface DrawerProps {
 }
 
 const sizeMap = {
-    lg: "md:min-w-[900px]",
-    md: "md:min-w-[650px]",
-    sm: "md:min-w-[400px]",
-  }
+  lg: "md:min-w-[900px]",
+  md: "md:min-w-[650px]",
+  sm: "md:min-w-[400px]",
+};
 
 const Drawer = ({
   isOpen,
@@ -37,7 +39,7 @@ const Drawer = ({
   title,
   isDismissible,
   footer,
-  size
+  size,
 }: DrawerProps) => {
   // Prevent closing when clicking outside by removing onClose from Dialog
   return (
@@ -80,7 +82,7 @@ const Drawer = ({
                   </ScrollShadow>
                 </div>
 
-                <div className="flex w-full items-center px-4 sm:px-6">
+                <div className="flex w-full items-center gap-2 px-4 sm:px-6">
                   {/* <SheetClose asChild>{footer}</SheetClose> */}
                   {footer ? (
                     footer

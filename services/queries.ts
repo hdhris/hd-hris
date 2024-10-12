@@ -6,7 +6,7 @@ import {Signatory} from "@/types/audit/types";
 import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
 import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
-import { Payhead, PayheadAffected } from "@/types/payroll/payrollType";
+import { Payhead, PayheadAffected } from "@/types/payroll/payheadType";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import { OvertimeEntry, OvertimeResponse } from "@/types/attendance-time/OvertimeType";
 

@@ -255,6 +255,7 @@ function Page() {
           description: "Overtime has been " + value.status,
           variant: isApproved ? "success" : "default",
         });
+        setPending({ id: 0, method: value.status });
         return value;
       } catch (error) {
         toast({

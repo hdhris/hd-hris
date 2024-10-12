@@ -14,7 +14,7 @@ import {
   AffectedEmployee,
   AffectedJson,
   PayheadAffected,
-} from "@/types/payroll/payrollType";
+} from "@/types/payroll/payheadType";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
