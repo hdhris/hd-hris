@@ -7,22 +7,20 @@ import {
   Card,
   CardBody,
   CardHeader,
-  Checkbox,
 } from "@nextui-org/react";
 import { parseDate, CalendarDate } from "@internationalized/date";
 import {
   FormControl,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 
 type FormValues = {
   department_id: string;
+  branch_id: string;  // Add branch_id for branch selection
   hired_at: string;
   job_id: string;
   batch_id: string;
-  days_json: Record<string, boolean>;
 };
 
 type BatchSchedule = {
@@ -86,26 +84,19 @@ const JobInformationForm: React.FC = () => {
   const [departments, setDepartments] = useState<
     Array<{ id: number; name: string }>
   >([]);
+  const [branches, setBranches] = useState<Array<{ id: number; name: string }>>([]); // State for branches
   const [jobTitles, setJobTitles] = useState<
-    Array<{ id: number; name: string; department_id: number }>
+    Array<{ id: number; name: string }>
   >([]);
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
-  const [departmentID, setDepartmentID] = useState("");
-  const formDepartmentID = watch("department_id");
   const selectedBatchId = watch("batch_id");
-  const daysJson = watch("days_json");
 
   useEffect(() => {
     fetchDepartments();
+    fetchBranches(); // Fetch branches on component load
     fetchJobTitles();
     fetchBatchSchedules();
   }, []);
-
-  useEffect(() => {
-    if (formDepartmentID && formDepartmentID !== departmentID) {
-      setDepartmentID(formDepartmentID);
-    }
-  }, [formDepartmentID]);
 
   const fetchDepartments = async () => {
     try {
@@ -114,6 +105,16 @@ const JobInformationForm: React.FC = () => {
       setDepartments(data);
     } catch (error) {
       console.error("Error fetching departments:", error);
+    }
+  };
+
+  const fetchBranches = async () => {
+    try {
+      const response = await fetch("/api/employeemanagement/branch");
+      const data = await response.json();
+      setBranches(data);
+    } catch (error) {
+      console.error("Error fetching branches:", error);
     }
   };
 
@@ -137,10 +138,6 @@ const JobInformationForm: React.FC = () => {
     }
   };
 
-  const handleDayChange = (day: string, checked: boolean) => {
-    setValue(`days_json.${day}`, checked, { shouldValidate: true });
-  };
-
   return (
     <form className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
@@ -158,13 +155,6 @@ const JobInformationForm: React.FC = () => {
                   label={<span className="font-semibold">Department</span>}
                   labelPlacement="outside"
                   variant="bordered"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setDepartmentID(value);
-                    setValue("department_id", value);
-                    // Clear job_id when department changes
-                    setValue("job_id", "");
-                  }}
                   selectedKeys={field.value ? [field.value] : []}
                 >
                   {departments.map((dept) => (
@@ -221,23 +211,48 @@ const JobInformationForm: React.FC = () => {
                   labelPlacement="outside"
                   isRequired
                   selectedKeys={field.value ? [field.value] : []}
-                  onChange={(e) => {
-                    setValue("job_id", e.target.value);
-                  }}
                 >
-                  {jobTitles
-                    .filter((j) => j.department_id === Number(departmentID))
-                    .map((job) => (
-                      <SelectItem key={job.id} value={job.id.toString()}>
-                        {job.name}
-                      </SelectItem>
-                    ))}
+                  {jobTitles.map((job) => (
+                    <SelectItem key={job.id} value={job.id.toString()}>
+                      {job.name}
+                    </SelectItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+         {/* Add Branch Dropdown */}
+         <Controller
+          name="branch_id"
+          control={control}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Select
+                  {...field}
+                  aria-label="Branch"
+                  placeholder="Select Branch"
+                  label={<span className="font-semibold">Branch</span>}
+                  variant="bordered"
+                  labelPlacement="outside"
+                  isRequired
+                  selectedKeys={field.value ? [field.value] : []}
+                >
+                  {branches.map((branch) => (
+                    <SelectItem key={branch.id} value={branch.id.toString()}>
+                      {branch.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
       </div>
 
       <div className="mt-5">
@@ -267,21 +282,6 @@ const JobInformationForm: React.FC = () => {
           ))}
         </div>
       </div>
-
-      {/* <div className="mt-5">
-        <h3 className="text-lg font-semibold mb-4">Work Days</h3>
-          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-         <div className="flex flex-wrap gap-4">
-           <Checkbox
-              key={day}
-              isSelected={daysJson?.[day] || false}
-              onValueChange={(checked) => handleDayChange(day, checked)}
-            >
-              {day}
-            </Checkbox>
-          ))}
-        </div>
-      </div> */}
     </form>
   );
 };

@@ -7,6 +7,7 @@ import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/rou
 import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
 import { Payhead, PayheadAffected } from "@/types/payroll/payrollType";
+import { Branch } from "@/types/employeee/BranchType";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -68,6 +69,12 @@ export function useJobpositionData() {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }
+export function useBranchesData() {
+    return useSWR<Branch[]>('/api/employeemanagement/branch', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
 
 export function useSchedule() {
     return useSWR<Schedules>('/api/admin/attendance-time/schedule', fetcher, {

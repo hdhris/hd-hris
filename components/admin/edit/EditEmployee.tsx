@@ -53,6 +53,7 @@ interface EmployeeFormData {
   highestDegree: string;
   hired_at: string;
   department_id: string;
+  branch_id: string;
   job_id: string;
   batch_id: string; // batch_schedule_id -> batch_id
   days_json: Record<string, boolean>;
@@ -149,6 +150,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         addr_municipal: employeeData.addr_municipal?.toString() || "",
         addr_baranggay: employeeData.addr_baranggay?.toString() || "",
         department_id: employeeData.department_id?.toString() || "",
+        branch_id: employeeData.branch_id?.toString() || "",
         job_id: employeeData.job_id?.toString() || "",
         elementary: educationalBg.elementary || "",
         highSchool: educationalBg.highSchool || "",
@@ -204,8 +206,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       title: "Submitting",
       description: "Updating employee information...",
     });
-
-
+  
     try {
       let pictureUrl = typeof data.picture === "string" ? data.picture : "";
       if (data.picture instanceof File) {
@@ -214,7 +215,8 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         });
         pictureUrl = result.url;
       }
-
+  
+      // Handle certificate uploads
       const updatedCertificates = await Promise.all(
         data.certificates.map(async (cert) => {
           if (cert.url instanceof File) {
@@ -229,9 +231,8 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           return { fileName: cert.fileName, fileUrl: cert.url as string };
         })
       );
-
+  
       const educationalBackground = {
-        
         elementary: data.elementary,
         highSchool: data.highSchool,
         seniorHighSchool: data.seniorHighSchool,
@@ -242,13 +243,11 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         highestDegree: data.highestDegree,
         certificates: updatedCertificates,
       };
-
+  
       const fullData = {
         ...data,
         picture: pictureUrl,
-        birthdate: data.birthdate
-          ? new Date(data.birthdate).toISOString()
-          : null,
+        birthdate: data.birthdate ? new Date(data.birthdate).toISOString() : null,
         hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
@@ -256,21 +255,22 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         addr_baranggay: parseInt(data.addr_baranggay, 10),
         department_id: parseInt(data.department_id, 10),
         job_id: parseInt(data.job_id, 10),
+        branch_id: parseInt(data.branch_id, 10),
         educational_bg_json: JSON.stringify(educationalBackground),
-        batch_id: parseInt(data.batch_id, 10), // Adjusted to batch_id
+        batch_id: parseInt(data.batch_id, 10),
         schedules: [
           {
             batch_id: parseInt(data.batch_id, 10),
             days_json: data.days_json,
-          }, 
+          },
         ],
       };
-
+  
       const response = await axios.put(
         `/api/employeemanagement/employees?id=${employeeId}`,
         fullData
       );
-
+  
       if (response.status === 200) {
         await onEmployeeUpdated();
         toast({
@@ -292,6 +292,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
     }
   };
 
+  
   return (
     <Modal
       size="5xl"

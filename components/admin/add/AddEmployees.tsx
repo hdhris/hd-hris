@@ -49,6 +49,7 @@ interface EmployeeFormData {
   hired_at: string;
   department_id: string;
   job_id: string;
+  branch_id: string;
   batch_id: string;
   days_json: Record<string, boolean>;
 }
@@ -162,6 +163,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         educational_bg_json: JSON.stringify(educationalBackground),
         department_id: parseInt(data.department_id, 10),
         job_id: parseInt(data.job_id, 10),
+        branch_id: parseInt(data.branch_id, 10),
         batch_id: parseInt(data.batch_id, 10),
         schedules: [
           {

@@ -1,55 +1,55 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
 import TableData from "@/components/tabledata/TableData";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { toast } from "@/components/ui/use-toast";
-import AddDepartment from "@/components/admin/add/AddDepartment";
-import EditDepartment from "@/components/admin/edit/EditDepartment";
-import { useDepartmentsData } from "@/services/queries";
-import { Department } from "@/types/employeee/DepartmentType";  // Import from the correct file
+import AddBranch from "@/components/admin/add/AddBranch"; // Assuming you have an AddBranch component
+import EditBranch from "@/components/admin/edit/EditBranch"; // Assuming you have an EditBranch component
+import { useBranchesData } from "@/services/queries"; // Assuming you have a useBranchesData hook
+import { Branch } from "@/types/employeee/BranchType"; // Import from the correct file
 import axios from "axios";
+import addressData from "@/components/common/forms/address/address.json"; // Assuming address data
 
-  const Page: React.FC = () => {
-  const { data: departments, error, mutate } = useDepartmentsData();
+const Page: React.FC = () => {
+  const { data: branches, error, mutate } = useBranchesData();
   const [loading, setLoading] = useState(true);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
+  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-
   useEffect(() => {
-    if (departments) {
+    if (branches) {
       setLoading(false);
     }
-  }, [departments]);
+  }, [branches]);
 
   useEffect(() => {
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to fetch departments. Please try again.",
+        description: "Failed to fetch branches. Please try again.",
         duration: 3000,
       });
       setLoading(false);
     }
   }, [error]);
 
-  const handleEdit = async (department: Department) => {
-    setSelectedDepartmentId(department.id);
+  const handleEdit = async (branch: Branch) => {
+    setSelectedBranchId(branch.id);
     setIsEditModalOpen(true);
   };
 
   const handleDelete = async (id: number) => {
     try {
-        await axios.delete(`/api/employeemanagement/department?id=${id}`);
+      await axios.delete(`/api/employeemanagement/branch?id=${id}`);
       setDeleteSuccess(true);
       await mutate();
     } catch (error) {
-      console.error("Error deleting department:", error);
+      console.error("Error deleting branch:", error);
       toast({
         title: "Error",
-        description: "Failed to delete department. Please try again.",
+        description: "Failed to delete branch. Please try again.",
         duration: 3000,
       });
     }
@@ -59,17 +59,25 @@ import axios from "axios";
     if (!loading && deleteSuccess) {
       toast({
         title: "Success",
-        description: "Department successfully deleted!",
+        description: "Branch successfully deleted!",
         duration: 3000,
       });
       setDeleteSuccess(false);
     }
   }, [loading, deleteSuccess]);
 
-  const config: TableConfigProps<Department> = {
+  const getMunicipalityName = (municipalityId: number | null): string => {
+    if (!municipalityId) return "Unknown";
+    const municipality = addressData.find(
+      (addr) => addr.address_code === municipalityId
+    );
+    return municipality ? municipality.address_name : "Unknown";
+  };
+
+  const config: TableConfigProps<Branch> = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "color", name: "Color", sortable: false },
+      { uid: "municipality", name: "Municipality", sortable: false }, // New column
       { uid: "is_active", name: "Status", sortable: true },
       { uid: "actions", name: "Actions", sortable: false },
     ],
@@ -77,21 +85,14 @@ import axios from "axios";
       switch (columnKey) {
         case "name":
           return <span>{item.name}</span>;
-        case "color":
-          return (
-            <div className="flex items-center">
-              <div
-                className="w-6 h-6 rounded-full mr-2"
-                style={{ backgroundColor: item.color || 'gray' }}
-              ></div>
-            </div>
-          );
+        case "municipality":
+          return <span>{getMunicipalityName(item.addr_municipal)}</span>; // Rendering the municipality
         case "is_active":
-          return <span>{item.is_active ? 'Active' : 'Inactive'}</span>;
+          return <span>{item.is_active ? "Active" : "Inactive"}</span>;
         case "actions":
           return (
             <TableActionButton
-              name={item.name}
+            name={item.name ?? "Unknown"}
               onEdit={() => handleEdit(item)}
               onDelete={() => handleDelete(item.id)}
             />
@@ -101,27 +102,25 @@ import axios from "axios";
       }
     },
   };
-  
 
-  const searchingItemKey: (keyof Department)[] = ["name", "color"];
+  const searchingItemKey: (keyof Branch)[] = ["name"];
 
-  const handleDepartmentUpdated = async () => {
+  const handleBranchUpdated = async () => {
     try {
       await mutate();
     } catch (error) {
-      console.error("Error updating department list:", error);
+      console.error("Error updating branch list:", error);
     }
   };
 
   return (
-    <div id="department-page" className="mt-2">
+    <div id="branch-page" className="mt-2">
       <TableData
-        aria-label="Department Table"
+        aria-label="Branch Table"
         config={config}
-        items={departments || []}
+        items={branches || []}
         searchingItemKey={searchingItemKey}
-        counterName="Departments"
-        selectionMode="multiple"
+        counterName="Branches"
         isLoading={loading}
         isHeaderSticky={true}
         classNames={{
@@ -130,19 +129,19 @@ import axios from "axios";
         contentTop={
           <div className="flex items-center justify-between">
             <div className="ml-4">
-              <AddDepartment onDepartmentAdded={handleDepartmentUpdated} />
+              <AddBranch onBranchAdded={handleBranchUpdated} />
             </div>
             <div className="ml-auto mr-4"></div>
           </div>
         }
       />
 
-      {selectedDepartmentId !== null && (
-        <EditDepartment
+      {selectedBranchId !== null && (
+        <EditBranch
           isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          departmentId={selectedDepartmentId}
-          onDepartmentUpdated={handleDepartmentUpdated}
+        onClose={() => setIsEditModalOpen(false)}
+          branchId={selectedBranchId}
+          onBranchUpdated={handleBranchUpdated}
         />
       )}
     </div>

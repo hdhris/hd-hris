@@ -5,7 +5,7 @@ import { Tabs, Tab } from "@nextui-org/react";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import BreadcrumbComponent from "@/components/common/breadcrumb";
 
-type TabKeys = "employees" | "suspend" | "resign" | "departments" | "jobposition";
+type TabKeys = "employees" | "suspend" | "resign" | "departments" | "jobposition" | "branch";
 
 const RootLayout = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
@@ -18,6 +18,8 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
     ? "departments"
      : pathname.includes("jobposition")
     ? "jobposition"
+     : pathname.includes("branch")
+    ? "branch"
     : "employees";
 
   const handleTabChange = (key: TabKeys) => {
@@ -45,6 +47,10 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
       { title: "Employee Management", link: "/employeemanagement" },
       { title: "position", link: "/employeemanagement/jobposition" },
     ],
+    branch: [
+      { title: "Employee Management", link: "/employeemanagement" },
+      { title: "branch", link: "/employeemanagement/branch" },
+    ],
   };
 
   return (
@@ -64,6 +70,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
           <Tab key="resign" title="Resign" /> */}
           <Tab key="departments" title="Departments" />
           <Tab key="jobposition" title="Job Positions" />
+          <Tab key="branch" title="Branches" />
         </Tabs>
       </div>
       <ScrollShadow>{children}</ScrollShadow>

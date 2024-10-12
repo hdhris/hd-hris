@@ -1,4 +1,5 @@
-"use client";
+"use client"
+
 import React, { useEffect, useState } from "react";
 import { useJobpositionData } from "@/services/queries";
 import TableData from "@/components/tabledata/TableData";
@@ -12,19 +13,10 @@ import axios from "axios";
 import showDialog from "@/lib/utils/confirmDialog";
 import { FilterProps } from "@/types/table/default_config";
 
-interface Department {
-  id: number;
-  name: string | null;
-  color: string | null;
-  is_active: boolean | null;
-}
-
 interface JobPosition {
   id: number;
   name: string;
-  department_id: number;
   is_active: boolean;
-  ref_departments?: Department;
   trans_employees?: Array<{
     id: number;
   }>;
@@ -94,7 +86,6 @@ const Page: React.FC = () => {
   const config: TableConfigProps<JobPosition> = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "department", name: "Department", sortable: true },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
       { uid: "status", name: "Status", sortable: true },
       { uid: "actions", name: "Actions", sortable: false },
@@ -103,8 +94,6 @@ const Page: React.FC = () => {
       switch (columnKey) {
         case "name":
           return <div>{item.name}</div>;
-        case "department":
-          return <div>{item.ref_departments?.name || "N/A"}</div>;
         case "employeeCount":
           return <div>{item.trans_employees?.length || 0}</div>;
         case "status":
@@ -125,35 +114,16 @@ const Page: React.FC = () => {
 
   const searchingItemKey: (keyof JobPosition)[] = ["name"];
 
-  const filterItems: FilterProps[] = [
-    {
-      filtered: jobPositions
-        ? Array.from(new Set(jobPositions.map(job => job.ref_departments?.name)))
-            .filter((dept): dept is string => dept !== null && dept !== undefined)
-            .map(dept => ({ name: dept, uid: dept }))
-        : [],
-      category: "Department",
-    },
-  ];
+  // Removed filterItems as it was related to departments
 
   // Ensure `jobPositions` is correctly mapped to match `JobPosition` type
   const jobItems: JobPosition[] =
     jobPositions?.map((job) => ({
       ...job,
-      department_id: job.department_id ?? 0, // Defaulting to 0 if undefined
-      ref_departments: job.ref_departments || null,
       trans_employees: job.trans_employees || [],
     })) || [];
 
-  // Filtering logic with type-safe handling
-  const filterConfig = (keys: Selection): JobPosition[] => {
-    if (keys !== "all" && keys.size > 0) {
-      return jobItems.filter((job) =>
-        keys.has(job.ref_departments?.name || "")
-      );
-    }
-    return jobItems;
-  };
+  // Removed filterConfig as it was related to departments
 
   return (
     <div id="job-position-page" className="mt-2">
@@ -162,8 +132,6 @@ const Page: React.FC = () => {
         config={config}
         items={jobItems}
         searchingItemKey={searchingItemKey}
-        filterItems={filterItems}
-        filterConfig={filterConfig}
         counterName="Job Positions"
         isLoading={loading}
         isHeaderSticky={true}

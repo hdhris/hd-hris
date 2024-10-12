@@ -7,23 +7,21 @@ import {
   Card,
   CardBody,
   CardHeader,
-  Checkbox,
 } from "@nextui-org/react";
 import { parseDate, CalendarDate } from "@internationalized/date";
 import {
   FormControl,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
 
 type FormValues = {
   department_id: string;
+  branch_id: string; // Added branch field
   hired_at: string;
   job_id: string;
   batch_id: string;
-  days_json: Record<string, boolean>;
 };
 
 const safeParseDate = (dateString: string) => {
@@ -78,33 +76,21 @@ const EditJobInformationForm: React.FC = () => {
   const [departments, setDepartments] = useState<
     Array<{ id: number; name: string }>
   >([]);
+  const [branches, setBranches] = useState<
+    Array<{ id: number; name: string }>
+  >([]); // Branch state
   const [jobTitles, setJobTitles] = useState<
-    Array<{ id: number; name: string; department_id: number }>
+    Array<{ id: number; name: string }>
   >([]);
   const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
-  const [departmentID, setDepartmentID] = useState("");
   const selectedBatchId = watch("batch_id");
-  const daysJson = watch("days_json");
-
-  // Fetch department_id from form and update departmentID when form loads
-  useEffect(() => {
-    const initialDepartmentId = watch("department_id");
-    if (initialDepartmentId) {
-      setDepartmentID(initialDepartmentId); // Initialize departmentID with the form value
-    }
-  }, [watch]);
 
   useEffect(() => {
     fetchDepartments();
+    fetchBranches(); // Fetch branches
     fetchJobTitles();
     fetchBatchSchedules();
   }, []);
-
-  useEffect(() => {
-    // Populate default values for days_json
-    const defaultDaysJson = {};
-    setValue("days_json", { ...defaultDaysJson, ...daysJson });
-  }, [daysJson, setValue]);
 
   const fetchDepartments = async () => {
     try {
@@ -113,6 +99,16 @@ const EditJobInformationForm: React.FC = () => {
       setDepartments(data);
     } catch (error) {
       console.error("Error fetching departments:", error);
+    }
+  };
+
+  const fetchBranches = async () => {
+    try {
+      const response = await fetch("/api/employeemanagement/branch"); // Fetch branches from your API
+      const data = await response.json();
+      setBranches(data);
+    } catch (error) {
+      console.error("Error fetching branches:", error);
     }
   };
 
@@ -136,10 +132,6 @@ const EditJobInformationForm: React.FC = () => {
     }
   };
 
-  const handleDayChange = (day: string, checked: boolean) => {
-    setValue(`days_json.${day}`, checked, { shouldValidate: true });
-  };
-
   return (
     <form className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
@@ -155,7 +147,6 @@ const EditJobInformationForm: React.FC = () => {
                   onSelectionChange={(keys) => {
                     const value = Array.from(keys)[0] as string;
                     field.onChange(value);
-                    setDepartmentID(value); // Update department ID when a department is selected
                     setValue("department_id", value);
                   }}
                   aria-label="Department"
@@ -176,6 +167,7 @@ const EditJobInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
+
 
         {/* Hire Date */}
         <Controller
@@ -218,7 +210,7 @@ const EditJobInformationForm: React.FC = () => {
                   onSelectionChange={(keys) => {
                     const value = Array.from(keys)[0] as string;
                     field.onChange(value);
-                    setValue("job_id", value); // Explicitly set the value for job_id
+                    setValue("job_id", value);
                   }}
                   aria-label="Job Title"
                   placeholder="Select Job Title"
@@ -227,32 +219,54 @@ const EditJobInformationForm: React.FC = () => {
                   labelPlacement="outside"
                   isRequired
                 >
-                  {/* Filter job titles based on selected department */}
-                  {jobTitles.filter(
-                    (job) => job.department_id === Number(departmentID)
-                  ).length > 0 ? (
-                    jobTitles
-                      .filter(
-                        (job) => job.department_id === Number(departmentID)
-                      )
-                      .map((job) => (
-                        <SelectItem key={job.id} value={job.id.toString()}>
-                          {job.name}
-                        </SelectItem>
-                      ))
-                  ) : (
-                    <SelectItem key={""} value={""} isReadOnly>
-                      No Job Position Available in this department
+                  {jobTitles.map((job) => (
+                    <SelectItem key={job.id} value={job.id.toString()}>
+                      {job.name}
                     </SelectItem>
-                  )}
+                  ))}
                 </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+         {/* Branch */}
+         <Controller
+          name="branch_id"
+          control={control}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Select
+                  selectedKeys={field.value ? [field.value] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    field.onChange(value);
+                    setValue("branch_id", value);
+                  }}
+                  aria-label="Branch"
+                  placeholder="Select Branch"
+                  isRequired
+                  label={<span className="font-semibold">Branch</span>}
+                  labelPlacement="outside"
+                  variant="bordered"
+                >
+                  {branches.map((branch) => (
+                    <SelectItem key={branch.id} value={branch.id.toString()}>
+                      {branch.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
       </div>
 
+       
       {/* Work Schedule */}
       <div className="mt-5">
         <h3 className="text-lg font-semibold mb-4">Work Schedule</h3>

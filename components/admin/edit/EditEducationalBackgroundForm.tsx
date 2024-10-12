@@ -13,7 +13,6 @@ import { FileState, FileDropzone } from "@/components/ui/fileupload/file";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { SharedSelection } from "@nextui-org/react";
 import { Button } from "@nextui-org/button";
-import { Download, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Certificate {
@@ -30,7 +29,7 @@ const EditEducationalBackgroundForm = () => {
   const [select, setSelect] = useState<string | null>(null);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
 
-  const { toast } = useToast(); // Importing toast from useToast
+  const { toast } = useToast();
 
   // Watch form fields
   const elementary = watch("elementary");
@@ -73,12 +72,6 @@ const EditEducationalBackgroundForm = () => {
     setValue("seniorHighStrand", value);
   };
 
-  useEffect(() => {
-    // Load existing certificates from form data
-    const existingCertificates = getValues("certificates") || [];
-    setCertificates(existingCertificates);
-  }, [getValues]);
-
   // Function to handle file progress updates
   function updateFileProgress(key: string, progress: FileState["progress"]) {
     setFileStates((prevFileStates) => {
@@ -89,57 +82,27 @@ const EditEducationalBackgroundForm = () => {
     });
   }
 
-  // Handle file download
-  const handleDownload = async (fileUrl: string, fileName: string) => {
-    try {
-      const response = await fetch(fileUrl);
-      if (!response.ok) throw new Error("Network response was not ok");
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-      toast({
-        title: "Error",
-        description: "Failed to download file. Please try again.",
-        variant: "danger", // Use "danger" variant instead of "destructive"
-      });
-    }
+  // Handle file removal (only from local state and form data)
+  const handleRemove = (index: number) => {
+    const updatedCertificates = [...certificates];
+    updatedCertificates.splice(index, 1);
+    setCertificates(updatedCertificates);
+    setValue("certificates", updatedCertificates);
+    toast({
+      title: "Success",
+      description: "File removed from the list",
+      variant: "success",
+    });
   };
 
-  // Handle file removal
-  const handleRemove = async (index: number) => {
-    try {
-      const updatedCertificates = [...certificates];
-      const removedCertificate = updatedCertificates.splice(index, 1)[0];
-
-      if (removedCertificate.fileUrl) {
-        // Remove file from EdgeStore
-        await edgestore.publicFiles.delete({
-          url: removedCertificate.fileUrl,
-        });
-      }
-
-      setCertificates(updatedCertificates);
-      setValue("certificates", updatedCertificates);
-      toast({
-        title: "Success",
-        description: "File removed successfully",
-        variant: "success",
-      });
-    } catch (error) {
-      console.error("Error removing file:", error);
-      toast({
-        title: "Error",
-        description: "Failed to remove file. Please try again.",
-        variant: "danger", // Use "danger" variant instead of "destructive"
-      });
-    }
+  // Handle file download
+  const handleDownload = (fileUrl: string, fileName: string) => {
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -221,7 +184,7 @@ const EditEducationalBackgroundForm = () => {
                     selectedKeys={field.value ? [field.value] : []}
                     onSelectionChange={(keys) => {
                       handleSelect(keys);
-                      const value = Array.from(keys)[0];
+                      const value = Array.from(keys)[0] as string;
                       field.onChange(value);
                     }}
                     placeholder="Select Strand"
@@ -292,7 +255,7 @@ const EditEducationalBackgroundForm = () => {
               </FormControl>
               <FormMessage />
             </FormItem>
-          )} 
+          )}
         />
 
         {/* Course */}
@@ -320,24 +283,24 @@ const EditEducationalBackgroundForm = () => {
       </div>
 
       <FormField
-          name="highestDegree"
-          control={control}
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Highest Degree Attainment</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Highest Degree"
-                  variant="bordered"
-                  className="border rounded"
-                  isReadOnly
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        name="highestDegree"
+        control={control}
+        render={({ field }) => (
+          <FormItem className="col-span-full">
+            <FormLabel>Highest Degree Attainment</FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                placeholder="Highest Degree"
+                variant="bordered"
+                className="border rounded"
+                isReadOnly
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       {/* File Upload Section */}
       <div className="space-y-4">
@@ -352,7 +315,7 @@ const EditEducationalBackgroundForm = () => {
                   value={fileStates}
                   onChange={(files) => {
                     setFileStates(files);
-                    field.onChange(files.map((f) => f.file)); // Here, 'field' is correctly used
+                    field.onChange(files.map((f) => f.file));
                   }}
                   onFilesAdded={async (addedFiles) => {
                     setFileStates([...fileStates, ...addedFiles]);
@@ -374,7 +337,6 @@ const EditEducationalBackgroundForm = () => {
                               }
                             },
                           });
-                          console.log(res);
                           const newCertificate: Certificate = {
                             fileName: addedFileState.file.name,
                             fileUrl: res.url,
@@ -405,7 +367,7 @@ const EditEducationalBackgroundForm = () => {
           )}
         />
 
-        {/* {certificates.length > 0 && (
+        {certificates.length > 0 && (
           <div className="space-y-2">
             {certificates.map((certificate, index) => (
               <div key={index} className="flex justify-between items-center">
@@ -414,24 +376,22 @@ const EditEducationalBackgroundForm = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() =>
-                      handleDownload(certificate.fileUrl, certificate.fileName)
-                    }
+                    onClick={() => handleDownload(certificate.fileUrl, certificate.fileName)}
                   >
-                    <Download size={16} />
+                    Download
                   </Button>
                   <Button
-                    color="danger" // Replace color="danger" with variant="danger"
+                    color="danger"
                     size="sm"
                     onClick={() => handleRemove(index)}
                   >
-                    <X size={16} />
+                    Remove
                   </Button>
                 </div>
               </div>
             ))}
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );
