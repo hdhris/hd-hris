@@ -1,21 +1,30 @@
 "use client";
-import Drawer from "@/components/common/Drawer";
-import FormFields from "@/components/common/forms/FormFields";
+import UserMail from "@/components/common/avatar/user-info-mail";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
-import { Form } from "@/components/ui/form";
+import TableData from "@/components/tabledata/TableData";
+import { toast } from "@/components/ui/use-toast";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import showDialog from "@/lib/utils/confirmDialog";
+import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { axiosInstance } from "@/services/fetcher";
 import { useQuery } from "@/services/queries";
 import { PayrollTable } from "@/types/payroll/payrollType";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { parseDate, getLocalTimeZone } from "@internationalized/date";
-import { Button, DateRangePicker, Link, Select, SelectItem } from "@nextui-org/react";
+import {
+  Button,
+  Chip,
+  DateRangePicker,
+  Link,
+  Select,
+  SelectItem,
+} from "@nextui-org/react";
 import { useDateFormatter } from "@react-aria/i18n";
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
 import { FaPen, FaPlus } from "react-icons/fa";
+import { IoMdCloseCircle } from "react-icons/io";
 import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import { MdDelete } from "react-icons/md";
 
@@ -24,19 +33,74 @@ function Page() {
   // const pageData = useQuery('');
   const [selectedDate, setSelectedDate] = React.useState("");
   const [selectedYear, setSelectedYear] = React.useState("");
-  const { data: payrollTable, isLoading:prtLoading } = useQuery<PayrollTable>(
-    "/api/admin/payroll/process"
+  const { data: payrollTable, isLoading: prtLoading } = useQuery<PayrollTable>(
+    "/api/admin/payroll/process",
+    3000
   );
+  function getProcessDate() {
+    return payrollTable?.pr_dates.find((i) => i.id === Number(selectedDate));
+  }
   useEffect(() => {
     if (payrollTable) {
-      setSelectedYear(toGMT8(payrollTable.pr_dates[0].start_date).format('YYYY'));
+      setSelectedYear(
+        toGMT8(payrollTable.pr_dates[0].start_date).format("YYYY")
+      );
       setSelectedDate(String(payrollTable.pr_dates[0].id));
     }
   }, [payrollTable]);
   const [rangeValue, setRangeValue] = React.useState({
-    start: parseDate("2024-04-01"),
-    end: parseDate("2024-04-08"),
+    start: parseDate("2024-12-01"),
+    end: parseDate("2024-12-01"),
   });
+  async function handleAddDate() {
+    try {
+      await axios.post("/api/admin/payroll/process/add-date", {
+        start_date: toGMT8(
+          rangeValue.start.toDate(getLocalTimeZone())
+        ).toISOString(),
+        end_date: toGMT8(
+          rangeValue.end.toDate(getLocalTimeZone())
+        ).toISOString(),
+      });
+      toast({
+        title: "Added",
+        description: "Date added successfully!",
+        variant: "success",
+      });
+      setIsAdding(false);
+    } catch (error) {
+      toast({
+        title: "Error adding",
+        description: String(error),
+        variant: "danger",
+      });
+    }
+  }
+  async function handleDeleteDate() {
+    try {
+      const response = await showDialog({
+        title: "Delete",
+        message: "Are you sure to delete this date process?",
+        preferredAnswer: "no",
+      });
+      if (response === "yes") {
+        await axios.post("/api/admin/payroll/process/delete-date", {
+          id: Number(selectedDate),
+        });
+        toast({
+          title: "Deleted",
+          description: "Date deleted successfully!",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error deleting",
+        description: String(error),
+        variant: "danger",
+      });
+    }
+  }
   SetNavEndContent(() => (
     <div className="flex gap-2 items-center">
       {isAdding ? (
@@ -60,7 +124,11 @@ function Page() {
             className="w-fit h-fit"
             variant="bordered"
           />
-          <Button {...uniformStyle({ color: "success" })} isIconOnly>
+          <Button
+            {...uniformStyle({ color: "success" })}
+            isIconOnly
+            onClick={handleAddDate}
+          >
             <IoCheckmarkSharp className="size-5 text-white" />
           </Button>
           <Button
@@ -74,11 +142,35 @@ function Page() {
         </>
       ) : (
         <>
-          {!payrollTable?.pr_dates.find((i)=>i.id===Number(selectedDate))?.is_processed &&
-            <Link className="text-blue-500">Mark as processed</Link>
-          }
+          {!getProcessDate()?.is_processed && (
+            <Link className="text-blue-500 cursor-pointer" onClick={async ()=>{
+              try {
+                await axios.post("/api/admin/payroll/process/update-date", {
+                  id: Number(selectedDate),
+                });
+                toast({
+                  title: "Proccessed",
+                  description: "Date has been marked proccessed!",
+                  variant: "success",
+                });
+                setIsAdding(false);
+              } catch (error) {
+                toast({
+                  title: "Error marking",
+                  description: String(error),
+                  variant: "danger",
+                });
+              }
+            }}>
+              Mark as processed
+            </Link>
+          )}
           <p className="text-default-500 text-sm">
-            {payrollTable?.pr_dates.find((i)=>i.id===Number(selectedDate))?.is_processed ? <span className="text-success">Proceessed</span>:'Processing'}
+            {getProcessDate()?.is_processed ? (
+              <span className="text-success">Proceessed</span>
+            ) : (
+              "Processing"
+            )}
           </p>
           <Select
             aria-label="Date Picker"
@@ -88,7 +180,10 @@ function Page() {
               payrollTable?.pr_dates.filter((item) => {
                 const startYear = toGMT8(item.start_date).year();
                 const endYear = toGMT8(item.end_date).year();
-                return startYear === Number(selectedYear) || endYear === Number(selectedYear);
+                return (
+                  startYear === Number(selectedYear) ||
+                  endYear === Number(selectedYear)
+                );
               }) || []
             }
             isLoading={prtLoading}
@@ -115,7 +210,7 @@ function Page() {
                     toGMT8(item.start_date).year()
                   )
                 )
-              ).map(year => ({ label: year.toString(), value: year })) || []
+              ).map((year) => ({ label: year.toString(), value: year })) || []
             }
             disallowEmptySelection
             selectedKeys={[selectedYear]}
@@ -128,7 +223,7 @@ function Page() {
           <Button
             {...uniformStyle({ color: "danger" })}
             isIconOnly
-            onClick={() => {}}
+            onClick={handleDeleteDate}
           >
             <MdDelete size={15} />
           </Button>
@@ -144,71 +239,176 @@ function Page() {
     </div>
   ));
 
-  const payrollData = useMemo(() => {
-    return axiosInstance
-      .get<PayrollTable>(
-        `/api/admin/payroll/process/${toGMT8(
-          rangeValue.start.toDate(getLocalTimeZone())
-        ).format("YYYY-MM-DD")},${toGMT8(
-          rangeValue.end.toDate(getLocalTimeZone())
-        ).format("YYYY-MM-DD")}`
-      )
-      .then((response) => response.data)
-      .catch((error) => {
+  const [payrollData, setPayrollData] = useState<PayrollTable | null>(null);
+  useEffect(() => {
+    const fetchPayrollData = async () => {
+      // setLoading(true); // Start loading
+      try {
+        const response: AxiosResponse<PayrollTable> = await axiosInstance.get(
+          `/api/admin/payroll/process/${toGMT8(
+            getProcessDate()?.start_date
+          ).format("YYYY-MM-DD")},${toGMT8(getProcessDate()?.end_date).format(
+            "YYYY-MM-DD"
+          )}`
+        );
+        setPayrollData(response.data);
+      } catch (error) {
         console.error("Error fetching payroll data:", error);
-        return null; // or handle error state
-      });
-  }, [rangeValue]);
+        // setError("Failed to load payroll data.");
+      } finally {
+        // setLoading(false); // End loading
+      }
+    };
+
+    fetchPayrollData(); // Fetch data when component mounts or `selectedDate` changes
+  }, [selectedDate]);
 
   const handleYearChange = (e: any) => {
     setSelectedYear(e.target.value);
-    setSelectedDate(String(payrollTable?.pr_dates.filter((item)=>
-      toGMT8(item.start_date).year() === Number(e.target.value)
-    )[0].id));
+    setSelectedDate(
+      String(
+        payrollTable?.pr_dates.filter(
+          (item) => toGMT8(item.start_date).year() === Number(e.target.value)
+        )[0].id
+      )
+    );
   };
 
   const handleDateChange = (e: any) => {
     setSelectedDate(e.target.value);
-  }
+  };
 
   let formatter = useDateFormatter({ dateStyle: "long" });
-  return <div>Payroll Process</div>;
+
+  const config: TableConfigProps<PayrollTable["employees"][0]> = {
+    columns: [
+      { uid: "name", name: "Name", sortable: true },
+      { uid: "gross", name: "Gross", sortable: true },
+      { uid: "deduction", name: "Deduction", sortable: true },
+      { uid: "net", name: "Net Salary", sortable: true },
+      { uid: "action", name: "Action", sortable: true },
+    ],
+    rowCell: (item, columnKey) => {
+      switch (columnKey) {
+        case "name":
+          return (
+            <UserMail
+              name={getEmpFullName(item)}
+              email={item.email}
+              picture={item.picture}
+            />
+          );
+        case "gross":
+          return <p>####</p>;
+        case "deduction":
+          return <p>####</p>;
+        case "net":
+          return <p>####</p>;
+        case "action":
+          return (
+            <Chip
+              startContent={<IoMdCloseCircle size={18} />}
+              variant="flat"
+              color="danger"
+              className="capitalize"
+            >
+              Uncalculated
+            </Chip>
+          );
+        // case "action":
+        //   return item.status === "pending" ? (
+        //     <div className="flex gap-1 items-center">
+        //       <Button
+        //         isIconOnly
+        //         variant="flat"
+        //         isLoading={
+        //           isPending.id === item.id && isPending.method === "rejected"
+        //         }
+        //         {...uniformStyle({ color: "danger" })}
+        //         onClick={async () => {
+        //           const result = await onUpdate({
+        //             ...item,
+        //             approved_at: toGMT8().toISOString(),
+        //             updated_at: toGMT8().toISOString(),
+        //             approved_by: userID!,
+        //             status: "rejected",
+        //             rate_per_hour: "0",
+        //           });
+        //         }}
+        //       >
+        //         <IoCloseSharp className="size-5 text-danger-500" />
+        //       </Button>
+        //       <Button
+        //         {...uniformStyle({ color: "success" })}
+        //         isLoading={
+        //           isPending.id === item.id && isPending.method === "approved"
+        //         }
+        //         startContent={
+        //           <IoCheckmarkSharp className="size-5 text-white" />
+        //         }
+        //         className="text-white"
+        //         onClick={async () => {
+        //           const result = await onUpdate({
+        //             ...item,
+        //             approved_at: toGMT8().toISOString(),
+        //             updated_at: toGMT8().toISOString(),
+        //             approved_by: userID!,
+        //             status: "approved",
+        //             rate_per_hour: String(
+        //               item.trans_employees_overtimes.ref_job_classes.pay_rate
+        //             ),
+        //           });
+        //         }}
+        //       >
+        //         Approve
+        //       </Button>
+        //     </div>
+        //   ) : (
+        //     <div className="flex justify-between w-36 items-center">
+        //       <Chip
+        //         startContent={
+        //           item.status === "approved" ? (
+        //             <FaCheckCircle size={18} />
+        //           ) : (
+        //             <IoMdCloseCircle size={18} />
+        //           )
+        //         }
+        //         variant="flat"
+        //         color={statusColorMap[item.status]}
+        //         className="capitalize"
+        //       >
+        //         {item.status}
+        //       </Chip>
+        //       {item.trans_employees_overtimes_approvedBy && (
+        //         <Tooltip className="pointer-events-auto" content={item.approvedBy_full_name}>
+        //           <Avatar
+        //           isBordered
+        //           radius="full"
+        //           size="sm"
+        //           src={
+        //             item?.trans_employees_overtimes_approvedBy?.picture ?? ""
+        //           }
+        //         />
+        //         </Tooltip>
+        //       )}
+        //     </div>
+        //   );
+        default:
+          return <></>;
+      }
+    },
+  };
+  return (
+    <div className="h-fit-navlayout">
+      <TableData
+        items={payrollTable?.employees || []}
+        config={config}
+        isHeaderSticky
+        className="h-full"
+        aria-label="Employee Payroll"
+      />
+    </div>
+  );
 }
 
 export default Page;
-
-// export default function Test() {
-//   const formSchema = z.object({
-//     name: z.string(),
-//     password: z.string(),
-//   });
-//   const form = useForm<z.infer<typeof formSchema>>({
-//     resolver: zodResolver(formSchema),
-//     defaultValues: {
-//       name: "user12345",
-//       password: "12345678",
-//     },
-//   });
-//   // Wrap `handleSubmit` with `form.handleSubmit` to manage form submission
-//   const handleSubmit = form.handleSubmit((values) => {
-//     console.log(values);
-//   });
-
-//   return (
-//     <Drawer isOpen onClose={() => {}} title="Test">
-//       <Form {...form}>
-//         <form id="drawer-form" onSubmit={(e) => {
-//                                     e.preventDefault(); // Prevent page reload
-//                                     handleSubmit(); // Handle form submission
-//                                 }}>
-//           <FormFields
-//             items={[
-//               { label: "Username", name: "name", type: "text" },
-//               { label: "Password", name: "password", type: "password" },
-//             ]}
-//           />
-//         </form>
-//       </Form>
-//     </Drawer>
-//   );
-// }
