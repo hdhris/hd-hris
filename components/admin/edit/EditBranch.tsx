@@ -147,7 +147,7 @@ const EditBranch: React.FC<EditBranchProps> = ({
   ];
 
   return (
-    <Modal size="md" isOpen={isOpen} onClose={onClose} isDismissable={false}>
+    <Drawer size="md" isOpen={isOpen} onClose={onClose} isDismissable={false}>
       <form onSubmit={methods.handleSubmit(onSubmit)}>
         <FormProvider {...methods}>
           <ModalContent>
