@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 
-
+export const dynamic = "force-dynamic"
 export async function GET() {
     try {
         const data = await prisma.ref_leave_types.findMany({
