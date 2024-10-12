@@ -15,12 +15,14 @@ import { useForm, FormProvider } from "react-hook-form";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
+import Drawer from "@/components/common/Drawer";
+import { Form } from "@/components/ui/form";
 
 
 interface EditEmployeeProps {
   isOpen: boolean;
   onClose: () => void;
-  employeeId: number;
+  employeeData: any;
   onEmployeeUpdated: () => Promise<void>;
 }
 interface Certificate {
@@ -53,6 +55,7 @@ interface EmployeeFormData {
   highestDegree: string;
   hired_at: string;
   department_id: string;
+  branch_id: string;
   job_id: string;
   batch_id: string; // batch_schedule_id -> batch_id
   days_json: Record<string, boolean>;
@@ -62,7 +65,7 @@ interface EmployeeFormData {
 const EditEmployee: React.FC<EditEmployeeProps> = ({
   isOpen,
   onClose,
-  employeeId,
+  employeeData,
   onEmployeeUpdated,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -106,10 +109,10 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
   const fetchEmployeeData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        `/api/employeemanagement/employees?id=${employeeId}`
-      );
-      const employeeData = response.data;
+      // const response = await axios.get(
+      //   `/api/employeemanagement/employees?id=${employeeId}`
+      // );
+      // const employeeData = response.data;
 
       if (!employeeData || !employeeData.id) {
         throw new Error("Employee data not found or invalid");
@@ -149,6 +152,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         addr_municipal: employeeData.addr_municipal?.toString() || "",
         addr_baranggay: employeeData.addr_baranggay?.toString() || "",
         department_id: employeeData.department_id?.toString() || "",
+        branch_id: employeeData.branch_id?.toString() || "",
         job_id: employeeData.job_id?.toString() || "",
         elementary: educationalBg.elementary || "",
         highSchool: educationalBg.highSchool || "",
@@ -190,13 +194,13 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [employeeId, methods, toast, onClose]);
+  }, [employeeData, methods, toast, onClose]);
 
   useEffect(() => {
-    if (isOpen && employeeId) {
+    if (isOpen && employeeData) {
       fetchEmployeeData();
     }
-  }, [isOpen, employeeId, fetchEmployeeData]);
+  }, [isOpen, employeeData, fetchEmployeeData]);
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
@@ -204,8 +208,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       title: "Submitting",
       description: "Updating employee information...",
     });
-
-
+  
     try {
       let pictureUrl = typeof data.picture === "string" ? data.picture : "";
       if (data.picture instanceof File) {
@@ -214,7 +217,8 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         });
         pictureUrl = result.url;
       }
-
+  
+      // Handle certificate uploads
       const updatedCertificates = await Promise.all(
         data.certificates.map(async (cert) => {
           if (cert.url instanceof File) {
@@ -229,9 +233,8 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           return { fileName: cert.fileName, fileUrl: cert.url as string };
         })
       );
-
+  
       const educationalBackground = {
-        
         elementary: data.elementary,
         highSchool: data.highSchool,
         seniorHighSchool: data.seniorHighSchool,
@@ -242,13 +245,11 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         highestDegree: data.highestDegree,
         certificates: updatedCertificates,
       };
-
+  
       const fullData = {
         ...data,
         picture: pictureUrl,
-        birthdate: data.birthdate
-          ? new Date(data.birthdate).toISOString()
-          : null,
+        birthdate: data.birthdate ? new Date(data.birthdate).toISOString() : null,
         hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
@@ -256,21 +257,22 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         addr_baranggay: parseInt(data.addr_baranggay, 10),
         department_id: parseInt(data.department_id, 10),
         job_id: parseInt(data.job_id, 10),
+        branch_id: parseInt(data.branch_id, 10),
         educational_bg_json: JSON.stringify(educationalBackground),
-        batch_id: parseInt(data.batch_id, 10), // Adjusted to batch_id
+        batch_id: parseInt(data.batch_id, 10),
         schedules: [
           {
             batch_id: parseInt(data.batch_id, 10),
             days_json: data.days_json,
-          }, 
+          },
         ],
       };
-
+  
       const response = await axios.put(
-        `/api/employeemanagement/employees?id=${employeeId}`,
+        `/api/employeemanagement/employees?id=${employeeData.id}`,
         fullData
       );
-
+  
       if (response.status === 200) {
         await onEmployeeUpdated();
         toast({
@@ -292,19 +294,19 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
     }
   };
 
+  
   return (
-    <Modal
-      size="5xl"
+    <Drawer
+      title="Edit Employee"
+      size="lg"
       isOpen={isOpen}
       onClose={onClose}
-      scrollBehavior="inside"
-      isDismissable={false}
+      // scrollBehavior="inside"
+      // isDismissable={false}
     >
-      <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
-          <ModalContent>
-            <ModalHeader>Edit Employee</ModalHeader>
-            <ModalBody>
+      <Form {...methods}>
+        <form className=" mb-4 space-y-4 " id="drawer-form" onSubmit={methods.handleSubmit(handleFormSubmit)}>
+            
               {isLoading ? (
                 <div>Loading employee data...</div>
               ) : (
@@ -319,23 +321,9 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
                   <EditJobInformationForm />
                 </>
               )}
-            </ModalBody>
-            <ModalFooter>
-              <Button color="danger" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
-                variant ="solid"
-                type="submit"
-                isDisabled={isSubmitting || isLoading}
-              >
-                {isSubmitting ? "Updating..." : "Update"}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
         </form>
-      </FormProvider>
-    </Modal>
+      </Form>
+    </Drawer>
   );
 };
 

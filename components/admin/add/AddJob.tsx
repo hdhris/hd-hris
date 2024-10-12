@@ -9,14 +9,11 @@ import {
   Button,
   Input,
   Checkbox,
-  Select,
-  SelectItem,
   useDisclosure,
 } from "@nextui-org/react";
 import Add from "@/components/common/button/Add";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
-import { useDepartmentsData } from "@/services/queries";
 import axios from "axios";
 import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 
@@ -26,7 +23,6 @@ interface AddJobPositionProps {
 
 interface JobPositionFormData {
   name: string;
-  department_id: number;
   is_active: boolean;
 }
 
@@ -34,12 +30,10 @@ const AddJobPosition: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { data: departments } = useDepartmentsData();
 
   const methods = useForm<JobPositionFormData>({
     defaultValues: {
       name: "",
-      department_id: 0,
       is_active: true,
     },
   });
@@ -118,34 +112,6 @@ const AddJobPosition: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
                   </FormControl>
                   {methods.formState.errors.name && (
                     <FormMessage>{methods.formState.errors.name.message}</FormMessage>
-                  )}
-                </FormItem>
-                <FormItem>
-                  <FormLabel>Department</FormLabel>
-                  <FormControl>
-                    <Controller
-                      name="department_id"
-                      control={methods.control}
-                      rules={{ required: "Department is required" }}
-                      render={({ field, fieldState: { error } }) => (
-                        <Select
-                          {...field}
-                          items={departments || []}
-                          placeholder="Select department"
-                          labelPlacement="outside"
-                          isInvalid={!!error}
-                        >
-                          {(department) => (
-                            <SelectItem key={department.id} value={department.id}>
-                              {department.name}
-                            </SelectItem>
-                          )}
-                        </Select>
-                      )}
-                    />
-                  </FormControl>
-                  {methods.formState.errors.department_id && (
-                    <FormMessage>{methods.formState.errors.department_id.message}</FormMessage>
                   )}
                 </FormItem>
                 <FormItem>

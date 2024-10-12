@@ -47,7 +47,7 @@ const EditPersonalInformationForm: React.FC = () => {
   );
   const { edgestore } = useEdgeStore();
   const [fileError, setFileError] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); 
 
   // Populate fields with initial data from the server
   useEffect(() => {

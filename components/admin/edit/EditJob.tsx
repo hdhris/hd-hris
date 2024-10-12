@@ -9,13 +9,11 @@ import {
   Button,
   Input,
   Checkbox,
-  Select,
-  SelectItem,
   useDisclosure,
 } from "@nextui-org/react";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
-import { useJobpositionData, useDepartmentsData } from "@/services/queries";
+import { useJobpositionData } from "@/services/queries";
 import axios from "axios";
 import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 
@@ -28,7 +26,6 @@ interface EditJobPositionProps {
 
 interface JobPositionFormData {
   name: string;
-  department_id: number;
   is_active: boolean;
 }
 
@@ -40,12 +37,10 @@ const EditJobPosition: React.FC<EditJobPositionProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { data: departments } = useDepartmentsData();
 
   const methods = useForm<JobPositionFormData>({
     defaultValues: {
       name: "",
-      department_id: 0,
       is_active: true,
     },
   });
@@ -59,7 +54,6 @@ const EditJobPosition: React.FC<EditJobPositionProps> = ({
       if (job) {
         methods.reset({
           name: job.name,
-          department_id: job.department_id,
           is_active: job.is_active,
         });
       } else {
@@ -152,33 +146,6 @@ const EditJobPosition: React.FC<EditJobPositionProps> = ({
                         variant="bordered"
                         isInvalid={!!error}
                       />
-                    </FormControl>
-                    {error && <FormMessage>{error.message}</FormMessage>}
-                  </FormItem>
-                )}
-              />
-              <Controller
-                name="department_id"
-                control={methods.control}
-                rules={{ required: "Department is required" }}
-                render={({ field, fieldState: { error } }) => (
-                  <FormItem>
-                    <FormLabel>Department</FormLabel>
-                    <FormControl>
-                      <Select
-                        selectedKeys={[field.value.toString()]}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                        items={departments || []}
-                        placeholder="Select department"
-                        labelPlacement="outside"
-                        isInvalid={!!error}
-                      >
-                        {(department) => (
-                          <SelectItem key={department.id} value={department.id}>
-                            {department.name}
-                          </SelectItem>
-                        )}
-                      </Select>
                     </FormControl>
                     {error && <FormMessage>{error.message}</FormMessage>}
                   </FormItem>

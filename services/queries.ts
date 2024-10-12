@@ -6,6 +6,7 @@ import {Signatory} from "@/types/audit/types";
 import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
 import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
+import { Branch } from "@/types/employeee/BranchType";
 import { Payhead, PayheadAffected } from "@/types/payroll/payheadType";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import { OvertimeEntry, OvertimeResponse } from "@/types/attendance-time/OvertimeType";
@@ -87,6 +88,12 @@ export function useJobpositionData() {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }
+export function useBranchesData() {
+    return useSWR<Branch[]>('/api/employeemanagement/branch', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
 
 export function useSchedule() {
     return useSWR<Schedules>('/api/admin/attendance-time/schedule', fetcher, {

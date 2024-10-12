@@ -72,6 +72,11 @@ function RootLayout({ children }: { children: ReactNode }) {
       title: "Job Positions",
       path: "jobposition",
     },
+    {
+      key: "branch",
+      title: "Branch",
+      path: "branch",
+    },
   ];
 
   return (

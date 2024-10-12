@@ -237,28 +237,28 @@ model ref_job_classes {
 
 model ref_leave_types {
   id                           Int            @id @default(autoincrement())
-  name                         String
-  code                         String
-  description                  String
-  accrual_rate                 Int
   accrual_frequency            String
-  max_accrual                  Int
-  carry_over                   Boolean
-  paid_leave                   Boolean
+  accrual_rate                 Int
   affects_overtime             Boolean
-  requires_signatories         Boolean
-  is_active                    Boolean
-  min_duration                 Int
-  max_duration                 Int
-  notice_required              Int
   applicable_to_employee_types String
-  pro_rated_for_probationary   Boolean
   attachment_required          Boolean
-  pay_rate                     Float? // Optional
-  pay_rate_frequency           String? // Optional
+  code                         String
   created_at                   DateTime       @db.Timestamp(6)
-  updated_at                   DateTime?      @db.Timestamp(6)
   deleted_at                   DateTime?      @db.Timestamp(6)
+  description                  String
+  is_active                    Boolean
+  max_accrual                  Int
+  max_duration                 Int
+  min_duration                 Int
+  name                         String
+  notice_required              Int
+  paid_leave                   Boolean
+  pay_rate                     Float?
+  pay_rate_frequency           String?
+  pro_rated_for_probationary   Boolean
+  requires_signatories         Boolean
+  updated_at                   DateTime?      @db.Timestamp(6)
+  carry_over                   Boolean
   trans_leaves                 trans_leaves[]
 }
 
