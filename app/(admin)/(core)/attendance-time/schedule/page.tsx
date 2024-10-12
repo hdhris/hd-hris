@@ -133,6 +133,7 @@ export default function Page() {
       const result = await showDialog({
         title: "Confirm Delete",
         message: `Are you sure you want to delete schedule?`,
+        preferredAnswer: "no"
       });
       if (result === "yes") {
         await axios.post(

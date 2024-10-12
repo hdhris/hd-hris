@@ -180,15 +180,15 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
       size="lg"
       title="Review Overtime"
       footer={
-        <div className="flex gap-2 items-center w-full">
-          <Button
+        <div className="flex gap-2 items-center ms-auto">
+          {/* <Button
             className="me-auto"
             variant="light"
             onClick={onClose}
             {...uniformStyle()}
           >
             Close
-          </Button>
+          </Button> */}
           {overtimeData?.status === "pending" && (
             <>
               <Button

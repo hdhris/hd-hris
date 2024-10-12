@@ -2,7 +2,7 @@
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import { usePayheads } from "@/services/queries";
-import { Payhead } from "@/types/payroll/payrollType";
+import { Payhead } from "@/types/payroll/payheadType";
 import { FilterProps } from "@/types/table/default_config";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Button, Chip, Selection } from "@nextui-org/react";
@@ -10,7 +10,7 @@ import { useRouter } from "next/dist/client/components/navigation";
 import axios from "axios";
 import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { parseBoolean } from "@/lib/utils/parser/parseClass";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 
@@ -19,6 +19,7 @@ const handleDelete = async (id: Number, name: string) => {
     const result = await showDialog({
       title: "Confirm Delete",
       message: `Are you sure you want to delete '${name}' ?`,
+      preferredAnswer: "no",
     });
     if (result === "yes") {
       await axios.post("/api/admin/payroll/payhead/delete", {
@@ -159,28 +160,30 @@ function Page() {
     return filteredItems;
   };
   return (
-    <TableData
-      config={config}
-      items={data!}
-      isLoading={isLoading}
-      searchingItemKey={["name"]}
-      filterItems={filterItems}
-      filterConfig={filterConfig}
-      counterName="Earnings"
-      isHeaderSticky
-      selectionMode="single"
-      aria-label="Earnings"
-      className="h-full"
-      endContent={() => (
-        <Button
-          {...uniformStyle()}
-          className=" w-fit"
-          onClick={() => router.push("/payroll/earnings/create")}
-        >
-          Create Earning
-        </Button>
-      )}
-    />
+    <div className="h-fit-navlayout">
+      <TableData
+        config={config}
+        items={data!}
+        isLoading={isLoading}
+        searchingItemKey={["name"]}
+        filterItems={filterItems}
+        filterConfig={filterConfig}
+        counterName="Earnings"
+        isHeaderSticky
+        selectionMode="single"
+        aria-label="Earnings"
+        className="h-full"
+        endContent={() => (
+          <Button
+            {...uniformStyle()}
+            className=" w-fit"
+            onClick={() => router.push("/payroll/earnings/create")}
+          >
+            Create Earning
+          </Button>
+        )}
+      />
+    </div>
   );
 }
 

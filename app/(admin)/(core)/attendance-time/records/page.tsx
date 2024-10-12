@@ -67,7 +67,6 @@ export default function Page() {
 
   const fetchAttendance = useCallback(
     async () => {
-      console.log("FLAG");
       setIsLoading(true);
       try {
         const formattedDate = toGMT8(date.toString()).format("YYYY-MM-DD");

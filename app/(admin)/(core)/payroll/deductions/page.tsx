@@ -2,7 +2,7 @@
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import { usePayheads } from "@/services/queries";
-import { Payhead } from "@/types/payroll/payrollType";
+import { Payhead } from "@/types/payroll/payheadType";
 import { FilterProps } from "@/types/table/default_config";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Button, Chip, Selection } from "@nextui-org/react";
@@ -10,14 +10,16 @@ import { useRouter } from "next/dist/client/components/navigation";
 import axios from "axios";
 import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
-import React, { useState } from "react";
+import React from "react";
 import { parseBoolean } from "@/lib/utils/parser/parseClass";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
     const result = await showDialog({
       title: "Confirm Delete",
       message: `Are you sure you want to delete '${name}' ?`,
+      preferredAnswer: "no",
     });
     if (result === "yes") {
       await axios.post("/api/admin/payroll/payhead/delete", {
@@ -167,15 +169,13 @@ function Page() {
         filterItems={filterItems}
         filterConfig={filterConfig}
         counterName="Deductions"
-        className="flex-1 h-full"
-        removeWrapper
+        className="h-full"
         isHeaderSticky
-        color={"primary"}
         selectionMode="single"
         aria-label="Deductions"
         endContent={() => (
           <Button
-            color="primary"
+            {...uniformStyle()}
             className=" w-fit"
             onClick={() => router.push("/payroll/deductions/create")}
           >

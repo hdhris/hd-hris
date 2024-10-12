@@ -1,7 +1,7 @@
 "use client";
 import { z } from "zod";
 import { useParams } from "next/navigation";
-import { AffectedJson, PayheadAffected } from "@/types/payroll/payrollType";
+import { AffectedJson, PayheadAffected } from "@/types/payroll/payheadType";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/dist/client/components/navigation";
 import { PayheadForm } from "@/components/admin/payroll/PayheadUI";

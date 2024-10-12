@@ -1,63 +1,43 @@
-export interface AffectedJson {
-  mandatory : {
-    probationary : boolean;
-    regular : boolean;
-  }
-  department : number[];
-  job_classes : number[];
-}
-
-
-export interface Payhead {
-  calculation: string;
+interface PRDate {
+  id: number;
+  start_date: string;
+  end_date: string;
+  is_processed: boolean;
   created_at: string;
   updated_at: string;
-  deleted_at?: string;
-  id: number;
-  is_active: boolean;
-  name: string;
-  type: 'earning' | 'deduction';
-  affected_json: AffectedJson;
-  dim_payhead_affecteds: Affected[];
+  deleted_at: string | null;
 }
-  export interface Affected {
-    id: number;
-    payhead_id: number;
-    employee_id: number;
-    created_at: string;
-    updated_at: string;
-  }
-  
-  export interface AffectedEmployee {
-    id: number,
-    picture: string;
-    last_name: string;
-    first_name: string;
-    middle_name: string;
-    ref_departments: {
-      id : number;
-      name : string;
-    };
-    ref_job_classes: {
-      id : number;
-      department_id: number;
-      name : string;
-    };
-  }
-  
-  export interface PayheadAffected {
-    affected: Affected[];
-    employees: AffectedEmployee[];
-    payhead: Payhead;
-    departments : {
-      id: number;
-      name : string;
-    }[],
-    job_classes : {
-      id : number;
-      name : string;
-      department_id : number;
-    }[],
-  }
-  
-  
+
+interface RefBranch {
+  id: number;
+  name: string;
+}
+
+interface RefJobClass {
+  id: number;
+  name: string;
+}
+
+interface RefDepartment {
+  id: number;
+  name: string;
+}
+
+interface Employee {
+  last_name: string;
+  first_name: string;
+  middle_name: string;
+  prefix: string | null;
+  suffix: string | null;
+  extension: string | null;
+  picture: string;
+  email: string;
+  ref_branches: RefBranch | null;
+  ref_job_classes: RefJobClass;
+  ref_departments: RefDepartment;
+}
+
+export interface PayrollTable {
+  pr_dates: PRDate[];
+  employees: Employee[];
+}

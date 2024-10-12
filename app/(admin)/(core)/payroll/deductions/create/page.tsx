@@ -7,7 +7,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/dist/client/components/navigation";
 import { PayheadForm } from "@/components/admin/payroll/PayheadUI";
 import axios from "axios";
-import { AffectedJson } from "@/types/payroll/payrollType";
+import { AffectedJson } from "@/types/payroll/payheadType";
 
 function Page() {
   const { data, isLoading } = useNewPayhead();
