@@ -72,7 +72,7 @@ export function useBackupLogs() {
 }
 
 export function useEmployeesData() {
-    return useSWR<Employee[]>('/api/employeemanagement/employees-leaves-status', fetcher, {
+    return useSWR<Employee[]>('/api/employeemanagement/employees', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }

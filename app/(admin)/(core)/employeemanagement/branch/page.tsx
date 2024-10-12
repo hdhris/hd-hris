@@ -4,12 +4,13 @@ import TableData from "@/components/tabledata/TableData";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { toast } from "@/components/ui/use-toast";
-import AddBranch from "@/components/admin/add/AddBranch"; // Assuming you have an AddBranch component
-import EditBranch from "@/components/admin/edit/EditBranch"; // Assuming you have an EditBranch component
-import { useBranchesData } from "@/services/queries"; // Assuming you have a useBranchesData hook
-import { Branch } from "@/types/employeee/BranchType"; // Import from the correct file
+import AddBranch from "@/components/admin/add/AddBranch";
+import EditBranch from "@/components/admin/edit/EditBranch";
+import { useBranchesData } from "@/services/queries";
+import { Branch } from "@/types/employeee/BranchType";
 import axios from "axios";
-import addressData from "@/components/common/forms/address/address.json"; // Assuming address data
+import addressData from "@/components/common/forms/address/address.json";
+import { Chip } from "@nextui-org/react";
 
 const Page: React.FC = () => {
   const { data: branches, error, mutate } = useBranchesData();
@@ -77,7 +78,7 @@ const Page: React.FC = () => {
   const config: TableConfigProps<Branch> = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "municipality", name: "Municipality", sortable: false }, // New column
+      { uid: "municipality", name: "Municipality", sortable: false },
       { uid: "is_active", name: "Status", sortable: true },
       { uid: "actions", name: "Actions", sortable: false },
     ],
@@ -86,13 +87,22 @@ const Page: React.FC = () => {
         case "name":
           return <span>{item.name}</span>;
         case "municipality":
-          return <span>{getMunicipalityName(item.addr_municipal)}</span>; // Rendering the municipality
+          return <span>{getMunicipalityName(item.addr_municipal)}</span>;
         case "is_active":
-          return <span>{item.is_active ? "Active" : "Inactive"}</span>;
+          return (
+            <Chip
+              className="capitalize"
+              color={item.is_active ? "success" : "danger"}
+              size="sm"
+              variant="flat"
+            >
+              {item.is_active ? "Active" : "Inactive"}
+            </Chip>
+          );
         case "actions":
           return (
             <TableActionButton
-            name={item.name ?? "Unknown"}
+              name={item.name ?? "Unknown"}
               onEdit={() => handleEdit(item)}
               onDelete={() => handleDelete(item.id)}
             />
@@ -139,7 +149,7 @@ const Page: React.FC = () => {
       {selectedBranchId !== null && (
         <EditBranch
           isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+          onClose={() => setIsEditModalOpen(false)}
           branchId={selectedBranchId}
           onBranchUpdated={handleBranchUpdated}
         />

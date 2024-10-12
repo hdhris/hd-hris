@@ -17,7 +17,7 @@ import { FilterProps } from "@/types/table/default_config";
 const Page: React.FC = () => {
   const { data: employees, mutate, error } = useEmployeesData();
   const [loading, setLoading] = useState(true);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<any | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -45,7 +45,7 @@ const Page: React.FC = () => {
   };
 
   const handleEdit = (employee: Employee) => {
-    setSelectedEmployeeId(employee.id);
+    setSelectedEmployeeId(employee);
     setIsEditModalOpen(true);
   };
 
@@ -244,7 +244,7 @@ const Page: React.FC = () => {
         <EditEmployee
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          employeeId={selectedEmployeeId}
+          employeeData={selectedEmployeeId}
           onEmployeeUpdated={handleEmployeeUpdated}
         />
       )}

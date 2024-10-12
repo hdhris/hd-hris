@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useJobpositionData } from "@/services/queries";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
-import { Button, Selection } from "@nextui-org/react";
+import { Button, Selection, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddJobPosition from "@/components/admin/add/AddJob";
@@ -96,7 +96,16 @@ const Page: React.FC = () => {
         case "employeeCount":
           return <div>{item.trans_employees?.length || 0}</div>;
         case "status":
-          return <div>{item.is_active ? "Active" : "Inactive"}</div>;
+          return (
+            <Chip
+              className="capitalize"
+              color={item.is_active ? "success" : "danger"}
+              size="sm"
+              variant="flat"
+            >
+              {item.is_active ? "Active" : "Inactive"}
+            </Chip>
+          );
         case "actions":
           return (
             <TableActionButton
@@ -113,16 +122,11 @@ const Page: React.FC = () => {
 
   const searchingItemKey: (keyof JobPosition)[] = ["name"];
 
-  // Removed filterItems as it was related to departments
-
-  // Ensure `jobPositions` is correctly mapped to match `JobPosition` type
   const jobItems: JobPosition[] =
     jobPositions?.map((job) => ({
       ...job,
       trans_employees: job.trans_employees || [],
     })) || [];
-
-  // Removed filterConfig as it was related to departments
 
   return (
     <div id="job-position-page" className="mt-2">

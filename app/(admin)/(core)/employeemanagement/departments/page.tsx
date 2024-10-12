@@ -7,16 +7,16 @@ import { toast } from "@/components/ui/use-toast";
 import AddDepartment from "@/components/admin/add/AddDepartment";
 import EditDepartment from "@/components/admin/edit/EditDepartment";
 import { useDepartmentsData } from "@/services/queries";
-import { Department } from "@/types/employeee/DepartmentType";  // Import from the correct file
+import { Department } from "@/types/employeee/DepartmentType";
 import axios from "axios";
+import { Chip } from "@nextui-org/react";
 
-  const Page: React.FC = () => {
+const Page: React.FC = () => {
   const { data: departments, error, mutate } = useDepartmentsData();
   const [loading, setLoading] = useState(true);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
 
   useEffect(() => {
     if (departments) {
@@ -42,7 +42,7 @@ import axios from "axios";
 
   const handleDelete = async (id: number) => {
     try {
-        await axios.delete(`/api/employeemanagement/department?id=${id}`);
+      await axios.delete(`/api/employeemanagement/department?id=${id}`);
       setDeleteSuccess(true);
       await mutate();
     } catch (error) {
@@ -70,6 +70,7 @@ import axios from "axios";
     columns: [
       { uid: "name", name: "Name", sortable: true },
       { uid: "color", name: "Color", sortable: false },
+      { uid: "employeeCount", name: "No. of Employees", sortable: true },
       { uid: "is_active", name: "Status", sortable: true },
       { uid: "actions", name: "Actions", sortable: false },
     ],
@@ -86,8 +87,19 @@ import axios from "axios";
               ></div>
             </div>
           );
+        case "employeeCount":
+          return <span>{item.employeeCount}</span>;
         case "is_active":
-          return <span>{item.is_active ? 'Active' : 'Inactive'}</span>;
+          return (
+            <Chip
+              className="capitalize"
+              color={item.is_active ? "success" : "danger"}
+              size="sm"
+              variant="flat"
+            >
+              {item.is_active ? 'Active' : 'Inactive'}
+            </Chip>
+          );
         case "actions":
           return (
             <TableActionButton
@@ -101,7 +113,6 @@ import axios from "axios";
       }
     },
   };
-  
 
   const searchingItemKey: (keyof Department)[] = ["name", "color"];
 

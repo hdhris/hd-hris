@@ -12,9 +12,14 @@ import {
 import { useForm, FormProvider } from "react-hook-form";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
-import FormFields, { FormInputProps, Selection } from "@/components/common/forms/FormFields";
+import FormFields, {
+  FormInputProps,
+  Selection,
+} from "@/components/common/forms/FormFields";
 import AddressInput from "@/components/common/forms/address/AddressInput";
 import { useBranchesData } from "@/services/queries";
+import Drawer from "@/components/common/Drawer";
+import { Form } from "@/components/ui/form";
 
 interface EditBranchProps {
   isOpen: boolean;
@@ -105,14 +110,17 @@ const EditBranch: React.FC<EditBranchProps> = ({
     try {
       const filteredData = {
         ...data,
-        is_active: data.status === 'active',
+        is_active: data.status === "active",
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
         addr_municipal: parseInt(data.addr_municipal, 10),
         addr_baranggay: parseInt(data.addr_baranggay, 10),
       };
 
-      const response = await axios.put(`/api/employeemanagement/branch?id=${branchId}`, filteredData);
+      const response = await axios.put(
+        `/api/employeemanagement/branch?id=${branchId}`,
+        filteredData
+      );
 
       if (response.status === 200) {
         onBranchUpdated();
@@ -147,55 +155,37 @@ const EditBranch: React.FC<EditBranchProps> = ({
   ];
 
   return (
-    <Drawer size="md" isOpen={isOpen} onClose={onClose} isDismissable={false}>
-      <form onSubmit={methods.handleSubmit(onSubmit)}>
-        <FormProvider {...methods}>
-          <ModalContent>
-            <ModalHeader>Edit Branch</ModalHeader>
-            <ModalBody>
-              {isLoading ? (
-                <div className="flex justify-center items-center h-40">
-                  <Spinner size="lg" />
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormFields items={formInputs} />
-                    <Selection
-                      name="status"
-                      label="Status"
-                      isRequired
-                      placeholder="Select status"
-                      items={[
-                        { key: "active", label: "Active" },
-                        { key: "inactive", label: "Inactive" },
-                      ]}
-                    />
-                  </div>
-                  <Divider className="my-1" />
-                  <strong>Address (Optional)</strong>
-                  <div className="grid grid-cols-2 gap-4">
-                    <AddressInput />
-                  </div>
-                </>
-              )}
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                color="danger"
-                onClick={onClose}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button color="primary" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save Changes"}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </FormProvider>
+    <Drawer size="md" isOpen={isOpen} onClose={onClose} title="Edit Branch">
+      <form id="drawer-form" onSubmit={methods.handleSubmit(onSubmit)}>
+        <Form {...methods}>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-40">
+              <Spinner size="lg" />
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col gap-4">
+                <FormFields items={formInputs} />
+                <Selection
+                  name="status"
+                  label="Status"
+                  isRequired
+                  placeholder="Select status"
+                  items={[
+                    { key: "active", label: "Active" },
+                    { key: "inactive", label: "Inactive" },
+                  ]}
+                />
+                <Divider className="space-y-6 my-1" />
+                <strong>Address (Optional)</strong>
+
+                <AddressInput />
+              </div>
+            </>
+          )}
+        </Form>
       </form>
-    </Modal>
+    </Drawer>
   );
 };
 

@@ -6,18 +6,15 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-// Singleton Prisma Client Initialization
 const prisma = globalThis.prisma || new PrismaClient();
 if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
 
-// Zod schema for department validation
 const departmentSchema = z.object({
   name: z.string().max(45),
   color: z.string().max(10).optional(),
   is_active: z.boolean().optional(),
 });
 
-// Error Handling Helper
 function handleError(error: unknown, operation: string) {
   console.error(`Error during ${operation} operation:`, error);
   if (error instanceof z.ZodError) {
@@ -32,23 +29,19 @@ function handleError(error: unknown, operation: string) {
   );
 }
 
-// Log Operations for Debugging
 function logDatabaseOperation(operation: string, result: any) {
   console.log(`Database operation: ${operation}`);
   console.log("Result:", JSON.stringify(result, null, 2));
 }
 
-// POST: Create a new department
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     console.log("Incoming data:", data);
 
-    // Validate the incoming data against the schema
     const validatedData = departmentSchema.parse(data);
     console.log("Validated data:", validatedData);
 
-    // Create the department
     const department = await prisma.ref_departments.create({
       data: {
         ...validatedData,
@@ -64,7 +57,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET: Fetch departments
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
@@ -79,28 +71,46 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Fetch department by ID
 async function getDepartmentById(id: number) {
   const department = await prisma.ref_departments.findFirst({
     where: { id, deleted_at: null },
+    include: {
+      _count: {
+        select: { trans_employees: true }
+      }
+    }
   });
 
-  logDatabaseOperation("GET department by ID", department);
   if (!department) throw new Error("Department not found");
-  return department;
+  
+  const departmentWithCount = {
+    ...department,
+    employeeCount: department._count.trans_employees
+  };
+
+  logDatabaseOperation("GET department by ID", departmentWithCount);
+  return departmentWithCount;
 }
 
-// Fetch all departments
 async function getAllDepartments() {
   const departments = await prisma.ref_departments.findMany({
     where: { deleted_at: null },
+    include: {
+      _count: {
+        select: { trans_employees: true }
+      }
+    }
   });
 
-  logDatabaseOperation("GET all departments", departments);
-  return departments;
+  const departmentsWithCount = departments.map(dept => ({
+    ...dept,
+    employeeCount: dept._count.trans_employees
+  }));
+
+  logDatabaseOperation("GET all departments", departmentsWithCount);
+  return departmentsWithCount;
 }
 
-// PUT: Update department
 export async function PUT(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
@@ -112,7 +122,6 @@ export async function PUT(req: NextRequest) {
   try {
     const data = await req.json();
 
-    // Assuming you have Prisma setup
     const department = await prisma.ref_departments.update({
       where: { id: parseInt(id) },
       data: {
@@ -127,7 +136,6 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// DELETE: Soft delete a department
 export async function DELETE(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
@@ -135,13 +143,14 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ error: "Department ID is required" }, { status: 400 });
 
   try {
+    // Soft delete: Update the deleted_at field instead of removing the record
     const department = await prisma.ref_departments.update({
       where: { id: parseInt(id) },
       data: { deleted_at: new Date() },
     });
 
-    logDatabaseOperation("DELETE department", department);
-    return NextResponse.json({ message: "Department deleted successfully" });
+    logDatabaseOperation("SOFT DELETE department", department);
+    return NextResponse.json({ message: "Department soft deleted successfully" });
   } catch (error) {
     return handleError(error, "delete");
   }

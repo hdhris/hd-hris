@@ -17,6 +17,8 @@ import { useForm, FormProvider } from "react-hook-form";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
+import Drawer from "@/components/common/Drawer";
+import { Form } from "@/components/ui/form";
 
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
@@ -123,10 +125,13 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
           if (cert.url instanceof File) {
             const result = await edgestore.publicFiles.upload({
               file: cert.url,
+              options: {
+                temporary: false,
+              },
             });
-            return { name: cert.name, url: result.url };
+            return { fileName: cert.name, fileUrl: result.url };
           }
-          return cert;
+          return { fileName: cert.name, fileUrl: cert.url as string };
         })
       );
   
@@ -218,18 +223,16 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
   return (
     <>
       <Add variant="flat" name="Add Employee" onClick={onOpen} />
-      <Modal
-        size="5xl"
+      <Drawer title="Add New Employee"
+        size="lg"
         isOpen={isOpen}
         onClose={onClose}
-        scrollBehavior="inside"
-        isDismissable={false}
+        // scrollBehavior="inside"
+        // isDismissable={false}
       >
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
-            <ModalContent>
-              <ModalHeader>Add New Employee</ModalHeader>
-              <ModalBody>
+        <Form {...methods}>
+          <form className="mb-4 space-y-4" id="drawer-form" onSubmit={methods.handleSubmit(handleFormSubmit)}>
+            
                 <h2>Personal Information</h2>
                 <PersonalInformationForm />
                 <Divider className="my-6" />
@@ -238,26 +241,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
                 <Divider className="my-6" />
                 <h2>Job Information</h2>
                 <JobInformationForm />
-              </ModalBody>
-              <ModalFooter>
-                <Button
-                  color="danger"
-                  onClick={() => {
-                    methods.reset();
-                    onClose();
-                  }}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button color="primary" type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save"}
-                </Button>
-              </ModalFooter>
-            </ModalContent>
           </form>
-        </FormProvider>
-      </Modal>
+        </Form>
+      </Drawer  >
     </>
   );
 };

@@ -13,7 +13,8 @@ import { useForm, Controller, FormProvider } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import { useDepartmentsData } from "@/services/queries"; // Import the useDepartmentsData hook
 import axios from "axios";
-import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { FormItem, FormLabel, FormControl, FormMessage, Form } from "@/components/ui/form";
+import Drawer from "@/components/common/Drawer";
 
 interface EditDepartmentProps {
   isOpen: boolean;
@@ -133,12 +134,10 @@ const EditDepartment: React.FC<EditDepartmentProps> = ({
   };
 
   return (
-    <Modal size="md" isOpen={isOpen} onClose={onClose} isDismissable={false}>
-      <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <ModalContent>
-            <ModalHeader>Edit Department</ModalHeader>
-            <ModalBody>
+    <Drawer title = "Edit Department" isOpen={isOpen} onClose={onClose} >
+      <Form {...methods}>
+        <form id = "drawer-form" onSubmit={handleSubmit(onSubmit)}>
+         
               <Controller
                 name="name"
                 control={control}
@@ -192,19 +191,11 @@ const EditDepartment: React.FC<EditDepartmentProps> = ({
                   </Checkbox>
                 )}
               />
-            </ModalBody>
-            <ModalFooter>
-              <Button color="danger" onClick={onClose} disabled={isSubmitting}>
-                Cancel
-              </Button>
-              <Button color="primary" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save"}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
+            
+             
         </form>
-      </FormProvider>
-    </Modal>
+      </Form>
+    </Drawer>
   );
 };
 

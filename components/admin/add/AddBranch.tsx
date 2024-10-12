@@ -18,6 +18,8 @@ import FormFields, {
   Selection,
 } from "@/components/common/forms/FormFields";
 import AddressInput from "@/components/common/forms/address/AddressInput";
+import Drawer from "@/components/common/Drawer";
+import { Form } from "@/components/ui/form";
 
 interface AddBranchProps {
   onBranchAdded: () => void;
@@ -62,13 +64,16 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
 
       const filteredData = {
         ...data,
-        is_active: data.status === 'active',
+        is_active: data.status === "active",
         addr_region: convertToNumberOrNull(data.addr_region),
         addr_province: convertToNumberOrNull(data.addr_province),
         addr_municipal: convertToNumberOrNull(data.addr_municipal),
       };
 
-      const response = await axios.post("/api/employeemanagement/branch", filteredData);
+      const response = await axios.post(
+        "/api/employeemanagement/branch",
+        filteredData
+      );
       if (response.status === 201) {
         onBranchAdded();
         methods.reset();
@@ -83,13 +88,17 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      
+
       if (axios.isAxiosError(error) && error.response) {
-        const errorMessage = error.response.data.error || "Failed to add branch. Please try again.";
+        const errorMessage =
+          error.response.data.error ||
+          "Failed to add branch. Please try again.";
         const errorDetails = error.response.data.details;
-        
+
         if (errorDetails) {
-          const formattedErrors = errorDetails.map((err: any) => `${err.path.join('.')}: ${err.message}`).join(', ');
+          const formattedErrors = errorDetails
+            .map((err: any) => `${err.path.join(".")}: ${err.message}`)
+            .join(", ");
           toast({
             title: "Validation Error",
             description: formattedErrors,
@@ -126,50 +135,30 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
   return (
     <>
       <Add variant="flat" name="Add Branch" onClick={onOpen} />
-      <Modal size="md" isOpen={isOpen} onClose={onClose} isDismissable={false}>
-        <form onSubmit={methods.handleSubmit(onSubmit)}>
-          <FormProvider {...methods}>
-            <ModalContent>
-              <ModalHeader>Add New Branch</ModalHeader>
-              <ModalBody>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormFields items={formInputs} />
-                  <Selection
-                    name="status"
-                    label="Status"
-                    isRequired
-                    placeholder="Select status"
-                    items={[
-                      { key: "active", label: "Active" },
-                      { key: "inactive", label: "Inactive" },
-                    ]}
-                  />
-                </div>
-                <Divider className="my-1"/>
-                <strong>Address (Optional)</strong>
-                <div className="grid grid-cols-2 gap-4">
-                  <AddressInput />
-                </div>
-              </ModalBody> 
-              <ModalFooter>
-                <Button
-                  color="danger"
-                  onClick={() => {
-                    methods.reset();
-                    onClose();
-                  }}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button color="primary" type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save"}
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </FormProvider>
+      <Drawer size="md" isOpen={isOpen} onClose={onClose} title="Edit Branch">
+        <form id="drawer-form" onSubmit={methods.handleSubmit(onSubmit)}>
+          <Form {...methods}>
+            <div className="flex flex-col gap-4">
+              <FormFields items={formInputs} />
+              <Selection
+                name="status"
+                label="Status"
+                isRequired
+                placeholder="Select status"
+                items={[
+                  { key: "active", label: "Active" },
+                  { key: "inactive", label: "Inactive" },
+                ]}
+              />
+
+              <Divider className="my-1" />
+              <strong>Address (Optional)</strong>
+
+              <AddressInput />
+            </div>
+          </Form>
         </form>
-      </Modal>
+      </Drawer>
     </>
   );
 };

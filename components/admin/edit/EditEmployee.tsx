@@ -15,12 +15,14 @@ import { useForm, FormProvider } from "react-hook-form";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
+import Drawer from "@/components/common/Drawer";
+import { Form } from "@/components/ui/form";
 
 
 interface EditEmployeeProps {
   isOpen: boolean;
   onClose: () => void;
-  employeeId: number;
+  employeeData: any;
   onEmployeeUpdated: () => Promise<void>;
 }
 interface Certificate {
@@ -63,7 +65,7 @@ interface EmployeeFormData {
 const EditEmployee: React.FC<EditEmployeeProps> = ({
   isOpen,
   onClose,
-  employeeId,
+  employeeData,
   onEmployeeUpdated,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -107,10 +109,10 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
   const fetchEmployeeData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        `/api/employeemanagement/employees?id=${employeeId}`
-      );
-      const employeeData = response.data;
+      // const response = await axios.get(
+      //   `/api/employeemanagement/employees?id=${employeeId}`
+      // );
+      // const employeeData = response.data;
 
       if (!employeeData || !employeeData.id) {
         throw new Error("Employee data not found or invalid");
@@ -192,13 +194,13 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [employeeId, methods, toast, onClose]);
+  }, [employeeData, methods, toast, onClose]);
 
   useEffect(() => {
-    if (isOpen && employeeId) {
+    if (isOpen && employeeData) {
       fetchEmployeeData();
     }
-  }, [isOpen, employeeId, fetchEmployeeData]);
+  }, [isOpen, employeeData, fetchEmployeeData]);
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
@@ -267,7 +269,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       };
   
       const response = await axios.put(
-        `/api/employeemanagement/employees?id=${employeeId}`,
+        `/api/employeemanagement/employees?id=${employeeData.id}`,
         fullData
       );
   
@@ -294,18 +296,17 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
 
   
   return (
-    <Modal
-      size="5xl"
+    <Drawer
+      title="Edit Employee"
+      size="lg"
       isOpen={isOpen}
       onClose={onClose}
-      scrollBehavior="inside"
-      isDismissable={false}
+      // scrollBehavior="inside"
+      // isDismissable={false}
     >
-      <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
-          <ModalContent>
-            <ModalHeader>Edit Employee</ModalHeader>
-            <ModalBody>
+      <Form {...methods}>
+        <form className=" mb-4 space-y-4 " id="drawer-form" onSubmit={methods.handleSubmit(handleFormSubmit)}>
+            
               {isLoading ? (
                 <div>Loading employee data...</div>
               ) : (
@@ -320,23 +321,9 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
                   <EditJobInformationForm />
                 </>
               )}
-            </ModalBody>
-            <ModalFooter>
-              <Button color="danger" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
-                variant ="solid"
-                type="submit"
-                isDisabled={isSubmitting || isLoading}
-              >
-                {isSubmitting ? "Updating..." : "Update"}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
         </form>
-      </FormProvider>
-    </Modal>
+      </Form>
+    </Drawer>
   );
 };
 
