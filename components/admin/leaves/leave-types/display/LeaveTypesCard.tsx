@@ -11,9 +11,11 @@ import {LeaveTypesKey} from "@/types/leaves/LeaveTypes";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import LeaveTypeForm from "@/components/admin/leaves/leave-types/form/LeaveTypeForm";
+import NoData from "@/components/common/no-data/NoData";
 
 function LeaveTypesCard() {
-    const {data, isLoading} = useLeaveTypes()
+
+    const {data, isLoading, error} = useLeaveTypes()
     const {formData} = useFormTable<LeaveTypesKey>()
     const [leaveTypes, setLeaveTypes] = useState<LeaveTypesItems[]>([])
     useEffect(() => {
@@ -22,11 +24,12 @@ function LeaveTypesCard() {
                 return {
                     key: item.key,
                     employee_count: item.employee_count,
-                    duration_days: item.duration_days ?? 0,
                     name: item.name,
                     code: item.code || "N/A",
-                    is_carry_forward: item.is_carry_forward!,
+                    carry_over: item.carry_over,
                     is_active: item.is_active!,
+                    min_duration: item.min_duration,
+                    max_duration: item.max_duration
                 }
             })
             setLeaveTypes(leaves_types)
@@ -44,18 +47,23 @@ function LeaveTypesCard() {
 
     SetNavEndContent(() => (<LeaveTypeForm/>));
     if (isLoading) return <Loading/>
-
+    if (!data && !isLoading || error) return <NoData/>
     // Effect for setting nav end content
-
     return (<>
         <ScrollShadow className="w-full h-full p-5 overflow-auto">
             <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] place-items-center gap-5">
                 <GridCard
                     data={leaveTypes?.sort((a, b) => a.name.localeCompare(b.name))}
-                    header={({key, name, is_active}) => (<Header id={key} name={name} is_active={is_active}/>)}
-                    body={({employee_count, duration_days, code, is_carry_forward}) => (
-                        <Body employee_count={employee_count} duration_days={duration_days} code={code}
-                              is_carry_forward={is_carry_forward}/>)}/>
+                    header={({key, name, is_active}) => (
+                        <Header id={key}
+                                name={name}
+                                is_active={is_active}/>)}
+                    body={({employee_count, min_duration, max_duration, code, carry_over}) => (
+                        <Body employee_count={employee_count}
+                              duration_range={`${min_duration} - ${max_duration}`}
+                              code={code}
+                              carry_over={carry_over}/>)}
+                />
             </div>
         </ScrollShadow>
     </>);

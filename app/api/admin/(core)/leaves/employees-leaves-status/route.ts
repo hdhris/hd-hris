@@ -52,7 +52,7 @@ export async function GET() {
         where: {
             is_active: true
         }, select: {
-            id: true, name: true, duration_days: true
+            id: true, name: true
         },
     }),]);
 

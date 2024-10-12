@@ -58,10 +58,11 @@ export interface LeaveTypesItems {
     key: React.Key;
     name: string;
     employee_count: number;
-    duration_days: number;
     code: string;
-    is_carry_forward: boolean;
+    carry_over: boolean;
     is_active: boolean;
+    min_duration: number;
+    max_duration: number;
 }
 
 interface EmployeeLeaveRequest {

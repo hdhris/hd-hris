@@ -1,6 +1,8 @@
 import { hasContentType } from "@/helper/content-type/content-type-check";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
+import { LeaveTypeSchema } from "@/helper/zodValidation/leaves/leave-types-form/LeaveTypesForm";
+import {ZodError} from "zod";
 
 export async function POST(request: NextRequest) {
     try {
@@ -8,23 +10,54 @@ export async function POST(request: NextRequest) {
 
         const data = await request.json();
 
-        await prisma.ref_leave_types.create({
-            data: {
+        // Validate the data
+        // const validatedData = LeaveTypeSchema.parse(data);
+
+        const isDuplicate = await prisma.ref_leave_types.findFirst({
+            where: {
                 name: data.name,
-                code: data.code,
-                duration_days: Number(data.duration_days),
-                created_at: new Date(),
-                updated_at: new Date(),
             },
         });
 
-        return NextResponse.json({ message: "Leave type created successfully." });
-    } catch (err: any) {
-        console.error(err); // Log the error for debugging
+        if (isDuplicate) {
+            return NextResponse.json({ message: "Leave type already exists." }, { status: 400 });
+        }
 
-        // User-friendly error messages based on the error type
+        // Create a new leave type
+        const createdLeaveType = await prisma.ref_leave_types.create({
+            data: {
+                name: data.name,
+                code: data.code,
+                description: data.description,
+                accrual_rate: data.accrualRate,
+                accrual_frequency: data.accrualFrequency,
+                max_accrual: data.maxAccrual,
+                carry_over: data.carryOver,
+                paid_leave: data.paidLeave,
+                affects_overtime: data.affectsOvertime,
+                requires_signatories: data.requiresSignatories,
+                is_active: data.isActive,
+                min_duration: data.minDuration,
+                max_duration: data.maxDuration,
+                notice_required: data.noticeRequired,
+                pro_rated_for_probationary: data.proRatedForProbationary,
+                attachment_required: data.attachmentRequired,
+                pay_rate: data.payRate,
+                pay_rate_frequency: data.payRateFrequency,
+                created_at: new Date(),
+                applicable_to_employee_types: data.applicableToEmployeeTypes,
+            },
+        });
 
+        return NextResponse.json({ message: "Leave type created successfully.", data: createdLeaveType });
+    } catch (err) {
+        console.error("Error: ", err); // Log the error for debugging
 
-        return NextResponse.json({ message: err.message }, { status: 500 });
+        // Handle validation errors
+        // if (err instanceof ZodError) {
+        //     return NextResponse.json({ message: "Validation error", errors: err.errors }, { status: 400 });
+        // }
+
+        return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
     }
 }

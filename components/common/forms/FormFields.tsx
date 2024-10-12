@@ -373,20 +373,20 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                             />
                         </Case>
 
-
                         <Default>
                             <Input
                                 id={item.name}
                                 aria-label={item.name}
                                 disabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
-                                type={String(item.type)}
+                                type={item.type || "text"}
                                 variant="bordered"
                                 color="success"
                                 radius="sm"
                                 placeholder={item.placeholder}
                                 size={size}
                                 {...field}
+                                value={item.type === "number" ? Number(field.value) : field.value}
                                 classNames={InputStyle}
                                 endContent={item.endContent}
                                 startContent={item.startContent}
@@ -395,8 +395,8 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                         </Default>
                     </SwitchCase>)}
                 </FormControl>
-                <FormMessage/>
                 {item.description && <FormDescription>{item.description}</FormDescription>}
+                <FormMessage/>
             </FormItem>)
         }}
     />);
