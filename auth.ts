@@ -38,7 +38,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
         async signIn({ account, user }) {
             try {
                 if (account?.provider === "google") {
-                    // Check if user email exists in the employees table
+                    // Check if user email exists in the employees-leaves-status table
                     const googleAuth = await prisma.trans_employees.findUnique({
                         where: {
                             email: user.email || undefined,
@@ -67,7 +67,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     }
 
                     if (access_control.banned_til) {
-                        const isBanned = dayjs(toGMT8(access_control.banned_til)).isAfter(dayjs());
+                        const isBanned = toGMT8(access_control.banned_til).isAfter(new Date());
                         console.log("You are banned");
                         return !isBanned;
                     }
@@ -132,7 +132,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                         }
                     });
 
-                    user.id = id.userId;
+                    user.id = String(googleAuth.id);
 
                     //Update the user in the session
                     if(existingUser) {

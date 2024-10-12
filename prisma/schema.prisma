@@ -245,6 +245,7 @@ model ref_leave_types {
   code             String?        @db.VarChar(45)
   is_carry_forward Boolean?
   is_active        Boolean?
+  is_paid          Boolean        @default(false)
   trans_leaves     trans_leaves[]
 }
 
@@ -255,9 +256,9 @@ model ref_payheads {
   deleted_at               DateTime?                  @db.Timestamp(6)
   id                       Int                        @id @default(autoincrement())
   is_active                Boolean?
-  is_mandatory             Boolean?
   name                     String?                    @db.VarChar(45)
   type                     String?                    @db.VarChar(10)
+  affected_json            Json?                      @db.Json
   dim_payhead_affecteds    dim_payhead_affecteds[]
   trans_payhead_breakdowns trans_payhead_breakdowns[]
 }
@@ -473,6 +474,7 @@ model trans_leaves {
   approved_by                       Int?
   approval_at                       DateTime?        @db.Timestamp(6)
   deleted_at                        DateTime?        @db.Timestamp(6)
+  attachment_json                   Json?            @db.Json
   trans_employees_leaves            trans_employees? @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
   ref_leave_types                   ref_leave_types? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
   trans_employees_leaves_approvedBy trans_employees? @relation("trans_leaves_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")

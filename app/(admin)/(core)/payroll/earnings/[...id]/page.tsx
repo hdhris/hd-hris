@@ -1,10 +1,10 @@
 "use client";
 import { z } from "zod";
 import { useParams } from "next/navigation";
-import { PayheadAffected } from "@/types/payroll/payrollType";
+import { AffectedJson, PayheadAffected } from "@/types/payroll/payheadType";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/dist/client/components/navigation";
-import { formSchema, PayheadForm } from "@/components/admin/payroll/PayheadUI";
+import { PayheadForm } from "@/components/admin/payroll/PayheadUI";
 import fetcher from "@/services/fetcher";
 import useSWR from "swr";import React, { useState } from "react";
 import axios from "axios";
@@ -18,14 +18,14 @@ function Page() {
   );
   const router = useRouter();
 
-  const onSubmit = async (values: z.infer<typeof formSchema>, keys: number[]) => {
-    console.log([values, keys]);
+  const onSubmit = async (values: z.infer<any>, employees: number[], affectedJson: AffectedJson) => {
     try {
       await axios.post(
         `/api/admin/payroll/payhead/update?id=${id}`,
         {
           data: values,
-          affected: values.is_mandatory? []:keys,
+          affected: employees,
+          affectedJson: affectedJson,
         }
       );
       toast({

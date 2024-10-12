@@ -21,6 +21,10 @@ const nextConfig = {
         source: "/employeemanagement",
         destination: "/employeemanagement/employees",
         permanent: true,
+      },{
+        source: "/leaves",
+        destination: "/leaves/leave-requests",
+        permanent: true,
       },
     ];
   },

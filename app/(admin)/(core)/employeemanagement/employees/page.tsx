@@ -4,7 +4,7 @@ import { useEmployeesData } from "@/services/queries";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Employee } from "@/types/employeee/EmployeeType";
-import { Avatar, Button, useDisclosure, Selection, Chip } from "@nextui-org/react";
+import { Avatar, Button, Selection, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/add/AddEmployees";
@@ -32,7 +32,7 @@ const Page: React.FC = () => {
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to fetch employees. Please try again.",
+        description: "Failed to fetch employees-leaves-status. Please try again.",
         duration: 3000,
       });
       setLoading(false);
@@ -51,11 +51,10 @@ const Page: React.FC = () => {
 
   const handleDelete = async (id: number, name: string) => {
     try {
-      const result = await showDialog(
-        "Confirm Delete",
-        `Are you sure you want to delete '${name}' ?`,
-        false
-      );
+      const result = await showDialog({
+        title: "Confirm Delete",
+        message: `Are you sure you want to delete '${name}' ?`,
+      });
       if (result === "yes") {
         await axios.delete(`/api/employeemanagement/employees?id=${id}`);
         toast({

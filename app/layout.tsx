@@ -38,9 +38,8 @@ export default function RootLayout({
 }>) {
 
     return (<html lang="en">
-    <body>
-    <Providers className={inter.className}>
-
+    <body className={inter.className}>
+    <Providers>
         <Debug/>
         <Switch expression={isMaintenanceMode!}>
             <Case of={"true"}>

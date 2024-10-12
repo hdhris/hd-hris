@@ -2,8 +2,8 @@
 import {Tooltip} from "@nextui-org/tooltip";
 import {Button} from "@nextui-org/button";
 import React from "react";
-import {Pencil, Trash2} from "lucide-react";
 import {ButtonProps, cn, TooltipProps} from "@nextui-org/react";
+import {LuPencil, LuTrash2} from "react-icons/lu";
 
 interface ActionProps {
     name: string
@@ -26,8 +26,8 @@ export const TableActionButton = ({onDelete, onEdit, name}: ActionProps) => {
             </Button>
         </Tooltip>)
     return (<>
-        {onEdit && actionBTN({children:  <Pencil className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
-        {onDelete && actionBTN({children: <Trash2 className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
+        {onEdit && actionBTN({children:  <LuPencil className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
+        {onDelete && actionBTN({children: <LuTrash2 className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
     </>);
 };
 

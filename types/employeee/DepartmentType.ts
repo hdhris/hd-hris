@@ -11,7 +11,7 @@ export type Department = {
     updated_at: string;
   };
   
-export interface EmployeeAssociate {//to connect the employees from other route I need to export this
+export interface EmployeeAssociate {//to connect the employees-leaves-status from other route I need to export this
     employee_id: number;
     fullName: string;
     job_title: string | null;
@@ -35,5 +35,5 @@ export interface DepartmentInfo {
     associated_employees: EmployeeAssociate[];
     total_employees: number;
     logo?: string; //for logo
-    resignedEmployees?: number; //for resigned employees
+    resignedEmployees?: number; //for resigned employees-leaves-status
 }

@@ -6,8 +6,10 @@ import {Signatory} from "@/types/audit/types";
 import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
 import { Department } from "@/types/employeee/DepartmentType";
 import { Schedules } from "@/types/attendance-time/AttendanceTypes";
-import { Payhead, PayheadAffected } from "@/types/payroll/payrollType";
 import { Branch } from "@/types/employeee/BranchType";
+import { Payhead, PayheadAffected } from "@/types/payroll/payheadType";
+import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
+import { OvertimeEntry, OvertimeResponse } from "@/types/attendance-time/OvertimeType";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -15,13 +17,30 @@ export function useDashboard() {
     })
 }
 
-export function useEmployeesListData({currentPage, limit}: {currentPage: number, limit: number}) {
-    return useSWR<any>(`/api/admin/employees?page=${currentPage}&limit=${limit}`, fetcher, {
+export function useEmployeesLeaveStatus() {
+    return useSWR<EmployeeLeavesStatus>('/api/admin/leaves/employees-leaves-status', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
-
-
 }
+
+// export function useEmployeesLeaveStatus() {
+//     const { data, error } = useSWR<EmployeeLeavesStatus>(
+//         "/api/admin/leaves/employees-leaves-status",
+//         fetcher,
+//         {
+//             revalidateOnFocus: true,
+//             refreshInterval: 3000
+//         }
+//     );
+//
+//     console.log("Data: ", data);
+//     console.log("Error: ", error);
+//
+//     if (error) return { error };
+//     if (!data) return { loading: true }; // Return loading state
+//
+//     return data; // Return the actual data
+// }
 
 export function useAudit() {
     return useSWR<Signatory[]>('/api/admin/audit/signatories', fetcher, {
@@ -53,7 +72,7 @@ export function useBackupLogs() {
 }
 
 export function useEmployeesData() {
-    return useSWR<Employee[]>('/api/employeemanagement/employees', fetcher, {
+    return useSWR<Employee[]>('/api/employeemanagement/employees-leaves-status', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }
@@ -91,5 +110,23 @@ export function usePayheads(type: string) {
 export function useNewPayhead() {
     return useSWR<PayheadAffected>('/api/admin/payroll/payhead/read', fetcher, {
         revalidateOnFocus: false
+    })
+}
+
+export function useQuery<T extends object>(api: string, refreshInterval?: number){
+    return useSWR<T>(api, fetcher, {
+        revalidateOnFocus: false, refreshInterval: refreshInterval
+    })
+}
+
+export function useLeaveRequest(){
+    return useSWR<LeaveRequest[]>('/api/admin/leaves/requests', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
+export function useLeaveTypes(){
+    return useSWR<LeaveTypesItems[]>('/api/admin/leaves/leave-types', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
     })
 }

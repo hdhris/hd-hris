@@ -4,9 +4,7 @@ import {cn, NavbarItem} from "@nextui-org/react";
 import {PiUsersThree} from "react-icons/pi";
 import {RxDashboard} from "react-icons/rx";
 import {FiClock} from "react-icons/fi";
-import {
-    LuBadgeCheck, LuChevronLeft, LuChevronRight, LuFileWarning, LuHeartHandshake, LuPersonStanding, LuPlane, LuTicket
-} from "react-icons/lu";
+import {LuBadgeCheck, LuFileWarning, LuHeartHandshake, LuPersonStanding, LuPlane, LuTicket} from "react-icons/lu";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {BiStats} from "react-icons/bi";
 import SideBarItem from "@/components/sidebar/SideBarItem";
@@ -15,9 +13,12 @@ import NavBar from "@/components/navbar/NavBar";
 import UserMenu from "@/components/dropdown/UserMenu";
 import Notification from '@/components/functions/notifications/Notification'
 import {LiaUsersSolid} from "react-icons/lia";
+import {useIsClient} from "@/hooks/ClientRendering";
+import Loading from "@/components/spinner/Loading";
 
 function RootLayout({children}: { children: ReactNode }) {
     // Use a function to lazily initialize the state
+    const isClient = useIsClient();
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
         if (typeof window !== "undefined") {
             // Check localStorage for the initial value if on the client side
@@ -40,6 +41,8 @@ function RootLayout({children}: { children: ReactNode }) {
         localStorage.setItem("isSidebarOpen", JSON.stringify(newSidebarState));
     };
 
+    if (!isClient) return <div className="h-screen w-screen"><Loading/></div>
+
     return (<main
         className="h-full w-full fixed top-0 left-0 flex bg-[#FAFAFA] overflow-x-auto overflow-y-hidden">
         {/* NavBar fixed at the top */}
@@ -48,42 +51,45 @@ function RootLayout({children}: { children: ReactNode }) {
         </NavBar>
 
         {/* SideBar fixed at the left */}
-        <section className="sticky mt-12 top-[calc(100% - 48px] left-0 flex z-10">
-            <SideBar
-                onClockShow={isSidebarOpen}
-                className={cn("transition-width", isSidebarOpen ? "w-52" : "w-16")}
+        <section className={cn("sticky mt-12 top-[calc(100% - 48px] left-0 flex")}>
+            <div className="relative group"
+                 onMouseEnter={() => {
+                     if (!isSidebarOpen) toggleSidebar(); // Expand the sidebar on hover
+                 }}
+                 onMouseLeave={() => {
+                     if (isSidebarOpen) toggleSidebar(); // Collapse the sidebar when not hovered
+                 }}
             >
-                <SideBarItem label="Dashboard" href="/dashboard" icon={<RxDashboard/>} showLabel={isSidebarOpen}/>
-                <SideBarItem label="Employee Management" href="/employeemanagement" icon={<PiUsersThree/>}
-                             showLabel={isSidebarOpen}/>
-                <SideBarItem label="Attendance & Time" href="/attendance-time" icon={<FiClock/>}
-                             showLabel={isSidebarOpen}/>
-                <SideBarItem label="Leaves Application" href="/leaves/leave-requests" icon={<LuPlane/>} showLabel={isSidebarOpen}/>
-                <SideBarItem label="Payroll" href="/payroll" icon={<LuTicket/>} showLabel={isSidebarOpen}/>
-                <SideBarItem label="Benefits" href="/benefits" icon={<LuHeartHandshake/>}
-                             showLabel={isSidebarOpen}/>
-                <SideBarItem label="Performance Appraisal" href="/performance" icon={<LuBadgeCheck/>}
-                             showLabel={isSidebarOpen}/>
-                <SideBarItem label="Privileges" href="/privileges" icon={<LuPersonStanding/>}
-                             showLabel={isSidebarOpen}/>
-                <SideBarItem label="Incident Report" href="/incident-report" icon={<LuFileWarning/>}
-                             showLabel={isSidebarOpen}/>
-                <SideBarItem label="Training And Seminars" href="/training&seminars" icon={<LiaUsersSolid/>}
-                             showLabel={isSidebarOpen}/>
-                <SideBarItem label="Reports" href="/reports" icon={<BiStats/>} showLabel={isSidebarOpen}/>
-            </SideBar>
+                <SideBar
+                    onClockShow={isSidebarOpen}
+                    className={cn("transition-width z-40 group-hover:w-52", isSidebarOpen ? "w-52" : "w-16")}
+                >
+                    <SideBarItem label="Dashboard" href="/dashboard" icon={<RxDashboard/>} showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Employee Management" href="/employeemanagement" icon={<PiUsersThree/>}
+                                 showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Attendance & Time" href="/attendance-time" icon={<FiClock/>}
+                                 showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Leaves Application" href="/leaves" icon={<LuPlane/>}
+                                 showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Payroll" href="/payroll" icon={<LuTicket/>} showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Benefits" href="/benefits" icon={<LuHeartHandshake/>}
+                                 showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Performance Appraisal" href="/performance" icon={<LuBadgeCheck/>}
+                                 showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Privileges" href="/privileges" icon={<LuPersonStanding/>}
+                                 showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Incident Report" href="/incident-report" icon={<LuFileWarning/>}
+                                 showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Training And Seminars" href="/training&seminars" icon={<LiaUsersSolid/>}
+                                 showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Reports" href="/reports" icon={<BiStats/>} showLabel={isSidebarOpen}/>
+                </SideBar>
 
-            <div
-                className={cn("absolute top-1/2 transform -translate-y-1/2 p-1 bg-white z-10 ring-2 ring-gray-200 ring-inset cursor-pointer rounded-full transition-all duration-300 ease-in-out left-[calc(100%-10px)]", // isSidebarOpen ? "left-[calc(100%-40px)]" : "left-[calc(100%-10px)]"
-                )}
-                onClick={toggleSidebar}
-            >
-                {isSidebarOpen ? <LuChevronLeft/> : <LuChevronRight/>}
             </div>
         </section>
 
 
-        <ScrollShadow className="p-4 mt-16 mb-4 w-full min-w-[980px]">
+        <ScrollShadow className="absolute p-4 mt-14 left-14 w-[calc(100%-56px)] h-full min-w-[980px] -z-10 pb-[70px]">
             {children}
         </ScrollShadow>
 

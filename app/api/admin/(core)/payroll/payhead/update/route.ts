@@ -3,12 +3,13 @@ import prisma from "@/prisma/prisma";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 
 export async function POST(req: NextRequest) {
-  const { data, affected } = await req.json();
+  const { data, affected, affectedJson } = await req.json();
   const { searchParams } = new URL(req.url);
   const id = Number(searchParams.get("id"));
   try {
     console.log(data);
     console.log(affected);
+    console.log(affectedJson);
 
     await prisma.$transaction(async (pm) => {
       // Update the payhead record
@@ -19,13 +20,12 @@ export async function POST(req: NextRequest) {
         data: {
           name: data.name,
           calculation: data.calculation,
-          is_mandatory: data.is_mandatory,
-          is_active: data.is_active,
-          updated_at: toGMT8(new Date()),
+          affected_json: affectedJson,
+          updated_at: toGMT8(new Date()).toISOString(),
         },
       });
 
-      // Step 1: Fetch existing affected employees for this payhead
+      // Step 1: Fetch existing affected employees-leaves-status for this payhead
       const existingAffected = await pm.dim_payhead_affecteds.findMany({
         where: { payhead_id: id },
         select: { employee_id: true },
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       );
       const newEmployeeIds = affected.map((employeeId: number) => employeeId);
 
-      // Step 2: Find employees to delete and to create
+      // Step 2: Find employees-leaves-status to delete and to create
       const employeesToDelete = existingEmployeeIds.filter(
         (employeeId) => !newEmployeeIds.includes(employeeId)
       ) as number[];
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         (employeeId: number) => !existingEmployeeIds.includes(employeeId)
       );
 
-      // Step 3: Delete employees that are no longer affected
+      // Step 3: Delete employees-leaves-status that are no longer affected
       if (employeesToDelete.length > 0) {
         await pm.dim_payhead_affecteds.deleteMany({
           where: {
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Step 4: Create new affected employees
+      // Step 4: Create new affected employees-leaves-status
       if (employeesToCreate.length > 0) {
         await pm.dim_payhead_affecteds.createMany({
           data: employeesToCreate.map((employeeId: number) => ({

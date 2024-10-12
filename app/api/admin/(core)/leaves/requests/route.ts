@@ -1,20 +1,13 @@
 import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
-import {LeaveRequestTypes} from "@/types/leaves/LeaveRequestTypes";
-import {getEmpFullName} from "@/lib/utils/nameFormatter";
-import dayjs from "dayjs";
 
-
+export const dynamic = "force-dynamic"
 export async function GET() {
-
     const data = await prisma.trans_leaves.findMany({
-        where: {
-            end_date: {
-                lt: new Date()
-            }
-        }, include: {
+        include: {
             trans_employees_leaves: {
                 select: {
+                    email: true,
                     prefix: true,
                     first_name: true,
                     last_name: true,
@@ -23,9 +16,9 @@ export async function GET() {
                     extension: true,
                     picture: true
                 }
-            },
-            trans_employees_leaves_approvedBy: {
+            }, trans_employees_leaves_approvedBy: {
                 select: {
+                    email: true,
                     prefix: true,
                     first_name: true,
                     last_name: true,
@@ -34,10 +27,15 @@ export async function GET() {
                     extension: true,
                     picture: true
                 }
-            },
-            ref_leave_types: true
+            }, ref_leave_types: true
         }
     });
+
+    // const leaves_request = data.map((item) => {
+    //     return {
+    //         id: item.id!, ...item
+    //     }
+    // })
 
     return NextResponse.json(data)
 }

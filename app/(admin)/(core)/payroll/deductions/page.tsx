@@ -2,7 +2,7 @@
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import { usePayheads } from "@/services/queries";
-import { Payhead } from "@/types/payroll/payrollType";
+import { Payhead } from "@/types/payroll/payheadType";
 import { FilterProps } from "@/types/table/default_config";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Button, Chip, Selection } from "@nextui-org/react";
@@ -10,16 +10,17 @@ import { useRouter } from "next/dist/client/components/navigation";
 import axios from "axios";
 import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
-import React, { useState } from "react";
+import React from "react";
 import { parseBoolean } from "@/lib/utils/parser/parseClass";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
-    const result = await showDialog(
-      "Confirm Delete",
-      `Are you sure you want to delete '${name}' ?`,
-      false
-    );
+    const result = await showDialog({
+      title: "Confirm Delete",
+      message: `Are you sure you want to delete '${name}' ?`,
+      preferredAnswer: "no",
+    });
     if (result === "yes") {
       await axios.post("/api/admin/payroll/payhead/delete", {
         id: id,
@@ -27,7 +28,7 @@ const handleDelete = async (id: Number, name: string) => {
       toast({
         title: "Deleted",
         description: "Deduction deleted successfully!",
-        variant: "warning",
+        variant: "success",
       });
     }
   } catch (error) {
@@ -54,10 +55,33 @@ function Page() {
         case "name":
           return <p className="capitalize">{item.name}</p>;
         case "affected":
-          return item.is_mandatory ? (
-            <Chip color="primary" variant="bordered">
-              Mandatory
-            </Chip>
+          return item.dim_payhead_affecteds.length === 0 ? (
+            <div className="flex gap-2">
+              {item.affected_json &&
+                item.affected_json.department.length > 0 && (
+                  <Chip color="default" variant="bordered">
+                    <strong>{item.affected_json.department.length}</strong>{" "}
+                    {item.affected_json.department.length >= 2
+                      ? "Departments"
+                      : "Department"}
+                  </Chip>
+                )}
+              {item.affected_json &&
+                (item.affected_json.mandatory.probationary ||
+                  item.affected_json.mandatory.regular) && (
+                  <Chip color="primary" variant="bordered">
+                    {item.affected_json.mandatory.probationary &&
+                      "Probationary"}
+                    {item.affected_json.mandatory.probationary &&
+                    item.affected_json.mandatory.regular
+                      ? ", "
+                      : item.affected_json.mandatory.probationary
+                      ? " "
+                      : ""}
+                    {item.affected_json.mandatory.regular && "Regular"}
+                  </Chip>
+                )}
+            </div>
           ) : (
             <Chip color="default" variant="bordered">
               <strong>{item.dim_payhead_affecteds?.length}</strong>{" "}
@@ -101,24 +125,33 @@ function Page() {
     },
     {
       filtered: [
-        { name: "Mandatory", uid: "mandatory_true" },
+        { name: "Probationary", uid: "mandatory_prob" },
+        { name: "Regular", uid: "mandatory_reg" },
         { name: "Non-mandatory", uid: "mandatory_false" },
       ],
-      category: "Affected",
+      category: "Mandatory",
     },
   ];
   const filterConfig = (keys: Selection) => {
     let filteredItems: Payhead[] = [...data!];
 
     if (keys !== "all" && keys.size > 0) {
-      console.log(Array.from(keys));
       Array.from(keys).forEach((key) => {
         const [uid, value] = (key as string).split("_");
         filteredItems = filteredItems.filter((items) => {
           if (uid.includes("active")) {
             return items.is_active === parseBoolean(value);
           } else if (uid.includes("mandatory")) {
-            return items.is_mandatory === parseBoolean(value);
+            if (value === "prob") {
+              return items.affected_json?.mandatory.probationary === true;
+            } else if (value === "reg") {
+              return items.affected_json?.mandatory.regular === true;
+            } else if (value === "false") {
+              return (
+                items.affected_json?.mandatory.regular === false &&
+                items.affected_json?.mandatory.probationary === false
+              );
+            }
           }
         });
       });
@@ -127,7 +160,7 @@ function Page() {
     return filteredItems;
   };
   return (
-    <>
+    <div className="h-fit-navlayout">
       <TableData
         config={config}
         items={data!}
@@ -136,15 +169,13 @@ function Page() {
         filterItems={filterItems}
         filterConfig={filterConfig}
         counterName="Deductions"
-        className="flex-1 h-[calc(100vh-9.5rem)] overflow-y-auto"
-        removeWrapper
+        className="h-full"
         isHeaderSticky
-        color={"primary"}
         selectionMode="single"
         aria-label="Deductions"
         endContent={() => (
           <Button
-            color="primary"
+            {...uniformStyle()}
             className=" w-fit"
             onClick={() => router.push("/payroll/deductions/create")}
           >
@@ -152,7 +183,7 @@ function Page() {
           </Button>
         )}
       />
-    </>
+    </div>
   );
 }
 

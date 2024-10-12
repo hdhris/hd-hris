@@ -4,11 +4,12 @@ import { number } from "zod";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 
 export async function POST(req: NextRequest) {
-  const { data, affected, type } = await req.json();
+  const { data, affected, affectedJson, type } = await req.json();
 
   try {
     console.log(data);
     console.log(affected);
+    console.log(affectedJson)
 
     // Create the payhead record
 
@@ -17,15 +18,15 @@ export async function POST(req: NextRequest) {
         data: {
           name: data.name,
           calculation: data.calculation,
-          is_mandatory: data.is_mandatory,
           is_active: data.is_active,
+          affected_json: affectedJson,
           type: type,
-          created_at: toGMT8(new Date()),
-          updated_at: toGMT8(new Date()),
+          created_at: toGMT8(new Date()).toISOString(),
+          updated_at: toGMT8(new Date()).toISOString(),
         },
       });
   
-      // Create new affected employees
+      // Create new affected employees-leaves-status
       if (affected.length > 0) {
         await pm.dim_payhead_affecteds.createMany({
           data: affected.map((employeeId: number) => ({

@@ -8,30 +8,39 @@ import {
   ModalFooter,
   Button,
 } from "@nextui-org/react";
-import ReactDOM from 'react-dom/client';
+import ReactDOM from "react-dom/client";
 
-const showDialog = async (
-  title: string,
-  message: string,
-  withCancel?: boolean
-): Promise< 'yes'|'no'|'cancel' > => {
+interface showDialogProps {
+  title: string;
+  message: string;
+  withCancel?: boolean;
+  preferredAnswer?: "yes" | "no" | "cancel";
+}
+
+const showDialog = async ({
+  title,
+  message,
+  withCancel,
+  preferredAnswer,
+}: showDialogProps): Promise<"yes" | "no" | "cancel"> => {
+  const prefAnswer = preferredAnswer || "yes";
   return new Promise((resolve) => {
     const Dialog = () => {
       const [isOpen, setIsOpen] = useState(true);
 
       const handleYes = () => {
         setIsOpen(false);
-        resolve('yes');
+        resolve("yes");
       };
 
       const handleNo = () => {
         setIsOpen(false);
-        resolve('no');
+        resolve("no");
       };
 
       const handleCancel = () => {
         setIsOpen(false);
-        resolve('cancel');
+        resolve("cancel");
       };
 
       return (
@@ -40,22 +49,43 @@ const showDialog = async (
           onOpenChange={setIsOpen}
           isDismissable={false}
           isKeyboardDismissDisabled={true}
+          size="sm"
+          closeButton={false}
+          style={{
+            zIndex: '9999 !important'
+          }}
         >
           <ModalContent>
             {(onClose) => (
               <>
-                <ModalHeader className="flex flex-col gap-1">{title}</ModalHeader>
+                <ModalHeader className="flex flex-col gap-1 text-small">
+                  {title}
+                </ModalHeader>
                 <ModalBody>
                   <p>{message}</p>
                 </ModalBody>
-                <ModalFooter>
-                  { withCancel && <Button color="default" variant="light" onPress={handleCancel}>
-                    Cancel
-                  </Button>}
-                  <Button color="danger" variant="light" onPress={handleNo}>
+                <ModalFooter className="z-[9999]">
+                  {withCancel && (
+                    <Button
+                      color="primary"
+                      variant={prefAnswer == "cancel" ? "solid" : "light"}
+                      onPress={handleCancel}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                  <Button
+                    color="danger"
+                    variant={prefAnswer == "no" ? "solid" : "light"}
+                    onPress={handleNo}
+                  >
                     No
                   </Button>
-                  <Button color="primary" onPress={handleYes}>
+                  <Button
+                    color="primary"
+                    variant={prefAnswer == "yes" ? "solid" : "light"}
+                    onPress={handleYes}
+                  >
                     Yes
                   </Button>
                 </ModalFooter>
@@ -79,7 +109,6 @@ const showDialog = async (
       const root = ReactDOM.createRoot(modalContainer);
       root.render(dialogJSX);
     };
-    
 
     renderDialog();
 

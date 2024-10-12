@@ -16,55 +16,55 @@ import { Button } from "@nextui-org/button";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Certificate {
-  fileName: string;
-  fileUrl: string;
+    fileName: string;
+    fileUrl: string;
 }
 
 const EditEducationalBackgroundForm = () => {
-  const { control, watch, setValue, getValues } = useFormContext();
-  const [showStrand, setShowStrand] = useState(false);
-  const [showCourse, setShowCourse] = useState(false);
-  const [fileStates, setFileStates] = useState<FileState[]>([]);
-  const { edgestore } = useEdgeStore();
-  const [select, setSelect] = useState<string | null>(null);
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
+    const {control, watch, setValue, getValues} = useFormContext();
+    const [showStrand, setShowStrand] = useState(false);
+    const [showCourse, setShowCourse] = useState(false);
+    const [fileStates, setFileStates] = useState<FileState[]>([]);
+    const {edgestore} = useEdgeStore();
+    const [select, setSelect] = useState<string | null>(null);
+    const [certificates, setCertificates] = useState<Certificate[]>([]);
 
   const { toast } = useToast();
 
-  // Watch form fields
-  const elementary = watch("elementary");
-  const highSchool = watch("highSchool");
-  const seniorHighSchool = watch("seniorHighSchool");
-  const universityCollege = watch("universityCollege");
-  const seniorHighStrand = watch("seniorHighStrand");
+    // Watch form fields
+    const elementary = watch("elementary");
+    const highSchool = watch("highSchool");
+    const seniorHighSchool = watch("seniorHighSchool");
+    const universityCollege = watch("universityCollege");
+    const seniorHighStrand = watch("seniorHighStrand");
 
-  useEffect(() => {
-    setShowStrand(!!seniorHighSchool);
-  }, [seniorHighSchool]);
+    useEffect(() => {
+        setShowStrand(!!seniorHighSchool);
+    }, [seniorHighSchool]);
 
-  useEffect(() => {
-    const initialSelect = seniorHighStrand || null;
-    setSelect(initialSelect);
-    setShowCourse(initialSelect === "tvl");
-  }, [seniorHighStrand]);
+    useEffect(() => {
+        const initialSelect = seniorHighStrand || null;
+        setSelect(initialSelect);
+        setShowCourse(initialSelect === "tvl");
+    }, [seniorHighStrand]);
 
-  useEffect(() => {
-    setShowCourse(select === "tvl");
-  }, [select]);
+    useEffect(() => {
+        setShowCourse(select === "tvl");
+    }, [select]);
 
-  useEffect(() => {
-    let highestDegree = "Elementary School";
-    if (highSchool) highestDegree = "High School";
-    if (seniorHighSchool) highestDegree = "Senior High School";
-    if (universityCollege) highestDegree = "University/College";
-    setValue("highestDegree", highestDegree);
-  }, [elementary, highSchool, seniorHighSchool, universityCollege, setValue]);
+    useEffect(() => {
+        let highestDegree = "Elementary School";
+        if (highSchool) highestDegree = "High School";
+        if (seniorHighSchool) highestDegree = "Senior High School";
+        if (universityCollege) highestDegree = "University/College";
+        setValue("highestDegree", highestDegree);
+    }, [elementary, highSchool, seniorHighSchool, universityCollege, setValue]);
 
-  useEffect(() => {
-    // Load existing certificates from form data
-    const existingCertificates = getValues("certificates") || [];
-    setCertificates(existingCertificates);
-  }, [getValues]);
+    useEffect(() => {
+        // Load existing certificates from form data
+        const existingCertificates = getValues("certificates") || [];
+        setCertificates(existingCertificates);
+    }, [getValues]);
 
   const handleSelect = (keys: SharedSelection) => {
     const value = Array.from(keys)[0] as string;
@@ -105,71 +105,64 @@ const EditEducationalBackgroundForm = () => {
     document.body.removeChild(link);
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Elementary School */}
-        <FormField
-          name="elementary"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Elementary School</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Enter Elementary School"
-                  variant="bordered"
-                  className="border rounded"
-                  isRequired
+    return (<div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Elementary School */}
+                <FormField
+                    name="elementary"
+                    control={control}
+                    render={({field}) => (<FormItem>
+                            <FormLabel>Elementary School</FormLabel>
+                            <FormControl>
+                                <Input
+                                    {...field}
+                                    placeholder="Enter Elementary School"
+                                    variant="bordered"
+                                    className="border rounded"
+                                    isRequired
+                                />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>)}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        {/* High School */}
-        <FormField
-          name="highSchool"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>High School</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Enter High School"
-                  variant="bordered"
-                  className="border rounded"
-                  isRequired
+                {/* High School */}
+                <FormField
+                    name="highSchool"
+                    control={control}
+                    render={({field}) => (<FormItem>
+                            <FormLabel>High School</FormLabel>
+                            <FormControl>
+                                <Input
+                                    {...field}
+                                    placeholder="Enter High School"
+                                    variant="bordered"
+                                    className="border rounded"
+                                    isRequired
+                                />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>)}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        {/* Senior High School */}
-        <FormField
-          name="seniorHighSchool"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Senior High School</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Enter Senior High School"
-                  variant="bordered"
-                  className="border rounded"
-                  isRequired
+                {/* Senior High School */}
+                <FormField
+                    name="seniorHighSchool"
+                    control={control}
+                    render={({field}) => (<FormItem>
+                            <FormLabel>Senior High School</FormLabel>
+                            <FormControl>
+                                <Input
+                                    {...field}
+                                    placeholder="Enter Senior High School"
+                                    variant="bordered"
+                                    className="border rounded"
+                                    isRequired
+                                />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>)}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {/* Senior High Strand */}
         {showStrand && (
@@ -214,28 +207,24 @@ const EditEducationalBackgroundForm = () => {
           />
         )}
 
-        {/* TVL Course */}
-        {showCourse && (
-          <FormField
-            name="tvlCourse"
-            control={control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>TVL Course</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Enter TVL Course"
-                    variant="bordered"
-                    className="border rounded"
-                    isRequired
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+                {/* TVL Course */}
+                {showCourse && (<FormField
+                        name="tvlCourse"
+                        control={control}
+                        render={({field}) => (<FormItem>
+                                <FormLabel>TVL Course</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        placeholder="Enter TVL Course"
+                                        variant="bordered"
+                                        className="border rounded"
+                                        isRequired
+                                    />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>)}
+                    />)}
 
         {/* University/College */}
         <FormField
@@ -258,29 +247,25 @@ const EditEducationalBackgroundForm = () => {
           )}
         />
 
-        {/* Course */}
-        {universityCollege && (
-          <FormField
-            name="course"
-            control={control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Course</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Enter Course"
-                    variant="bordered"
-                    className="border rounded"
-                    isRequired
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-      </div>
+                {/* Course */}
+                {universityCollege && (<FormField
+                        name="course"
+                        control={control}
+                        render={({field}) => (<FormItem>
+                                <FormLabel>Course</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        placeholder="Enter Course"
+                                        variant="bordered"
+                                        className="border rounded"
+                                        isRequired
+                                    />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>)}
+                    />)}
+            </div>
 
       <FormField
         name="highestDegree"

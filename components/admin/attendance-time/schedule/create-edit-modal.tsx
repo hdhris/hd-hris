@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   Button,
-  Input,
-  Switch,
   ModalContent,
   ModalBody,
   ModalFooter,
   ModalHeader,
-  TimeInput,
 } from "@nextui-org/react";
 import { BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
-import { Time } from "@internationalized/date";
-import { dateToTime } from "@/lib/utils/dateToTime";
+import { Form } from "@/components/ui/form";
+import FormFields from "@/components/common/forms/FormFields";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toGMT8 } from "@/lib/utils/toGMT8";
+import Drawer from "@/components/common/Drawer";
 
 interface ScheduleModalProps {
   visible: boolean;
@@ -31,98 +33,76 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
   onDelete,
   selectedSchedule,
 }) => {
-  const [name, setName] = useState("");
-  const [clockIn, setClockIn] = useState(new Time(8));
-  const [clockOut, setClockOut] = useState(new Time(17));
-  const [breakMin, setBreakMin] = useState<number>(0);
-  const [isActive, setIsActive] = useState(true);
+  const formSchema = z.object({
+    id: z.number().optional(),
+    name: z
+      .string()
+      .min(1, { message: "Schedule name is required." })
+      .max(20, { message: "Character limit reached." }),
+    clock_in: z.string(),
+    clock_out: z.string(),
+    break_min: z.number(),
+    is_active: z.boolean(),
+  });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      id: -1,
+      name: "",
+      clock_in: "",
+      clock_out: "",
+      break_min: 60,
+      is_active: true,
+    },
+  });
 
   // Effect to populate modal fields if editing
-  useEffect(() => {
+  const load = useCallback(() => {
     if (selectedSchedule) {
-      setName(selectedSchedule.name);
-      console.log(selectedSchedule);
-      setClockIn(dateToTime(new Date(selectedSchedule.clock_in)));
-      setClockOut(dateToTime(new Date(selectedSchedule.clock_out)));
-      setBreakMin(selectedSchedule.break_min);
-      setIsActive(selectedSchedule.is_active);
+      form.reset({
+        id: selectedSchedule.id,
+        name: selectedSchedule.name,
+        clock_in: toGMT8(selectedSchedule.clock_in).format("HH:mm"),
+        clock_out: toGMT8(selectedSchedule.clock_out).format("HH:mm"),
+        break_min: selectedSchedule.break_min,
+        is_active: selectedSchedule.is_active,
+      });
     } else {
       // Reset form if adding a new schedule
-      setName("");
-      setClockIn(new Time(8));
-      setClockOut(new Time(17));
-      setBreakMin(0);
-      setIsActive(true);
+      form.reset({
+        id: -1,
+        name: "",
+        clock_in: "",
+        clock_out: "",
+        break_min: 60,
+        is_active: true,
+      });
     }
-  }, [selectedSchedule]);
+  }, [selectedSchedule, form]);
+  useEffect(() => {
+    load();
+  }, [selectedSchedule, load]);
 
-  const handleSave = () => {
+  const handleSave = (value: any) => {
     const newSchedule: BatchSchedule = {
-      id: selectedSchedule ? selectedSchedule.id : -1,
-      name: name,
-      clock_in: clockIn.toString(),
-      clock_out: clockOut.toString(),
-      break_min: breakMin,
-      is_active: isActive,
       created_at: selectedSchedule
         ? selectedSchedule.created_at
         : new Date().toISOString(),
       updated_at: new Date().toISOString(),
       deleted_at: null,
+      ...value,
     };
 
     onSave(newSchedule);
   };
 
   return (
-    <Modal isOpen={visible} onClose={onClose} size="lg">
-      <ModalContent>
-        <ModalHeader>
-          {selectedSchedule ? "Edit Schedule" : "Add Schedule"}
-        </ModalHeader>
-        <ModalBody>
-          <Input
-            isClearable={true}
-            label="Schedule Name"
-            placeholder="Enter schedule name"
-            fullWidth
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <TimeInput
-            label="Clock In Time"
-            fullWidth
-            value={clockIn}
-            onChange={setClockIn}
-          />
-          <TimeInput
-            label="Clock Out Time"
-            fullWidth
-            value={clockOut}
-            onChange={setClockOut}
-          />
-          <Input
-            isClearable={true}
-            label="Break Minutes"
-            placeholder="Enter break time in minutes"
-            fullWidth
-            type="number"
-            value={breakMin.toString()}
-            onChange={(e) => setBreakMin(parseInt(e.target.value))}
-          />
-          <Switch
-            isSelected={isActive}
-            onValueChange={setIsActive}
-            color="success"
-          >
-            {isActive ? "Active" : "Inactive"}
-          </Switch>
-        </ModalBody>
-        <ModalFooter>
+    <Drawer
+      footer={
+        <>
           {selectedSchedule && (
             <Button
               color="warning"
-              className="me-auto"
               onClick={() => {
                 onDelete(selectedSchedule?.id);
               }}
@@ -130,15 +110,61 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
               Delete
             </Button>
           )}
-          <Button color="danger" variant="light" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button isLoading={pending} color="primary" onClick={handleSave}>
+          <Button
+            isLoading={pending}
+            color="primary"
+            type="submit"
+            form="schedule-form"
+            className="ms-auto"
+          >
             {selectedSchedule ? "Update" : "Add"}
           </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </>
+      }
+      title={selectedSchedule ? "Edit Schedule" : "Add Schedule"}
+      isOpen={visible}
+      onClose={onClose}
+    >
+      <Form {...form}>
+        <form id="schedule-form" onSubmit={form.handleSubmit(handleSave)}>
+          <FormFields
+            items={[
+              {
+                name: "name",
+                label: "Schedule Name",
+                isRequired: true,
+              },
+              {
+                name: "clock_in",
+                label: "Clock In",
+                isRequired: true,
+                type: "time",
+              },
+              {
+                name: "clock_out",
+                label: "Clock Out",
+                isRequired: true,
+                type: "time",
+              },
+              {
+                name: "break_min",
+                label: "Break Minutes",
+                isRequired: true,
+              },
+              {
+                name: "is_active",
+                type: "checkbox",
+                label: "Active",
+                config: {
+                  defaultSelected: true,
+                  description: "test",
+                },
+              },
+            ]}
+          />
+        </form>
+      </Form>
+    </Drawer>
   );
 };
 

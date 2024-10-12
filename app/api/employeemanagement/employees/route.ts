@@ -166,7 +166,7 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
   }
 }
 
-// GET: Fetch employees
+// GET: Fetch employees-leaves-status
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
@@ -222,7 +222,7 @@ async function getEmployeeById(id: number, daysJson?: Record<string, boolean>) {
   return employee;
 }
 
-// Fetch all employees
+// Fetch all employees-leaves-status
 async function getAllEmployees(daysJson?: Record<string, boolean>) {
   const employees = await prisma.trans_employees.findMany({
     where: {
@@ -248,7 +248,7 @@ async function getAllEmployees(daysJson?: Record<string, boolean>) {
     },
   });
 
-  logDatabaseOperation("GET all employees", employees);
+  logDatabaseOperation("GET all employees-leaves-status", employees);
   return employees;
 }
 

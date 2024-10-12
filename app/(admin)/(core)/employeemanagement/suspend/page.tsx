@@ -20,13 +20,13 @@ export default page
 // import { TableActionButton } from "@/components/actions/ActionButton";
 
 // const Page = () => {
-//   const [employees, setEmployees] = useState<Employee[]>([]);
+//   const [employees-leaves-status, setEmployees] = useState<Employee[]>([]);
 //   const [loading, setLoading] = useState(true);
 
 //   useEffect(() => {
 //     const fetchEmployees = async () => {
 //       try {
-//         const response = await fetch("/api/employeemanagement/employees");
+//         const response = await fetch("/api/employeemanagement/employees-leaves-status");
 //         if (!response.ok) {
 //           throw new Error("Network response was not ok");
 //         }
@@ -35,7 +35,7 @@ export default page
 //       );
 //         setEmployees(suspendedEmployees);
 //       } catch (error) {
-//         console.error("Failed to fetch employees:", error);
+//         console.error("Failed to fetch employees-leaves-status:", error);
 //       } finally {
 //         setLoading(false);
 //       }
@@ -48,14 +48,14 @@ export default page
 //   // useEffect(() => {
 //   //   const fetchEmployees = async () => {
 //   //     try {
-//   //       const response = await fetch("/api/employeemanagement/employees?suspended=true");
+//   //       const response = await fetch("/api/employeemanagement/employees-leaves-status?suspended=true");
 //   //       if (!response.ok) {
 //   //         throw new Error("Network response was not ok");
 //   //       }
 //   //       const data: Employee[] = await response.json();
 //   //       setEmployees(data);
 //   //     } catch (error) {
-//   //       console.error("Failed to fetch employees:", error);
+//   //       console.error("Failed to fetch employees-leaves-status:", error);
 //   //     } finally {
 //   //       setLoading(false);
 //   //     }
@@ -154,7 +154,7 @@ export default page
 //       <TableData
 //         aria-label="Employee Table"
 //         config={config}
-//         items={employees}
+//         items={employees-leaves-status}
 //         searchingItemKey={searchingItemKey}
 //         counterName="Employees"
 //         selectionMode="multiple"

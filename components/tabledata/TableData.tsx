@@ -21,7 +21,6 @@ import {
     TableRow,
     Tooltip
 } from '@nextui-org/react';
-import {SearchIcon, Trash2} from "lucide-react";
 import Text from "@/components/Text";
 import {capitalize} from "@nextui-org/shared-utils";
 import CountUp from "react-countup";
@@ -33,6 +32,7 @@ import {cn} from '@nextui-org/react'
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
+import { LuSearch, LuTrash2 } from 'react-icons/lu';
 
 interface TableProp<T extends { id: string | number }> extends TableProps {
     config: TableConfigProps<T>;
@@ -212,7 +212,7 @@ function DataTable<T extends { id: string | number }>({
                                     className="max-w-sm"
                                     color="primary"
                                     placeholder={`Search by ${searchingItemKey.map((item) => item.toString().replace(/[,_]+/g, ' ')).join(", ").toUpperCase()}`}
-                                    startContent={<SearchIcon className={cn("text-small", icon_color, icon_size)}/>}
+                                    startContent={<LuSearch className={cn("text-small", icon_color, icon_size)}/>}
                                     value={filterValue} // Set the value of the input
                                     onClear={() => onClear()}
                                     onValueChange={onSearchChange}
@@ -316,7 +316,7 @@ function DataTable<T extends { id: string | number }>({
                 {onSelectToDelete && isActionable && (<Tooltip color="danger"
                                                                content={`Delete ${selectedKeys === "all" ? "all users selected" : `${selectedKeys.size} users`}`}>
                     <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                        <Trash2/>
+                        <LuTrash2/>
                     </span>
                 </Tooltip>)}
             </div>
@@ -328,7 +328,7 @@ function DataTable<T extends { id: string | number }>({
 
     return (<div className="grid grid-rows-[auto,1fr,auto] h-full w-full">
         {/* Show section if either one is not null */}
-        {(counterName ||contentTop || endContent || filterItems || searchingItemKey) && <section className='pb-3'>
+        {(counterName ||contentTop || endContent || filterItems || searchingItemKey) && <section>
             {topContent}
         </section>}
         <div className='flex flex-col h-full overflow-y-hidden'>
@@ -357,7 +357,7 @@ function DataTable<T extends { id: string | number }>({
                             color="primary"
                             label="Loading..."
                             classNames={{
-                                base: 'h-screen mt-52', // wrapper: "" // Uncomment and specify if needed
+                                base: 'h-96 mt-52', // wrapper: "" // Uncomment and specify if needed
                             }}
                         />) : null}
                         loadingState={loadingState}

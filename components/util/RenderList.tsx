@@ -8,7 +8,7 @@ interface RenderListProps<T> {
 const RenderList = <T extends { key: string | number }, >({items, map}: RenderListProps<T>) => {
     return (<>
             {items.map((item) => (<React.Fragment key={item.key}>
-                    {map(item, item.key)}
+                   {map(item, item.key)}
                 </React.Fragment>))}
         </>);
 };

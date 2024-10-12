@@ -1,5 +1,6 @@
 import {nextui} from '@nextui-org/theme';
 import type { Config } from "tailwindcss"
+import plugin from 'tailwindcss/plugin';
 
 const config = {
   darkMode: ["class"],
@@ -109,9 +110,20 @@ const config = {
         medium: 'var(--font-size-base)', // text-medium
         large: 'var(--font-size-lg)', // text-large
       },
-
     }
-  }), require("tailwindcss-animate")],
+  }), require("tailwindcss-animate"),
+  plugin(function ({ addUtilities }) {
+    addUtilities({
+      '.h-fit-navlayout': {
+        height: 'calc(100vh - 165px)',
+        overflowY: 'auto',
+      },
+      '.variant-blue': {
+        backgroundColor: 'rgba(59, 130, 246)',
+        foregroundColor: 'rgb(255,255,255)',
+      }
+    });
+  }),],
 } satisfies Config
 
 export default config

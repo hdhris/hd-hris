@@ -2,7 +2,7 @@ import React, { ReactElement, ReactNode } from "react";
 import {boolean} from "zod";
 
 interface CaseProps {
-    of: boolean | string;
+    of: any;
     children: ReactNode;
 }
 
@@ -17,7 +17,7 @@ interface DefaultProps {
 const Default = ({ children }: DefaultProps): ReactElement => <>{children}</>;
 
 interface SwitchProps {
-    expression: string;
+    expression: any;
     children: ReactNode;
 }
 

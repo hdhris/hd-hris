@@ -194,36 +194,32 @@
         @apply bg-background text-foreground;
     }
 
+
     /*.bg-navbar, .bg-sidebar {*/
     /*    background-color: var(--bar-color);*/
     /*}*/
-
     /*.text-navbar, .text-sidebar {*/
     /*    color: hsl(var(--primary));*/
     /*}*/
-
     /*.bg-active-bar {*/
     /*    background-color: var(--bar-bg);*/
     /*}*/
-
     /*.text-active-bar {*/
     /*    color: var(--text-color-active);*/
     /*}*/
-
     /*.text-inactive-bar {*/
     /*    color: var(--text-color-inactive)!important;*/
     /*}*/
-
     /*.hover-bg {*/
     /*    background-color: var(--text-color-inactive) !important;*/
     /*}*/
-
     /*.hover-text {*/
     /*    color: var(--text-color-active) !important;*/
     /*    !*@apply text-active-bar;*!*/
     /*}*/
 
 }
+
 
 .outline {
     outline: 1px solid rgb(128, 128, 128);
@@ -253,3 +249,4 @@
 ::-webkit-scrollbar-thumb:hover {
     background: rgb(156 163 175 / 1);
 }
+

@@ -12,7 +12,7 @@ export function Providers({children, className}: { children: React.ReactNode, cl
     return (<EdgeStoreProvider>
         <SessionProvider>
             <SWRProvider>
-                <NextUIProvider className={className} navigate={router.push}>
+                <NextUIProvider navigate={router.push}>
                     {children}
                 </NextUIProvider>
             </SWRProvider>

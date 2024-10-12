@@ -44,7 +44,7 @@ export default function SideBarItem({
         {showLabel && (
             <Typography
                 className={cn(
-                    "ms-3 text-sm text-nowrap",
+                    "ms-3 text-sm text-nowrap whitespace-nowrap",
                     isActive ? "text-white" : "group-hover:text-primary"
                 )}
             >
@@ -59,9 +59,10 @@ export default function SideBarItem({
         {showLabel ? (
             linkContent
         ) : (
-            <Tooltip content={label} placement="left">
-              {linkContent}
-            </Tooltip>
+            <>
+                {linkContent}
+            </>
+
         )}
       </li>
   );

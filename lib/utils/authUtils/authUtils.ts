@@ -38,7 +38,7 @@ export const getUserData = async (username: string, password: string) => {
 
     if (!access_control) return {error: {message: "You are not authorized"}}
     if (access_control.banned_til) {
-        const isBanned = dayjs(toGMT8(access_control?.banned_til)).isAfter(dayjs())
+        const isBanned = toGMT8(access_control?.banned_til).isAfter(new Date())
         if (isBanned) {
             return {
                 error: {
@@ -56,7 +56,7 @@ export const getUserData = async (username: string, password: string) => {
     if (role) throw new Error('Only admin can login');
 
     return {
-        id: auth.user_id,
+        id: access_control.employee_id,
         name: auth.trans_users.name, // Use actual user name if available
         role,
         image: auth.trans_users.image || '',
