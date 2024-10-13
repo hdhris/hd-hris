@@ -35,7 +35,6 @@ import { PiClockCountdownFill } from "react-icons/pi";
 import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
 import UserMail from "@/components/common/avatar/user-info-mail";
-import { SheetModal } from "@/components/common/sheets/Sheets";
 import Drawer from "@/components/common/Drawer";
 
 interface ScheduleModalProps {

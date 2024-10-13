@@ -127,6 +127,7 @@ export interface FormInputProps {
     endContent?: React.ReactNode;
     startContent?: React.ReactNode;
     config?: InputVariant[InputType]; // Ensure config can handle CheckboxGroupProps
+    isVisible?: boolean | (() => boolean); // Option to hide the field
 }
 
 interface FormsControlProps {
@@ -148,7 +149,10 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
     //
     // const [dateRangePickerInput, setDateRangePickerInput] = React.useState<RangeValue<DateValue> | null>(null);
 
+    // Determine if the field is visible
+    const isVisible = typeof item.isVisible === "function" ? item.isVisible() : item.isVisible !== false;
 
+    if (!isVisible) return null; // If the field is not visible, return null
     return (<FormField
         control={control}
         name={item.name}
@@ -160,7 +164,8 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                     </FormLabel>)}
                 {item.isRequired && <span className="ml-2 inline-flex text-destructive text-medium"> *</span>}
                 <FormControl className="space-y-2">
-                    {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
+                    {item.Component ? (item.Component(field)) : (
+                        <SwitchCase expression={item.type}>
                         <Case of="auto-complete">
                             <Autocomplete
                                 {...(item.config as AutocompleteProps)}
@@ -368,29 +373,30 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                             />
                         </Case>
 
-
                         <Default>
                             <Input
                                 id={item.name}
                                 aria-label={item.name}
                                 disabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
-                                type={String(item.type)}
+                                type={item.type || "text"}
                                 variant="bordered"
                                 color="success"
                                 radius="sm"
                                 placeholder={item.placeholder}
                                 size={size}
                                 {...field}
+                                value={item.type === "number" ? Number(field.value) : field.value}
                                 classNames={InputStyle}
                                 endContent={item.endContent}
                                 startContent={item.startContent}
+                                {...(item.config as InputProps)}
                             />
                         </Default>
                     </SwitchCase>)}
                 </FormControl>
-                <FormMessage/>
                 {item.description && <FormDescription>{item.description}</FormDescription>}
+                <FormMessage/>
             </FormItem>)
         }}
     />);

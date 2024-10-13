@@ -9,6 +9,7 @@ import uniqolor from "uniqolor";
 import {useToast} from "@/components/ui/use-toast";
 import {useFormTable} from "@/components/providers/FormTableProvider";
 import {LeaveTypesKey} from "@/types/leaves/LeaveTypes";
+import {axiosInstance} from "@/services/fetcher";
 
 interface HeaderProps {
     name: string;
@@ -27,13 +28,36 @@ function Header({id, name , is_active}: HeaderProps) {
     }
     const isLight = uniqolor(name).isLight;
 
-    const handleDelete = (key: React.Key) => {
-        setFormData({
-            method: "Delete",
-            data: {
-                key,
+    const handleDelete = async (key: React.Key) => {
+        try{
+            setFormData({
+                method: "Delete",
+                data: {
+                    key,
+                }
+            })
+            const res = await axiosInstance.post("/api/admin/leaves/leave-types/delete", {id: key})
+            if(res.status === 200){
+                toast({
+                    title: "Delete",
+                    description: "Leave type deleted successfully",
+                    duration: 2000,
+                })
             }
-        })
+        } catch (error) {
+            setFormData({
+                method: "Delete",
+                data: {
+                    key,
+                }
+            })
+            toast({
+                title: "Delete",
+                description: "Leave type deleted successfully",
+                duration: 2000,
+            })
+        }
+
     }
 
     const handleEdit = (key: Key) => {

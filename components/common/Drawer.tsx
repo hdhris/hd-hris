@@ -13,17 +13,16 @@ import { Button } from "@nextui-org/button";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { cn } from "@nextui-org/react";
-import { FieldValues, UseFormReturn } from "react-hook-form";
-import { Form } from "../ui/form";
 
 interface DrawerProps {
-  isOpen: boolean;
-  onClose: (value: boolean) => void;
-  children: ReactNode;
-  footer?: ReactNode;
-  title: string | ReactNode;
-  isDismissible?: boolean;
-  size?: "sm" | "md" | "lg";
+    isOpen: boolean;
+    onClose: (value: boolean) => void;
+    children: ReactNode;
+    footer?: ReactNode;
+    title: string | ReactNode;
+    isDismissible?: boolean;
+    size?: "sm" | "md" | "lg";
+    isSubmitting?: boolean
 }
 
 const sizeMap = {
@@ -40,6 +39,7 @@ const Drawer = ({
   isDismissible,
   footer,
   size,
+                    isSubmitting
 }: DrawerProps) => {
   // Prevent closing when clicking outside by removing onClose from Dialog
   return (
@@ -88,6 +88,7 @@ const Drawer = ({
                     footer
                   ) : (
                     <Button
+                        isLoading={isSubmitting}
                       {...uniformStyle()}
                       type="submit"
                       form="drawer-form"

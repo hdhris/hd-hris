@@ -1,8 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-
-const prisma = new PrismaClient();
+import prisma from "@/prisma/prisma";
 
 export async function POST(req: NextRequest) {
   try {

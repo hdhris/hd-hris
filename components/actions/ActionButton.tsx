@@ -26,8 +26,8 @@ export const TableActionButton = ({onDelete, onEdit, name}: ActionProps) => {
             </Button>
         </Tooltip>)
     return (<>
-        {onEdit && actionBTN({children:  <LuPencil className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
-        {onDelete && actionBTN({children: <LuTrash2 className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
+        {onEdit && actionBTN({children:  <LuPencil size={18} className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
+        {onDelete && actionBTN({children: <LuTrash2 size={18} className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
     </>);
 };
 

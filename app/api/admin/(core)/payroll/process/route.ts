@@ -6,15 +6,19 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const pr_dates = await prisma.trans_payroll_date.findMany({
+        where: {
+            deleted_at:null,
+        },
         orderBy: {
           start_date: 'desc', // Sort by start_date in descending order
         },
       });
-    const employeees = await prisma.trans_employees.findMany({
+    const employees = await prisma.trans_employees.findMany({
         where : {
             deleted_at: null,
         },
         select: {
+            id: true,
             last_name: true,
             first_name: true,
             middle_name: true,
@@ -43,7 +47,7 @@ export async function GET() {
             }
         }
     })
-    return NextResponse.json({pr_dates, employeees});
+    return NextResponse.json({pr_dates, employees});
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch data" },
