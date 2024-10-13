@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import {ReactNode, useState} from "react";
 import {
   Modal,
   ModalContent,
@@ -11,8 +11,8 @@ import {
 import ReactDOM from "react-dom/client";
 
 interface showDialogProps {
-  title: string;
-  message: string;
+  title: ReactNode;
+  message: ReactNode;
   withCancel?: boolean;
   preferredAnswer?: "yes" | "no" | "cancel";
 }

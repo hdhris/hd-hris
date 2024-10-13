@@ -9,14 +9,14 @@ import uniqolor from "uniqolor";
 import {useToast} from "@/components/ui/use-toast";
 import {useFormTable} from "@/components/providers/FormTableProvider";
 import {LeaveTypesKey} from "@/types/leaves/LeaveTypes";
-import {axiosInstance} from "@/services/fetcher";
 
 interface HeaderProps {
     name: string;
     is_active: boolean;
     id: React.Key;
 }
-function Header({id, name , is_active}: HeaderProps) {
+
+function Header({id, name, is_active}: HeaderProps) {
     const {toast} = useToast()
     const {setFormData} = useFormTable<LeaveTypesKey>()
     const bgGradient = (name: string) => {
@@ -29,48 +29,23 @@ function Header({id, name , is_active}: HeaderProps) {
     const isLight = uniqolor(name).isLight;
 
     const handleDelete = async (key: React.Key) => {
-        try{
-            setFormData({
-                method: "Delete",
-                data: {
-                    key,
-                }
-            })
-            const res = await axiosInstance.post("/api/admin/leaves/leave-types/delete", {id: key})
-            if(res.status === 200){
-                toast({
-                    title: "Delete",
-                    description: "Leave type deleted successfully",
-                    duration: 2000,
-                })
-            }
-        } catch (error) {
-            setFormData({
-                method: "Delete",
-                data: {
-                    key,
-                }
-            })
-            toast({
-                title: "Delete",
-                description: "Leave type deleted successfully",
-                duration: 2000,
-            })
-        }
 
-    }
-
-    const handleEdit = (key: Key) => {
         setFormData({
-            method: "Edit",
-            data: {
+            method: "Delete", data: {
                 key,
             }
         })
     }
-    return (
-        <div {...bgGradient(name)}
-             className={cn("relative flex w-full h-28 rounded-b-sm rounded-r-sm", !isLight ? "shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)]" : "shadow-[inset_-1px_-121px_75px_-52px_rgba(255,255,255,0.49)]")}> {/* shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)] */}
+
+    const handleEdit = (key: Key) => {
+        setFormData({
+            method: "Edit", data: {
+                key,
+            }
+        })
+    }
+    return (<div {...bgGradient(name)}
+                 className={cn("relative flex w-full h-28 rounded-b-sm rounded-r-sm", !isLight ? "shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)]" : "shadow-[inset_-1px_-121px_75px_-52px_rgba(255,255,255,0.49)]")}> {/* shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)] */}
             {/* Name positioned bottom-left */}
             <div className="absolute top-2 right-0 pr-2">
                 <ActionControlDropdown
@@ -87,8 +62,7 @@ function Header({id, name , is_active}: HeaderProps) {
                     {name}
                 </Typography>
             </div>
-        </div>
-    );
+        </div>);
 }
 
 export default Header;

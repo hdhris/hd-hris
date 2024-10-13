@@ -77,7 +77,7 @@ const Drawer = ({
                 </div>
 
                 <div className="relative mt-6 flex-1 overflow-hidden px-4 sm:px-6">
-                  <ScrollShadow className="h-full overflow-y-auto pr-4">
+                  <ScrollShadow className="h-full overflow-y-auto pr-4 pb-5">
                     {children}
                   </ScrollShadow>
                 </div>

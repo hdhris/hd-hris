@@ -4,7 +4,7 @@ import {FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessag
 import {ControllerRenderProps, FieldValues, useFormContext} from "react-hook-form";
 import InputStyle, {DateStyle} from "@/lib/custom/styles/InputStyle";
 import {SelectionProp} from "./types/SelectionProp";
-import {Input, InputProps, TextAreaProps} from "@nextui-org/input";
+import {InputProps, TextAreaProps} from "@nextui-org/input";
 import {Select, SelectItem} from "@nextui-org/select";
 import {
     Autocomplete,
@@ -40,6 +40,7 @@ import timezone from 'dayjs/plugin/timezone';
 import {Radio} from "@nextui-org/radio";
 import {Key} from "@react-types/shared";
 import {Granularity} from "@react-types/datepicker";
+import {Input} from "@/components/ui/input";
 
 // Load plugins
 dayjs.extend(utc);
@@ -164,10 +165,10 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                     </FormLabel>)}
                 {item.isRequired && <span className="ml-2 inline-flex text-destructive text-medium"> *</span>}
                 <FormControl className="space-y-2">
-                    {item.Component ? (item.Component(field)) : (
-                        <SwitchCase expression={item.type}>
+                    {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
                         <Case of="auto-complete">
                             <Autocomplete
+                                placeholder={item.placeholder}
                                 {...(item.config as AutocompleteProps)}
                                 id={item.name}
                                 aria-label={item.name}
@@ -309,6 +310,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                         </Case>
                         <Case of="select">
                             <Select
+                                placeholder={item.placeholder}
                                 id={item.name}
                                 aria-label={item.name}
                                 disabled={item.inputDisabled}
@@ -362,6 +364,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                         </Case>
                         <Case of="text-area">
                             <Textarea
+                                placeholder={item.placeholder}
                                 id={item.name}
                                 aria-label={item.name}
                                 isDisabled={item.inputDisabled}
@@ -385,11 +388,22 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 radius="sm"
                                 placeholder={item.placeholder}
                                 size={size}
-                                {...field}
-                                value={item.type === "number" ? Number(field.value) : field.value}
+                                value={item.type==="number" ? Number(field.value) : field.value}
                                 classNames={InputStyle}
                                 endContent={item.endContent}
                                 startContent={item.startContent}
+                                onValueChange={(value) => {
+                                    if (item.type === "number") {
+                                        // Parse value and ensure it's a number before passing it
+                                        const numericValue = Number(value);
+                                        // Only update if the value is a valid number or if it's empty (allowing clearing)
+                                        if (!isNaN(numericValue) || value === '') {
+                                            field.onChange(value === '' ? null : numericValue); // set to null if empty, else pass the number
+                                        }
+                                    } else {
+                                        field.onChange(value);
+                                    }
+                                }}
                                 {...(item.config as InputProps)}
                             />
                         </Default>

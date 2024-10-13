@@ -239,7 +239,6 @@ model ref_leave_types {
   id                           Int            @id @default(autoincrement())
   accrual_frequency            String
   accrual_rate                 Int
-  affects_overtime             Boolean
   applicable_to_employee_types String
   attachment_required          Boolean
   code                         String
@@ -253,10 +252,6 @@ model ref_leave_types {
   name                         String
   notice_required              Int
   paid_leave                   Boolean
-  pay_rate                     Float?
-  pay_rate_frequency           String?
-  pro_rated_for_probationary   Boolean
-  requires_signatories         Boolean
   updated_at                   DateTime?      @db.Timestamp(6)
   carry_over                   Boolean
   trans_leaves                 trans_leaves[]
