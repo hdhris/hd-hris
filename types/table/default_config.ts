@@ -1,4 +1,5 @@
-export interface FilterProps{
+export interface FilterProps {
+    parent?: string;
     filtered: FilteredItemProps[]
     category: string
 }
@@ -9,12 +10,8 @@ export interface FilteredItemProps {
 }
 
 
-const default_config:FilterProps[] = [{
-    filtered: [
-        {name: "Active", uid: "active"},
-        {name: "Suspend", uid: "suspend"},
-        {name: "On Leave", uid: "on leave"},
+const default_config: FilterProps[] = [{
+    filtered: [{name: "Active", uid: "active"}, {name: "Suspend", uid: "suspend"}, {name: "On Leave", uid: "on leave"},
 
-    ],
-    category: "Status"
+    ], category: "Status"
 }]

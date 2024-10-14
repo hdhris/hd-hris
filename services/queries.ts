@@ -9,7 +9,7 @@ import { Schedules } from "@/types/attendance-time/AttendanceTypes";
 import { Branch } from "@/types/employeee/BranchType";
 import { Payhead, PayheadAffected } from "@/types/payroll/payheadType";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
-import { OvertimeEntry, OvertimeResponse } from "@/types/attendance-time/OvertimeType";
+import {LeaveType} from "@/types/leaves/LeaveTypes";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {

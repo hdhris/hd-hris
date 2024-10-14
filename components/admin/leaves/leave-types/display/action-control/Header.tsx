@@ -9,6 +9,7 @@ import uniqolor from "uniqolor";
 import {useToast} from "@/components/ui/use-toast";
 import {useFormTable} from "@/components/providers/FormTableProvider";
 import {LeaveTypesKey} from "@/types/leaves/LeaveTypes";
+import {bgColor} from "@/helper/background-color-generator/generator";
 
 interface HeaderProps {
     name: string;
@@ -19,13 +20,6 @@ interface HeaderProps {
 function Header({id, name, is_active}: HeaderProps) {
     const {toast} = useToast()
     const {setFormData} = useFormTable<LeaveTypesKey>()
-    const bgGradient = (name: string) => {
-        return {
-            style: {
-                background: uniqolor(name).color
-            }
-        }
-    }
     const isLight = uniqolor(name).isLight;
 
     const handleDelete = async (key: React.Key) => {
@@ -44,7 +38,7 @@ function Header({id, name, is_active}: HeaderProps) {
             }
         })
     }
-    return (<div {...bgGradient(name)}
+    return (<div {...bgColor(name)}
                  className={cn("relative flex w-full h-28 rounded-b-sm rounded-r-sm", !isLight ? "shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)]" : "shadow-[inset_-1px_-121px_75px_-52px_rgba(255,255,255,0.49)]")}> {/* shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)] */}
             {/* Name positioned bottom-left */}
             <div className="absolute top-2 right-0 pr-2">

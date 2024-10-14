@@ -10,6 +10,8 @@ import {unstable_cache} from 'next/cache'
 import {Button} from "@nextui-org/button";
 import Link from "next/link";
 import {useLeaveRequest} from "@/services/queries";
+import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
+import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 
 // const getRequests = unstable_cache(async () => {
 //     return prisma.trans_leaves.findMany({
@@ -73,10 +75,18 @@ function Page() {
         })
     }, [data])
 
+    SetNavEndContent((router) =>
+        <Button
+            {...uniformStyle()}
+            onClick={() => router?.push("/leaves/leave-requests/create")}
+        >
+            File Leave
+        </Button>
+    )
     return (<TableData
             isLoading={isLoading}
             config={TableConfigurations}
-            items={allRequests!}
+            items={allRequests || []}
             isStriped
             isHeaderSticky
             counterName="Leave Requests"
@@ -84,7 +94,6 @@ function Page() {
             removeWrapper
             aria-label="Leave Approvals"
             filterItems={FilterItems}
-            endContent={<Button color="primary" radius="sm" size="sm" as={Link} href="/leaves/leave-requests/create">Add Leave Application</Button>}
         />
 
 
