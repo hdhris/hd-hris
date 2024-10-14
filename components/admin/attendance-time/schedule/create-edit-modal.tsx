@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import Drawer from "@/components/common/Drawer";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 
 interface ScheduleModalProps {
   visible: boolean;
@@ -97,7 +98,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
         <>
           {selectedSchedule && (
             <Button
-              color="warning"
+              {...uniformStyle({color:"warning"})}
               onClick={() => {
                 onDelete(selectedSchedule?.id);
               }}
@@ -107,7 +108,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
           )}
           <Button
             isLoading={pending}
-            color="primary"
+            {...uniformStyle()}
             type="submit"
             form="schedule-form"
             className="ms-auto"
@@ -148,7 +149,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
               },
               {
                 name: "is_active",
-                type: "checkbox",
+                type: "switch",
                 label: "Active",
                 config: {
                   defaultSelected: true,

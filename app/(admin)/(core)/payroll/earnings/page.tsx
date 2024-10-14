@@ -13,6 +13,7 @@ import showDialog from "@/lib/utils/confirmDialog";
 import React from "react";
 import { parseBoolean } from "@/lib/utils/parser/parseClass";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import { pathOfObject } from "@/helper/objects/pathGetterObject";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
@@ -118,47 +119,20 @@ function Page() {
   const filterItems: FilterProps[] = [
     {
       filtered: [
-        { name: "Active", uid: "active_true" },
-        { name: "Inactive", uid: "active_false" },
+        { name: "Active", key: 'is_active', value: true},
+        { name: "Inactive", key: 'is_active', value: false },
       ],
       category: "Status",
     },
     {
       filtered: [
-        { name: "Probationary", uid: "mandatory_prob" },
-        { name: "Regular", uid: "mandatory_reg" },
-        { name: "Non-mandatory", uid: "mandatory_false" },
+        { name: "Probationary", key: 'affected_json.mandatory.probationary', value: true },
+        { name: "Regular", key: 'affected_json.mandatory.regular', value: true },
       ],
       category: "Mandatory",
     },
   ];
-  const filterConfig = (keys: Selection) => {
-    let filteredItems: Payhead[] = [...data!];
-
-    if (keys !== "all" && keys.size > 0) {
-      Array.from(keys).forEach((key) => {
-        const [uid, value] = (key as string).split("_");
-        filteredItems = filteredItems.filter((items) => {
-          if (uid.includes("active")) {
-            return items.is_active === parseBoolean(value);
-          } else if (uid.includes("mandatory")) {
-            if (value === "prob") {
-              return items.affected_json?.mandatory.probationary === true;
-            } else if (value === "reg") {
-              return items.affected_json?.mandatory.regular === true;
-            } else if (value === "false") {
-              return (
-                items.affected_json?.mandatory.regular === false &&
-                items.affected_json?.mandatory.probationary === false
-              );
-            }
-          }
-        });
-      });
-    }
-
-    return filteredItems;
-  };
+  
   return (
     <div className="h-fit-navlayout">
       <TableData
@@ -167,7 +141,7 @@ function Page() {
         isLoading={isLoading}
         searchingItemKey={["name"]}
         filterItems={filterItems}
-        filterConfig={filterConfig}
+        // filterConfig={filterConfig}
         counterName="Earnings"
         isHeaderSticky
         selectionMode="single"

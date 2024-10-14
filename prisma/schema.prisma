@@ -239,7 +239,6 @@ model ref_leave_types {
   id                           Int            @id @default(autoincrement())
   accrual_frequency            String
   accrual_rate                 Int
-  affects_overtime             Boolean
   applicable_to_employee_types String
   attachment_required          Boolean
   code                         String
@@ -253,10 +252,6 @@ model ref_leave_types {
   name                         String
   notice_required              Int
   paid_leave                   Boolean
-  pay_rate                     Float?
-  pay_rate_frequency           String?
-  pro_rated_for_probationary   Boolean
-  requires_signatories         Boolean
   updated_at                   DateTime?      @db.Timestamp(6)
   carry_over                   Boolean
   trans_leaves                 trans_leaves[]
@@ -637,4 +632,23 @@ model trans_users {
   auth_accounts           auth_accounts[]
   auth_credentials        auth_credentials?
   sec_sessions            sec_sessions[]
+}
+
+model ref_holidays {
+  id                  Int              @id @default(autoincrement())
+  name                String?          @db.VarChar(45)
+  country_code        String?          @db.VarChar(10)
+  pay_rate_percentage Decimal?         @db.Decimal(5, 2)
+  month               String?          @db.VarChar(255)
+  day                 String?          @db.VarChar(255)
+  type                String?          @db.VarChar(10)
+  trans_holidays      trans_holidays[]
+}
+
+model trans_holidays {
+  id            Int           @id @default(autoincrement())
+  holiday_id    Int?
+  observed_date DateTime?     @db.Date
+  no_work       Boolean?
+  ref_holidays  ref_holidays? @relation(fields: [holiday_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_holidays_ref_holidays_1")
 }

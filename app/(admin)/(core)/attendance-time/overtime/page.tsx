@@ -17,75 +17,14 @@ import { FaCheckCircle } from "react-icons/fa";
 import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import OvertimeModal from "@/components/admin/attendance-time/overtime/view-modal";
-import { objectIncludes } from "@/helper/filterObject/filterObject";
+import { objectIncludes } from "@/helper/objects/filterObject";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
-
-const handleDelete = async (id: Number, name: string) => {
-  try {
-    const result = await showDialog({
-      title: "Confirm Delete",
-      message: `Are you sure you want to delete '${name}' ?`,
-    });
-    if (result === "yes") {
-      await axios.post("/api/admin/payroll/payhead/delete", {
-        id: id,
-      });
-      toast({
-        title: "Deleted",
-        description: "Earning deleted successfully!",
-        variant: "warning",
-      });
-    }
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: "Error: " + error,
-      variant: "danger",
-    });
-  }
-};
 
 const statusColorMap: Record<string, "danger" | "success" | "default"> = {
   pending: "default",
   approved: "success",
   rejected: "danger",
 };
-
-// const statusColorMap = {
-//   pending: "text-danger-500",
-//   approved: "text-success-500",
-//   denied: "text-danger-500",
-// };
-
-// function items(item: OvertimeEntry): GridItemProps[] {
-//   return [
-//     {
-//       column: "date",
-//       label: "Date",
-//       value: new Date(item.date),
-//     },
-//     {
-//       column: "clock_in",
-//       label: "Time In",
-//       value: new Time(item.clock_in),
-//     },
-//     {
-//       column: "clock_in",
-//       label: "Time Out",
-//       value: new Time(item.clock_out),
-//     },
-//     {
-//       column: "minutes",
-//       label: "Requested",
-//       value: item.rendered_mins,
-//     },
-//     {
-//       column: "checkbox",
-//       label: "Greater than 40 mins",
-//       value: item.rendered_mins > 30,
-//     },
-//   ];
-// }
 
 function Page() {
   const userID = useEmployeeId();
@@ -120,6 +59,7 @@ function Page() {
         case "name":
           return (
             <UserMail
+              key={item.full_name}
               name={item.full_name}
               email={item.trans_employees_overtimes.email}
               picture={item.trans_employees_overtimes.picture}
@@ -299,22 +239,6 @@ function Page() {
         isPending={isPending}
       />
     </>
-    // <div className="h-full overflow-auto flex flex-col bg-blue-500">
-    //   {/* <GridList items={data || []}>
-    //     {(item: OvertimeEntry) => (
-    //       <GridCard
-    //         name={item.full_name}
-    //         size="sm"
-    //         wide
-    //         items={items(item)}
-    //         avatarProps={{ src: item.trans_employees_overtimes.picture }}
-    //         status={{ label: item.status, color: statusColorMap[item.status] }}
-    //         deadPulse={["denied", "pending"].includes(item.status)}
-    //         bottomShadow={false}
-    //       />
-    //     )}
-    //   </GridList> */}
-    // </div>
   );
 }
 

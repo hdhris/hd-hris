@@ -33,6 +33,7 @@ import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
 import { LuSearch, LuTrash2 } from 'react-icons/lu';
+import { valueOfObject } from '@/helper/objects/pathGetterObject';
 
 interface TableProp<T extends { id: string | number }> extends TableProps {
     config: TableConfigProps<T>;
@@ -67,7 +68,7 @@ function genericSearch<T>(object: T, searchingItemKey: Array<keyof T>, query: st
     return searchable;
 }
 
-function DataTable<T extends { id: string | number }>({
+function DataTable<T extends { id: string | number }>({  // T extends { id: string | number }
                                                           config,
                                                           items,
                                                           sort,
@@ -117,16 +118,17 @@ function DataTable<T extends { id: string | number }>({
                 if (filterConfig) {
                     filteredUsers = filteredUsers.filter((user) => filterConfig(filter).includes(user));
                 } else {
-                    filteredUsers = filteredUsers.filter((user) => {
-                        const userProperties = Object.keys(user) as (keyof T)[];
-                        return Array.from(filter).every((filterItem) => userProperties.some(property => {
-                            const propertyValue = user[property];
-                            if (typeof propertyValue === 'string') {
-                                return propertyValue.toLowerCase() === filterItem.toString().toLowerCase();
-                            }
-                            return false;
-                        }));
-                    });
+                    if (filter instanceof Set && filter.size > 0) {
+                        Array.from(filter).forEach((ft) => {
+                          filteredUsers = filteredUsers.filter((items) => {
+                            console.log("Filter: ",ft);
+                            console.log("Name: ", (items as any).name)
+                            console.log("Value: ",String(valueOfObject(items,ft.toString().split('=')[0])))
+                            console.log("Result: ",String(valueOfObject(items,ft.toString().split('=')[0])) === ft.toString().split('=')[1])
+                            return String(valueOfObject(items,ft.toString().split('=')[0])) === ft.toString().split('=')[1]
+                          });
+                        });
+                      }
                 }
             }
         } else {
@@ -229,7 +231,7 @@ function DataTable<T extends { id: string | number }>({
                                             ? `Filter by: ${Array.from(filterItems)
                                                 .filter((item) => 
                                                     item.filtered.some((filteredItem) => 
-                                                        Array.from(filter).some((f) => String(f) === filteredItem.uid)
+                                                        Array.from(filter).some((f) => String(f).includes(filteredItem.key))
                                                     )
                                                 )
                                                 .map((item) => item.category)  // Return the `category` for each item that matches
@@ -247,16 +249,17 @@ function DataTable<T extends { id: string | number }>({
                                     onSelectionChange={(keys) => {
                                         const newFilter = new Set(filter); // Clone current filter
                                         const selectedFilter = Array.from(keys) as string[];
+                                        // console.log("Selected: ",selectedFilter)
                                   
                                         // Ensure one selection per section
                                         filterItems.forEach((item) => {
                                             const sectionSelected = selectedFilter.filter((key) =>
-                                              item.filtered.some((data) => data.uid === key)
+                                              item.filtered.some((data) => `${data.key}=${data.value}` === key)
                                             );
                                           
                                             // Clear old selections from the section by iterating over the section items
                                             item.filtered.forEach((data) => {
-                                              newFilter.delete(data.uid); // Remove all previously selected keys from this section
+                                              newFilter.delete(`${data.key}=${data.value}`); // Remove all previously selected keys from this section
                                             });
                                           
                                             // Add only the new selection
@@ -267,6 +270,7 @@ function DataTable<T extends { id: string | number }>({
                                           
                                   
                                         setFilter(newFilter);
+                                        // console.log("New Selected: ",newFilter)
                                   
                                         // Handle URL params
                                         const newSearchParams = new URLSearchParams(searchParams.toString());
@@ -284,7 +288,7 @@ function DataTable<T extends { id: string | number }>({
                                     {filterItems.map((item) => (
                                         <DropdownSection key={item.category} title={item.category} showDivider>
                                             {item.filtered.map((data) => (
-                                                <DropdownItem key={data.uid} className="capitalize">
+                                                <DropdownItem key={`${data.key}=${data.value}`} className="capitalize">
                                                     {capitalize(data.name)}
                                                 </DropdownItem>))}
                                         </DropdownSection>))}
