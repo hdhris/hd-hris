@@ -39,8 +39,12 @@ const Drawer = ({
   isDismissible,
   footer,
   size,
-                    isSubmitting
+  isSubmitting
 }: DrawerProps) => {
+  const hasDrawerForm = React.useMemo((): boolean => {
+    return checkForDrawerForm(children);
+  }, [children]);
+
   // Prevent closing when clicking outside by removing onClose from Dialog
   return (
     <Dialog
@@ -86,9 +90,9 @@ const Drawer = ({
                   {/* <SheetClose asChild>{footer}</SheetClose> */}
                   {footer ? (
                     footer
-                  ) : (
+                  ) : hasDrawerForm && (
                     <Button
-                        isLoading={isSubmitting}
+                      isLoading={isSubmitting}
                       {...uniformStyle()}
                       type="submit"
                       form="drawer-form"
@@ -108,3 +112,19 @@ const Drawer = ({
 };
 
 export default Drawer;
+
+// Recursive function to check for a <form> element with id="drawer-form"
+const checkForDrawerForm = (children: React.ReactNode): boolean => {
+  return React.Children.toArray(children).some((child) => {
+    if (React.isValidElement(child)) {
+      if (child.type === 'form' && child.props.id === 'drawer-form') {
+        return true;
+      }
+      // Recursively check nested children
+      if (child.props.children) {
+        return checkForDrawerForm(child.props.children);
+      }
+    }
+    return false;
+  });
+};
