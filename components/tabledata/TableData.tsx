@@ -34,6 +34,7 @@ import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
 import { LuSearch, LuTrash2 } from 'react-icons/lu';
 import { valueOfObject } from '@/helper/objects/pathGetterObject';
+import { joinNestedKeys } from '@/helper/objects/joinNestedKeys';
 
 interface TableProp<T extends { id: string | number }> extends TableProps {
     config: TableConfigProps<T>;
@@ -50,20 +51,28 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
     setSelectedKeys?: (keys: Selection) => void;
 }
 
+type NestedKeys<T> = {
+    [K in keyof T]: T[K] extends Record<string, any>
+        ? K | [K, NestedKeys<T[K]>]
+        : K; // Return the key itself if it's not an object
+}[keyof T];
+
+
 interface SearchProps<T> {
-    searchingItemKey?: Array<keyof T>;
+    searchingItemKey?: NestedKeys<T>[]; // e.g., [["details", "address"], ["details", "phone"]]
 }
 
-function genericSearch<T>(object: T, searchingItemKey: Array<keyof T>, query: string): boolean {
+function genericSearch<T>(object: T, searchingItemKey: NestedKeys<T>[], query: string): boolean {
     let searchable = false;
     searchingItemKey.forEach(property => {
-        const value = object[property];
+        // const value = object[property];
+        let newProperty = Array.isArray(property) ? joinNestedKeys(property) : property;
+        // console.log("New Prop: ",newProperty)
+        const value = valueOfObject(object, String(newProperty));
 
-        if (typeof value === "string" || typeof value === "number") {
-            if (value.toString().toLowerCase().includes(query.toLowerCase())) {
-                searchable = true;
-            }
-        }
+        // console.log("Query: ",String(query.toLowerCase()));
+        // console.log("Value: ",String(value));
+        searchable = String(value).toLowerCase().includes(query.toLowerCase())
     });
     return searchable;
 }
@@ -121,10 +130,10 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                     if (filter instanceof Set && filter.size > 0) {
                         Array.from(filter).forEach((ft) => {
                           filteredUsers = filteredUsers.filter((items) => {
-                            console.log("Filter: ",ft);
-                            console.log("Name: ", (items as any).name)
-                            console.log("Value: ",String(valueOfObject(items,ft.toString().split('=')[0])))
-                            console.log("Result: ",String(valueOfObject(items,ft.toString().split('=')[0])) === ft.toString().split('=')[1])
+                            // console.log("Filter: ",ft);
+                            // console.log("Name: ", (items as any).name)
+                            // console.log("Value: ",String(valueOfObject(items,ft.toString().split('=')[0])))
+                            // console.log("Result: ",String(valueOfObject(items,ft.toString().split('=')[0])) === ft.toString().split('=')[1])
                             return String(valueOfObject(items,ft.toString().split('=')[0])) === ft.toString().split('=')[1]
                           });
                         });
@@ -202,112 +211,167 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
     };
 
     const topContent = React.useMemo(() => {
-        return (<Suspense fallback={<Spinner/>}>
-                <div className="flex flex-col gap-4">
-                    <div className="flex gap-3">
-                        {
-                            searchingItemKey && (
-                                <Input
-                                    isClearable
-                                    variant="bordered"
-                                    radius="sm"
-                                    className="max-w-sm"
-                                    color="primary"
-                                    placeholder={`Search by ${searchingItemKey.map((item) => item.toString().replace(/[,_]+/g, ' ')).join(", ").toUpperCase()}`}
-                                    startContent={<LuSearch className={cn("text-small", icon_color, icon_size)}/>}
-                                    value={filterValue} // Set the value of the input
-                                    onClear={() => onClear()}
-                                    onValueChange={onSearchChange}
-                                />
-                            )
-                        }
-                        <div className='flex w-full flex-row gap-3 justify-end'>
-                        {filterItems && (<div className="flex gap-3 items-center">
-                            <Dropdown classNames={{content: 'rounded'}}>
-                                <DropdownTrigger className="hidden sm:flex">
-                                    <Button radius="sm" endContent={<ChevronDownIcon
-                                        className={cn('text-small', icon_color, icon_size)}/>} variant="bordered">
-                                        {filter !== "all" && filter.size > 0
-                                            ? `Filter by: ${Array.from(filterItems)
-                                                .filter((item) => 
-                                                    item.filtered.some((filteredItem) => 
-                                                        Array.from(filter).some((f) => String(f).includes(filteredItem.key))
-                                                    )
-                                                )
-                                                .map((item) => item.category)  // Return the `category` for each item that matches
-                                                .join(", ")   }`                 // Join them with commas
-                                            : "Filter options"}
+        return (
+          <Suspense fallback={<Spinner />}>
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-3">
+                {searchingItemKey && (
+                  <Input
+                    isClearable
+                    variant="bordered"
+                    radius="sm"
+                    className="max-w-sm"
+                    color="primary"
+                    placeholder={`Search by ${searchingItemKey
+                            .map((item) => {
+                                // Convert to dot notation string
+                                const joinedKey = Array.isArray(item) ? joinNestedKeys(item) : String(item);
+                                // Split by dot and get the last segment
+                                const lastSegment = joinedKey.split(".").pop();
+                                // Replace any undesired characters and return the result
+                                return lastSegment?.replace(/[,_]+/g, " ");
+                            })
+                            .join(", ")
+                            .toUpperCase()}`}
+                    startContent={
+                      <LuSearch
+                        className={cn("text-small", icon_color, icon_size)}
+                      />
+                    }
+                    value={filterValue} // Set the value of the input
+                    onClear={() => onClear()}
+                    onValueChange={onSearchChange}
+                  />
+                )}
+                <div className="flex w-full flex-row gap-3 justify-end">
+                  {filterItems && (
+                    <div className="flex gap-3 items-center">
+                      <Dropdown classNames={{ content: "rounded" }}>
+                        <DropdownTrigger className="hidden sm:flex">
+                          <Button
+                            radius="sm"
+                            endContent={
+                              <ChevronDownIcon
+                                className={cn(
+                                  "text-small",
+                                  icon_color,
+                                  icon_size
+                                )}
+                              />
+                            }
+                            variant="bordered"
+                          >
+                            {filter !== "all" && filter.size > 0
+                              ? `Filter by: ${Array.from(filterItems)
+                                  .filter((item) =>
+                                    item.filtered.some((filteredItem) =>
+                                      Array.from(filter).some((f) =>
+                                        String(f).includes(filteredItem.key)
+                                      )
+                                    )
+                                  )
+                                  .map((item) => item.category) // Return the `category` for each item that matches
+                                  .join(", ")}` // Join them with commas
+                              : "Filter options"}
+                          </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu
+                          aria-label="Table Columns"
+                          className="max-h-96 overflow-y-auto"
+                          closeOnSelect={false}
+                          selectedKeys={filter}
+                          selectionMode="multiple"
+                          onSelectionChange={(keys) => {
+                            const newFilter = new Set(filter); // Clone current filter
+                            const selectedFilter = Array.from(keys) as string[];
+                            // console.log("Selected: ",selectedFilter)
 
-                                    </Button>
-                                </DropdownTrigger>
-                                <DropdownMenu
-                                    aria-label="Table Columns"
-                                    className="max-h-96 overflow-y-auto"
-                                    closeOnSelect={false}
-                                    selectedKeys={filter}
-                                    selectionMode="multiple"
-                                    onSelectionChange={(keys) => {
-                                        const newFilter = new Set(filter); // Clone current filter
-                                        const selectedFilter = Array.from(keys) as string[];
-                                        // console.log("Selected: ",selectedFilter)
-                                  
-                                        // Ensure one selection per section
-                                        filterItems.forEach((item) => {
-                                            const sectionSelected = selectedFilter.filter((key) =>
-                                              item.filtered.some((data) => `${data.key}=${data.value}` === key)
-                                            );
-                                          
-                                            // Clear old selections from the section by iterating over the section items
-                                            item.filtered.forEach((data) => {
-                                              newFilter.delete(`${data.key}=${data.value}`); // Remove all previously selected keys from this section
-                                            });
-                                          
-                                            // Add only the new selection
-                                            if (sectionSelected.length > 0) {
-                                              newFilter.add(sectionSelected[sectionSelected.length - 1]); // Add the latest selected item
-                                            }
-                                          });
-                                          
-                                  
-                                        setFilter(newFilter);
-                                        // console.log("New Selected: ",newFilter)
-                                  
-                                        // Handle URL params
-                                        const newSearchParams = new URLSearchParams(searchParams.toString());
-                                        if (newFilter.size > 0) {
-                                          newSearchParams.set('filter', Array.from(newFilter).join(','));
-                                        } else {
-                                          newSearchParams.delete('filter');
-                                        }
-                                        if (filterValue) {
-                                          newSearchParams.set('search', filterValue);
-                                        }
-                                        router.push(`${getCurrentPath}?${newSearchParams.toString()}`);
-                                      }}
+                            // Ensure one selection per section
+                            filterItems.forEach((item) => {
+                              const sectionSelected = selectedFilter.filter(
+                                (key) =>
+                                  item.filtered.some(
+                                    (data) =>
+                                      `${data.key}=${data.value}` === key
+                                  )
+                              );
+
+                              // Clear old selections from the section by iterating over the section items
+                              item.filtered.forEach((data) => {
+                                newFilter.delete(`${data.key}=${data.value}`); // Remove all previously selected keys from this section
+                              });
+
+                              // Add only the new selection
+                              if (sectionSelected.length > 0) {
+                                newFilter.add(
+                                  sectionSelected[sectionSelected.length - 1]
+                                ); // Add the latest selected item
+                              }
+                            });
+
+                            setFilter(newFilter);
+                            // console.log("New Selected: ",newFilter)
+
+                            // Handle URL params
+                            const newSearchParams = new URLSearchParams(
+                              searchParams.toString()
+                            );
+                            if (newFilter.size > 0) {
+                              newSearchParams.set(
+                                "filter",
+                                Array.from(newFilter).join(",")
+                              );
+                            } else {
+                              newSearchParams.delete("filter");
+                            }
+                            if (filterValue) {
+                              newSearchParams.set("search", filterValue);
+                            }
+                            router.push(
+                              `${getCurrentPath}?${newSearchParams.toString()}`
+                            );
+                          }}
+                        >
+                          {filterItems.map((item) => (
+                            <DropdownSection
+                              key={item.category}
+                              title={item.category}
+                              showDivider
+                            >
+                              {item.filtered.map((data) => (
+                                <DropdownItem
+                                  key={`${data.key}=${data.value}`}
+                                  className="capitalize"
                                 >
-                                    {filterItems.map((item) => (
-                                        <DropdownSection key={item.category} title={item.category} showDivider>
-                                            {item.filtered.map((data) => (
-                                                <DropdownItem key={`${data.key}=${data.value}`} className="capitalize">
-                                                    {capitalize(data.name)}
-                                                </DropdownItem>))}
-                                        </DropdownSection>))}
-                                </DropdownMenu>
-                            </Dropdown>
-                        </div>)}
-                            <div className='ms-auto self-center'>{typeof endContent === 'function' ? endContent() : endContent}</div>
-                        </div>
+                                  {capitalize(data.name)}
+                                </DropdownItem>
+                              ))}
+                            </DropdownSection>
+                          ))}
+                        </DropdownMenu>
+                      </Dropdown>
                     </div>
-                    <div className='flex justify-between items-center'>
-                        {counterName &&
-                            <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
-                                <span><CountUp start={0} end={sortedItems.length}/> </span> {counterName}
-                            </h1>}
-                        {contentTop && contentTop}
-                    </div>
+                  )}
+                  <div className="ms-auto self-center">
+                    {typeof endContent === "function"
+                      ? endContent()
+                      : endContent}
+                  </div>
                 </div>
-            </Suspense>
-
+              </div>
+              <div className="flex justify-between items-center">
+                {counterName && (
+                  <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
+                    <span>
+                      <CountUp start={0} end={sortedItems.length} />{" "}
+                    </span>{" "}
+                    {counterName}
+                  </h1>
+                )}
+                {contentTop && contentTop}
+              </div>
+            </div>
+          </Suspense>
         );
     }, [searchingItemKey, filterValue, onSearchChange, filterItems, filter, endContent, sortedItems.length, counterName, contentTop, onClear, searchParams, router, getCurrentPath]);
 

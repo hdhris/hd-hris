@@ -11,9 +11,7 @@ import axios from "axios";
 import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
 import React from "react";
-import { parseBoolean } from "@/lib/utils/parser/parseClass";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
-import { pathOfObject } from "@/helper/objects/pathGetterObject";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
@@ -137,11 +135,10 @@ function Page() {
     <div className="h-fit-navlayout">
       <TableData
         config={config}
-        items={data!}
+        items={data || []}
         isLoading={isLoading}
         searchingItemKey={["name"]}
         filterItems={filterItems}
-        // filterConfig={filterConfig}
         counterName="Earnings"
         isHeaderSticky
         selectionMode="single"
