@@ -12,9 +12,12 @@ import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import LeaveTypeForm from "@/components/admin/leaves/leave-types/form/LeaveTypeForm";
 import NoData from "@/components/common/no-data/NoData";
+import {axiosInstance} from "@/services/fetcher";
+import {useToast} from "@/components/ui/use-toast";
 
 function LeaveTypesCard() {
 
+    const {toast} = useToast()
     const {data, isLoading, error} = useLeaveTypes()
     const {formData} = useFormTable<LeaveTypesKey>()
     const [leaveTypes, setLeaveTypes] = useState<LeaveTypesItems[]>([])
@@ -37,13 +40,45 @@ function LeaveTypesCard() {
     }, [data, isLoading])
 
     useEffect(() => {
-        if (formData?.method === "Delete") {
-            // alert("Delete: " + formData?.data?.key)
-            setLeaveTypes((prev) => prev.filter((item) => item.key !== formData?.data?.key))
-        } else if (formData?.method === "Edit") {
+        const handleFormData = async () => {
+            if (formData?.method === "Delete") {
+                const key = formData?.data?.key;
+                const deletedItem = leaveTypes.find(item => item.key === key); // Ensure you find the correct item based on the key
 
-        }
-    }, [formData])
+                if (deletedItem) {
+                    // Update state to remove the item optimistically
+                    setLeaveTypes((prev) => prev.filter((item) => item.key !== deletedItem.key));
+                    try {
+                        // Send delete request
+                        const res =await axiosInstance.post("/api/admin/leaves/leave-types/delete", key);
+                        if(res.status === 200){
+                            toast({
+                                title: "Delete",
+                                description: "Leave type deleted successfully",
+                                variant: "success"
+                            })
+                        }
+                    } catch (error) {
+                        // If delete fails, restore the deleted item
+                        setLeaveTypes((prevState) => [...prevState, deletedItem]);
+                        console.error("Delete failed:", error); // Log the error for debugging
+                        toast({
+                            title: "Delete Failed",
+                            description: "Failed to delete the leave type. Please try again.",
+                            variant: "danger"
+                        });
+                    }
+                }
+            } else if (formData?.method === "Edit") {
+                // Handle the edit logic here
+                // Example: const updatedItem = { ... };
+                // setLeaveTypes((prev) => prev.map(item => item.key === updatedItem.key ? updatedItem : item));
+            }
+        };
+
+        handleFormData();
+    }, [formData, leaveTypes]); // Ensure leaveTypes is included in the dependency array
+
 
     SetNavEndContent(() => (<LeaveTypeForm/>));
     if (isLoading) return <Loading/>

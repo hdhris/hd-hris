@@ -1,8 +1,6 @@
 import React from 'react';
-import {unstable_cache} from "next/cache";
-import prisma from "@/prisma/prisma";
-import LeaveTypesCard from "@/components/admin/leaves/leave-types/display/LeaveTypesCard";
 import LeaveTypesProvider from "@/components/admin/leaves/leave-types/provider/LeaveTypesProvider";
+import LeaveTypes from "@/components/admin/leaves/leave-types/display/table/LeaveTypes";
 
 // const getLeaveTypes = unstable_cache(async () => {
 //     return prisma.ref_leave_types.findMany({
@@ -29,7 +27,9 @@ async function Page() {
     // });
 
     return (<LeaveTypesProvider>
-            <LeaveTypesCard/>
+
+            <LeaveTypes/>
+
         </LeaveTypesProvider>
 
     );

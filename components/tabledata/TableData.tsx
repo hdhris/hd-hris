@@ -1,13 +1,15 @@
 'use client';
-import React, {Suspense, useEffect, useRef, useState} from 'react';
+import React, {Suspense, useEffect, useRef} from 'react';
 import {
     Button,
+    cn,
     Dropdown,
     DropdownItem,
     DropdownMenu,
     DropdownSection,
     DropdownTrigger,
     Input,
+    Pagination,
     ScrollShadow,
     Selection,
     SortDescriptor,
@@ -18,8 +20,7 @@ import {
     TableColumn,
     TableHeader,
     TableProps,
-    TableRow,
-    Tooltip
+    TableRow
 } from '@nextui-org/react';
 import Text from "@/components/Text";
 import {capitalize} from "@nextui-org/shared-utils";
@@ -28,13 +29,13 @@ import {TableConfigProps} from "@/types/table/TableDataTypes";
 import {FilterProps} from "@/types/table/default_config";
 import {ChevronDownIcon} from "@nextui-org/shared-icons";
 import {icon_color, icon_size} from "@/lib/utils";
-import {cn} from '@nextui-org/react'
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
-import { LuSearch, LuTrash2 } from 'react-icons/lu';
-import { valueOfObject } from '@/helper/objects/pathGetterObject';
 import { joinNestedKeys } from '@/helper/objects/joinNestedKeys';
+import {LuSearch} from 'react-icons/lu';
+import {valueOfObject} from '@/helper/objects/pathGetterObject';
+import Typography from "@/components/common/typography/Typography";
 
 interface TableProp<T extends { id: string | number }> extends TableProps {
     config: TableConfigProps<T>;
@@ -104,12 +105,15 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
     const searchValueFromParams = searchParams.get('search') || '';
     const filterValueFromParams = searchParams.get('filter') || '';
     const [get, set] = React.useState<Selection>(new Set([]));
-    const [selectedKeys, setSelectedKeys] = [selKeys||get , setSelKeys||set];
+    const [selectedKeys, setSelectedKeys] = [selKeys || get, setSelKeys || set];
     const [filterValue, setFilterValue] = React.useState(searchValueFromParams);
+    const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [filter, setFilter] = React.useState<Selection>(() => {
         const values = filterValueFromParams.split(',');
         return values.length === 1 && values[0] === '' ? new Set([]) : new Set(values);
-      });
+    });
+
+    const [page, setPage] = React.useState<number>(1);
     const hasSearchFilter = Boolean(filterValue);
     const isActionable = selectedKeys === 'all' || selectedKeys.size >= 2;
 
@@ -129,15 +133,11 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                 } else {
                     if (filter instanceof Set && filter.size > 0) {
                         Array.from(filter).forEach((ft) => {
-                          filteredUsers = filteredUsers.filter((items) => {
-                            // console.log("Filter: ",ft);
-                            // console.log("Name: ", (items as any).name)
-                            // console.log("Value: ",String(valueOfObject(items,ft.toString().split('=')[0])))
-                            // console.log("Result: ",String(valueOfObject(items,ft.toString().split('=')[0])) === ft.toString().split('=')[1])
-                            return String(valueOfObject(items,ft.toString().split('=')[0])) === ft.toString().split('=')[1]
-                          });
+                            filteredUsers = filteredUsers.filter((items) => {
+                                return String(valueOfObject(items, ft.toString().split('=')[0])) === ft.toString().split('=')[1]
+                            });
                         });
-                      }
+                    }
                 }
             }
         } else {
@@ -146,7 +146,12 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
         return filteredUsers;
     }, [items, hasSearchFilter, filterConfig, filter, searchingItemKey, filterValue]);
 
+    const dataItems = React.useMemo(() => {
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
 
+        return filteredItems.slice(start, end);
+    }, [page, filteredItems, rowsPerPage]);
     const chipContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -159,7 +164,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
     }, [filter, getCurrentPath]);
 
     const sortedItems = React.useMemo(() => {
-        return [...filteredItems].sort((a, b) => {
+        return [...dataItems].sort((a, b) => {
             const getColumnValue = (item: T, column: keyof T | string): any => {
                 if (typeof column === 'string') {
                     const keys = column.split('.');
@@ -185,13 +190,14 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
             const cmp = first < second ? -1 : first > second ? 1 : 0;
             return sortDescriptor.direction === 'descending' ? -cmp : cmp;
         });
-    }, [sortDescriptor, filteredItems]);
+    }, [sortDescriptor, dataItems]);
 
     const onSearchChange = React.useCallback((value?: string) => {
         if (value) {
             // router.push(`${getCurrentPath}?search=${value}`);
             router.push(`${getCurrentPath}?search=${value}${filter !== "all" && filter.size > 0 ? `&filter=${Array.from(filter).join(',')}` : ''}`);
             setFilterValue(value);
+            setPage(1);
         } else {
             setFilterValue("");
             router.push(`${getCurrentPath}${filter !== "all" && filter.size > 0 ? `?filter=${Array.from(filter).join(',')}` : ''}`);
@@ -205,10 +211,10 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
     }, [getCurrentPath, router, filter]);
 
 
-    const handleClose = (removeFilter: string) => {
-        const newFilter = Array.from(filter).filter(item => item !== removeFilter);
-        setFilter(new Set(newFilter));
-    };
+    const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+        setRowsPerPage(Number(e.target.value));
+        setPage(1);
+    }, []);
 
     const topContent = React.useMemo(() => {
         return (
@@ -373,30 +379,50 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
             </div>
           </Suspense>
         );
-    }, [searchingItemKey, filterValue, onSearchChange, filterItems, filter, endContent, sortedItems.length, counterName, contentTop, onClear, searchParams, router, getCurrentPath]);
+    }, [searchingItemKey, filterValue, onSearchChange, filterItems, filter, endContent, counterName, sortedItems.length, contentTop, onRowsPerPageChange, onClear, searchParams, router, getCurrentPath]);
+
 
     const bottomContent = React.useMemo(() => {
-        return (<section className="py-2 px-2 flex justify-between items-center">
-            <div className='flex gap-4 items-center'>
-                <Text className="text-small font-semibold opacity-50">
-                    {selectedKeys === "all" || selectedKeys.size===sortedItems.length ? `All ${counterName?.toLocaleLowerCase()} selected` : `${selectedKeys.size} of ${sortedItems.length} selected`}
-                </Text>
-                {onSelectToDelete && isActionable && (<Tooltip color="danger"
-                                                               content={`Delete ${selectedKeys === "all" ? "all users selected" : `${selectedKeys.size} users`}`}>
-                    <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                        <LuTrash2/>
-                    </span>
-                </Tooltip>)}
-            </div>
-        </section>);
-    }, [counterName, isActionable, onSelectToDelete, selectedKeys, sortedItems.length]);
+        const pages = Math.ceil(items.length / rowsPerPage);
+        return (//     <section className="py-2 px-2 flex justify-between items-center">
+            //     <div className='flex gap-4 items-center'>
+            //         <Text className="text-small font-semibold opacity-50">
+            //             {selectedKeys === "all" || selectedKeys.size===sortedItems.length ? `All ${counterName?.toLocaleLowerCase()} selected` : `${selectedKeys.size} of ${sortedItems.length} selected`}
+            //         </Text>
+            //         {onSelectToDelete && isActionable && (<Tooltip color="danger"
+            //                                                        content={`Delete ${selectedKeys === "all" ? "all users selected" : `${selectedKeys.size} users`}`}>
+            //             <span className="text-lg text-danger cursor-pointer active:opacity-50">
+            //                 <LuTrash2/>
+            //             </span>
+            //         </Tooltip>)}
+            //     </div>
+            // </section>
+            <div className="py-2 px-2 flex justify-between items-center">
+                <Pagination
+                    loop
+                    showControls
+                    classNames={{
+                        cursor: "bg-foreground text-background",
+                    }}
+                    color="default"
+                    isDisabled={hasSearchFilter}
+                    page={page}
+                    total={pages}
+                    variant="light"
+                    onChange={setPage}
+                />
+                <Typography className="text-small text-default-400">
+                    {selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${items.length} selected`}
+                </Typography>
+            </div>);
+    }, [hasSearchFilter, items.length, page, rowsPerPage, selectedKeys, sortedItems.length]);
 
     const loadingState = isLoading ? "loading" : "idle";
     const emptyContent = sortedItems.length === 0 && !isLoading && 'No data found. Try to refresh';
 
     return (<div className="grid grid-rows-[auto,1fr,auto] h-full w-full">
         {/* Show section if either one is not null */}
-        {(counterName ||contentTop || endContent || filterItems || searchingItemKey) && <section>
+        {(counterName || contentTop || endContent || filterItems || searchingItemKey) && <section>
             {topContent}
         </section>}
         <div className='flex flex-col h-full overflow-y-hidden'>
@@ -407,6 +433,11 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                     selectedKeys={selectedKeys}
                     onSelectionChange={setSelectedKeys}
                     selectionMode={selectionMode}
+                    removeWrapper
+                    isHeaderSticky
+                    classNames={{
+                        base: "h-full", emptyWrapper: "h-full", loadingWrapper: "h-full",
+                    }}
                     {...props}
                 >
                     <TableHeader columns={config.columns}>
@@ -421,13 +452,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                     <TableBody
                         emptyContent={emptyContent}
                         items={sortedItems}
-                        loadingContent={isLoading ? (<Spinner
-                            color="primary"
-                            label="Loading..."
-                            classNames={{
-                                base: 'h-96 mt-52', // wrapper: "" // Uncomment and specify if needed
-                            }}
-                        />) : null}
+                        loadingContent={<Loading/>}
                         loadingState={loadingState}
                     >
                         {(item: T) => (<TableRow key={item.id} className='cursor-pointer'>
@@ -438,9 +463,10 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                     </TableBody>
                 </Table>
             </ScrollShadow>
+            {selectionMode === "multiple" && (<section className="bg-amber-500">{bottomContent}</section>)}
         </div>
         <section>
-            {selectionMode === "multiple" && bottomContent}
+            {bottomContent}
         </section>
     </div>);
 }
