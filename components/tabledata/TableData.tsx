@@ -71,9 +71,12 @@ function genericSearch<T>(object: T, searchingItemKey: NestedKeys<T>[], query: s
         // console.log("New Prop: ",newProperty)
         const value = valueOfObject(object, String(newProperty));
 
-        // console.log("Query: ",String(query.toLowerCase()));
-        // console.log("Value: ",String(value));
-        searchable = String(value).toLowerCase().includes(query.toLowerCase())
+        // console.log("Query: ",String(query).toLowerCase());
+        // console.log("Value: ",String(value).toLowerCase());
+        const isValid = String(value).toLowerCase().includes(query.toLowerCase())
+        if (isValid){
+            searchable = true;
+        }
     });
     return searchable;
 }
@@ -133,8 +136,9 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                 } else {
                     if (filter instanceof Set && filter.size > 0) {
                         Array.from(filter).forEach((ft) => {
+                            const ftPart = ft.toString().split('=');
                             filteredUsers = filteredUsers.filter((items) => {
-                                return String(valueOfObject(items, ft.toString().split('=')[0])) === ft.toString().split('=')[1]
+                                return String(valueOfObject(items, ftPart[0])) === ftPart[1]
                             });
                         });
                     }
@@ -397,7 +401,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
             //         </Tooltip>)}
             //     </div>
             // </section>
-            <div className="py-2 px-2 flex justify-between items-center">
+            <div className="pt-2 px-2 flex justify-between items-center">
                 <Pagination
                     loop
                     showControls
@@ -411,9 +415,9 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                     variant="light"
                     onChange={setPage}
                 />
-                <Typography className="text-small text-default-400">
+                {selectionMode==="multiple" && <Typography className="text-small text-default-400">
                     {selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${items.length} selected`}
-                </Typography>
+                </Typography>}
             </div>);
     }, [hasSearchFilter, items.length, page, rowsPerPage, selectedKeys, sortedItems.length]);
 

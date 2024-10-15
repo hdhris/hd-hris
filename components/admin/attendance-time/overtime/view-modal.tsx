@@ -58,28 +58,6 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   overtimeData: data,
   isPending,
 }) => {
-  // Effect to populate modal fields if editing
-  //   const load = useCallback(() => {
-  //     if (overtimeData) {
-  //     //   form.reset({
-  //     //     ...overtimeData,
-  //     //     clock_in: toGMT8(overtimeData.clock_in).format('HH:mm'),
-  //     //     clock_out: toGMT8(overtimeData.clock_out).format('HH:mm'),
-  //     //     date: toGMT8(overtimeData.date).format('YYYY-MM-DD'),
-  //     //   });
-  //     } else {
-  //     //   form.reset({
-  //     //     id: -1,
-  //     //     clock_in: "",
-  //     //     clock_out: "",
-  //     //     date: "",
-  //     //     comment: "",
-  //     //   });
-  //     }
-  //   }, [overtimeData, form]);
-  //   useEffect(() => {
-  //     load();
-  //   }, [overtimeData]);
 
   const [overtimeData, setOvertimeData] = useState<OvertimeEntry>();
   const [selectedKey, setSelectedKey] = useState(new Set([""]));
@@ -180,14 +158,6 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
       title="Review Overtime"
       footer={
         <div className="flex gap-2 items-center ms-auto">
-          {/* <Button
-            className="me-auto"
-            variant="light"
-            onClick={onClose}
-            {...uniformStyle()}
-          >
-            Close
-          </Button> */}
           {overtimeData?.status === "pending" && (
             <>
               <Button
@@ -291,14 +261,14 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
         )}
       </div>
       <div className="flex gap-4">
-        <div className="flex flex-col gap-4 w-[440px]">
+        <div className="flex flex-col gap-4 w-[500px]">
           <div className="flex w-full">
-            <div className="flex-1">
+            <div className="flex-1 py-2">
               {/* {left} */}
               <p className="text-small font-semibold text-default-600">
                 Requested:
               </p>
-              <div>
+              <div className=" space-y-2">
                 <Info
                   icon={<TbClock size={20} className="text-default-600" />}
                   content={calculateShiftLength(
@@ -334,12 +304,12 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
                 />
               </div>
             </div>
-            <div className="flex-1">
-              {/* {left} */}
+            <div className="flex-1 py-2">
+              {/* {right} */}
               <p className="text-small font-semibold text-default-600">
                 Rendered:
               </p>
-              <div>
+              <div  className=" space-y-2">
                 <Info
                   icon={<TbClock size={20} className="text-default-600" />}
                   content={
@@ -403,7 +373,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
               }}
             />
           </div>
-          <div>
+          {/* <div>
             <p className="text-small font-semibold text-default-600">
               Rate Per Hour:
             </p>
@@ -422,7 +392,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
                 ),
               }}
             />
-          </div>
+          </div> */}
         </div>
         {isLoading ? (
           <Spinner label="Loading..." color="primary" className="w-full" />
@@ -472,12 +442,10 @@ const Info = ({
   return (
     <div className="flex-1 flex items-center gap-4 min-h-10">
       {icon}
-      <div>
+      <div className="flex flex-col gap-1">
         <p className="font-semibold leading-none">{content}</p>
-        <p className="text-tiny leading-none">
-          <span className="font-semibold text-gray-500 leading-none">
+        <p className="text-tiny leading-none font-semibold text-gray-500">
             {label}
-          </span>
         </p>
       </div>
     </div>
