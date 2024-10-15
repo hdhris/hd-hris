@@ -145,15 +145,18 @@ function Page() {
                 {item.status}
               </Chip>
               {item.trans_employees_overtimes_approvedBy && (
-                <Tooltip className="pointer-events-auto" content={item.approvedBy_full_name}>
+                <Tooltip
+                  className="pointer-events-auto"
+                  content={item.approvedBy_full_name}
+                >
                   <Avatar
-                  isBordered
-                  radius="full"
-                  size="sm"
-                  src={
-                    item?.trans_employees_overtimes_approvedBy?.picture ?? ""
-                  }
-                />
+                    isBordered
+                    radius="full"
+                    size="sm"
+                    src={
+                      item?.trans_employees_overtimes_approvedBy?.picture ?? ""
+                    }
+                  />
                 </Tooltip>
               )}
             </div>
@@ -217,19 +220,23 @@ function Page() {
         isLoading={isLoading}
         isHeaderSticky
         isStriped
+        searchingItemKey={[
+          ["trans_employees_overtimes", "last_name"],
+          ["trans_employees_overtimes", "first_name"],
+          ["trans_employees_overtimes", "middle_name"],
+          ["trans_employees_overtimes", "email"],
+          ["trans_employees_overtimes_approvedBy", "last_name"],
+          "date",
+        ]}
+        className="h-full"
         selectionMode="single"
         aria-label="Overtime entries"
         onRowAction={(key) => {
-          // alert(`Opening item ${key}...`);
           const item = data?.find((item) => item.id === Number(key));
           setSelectedOvertime(item);
           console.log(item);
-          // if(selectedOvertime){
-          //   setVisible(true)
-          // }
           setVisible(true);
         }}
-        // classNames={{ wrapper: "h-fit-navlayout" }}
       />
       <OvertimeModal
         visible={isVisible}

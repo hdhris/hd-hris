@@ -6,6 +6,7 @@ import TableData from "@/components/tabledata/TableData";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { useQuery } from "@/services/queries";
 import { PayrollTable } from "@/types/payroll/payrollType";
+import { FilterProps } from "@/types/table/default_config";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Chip, Spinner } from "@nextui-org/react";
 import React, { useState } from "react";
@@ -150,6 +151,24 @@ function Page() {
     },
   };
 
+  const filterItems: FilterProps[] = [
+    {
+      filtered: payrollTable?.employees
+        ?.map((emp) => {
+          return {
+            name: emp.ref_job_classes.name,
+            key: 'ref_job_classes.id',
+            value: emp.ref_job_classes.id,
+          };
+        })
+        ?.filter(
+          (item, index, self) =>
+            index === self.findIndex((t) => t.value === item.value)
+        ) || [],
+      category: 'Roles',
+    },
+  ];
+
   if (isLoading || prtLoading) {
     return <Spinner label="Loading..." className="w-full h-full" />;
   }
@@ -158,6 +177,8 @@ function Page() {
       <TableData
         items={payrollTable?.employees || []}
         config={config}
+        searchingItemKey={["first_name","middle_name","last_name"]}
+        filterItems={filterItems}
         isHeaderSticky
         className="h-full"
         aria-label="Employee Payroll"

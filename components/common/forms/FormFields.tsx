@@ -1,7 +1,7 @@
 'use client';
-import React, {FC, ReactNode, useState} from "react";
+import React, {FC, ReactNode} from "react";
 import {FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
-import {ControllerRenderProps, FieldValues, useFormContext, UseFormSetValue} from "react-hook-form";
+import {ControllerRenderProps, FieldValues, useFormContext} from "react-hook-form";
 import InputStyle, {DateStyle} from "@/lib/custom/styles/InputStyle";
 import {SelectionProp} from "./types/SelectionProp";
 import {InputProps, TextAreaProps} from "@nextui-org/input";
@@ -33,7 +33,7 @@ import {
     TimeInputProps,
 } from "@nextui-org/react";
 import {Case, Default, Switch as SwitchCase} from "@/components/common/Switch";
-import {DateValue, parseAbsoluteToLocal} from "@internationalized/date";
+import {getLocalTimeZone, parseAbsoluteToLocal, parseDate} from "@internationalized/date";
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -41,6 +41,7 @@ import {Radio} from "@nextui-org/radio";
 import {Key} from "@react-types/shared";
 import {Granularity} from "@react-types/datepicker";
 import {Input} from "@/components/ui/input";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 // Load plugins
 dayjs.extend(utc);
@@ -138,12 +139,12 @@ interface FormsControlProps {
 
 interface FormInputOptions {
     item: FormInputProps,
+    control: any,
     size: InputProps['size']
 }
 
 
-const RenderFormItem: FC<FormInputOptions> = ({item, size}) => {
-    const {control, setValue, getValues} = useFormContext();
+const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
     // const [dateInput, setDateInput] = useState<DateValue | null>(parseAbsoluteToLocal("2021-04-07T18:45:22Z"))
     // const [datePickerInput, setDatePickerInput] = useState<DateValue | null>(null)
     // const [timeInput, setTimeInput] = useState<TimeInputValue | null>(null)
@@ -151,9 +152,6 @@ const RenderFormItem: FC<FormInputOptions> = ({item, size}) => {
     // const [dateRangePickerInput, setDateRangePickerInput] = React.useState<RangeValue<DateValue> | null>(null);
 
     // Determine if the field is visible
-    const [datePicker, setDatePicker] = useState<DateValue | null>(null)
-    // console.log("Values: ", getValues(item.name))
-    // console.log("Date: ", date)
     const isVisible = typeof item.isVisible === "function" ? item.isVisible() : item.isVisible !== false;
 
     if (!isVisible) return null; // If the field is not visible, return null
@@ -161,16 +159,6 @@ const RenderFormItem: FC<FormInputOptions> = ({item, size}) => {
         control={control}
         name={item.name}
         render={({field}) => {
-
-            if(item.type === "date-input" && field.value) {
-                const dateValid = dayjs(field.value).isValid()
-                if(dateValid) {
-                    console.log("Name: ", item.name)
-                    console.log("Date: ", new Date(getValues(item.name)).toISOString())
-                    console.log("Parsed: ", parseAbsoluteToLocal(new Date(getValues(item.name)).toISOString()));
-                    // setDatePicker(parseAbsoluteToLocal(new Date(getValues(item.name)).toISOString()))
-                }
-            }
             return (<FormItem>
                 {item.label && item.type !== "checkbox" && item.type !== "group-checkbox" && item.type !== "radio-group" && item.type !== "switch" && (
                     <FormLabel htmlFor={item.name} className={item.inputClassName}>
@@ -246,20 +234,13 @@ const RenderFormItem: FC<FormInputOptions> = ({item, size}) => {
                                 {...(item.config as DateInputProps)}
                                 id={item.name}
                                 value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
-                                // value={field.value && dayjs(field.value).isValid()
-                                //     ? parseAbsoluteToLocal(new Date(field.value).toISOString()) as DateValue // Cast to the appropriate type
-                                //     : null}
-                                // value={datePicker}
                                 granularity={(item.config as any)?.granularity as Granularity || "day"}
                                 aria-label={item.name}
                                 isDisabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
                                 onChange={(value) => {
                                     if (value) {
-                                        const parsedValue = value.toString(); // Adjust based on your handling of the ZonedDateTime or CalendarDate
-                                        setDatePicker(value); // Update local state with the appropriate type
-                                        setValue(item.name, parsedValue); // Ensure this matches your expected string or type format
-                                        field.onChange(parsedValue); // Ensure proper type conversion before passing to onChange
+                                        field.onChange(toGMT8(value.toDate(getLocalTimeZone())).format('YYYY-MM-DD'))
                                     }
                                 }}
                             />
@@ -278,10 +259,9 @@ const RenderFormItem: FC<FormInputOptions> = ({item, size}) => {
                                 aria-label={item.name}
                                 isDisabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
-                                showMonthAndYearPickers
                                 onChange={(value) => {
                                     if (value) {
-                                        field.onChange(value.toString());
+                                        field.onChange(toGMT8(value.toDate(getLocalTimeZone())).format('YYYY-MM-DD'))
                                     }
                                 }}
                             />
@@ -295,8 +275,10 @@ const RenderFormItem: FC<FormInputOptions> = ({item, size}) => {
                                 variant="bordered"
                                 radius="sm"
                                 value={field.value?.start && field.value?.end && dayjs(field.value?.start).isValid() && dayjs(field.value?.end).isValid() ? {
-                                    start: parseAbsoluteToLocal(dayjs(field.value?.start).toISOString()),
-                                    end: parseAbsoluteToLocal(dayjs(field.value?.end).toISOString()),
+                                    // start: parseAbsoluteToLocal(dayjs(field.value?.start).toISOString()),
+                                    // end: parseAbsoluteToLocal(dayjs(field.value?.end).toISOString()),
+                                    start: parseDate(toGMT8(field.value?.start).format("YYYY-MM-DD")),
+                                    end: parseDate(toGMT8(field.value?.end).format("YYYY-MM-DD")),
                                 } : null}
                                 granularity={(item.config as any)?.granularity as Granularity || "day"}
                                 isRequired
@@ -368,7 +350,8 @@ const RenderFormItem: FC<FormInputOptions> = ({item, size}) => {
                         <Case of="time-input">
                             <TimeInput
                                 value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
-                                granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || "hour"}
+                                // granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || "hour"}
+                                granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || undefined}
                                 id={item.name}
                                 aria-label={item.name}
                                 isDisabled={item.inputDisabled}
@@ -377,7 +360,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, size}) => {
                                 radius="sm"
                                 {...(item.config as TimeInputProps)}
                                 onChange={(value) => {
-                                    field.onChange(value.toString());
+                                    field.onChange(toGMT8(value.toString().split('[')[0]).toISOString());
                                 }}
                             />
                         </Case>
@@ -499,6 +482,7 @@ export const Selection = ({
 };
 
 export default function FormFields({items, size}: FormsControlProps) {
+    const {control} = useFormContext();
     // RenderFormItem(item, control, index, size))}
-    return <>{items.map((item, index) => <RenderFormItem key={index} item={item} size={size}/>)}</>;
+    return <>{items.map((item, index) => <RenderFormItem key={index} item={item} control={control} size={size}/>)}</>;
 }
