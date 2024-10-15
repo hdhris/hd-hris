@@ -1,30 +1,54 @@
-import React from "react";
-import { SortDescriptor } from "@nextui-org/react";
+import React, {useCallback} from "react";
+import {SortDescriptor} from "@nextui-org/react";
+import {useRouter} from "next/navigation";
 
 interface SortHookProps {
     sort?: SortDescriptor;
 }
 
-export function useSort<T>(data: T[], { sort }: SortHookProps = {}) {
-    const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>(
-        sort || {
-            column: "id",
-            direction: "descending",
-        }
+export function useSort<T>(data: T[], {sort}: SortHookProps = {}) {
+    const router = useRouter()
+    const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>(sort || {
+        column: "id", direction: "descending",
+    });
+
+    const onChange = useCallback((sort: SortDescriptor) => {
+            setSortDescriptor(sort);
+
+            // Get current search parameters from the URL
+            const newSearchParams = new URLSearchParams(window.location.search);
+
+            const column = sort.column ?? "";
+            const direction = sort.direction ?? "";
+
+            // Update the search parameters with the new column and direction
+            if (column) {
+                newSearchParams.set("sortColumn", String(column));
+            } else {
+                newSearchParams.delete("sortColumn");
+            }
+
+            if (direction) {
+                newSearchParams.set("sortDirection", direction);
+            } else {
+                newSearchParams.delete("sortDirection");
+
+            }
+
+            // Update the router with the new search parameters
+            router.push(`?${newSearchParams.toString()}`);
+        }, [setSortDescriptor, router] // Ensure router is included in the dependencies
     );
 
-    const onChange = (sort: SortDescriptor) => {
-        setSortDescriptor(sort);
-    };
 
     const sortedItems = React.useMemo(() => {
         return [...data].sort((a, b) => {
             const getColumnValue = (item: T, column: keyof T | string): any => {
-                if (typeof column === "string") {
-                    const keys = column.split(".");
+                if (typeof column === 'string') {
+                    const keys = column.split('.');
                     let value: any = item;
                     for (const key of keys) {
-                        if (value && typeof value === "object" && key in value) {
+                        if (value && typeof value === 'object' && key in value) {
                             value = value[key as keyof typeof value];
                         } else {
                             value = undefined;
@@ -40,18 +64,10 @@ export function useSort<T>(data: T[], { sort }: SortHookProps = {}) {
             const first = getColumnValue(a, sortDescriptor.column as keyof T);
             const second = getColumnValue(b, sortDescriptor.column as keyof T);
 
-            if (typeof first === "string" && typeof second === "string") {
-                // Use localeCompare for string comparison to handle case and locale sensitivity
-                const cmp = first.localeCompare(second, undefined, { sensitivity: "base" });
-                return sortDescriptor.direction === "descending" ? -cmp : cmp;
-            }
-
-            // Fallback for non-string values
             const cmp = first < second ? -1 : first > second ? 1 : 0;
-            return sortDescriptor.direction === "descending" ? -cmp : cmp;
+            return sortDescriptor.direction === 'descending' ? -cmp : cmp;
         });
     }, [sortDescriptor, data]);
 
-    const sortedColumn = sortDescriptor.column ?? "id";
-    return { sortedColumn, onChange, sortedItems };
+    return {onChange, sortedItems};
 }
