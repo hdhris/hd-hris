@@ -1,7 +1,7 @@
 'use client';
-import React, {FC, ReactNode} from "react";
+import React, {FC, ReactNode, useState} from "react";
 import {FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
-import {ControllerRenderProps, FieldValues, useFormContext} from "react-hook-form";
+import {ControllerRenderProps, FieldValues, useFormContext, UseFormSetValue} from "react-hook-form";
 import InputStyle, {DateStyle} from "@/lib/custom/styles/InputStyle";
 import {SelectionProp} from "./types/SelectionProp";
 import {InputProps, TextAreaProps} from "@nextui-org/input";
@@ -33,7 +33,7 @@ import {
     TimeInputProps,
 } from "@nextui-org/react";
 import {Case, Default, Switch as SwitchCase} from "@/components/common/Switch";
-import {parseAbsoluteToLocal} from "@internationalized/date";
+import {DateValue, parseAbsoluteToLocal} from "@internationalized/date";
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -138,12 +138,12 @@ interface FormsControlProps {
 
 interface FormInputOptions {
     item: FormInputProps,
-    control: any,
     size: InputProps['size']
 }
 
 
-const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
+const RenderFormItem: FC<FormInputOptions> = ({item, size}) => {
+    const {control, setValue, getValues} = useFormContext();
     // const [dateInput, setDateInput] = useState<DateValue | null>(parseAbsoluteToLocal("2021-04-07T18:45:22Z"))
     // const [datePickerInput, setDatePickerInput] = useState<DateValue | null>(null)
     // const [timeInput, setTimeInput] = useState<TimeInputValue | null>(null)
@@ -151,6 +151,9 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
     // const [dateRangePickerInput, setDateRangePickerInput] = React.useState<RangeValue<DateValue> | null>(null);
 
     // Determine if the field is visible
+    const [datePicker, setDatePicker] = useState<DateValue | null>(null)
+    // console.log("Values: ", getValues(item.name))
+    // console.log("Date: ", date)
     const isVisible = typeof item.isVisible === "function" ? item.isVisible() : item.isVisible !== false;
 
     if (!isVisible) return null; // If the field is not visible, return null
@@ -158,6 +161,16 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
         control={control}
         name={item.name}
         render={({field}) => {
+
+            if(item.type === "date-input" && field.value) {
+                const dateValid = dayjs(field.value).isValid()
+                if(dateValid) {
+                    console.log("Name: ", item.name)
+                    console.log("Date: ", new Date(getValues(item.name)).toISOString())
+                    console.log("Parsed: ", parseAbsoluteToLocal(new Date(getValues(item.name)).toISOString()));
+                    // setDatePicker(parseAbsoluteToLocal(new Date(getValues(item.name)).toISOString()))
+                }
+            }
             return (<FormItem>
                 {item.label && item.type !== "checkbox" && item.type !== "group-checkbox" && item.type !== "radio-group" && item.type !== "switch" && (
                     <FormLabel htmlFor={item.name} className={item.inputClassName}>
@@ -233,14 +246,20 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 {...(item.config as DateInputProps)}
                                 id={item.name}
                                 value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
+                                // value={field.value && dayjs(field.value).isValid()
+                                //     ? parseAbsoluteToLocal(new Date(field.value).toISOString()) as DateValue // Cast to the appropriate type
+                                //     : null}
+                                // value={datePicker}
                                 granularity={(item.config as any)?.granularity as Granularity || "day"}
                                 aria-label={item.name}
                                 isDisabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
                                 onChange={(value) => {
                                     if (value) {
-
-                                        field.onChange(value.toString())
+                                        const parsedValue = value.toString(); // Adjust based on your handling of the ZonedDateTime or CalendarDate
+                                        setDatePicker(value); // Update local state with the appropriate type
+                                        setValue(item.name, parsedValue); // Ensure this matches your expected string or type format
+                                        field.onChange(parsedValue); // Ensure proper type conversion before passing to onChange
                                     }
                                 }}
                             />
@@ -259,9 +278,9 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 aria-label={item.name}
                                 isDisabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
+                                showMonthAndYearPickers
                                 onChange={(value) => {
                                     if (value) {
-
                                         field.onChange(value.toString());
                                     }
                                 }}
@@ -480,7 +499,6 @@ export const Selection = ({
 };
 
 export default function FormFields({items, size}: FormsControlProps) {
-    const {control} = useFormContext();
     // RenderFormItem(item, control, index, size))}
-    return <>{items.map((item, index) => <RenderFormItem key={index} item={item} control={control} size={size}/>)}</>;
+    return <>{items.map((item, index) => <RenderFormItem key={index} item={item} size={size}/>)}</>;
 }
