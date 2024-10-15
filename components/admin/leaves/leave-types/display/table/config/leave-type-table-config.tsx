@@ -101,20 +101,21 @@ export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
     }
 }
 
+const filterKeyEmpCat = "applicable_to_employee_types"
+const filterKeyPaidLeave = "paid_leave"
 export const filterLeaveTypes: FilterProps[] = [{
     filtered: [{
-        name: "All", uid: "all"
+        name: "All", key: filterKeyEmpCat, value: "All"
     }, {
-        name: "Regular", uid: "regular"
+        name: "Regular", key: filterKeyEmpCat, value: "Regular"
     }, {
-        name: "Probationary", uid: "probationary"
+        name: "Probationary", key: filterKeyEmpCat, value: "Probationary"
     }], category: "Employee Category"
 }, {
-    parent: "paid_leave",
     filtered: [{
-        name: "Paid", uid: "true"
+        name: "Paid", key: filterKeyPaidLeave, value: true
     }, {
-        name: "Not Paid", uid: "false"
+        name: "Not Paid", key: filterKeyPaidLeave, value: false
     }], category: "Is Paid"
 }]
 
