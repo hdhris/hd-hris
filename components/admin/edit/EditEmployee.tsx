@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
   Divider,
 } from "@nextui-org/react";
 import EditPersonalInformationForm from "./EditPersonalInformationForm";
