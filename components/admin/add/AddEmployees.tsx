@@ -19,7 +19,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import Drawer from "@/components/common/Drawer";
 import { Form } from "@/components/ui/form";
-
+import Text from "@/components/Text";
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
 }
@@ -68,6 +68,8 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       first_name: "",
       middle_name: "",
       last_name: "",
+      suffix: "",
+      extension: "",
       gender: "",
       email: "",
       contact_no: "",
@@ -88,26 +90,20 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       hired_at: "",
       department_id: "",
       job_id: "",
+      branch_id: "",
       batch_id: "",
-      days_json: {
-        // Monday: false,
-        // Tuesday: false,
-        // Wednesday: false,
-        // Thursday: false,
-        // Friday: false,
-        // Saturday: false,
-        // Sunday: false,
-      },
+      days_json: {},
     },
     mode: "onChange",
   });
+
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
     toast({
       title: "Submitting",
       description: "Adding new employee...",
     });
-  
+
     try {
       let pictureUrl = "";
       if (data.picture instanceof File) {
@@ -118,7 +114,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       } else {
         pictureUrl = data.picture; // If it's already a URL or default picture
       }
-  
+
       // Handle certificates
       const updatedCertificates = await Promise.all(
         data.certificates.map(async (cert) => {
@@ -134,7 +130,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
           return { fileName: cert.name, fileUrl: cert.url as string };
         })
       );
-  
+
       // Build educational background
       const educationalBackground = {
         elementary: data.elementary,
@@ -147,19 +143,21 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         highestDegree: data.highestDegree,
         certificates: updatedCertificates,
       };
-  
+
       // Prepare full data
       const fullData = {
         picture: pictureUrl,
         first_name: data.first_name,
         middle_name: data.middle_name,
         last_name: data.last_name,
-        suffix:data.suffix,
-        extension:data.extension,
+        suffix: data.suffix,
+        extension: data.extension,
         gender: data.gender,
         email: data.email,
         contact_no: data.contact_no,
-        birthdate: data.birthdate ? new Date(data.birthdate).toISOString() : null,
+        birthdate: data.birthdate
+          ? new Date(data.birthdate).toISOString()
+          : null,
         hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
@@ -177,14 +175,14 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
           },
         ],
       };
-  
+
       console.log("Sending data:", JSON.stringify(fullData, null, 2));
-  
+
       const response = await axios.post(
         "/api/employeemanagement/employees",
         fullData
       );
-  
+
       if (response.status === 201) {
         onEmployeeAdded();
         methods.reset();
@@ -193,7 +191,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
           description: "Employee successfully added!",
           duration: 3000,
         });
-  
+
         setTimeout(() => {
           onClose();
         }, 500);
@@ -204,7 +202,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         console.error("Server error response:", error.response.data);
         toast({
           title: "Error",
-          description: error.response.data.message || "Failed to add employee. Please try again.",
+          description:
+            error.response.data.message ||
+            "Failed to add employee. Please try again.",
           duration: 3000,
         });
       } else {
@@ -218,32 +218,32 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       setIsSubmitting(false);
     }
   };
-  
 
   return (
     <>
       <Add variant="flat" name="Add Employee" onClick={onOpen} />
-      <Drawer title="Add New Employee"
+      <Drawer
+        title="Add New Employee"
         size="lg"
         isOpen={isOpen}
         onClose={onClose}
-        // scrollBehavior="inside"
-        // isDismissable={false}
       >
         <Form {...methods}>
-          <form className="mb-4 space-y-4" id="drawer-form" onSubmit={methods.handleSubmit(handleFormSubmit)}>
-            
-                <h2>Personal Information</h2>
-                <PersonalInformationForm />
-                <Divider className="my-6" />
-                <h2>Educational Background</h2>
-                <EducationalBackgroundForm />
-                <Divider className="my-6" />
-                <h2>Job Information</h2>
-                <JobInformationForm />
+          <form
+            className="mb-4 space-y-4"
+            id="drawer-form"
+            onSubmit={methods.handleSubmit(handleFormSubmit)}
+          >
+            <PersonalInformationForm />
+            <Divider className="my-6" />
+            <Text className="text-medium font-semibold">Educational Background</Text>
+            <EducationalBackgroundForm />
+            <Divider className="my-6" />
+            <h2>Job Information</h2>
+            <JobInformationForm />
           </form>
         </Form>
-      </Drawer  >
+      </Drawer>
     </>
   );
 };

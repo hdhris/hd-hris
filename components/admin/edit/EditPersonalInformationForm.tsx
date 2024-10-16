@@ -16,15 +16,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { parseDate } from "@internationalized/date";
 import AddressInput from "@/components/common/forms/address/AddressInput";
-import {LuUserCircle2} from "react-icons/lu";
-
-interface AddressOption {
-  address_code: number;
-  address_name: string;
-}
+import { LuUserCircle2 } from "react-icons/lu";
 
 const safeParseDate = (dateString: string) => {
   try {
@@ -45,46 +39,37 @@ const EditPersonalInformationForm: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | undefined>(
     undefined
   );
-  const { edgestore } = useEdgeStore();
   const [fileError, setFileError] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null); 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isImageRemoved, setIsImageRemoved] = useState(false);
 
   // Populate fields with initial data from the server
   useEffect(() => {
     const pictureValue = getValues("picture");
     const gender = getValues("gender");
-
     if (pictureValue) {
       setImagePreview(pictureValue);
     }
-
     if (gender) {
-      setValue("gender", gender); // Set gender value
+      setValue("gender", gender);
     }
   }, [getValues, setValue]);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 1024 * 1024 * 5) {
         setFileError("File size must be less than 5MB");
         return;
       }
-
-      try {
-        const res = await edgestore.publicFiles.upload({
-          file,
-          onProgressChange: (progress) => {
-            console.log(`Upload progress: ${progress}%`);
-          },
-        });
-
-        setImagePreview(res.url);
-        setValue("picture", res.url);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        setFileError("Failed to upload image");
-      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+        setValue("picture", file); // Store the File object, not the URL
+      };
+      reader.readAsDataURL(file);
+      setFileError("");
+      setIsImageRemoved(false);
     }
   };
 
@@ -94,8 +79,12 @@ const EditPersonalInformationForm: React.FC = () => {
 
   const handleRemovePhoto = useCallback(() => {
     setImagePreview(undefined);
-    fileInputRef.current!.value = "";
-  }, []);
+    setValue("picture", ""); // Set to empty string to indicate removal
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    setIsImageRemoved(true);
+  }, [setValue]);
 
   return (
     <div className="space-y-6">
@@ -144,7 +133,7 @@ const EditPersonalInformationForm: React.FC = () => {
                         />
                         Upload New Picture
                       </Button>
-                      {imagePreview && (
+                      {(imagePreview || isImageRemoved) && (
                         <Button
                           size="sm"
                           radius="md"
@@ -184,7 +173,7 @@ const EditPersonalInformationForm: React.FC = () => {
                   isInvalid={(() => {
                     const value = field.value;
                     const validateText = (value: string) =>
-                      /^[a-zA-Z\s]+$/.test(value); // Regex for alphabets only
+                      /^[a-zA-Z\s]+$/.test(value);
                     return value === "" ? false : !validateText(value);
                   })()}
                   errorMessage="First name should contain only alphabets"
@@ -199,7 +188,6 @@ const EditPersonalInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-             
               <FormControl>
                 <Input
                   {...field}
@@ -210,7 +198,7 @@ const EditPersonalInformationForm: React.FC = () => {
                   isInvalid={(() => {
                     const value = field.value;
                     const validateText = (value: string) =>
-                      /^[a-zA-Z]*$/.test(value); // Optional field, alphabets only
+                      /^[a-zA-Z]*$/.test(value);
                     return value === "" ? false : !validateText(value);
                   })()}
                   errorMessage="Middle name should contain only alphabets"
@@ -225,7 +213,6 @@ const EditPersonalInformationForm: React.FC = () => {
           control={control}
           render={({ field }) => (
             <FormItem>
-             
               <FormControl>
                 <Input
                   {...field}
@@ -238,7 +225,7 @@ const EditPersonalInformationForm: React.FC = () => {
                   isInvalid={(() => {
                     const value = field.value;
                     const validateText = (value: string) =>
-                      /^[a-zA-Z]+$/.test(value); // Regex for alphabets only
+                      /^[a-zA-Z]+$/.test(value);
                     return value === "" ? false : !validateText(value);
                   })()}
                   errorMessage="Last name should contain only alphabets"
@@ -248,13 +235,11 @@ const EditPersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-        {/* Suffix */}
         <Controller
           name="suffix"
           control={control}
           render={({ field }) => (
             <FormItem>
-             
               <FormControl>
                 <Input
                   {...field}
@@ -266,7 +251,7 @@ const EditPersonalInformationForm: React.FC = () => {
                   isInvalid={(() => {
                     const value = field.value;
                     const validateText = (value: string) =>
-                      /^[a-zA-Z]*$/.test(value); // Optional field, alphabets only
+                      /^[a-zA-Z]*$/.test(value);
                     return value === "" ? false : !validateText(value);
                   })()}
                   errorMessage="Suffix should contain only alphabets"
@@ -276,15 +261,13 @@ const EditPersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-        {/* Extension */}
         <Controller
           name="extension"
           control={control}
           render={({ field }) => (
             <FormItem>
-             
               <FormControl>
-              <Input
+                <Input
                   {...field}
                   label={<span className="font-semibold">Extension</span>}
                   type="text"
@@ -294,7 +277,7 @@ const EditPersonalInformationForm: React.FC = () => {
                   isInvalid={(() => {
                     const value = field.value;
                     const validateText = (value: string) =>
-                      /^[a-zA-Z]*$/.test(value); // Optional field, alphabets only
+                      /^[a-zA-Z]*$/.test(value);
                     return value === "" ? false : !validateText(value);
                   })()}
                   errorMessage="Extension should contain only alphabets"
@@ -304,13 +287,11 @@ const EditPersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-
         <Controller
           name="gender"
           control={control}
           render={({ field }) => (
             <FormItem>
-             
               <FormControl>
                 <Select
                   selectedKeys={field.value ? [field.value] : []}
@@ -336,7 +317,7 @@ const EditPersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-
+        
         <Controller
           name="birthdate"
           control={control}
@@ -345,7 +326,6 @@ const EditPersonalInformationForm: React.FC = () => {
 
             return (
               <FormItem>
-             
                 <FormControl>
                   <DatePicker
                     value={parsedValue}
@@ -366,17 +346,16 @@ const EditPersonalInformationForm: React.FC = () => {
           }}
         />
       </div>
+
       <Divider />
       <Text className="text-medium font-semibold">Contact Information</Text>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* Email */}
         <Controller
           name="email"
           control={control}
           render={({ field }) => (
             <FormItem>
-        
               <FormControl>
                 <Input
                   {...field}
@@ -386,12 +365,8 @@ const EditPersonalInformationForm: React.FC = () => {
                   type="email"
                   isInvalid={(() => {
                     const value = field.value;
-
-                    // Correct regex for email validation, made case-insensitive
                     const validateEmail = (value: string) =>
                       /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value);
-
-                    // Check if value is empty, return false. Otherwise, check if it's a valid email
                     return value === "" ? false : !validateEmail(value);
                   })()}
                   placeholder="Enter email"
@@ -403,21 +378,18 @@ const EditPersonalInformationForm: React.FC = () => {
             </FormItem>
           )}
         />
-
-        {/* Phone Number */}
         <Controller
           name="contact_no"
           control={control}
           render={({ field }) => (
             <FormItem>
-        
               <FormControl>
                 <Input
                   {...field}
                   placeholder="Enter phone number"
                   variant="bordered"
                   isRequired
-                  label={<span className="font-semibold">Phone No.</span>}
+                  label={<span className="font-semibold">Phone Number</span>}
                   labelPlacement="outside"
                   type="text"
                   value={field.value ? `+63${field.value}` : ""}
@@ -439,8 +411,9 @@ const EditPersonalInformationForm: React.FC = () => {
           )}
         />
       </div>
+
       <Divider />
-      <Text className="text-medium font-semibold">Address Information</Text>
+      <Text className="text-medium font-semibold">Address</Text>
 
       <div className="grid grid-cols-2 gap-4">
         <AddressInput />
