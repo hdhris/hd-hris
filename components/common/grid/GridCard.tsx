@@ -13,7 +13,9 @@ import Typography from "../typography/Typography";
 import dayjs from "dayjs";
 import { Time } from "@/helper/timeParse/datetimeParse";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-import {LuCheckCircle2, LuXCircle} from "react-icons/lu";
+import { LuCheckCircle2, LuXCircle } from "react-icons/lu";
+import DropdownList, { DropdownListItemProp } from "../Dropdown";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 const bgGradient = (name: string) => {
   return {
@@ -65,10 +67,11 @@ const wideHeightSize = {
 export interface GridItemProps {
   column?: string;
   label: string;
-  value: any;
+  value: ReactNode;
 }
 
 interface GridCardProps<T extends object> {
+  // id: string | number;
   name: string;
   items: T[];
   size?: "sm" | "md" | "lg";
@@ -79,6 +82,7 @@ interface GridCardProps<T extends object> {
   status?: { label: string; color: PulseColorType };
   bottomShadow?: boolean;
   wide?: boolean;
+  actionList: DropdownListItemProp[];
 }
 
 function GridCard<T extends GridItemProps>({
@@ -92,17 +96,21 @@ function GridCard<T extends GridItemProps>({
   status,
   bottomShadow,
   wide,
+  actionList,
 }: GridCardProps<T>) {
   const isLight = uniqolor(name).isLight;
   return (
-    <Card className={cn("h-auto", wide? wideWidthSize[size]: widthSize[size])} isHoverable>
+    <Card
+      className={cn("h-fit", wide ? wideWidthSize[size] : widthSize[size])}
+      isHoverable
+    >
       <CardHeader className="p-0 -z-1">
         <div
           {...(!background ? bgGradient(name) : coverPhoto(background))}
           className={cn(
             "relative flex w-full rounded h-2-b-sm rounded-r-sm",
-            wide? wideHeightSize[size] :heightSize[size],
-            isLight && "brightness-110",
+            wide ? wideHeightSize[size] : heightSize[size],
+            isLight && "shadow-[inset_10px_10px_5px_172px_rgba(0,0,0,0.06)];",
             !bottomShadow
               ? ""
               : !isLight
@@ -110,11 +118,17 @@ function GridCard<T extends GridItemProps>({
               : "shadow-[inset_-1px_-121px_75px_-52px_rgba(255,255,255,0.49)]"
           )}
         >
-          <div className="flex items-end p-2 gap-2 w-full h-full">
+          <div className="relative flex items-end p-2 gap-2 w-full h-full">
+            <DropdownList
+              trigger={{
+                icon: <BsThreeDotsVertical size={18}/>,
+                class: "absolute top-0 right-0 text-white",
+              }}
+              items={actionList}
+            />
             <Typography
               className={cn(
-                "flex-1 font-extrabold break-words overflow-hidden text-pretty",
-                isLight ? "text-black" : "text-white",
+                "flex-1 font-extrabold break-words overflow-hidden text-pretty text-white",
                 textSize[size]
               )}
             >
@@ -135,10 +149,10 @@ function GridCard<T extends GridItemProps>({
       <CardBody className="overflow-hidden">
         <div
           className={`grid ${
-            size == "sm" ? "" : size == "md" ? "gap-1" : "gap-2"
+            size == "sm" ? "gap-2" : size == "md" ? "gap-3" : "gap-4"
           }`}
         >
-          {items.map((item,key) => {
+          {items.map((item, key) => {
             return (
               <div className="flex justify-between items-center" key={key}>
                 <span className="text-medium">{item.label}:</span>
@@ -154,7 +168,7 @@ function GridCard<T extends GridItemProps>({
                     toGMT8(item.value).format("MMM D, YYYY") // Date
                   ) : typeof item.value === "object" &&
                     item.value instanceof Time ? (
-                    toGMT8(new Date).format('h:mm a')
+                    toGMT8(new Date()).format("h:mm a")
                   ) : (
                     // Any
                     item.value

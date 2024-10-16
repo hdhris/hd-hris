@@ -18,6 +18,11 @@ function RootLayout({ children }: { children: ReactNode }) {
       key: "overtime",
       title: "Overtime",
       path: "overtime"
+    },
+    {
+      key: "holidays",
+      title: "Holidays",
+      path: "holidays"
     }
   ]
 
