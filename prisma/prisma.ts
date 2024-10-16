@@ -1,8 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
 const prismaClientSingleton = () => {
-    // return new PrismaClient() //.$extends(withPulse({ apiKey: process.env.PULSE_API_KEY }));
-
     return new PrismaClient();
 
 };
@@ -12,6 +10,7 @@ declare const globalThis: {
 } & typeof global;
 
 const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+
 
 export default prisma;
 

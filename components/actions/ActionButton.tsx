@@ -7,8 +7,8 @@ import {LuPencil, LuTrash2} from "react-icons/lu";
 
 interface ActionProps {
     name: string
-    onDelete?: () => void; // for delete
-    onEdit?: () => void; // for edit
+    onDelete: () => void; // for delete
+    onEdit: () => void; // for edit
 }
 export const TableActionButton = ({onDelete, onEdit, name}: ActionProps) => {
     interface ActionBTNProps {
@@ -26,8 +26,8 @@ export const TableActionButton = ({onDelete, onEdit, name}: ActionProps) => {
             </Button>
         </Tooltip>)
     return (<>
-        {onEdit && actionBTN({children:  <LuPencil size={18} className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
-        {onDelete && actionBTN({children: <LuTrash2 size={18} className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
+        {actionBTN({children:  <LuPencil size={18} className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
+        {actionBTN({children: <LuTrash2 size={18} className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
     </>);
 };
 

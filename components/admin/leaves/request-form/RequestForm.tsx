@@ -71,16 +71,15 @@ function RequestForm() {
             comment: ""
         }
     });
-
     const {isDirty, isValid} = useFormState(form)
-    const reset = () => {
+    const reset = useCallback(() => {
         form.reset({
             employee_id: 0, leave_type_id: 0, comment: "", reason: "",
         });
         setLeaveTypeDuration(null);
         setLeaveDate(null);
         setIsAdd(true);
-    }
+    }, [form])
 
 // Your other code...
     const handleClear = () => {
@@ -146,8 +145,6 @@ function RequestForm() {
             }
             setIsAdd(false);
         } else if (formData?.method === "Reset") {
-            console.log("Reset...")
-
             console.log("Data: ", data)
             setUser((prevData) => {
                 return {
@@ -267,9 +264,6 @@ function RequestForm() {
             }
         });
 
-        console.log("Edit: ", {
-            comment, reason, employee_id, leave_type_id, start_date, end_date
-        })
     }
 
 

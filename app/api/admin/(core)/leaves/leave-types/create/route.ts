@@ -1,8 +1,6 @@
 import { hasContentType } from "@/helper/content-type/content-type-check";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
-import { LeaveTypeSchema } from "@/helper/zodValidation/leaves/leave-types-form/LeaveTypesForm";
-import {ZodError} from "zod";
 
 export async function POST(request: NextRequest) {
     try {
@@ -34,16 +32,11 @@ export async function POST(request: NextRequest) {
                 max_accrual: data.maxAccrual,
                 carry_over: data.carryOver,
                 paid_leave: data.paidLeave,
-                affects_overtime: data.affectsOvertime,
-                requires_signatories: data.requiresSignatories,
                 is_active: data.isActive,
                 min_duration: data.minDuration,
                 max_duration: data.maxDuration,
                 notice_required: data.noticeRequired,
-                pro_rated_for_probationary: data.proRatedForProbationary,
                 attachment_required: data.attachmentRequired,
-                pay_rate: data.payRate,
-                pay_rate_frequency: data.payRateFrequency,
                 created_at: new Date(),
                 applicable_to_employee_types: data.applicableToEmployeeTypes,
             },

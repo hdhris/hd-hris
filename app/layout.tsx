@@ -10,6 +10,7 @@ import MaintenanceBreak from "@/components/maintainance/Maintenance";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import {Toaster} from "@/components/ui/toaster";
+import DbConnection from "@/components/DBConnection";
 
 
 
@@ -54,6 +55,7 @@ export default function RootLayout({
         <SpeedInsights/>
         <Analytics/>
     </Providers>
+    {/*<DbConnection/>*/}
     <Toaster />
 
     </body>
