@@ -12,8 +12,6 @@ import { Analytics } from "@vercel/analytics/react"
 import {Toaster} from "@/components/ui/toaster";
 import DbConnection from "@/components/DBConnection";
 
-
-
 const inter = Inter({subsets: ["latin"]});
 const isMaintenanceMode = process.env.MAINTAINANCE_MODE;
 let title = ""

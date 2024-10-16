@@ -1,4 +1,4 @@
-import React, {useCallback} from "react";
+import React, {useCallback, useEffect} from "react";
 import {SortDescriptor} from "@nextui-org/react";
 import {useRouter} from "next/navigation";
 
@@ -9,36 +9,67 @@ interface SortHookProps {
 export function useSort<T>(data: T[], {sort}: SortHookProps = {}) {
     const router = useRouter()
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>(sort || {
-        column: "id", direction: "descending",
+        column: "id",
+        direction: "descending",
     });
 
-    const onChange = useCallback((sort: SortDescriptor) => {
-            setSortDescriptor(sort);
+    useEffect(() => {
+        // On component mount, initialize sort state from the URL
+        const getCurrentSort = new URLSearchParams(window.location.search);
+        const sortParam = getCurrentSort.get("sort");
+        if (sortParam) {
+            const [column, dir] = sortParam.split("&");
+            if(!column) setSortDescriptor({ column, direction: undefined });
+            else {
+                const direction = dir === "desc" ? "descending" : "ascending";
+                setSortDescriptor({column, direction});
+            }
+        }
+    }, []); // Empty dependency array to only run on component mount
 
-            // Get current search parameters from the URL
+    useEffect(() => {
+        // Update the URL and sorting state whenever the sortDescriptor changes
+        if (sortDescriptor?.column && sortDescriptor?.direction) {
             const newSearchParams = new URLSearchParams(window.location.search);
+            newSearchParams.set("sort", `${sortDescriptor.column}&${sortDescriptor.direction === "descending" ? "desc" : "asc"}`);
 
-            const column = sort.column ?? "";
-            const direction = sort.direction ?? "";
+            // Update the URL with the new sort parameters
+            router.replace(`?${newSearchParams.toString()}`);
+        }
+    }, [router, sortDescriptor]);
 
-            // Update the search parameters with the new column and direction
-            if (column) {
-                newSearchParams.set("sortColumn", String(column));
-            } else {
-                newSearchParams.delete("sortColumn");
-            }
 
-            if (direction) {
-                newSearchParams.set("sortDirection", direction);
-            } else {
-                newSearchParams.delete("sortDirection");
 
-            }
+    const onChange = useCallback((sort: SortDescriptor) => {
+        setSortDescriptor(sort);
 
-            // Update the router with the new search parameters
-            router.push(`?${newSearchParams.toString()}`);
-        }, [setSortDescriptor, router] // Ensure router is included in the dependencies
-    );
+        // Get current search parameters from the URL
+        const newSearchParams = new URLSearchParams(window.location.search);
+
+        const column = sort.column ?? "";
+        const direction = sort.direction ?? "";
+
+        let sortPath = "";
+
+        if (column) {
+            sortPath = `${sortPath}=${encodeURIComponent(column)}`;
+        }
+
+        if (direction) {
+            sortPath = `${sortPath}&${encodeURIComponent(direction.slice(0, direction === "descending" ? 4 : 3))}`;
+        }
+
+        if (column || direction) {
+            // Set the new sortPath in search parameters
+            newSearchParams.set("sort", sortPath);
+        } else {
+            newSearchParams.delete("sort");
+        }
+
+        // Update the router with the new search parameters
+        router.push(`?${newSearchParams.toString()}`);
+    }, [setSortDescriptor, router]);
+
 
 
     const sortedItems = React.useMemo(() => {

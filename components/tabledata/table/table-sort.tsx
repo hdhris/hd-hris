@@ -22,7 +22,7 @@ interface SortProps<T> {
 
 function TableSort<T>({sortItems, initialValue, onSortChange}: SortProps<T>) {
     const [sort, setSort] = useState<Selection>(initialValue ? new Set([initialValue]) : new Set([]));
-    const [direction, setDirection] = useState<'ascending' | 'descending'>()
+    const [direction, setDirection] = useState<'ascending' | 'descending'>("ascending")
 
     const handleDirectionChange = (isSelected: boolean) => {
         setDirection(isSelected ? 'ascending' : 'descending')
@@ -34,9 +34,17 @@ function TableSort<T>({sortItems, initialValue, onSortChange}: SortProps<T>) {
     };
 
     useEffect(() => {
-        const selectedKey = Array.from(sort).pop() as string;
-        onSortChange({column: selectedKey, direction: direction});
+        const selectedKey = Array.from(sort).pop() as string | undefined;
+
+        if (selectedKey) {
+            // If selectedKey exists, use the current direction
+            onSortChange({ column: selectedKey, direction });
+        } else {
+            // If selectedKey is null/undefined, set direction to undefined
+            onSortChange({ column: undefined, direction: undefined });
+        }
     }, [direction, onSortChange, sort]);
+
 
     return (<div className="flex gap-3 items-center">
         <Dropdown>
@@ -69,12 +77,14 @@ function TableSort<T>({sortItems, initialValue, onSortChange}: SortProps<T>) {
                     {sortItems.map((item) => (<DropdownItem
                         key={`${item.key}`}
                         className="capitalize"
+                        textValue={item.key}
                     >
                         {capitalize(item.name)}
                     </DropdownItem>))}
                 </DropdownSection>
                 <DropdownSection>
                     <DropdownItem
+                        textValue="direction"
                         isReadOnly
                         key="direction"
                         className="cursor-default"
