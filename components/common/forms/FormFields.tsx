@@ -350,8 +350,8 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                         <Case of="time-input">
                             <TimeInput
                                 value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
-                                // granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || "hour"}
-                                granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || undefined}
+                                granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || "hour"}
+                                // granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || undefined}
                                 id={item.name}
                                 aria-label={item.name}
                                 isDisabled={item.inputDisabled}

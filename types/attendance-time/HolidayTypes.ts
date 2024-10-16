@@ -1,8 +1,9 @@
 export interface HolidayEvent {
-    id: string;
+    id: string | number;
     name: string;
     // description: string;
-    startDate: string;
-    endDate: string;
-    isPublicHoliday: boolean;
+    start_date: string | Date;
+    end_date: string | Date;
+    type: "Public Holiday" | "Private Holiday" | "Observance";
+    created_at?: string | Date;
   }

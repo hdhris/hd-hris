@@ -1,15 +1,18 @@
 "use client";
+import Drawer from "@/components/common/Drawer";
 import GridCard from "@/components/common/grid/GridCard";
 import GridList from "@/components/common/grid/GridList";
 import SearchItems from "@/components/common/SearchItems";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import Loading from "@/components/spinner/Loading";
+import { Form } from "@/components/ui/form";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
 import { HolidayEvent } from "@/types/attendance-time/HolidayTypes";
 import React, { useState } from "react";
 
 function Page() {
+  const [open, setOpen] = useState(false)
   const [selectedYear, setSelectedYear] = useState(toGMT8().get("year"));
   const { data, isLoading } = useQuery<HolidayEvent[]>(
     `/api/admin/attendance-time/holidays/${selectedYear}`
@@ -21,9 +24,9 @@ function Page() {
         items={data || []}
         config={[
           { key: "name", label: "Name" },
-          { key: "startDate", label: "Date" },
+          { key: "start_date", label: "Date" },
         ]}
-        searchedItems={setSearchedItems}
+        setResults={setSearchedItems}
       />
     );
   });
@@ -36,13 +39,15 @@ function Page() {
       <GridList items={searchedItems || []}>
         {(item) => (
           <GridCard
+            id={item.id}
             name={item.name}
             size="sm"
+            onPress={() => alert(item.id)}
             items={[
               {
                 column: "date",
                 label: "Date",
-                value: toGMT8(item.startDate).format("MMM DD, YYYY"),
+                value: new Date(item.start_date),
               },
               {
                 column: "type",
@@ -50,16 +55,20 @@ function Page() {
                 value: (
                   <p
                     className={
-                      item.isPublicHoliday ? "text-blue-500" : "text-gray-800"
+                      item.type === "Public Holiday"
+                        ? "text-blue-500"
+                        : item.type === "Private Holiday"
+                        ? "text-pink-500"
+                        : "text-gray-800"
                     }
                   >
-                    {item.isPublicHoliday ? "Public Holiday" : "Observance"}
+                    {item.type}
                   </p>
                 ),
               },
             ]}
             status={(() => {
-              const start = toGMT8(item.startDate);
+              const start = toGMT8(item.start_date);
               const now = toGMT8();
               const status: "Upcoming" | "Ongoing" | "Completed" = start.isSame(
                 now,
@@ -79,24 +88,17 @@ function Page() {
                     : "gray",
               };
             })()}
-            deadPulse={!toGMT8(item.startDate).isSame(toGMT8())}
-            actionList={[
-              {
-                label: "Edit",
-                key: item.id,
-                description: "Edit holiday",
-                onClick: (key)=>alert("Edit: "+key),
-              },
-              {
-                label: "Delete",
-                key: item.id,
-                description: "Delete holiday",
-                onClick: (key)=>alert("Delete: "+key),
-              },
-            ]}
+            deadPulse={toGMT8(item.start_date).get('date')!= toGMT8().get('date')}
           />
         )}
       </GridList>
+      {/* <Drawer isOpen isDismissible onClose={setOpen}>
+        <Form>
+          <form>
+
+          </form>
+        </Form>
+      </Drawer> */}
     </div>
   );
 }

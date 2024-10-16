@@ -67,11 +67,11 @@ const wideHeightSize = {
 export interface GridItemProps {
   column?: string;
   label: string;
-  value: ReactNode;
+  value: any;
 }
 
 interface GridCardProps<T extends object> {
-  // id: string | number;
+  id: string | number;
   name: string;
   items: T[];
   size?: "sm" | "md" | "lg";
@@ -82,10 +82,12 @@ interface GridCardProps<T extends object> {
   status?: { label: string; color: PulseColorType };
   bottomShadow?: boolean;
   wide?: boolean;
-  actionList: DropdownListItemProp[];
+  actionList?: DropdownListItemProp[];
+  onPress?: ()=> void;
 }
 
 function GridCard<T extends GridItemProps>({
+  onPress,
   name,
   pulseVariant,
   deadPulse,
@@ -103,6 +105,8 @@ function GridCard<T extends GridItemProps>({
     <Card
       className={cn("h-fit", wide ? wideWidthSize[size] : widthSize[size])}
       isHoverable
+      isPressable={onPress!=undefined}
+      onPress={()=>onPress&&onPress()}
     >
       <CardHeader className="p-0 -z-1">
         <div
@@ -119,16 +123,16 @@ function GridCard<T extends GridItemProps>({
           )}
         >
           <div className="relative flex items-end p-2 gap-2 w-full h-full">
-            <DropdownList
+            {actionList && <DropdownList
               trigger={{
                 icon: <BsThreeDotsVertical size={18}/>,
                 class: "absolute top-0 right-0 text-white",
               }}
               items={actionList}
-            />
+            />}
             <Typography
               className={cn(
-                "flex-1 font-extrabold break-words overflow-hidden text-pretty text-white",
+                "flex-1 font-extrabold break-words overflow-hidden text-pretty text-start text-white",
                 textSize[size]
               )}
             >
@@ -168,7 +172,7 @@ function GridCard<T extends GridItemProps>({
                     toGMT8(item.value).format("MMM D, YYYY") // Date
                   ) : typeof item.value === "object" &&
                     item.value instanceof Time ? (
-                    toGMT8(new Date()).format("h:mm a")
+                    toGMT8(item.value.toISOString).format("h:mm a")
                   ) : (
                     // Any
                     item.value

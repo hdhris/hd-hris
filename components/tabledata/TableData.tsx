@@ -52,7 +52,7 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
     setSelectedKeys?: (keys: Selection) => void;
 }
 
-type NestedKeys<T> = {
+export type NestedKeys<T> = {
     [K in keyof T]: T[K] extends Record<string, any>
         ? K | [K, NestedKeys<T[K]>]
         : K; // Return the key itself if it's not an object
@@ -67,7 +67,7 @@ function genericSearch<T>(object: T, searchingItemKey: NestedKeys<T>[], query: s
     let searchable = false;
     searchingItemKey.forEach(property => {
         // const value = object[property];
-        let newProperty = Array.isArray(property) ? joinNestedKeys(property) : property;
+        let newProperty = joinNestedKeys([property]);
         // console.log("New Prop: ",newProperty)
         const value = valueOfObject(object, String(newProperty));
 
@@ -294,7 +294,6 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                           onSelectionChange={(keys) => {
                             const newFilter = new Set(filter); // Clone current filter
                             const selectedFilter = Array.from(keys) as string[];
-                            // console.log("Selected: ",selectedFilter)
 
                             // Ensure one selection per section
                             filterItems.forEach((item) => {

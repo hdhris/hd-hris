@@ -2,17 +2,19 @@ import { valueOfObject } from "@/helper/objects/pathGetterObject";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { Input } from "@nextui-org/react";
 import React, { useCallback, useEffect, useState } from "react";
+import { NestedKeys } from "../tabledata/TableData";
+import { joinNestedKeys } from "@/helper/objects/joinNestedKeys";
 
-interface SearchItemsProps<T extends object> {
+interface SearchItemsProps<T> {
   items: T[];
-  config: { key: string; label: string }[];
-  searchedItems: (items: T[]) => void;
+  config: { key: NestedKeys<T>; label: string }[];
+  setResults: (items: T[]) => void;
 }
 
 function SearchItems<T extends object>({
   items,
   config,
-  searchedItems,
+  setResults,
 }: SearchItemsProps<T>) {
   const [searchValue, setSearchValue] = useState("");
 
@@ -20,12 +22,12 @@ function SearchItems<T extends object>({
     setSearchValue(value);
     const searched = items.filter((item) =>
       config.some((conf) =>
-        valueOfObject(item, conf.key)
+        String(valueOfObject(item, joinNestedKeys([conf.key])))
           .toLowerCase()
           .includes(value.toLowerCase())
       )
     );
-    searchedItems(searched);
+    setResults(searched);
   }, [items,config]);
 
   useEffect(()=>{

@@ -11,6 +11,7 @@ import { Key } from "@react-types/shared";
 export interface DropdownListItemProp {
   label: ReactNode;
   key: string | number;
+  id?: string | number;
   description?: string;
   icon?: ReactNode;
   onClick?: (key: Key) => void;
@@ -34,9 +35,10 @@ function DropdownList({
     <Dropdown className={className}>
       <DropdownTrigger>
         {!trigger ? (
-          <Button variant="bordered">Open</Button>
+          <Button as={'div'} variant="bordered">Open</Button>
         ) : (
           <Button
+            as={'div'}
             startContent={trigger.icon}
             variant="light"
             className={trigger.class}
@@ -55,7 +57,7 @@ function DropdownList({
               description={item.description}
               startContent={item.icon}
               onClick={() => {
-                item.onClick && item.onClick(item.key);
+                item.onClick && item.onClick(item.id || item.key);
               }}
             >
               {item.label}
