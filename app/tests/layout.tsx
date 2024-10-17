@@ -11,7 +11,7 @@ const ClientOnlyLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         return <Loading/>; // Customize this to suit your app (or render nothing)
     }
 
-    return <>{children}</>; // Render children once it's confirmed that we're on the client
+    return <div className="h-screen">{children}</div>; // Render children once it's confirmed that we're on the client
 };
 
 export default ClientOnlyLayout;

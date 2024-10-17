@@ -5,19 +5,15 @@ import {
 } from '@nextui-org/react';
 import {icon_size_sm} from "@/lib/utils";
 import {capitalize} from "@nextui-org/shared-utils";
-import {FilterProps} from "@/types/table/default_config";
 import {LuListFilter} from "react-icons/lu";
+import {DataFilterProps} from "@/components/util/types/types";
 
-interface TableFilterProps {
-    filterItems: FilterProps[]
-    onChange: (value: Selection) => void
-    filterValue: Selection
-}
 
-function TableFilter({filterItems, onChange, filterValue}: TableFilterProps) {
+
+function Filter({filterItems, onChange, filterValue, wrapperClassName}: DataFilterProps) {
     const [filter, setFilter] = React.useState<Selection>(filterValue ?? new Set([]));
 
-    return (<div className="flex gap-3 items-center">
+    return (<div className={cn("flex gap-3 items-center", wrapperClassName)}>
         <Dropdown>
             <DropdownTrigger className="hidden sm:flex">
                 <Button
@@ -41,7 +37,6 @@ function TableFilter({filterItems, onChange, filterValue}: TableFilterProps) {
                 onSelectionChange={(keys) => {
                     const newFilter = new Set(filter); // Clone current filter
                     const selectedFilter = Array.from(keys) as string[];
-                    // console.log("Selected: ",selectedFilter)
 
                     // Ensure one selection per section
                     filterItems.forEach((item) => {
@@ -79,4 +74,4 @@ function TableFilter({filterItems, onChange, filterValue}: TableFilterProps) {
     </div>)
 }
 
-export default TableFilter;
+export default Filter;

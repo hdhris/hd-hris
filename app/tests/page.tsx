@@ -1,22 +1,23 @@
 "use client"
-import React, {useEffect, useMemo} from 'react';
-import TableSearch from "@/components/tabledata/table/table-search";
-import useSearch from "@/hooks/table/SearchHook";
-import {useQuery} from "@/services/queries";
-import useFilter from "@/hooks/table/FilterHook";
-import {
-    filterLeaveTypes, LeaveTypeTableConfiguration
-} from "@/components/admin/leaves/leave-types/display/table/config/leave-type-table-config";
-import TableFilter from "@/components/tabledata/table/table-filter";
-import TableSort from "@/components/tabledata/table/table-sort";
-import {useSort} from "@/hooks/table/SortHook";
+import { useQuery } from "@/services/queries";
 import {LeaveType} from "@/types/leaves/LeaveTypes";
-import TableData from "@/components/tabledata/TableData";
+import {useMemo} from "react";
+import useSearch from "@/hooks/utils/useSearch";
+import useFilter from "@/hooks/utils/useFilter";
+import {useSort} from "@/hooks/utils/useSort";
+import {usePagination} from "@/hooks/utils/usePagination";
+import TableSearch from "@/components/util/search";
+import TableFilter from "@/components/util/filter";
+import Sort from "@/components/util/sort";
 import {Pagination} from "@nextui-org/react";
-import {usePagination} from "@/hooks/table/usePagination";
-import {Selection} from "@nextui-org/react";
+import {
+    filterLeaveTypes,
+    LeaveTypeTableConfiguration
+} from "@/components/admin/leaves/leave-types/display/table/config/leave-type-table-config";
 import Loading from "@/components/spinner/Loading";
 import dayjs from "dayjs";
+import {Selection} from "@nextui-org/react";
+import DataTable from "@/components/common/data-display/data-table";
 
 function Page() {
     const {data, isLoading} = useQuery<LeaveType[]>("/api/admin/leaves/leave-types", 3000);
@@ -26,7 +27,7 @@ function Page() {
     }, [data])
     const {searchValue, onSearchChange, itemSearched} = useSearch<LeaveType>(leaveData, ["name"])
     const {filteredItems, onFilterChange, filter} = useFilter<LeaveType>(itemSearched)
-    const {sortedItems, onChange} = useSort<LeaveType>(filteredItems)
+    const {sortedItems, onSortChange} = useSort<LeaveType>(filteredItems)
     const {page, paginatedData, onPageChange, totalPages} =  usePagination(sortedItems)
 
 
@@ -51,13 +52,16 @@ function Page() {
             <div className="flex gap-2 items-center m-5">
                 <TableSearch value={searchValue} onChange={handleOnSearch}/>
                 <TableFilter filterValue={filter} filterItems={filterLeaveTypes} onChange={handleOnFilterChange}/>
-                <TableSort sortItems={[{
+                <Sort sortItems={[{
                     name: "Name", key: "name"
                 }, {
                     name: "Created At", key: "created_at"
-                }]} onSortChange={onChange}/>
+                }]} onSortChange={onSortChange}/>
             </div>
-            {render}
+            <DataTable
+                data={paginatedData}
+                config={LeaveTypeTableConfiguration}
+            />
             <Pagination
                 showControls
                 total={totalPages}
@@ -70,4 +74,4 @@ function Page() {
 
 }
 
-export default Page;
+export default Page
