@@ -54,7 +54,7 @@ function FilterItems<T>({ items, config, setResults, isLoading }: FilterProps<T>
     [items, config]
   );
   useEffect(() => {
-    if (items.length > 0) {
+    if (items) {
       refresh(selectedKeys);
     }
   }, [items, selectedKeys]);

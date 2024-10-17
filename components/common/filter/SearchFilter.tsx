@@ -24,7 +24,7 @@ function SearchFilter<T extends object>({
         />}
         {filterConfig && <FilterItems
           isLoading={isLoading}
-          items={searchConfig ? searchedData : items}
+          items={searchConfig? searchedData : items}
           config={filterConfig}
           setResults={setResults}
         />}
