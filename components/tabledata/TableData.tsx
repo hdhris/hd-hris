@@ -32,7 +32,7 @@ import {icon_color, icon_size} from "@/lib/utils";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
-import { joinNestedKeys } from '@/helper/objects/joinNestedKeys';
+import { joinNestedKeys, NestedKeys } from '@/helper/objects/joinNestedKeys';
 import {LuSearch} from 'react-icons/lu';
 import {valueOfObject} from '@/helper/objects/pathGetterObject';
 import Typography from "@/components/common/typography/Typography";
@@ -51,12 +51,6 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
     selectedKeys?: Selection;
     setSelectedKeys?: (keys: Selection) => void;
 }
-
-export type NestedKeys<T> = {
-    [K in keyof T]: T[K] extends Record<string, any>
-        ? K | [K, NestedKeys<T[K]>]
-        : K; // Return the key itself if it's not an object
-}[keyof T];
 
 
 interface SearchProps<T> {

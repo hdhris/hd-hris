@@ -68,6 +68,7 @@ export interface GridItemProps {
   column?: string;
   label: string;
   value: any;
+  textColor?: string; 
 }
 
 interface GridCardProps<T extends object> {
@@ -103,7 +104,7 @@ function GridCard<T extends GridItemProps>({
   const isLight = uniqolor(name).isLight;
   return (
     <Card
-      className={cn("h-fit", wide ? wideWidthSize[size] : widthSize[size])}
+      className={cn("h-fit border", wide ? wideWidthSize[size] : widthSize[size])}
       isHoverable
       isPressable={onPress!=undefined}
       onPress={()=>onPress&&onPress()}
@@ -112,7 +113,7 @@ function GridCard<T extends GridItemProps>({
         <div
           {...(!background ? bgGradient(name) : coverPhoto(background))}
           className={cn(
-            "relative flex w-full rounded h-2-b-sm rounded-r-sm",
+            "relative flex w-full rounded h-2-b-sm rounded-t-sm rounded-b-none",
             wide ? wideHeightSize[size] : heightSize[size],
             isLight && "shadow-[inset_10px_10px_5px_172px_rgba(0,0,0,0.06)];",
             !bottomShadow
@@ -126,7 +127,9 @@ function GridCard<T extends GridItemProps>({
             {actionList && <DropdownList
               trigger={{
                 icon: <BsThreeDotsVertical size={18}/>,
-                class: "absolute top-0 right-0 text-white",
+                props: {
+                  className: "absolute top-0 right-0 text-white",
+                }
               }}
               items={actionList}
             />}
@@ -160,7 +163,7 @@ function GridCard<T extends GridItemProps>({
             return (
               <div className="flex justify-between items-center" key={key}>
                 <span className="text-medium">{item.label}:</span>
-                <span className="font-semibold text-medium ">
+                <span className={cn("font-semibold text-medium",item.textColor)}>
                   {typeof item.value === "boolean" ? ( // Boolean
                     item.value ? (
                       <LuCheckCircle2 className="h-5 w-5 text-green-500" />

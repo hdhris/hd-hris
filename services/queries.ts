@@ -113,7 +113,7 @@ export function useNewPayhead() {
     })
 }
 
-export function useQuery<T extends object>(api: string, refreshInterval?: number){
+export function useQuery<T>(api: string, refreshInterval?: number){
     return useSWR<T>(api, fetcher, {
         revalidateOnFocus: false, refreshInterval: refreshInterval
     })

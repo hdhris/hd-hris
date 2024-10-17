@@ -1,8 +1,10 @@
 "use client";
 import Drawer from "@/components/common/Drawer";
+import { FilterItemsProps } from "@/components/common/filter/FilterItems";
+import SearchFilter from "@/components/common/filter/SearchFilter";
+import { SearchItemsProps } from "@/components/common/filter/SearchItems";
 import GridCard from "@/components/common/grid/GridCard";
 import GridList from "@/components/common/grid/GridList";
-import SearchItems from "@/components/common/SearchItems";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import Loading from "@/components/spinner/Loading";
 import { Form } from "@/components/ui/form";
@@ -12,21 +14,21 @@ import { HolidayEvent } from "@/types/attendance-time/HolidayTypes";
 import React, { useState } from "react";
 
 function Page() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState(toGMT8().get("year"));
-  const { data, isLoading } = useQuery<HolidayEvent[]>(
+  const [selectedItem, setSelectedItem] = useState<HolidayEvent | null>(null);
+  let { data, isLoading } = useQuery<HolidayEvent[]>(
     `/api/admin/attendance-time/holidays/${selectedYear}`
   );
-  const [searchedItems, setSearchedItems] = useState<HolidayEvent[]>([]);
+  const [holidayItems, setHolidayItems] = useState<HolidayEvent[]>([]);
+
   SetNavEndContent(() => {
     return (
-      <SearchItems
+      <SearchFilter
         items={data || []}
-        config={[
-          { key: "name", label: "Name" },
-          { key: "start_date", label: "Date" },
-        ]}
-        setResults={setSearchedItems}
+        filterConfig={filterConfig}
+        searchConfig={searchConfig}
+        setResults={setHolidayItems}
       />
     );
   });
@@ -36,13 +38,16 @@ function Page() {
   }
   return (
     <div className="h-full">
-      <GridList items={searchedItems || []}>
+      <GridList items={holidayItems || []}>
         {(item) => (
           <GridCard
             id={item.id}
             name={item.name}
             size="sm"
-            onPress={() => alert(item.id)}
+            onPress={() => {
+              setSelectedItem(item);
+              setOpen(true);
+            }}
             items={[
               {
                 column: "date",
@@ -52,19 +57,13 @@ function Page() {
               {
                 column: "type",
                 label: "Type",
-                value: (
-                  <p
-                    className={
-                      item.type === "Public Holiday"
-                        ? "text-blue-500"
-                        : item.type === "Private Holiday"
-                        ? "text-pink-500"
-                        : "text-gray-800"
-                    }
-                  >
-                    {item.type}
-                  </p>
-                ),
+                value: item.type,
+                textColor:
+                  item.type === "Public Holiday"
+                    ? "text-blue-500"
+                    : item.type === "Private Holiday"
+                    ? "text-pink-500"
+                    : "text-gray-800",
               },
             ]}
             status={(() => {
@@ -88,19 +87,77 @@ function Page() {
                     : "gray",
               };
             })()}
-            deadPulse={toGMT8(item.start_date).get('date')!= toGMT8().get('date')}
+            deadPulse={!toGMT8(item.start_date).isSame(toGMT8(), "day")}
           />
         )}
       </GridList>
-      {/* <Drawer isOpen isDismissible onClose={setOpen}>
-        <Form>
+      <Drawer
+        isOpen={open}
+        onClose={() => {
+          setOpen(false);
+          setSelectedItem(null);
+        }}
+        title={selectedItem?.name}
+      >
+        {/* <Form>
           <form>
 
           </form>
-        </Form>
-      </Drawer> */}
+        </Form> */}
+        <div>Test</div>
+      </Drawer>
     </div>
   );
 }
 
 export default Page;
+
+const filterConfig: FilterItemsProps<HolidayEvent>[] = [
+  {
+    filter: [
+      {
+        label: "Private",
+        value: "Private Holiday",
+      },
+      {
+        label: "Public",
+        value: "Public Holiday",
+      },
+      {
+        label: "Observance",
+        value: "Observance",
+      },
+    ],
+    key: "type",
+    sectionName: "Type",
+  },
+  {
+    filter: [
+      {
+        label: "Ongoing",
+        value: (item: HolidayEvent) => {
+          return toGMT8(item.start_date).isSame(toGMT8());
+        },
+      },
+      {
+        label: "Upcoming",
+        value: (item: HolidayEvent) => {
+          return toGMT8(item.start_date).isAfter(toGMT8());
+        },
+      },
+      {
+        label: "Completed",
+        value: (item: HolidayEvent) => {
+          return toGMT8(item.start_date).isBefore();
+        },
+      },
+    ],
+    key: "start_date",
+    sectionName: "Status",
+  },
+];
+const searchConfig: SearchItemsProps<HolidayEvent>[] = [
+  { key: "name", label: "Name" },
+  { key: "start_date", label: "Date" },
+  { key: "type", label: "Type" },
+];
