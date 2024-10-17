@@ -30,40 +30,49 @@ export async function GET(
     );
 
     // Map and filter the relevant events
-    const googleHolidays: HolidayEvent[] = data.items
-      .map((event: any) => ({
-        id: event.id,
-        name: event.summary,
-        start_date: event.start?.date || event.start?.dateTime,
-        end_date: event.end?.date || event.end?.dateTime,
-        created_at: event.created,
-        updated_at: event.updated,
-        type: isPublicHoliday(event.description || "")
-          ? "Public Holiday"
-          : "Observance",
-      }))
-      .filter(
-        (event: HolidayEvent) => toGMT8(event.start_date).get("year") === year
+    const fetchHolidays: HolidayEvent[] = data.items.map((event: any) => ({
+      id: event.id,
+      name: event.summary,
+      start_date: event.start?.date || event.start?.dateTime,
+      end_date: event.end?.date || event.end?.dateTime,
+      created_at: event.created,
+      updated_at: event.updated,
+      type: isPublicHoliday(event.description || "")
+        ? "Public Holiday"
+        : "Observance",
+    }));
+
+    const distinctYears = Array.from(
+      new Set(
+        fetchHolidays
+          .map((holiday) => toGMT8((holiday.start_date)).year()) // Get the year from start_date
+          .filter((year) => !isNaN(year)) // Filter out any invalid years
       )
+    );
+
+    const googleHolidays = fetchHolidays.filter(
+      (event: HolidayEvent) => toGMT8(event.start_date).get("year") === year
+    );
+
     // .filter((event: HolidayEvent) => event.isPublicHoliday); // Return only public holidays
 
-    const privateHolidays = (await prisma.ref_holidays.findMany({
-      where: {
-        deleted_at: null,
-      },
-    }))
-    .map((holiday) => ({
+    const privateHolidays = (
+      await prisma.ref_holidays.findMany({
+        where: {
+          deleted_at: null,
+        },
+      })
+    ).map((holiday) => ({
       ...holiday,
-      start_date: toGMT8(holiday.start_date!).year(toGMT8().year()).toISOString(),
-      end_date: toGMT8(holiday.end_date!).year(toGMT8().year()).toISOString(),
+      start_date: toGMT8(holiday.start_date!).year(year).toISOString(),
+      end_date: toGMT8(holiday.end_date!).year(year).toISOString(),
     })) as HolidayEvent[];
-    
 
     const combinedHolidays = [...googleHolidays, ...privateHolidays].sort(
       (a: HolidayEvent, b: HolidayEvent) =>
         toGMT8(a.start_date).valueOf() - toGMT8(b.start_date).valueOf()
     );
-    return NextResponse.json(combinedHolidays);
+    return NextResponse.json({combinedHolidays, distinctYears});
   } catch (error) {
     console.error("Error fetching holidays:", error);
     return NextResponse.json(

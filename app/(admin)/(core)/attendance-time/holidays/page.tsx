@@ -1,5 +1,6 @@
 "use client";
 import Drawer from "@/components/common/Drawer";
+import DropdownList from "@/components/common/Dropdown";
 import { FilterItemsProps } from "@/components/common/filter/FilterItems";
 import SearchFilter from "@/components/common/filter/SearchFilter";
 import { SearchItemsProps } from "@/components/common/filter/SearchItems";
@@ -8,28 +9,63 @@ import GridList from "@/components/common/grid/GridList";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import Loading from "@/components/spinner/Loading";
 import { Form } from "@/components/ui/form";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import { useAxiosGet } from "@/lib/utils/axiosGetPost";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
-import { HolidayEvent } from "@/types/attendance-time/HolidayTypes";
+import {
+  HolidayData,
+  HolidayEvent,
+} from "@/types/attendance-time/HolidayTypes";
 import React, { useState } from "react";
+import { IoChevronDown } from "react-icons/io5";
 
 function Page() {
   const [open, setOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState(toGMT8().get("year"));
   const [selectedItem, setSelectedItem] = useState<HolidayEvent | null>(null);
-  let { data, isLoading } = useQuery<HolidayEvent[]>(
+  const { data, isLoading, setApi } = useAxiosGet<HolidayData>(
     `/api/admin/attendance-time/holidays/${selectedYear}`
   );
   const [holidayItems, setHolidayItems] = useState<HolidayEvent[]>([]);
 
   SetNavEndContent(() => {
     return (
-      <SearchFilter
-        items={data || []}
-        filterConfig={filterConfig}
-        searchConfig={searchConfig}
-        setResults={setHolidayItems}
-      />
+      <>
+        <SearchFilter
+          items={data?.combinedHolidays || []}
+          filterConfig={filterConfig}
+          searchConfig={searchConfig}
+          setResults={setHolidayItems}
+          isLoading={isLoading}
+        />
+        <DropdownList
+          selectionMode="single"
+          selectedKeys={new Set([String(selectedYear)])}
+          onSelectionChange={(key) =>
+            setSelectedYear(Number(Array.from(key)[0]))
+          }
+          items={
+            data?.distinctYears.map((year) => ({
+              label: String(year),
+              key: String(year),
+            })) || []
+          }
+          trigger={{
+            label: (
+              <p className="font-semibold text-blue-500">{selectedYear}</p>
+            ),
+            props: {
+              ...uniformStyle({ color: "default", radius: "md" }),
+              variant: "bordered",
+              endContent: <IoChevronDown />,
+            },
+          }}
+          onAction={(key) =>
+            setApi(`/api/admin/attendance-time/holidays/${String(key)}`)
+          }
+        />
+      </>
     );
   });
 

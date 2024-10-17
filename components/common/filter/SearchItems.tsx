@@ -14,12 +14,14 @@ interface SearchProps<T> {
   items: T[];
   config: SearchItemsProps<T>[];
   setResults: (items: T[]) => void;
+  isLoading?: boolean;
 }
 
 function SearchItems<T extends object>({
   items,
   config,
   setResults,
+  isLoading,
 }: SearchProps<T>) {
   const [searchValue, setSearchValue] = useState("");
 
@@ -49,6 +51,7 @@ function SearchItems<T extends object>({
 
   return (
     <Input
+      isDisabled={isLoading}
       placeholder={`Search by ${config.map((item) => item.label).join(", ")}`}
       variant="bordered"
       value={searchValue}

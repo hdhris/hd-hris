@@ -19,9 +19,10 @@ interface FilterProps<T> {
   items: T[];
   config: FilterItemsProps<T>[];
   setResults: (items: T[]) => void;
+  isLoading?: boolean;
 }
 
-function FilterItems<T>({ items, config, setResults }: FilterProps<T>) {
+function FilterItems<T>({ items, config, setResults, isLoading }: FilterProps<T>) {
   const [selectedKeys, setSelectedKeys] = useState<
     Record<string, SharedSelection>
   >({});
@@ -120,6 +121,7 @@ function FilterItems<T>({ items, config, setResults }: FilterProps<T>) {
               variant: "bordered",
               endContent: <IoChevronDown />,
               className: "text-medium",
+              isLoading: isLoading,
             },
           }}
         />

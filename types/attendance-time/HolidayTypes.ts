@@ -7,3 +7,8 @@ export interface HolidayEvent {
     type: "Public Holiday" | "Private Holiday" | "Observance";
     created_at?: string | Date;
   }
+
+  export interface HolidayData {
+    combinedHolidays: HolidayEvent[],
+    distinctYears: number[];
+  }
