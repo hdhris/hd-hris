@@ -78,8 +78,6 @@ const RenderDisplay = <T extends { id: string | number }>({
                                                           }: RenderDisplayProps<T>) => {
 
     const { display } = useDataDisplayControl();
-
-    console.log("Display type: ", display)
     return (
         <Switch expression={display}>
             <Case of="table">
@@ -119,7 +117,6 @@ const DataDisplayTable = <T extends { id: string | number }, >({data, config, ..
     }, [setSelectedKeys, props.selectionMode])
 
     useEffect(() => {
-        console.log("Setting selected keys")
         if (props.selectionMode === "multiple") {
             setSelectedKeys(new Set([]))
         }

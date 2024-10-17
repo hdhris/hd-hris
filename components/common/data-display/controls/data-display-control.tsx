@@ -91,7 +91,7 @@ function DataDisplayControl<T>({
                 <ButtonGroup variant="light" color="primary" isIconOnly {...buttonGroupProps}>
                     {isTable && (
                         <Tooltip content="Table">
-                            <Button onClick={() => setDisplay("table")}>
+                            <Button onClick={() => setDisplay("table")} variant={display === "table" ? "flat" : "light"}>
                                 <LuTable2 className={cn("text-slate-700", icon_size_sm)}/>
                             </Button>
                         </Tooltip>
@@ -99,7 +99,7 @@ function DataDisplayControl<T>({
 
                     {isGrid && (
                         <Tooltip content="Grid">
-                            <Button onClick={() => setDisplay("grid")}>
+                            <Button onClick={() => setDisplay("grid")} variant={display === "grid" ? "flat" : "light"}>
                                 <LuLayoutGrid className={cn("text-slate-700", icon_size_sm)}/>
                             </Button>
                         </Tooltip>
@@ -107,7 +107,7 @@ function DataDisplayControl<T>({
 
                     {isList && (
                         <Tooltip content="List">
-                            <Button onClick={() => setDisplay("list")}>
+                            <Button onClick={() => setDisplay("list")} variant={display === "list" ? "flat" : "light"}>
                                 <LuLayoutList className={cn("text-slate-700", icon_size_sm)}/>
                             </Button>
                         </Tooltip>
