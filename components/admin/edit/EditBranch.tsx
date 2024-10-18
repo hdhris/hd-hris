@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
   Divider,
   Spinner,
 } from "@nextui-org/react";
@@ -17,14 +11,14 @@ import FormFields, {
   Selection,
 } from "@/components/common/forms/FormFields";
 import AddressInput from "@/components/common/forms/address/AddressInput";
-import { useBranchesData } from "@/services/queries";
 import Drawer from "@/components/common/Drawer";
 import { Form } from "@/components/ui/form";
+import { Branch } from "@/types/employeee/BranchType";
 
 interface EditBranchProps {
   isOpen: boolean;
   onClose: () => void;
-  branchId: number;
+  branchData: Branch;
   onBranchUpdated: () => void;
 }
 
@@ -40,13 +34,12 @@ interface BranchFormData {
 const EditBranch: React.FC<EditBranchProps> = ({
   isOpen,
   onClose,
-  branchId,
+  branchData,
   onBranchUpdated,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { data: branches } = useBranchesData();
 
   const methods = useForm<BranchFormData>({
     defaultValues: {
@@ -59,21 +52,20 @@ const EditBranch: React.FC<EditBranchProps> = ({
     },
   });
 
-  const fetchBranchData = useCallback(async () => {
+  const fetchBranchData = useCallback(() => {
     setIsLoading(true);
     try {
-      const branch = branches?.find((b) => b.id === branchId);
-      if (!branch) {
-        throw new Error("Branch data not found");
+      if (!branchData || !branchData.id) {
+        throw new Error("branch data not found or invalid");
       }
 
       methods.reset({
-        name: branch.name || "",
-        status: branch.is_active ? "active" : "inactive",
-        addr_region: branch.addr_region?.toString() || "",
-        addr_province: branch.addr_province?.toString() || "",
-        addr_municipal: branch.addr_municipal?.toString() || "",
-        addr_baranggay: branch.addr_baranggay?.toString() || "",
+        name: branchData.name || "",
+        status: branchData.is_active ? "active" : "inactive",
+        addr_region: branchData.addr_region?.toString() || "",
+        addr_province: branchData.addr_province?.toString() || "",
+        addr_municipal: branchData.addr_municipal?.toString() || "",
+        addr_baranggay: branchData.addr_baranggay?.toString() || "",
       });
 
       toast({
@@ -92,13 +84,13 @@ const EditBranch: React.FC<EditBranchProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [branchId, branches, methods, toast, onClose]);
+  }, [branchData, methods, toast, onClose]);
 
   useEffect(() => {
-    if (isOpen && branchId) {
+    if (isOpen && branchData) {
       fetchBranchData();
     }
-  }, [isOpen, branchId, fetchBranchData]);
+  }, [isOpen, branchData, fetchBranchData]);
 
   const onSubmit = async (data: BranchFormData) => {
     setIsSubmitting(true);
@@ -118,7 +110,7 @@ const EditBranch: React.FC<EditBranchProps> = ({
       };
 
       const response = await axios.put(
-        `/api/employeemanagement/branch?id=${branchId}`,
+        `/api/employeemanagement/branch?id=${branchData.id}`,
         filteredData
       );
 

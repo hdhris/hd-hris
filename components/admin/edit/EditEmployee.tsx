@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
   Divider,
 } from "@nextui-org/react";
 import EditPersonalInformationForm from "./EditPersonalInformationForm";
@@ -18,18 +12,19 @@ import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import Drawer from "@/components/common/Drawer";
 import { Form } from "@/components/ui/form";
 
-
 interface EditEmployeeProps {
   isOpen: boolean;
   onClose: () => void;
   employeeData: any;
   onEmployeeUpdated: () => Promise<void>;
 }
+
 interface Certificate {
   name: string;
   url: string | File;
   fileName: string;
 }
+
 interface EmployeeFormData {
   picture: File | string;
   first_name: string;
@@ -57,11 +52,11 @@ interface EmployeeFormData {
   department_id: string;
   branch_id: string;
   job_id: string;
-  batch_id: string; // batch_schedule_id -> batch_id
+  batch_id: string;
   days_json: Record<string, boolean>;
   certificates: Certificate[];
-  
 }
+
 const EditEmployee: React.FC<EditEmployeeProps> = ({
   isOpen,
   onClose,
@@ -99,9 +94,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       department_id: "",
       job_id: "",
       batch_id: "",
-      days_json: {
-        
-      },
+      days_json: {},
     },
     mode: "onChange",
   });
@@ -109,11 +102,6 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
   const fetchEmployeeData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // const response = await axios.get(
-      //   `/api/employeemanagement/employees?id=${employeeId}`
-      // );
-      // const employeeData = response.data;
-
       if (!employeeData || !employeeData.id) {
         throw new Error("Employee data not found or invalid");
       }
@@ -127,7 +115,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         (cert: { fileName: string; fileUrl: string }) => ({
           name: cert.fileName,
           url: cert.fileUrl,
-          fileName: cert.fileName, // Preserve the original file name
+          fileName: cert.fileName,
         })
       );
 
@@ -165,17 +153,16 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         certificates: certificatesWithUrls,
         batch_id:
           employeeData.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() ||
-          "", // Adjusted to batch_id
-          days_json: employeeData.schedules?.[0]?.days_json || {
-            Monday: false,
-            Tuesday: false,
-            Wednesday: false,
-            Thursday: false,
-            Friday: false,
-            Saturday: false,
-            Sunday: false,
-          },
-          
+          "",
+        days_json: employeeData.schedules?.[0]?.days_json || {
+          Monday: false,
+          Tuesday: false,
+          Wednesday: false,
+          Thursday: false,
+          Friday: false,
+          Saturday: false,
+          Sunday: false,
+        },
       });
 
       toast({
@@ -216,6 +203,15 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           file: data.picture,
         });
         pictureUrl = result.url;
+      } else if (data.picture === "") {
+        // If the picture is empty, it means the user wants to remove it
+        if (employeeData.picture) {
+          // Delete the old picture from EdgeStore
+          await edgestore.publicFiles.delete({
+            url: employeeData.picture,
+          });
+        }
+        pictureUrl = "";
       }
   
       // Handle certificate uploads
@@ -294,33 +290,29 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
     }
   };
 
-  
   return (
     <Drawer
       title="Edit Employee"
       size="lg"
       isOpen={isOpen}
       onClose={onClose}
-      // scrollBehavior="inside"
-      // isDismissable={false}
     >
       <Form {...methods}>
-        <form className=" mb-4 space-y-4 " id="drawer-form" onSubmit={methods.handleSubmit(handleFormSubmit)}>
-            
-              {isLoading ? (
-                <div>Loading employee data...</div>
-              ) : (
-                <>
-                  <h2>Personal Information</h2>
-                  <EditPersonalInformationForm />
-                  <Divider className="my-4" />
-                  <h2>Educational Background</h2>
-                  <EditEducationalBackgroundForm />
-                  <Divider className="my-4" />
-                  <h2>Job Information & Work Schedules</h2>
-                  <EditJobInformationForm />
-                </>
-              )}
+        <form className="mb-4 space-y-4" id="drawer-form" onSubmit={methods.handleSubmit(handleFormSubmit)}>
+          {isLoading ? (
+            <div>Loading employee data...</div>
+          ) : (
+            <>
+              <h2>Personal Information</h2>
+              <EditPersonalInformationForm />
+              <Divider className="my-4" />
+              <h2>Educational Background</h2>
+              <EditEducationalBackgroundForm />
+              <Divider className="my-4" />
+              <h2>Job Information & Work Schedules</h2>
+              <EditJobInformationForm />
+            </>
+          )}
         </form>
       </Form>
     </Drawer>
