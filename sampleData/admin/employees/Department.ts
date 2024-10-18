@@ -439,7 +439,7 @@ const departmentColumns: ColumnsProps[] = [{
 }]
 
 const departmentFilter: FilterProps[] = [{
-    filtered: [{name: "Active", uid: "active"}, {name: "Inactive", uid: "inactive"}], category: "Status"
+    filtered: [{name: "Active", value: "active", key: ""}, {name: "Inactive", value: "inactive", key: ""}], category: "Status"
 }]
 export {departmentColumns, departmentFilter, departments}
 

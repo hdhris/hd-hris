@@ -42,6 +42,7 @@ import {Key} from "@react-types/shared";
 import {Granularity} from "@react-types/datepicker";
 import {Input} from "@/components/ui/input";
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import FormSwitch from "@/components/ui/FormSwitch";
 
 // Load plugins
 dayjs.extend(utc);
@@ -336,7 +337,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                             </Select>
                         </Case>
                         <Case of="switch">
-                            <Switch
+                            <FormSwitch
                                 {...(item.config as SwitchProps)}
                                 id={item.name}
                                 aria-label={item.name}
@@ -347,7 +348,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 isSelected={field.value}
                             >
                                 {item.label}
-                            </Switch>
+                            </FormSwitch>
                         </Case>
                         <Case of="time-input">
                             <TimeInput

@@ -32,7 +32,7 @@ const Page: React.FC = () => {
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to fetch employees-leaves-status. Please try again.",
+        description: "Failed to fetch employees. Please try again.",
         duration: 3000,
       });
       setLoading(false);

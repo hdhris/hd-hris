@@ -11,12 +11,12 @@ import { Branch } from "@/types/employeee/BranchType";
 import axios from "axios";
 import addressData from "@/components/common/forms/address/address.json";
 import { Chip } from "@nextui-org/react";
+import showDialog from "@/lib/utils/confirmDialog";
 
 const Page: React.FC = () => {
   const { data: branches, error, mutate } = useBranchesData();
   const [loading, setLoading] = useState(true);
-  const [deleteSuccess, setDeleteSuccess] = useState(false);
-  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
+  const [selectedBranchId, setSelectedBranchId] = useState<Branch | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
@@ -37,35 +37,36 @@ const Page: React.FC = () => {
   }, [error]);
 
   const handleEdit = async (branch: Branch) => {
-    setSelectedBranchId(branch.id);
+    setSelectedBranchId(branch);
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number, name: string ) => {
     try {
-      await axios.delete(`/api/employeemanagement/branch?id=${id}`);
-      setDeleteSuccess(true);
-      await mutate();
+      const result = await showDialog({
+        title: "Confirm Delete",
+        message: `Are you sure you want to delete '${name}' ?`,
+      });
+      if (result === "yes") {
+        await axios.delete(`/api/employeemanagement/branch?id=${id}`);
+
+         toast({
+          title: "Deleted",
+          description: "Employee deleted successfully!",
+          variant: "warning",
+        });
+        await mutate();
+      }
     } catch (error) {
       console.error("Error deleting branch:", error);
       toast({
         title: "Error",
-        description: "Failed to delete branch. Please try again.",
+        description: "Failed to delete branch. Please try again." + error,
         duration: 3000,
       });
     }
   };
 
-  useEffect(() => {
-    if (!loading && deleteSuccess) {
-      toast({
-        title: "Success",
-        description: "Branch successfully deleted!",
-        duration: 3000,
-      });
-      setDeleteSuccess(false);
-    }
-  }, [loading, deleteSuccess]);
 
   const getMunicipalityName = (municipalityId: number | null): string => {
     if (!municipalityId) return "Unknown";
@@ -104,7 +105,7 @@ const Page: React.FC = () => {
             <TableActionButton
               name={item.name ?? "Unknown"}
               onEdit={() => handleEdit(item)}
-              onDelete={() => handleDelete(item.id)}
+              onDelete={() => handleDelete(item.id, `${item.name}`)}
             />
           );
         default:
