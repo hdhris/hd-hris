@@ -5,6 +5,7 @@ import {useDataDisplay} from "@/components/common/data-display/provider/data-dis
 type DisplayType = "table" | "grid" | "list"
 interface DataDisplayControlContext<T> {
     values: T[]
+    setValues: (values: T[]) => void
     selectedKeys: Selection | null
     setSelectedKeys: (keys: Selection) => void
     display: DisplayType
@@ -47,6 +48,7 @@ export const DataDisplayControlProvider = <T,>({children, values}: DataDisplayCo
         <DataDisplayControlContext.Provider
             value={{
                 values: dataDisplay,
+                setValues: setDataDisplay,
                 selectedKeys,
                 setSelectedKeys,
                 display,

@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React from 'react';
 import useSearch from "@/hooks/utils/useSearch";
 import useFilter from "@/hooks/utils/useFilter";
 import {usePagination} from "@/hooks/utils/usePagination";
@@ -15,10 +15,10 @@ import {icon_size_sm} from "@/lib/utils";
 import {useDataDisplayControl} from "@/components/common/data-display/provider/data-display-control-provider";
 import {DataDisplayControlProps} from "@/components/common/data-display/types/types";
 import CountUp from "react-countup";
-import {string} from "zod";
+import DataMigration from "@/components/util/data-migration";
 
 function DataDisplayControl<T>({
-                                    title,
+                                   title,
                                    children,
                                    searchProps,
                                    sortProps,
@@ -28,13 +28,16 @@ function DataDisplayControl<T>({
                                    buttonGroupProps,
                                    isTable,
                                    isGrid,
-                                   isList
+                                   isList,
+                                   onExport,
+                                   onImport
                                }: DataDisplayControlProps<T>) {
     const {values, selectedKeys, display, setDisplay, setSortDescriptor} = useDataDisplayControl<T>()
     const {searchValue, onSearchChange, itemSearched} = useSearch<T>(values, searchProps.searchingItemKey)
     const {filteredItems, onFilterChange, filter} = useFilter<T>(itemSearched)
     const {paginatedData, onPageChange, totalPages, page, setRows, rows} = usePagination<T>(filteredItems)
     const {sortedItems, onSortChange, sortDescriptor} = useSort<T>(paginatedData)
+
 
     const handleOnSearch = (value: string) => {
         onSearchChange(value)
@@ -52,7 +55,7 @@ function DataDisplayControl<T>({
     }
 
     return (<div className={cn("flex flex-col h-full w-full p-5", className?.wrapper)}>
-        <div className={cn("sticky top-0 z-10 pb-3 flex justify-between", className?.upper)}>
+        <div className={cn("sticky top-0 z-10 pb-3 flex justify-between items-center", className?.upper)}>
             <div className="flex justify-start gap-3">
                 <Search value={searchValue} onChange={handleOnSearch} {...searchProps} className="flex-1"/>
                 <Filter
@@ -62,9 +65,11 @@ function DataDisplayControl<T>({
                 />
                 <Sort
                     onSortChange={onSortChange}
-                    initialValue={sortDescriptor}
                     {...sortProps}
                 />
+            </div>
+            <div className="flex justify-end gap-3">
+                <DataMigration onImport={onImport!} onExport={onExport!}/>
             </div>
         </div>
         <div className="flex justify-between pb-3 items-center">
@@ -73,9 +78,13 @@ function DataDisplayControl<T>({
                 {/*{ title ? Total < CountUp start={0} end={values.length}/>}*/}
                 {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
             </Typography>
-            <div className="flex mr-0 ml-auto w-[75px]">
+            <div className="flex mr-0 ml-auto items-center">
+                <Typography className="text-medium font-semibold text-primary/50 w-[100px]">
+                    Rows per page
+                </Typography>
                 <Select
                     aria-label="Rows Per Page"
+                    className="w-[75px]"
                     size="sm"
                     radius="md"
                     variant="bordered"
@@ -90,7 +99,6 @@ function DataDisplayControl<T>({
                 </Select>
             </div>
         </div>
-
 
         {children(sortedItems, sortDescriptor, setSortDescriptor)}
 
@@ -117,23 +125,23 @@ function DataDisplayControl<T>({
             <div className={cn("flex justify-end", className?.lower.buttonClassname)}>
                 <ButtonGroup variant="light" color="primary" isIconOnly {...buttonGroupProps}>
                     {isTable && (<Tooltip content="Table">
-                            <Button onClick={() => setDisplay("table")}
-                                    variant={display === "table" ? "flat" : "light"}>
-                                <LuTable2 className={cn("text-slate-700", icon_size_sm)}/>
-                            </Button>
-                        </Tooltip>)}
+                        <Button onClick={() => setDisplay("table")}
+                                variant={display === "table" ? "flat" : "light"}>
+                            <LuTable2 className={cn("text-slate-700", icon_size_sm)}/>
+                        </Button>
+                    </Tooltip>)}
 
                     {isGrid && (<Tooltip content="Grid">
-                            <Button onClick={() => setDisplay("grid")} variant={display === "grid" ? "flat" : "light"}>
-                                <LuLayoutGrid className={cn("text-slate-700", icon_size_sm)}/>
-                            </Button>
-                        </Tooltip>)}
+                        <Button onClick={() => setDisplay("grid")} variant={display === "grid" ? "flat" : "light"}>
+                            <LuLayoutGrid className={cn("text-slate-700", icon_size_sm)}/>
+                        </Button>
+                    </Tooltip>)}
 
                     {isList && (<Tooltip content="List">
-                            <Button onClick={() => setDisplay("list")} variant={display === "list" ? "flat" : "light"}>
-                                <LuLayoutList className={cn("text-slate-700", icon_size_sm)}/>
-                            </Button>
-                        </Tooltip>)}
+                        <Button onClick={() => setDisplay("list")} variant={display === "list" ? "flat" : "light"}>
+                            <LuLayoutList className={cn("text-slate-700", icon_size_sm)}/>
+                        </Button>
+                    </Tooltip>)}
                 </ButtonGroup>
             </div>
 
@@ -143,3 +151,4 @@ function DataDisplayControl<T>({
 }
 
 export default DataDisplayControl;
+

@@ -2,7 +2,12 @@ import {ButtonGroupProps, PaginationProps, SortDescriptor, TableProps} from "@ne
 import {TableConfigProps} from "@/types/table/TableDataTypes";
 import React, {ReactNode} from "react";
 import {DataFilterProps, SearchProps, SortProps} from "@/components/util/types/types";
+import {DrawerProps} from "@/components/common/Drawer";
 
+
+export interface DataImportAndExportProps {
+    drawerProps: Omit<DrawerProps, "onClose" | "isOpen" | "children">
+}
 export interface DataDisplayControlProps<T> extends DataControlProps {
     title: string
     children: (data: T[], sortDescriptor?: SortDescriptor, onSortChange?: (value: SortDescriptor) => void) => ReactNode
@@ -14,6 +19,8 @@ export interface DataDisplayControlProps<T> extends DataControlProps {
     isTable: boolean
     isGrid: boolean
     isList: boolean
+    onExport?: DataImportAndExportProps
+    onImport?: DataImportAndExportProps
 }
 
 export interface DataTableProps<T> extends Omit<TableProps, "aria-label"> {
