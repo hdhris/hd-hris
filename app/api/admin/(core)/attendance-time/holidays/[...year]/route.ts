@@ -72,7 +72,9 @@ export async function GET(
       (a: HolidayEvent, b: HolidayEvent) =>
         toGMT8(a.start_date).valueOf() - toGMT8(b.start_date).valueOf()
     );
-    return NextResponse.json({combinedHolidays, distinctYears});
+
+    const transHolidays = await prisma.trans_holidays.findMany()
+    return NextResponse.json({combinedHolidays, distinctYears, transHolidays});
   } catch (error) {
     console.error("Error fetching holidays:", error);
     return NextResponse.json(

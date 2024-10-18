@@ -648,11 +648,10 @@ model ref_holidays {
 model trans_holidays {
   id                  Int       @id @default(autoincrement())
   no_work             Boolean?
-  month               Decimal?  @db.Decimal
-  day                 Decimal?  @db.Decimal
-  name                String?   @db.VarChar(45)
   pay_rate_percentage Decimal?  @db.Decimal(5, 2)
   created_at          DateTime? @db.Timestamp(6)
   updated_at          DateTime? @db.Timestamp(6)
   deleted_at          DateTime? @db.Timestamp(6)
+  date                DateTime? @db.Date
+  name                String?   @unique
 }

@@ -11,7 +11,7 @@ import { AffectedJson } from "@/types/payroll/payheadType";
 function Page() {
   const { data, isLoading } = useNewPayhead();
   const router = useRouter();
-  const onSubmit = async (values: z.infer<any>, employees: number[], affectedJson: AffectedJson) => {
+  const onSubmit = async (values: unknown, employees: number[], affectedJson: AffectedJson) => {
     try {
       await axios.post("/api/admin/payroll/payhead/create", {
         data: values,

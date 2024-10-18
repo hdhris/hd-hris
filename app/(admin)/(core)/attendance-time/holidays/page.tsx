@@ -1,4 +1,5 @@
 "use client";
+import HolidayForm from "@/components/admin/attendance-time/holidays/HolidayForm";
 import Drawer from "@/components/common/Drawer";
 import DropdownList from "@/components/common/Dropdown";
 import { FilterItemsProps } from "@/components/common/filter/FilterItems";
@@ -8,16 +9,17 @@ import GridCard from "@/components/common/grid/GridCard";
 import GridList from "@/components/common/grid/GridList";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import Loading from "@/components/spinner/Loading";
-import { Form } from "@/components/ui/form";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { useAxiosGet } from "@/lib/utils/axiosGetPost";
+import { getSimilarityPercentage } from "@/lib/utils/similarityPercentage";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-import { useQuery } from "@/services/queries";
 import {
   HolidayData,
   HolidayEvent,
+  TransHoliday,
 } from "@/types/attendance-time/HolidayTypes";
-import React, { useState } from "react";
+import { Button } from "@nextui-org/react";
+import React, { useMemo, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
 
 function Page() {
@@ -65,6 +67,15 @@ function Page() {
             setApi(`/api/admin/attendance-time/holidays/${String(key)}`)
           }
         />
+        <Button
+          {...uniformStyle()}
+          onClick={() => {
+            setSelectedItem(null);
+            setOpen(true);
+          }}
+        >
+          Create Holiday
+        </Button>
       </>
     );
   });
@@ -127,21 +138,14 @@ function Page() {
           />
         )}
       </GridList>
-      <Drawer
+      <HolidayForm
         isOpen={open}
         onClose={() => {
           setOpen(false);
-          setSelectedItem(null);
         }}
-        title={selectedItem?.name}
-      >
-        {/* <Form>
-          <form>
-
-          </form>
-        </Form> */}
-        <div>Test</div>
-      </Drawer>
+        selectedItem={selectedItem}
+        transItem={findByDateAndName(data, selectedItem)}
+      />
     </div>
   );
 }
@@ -197,3 +201,65 @@ const searchConfig: SearchItemsProps<HolidayEvent>[] = [
   { key: "start_date", label: "Date" },
   { key: "type", label: "Type" },
 ];
+
+
+function findByDateAndName(data: any, selectedItem: any): TransHoliday | null {
+  if (!data?.transHolidays || !selectedItem) return null;
+
+  // First: Try to find by date (MM-DD format)
+  const foundByDate = data.transHolidays.filter(
+    (th: any) => toGMT8(th.date).format('MM-DD') === toGMT8(selectedItem?.created_at).format('MM-DD')
+  );
+  
+  // If found by date, check name similarity
+  if (foundByDate) {
+    let bestNameMatch: TransHoliday | null = null;
+    let highestNamePercentage = 0;
+    foundByDate.forEach((fbd: any)=> {
+      const percentage = getSimilarityPercentage(fbd.name, selectedItem.name);
+      if (percentage > 80 && percentage > highestNamePercentage) {
+        highestNamePercentage = percentage;
+        bestNameMatch = fbd;
+      }
+    })
+    // const nameSimilarity = getSimilarityPercentage(foundByDate.name, selectedItem.name);
+    // console.log("Find by date:",foundByDate.name, selectedItem.name, nameSimilarity)
+    // If similarity is above 50%, return the found item
+    if (highestNamePercentage > 50) {
+      // return foundByDate;
+      return bestNameMatch;
+    }
+
+    // If similarity is too low (< 50%), find another by name with 70% similarity
+    let bestMatch: TransHoliday | null = null;
+    let highestPercentage = 0;
+
+    data.transHolidays.forEach((th: any) => {
+      const percentage = getSimilarityPercentage(th.name, selectedItem.name);
+      // console.log("Find by name: ",th.name, selectedItem.name, percentage)
+      if (percentage > 75 && percentage > highestPercentage) {
+        highestPercentage = percentage;
+        bestMatch = th;
+      }
+    });
+
+    // Return best match if found, otherwise null
+    return bestMatch || null;
+  }
+
+  // If no match by date, fallback to finding a similar name with 80% threshold
+  let bestNameMatch: TransHoliday | null = null;
+  let highestNamePercentage = 0;
+
+  data.transHolidays.forEach((th: any) => {
+    const percentage = getSimilarityPercentage(th.name, selectedItem.name);
+      // console.log("No date; Find by name: ",th.name, selectedItem.name, percentage)
+      if (percentage > 80 && percentage > highestNamePercentage) {
+      highestNamePercentage = percentage;
+      bestNameMatch = th;
+    }
+  });
+
+  // Return best match by name or null if no match
+  return bestNameMatch || null;
+}

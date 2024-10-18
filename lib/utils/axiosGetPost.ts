@@ -50,9 +50,3 @@ export function useAxiosGet<T>(initialApi: string, refreshInterval?: number) {
 
   return { data, isLoading, setApi };
 }
-
-
-
-export async function axiosPost(api: string, data: object) {
-    await axios.post(api, data);
-}
