@@ -161,7 +161,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
         name={item.name}
         render={({field}) => {
             return (<FormItem>
-                {item.label && item.type !== "checkbox" && item.type !== "group-checkbox" && item.type !== "radio-group" && item.type !== "switch" && (
+                {item.label && item.type !== "checkbox" && item.type !== "group-checkbox" && item.type !== "switch" && (
                     <FormLabel htmlFor={item.name} className={item.inputClassName}>
                         {item.label}
                     </FormLabel>)}
@@ -215,8 +215,10 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 aria-label={item.name}
                                 disabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
-                                isSelected={field.value}
+                                // isSelected={field.value}
                                 {...field}
+                                value={String(field.value).split(',')}
+                                onValueChange={(value)=>field.onChange(value.join(','))}
                             >
                                 {(item.config as any)?.options?.map((option: GroupInputOptions) => (
                                     <Checkbox key={option.value} value={option.value}
@@ -293,10 +295,10 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                         </Case>
                         <Case of="radio-group">
                             <RadioGroup
-                                label={item.label}
+                                // label={item.label}
                                 id={item.name}
                                 aria-label={item.name}
-                                disabled={item.inputDisabled}
+                                isDisabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
                                 {...field}
                                 {...(item.config as RadioGroupProps)}
@@ -351,8 +353,8 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                         <Case of="time-input">
                             <TimeInput
                                 value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
-                                // granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || "hour"}
-                                granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || undefined}
+                                granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || "hour"}
+                                // granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || undefined}
                                 id={item.name}
                                 aria-label={item.name}
                                 isDisabled={item.inputDisabled}

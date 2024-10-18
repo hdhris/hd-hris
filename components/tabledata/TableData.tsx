@@ -32,7 +32,7 @@ import {icon_color, icon_size} from "@/lib/utils";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
-import { joinNestedKeys } from '@/helper/objects/joinNestedKeys';
+import { joinNestedKeys, NestedKeys } from '@/helper/objects/joinNestedKeys';
 import {LuSearch} from 'react-icons/lu';
 import {valueOfObject} from '@/helper/objects/pathGetterObject';
 import Typography from "@/components/common/typography/Typography";
@@ -52,12 +52,6 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
     setSelectedKeys?: (keys: Selection) => void;
 }
 
-type NestedKeys<T> = {
-    [K in keyof T]: T[K] extends Record<string, any>
-        ? K | [K, NestedKeys<T[K]>]
-        : K; // Return the key itself if it's not an object
-}[keyof T];
-
 
 interface SearchProps<T> {
     searchingItemKey?: NestedKeys<T>[]; // e.g., [["details", "address"], ["details", "phone"]]
@@ -67,7 +61,7 @@ function genericSearch<T>(object: T, searchingItemKey: NestedKeys<T>[], query: s
     let searchable = false;
     searchingItemKey.forEach(property => {
         // const value = object[property];
-        let newProperty = Array.isArray(property) ? joinNestedKeys(property) : property;
+        let newProperty = joinNestedKeys([property]);
         // console.log("New Prop: ",newProperty)
         const value = valueOfObject(object, String(newProperty));
 
@@ -294,7 +288,6 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                           onSelectionChange={(keys) => {
                             const newFilter = new Set(filter); // Clone current filter
                             const selectedFilter = Array.from(keys) as string[];
-                            // console.log("Selected: ",selectedFilter)
 
                             // Ensure one selection per section
                             filterItems.forEach((item) => {
