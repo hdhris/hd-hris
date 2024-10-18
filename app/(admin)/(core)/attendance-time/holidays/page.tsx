@@ -1,6 +1,5 @@
 "use client";
 import HolidayForm from "@/components/admin/attendance-time/holidays/HolidayForm";
-import Drawer from "@/components/common/Drawer";
 import DropdownList from "@/components/common/Dropdown";
 import { FilterItemsProps } from "@/components/common/filter/FilterItems";
 import SearchFilter from "@/components/common/filter/SearchFilter";
@@ -19,7 +18,7 @@ import {
   TransHoliday,
 } from "@/types/attendance-time/HolidayTypes";
 import { Button } from "@nextui-org/react";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
 
 function Page() {
@@ -144,7 +143,9 @@ function Page() {
           setOpen(false);
         }}
         selectedItem={selectedItem}
-        transItem={findByDateAndName(data, selectedItem)}
+        transItem={findByDateAndName(data, selectedItem) || data?.transHolidays.find(th=>{
+          return th.date === null && th.name === selectedItem?.type
+        }) || null}
       />
     </div>
   );
@@ -202,64 +203,41 @@ const searchConfig: SearchItemsProps<HolidayEvent>[] = [
   { key: "type", label: "Type" },
 ];
 
-
 function findByDateAndName(data: any, selectedItem: any): TransHoliday | null {
-  if (!data?.transHolidays || !selectedItem) return null;
-
-  // First: Try to find by date (MM-DD format)
-  const foundByDate = data.transHolidays.filter(
-    (th: any) => toGMT8(th.date).format('MM-DD') === toGMT8(selectedItem?.created_at).format('MM-DD')
-  );
-  
-  // If found by date, check name similarity
-  if (foundByDate) {
-    let bestNameMatch: TransHoliday | null = null;
+  function findBestMatch(target: any, criteria: number) {
+    let transHoliday: TransHoliday | null = null;
     let highestNamePercentage = 0;
-    foundByDate.forEach((fbd: any)=> {
-      const percentage = getSimilarityPercentage(fbd.name, selectedItem.name);
-      if (percentage > 80 && percentage > highestNamePercentage) {
+    target.forEach((tg: any) => {
+      const percentage = getSimilarityPercentage(tg.name, selectedItem.name);
+      console.log(tg.name, selectedItem.name, percentage);
+      if (percentage > criteria && percentage > highestNamePercentage) {
         highestNamePercentage = percentage;
-        bestNameMatch = fbd;
-      }
-    })
-    // const nameSimilarity = getSimilarityPercentage(foundByDate.name, selectedItem.name);
-    // console.log("Find by date:",foundByDate.name, selectedItem.name, nameSimilarity)
-    // If similarity is above 50%, return the found item
-    if (highestNamePercentage > 50) {
-      // return foundByDate;
-      return bestNameMatch;
-    }
-
-    // If similarity is too low (< 50%), find another by name with 70% similarity
-    let bestMatch: TransHoliday | null = null;
-    let highestPercentage = 0;
-
-    data.transHolidays.forEach((th: any) => {
-      const percentage = getSimilarityPercentage(th.name, selectedItem.name);
-      // console.log("Find by name: ",th.name, selectedItem.name, percentage)
-      if (percentage > 75 && percentage > highestPercentage) {
-        highestPercentage = percentage;
-        bestMatch = th;
+        transHoliday = tg;
       }
     });
-
-    // Return best match if found, otherwise null
-    return bestMatch || null;
+    return transHoliday;
   }
 
-  // If no match by date, fallback to finding a similar name with 80% threshold
-  let bestNameMatch: TransHoliday | null = null;
-  let highestNamePercentage = 0;
+  if (!data?.transHolidays || !selectedItem) return null;
+  // First: Try to find by date (MM-DD format)
+  const foundByDate = data.transHolidays.filter(
+    (th: any) =>
+      toGMT8(th.date).format("MM-DD") ===
+      toGMT8(selectedItem?.created_at).format("MM-DD")
+  );
+  console.log(foundByDate);
 
-  data.transHolidays.forEach((th: any) => {
-    const percentage = getSimilarityPercentage(th.name, selectedItem.name);
-      // console.log("No date; Find by name: ",th.name, selectedItem.name, percentage)
-      if (percentage > 80 && percentage > highestNamePercentage) {
-      highestNamePercentage = percentage;
-      bestNameMatch = th;
+  // If found by date, check name similarity
+  if (foundByDate.length > 0) {
+    // If similarity is above 75%, return the found item
+    const bestDateMatch = findBestMatch(foundByDate, 50);
+    if (bestDateMatch) {
+      return bestDateMatch;
     }
-  });
+  }
 
-  // Return best match by name or null if no match
+  // If no match by date, fallback to finding a similar name with 90% threshold
+  const bestNameMatch = findBestMatch(data.transHolidays, 60);
+  // Return best match if found, otherwise null
   return bestNameMatch || null;
 }
