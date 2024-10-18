@@ -17,7 +17,9 @@ function DataTable<T extends { id: string | number } >({
                 classNames={{
                     base: "h-full", emptyWrapper: "h-full", loadingWrapper: "h-full",
                 }}
+                layout="fixed"
                 {...props}
+
             >
                 <TableHeader columns={config.columns}>
                     {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn

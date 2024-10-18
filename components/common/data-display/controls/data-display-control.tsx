@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {useMemo, useState} from 'react';
 import useSearch from "@/hooks/utils/useSearch";
 import useFilter from "@/hooks/utils/useFilter";
 import {usePagination} from "@/hooks/utils/usePagination";
 import {useSort} from "@/hooks/utils/useSort";
-import {ButtonGroup, cn, Pagination, Selection} from "@nextui-org/react";
+import {ButtonGroup, cn, Pagination, Select, Selection, SelectItem} from "@nextui-org/react";
 import Search from "@/components/util/search";
 import Filter from "@/components/util/filter";
 import Sort from "@/components/util/sort";
@@ -12,12 +12,13 @@ import {Tooltip} from "@nextui-org/tooltip";
 import {Button} from "@nextui-org/button";
 import {LuLayoutGrid, LuLayoutList, LuTable2} from "react-icons/lu";
 import {icon_size_sm} from "@/lib/utils";
-import {useDataDisplay} from "@/components/common/data-display/provider/data-display-provider";
 import {useDataDisplayControl} from "@/components/common/data-display/provider/data-display-control-provider";
-import {Case, Switch} from "@/components/common/Switch";
 import {DataDisplayControlProps} from "@/components/common/data-display/types/types";
+import CountUp from "react-countup";
+import {string} from "zod";
 
 function DataDisplayControl<T>({
+                                    title,
                                    children,
                                    searchProps,
                                    sortProps,
@@ -29,11 +30,10 @@ function DataDisplayControl<T>({
                                    isGrid,
                                    isList
                                }: DataDisplayControlProps<T>) {
-    const {values} = useDataDisplay<T>()
-    const {selectedKeys, display, setDisplay, setSortDescriptor} = useDataDisplayControl()
+    const {values, selectedKeys, display, setDisplay, setSortDescriptor} = useDataDisplayControl<T>()
     const {searchValue, onSearchChange, itemSearched} = useSearch<T>(values, searchProps.searchingItemKey)
     const {filteredItems, onFilterChange, filter} = useFilter<T>(itemSearched)
-    const {paginatedData, onPageChange, totalPages, page} = usePagination<T>(filteredItems)
+    const {paginatedData, onPageChange, totalPages, page, setRows, rows} = usePagination<T>(filteredItems)
     const {sortedItems, onSortChange, sortDescriptor} = useSort<T>(paginatedData)
 
     const handleOnSearch = (value: string) => {
@@ -46,26 +46,53 @@ function DataDisplayControl<T>({
         onPageChange(1)
     }
 
+    const handleOnRowsPerPageChange = (value: Selection) => {
+        const rowPerPage = value !== "all" && value.size > 0 ? Array.from(value)[0] : 5
+        setRows(Number(rowPerPage))
+    }
 
-    return (<div className={cn("flex flex-col h-full", className?.wrapper)}>
-
-        <div className={cn("sticky top-0 z-10 bg-white p-5 shadow-sm flex gap-2", className?.upper)}>
-            <Search value={searchValue} onChange={handleOnSearch} {...searchProps}/>
-            <Filter
-                filterValue={filter}
-                onChange={handleOnFilterChange}
-                {...filterProps!}
-            />
-            <Sort
-                onSortChange={onSortChange}
-                initialValue={sortDescriptor}
-                {...sortProps}
-            />
+    return (<div className={cn("flex flex-col h-full w-full p-5", className?.wrapper)}>
+        <div className={cn("sticky top-0 z-10 pb-3 flex justify-between", className?.upper)}>
+            <div className="flex justify-start gap-3">
+                <Search value={searchValue} onChange={handleOnSearch} {...searchProps} className="flex-1"/>
+                <Filter
+                    filterValue={filter}
+                    onChange={handleOnFilterChange}
+                    {...filterProps!}
+                />
+                <Sort
+                    onSortChange={onSortChange}
+                    initialValue={sortDescriptor}
+                    {...sortProps}
+                />
+            </div>
+        </div>
+        <div className="flex justify-between pb-3 items-center">
+            <Typography className="text-medium font-semibold text-primary/50">
+                <CountUp start={0} end={values.length} prefix="Total of " suffix={` ${title}`}/>
+                {/*{ title ? Total < CountUp start={0} end={values.length}/>}*/}
+                {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
+            </Typography>
+            <div className="flex mr-0 ml-auto w-[75px]">
+                <Select
+                    aria-label="Rows Per Page"
+                    size="sm"
+                    radius="md"
+                    variant="bordered"
+                    color="primary"
+                    selectedKeys={new Set([String(rows)])}
+                    onSelectionChange={handleOnRowsPerPageChange}
+                >
+                    <SelectItem key={5}>5</SelectItem>
+                    <SelectItem key={10}>10</SelectItem>
+                    <SelectItem key={15}>15</SelectItem>
+                    <SelectItem key={20}>20</SelectItem>
+                </Select>
+            </div>
         </div>
 
-        {/*<div className={cn("flex-1 h-full", className?.content)}>*/}
+
         {children(sortedItems, sortDescriptor, setSortDescriptor)}
-        {/*</div>*/}
 
         {/* Bottom pagination */}
         <div
@@ -89,29 +116,24 @@ function DataDisplayControl<T>({
 
             <div className={cn("flex justify-end", className?.lower.buttonClassname)}>
                 <ButtonGroup variant="light" color="primary" isIconOnly {...buttonGroupProps}>
-                    {isTable && (
-                        <Tooltip content="Table">
-                            <Button onClick={() => setDisplay("table")} variant={display === "table" ? "flat" : "light"}>
+                    {isTable && (<Tooltip content="Table">
+                            <Button onClick={() => setDisplay("table")}
+                                    variant={display === "table" ? "flat" : "light"}>
                                 <LuTable2 className={cn("text-slate-700", icon_size_sm)}/>
                             </Button>
-                        </Tooltip>
-                    )}
+                        </Tooltip>)}
 
-                    {isGrid && (
-                        <Tooltip content="Grid">
+                    {isGrid && (<Tooltip content="Grid">
                             <Button onClick={() => setDisplay("grid")} variant={display === "grid" ? "flat" : "light"}>
                                 <LuLayoutGrid className={cn("text-slate-700", icon_size_sm)}/>
                             </Button>
-                        </Tooltip>
-                    )}
+                        </Tooltip>)}
 
-                    {isList && (
-                        <Tooltip content="List">
+                    {isList && (<Tooltip content="List">
                             <Button onClick={() => setDisplay("list")} variant={display === "list" ? "flat" : "light"}>
                                 <LuLayoutList className={cn("text-slate-700", icon_size_sm)}/>
                             </Button>
-                        </Tooltip>
-                    )}
+                        </Tooltip>)}
                 </ButtonGroup>
             </div>
 

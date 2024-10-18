@@ -12,7 +12,7 @@ import React, { useState } from "react";
 function Page() {
   const [selectedYear, setSelectedYear] = useState(toGMT8().get("year"));
   const { data, isLoading } = useQuery<HolidayEvent[]>(
-    `/api/admin/attendance-time/holidays/${selectedYear}`
+    `/api/admin/attendance-time/holidays/${selectedYear}`,
   );
   const [searchedItems, setSearchedItems] = useState<HolidayEvent[]>([]);
   SetNavEndContent(() => {

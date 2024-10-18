@@ -12,8 +12,8 @@ export interface SearchProps<T> extends Omit<InputProps, "onChange">{
     searchingItemKey: NestedKeys<T>[]
 }
 
-export interface SortProps {
-    sortItems: SortedItemProps[];
+export interface SortProps<T> {
+    sortItems: SortedItemProps<T>[];
     initialValue?: SortDescriptor;
     onSortChange: (keys: SortDescriptor) => void;
     wrapperClassName?: string

@@ -6,18 +6,18 @@ import {icon_size_sm} from "@/lib/utils";
 import {SearchProps} from "@/components/util/types/types";
 
 
-function Search({value, onChange, searchingItemKey, ...rest}: SearchProps) {
+function Search<T>({value, onChange, searchingItemKey, ...rest}: SearchProps<T>) {
     return (<Input
         {...rest}
         variant="bordered"
         radius="md"
-        className="max-w-sm"
+        className={cn("w-[400px]", rest.className)}
         placeholder={Array.isArray(searchingItemKey) && searchingItemKey.length > 0 ? `Search by ${searchingItemKey
-            .map((item: string | string[]) => {
+            .map((item) => {
                 // Convert nested keys array into dot-notation string
                 const joinedKey = Array.isArray(item) ? joinNestedKeys(item) : item;
                 // Get the last segment of the dot-notation string
-                const lastSegment = joinedKey.split(".").pop();
+                const lastSegment = joinedKey.toString().split(".").pop();
                 // Replace any undesired characters and return a cleaned version
                 return lastSegment?.replace(/[,_]+/g, " ");
             })

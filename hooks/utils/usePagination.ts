@@ -8,6 +8,7 @@ interface PaginationProps {
 export function usePagination<T>(data: T[], {rowsPerPage = 5}: PaginationProps = {}) {
     const router = useRouter()
     const [page, setPage] = React.useState<number>(1);
+    const [rows, setRows] = React.useState<number>(rowsPerPage);
     const totalPages = React.useMemo(() => {
         const searchParams = new URLSearchParams(window.location.search);
         const initialPage = Number(searchParams.get("page")) || 1;
@@ -16,7 +17,7 @@ export function usePagination<T>(data: T[], {rowsPerPage = 5}: PaginationProps =
             console.log("No data");
             return 1;
         }
-        const total = Math.ceil(data.length / rowsPerPage);
+        const total = Math.ceil(data.length / rows);
 
         if (initialPage > total) {
             searchParams.set("page", "1");
@@ -27,15 +28,15 @@ export function usePagination<T>(data: T[], {rowsPerPage = 5}: PaginationProps =
         }
 
         return total;
-    }, [data.length, rowsPerPage]);
+    }, [data.length, rows]);
 
 
     const paginatedData = React.useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
+        const start = (page - 1) * rows;
+        const end = start + rows;
 
         return data.slice(start, end);
-    }, [data, page, rowsPerPage]);
+    }, [data, page, rows]);
 
     const onPageChange = (newPage: number) => {
         const searchParams = new URLSearchParams(window.location.search);
@@ -44,6 +45,6 @@ export function usePagination<T>(data: T[], {rowsPerPage = 5}: PaginationProps =
         setPage(newPage);
     };
     return {
-        page, totalPages, onPageChange, paginatedData
+        rows, page, totalPages, onPageChange, paginatedData, setRows
     };
 }

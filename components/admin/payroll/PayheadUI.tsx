@@ -387,7 +387,8 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                     filtered: data.departments.map((dep) => {
                       return {
                         name: dep.name,
-                        uid: "dep_" + dep.id,
+                        value: "dep_" + dep.id,
+                        key: ""
                       };
                     }),
                     category: "Department",
@@ -396,7 +397,8 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                     filtered: data.job_classes.map((job) => {
                       return {
                         name: job.name,
-                        uid: "job_" + job.id,
+                        value: "job_" + job.id,
+                        key: ""
                       };
                     }),
                     category: "Roles",

@@ -1,9 +1,10 @@
-import React, {createContext, useContext, useState} from "react";
+import React, {createContext, useContext, useEffect, useState} from "react";
 import {Selection, SortDescriptor} from "@nextui-org/react";
 import {useDataDisplay} from "@/components/common/data-display/provider/data-display-provider";
 
 type DisplayType = "table" | "grid" | "list"
 interface DataDisplayControlContext<T> {
+    values: T[]
     selectedKeys: Selection | null
     setSelectedKeys: (keys: Selection) => void
     display: DisplayType
@@ -22,23 +23,30 @@ export const useDataDisplayControl = <T,>(): DataDisplayControlContext<T> => {
     return context
 }
 
-interface DataDisplayControlProviderProps {
+interface DataDisplayControlProviderProps<T> {
     children: React.ReactNode
+    values: T[]
 }
 
 
 
 
-export const DataDisplayControlProvider = ({children}: DataDisplayControlProviderProps) => {
+export const DataDisplayControlProvider = <T,>({children, values}: DataDisplayControlProviderProps<T>) => {
     // const {values} = useDataDisplay<T>()
+    const [dataDisplay, setDataDisplay] = useState<T[]>(values);
     const [selectedKeys, setSelectedKeys] = useState<Selection | null>(null)
     const [display, setDisplay] = useState<DisplayType>("table")
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor | null>(null)
+
+    useEffect(() => {
+        setDataDisplay(values);
+    }, [values]); // Trigger the effect when `values` changes
 
 
     return (
         <DataDisplayControlContext.Provider
             value={{
+                values: dataDisplay,
                 selectedKeys,
                 setSelectedKeys,
                 display,

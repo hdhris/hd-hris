@@ -50,7 +50,7 @@ function Page() {
     }, [isLoading, paginatedData])
     return (<>
             <div className="flex gap-2 items-center m-5">
-                <TableSearch value={searchValue} onChange={handleOnSearch}/>
+                <TableSearch value={searchValue} onChange={handleOnSearch} searchingItemKey={["name"]}/>
                 <TableFilter filterValue={filter} filterItems={filterLeaveTypes} onChange={handleOnFilterChange}/>
                 <Sort sortItems={[{
                     name: "Name", key: "name"
@@ -58,10 +58,10 @@ function Page() {
                     name: "Created At", key: "created_at"
                 }]} onSortChange={onSortChange}/>
             </div>
-            <DataTable
-                data={paginatedData}
-                config={LeaveTypeTableConfiguration}
-            />
+            {/*<DataTable*/}
+            {/*    data={paginatedData}*/}
+            {/*    config={LeaveTypeTableConfiguration}*/}
+            {/*/>*/}
             <Pagination
                 showControls
                 total={totalPages}

@@ -9,11 +9,12 @@ import {capitalize} from "@nextui-org/shared-utils";
 import {SortedItemProps} from "@/hooks/types/types";
 import {isEqual} from "lodash";
 import {SortProps} from "@/components/util/types/types";
+import {joinNestedKeys} from "@/helper/objects/joinNestedKeys";
 
 
 
 
-function Sort({sortItems, initialValue, onSortChange, wrapperClassName}: SortProps) {
+function Sort<T>({sortItems, initialValue, onSortChange, wrapperClassName}: SortProps<T>) {
     // Memoize the initial state
     const initial = useMemo(() => {
         const column = new Set(initialValue?.column ? [initialValue?.column] : []);
@@ -91,7 +92,7 @@ function Sort({sortItems, initialValue, onSortChange, wrapperClassName}: SortPro
             >
                 <DropdownSection showDivider>
                     {sortItems.map((data) => (<DropdownItem
-                        key={data.key}
+                        key={joinNestedKeys([data.key])}
                         className="capitalize"
                     >
                         {capitalize(data.name)}

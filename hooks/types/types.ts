@@ -3,7 +3,7 @@ export type NestedKeys<T> = {
 }[keyof T];
 
 
-export interface SortedItemProps {
-    key: string;
+export interface SortedItemProps<T> {
+    key: NestedKeys<T>;
     name: string;
 }

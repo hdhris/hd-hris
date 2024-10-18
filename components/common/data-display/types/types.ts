@@ -1,22 +1,14 @@
-import {
-    ButtonGroupProps,
-    PaginationProps,
-    Selection,
-    SelectionMode,
-    SortDescriptor,
-    TableProps
-} from "@nextui-org/react";
+import {ButtonGroupProps, PaginationProps, SortDescriptor, TableProps} from "@nextui-org/react";
 import {TableConfigProps} from "@/types/table/TableDataTypes";
 import React, {ReactNode} from "react";
-import {FilterProps} from "@/types/table/default_config";
-import {NestedKeys} from "@/hooks/types/types";
 import {DataFilterProps, SearchProps, SortProps} from "@/components/util/types/types";
 
-export interface DataDisplayControlProps<T> extends DataControlProps{
+export interface DataDisplayControlProps<T> extends DataControlProps {
+    title: string
     children: (data: T[], sortDescriptor?: SortDescriptor, onSortChange?: (value: SortDescriptor) => void) => ReactNode
     searchProps: Omit<SearchProps<T>, "onChange">
     filterProps: Omit<DataFilterProps, "onChange" | "filterValue">
-    sortProps: Omit<SortProps, "onSortChange">
+    sortProps: Omit<SortProps<T>, "onSortChange">
     paginationProps?: Omit<PaginationProps, "total">
     buttonGroupProps?: ButtonGroupProps
     isTable: boolean
@@ -33,12 +25,8 @@ export interface DataTableProps<T> extends Omit<TableProps, "aria-label"> {
 
 export interface DataControlProps {
     className?: {
-        wrapper: string;
-        upper: string;
-        lower: {
-            selectedKeysClassname: string;
-            paginationClassname: string;
-            buttonClassname: string;
+        wrapper: string; upper: string; lower: {
+            selectedKeysClassname: string; paginationClassname: string; buttonClassname: string;
         };
     }
 }
