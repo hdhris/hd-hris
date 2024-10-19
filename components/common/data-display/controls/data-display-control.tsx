@@ -78,8 +78,8 @@ function DataDisplayControl<T>({
                 {/*{ title ? Total < CountUp start={0} end={values.length}/>}*/}
                 {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
             </Typography>
-            <div className="flex mr-0 ml-auto items-center">
-                <Typography className="text-medium font-semibold text-primary/50 w-[100px]">
+            <div className="flex mr-0 ml-auto items-center gap-2">
+                <Typography className="text-medium font-semibold text-primary/50 w-[125px]">
                     Rows per page
                 </Typography>
                 <Select
