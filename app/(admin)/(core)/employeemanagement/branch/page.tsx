@@ -49,7 +49,7 @@ const Page: React.FC = () => {
       });
       if (result === "yes") {
         await axios.delete(`/api/employeemanagement/branch?id=${id}`);
-        
+
          toast({
           title: "Deleted",
           description: "Employee deleted successfully!",
@@ -151,7 +151,7 @@ const Page: React.FC = () => {
         <EditBranch
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          branchData={selectedBranchId}
+          branchId={selectedBranchId}
           onBranchUpdated={handleBranchUpdated}
         />
       )}

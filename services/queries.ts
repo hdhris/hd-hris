@@ -1,5 +1,5 @@
 import fetcher from "@/services/fetcher";
-import useSWR from "swr";
+import useSWR, {SWRConfiguration} from "swr";
 import {ApiResponse} from "@/types/dashboard/reportStat";
 import {Employee} from "@/types/employeee/EmployeeType";
 import {Signatory} from "@/types/audit/types";
@@ -120,10 +120,10 @@ export function useNewPayhead() {
     })
 }
 
-export function useQuery<T extends object>(api: string, refreshInterval?: number){
+export function useQuery<T>(api: string, options?: SWRConfiguration<T>) {
     return useSWR<T>(api, fetcher, {
-        revalidateOnFocus: false, refreshInterval: refreshInterval
-    })
+        ...options
+    });
 }
 
 export function useLeaveRequest(){

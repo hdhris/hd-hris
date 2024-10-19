@@ -67,11 +67,12 @@ const wideHeightSize = {
 export interface GridItemProps {
   column?: string;
   label: string;
-  value: ReactNode;
+  value: any;
+  textColor?: string; 
 }
 
 interface GridCardProps<T extends object> {
-  // id: string | number;
+  id: string | number;
   name: string;
   items: T[];
   size?: "sm" | "md" | "lg";
@@ -82,10 +83,12 @@ interface GridCardProps<T extends object> {
   status?: { label: string; color: PulseColorType };
   bottomShadow?: boolean;
   wide?: boolean;
-  actionList: DropdownListItemProp[];
+  actionList?: DropdownListItemProp[];
+  onPress?: ()=> void;
 }
 
 function GridCard<T extends GridItemProps>({
+  onPress,
   name,
   pulseVariant,
   deadPulse,
@@ -101,14 +104,16 @@ function GridCard<T extends GridItemProps>({
   const isLight = uniqolor(name).isLight;
   return (
     <Card
-      className={cn("h-fit", wide ? wideWidthSize[size] : widthSize[size])}
+      className={cn("h-fit border", wide ? wideWidthSize[size] : widthSize[size])}
       isHoverable
+      isPressable={onPress!=undefined}
+      onPress={()=>onPress&&onPress()}
     >
       <CardHeader className="p-0 -z-1">
         <div
           {...(!background ? bgGradient(name) : coverPhoto(background))}
           className={cn(
-            "relative flex w-full rounded h-2-b-sm rounded-r-sm",
+            "relative flex w-full rounded h-2-b-sm rounded-t-sm rounded-b-none",
             wide ? wideHeightSize[size] : heightSize[size],
             isLight && "shadow-[inset_10px_10px_5px_172px_rgba(0,0,0,0.06)];",
             !bottomShadow
@@ -119,16 +124,18 @@ function GridCard<T extends GridItemProps>({
           )}
         >
           <div className="relative flex items-end p-2 gap-2 w-full h-full">
-            <DropdownList
+            {actionList && <DropdownList
               trigger={{
                 icon: <BsThreeDotsVertical size={18}/>,
-                class: "absolute top-0 right-0 text-white",
+                props: {
+                  className: "absolute top-0 right-0 text-white",
+                }
               }}
               items={actionList}
-            />
+            />}
             <Typography
               className={cn(
-                "flex-1 font-extrabold break-words overflow-hidden text-pretty text-white",
+                "flex-1 font-extrabold break-words overflow-hidden text-pretty text-start text-white",
                 textSize[size]
               )}
             >
@@ -156,7 +163,7 @@ function GridCard<T extends GridItemProps>({
             return (
               <div className="flex justify-between items-center" key={key}>
                 <span className="text-medium">{item.label}:</span>
-                <span className="font-semibold text-medium ">
+                <span className={cn("font-semibold text-medium",item.textColor)}>
                   {typeof item.value === "boolean" ? ( // Boolean
                     item.value ? (
                       <LuCheckCircle2 className="h-5 w-5 text-green-500" />
@@ -168,7 +175,7 @@ function GridCard<T extends GridItemProps>({
                     toGMT8(item.value).format("MMM D, YYYY") // Date
                   ) : typeof item.value === "object" &&
                     item.value instanceof Time ? (
-                    toGMT8(new Date()).format("h:mm a")
+                    toGMT8(item.value.toISOString).format("h:mm a")
                   ) : (
                     // Any
                     item.value

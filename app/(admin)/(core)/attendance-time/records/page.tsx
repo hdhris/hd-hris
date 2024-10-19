@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Calendar,
@@ -9,8 +9,6 @@ import {
   Chip,
 } from "@nextui-org/react";
 import { parseDate } from "@internationalized/date";
-import { AxiosResponse } from "axios";
-import { axiosInstance } from "@/services/fetcher";
 import {
   AttendanceLog,
   EmployeeSchedule,
@@ -20,6 +18,7 @@ import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
+import { useAxiosGet } from "@/lib/utils/axiosGetPost";
 
 const modeType = ["Password", "Fingerprint", "Card", "Face ID", "Other"];
 const punchType = ["IN", "OUT"];
@@ -56,44 +55,18 @@ const calculateStatus = (
 };
 
 export default function Page() {
-  const today = new Date();
-  const [isLoading, setIsLoading] = useState(true);
-  const [attendanceLog, setAttendanceLog] = useState<AttendanceLog[]>([]);
-  const [scheduleData, setScheduleData] = useState<EmployeeSchedule[]>([]);
-  const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
-  const [date, setDate] = useState(
-    parseDate((toGMT8(new Date()).format('YYYY-MM-DD')))
+  const [date, setDate] = useState(parseDate(toGMT8().format("YYYY-MM-DD")));
+  const {
+    data: attendanceLog,
+    isLoading,
+    setApi,
+  } = useAxiosGet<AttendanceLog[]>(
+    `/api/admin/attendance-time/records/${toGMT8().format("YYYY-MM-DD")}`
   );
-
-  const fetchAttendance = useCallback(
-    async () => {
-      setIsLoading(true);
-      try {
-        const formattedDate = toGMT8(date.toString()).format("YYYY-MM-DD");
-        const response: AxiosResponse<AttendanceLog[]> =
-          await axiosInstance.get(
-            `/api/admin/attendance-time/records/${formattedDate}`
-          );
-        setAttendanceLog(response.data);
-
-        const response2: AxiosResponse<{
-          batch: BatchSchedule[];
-          emp_sched: EmployeeSchedule[];
-        }> = await axiosInstance.get("/api/admin/attendance-time/schedule");
-        setBatchSchedules(response2.data.batch);
-        setScheduleData(response2.data.emp_sched);
-      } catch (error) {
-        console.error("Error fetching schedules:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [date] // Depend on 'date' as it's used in the function
-  );
-
-  useEffect(() => {
-    fetchAttendance();
-  }, [fetchAttendance]);
+  const { data, setApi: setInfoApi } = useAxiosGet<{
+    batch: BatchSchedule[];
+    emp_sched: EmployeeSchedule[];
+  }>("/api/admin/attendance-time/schedule");
 
   const [selectedKey, setSelectedKey] = useState<any>("");
 
@@ -106,10 +79,10 @@ export default function Page() {
       { uid: "timestamp", name: "Timestamp", sortable: true },
     ],
     rowCell: (item, columnKey) => {
-      const employeeSchedule = scheduleData.find(
+      const employeeSchedule = data?.emp_sched.find(
         (sched) => sched.employee_id === item.employee_id
       );
-      const batchSchedule = batchSchedules.find(
+      const batchSchedule = data?.batch.find(
         (batch) => batch.id === employeeSchedule?.batch_id
       );
       const status =
@@ -159,7 +132,7 @@ export default function Page() {
         case "status":
           return <span>{status}</span>;
         case "timestamp":
-          return <span>{toGMT8(item.timestamp).format('hh:mm a')}</span>;
+          return <span>{toGMT8(item.timestamp).format("hh:mm a")}</span>;
         default:
           return <></>;
       }
@@ -170,10 +143,10 @@ export default function Page() {
     <div className="flex flex-row gap-1 h-full">
       <TableData
         config={config}
-        items={attendanceLog}
+        items={attendanceLog || []}
         isLoading={isLoading}
         classNames={{
-          wrapper: 'h-fit-navlayout',
+          wrapper: "h-fit-navlayout",
         }}
         isHeaderSticky
         selectionMode="single"
@@ -189,7 +162,15 @@ export default function Page() {
           aria-label="Date (Controlled)"
           showMonthAndYearPickers
           value={date}
-          onChange={setDate}
+          onChange={(value)=>{
+            setDate(value)
+            setApi(
+              `/api/admin/attendance-time/records/${toGMT8(value.toString()).format(
+                "YYYY-MM-DD"
+              )}`
+            );
+            setInfoApi("/api/admin/attendance-time/schedule");
+          }}
         />
         <Card shadow="none" className="border">
           <CardHeader className="flex gap-1">
