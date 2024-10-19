@@ -212,6 +212,7 @@ function Page() {
         if (!data) return []
         return data
     }, [data])
+
     return (<DataDisplay
         title="Leave Types"
         data={leaveData}

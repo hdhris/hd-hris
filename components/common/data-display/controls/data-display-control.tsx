@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import useSearch from "@/hooks/utils/useSearch";
 import useFilter from "@/hooks/utils/useFilter";
 import {usePagination} from "@/hooks/utils/usePagination";
@@ -16,6 +16,7 @@ import {useDataDisplayControl} from "@/components/common/data-display/provider/d
 import {DataDisplayControlProps} from "@/components/common/data-display/types/types";
 import CountUp from "react-countup";
 import DataMigration from "@/components/util/data-migration";
+import {useRouter, useSearchParams} from "next/navigation";
 
 function DataDisplayControl<T>({
                                    title,
@@ -32,6 +33,8 @@ function DataDisplayControl<T>({
                                    onExport,
                                    onImport
                                }: DataDisplayControlProps<T>) {
+    const router = useRouter()
+    const searchParams = useSearchParams()
     const {values, selectedKeys, display, setDisplay, setSortDescriptor} = useDataDisplayControl<T>()
     const {searchValue, onSearchChange, itemSearched} = useSearch<T>(values, searchProps.searchingItemKey)
     const {filteredItems, onFilterChange, filter} = useFilter<T>(itemSearched)
@@ -39,10 +42,22 @@ function DataDisplayControl<T>({
     const {sortedItems, onSortChange, sortDescriptor} = useSort<T>(paginatedData)
 
 
-    const handleOnSearch = (value: string) => {
-        onSearchChange(value)
-        onPageChange(1)
-    }
+    const handleOnSearch = useCallback((value: string) => {
+        const newSearchParams = new URLSearchParams(searchParams.toString());
+        if (value.trim() === '') {
+            // If the input is empty, delete the query parameter
+            newSearchParams.delete('query'); // Replace 'query' with your actual query parameter name
+        } else {
+            // Update the query parameter with the new value
+            newSearchParams.set('query', value);
+        }
+        newSearchParams.set('query', value);
+        // Update the router with new search parameters
+        router.push(`?${newSearchParams.toString()}`); // Navigate to the new URL
+        console.log("URL: ", newSearchParams.toString())
+        onSearchChange(value);
+        onPageChange(1); // Reset to page 1 when a new search is triggered
+    }, [searchParams, router, onSearchChange, onPageChange]);
 
     const handleOnFilterChange = (value: Selection) => {
         onFilterChange(value)
@@ -54,7 +69,7 @@ function DataDisplayControl<T>({
         setRows(Number(rowPerPage))
     }
 
-    return (<div className={cn("flex flex-col h-full w-full p-5", className?.wrapper)}>
+    return (<div className={cn("flex flex-col h-full w-full px-2", className?.wrapper)}>
         <div className={cn("sticky top-0 z-10 pb-3 flex justify-between items-center", className?.upper)}>
             <div className="flex justify-start gap-3">
                 <Search value={searchValue} onChange={handleOnSearch} {...searchProps} className="flex-1"/>
@@ -104,7 +119,7 @@ function DataDisplayControl<T>({
 
         {/* Bottom pagination */}
         <div
-            className={cn("sticky bottom-0 z-10 bg-white p-5 shadow-sm flex justify-between items-center w-full", className?.lower)}>
+            className={cn("sticky bottom-0 z-10 py-2 shadow-sm flex justify-between items-center w-full", className?.lower)}>
             <div className={cn("flex justify-start", className?.lower.selectedKeysClassname)}>
                 <Typography className="text-medium font-semibold text-primary/50">
                     {selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}

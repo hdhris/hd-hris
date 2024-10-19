@@ -61,7 +61,8 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
     const {
         getRootProps, getInputProps, fileRejections, isFocused, isDragAccept, isDragReject,
     } = useDropzone({
-        disabled, onDrop: (acceptedFiles) => {
+        disabled,
+        onDrop: (acceptedFiles) => {
             const files = acceptedFiles;
             setCustomError(undefined);
             if (dropzoneOptions?.maxFiles && (value?.length ?? 0) + files.length > dropzoneOptions.maxFiles) {

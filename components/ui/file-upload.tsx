@@ -1,7 +1,7 @@
 import { cn } from "@nextui-org/react";
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { useDropzone } from "react-dropzone";
+import {DropzoneOptions, useDropzone} from "react-dropzone";
 import {LuUpload} from "react-icons/lu";
 
 const mainVariant = {
@@ -25,11 +25,15 @@ const secondaryVariant = {
     },
 };
 
+interface FileUploadProps {
+    onChange?: (files: File[]) => void;
+    dropzoneOptions?: Omit<DropzoneOptions, "disabled">;
+}
+
 export const FileUpload = ({
                                onChange,
-                           }: {
-    onChange?: (files: File[]) => void;
-}) => {
+                               dropzoneOptions
+                           }: FileUploadProps) => {
     const [files, setFiles] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,6 +53,7 @@ export const FileUpload = ({
         onDropRejected: (error) => {
             console.log(error);
         },
+        ...dropzoneOptions
     });
 
     return (

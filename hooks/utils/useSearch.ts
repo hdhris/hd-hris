@@ -30,6 +30,7 @@ function useSearch<T>(items: T[], searchingItemKey?: NestedKeys<T>[]) {
 
         // Update the router with new search parameters
         router.push(`?${newSearchParams.toString()}`); // Navigate to the new URL
+        console.log("newSearchParams: ", newSearchParams.toString());
     }, [router]);
 
     if (searchingItemKey) {
