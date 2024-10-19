@@ -1,60 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { useFormContext, Controller } from "react-hook-form";
+import React from "react";
+import { useFormContext } from "react-hook-form";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
+import { Card, CardBody, CardHeader } from "@nextui-org/react";
+import Text from "@/components/Text";
+import { Divider } from "@nextui-org/react";
 import {
-  DatePicker,
-  Select,
-  SelectItem,
-  Card,
-  CardBody,
-  CardHeader,
-} from "@nextui-org/react";
-import { parseDate, CalendarDate } from "@internationalized/date";
-import {
-  FormControl,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-
-type FormValues = {
-  department_id: string;
-  branch_id: string;  // Add branch_id for branch selection
-  hired_at: string;
-  job_id: string;
-  batch_id: string;
-};
-
-type BatchSchedule = {
-  id: number;
-  name: string;
-  clock_in: string;
-  clock_out: string;
-  shift_hours: number;
-  break_minutes: number;
-};
-
-const safeParseDate = (dateString: string) => {
-  try {
-    return parseDate(dateString);
-  } catch (error) {
-    console.error("Date parsing error:", error);
-    return null;
-  }
-};
+  useDepartmentsData,
+  useJobpositionData,
+  useBranchesData,
+  useBatchSchedules,
+} from "@/services/queries";
 
 const formatTimeTo12Hour = (time: string) => {
-  if (!time || typeof time !== "string") {
-    console.error("Invalid time value:", time);
-    return "Invalid time";
-  }
-
+  if (!time || typeof time !== "string") return "Invalid time";
   const timeParts = time.split("T")[1]?.split("Z")[0];
-  if (!timeParts) {
-    console.error("Invalid time format:", time);
-    return "Invalid time";
-  }
-
+  if (!timeParts) return "Invalid time";
   const [hours, minutes] = timeParts.split(":").map(Number);
-
   if (
     isNaN(hours) ||
     isNaN(minutes) ||
@@ -63,15 +26,12 @@ const formatTimeTo12Hour = (time: string) => {
     minutes < 0 ||
     minutes > 59
   ) {
-    console.error("Invalid hours or minutes:", timeParts);
     return "Invalid time";
   }
-
   const date = new Date();
   date.setHours(hours);
   date.setMinutes(minutes);
   date.setSeconds(0);
-
   return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "numeric",
@@ -80,209 +40,151 @@ const formatTimeTo12Hour = (time: string) => {
 };
 
 const JobInformationForm: React.FC = () => {
-  const { control, setValue, watch } = useFormContext<FormValues>();
-  const [departments, setDepartments] = useState<
-    Array<{ id: number; name: string }>
-  >([]);
-  const [branches, setBranches] = useState<Array<{ id: number; name: string }>>([]); // State for branches
-  const [jobTitles, setJobTitles] = useState<
-    Array<{ id: number; name: string }>
-  >([]);
-  const [batchSchedules, setBatchSchedules] = useState<BatchSchedule[]>([]);
+  // Use form context instead of creating a new form instance
+  const { setValue, watch } = useFormContext();
   const selectedBatchId = watch("batch_id");
 
-  useEffect(() => {
-    fetchDepartments();
-    fetchBranches(); // Fetch branches on component load
-    fetchJobTitles();
-    fetchBatchSchedules();
+  // Fetch data using SWR hooks with default empty arrays
+  const { data: departments = [] } = useDepartmentsData();
+  const { data: jobTitles = [] } = useJobpositionData();
+  const { data: branches = [] } = useBranchesData();
+  const { data: batchSchedules = [] } = useBatchSchedules();
+
+  // Create options arrays
+  const departmentOptions = departments.reduce((acc: any[], dept) => {
+    if (dept && dept.id && dept.name) {
+      acc.push({ value: dept.id.toString(), label: dept.name });
+    }
+    return acc;
   }, []);
 
-  const fetchDepartments = async () => {
-    try {
-      const response = await fetch("/api/employeemanagement/department");
-      const data = await response.json();
-      setDepartments(data);
-    } catch (error) {
-      console.error("Error fetching departments:", error);
+  const branchOptions = branches.reduce((acc: any[], branch) => {
+    if (branch && branch.id && branch.name) {
+      acc.push({ value: branch.id.toString(), label: branch.name });
     }
+    return acc;
+  }, []);
+
+  const jobOptions = jobTitles.reduce((acc: any[], job) => {
+    if (job && job.id && job.name) {
+      acc.push({ value: job.id.toString(), label: job.name });
+    }
+    return acc;
+  }, []);
+
+  const formBasicFields: FormInputProps[] = [
+    {
+      name: "department_id",
+      label: "Department",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select Department",
+        options: departmentOptions,
+      },
+    },
+    {
+      name: "hired_at",
+      label: "Hired Date",
+      type: "date-picker",
+      isRequired: true,
+      config: {
+        placeholder: "Select hire date",
+      },
+    },
+    {
+      name: "job_id",
+      label: "Job Position",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select Job Position",
+        options: jobOptions,
+      },
+    },
+    {
+      name: "branch_id",
+      label: "Branch",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select Branch",
+        options: branchOptions,
+      },
+    },
+  ];
+
+  const handleBatchSelect = (batchId: string) => {
+    setValue("batch_id", batchId, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+
+    // Initialize days_json with default values when batch is selected
+    setValue(
+      "days_json",
+      {
+        monday: false,
+        tuesday: false,
+        wednesday: false,
+        thursday: false,
+        friday: false,
+        saturday: false,
+        sunday: false,
+      },
+      {
+        shouldValidate: true,
+      }
+    );
   };
 
-  const fetchBranches = async () => {
-    try {
-      const response = await fetch("/api/employeemanagement/branch");
-      const data = await response.json();
-      setBranches(data);
-    } catch (error) {
-      console.error("Error fetching branches:", error);
+  const renderBatchSchedules = () => {
+    if (!batchSchedules || batchSchedules.length === 0) {
+      return <p>No batch schedules available</p>;
     }
-  };
 
-  const fetchJobTitles = async () => {
-    try {
-      const response = await fetch("/api/employeemanagement/jobposition");
-      const data = await response.json();
-      setJobTitles(data);
-    } catch (error) {
-      console.error("Error fetching job titles:", error);
-    }
-  };
+    return batchSchedules.map((schedule) => {
+      if (!schedule || !schedule.id) return null;
 
-  const fetchBatchSchedules = async () => {
-    try {
-      const response = await fetch("/api/employeemanagement/batch_schedules");
-      const data = await response.json();
-      setBatchSchedules(data);
-    } catch (error) {
-      console.error("Error fetching batch schedules:", error);
-    }
+      const isSelected = selectedBatchId === schedule.id.toString();
+
+      return (
+        <Card
+          key={schedule.id}
+          isPressable
+          onPress={() => handleBatchSelect(schedule.id.toString())}
+          className={isSelected ? "border-2 border-green-500" : ""}
+        >
+          <CardHeader className="font-bold">{schedule.name}</CardHeader>
+          <CardBody>
+            <p>
+              {formatTimeTo12Hour(schedule.clock_in)} -{" "}
+              {formatTimeTo12Hour(schedule.clock_out)}
+            </p>
+            <p>{schedule.shift_hours} hrs shift</p>
+            <p>{schedule.break_min} mins break</p>
+          </CardBody>
+        </Card>
+      );
+    });
   };
 
   return (
-    <form className="space-y-6">
+    <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
-        <Controller
-          name="department_id"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Select
-                  {...field}
-                  aria-label="Department"
-                  placeholder="Select Department"
-                  isRequired
-                  label={<span className="font-semibold">Department</span>}
-                  labelPlacement="outside"
-                  variant="bordered"
-                  selectedKeys={field.value ? [field.value] : []}
-                >
-                  {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id.toString()}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Controller
-          name="hired_at"
-          control={control}
-          render={({ field }) => {
-            const parsedValue = field.value ? safeParseDate(field.value) : null;
-            return (
-              <FormItem>
-                <FormControl>
-                  <DatePicker
-                    value={parsedValue}
-                    onChange={(date: CalendarDate | null) => {
-                      field.onChange(date ? date.toString() : "");
-                    }}
-                    aria-label="Hire Date"
-                    variant="bordered"
-                    labelPlacement="outside"
-                    label={<span className="font-semibold">Hired Date</span>}
-                    isRequired
-                    showMonthAndYearPickers
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
-        />
-
-        <Controller
-          name="job_id"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Select
-                  {...field}
-                  aria-label="Job Title"
-                  placeholder="Select Job Title"
-                  label={<span className="font-semibold">Job Position</span>}
-                  variant="bordered"
-                  labelPlacement="outside"
-                  isRequired
-                  selectedKeys={field.value ? [field.value] : []}
-                >
-                  {jobTitles.map((job) => (
-                    <SelectItem key={job.id} value={job.id.toString()}>
-                      {job.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-         {/* Add Branch Dropdown */}
-         <Controller
-          name="branch_id"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Select
-                  {...field}
-                  aria-label="Branch"
-                  placeholder="Select Branch"
-                  label={<span className="font-semibold">Branch</span>}
-                  variant="bordered"
-                  labelPlacement="outside"
-                  isRequired
-                  selectedKeys={field.value ? [field.value] : []}
-                >
-                  {branches.map((branch) => (
-                    <SelectItem key={branch.id} value={branch.id.toString()}>
-                      {branch.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+        <FormFields items={formBasicFields} />
       </div>
+
+      <Divider />
 
       <div className="mt-5">
-        <h3 className="text-lg font-semibold mb-4">Work Schedule</h3>
+        <Text className="text-lg font-semibold mb-4">Work Schedule</Text>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {batchSchedules.map((schedule) => (
-            <Card
-              key={schedule.id}
-              isPressable
-              onPress={() => setValue("batch_id", schedule.id.toString())}
-              className={
-                selectedBatchId === schedule.id.toString()
-                  ? "border-2 border-green-500"
-                  : ""
-              }
-            >
-              <CardHeader className="font-bold">{schedule.name}</CardHeader>
-              <CardBody>
-                <p>
-                  {formatTimeTo12Hour(schedule.clock_in)} -{" "}
-                  {formatTimeTo12Hour(schedule.clock_out)}
-                </p>
-                <p>{schedule.shift_hours} hrs shift</p>
-                <p>{schedule.break_minutes} mins break</p>
-              </CardBody>
-            </Card>
-          ))}
+          {renderBatchSchedules()}
         </div>
       </div>
-    </form>
+    </div>
   );
 };
 

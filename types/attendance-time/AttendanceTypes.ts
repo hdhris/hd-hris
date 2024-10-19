@@ -29,6 +29,7 @@ export interface EmployeeSchedule {
   }
   
   export  interface BatchSchedule {
+    shift_hours: ReactNode;
     id: number;
     name: string;
     clock_in: string;

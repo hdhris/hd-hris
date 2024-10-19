@@ -2,21 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
-import { Input } from "@nextui-org/input";
-import { Select, SelectItem } from "@nextui-org/select";
-import {
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormField,
-  FormMessage,
-} from "@/components/ui/form";
-import { FileState, FileDropzone } from "@/components/ui/fileupload/file";
-import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { SharedSelection } from "@nextui-org/react";
+import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
+import { useEdgeStore } from "@/lib/edgestore/edgestore";
+import { FileState, FileDropzone } from "@/components/ui/fileupload/file";
+import { Divider } from "@nextui-org/react";
+import Text from "@/components/Text";
 
 const EducationalBackgroundForm = () => {
-  const { control, watch, setValue } = useFormContext();
+  const { watch, setValue } = useFormContext();
   const [showStrand, setShowStrand] = useState(false);
   const [showCourse, setShowCourse] = useState(false);
   const [fileStates, setFileStates] = useState<FileState[]>([]);
@@ -29,17 +23,14 @@ const EducationalBackgroundForm = () => {
   const seniorHighSchool = watch("seniorHighSchool");
   const universityCollege = watch("universityCollege");
 
-  // Show Strand field when Senior High School is entered
   useEffect(() => {
     setShowStrand(!!seniorHighSchool);
   }, [seniorHighSchool]);
 
-  // Show Course field when University/College is entered
   useEffect(() => {
     setShowCourse(!!universityCollege);
   }, [universityCollege]);
 
-  // Determine the highest degree based on entered fields
   useEffect(() => {
     let highestDegree = "Elementary School";
     if (highSchool) highestDegree = "High School";
@@ -67,261 +58,154 @@ const EducationalBackgroundForm = () => {
     }
   };
 
+  const formFields: FormInputProps[] = [
+    {
+      name: "elementary",
+      label: "Elementary",
+      type: "text",
+      placeholder: "Enter Elementary School",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    {
+      name: "highSchool",
+      label: "High School",
+      type: "text",
+      placeholder: "Enter High School",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    {
+      name: "seniorHighSchool",
+      label: "Senior High School",
+      type: "text",
+      placeholder: "Enter Senior High School",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    {
+      name: "seniorHighStrand",
+      label: "Senior High School Strand",
+      type: "auto-complete",
+      isVisible: showStrand,
+      placeholder: "Select Strand",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+        options: [
+          { value: "HUMSS", label: "HUMSS" },
+          { value: "ABM", label: "ABM" },
+          { value: "STEM", label: "STEM" },
+          { value: "GAS", label: "GAS" },
+          { value: "TVL", label: "TVL" },
+        ],
+        onSelectionChange: handleSelect,
+      },
+    },
+    {
+      name: "tvlCourse",
+      label: "TVL Course",
+      type: "text",
+      isVisible: select === "tvl",
+      placeholder: "Enter TVL Course",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    {
+      name: "universityCollege",
+      label: "University/College",
+      type: "text",
+      placeholder: "Enter University/College",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    {
+      name: "course",
+      label: "Course",
+      type: "text",
+      isVisible: showCourse,
+      placeholder: "Enter Course",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    {
+      name: "highestDegree",
+      label: "Highest Degree Attainment",
+      type: "text",
+      config: {
+        variant: "bordered",
+        isReadOnly: true,
+      },
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Elementary School */}
-        <FormField
-          name="elementary"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  {...field}
-                 
-                  label={<span className="font-semibold">Elementary</span>}
-                  placeholder="Enter Elementary School"
-                  labelPlacement="outside"
-                  variant="bordered"
-                  className="border rounded"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* High School */}
-        <FormField
-          name="highSchool"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  {...field}
-                  label={<span className="font-semibold">High School</span>}
-                  placeholder="Enter High School"
-                  variant="bordered"
-                  labelPlacement="outside"
-                  className="border rounded"
-                  
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Senior High School */}
-        <FormField
-          name="seniorHighSchool"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  {...field}
-                  
-                  label={
-                    <span className="font-semibold">Senior High School</span>
-                  }
-                  placeholder="Enter Senior High School"
-                  variant="bordered"
-                  labelPlacement="outside"
-                  className="border rounded"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Senior High Strand - Show when Senior High School is entered */}
-        {showStrand && (
-          <FormField
-            name="seniorHighStrand"
-            control={control}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Select
-                    {...field}
-                    
-                    label={
-                      <span className="font-semibold">Senior High School</span>
-                    }
-                    placeholder="Select Strand"
-                    labelPlacement="outside"
-                    variant="bordered"
-                    className="border rounded"
-                    onSelectionChange={handleSelect}
-                  >
-                    <SelectItem key="humss" value="HUMSS">
-                      HUMSS
-                    </SelectItem>
-                    <SelectItem key="abm" value="ABM">
-                      ABM
-                    </SelectItem>
-                    <SelectItem key="stem" value="STEM">
-                      STEM
-                    </SelectItem>
-                    <SelectItem key="gas" value="GAS">
-                      GAS
-                    </SelectItem>
-                    <SelectItem key="tvl" value="TVL">
-                      TVL
-                    </SelectItem>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        {/* TVL Course - TVL is entered */}
-        {select && (
-          <FormField
-            name="tvlCourse"
-            control={control}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    {...field}
-                    
-                    label={
-                      <span className="font-semibold">TVL COURSE</span>
-                    }
-                    placeholder="Enter TVL Course"
-                    variant="bordered"
-                    className="border rounded"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        {/* University/College */}
-        <FormField
-          name="universityCollege"
-          control={control}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  {...field}
-                
-                  label={<span className="font-semibold">University/College</span>}
-                  placeholder="Enter University/College"
-                  labelPlacement="outside"
-                  variant="bordered"
-                  className="border rounded"
-                  
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Course - Show if University/College is entered */}
-        {showCourse && (
-          <FormField
-            name="course"
-            control={control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Course</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Enter Course"
-                    variant="bordered"
-                    className="border rounded"
-                   
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        {/* Highest Degree Attainment */}
-        <FormField
-          name="highestDegree"
-          control={control}
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Highest Degree Attainment</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Highest Degree"
-                  variant="bordered"
-                  className="border rounded"
-                  isReadOnly
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Certificate Upload */}
-        <FormField
-          name="certificates"
-          control={control}
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Certificates</FormLabel>
-              <FormControl>
-                <FileDropzone
-                  value={fileStates}
-                  onChange={(files) => {
-                    setFileStates(files);
-                    field.onChange(files.map((f) => f.file));
-                  }}
-                  onFilesAdded={async (addedFiles) => {
-                    setFileStates([...fileStates, ...addedFiles]);
-                    await Promise.all(
-                      addedFiles.map(async (addedFileState) => {
-                        try {
-                          const res = await edgestore.publicFiles.upload({
-                            file: addedFileState.file,
-                            onProgressChange: async (progress) => {
-                              updateFileProgress(addedFileState.key, progress);
-                              if (progress === 100) {
-                                await new Promise((resolve) =>
-                                  setTimeout(resolve, 1000)
-                                );
-                                updateFileProgress(
-                                  addedFileState.key,
-                                  "COMPLETE"
-                                );
-                              }
-                            },
-                          });
-                          console.log(res);
-                        } catch (err) {
-                          console.error(err);
-                          updateFileProgress(addedFileState.key, "ERROR");
-                        }
-                      })
-                    );
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <FormFields items={formFields} />
       </div>
+
+      <Divider />
+      <Text className="text-medium font-semibold">Certificates</Text>
+
+      <FormFields
+        items={[
+          {
+            name: "certificates",
+            label: "Certificates",
+            type: "text",
+            Component: ({ onChange }) => (
+              <FileDropzone
+                value={fileStates}
+                onChange={(files) => {
+                  setFileStates(files);
+                  onChange(files.map((f) => f.file));
+                }}
+                onFilesAdded={async (addedFiles) => {
+                  setFileStates([...fileStates, ...addedFiles]);
+                  await Promise.all(
+                    addedFiles.map(async (addedFileState) => {
+                      try {
+                        const res = await edgestore.publicFiles.upload({
+                          file: addedFileState.file,
+                          onProgressChange: async (progress) => {
+                            updateFileProgress(addedFileState.key, progress);
+                            if (progress === 100) {
+                              await new Promise((resolve) =>
+                                setTimeout(resolve, 1000)
+                              );
+                              updateFileProgress(
+                                addedFileState.key,
+                                "COMPLETE"
+                              );
+                            }
+                          },
+                        });
+                        console.log(res);
+                      } catch (err) {
+                        console.error(err);
+                        updateFileProgress(addedFileState.key, "ERROR");
+                      }
+                    })
+                  );
+                }}
+              />
+            ),
+          },
+        ]}
+      />
     </div>
   );
 };
