@@ -1,0 +1,198 @@
+.tree {
+  width: 100%;
+  height: auto;
+  text-align: center;
+}
+/* 
+.tree:
+- Sets the width of the tree container to 100% of its parent.
+- Makes the height auto-adjust based on content.
+- Centers the text within the tree container.
+*/
+
+.tree ul {
+  padding-top: 20px;
+  position: relative;
+  transition: 0.5s;
+}
+/* 
+.tree ul:
+- Adds a 20px padding to the top of each <ul> element within the tree for spacing.
+- Sets the position of the <ul> element to relative, allowing absolutely positioned child elements to be positioned relative to this element.
+- Applies a 0.5s transition for any CSS property changes, enabling smooth animations.
+*/
+
+.tree li {
+  display: inline-table;
+  text-align: center;
+  list-style-type: none;
+  position: relative;
+  padding: 10px;
+  transition: 0.5s;
+}
+/* 
+.tree li:
+- Displays each <li> element as an inline-table, aligning them horizontally but allowing for block-level content inside.
+- Centers the text within each <li>.
+- Removes default list styling (no bullet points).
+- Sets the position to relative to allow absolutely positioned child elements to be positioned relative to this <li>.
+- Adds 10px padding around each <li> for spacing.
+- Applies a 0.5s transition for smooth animations on changes.
+*/
+
+.tree li::before,
+.tree li::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 50%;
+  border-top: 1px solid #ccc;
+  width: 51%;
+  height: 10px;
+}
+/* 
+.tree li::before, .tree li::after:
+- Creates empty pseudo-elements (::before and ::after) before and after each <li>.
+- Positions these elements absolutely, relative to the <li>.
+- Places the elements at the top of the <li>, centered horizontally by setting right: 50%.
+- Draws a horizontal line (border-top) for 51% of the width of the parent <li>.
+- Sets the height of the elements to 10px, but only the border-top is visible.
+*/
+
+.tree li::after {
+  right: auto;
+  left: 50%;
+  border-left: 1px solid #ccc;
+}
+/* 
+.tree li::after:
+- Adjusts the positioning of the ::after pseudo-element, aligning it to the left of the <li>.
+- Draws a vertical line (border-left) from the middle of the <li>.
+*/
+
+.tree li:only-child::after,
+.tree li:only-child::before {
+  display: none;
+}
+/* 
+.tree li:only-child::after, .tree li:only-child::before:
+- Removes the connecting lines (::before and ::after elements) if the <li> is the only child of its parent <ul>.
+*/
+
+.tree li:only-child {
+  padding-top: 0;
+}
+/* 
+.tree li:only-child:
+- Removes the top padding if the <li> is the only child.
+*/
+
+.tree li:first-child::before,
+.tree li:last-child::after {
+  border: 0 none;
+}
+/* 
+.tree li:first-child::before, .tree li:last-child::after:
+- Removes the connecting lines for the first child's ::before element and the last child's ::after element.
+*/
+
+.tree li:last-child::before {
+  border-right: 1px solid #ccc;
+  border-radius: 0 5px 0 0;
+}
+/* 
+.tree li:last-child::before:
+- Adds a vertical line (border-right) for the last child's ::before element.
+- Rounds the top-right corner of this line with a border-radius.
+*/
+
+.tree li:first-child::after {
+  border-radius: 5px 0 0 0;
+}
+/* 
+.tree li:first-child::after:
+- Rounds the top-left corner of the first child's ::after element with a border-radius.
+*/
+
+.tree ul ul::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  border-left: 1px solid #ccc;
+  width: 0;
+  height: 20px;
+}
+/* 
+.tree ul ul::before:
+- Creates an empty pseudo-element before nested <ul> elements.
+- Positions the element absolutely, centered horizontally (left: 50%).
+- Draws a vertical line (border-left) from the top of the nested <ul>.
+- Sets the height of the line to 20px to connect the child nodes.
+*/
+
+.tree li a {
+  border: 1px solid #ccc;
+  padding: 10px;
+  display: inline-grid;
+  border-radius: 5px;
+  text-decoration-line: none;
+  border-radius: 5px;
+  transition: 0.5s;
+}
+/* 
+.tree li a:
+- Adds a 1px solid border around each link (<a>) within the <li>.
+- Adds 10px padding inside each link.
+- Displays the links as inline-grid elements, allowing for structured layout within.
+- Rounds the corners of the links with a 5px border-radius.
+- Removes any default text decorations (like underlines).
+- Adds a 0.5s transition for smooth animations on changes.
+*/
+
+.tree li a span {
+  border: 0px solid #ccc;
+  border-radius: 5px;
+  color: #666;
+  padding: 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+/* 
+.tree li a span:
+- Removes any borders around <span> elements inside the links.
+- Rounds the corners of the <span> with a 5px border-radius.
+- Sets the text color to #666 (gray).
+- Adds 8px padding around the text inside the <span>.
+- Sets the font size to 12px.
+- Converts the text to uppercase.
+- Adds 1px letter spacing between characters.
+- Sets the font weight to 500 (medium weight).
+*/
+
+.tree li a:hover,
+.tree li a:hover i,
+.tree li a:hover span,
+.tree li a:hover + ul li a {
+  background: #c8e4f8;
+  color: #000;
+  /* border: 1px solid #94a0b4; */
+}
+/* 
+.tree li a:hover, .tree li a:hover i, .tree li a:hover span, .tree li a:hover + ul li a:
+- Changes the background color to #c8e4f8 (light blue) when a link is hovered.
+- Changes the text color to black when a link or any child element is hovered.
+*/
+
+.tree li a:hover + ul li::after,
+.tree li a:hover + ul li::before,
+.tree li a:hover + ul::before,
+.tree li a:hover + ul ul::before {
+  border-color: #94a0b4;
+}
+/* 
+.tree li a:hover + ul li::after, .tree li a:hover + ul li::before, .tree li a:hover + ul::before, .tree li a:hover + ul ul::before:
+- Changes the border color of connecting lines to #94a0b4 (darker blue) when a link is hovered, giving a visual indication of the relationship.
+*/
