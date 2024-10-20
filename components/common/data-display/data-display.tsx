@@ -1,7 +1,8 @@
 import React, {ReactNode, useCallback, useEffect} from 'react';
 import DataDisplayControl from "@/components/common/data-display/controls/data-display-control";
 import {
-    DataDisplayControlProvider, useDataDisplayControl
+    DataDisplayControlProvider,
+    useDataDisplayControl
 } from "@/components/common/data-display/provider/data-display-control-provider";
 import DataTable from "@/components/common/data-display/data-table";
 import {
@@ -33,6 +34,7 @@ function DataDisplay<T extends { id: string | number }>({
                                                             className,
                                                             paginationProps,
                                                             buttonGroupProps,
+                                                            rowSelectionProps,
                                                             ...rest
                                                         }: DataDisplayType<T>) {
 
@@ -46,6 +48,7 @@ function DataDisplay<T extends { id: string | number }>({
             filterProps={filterProps}
             sortProps={sortProps}
             paginationProps={paginationProps}
+            rowSelectionProps={rowSelectionProps}
             isList={!!rest.onListDisplay}
             isGrid={!!rest.onGridDisplay}
             isTable={!!rest.onTableDisplay}
@@ -113,10 +116,9 @@ const RenderDisplay = <T extends { id: string | number }>({
                     <div className="grid grid-row-[repeat(auto-fit,minmax(100%,1fr))] gap-5 w-full">
                         <RenderList
                             items={newData}
-                            map={(item, key) => (
-                                <>
-                                    {onListDisplay ? onListDisplay(item, key) : <p>No grid display available</p>}
-                                </>)}
+                            map={(item, key) => (<>
+                                {onListDisplay ? onListDisplay(item, key) : <p>No grid display available</p>}
+                            </>)}
                         />
                     </div>
                 </AnimatedList>

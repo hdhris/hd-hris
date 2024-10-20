@@ -5,11 +5,8 @@ import {usePathname, useRouter, useSearchParams} from "next/navigation";
 
 
 function useFilter<T>(items: T[]) {
-    const getCurrentPath = usePathname();
-    const router = useRouter();
     const searchParams = useSearchParams();
     const filterValueFromParams = searchParams.get('filter') || '';
-    const searchValueFromParams = searchParams.get('search') || '';
 
     const [filter, setFilter] = useState<Selection>(() => {
         const values = filterValueFromParams.split(',');
@@ -27,18 +24,17 @@ function useFilter<T>(items: T[]) {
             newSearchParams.delete('filter');
         }
 
-        // Keep the existing search query parameter
-        if (searchValueFromParams) {
-            newSearchParams.set('search', searchValueFromParams);
-        }
+        // // Keep the existing search query parameter
+        // if (searchValueFromParams) {
+        //     newSearchParams.set('search', searchValueFromParams);
+        // }
 
         // Build new path with updated query parameters
-        const newPath = `${getCurrentPath}?${newSearchParams.toString()}`;
 
         // Navigate to the new path
-        router.push(newPath);
+        window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
         setFilter(value); // Update the filter state
-    }, [getCurrentPath, router, searchParams, searchValueFromParams]);
+    }, [searchParams]);
 
     const filteredItems = useMemo(() => {
         let filteredUsers: T[] = [...items]; // Start with the already searched items

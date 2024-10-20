@@ -3,7 +3,6 @@ import prisma from "@/prisma/prisma";
 import { getPaginatedData } from "@/server/pagination/paginate"; // Import the reusable function
 import { LeaveType } from "@/types/leaves/LeaveTypes";
 import { capitalize } from "@nextui-org/shared-utils";
-import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +64,7 @@ export async function GET(request: Request) {
             currentPage,
             perPage,
             totalItems,
-            totalPages
+            // totalPages
         });
     } catch (err) {
         console.error("Error: ", err);

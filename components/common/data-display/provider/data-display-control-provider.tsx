@@ -2,7 +2,7 @@ import React, {createContext, useContext, useEffect, useState} from "react";
 import {Selection, SortDescriptor} from "@nextui-org/react";
 import {useDataDisplay} from "@/components/common/data-display/provider/data-display-provider";
 
-type DisplayType = "table" | "grid" | "list"
+export type DisplayType = "table" | "grid" | "list"
 interface DataDisplayControlContext<T> {
     values: T[]
     setValues: (values: T[]) => void
@@ -42,6 +42,7 @@ export const DataDisplayControlProvider = <T,>({children, values}: DataDisplayCo
     useEffect(() => {
         setDataDisplay(values);
     }, [values]); // Trigger the effect when `values` changes
+
 
 
     return (
