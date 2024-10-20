@@ -18,7 +18,7 @@ const Page: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedBranchId, setSelectedBranchId] = useState<Branch | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
+//
   useEffect(() => {
     if (branches) {
       setLoading(false);

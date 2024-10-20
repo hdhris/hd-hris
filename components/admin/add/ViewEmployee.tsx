@@ -21,7 +21,7 @@ import {
   MoreVertical,
   User,
 } from "lucide-react";
-
+//
 interface ViewEmployeeProps {
   isOpen: boolean;
   onClose: () => void;

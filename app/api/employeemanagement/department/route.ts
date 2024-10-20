@@ -22,7 +22,7 @@ function handleError(error: unknown, operation: string) {
       { error: "Invalid data", details: error.errors },
       { status: 400 }
     );
-  }
+  }//
   return NextResponse.json(
     { error: `Failed to ${operation} department`, message: (error as Error).message },
     { status: 500 }

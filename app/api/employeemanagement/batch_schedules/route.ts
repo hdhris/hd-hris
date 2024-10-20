@@ -16,7 +16,7 @@ export async function GET() {
         clock_in: true,
         clock_out: true,
       },
-    });
+    });//
 
     return NextResponse.json(batchSchedules);
   } catch (error) {

@@ -87,7 +87,7 @@ const EditEducationalBackgroundForm = () => {
       variant: "success",
     });
   };
-
+//
   // Handle file download
   const handleDownload = (fileUrl: string, fileName: string) => {
     const link = document.createElement("a");
