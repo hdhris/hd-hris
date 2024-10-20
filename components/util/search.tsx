@@ -7,6 +7,7 @@ import {SearchProps} from "@/components/util/types/types";
 
 
 function Search<T>({value, onChange, searchingItemKey, ...rest}: SearchProps<T>) {
+
     return (<Input
         {...rest}
         variant="bordered"

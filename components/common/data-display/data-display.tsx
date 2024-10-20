@@ -1,10 +1,15 @@
 import React, {ReactNode, useCallback, useEffect} from 'react';
 import DataDisplayControl from "@/components/common/data-display/controls/data-display-control";
 import {
-    DataDisplayControlProvider, useDataDisplayControl
+    DataDisplayControlProvider,
+    useDataDisplayControl
 } from "@/components/common/data-display/provider/data-display-control-provider";
 import DataTable from "@/components/common/data-display/data-table";
-import {DataDisplayControlProps, DataTableProps} from "@/components/common/data-display/types/types";
+import {
+    DataDisplayControlProps,
+    DataImportAndExportProps,
+    DataTableProps
+} from "@/components/common/data-display/types/types";
 import {TableConfigProps} from "@/types/table/TableDataTypes";
 import {Case, Switch} from "@/components/common/Switch";
 import {Selection} from "@nextui-org/react";
@@ -18,7 +23,7 @@ interface DataDisplayProps<T> extends RenderDisplayProps<T> {
 }
 
 type DataDisplayType<T> =
-    Omit<DataDisplayControlProps<T>, "children" | "isList" | "isGrid" | "isTable">
+    Omit<DataDisplayControlProps<T>, "children" | "isList" | "isGrid" | "isTable" | "isImport" | "isExport">
     & DataDisplayProps<T>
 
 function DataDisplay<T extends { id: string | number }>({
@@ -29,6 +34,7 @@ function DataDisplay<T extends { id: string | number }>({
                                                             className,
                                                             paginationProps,
                                                             buttonGroupProps,
+                                                            rowSelectionProps,
                                                             ...rest
                                                         }: DataDisplayType<T>) {
 
@@ -42,9 +48,12 @@ function DataDisplay<T extends { id: string | number }>({
             filterProps={filterProps}
             sortProps={sortProps}
             paginationProps={paginationProps}
+            rowSelectionProps={rowSelectionProps}
             isList={!!rest.onListDisplay}
             isGrid={!!rest.onGridDisplay}
             isTable={!!rest.onTableDisplay}
+            onExport={rest.onExport}
+            onImport={rest.onImport}
         >
             {(data: T[], sortDescriptor, onSortChange) => {
                 return (<RenderDisplay data={data} onTableDisplay={{
@@ -70,6 +79,8 @@ interface RenderDisplayProps<T> {
     onTableDisplay: Omit<DataDisplayTableProps<T>, "data">;
     onGridDisplay?: (data: T, key: number | string) => ReactNode;
     onListDisplay?: (data: T, key: number | string) => ReactNode;
+    onImport?: DataImportAndExportProps;
+    onExport?: DataImportAndExportProps;
     data: T[];
     query?: string
 }
@@ -105,10 +116,9 @@ const RenderDisplay = <T extends { id: string | number }>({
                     <div className="grid grid-row-[repeat(auto-fit,minmax(100%,1fr))] gap-5 w-full">
                         <RenderList
                             items={newData}
-                            map={(item, key) => (
-                                <>
-                                    {onListDisplay ? onListDisplay(item, key) : <p>No grid display available</p>}
-                                </>)}
+                            map={(item, key) => (<>
+                                {onListDisplay ? onListDisplay(item, key) : <p>No grid display available</p>}
+                            </>)}
                         />
                     </div>
                 </AnimatedList>

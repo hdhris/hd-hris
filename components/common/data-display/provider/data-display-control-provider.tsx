@@ -2,9 +2,10 @@ import React, {createContext, useContext, useEffect, useState} from "react";
 import {Selection, SortDescriptor} from "@nextui-org/react";
 import {useDataDisplay} from "@/components/common/data-display/provider/data-display-provider";
 
-type DisplayType = "table" | "grid" | "list"
+export type DisplayType = "table" | "grid" | "list"
 interface DataDisplayControlContext<T> {
     values: T[]
+    setValues: (values: T[]) => void
     selectedKeys: Selection | null
     setSelectedKeys: (keys: Selection) => void
     display: DisplayType
@@ -43,10 +44,12 @@ export const DataDisplayControlProvider = <T,>({children, values}: DataDisplayCo
     }, [values]); // Trigger the effect when `values` changes
 
 
+
     return (
         <DataDisplayControlContext.Provider
             value={{
                 values: dataDisplay,
+                setValues: setDataDisplay,
                 selectedKeys,
                 setSelectedKeys,
                 display,

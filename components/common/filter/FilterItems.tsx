@@ -11,22 +11,21 @@ import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { joinNestedKeys, NestedKeys } from "@/helper/objects/joinNestedKeys";
 import { valueOfObject } from "@/helper/objects/pathGetterObject";
 import DropdownList from "../Dropdown";
-import { IoChevronDown } from "react-icons/io5";
+import {IoChevronDown} from "react-icons/io5";
 
 export interface FilterItemsProps<T> {
-  filter: {
-    label: string;
-    value: any | ((item: T) => boolean);
-  }[];
-  key: NestedKeys<T>;
-  sectionName: string;
+    filter: {
+        label: string; value: any | ((item: T) => boolean);
+    }[];
+    key: NestedKeys<T>;
+    sectionName: string;
 }
 
 interface FilterProps<T> {
-  items: T[];
-  config: FilterItemsProps<T>[];
-  setResults: (items: T[]) => void;
-  isLoading?: boolean;
+    items: T[];
+    config: FilterItemsProps<T>[];
+    setResults: (items: T[]) => void;
+    isLoading?: boolean;
 }
 
 function FilterItems<T>({

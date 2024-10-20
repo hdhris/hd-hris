@@ -1,10 +1,9 @@
 import React from 'react';
 import {valueOfObject} from "@/helper/objects/pathGetterObject";
-import {useRouter} from "next/navigation";
 import {NestedKeys} from "@/hooks/types/types"; // Import type if necessary
 
 function useSearch<T>(items: T[], searchingItemKey?: NestedKeys<T>[]) {
-    const router = useRouter();
+
 
     let itemSearched = [...items];
     // Utility function to get the initial search value from URL
@@ -15,7 +14,7 @@ function useSearch<T>(items: T[], searchingItemKey?: NestedKeys<T>[]) {
 
     const [searchValue, setSearchValue] = React.useState(getInitialSearchValue());
 
-    const onSearchChange = React.useCallback((value: string) => {
+    const onSearchChange = (value: string) => {
         setSearchValue(value);
 
         const newSearchParams = new URLSearchParams(window.location.search);
@@ -27,10 +26,8 @@ function useSearch<T>(items: T[], searchingItemKey?: NestedKeys<T>[]) {
             // Update the query parameter with the new value
             newSearchParams.set('query', value);
         }
-
-        // Update the router with new search parameters
-        router.push(`?${newSearchParams.toString()}`); // Navigate to the new URL
-    }, [router]);
+        window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
+    };
 
     if (searchingItemKey) {
         itemSearched = items.filter(item => searchingItemKey.some(key => {

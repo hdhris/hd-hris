@@ -4,12 +4,11 @@ import {ApiResponse} from "@/types/dashboard/reportStat";
 import {Employee} from "@/types/employeee/EmployeeType";
 import {Signatory} from "@/types/audit/types";
 import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
-import { Department } from "@/types/employeee/DepartmentType";
-import { BatchSchedule, Schedules } from "@/types/attendance-time/AttendanceTypes";
-import { Branch } from "@/types/employeee/BranchType";
-import { Payhead, PayheadAffected } from "@/types/payroll/payheadType";
+import {Department} from "@/types/employeee/DepartmentType";
+import {BatchSchedule, Schedules} from "@/types/attendance-time/AttendanceTypes";
+import {Branch} from "@/types/employeee/BranchType";
+import {Payhead, PayheadAffected} from "@/types/payroll/payheadType";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
-import {LeaveType} from "@/types/leaves/LeaveTypes";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -136,4 +135,11 @@ export function useLeaveTypes(){
     return useSWR<LeaveTypesItems[]>('/api/admin/leaves/leave-types', fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
+}
+
+export function usePaginateQuery<T>(api: string, page: number, limit: number, options?: Omit<SWRConfiguration<T>, "keepPreviousData">) {
+    return useSWR<T>(`${api}?page=${page}&limit=${limit}`, fetcher, {
+        keepPreviousData: true,
+        ...options,
+    });
 }

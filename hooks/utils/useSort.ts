@@ -1,24 +1,30 @@
 import React, {useCallback, useEffect} from "react";
 import {SortDescriptor} from "@nextui-org/react";
-import {useRouter} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 
 interface SortHookProps {
     sort?: SortDescriptor;
 }
 
 export function useSort<T>(data: T[], {sort}: SortHookProps = {}) {
-    // const router = useRouter()
-    const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>(sort || {
+    const searchParams = useSearchParams();
+    const sortValueFromParams = searchParams.get('sort');
+    const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>(sort || (sortValueFromParams ? JSON.parse(sortValueFromParams) : {
         column: "id",
-        direction: "descending",
-    });
+        direction: "ascending",
+    }));
 
-
-
-
+    
     const onSortChange = useCallback((sort: SortDescriptor) => {
         setSortDescriptor(sort);
-    }, [setSortDescriptor]);
+        const newSearchParams = new URLSearchParams(searchParams.toString());
+        if(sort.column?.toString().trim() === '') {
+            newSearchParams.delete('sort');
+        } else {
+            newSearchParams.set('sort', JSON.stringify(sort));
+        }
+        window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
+    }, [searchParams]);
 
 
 

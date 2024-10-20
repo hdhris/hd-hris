@@ -20,7 +20,7 @@ import {Selection} from "@nextui-org/react";
 import DataTable from "@/components/common/data-display/data-table";
 
 function Page() {
-    const {data, isLoading} = useQuery<LeaveType[]>("/api/admin/leaves/leave-types", 3000);
+    const {data, isLoading} = useQuery<LeaveType[]>("/api/admin/leaves/leave-types");
     const leaveData = useMemo(() => {
         if (!data) return []
         return data
@@ -49,25 +49,39 @@ function Page() {
         )
     }, [isLoading, paginatedData])
     return (<>
-            <div className="flex gap-2 items-center m-5">
-                <TableSearch value={searchValue} onChange={handleOnSearch} searchingItemKey={["name"]}/>
-                <TableFilter filterValue={filter} filterItems={filterLeaveTypes} onChange={handleOnFilterChange}/>
-                <Sort sortItems={[{
-                    name: "Name", key: "name"
-                }, {
-                    name: "Created At", key: "created_at"
-                }]} onSortChange={onSortChange}/>
+            {/*<div className="flex gap-2 items-center m-5">*/}
+            {/*    <TableSearch value={searchValue} onChange={handleOnSearch} searchingItemKey={["name"]}/>*/}
+            {/*    <TableFilter filterValue={filter} filterItems={filterLeaveTypes} onChange={handleOnFilterChange}/>*/}
+            {/*    <Sort sortItems={[{*/}
+            {/*        name: "Name", key: "name"*/}
+            {/*    }, {*/}
+            {/*        name: "Created At", key: "created_at"*/}
+            {/*    }]} onSortChange={onSortChange}/>*/}
+            {/*</div>*/}
+            <div className="flex gap-x-3" data-hs-pin-input="">
+                <input type="text"
+                       className="block w-[38px] text-center border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                       data-hs-pin-input-item="" autoFocus/>
+                <input type="text"
+                       className="block w-[38px] text-center border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                       data-hs-pin-input-item=""/>
+                <input type="text"
+                       className="block w-[38px] text-center border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                       data-hs-pin-input-item=""/>
+                <input type="text"
+                       className="block w-[38px] text-center border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                       data-hs-pin-input-item=""/>
             </div>
             {/*<DataTable*/}
             {/*    data={paginatedData}*/}
             {/*    config={LeaveTypeTableConfiguration}*/}
             {/*/>*/}
-            <Pagination
-                showControls
-                total={totalPages}
-                page={page}
-                onChange={onPageChange}
-            />
+            {/*<Pagination*/}
+            {/*    showControls*/}
+            {/*    total={totalPages}*/}
+            {/*    page={page}*/}
+            {/*    onChange={onPageChange}*/}
+            {/*/>*/}
         </>
 
     );
