@@ -24,13 +24,9 @@ const LeaveTypesTableColumns: ColumnsProps[] = [{
 }, {
     name: "Duration Range", uid: "duration_range"
 }, {
-    name: "Employee Avails", uid: "employee_count", sortable: true
-}, {
     name: "Paid Leave", uid: "paid_leave"
 }, {
     name: "Status", uid: "is_active"
-}, {
-    name: "Action", uid: "action", sortable: true
 }]
 
 const employee_types_color_map: Record<string, ChipProps["color"]> = {
@@ -78,22 +74,11 @@ export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
                     {item.is_active ? "Active" : "Inactive"}
                 </Status>
             </Case>
-            <Case of="action">
-                <TableActionButton
-                    name={item.name}
-                    onEdit={() => {
-
-                    }}
-                    onDelete={() => {
-
-                    }}
-                />
-            </Case>
-            <Case of="employee_count">
-                <div className="rounded-full bg-slate-500/20 size-5 grid place-items-center ">
-                    <Typography className="font-semibold">{cellValue}</Typography>
-                </div>
-            </Case>
+            {/*<Case of="employee_count">*/}
+            {/*    <div className="rounded-full bg-slate-500/20 size-5 grid place-items-center ">*/}
+            {/*        <Typography className="font-semibold">{cellValue}</Typography>*/}
+            {/*    </div>*/}
+            {/*</Case>*/}
             <Default>
                 {cellValue}
             </Default>

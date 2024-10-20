@@ -38,7 +38,7 @@ function Header({id, name, is_active}: HeaderProps) {
             }
         })
     }
-    return (<div {...bgColor(name)}
+    return (<div {...bgColor(name, 0.2)}
                  className={cn("relative flex w-full h-28 rounded-b-sm rounded-r-sm", !isLight ? "shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)]" : "shadow-[inset_-1px_-121px_75px_-52px_rgba(255,255,255,0.49)]")}> {/* shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)] */}
             {/* Name positioned bottom-left */}
             <div className="absolute top-2 right-0 pr-2">
