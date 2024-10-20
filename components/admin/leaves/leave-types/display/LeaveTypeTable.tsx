@@ -13,7 +13,7 @@ import {parseBoolean} from "@/lib/utils/parser/parseClass";
 function LeaveTypeTable() {
     const { data, isLoading} = useQuery<LeaveType[]>(
         "/api/admin/leaves/leave-types",
-        3000
+        {refreshInterval:3000}
     );
     return (
         <TableData

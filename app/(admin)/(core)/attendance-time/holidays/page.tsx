@@ -12,6 +12,7 @@ import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { useAxiosGet } from "@/lib/utils/axiosGetPost";
 import { getSimilarityPercentage } from "@/lib/utils/similarityPercentage";
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import { useQuery } from "@/services/queries";
 import {
   HolidayData,
   HolidayEvent,
@@ -25,8 +26,8 @@ function Page() {
   const [open, setOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState(toGMT8().get("year"));
   const [selectedItem, setSelectedItem] = useState<HolidayEvent | null>(null);
-  const { data, isLoading, setApi } = useAxiosGet<HolidayData>(
-    `/api/admin/attendance-time/holidays/${selectedYear}`
+  const { data, isLoading } = useQuery<HolidayData>(
+    `/api/admin/attendance-time/holidays/${selectedYear}`, {refreshInterval: 3000}
   );
   const [holidayItems, setHolidayItems] = useState<HolidayEvent[]>([]);
 
@@ -63,7 +64,8 @@ function Page() {
             },
           }}
           onAction={(key) =>
-            setApi(`/api/admin/attendance-time/holidays/${String(key)}`)
+            setSelectedYear(Number(key))
+            // setApi(`/api/admin/attendance-time/holidays/${String(key)}`)
           }
         />
         <Button

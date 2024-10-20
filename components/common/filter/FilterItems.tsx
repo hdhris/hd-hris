@@ -1,5 +1,12 @@
 import { Select, SelectItem, SharedSelection } from "@nextui-org/react";
-import React, { useState, useEffect, Key, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  Key,
+  useCallback,
+  useMemo,
+  ReactElement,
+} from "react";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { joinNestedKeys, NestedKeys } from "@/helper/objects/joinNestedKeys";
 import { valueOfObject } from "@/helper/objects/pathGetterObject";
@@ -22,7 +29,12 @@ interface FilterProps<T> {
   isLoading?: boolean;
 }
 
-function FilterItems<T>({ items, config, setResults, isLoading }: FilterProps<T>) {
+function FilterItems<T>({
+  items,
+  config,
+  setResults,
+  isLoading,
+}: FilterProps<T>) {
   const [selectedKeys, setSelectedKeys] = useState<
     Record<string, SharedSelection>
   >({});
@@ -65,43 +77,42 @@ function FilterItems<T>({ items, config, setResults, isLoading }: FilterProps<T>
       [sectionName]: key,
     }));
   };
-  const getSectionName = useMemo(() => {
-    return (sectionName: string) => {
-      if (selectedKeys && selectedKeys[sectionName]) {
-        const items = Array.from(selectedKeys[sectionName]);
-        if (items.length > 0) {
-          const [key, value] = String(items[0]).split(":");
-          const category = config.find((c) => joinNestedKeys([c.key]) === key);
-          if (category) {
-            const filter = category.filter.find(
-              (ft) => String(ft.value) === String(value)
-            );
-            return (
-              <p className="text-gray-500 text-sm">
-                {sectionName}
-                {": "}
-                <span className="font-semibold text-blue-500">
-                  {filter?.label}
-                </span>
-              </p>
-            );
-          }
+
+  const getSectionName = (sectionName: string): ReactElement => {
+    if (selectedKeys && selectedKeys[sectionName]) {
+      const items = Array.from(selectedKeys[sectionName]);
+      if (items.length > 0) {
+        const [key, value] = String(items[0]).split(":");
+        const category = config.find((c) => joinNestedKeys([c.key]) === key);
+        if (category) {
+          const filter = category.filter.find(
+            (ft) => String(ft.value) === String(value)
+          );
+          return (
+            <p className="text-gray-500 text-sm">
+              {sectionName}
+              {": "}
+              <span className="font-semibold text-blue-500">
+                {filter?.label}
+              </span>
+            </p>
+          );
         }
-        // console.log(items);
       }
-      return (
-        <p className="text-gray-500 text-sm">
-          Filter{" "}
-          <span className="font-semibold text-gray-700">{sectionName}</span>
-        </p>
-      );
-    };
-  }, [selectedKeys]);
+    }
+    return (
+      <p className="text-gray-500 text-sm">
+        Filter{" "}
+        <span className="font-semibold text-gray-700">{sectionName}</span>
+      </p>
+    );
+  };
 
   return (
     <div className="flex gap-2 items-center">
-      {config.map((section) => (
+      {config.map((section, index) => (
         <DropdownList
+          key={index}
           closeOnSelect={false}
           selectionMode="single"
           selectedKeys={selectedKeys[section.sectionName] || []}

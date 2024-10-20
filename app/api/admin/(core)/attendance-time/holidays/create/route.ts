@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       if (isNewHoliday) {
         holiday = await pm.ref_holidays.create({
           data: {
-            ...objectExcludes(holidayInfo, ["id"]),
+            ...objectExcludes(holidayInfo, ["id","unset"]),
             created_at: toGMT8().toISOString(),
             updated_at: toGMT8().toISOString(),
           },
@@ -31,11 +31,25 @@ export async function POST(req: NextRequest) {
           holiday = await pm.ref_holidays.update({
             where: { id: holidayInfo.id },
             data: {
-              ...objectExcludes(holidayInfo, ["id"]),
+              ...objectExcludes(holidayInfo, ["id","unset"]),
               updated_at: toGMT8().toISOString(),
             },
           });
         }
+      }
+
+      if (holidayInfo.unset != null){
+        await pm.trans_holidays.update({
+          where: {
+            date: {
+              not : null,
+            },
+            id: Number(holidayInfo.unset),
+          },
+          data: {
+            deleted_at: toGMT8().toISOString(),
+          }
+        })
       }
 
       let transHoliday;

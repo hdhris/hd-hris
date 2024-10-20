@@ -9,13 +9,15 @@ import {
   TransHoliday,
 } from "@/types/attendance-time/HolidayTypes";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn, Divider } from "@nextui-org/react";
+import { Button, cn, Divider } from "@nextui-org/react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { findByDateAndName, switchLabel } from "./script";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import showDialog from "@/lib/utils/confirmDialog";
 
 function HolidayForm({
   isOpen,
@@ -31,6 +33,7 @@ function HolidayForm({
   const router = useRouter();
   const [selectedItem, setSelectedItem] = useState<HolidayEvent | null>(null);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [deleteTrans, setDeleteTrans] = useState<string | null>(null);
   const [transItem, setTransItem] = useState<TransHoliday | null>(null);
   const [defaultTrans, setDefaultTrans] = useState<TransHoliday>();
@@ -59,9 +62,13 @@ function HolidayForm({
 
       if (selectedItem) {
         const found = findByDateAndName(transHolidays, selectedItem);
-        // console.log("Effect result: ", found)
+        console.log("Effect result: ", found);
         setTransItem(found);
-        setDeleteTrans("");
+        if (found) {
+          setDeleteTrans("");
+        } else {
+          setDeleteTrans(null);
+        }
       } else {
         setTransItem(null);
       }
@@ -94,18 +101,20 @@ function HolidayForm({
   }, [transItem, defaultTrans, selectedItem]);
 
   useEffect(() => {
-    if (data) {
-      setSelectedItem(data);
-    } else {
-      setSelectedItem({
-        id: null,
-        name: "New Holiday",
-        type: "Private Holiday",
-        start_date: toGMT8().format("YYYY-MM-DD"),
-        end_date: toGMT8().add(1, "day").format("YYYY-MM-DD"),
-      });
+    if (isOpen) {
+      if (data) {
+        setSelectedItem(data);
+      } else {
+        setSelectedItem({
+          id: null,
+          name: "New Holiday",
+          type: "Private Holiday",
+          start_date: toGMT8().format("YYYY-MM-DD"),
+          end_date: toGMT8().add(1, "day").format("YYYY-MM-DD"),
+        });
+      }
     }
-  }, [data]);
+  }, [data, isOpen]);
 
   async function handleSubmit(value: z.infer<typeof formSchema>) {
     // console.log(value);
@@ -118,6 +127,7 @@ function HolidayForm({
           end_date: toGMT8(value.date.end).toISOString(),
           created_at: toGMT8().toISOString(),
           updated_at: toGMT8().toISOString(),
+          unset: deleteTrans === "" ? null : deleteTrans,
         },
         transHolidayInfo: transItem
           ? {
@@ -135,6 +145,7 @@ function HolidayForm({
         description: `Holiday ${isNew ? "created" : "updated"} successfully!`,
         variant: "success",
       });
+      onClose();
     } catch (error) {
       toast({
         title: "Error",
@@ -143,6 +154,33 @@ function HolidayForm({
       });
     }
     setSubmitting(false);
+  }
+  async function handleDelete() {
+    setIsDeleting(true);
+    const response = await showDialog({
+      title: "Delete",
+      message: `Are you sure to delete ${selectedItem?.name}?`,
+      preferredAnswer: "no",
+    });
+    try {
+      await axios.post("/api/admin/attendance-time/holidays/delete", {
+        holidayID: selectedItem?.id,
+        transHolidayID: transItem ? transItem.id : null,
+      });
+      toast({
+        title: "Deleted",
+        description: `Holiday deleted successfully!`,
+        variant: "default",
+      });
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error deleting: " + error,
+        variant: "danger",
+      });
+    }
+    setIsDeleting(false);
   }
 
   function newTrans({
@@ -169,9 +207,38 @@ function HolidayForm({
   return (
     <Drawer
       isOpen={isOpen}
-      onClose={onClose}
-      title={selectedItem ? "Manage Holiday" : "Create Holiday"}
+      onClose={() => {
+        onClose();
+        setTimeout(() => {
+          // console.log("Flag reset");
+          setSelectedItem(null);
+          setTransItem(null);
+        }, 300);
+      }}
+      title={selectedItem?.id ? "Manage Holiday" : "Create Holiday"}
       isSubmitting={isSubmitting}
+      footer={
+        <div className="ms-auto flex gap-2 items-center">
+          {selectedItem?.id && (
+            <Button
+              variant="light"
+              isLoading={isDeleting}
+              onClick={handleDelete}
+              {...uniformStyle({ color: "danger" })}
+            >
+              Delete
+            </Button>
+          )}
+          <Button
+            isLoading={isSubmitting}
+            form="drawer-form"
+            type="submit"
+            {...uniformStyle()}
+          >
+            {selectedItem?.id ? "Create" : "Update"}
+          </Button>
+        </div>
+      }
     >
       <Form {...form}>
         <form id="drawer-form" onSubmit={form.handleSubmit(handleSubmit)}>
@@ -222,30 +289,30 @@ function HolidayForm({
                   return (
                     <>
                       <Divider className="my-4" />
-                      <div className="text-sm text-gray-600 flex gap-2 items-center leading-none">
+                      <div className="text-sm text-gray-600 flex gap-2 !mb-4 items-center leading-none">
                         {transItem ? (
                           <>
-                            <p className="font-semibold mb-2 text-pink-500">
+                            <p className="font-semibold text-pink-500">
                               {transItem?.name}
                             </p>
                             <button
                               className="text-tiny !m-0"
                               onClick={() => {
-                                if(deleteTrans === "" ){
-                                  console.log("will delete");
-                                  setDeleteTrans(transItem.name);
+                                if (deleteTrans === "") {
+                                  // console.log("will delete");
+                                  setDeleteTrans(String(transItem.id));
                                 }
                                 setTransItem(null);
                               }}
                             >
-                              Unset
+                              UNSET
                             </button>
                           </>
                         ) : (
                           <>
                             <p
                               className={cn(
-                                "font-semibold mb-2",
+                                "font-semibold",
                                 defaultTrans?.name === "Public Holiday"
                                   ? "text-blue-500"
                                   : "text-gray-800"
@@ -262,11 +329,11 @@ function HolidayForm({
               },
               {
                 name: "no_work",
+                type: "switch",
                 label: switchLabel(
                   "No Work",
                   "Attendances will not be recorded during this holiday."
                 ),
-                type: "switch",
                 config: {
                   isSelected: noWork,
                   onValueChange: (value: boolean) => {
@@ -287,6 +354,7 @@ function HolidayForm({
                       isRequired: true,
                       config: {
                         type: "number",
+                        pattern: "^d{1,3}(.d{0,2})?$",
                         value: payRatePercent,
                         onValueChange: (value: string) => {
                           if (!transItem) {
