@@ -108,12 +108,14 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
                     <div className="flex items-end p-2 pl-4 pb-4 gap-4 w-full h-full">
                         {/*<Pulse color={props.is_active ? "success" : "danger"}/>*/}
                         <Typography
-                            {...textColor(props.code, 0.5)}
+                            {...textColor(props.code)}
                             className={cn("w-fit text-2xl font-bold break-words overflow-hidden text-pretty")}>
                             {props.name}
                         </Typography>
                         <Chip variant="flat" {...bgColor(props.code, 0.75)} className="ml-auto mr-0">
-                            <Typography className="font-semibold">
+                            <Typography
+                                {...textColor(props.code)}
+                                className="font-semibold">
                                 {props.code}
                             </Typography>
                         </Chip>
