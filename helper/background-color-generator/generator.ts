@@ -19,6 +19,18 @@ export const textColor = (name: string, alpha?: number) => {
     }
 }
 
+export const gradientColor = (name: string, secondaryName: string, alpha: number = 1) => {
+    const primaryColor = getColor(name, alpha);
+    const secondaryColor = secondaryName ? getColor(secondaryName, alpha) : getColor(name, alpha * 0.5); // Default to a lighter shade if no secondary color is provided.
+
+    return {
+        style: {
+            background: `linear-gradient(to bottom right, ${primaryColor} 0%, ${secondaryColor} 100%)`
+        }
+    }
+}
+
+
 export const getColor = (name: string, alpha?: number) => {
     let color = uniqolor(name).color
     if(alpha) {

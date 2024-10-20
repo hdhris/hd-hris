@@ -8,12 +8,14 @@ import {LeaveRequestPaginate, LeaveType} from "@/types/leaves/LeaveTypes";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import LeaveTypeForm from "@/components/admin/leaves/leave-types/form/LeaveTypeForm";
-import BorderCard from "@/components/common/BorderCard";
 import Typography from "@/components/common/typography/Typography";
-import {cn, Tab, Tabs} from "@nextui-org/react";
-import {bgColor, textColor} from "@/helper/background-color-generator/generator";
+import {Card} from "@nextui-org/react";
+import {getColor, gradientColor, textColor} from "@/helper/background-color-generator/generator";
 import {isObjectEmpty} from "@/helper/objects/isObjectEmpty";
 import {Chip} from "@nextui-org/chip";
+import {CardBody, CardHeader} from "@nextui-org/card";
+import {Bell, Calendar, Clock, DollarSign, FileCheck, RefreshCcw, Users} from "lucide-react";
+import {capitalize} from "@nextui-org/shared-utils";
 
 
 function LeaveTypeTable() {
@@ -92,74 +94,92 @@ export default LeaveTypeTable;
 
 
 const LeaveTypesDetails = ({...props}: LeaveType) => {
-    return (<BorderCard className="w-1/3 p-0">
+    return (<Card {...gradientColor(props.code, props.name, 0.2)} className="w-[40%] overflow-hidden">
         {!isObjectEmpty(props) ? (<>
-                <div {...bgColor(props.code, 0.2)}
-                     className={cn("relative flex w-full h-24 rounded-b-sm rounded-r-sm shadow-[inset_-1px_-121px_75px_-52px_rgba(255,255,255,0.49)]")}> {/* shadow-[inset_-1px_-121px_75px_-52px_rgba(0,0,0,0.49)] */}
-                    {/* Name positioned bottom-left */}
-                    {/*<div className="absolute top-2 right-0 pr-2">*/}
-                    {/*    <ActionControlDropdown*/}
-                    {/*        className="text-default-200"*/}
-                    {/*        onDelete={() => {}}*/}
-                    {/*        onEdit={() => {}}*/}
-                    {/*    />*/}
-                    {/*</div>*/}
-
-                    <div className="flex items-end p-2 pl-4 pb-4 gap-4 w-full h-full">
-                        {/*<Pulse color={props.is_active ? "success" : "danger"}/>*/}
-                        <Typography
-                            {...textColor(props.code)}
-                            className={cn("w-fit text-2xl font-bold break-words overflow-hidden text-pretty")}>
-                            {props.name}
-                        </Typography>
-                        <Chip variant="flat" {...bgColor(props.code, 0.75)} className="ml-auto mr-0">
-                            <Typography
-                                {...textColor(props.code)}
-                                className="font-semibold">
-                                {props.code}
-                            </Typography>
+                <CardHeader className="h-24 border-b bg-white bg-opacity-50 backdrop-blur-sm w-full">
+                    <div className="flex items-center justify-between w-full">
+                        <Typography {...textColor(props.code)} className="text-2xl font-bold">{props.name}</Typography>
+                        <Chip style={{
+                            background: getColor(props.code, 0.2),
+                            borderColor: getColor(props.code, 0.5),
+                            color: getColor(props.code)
+                        }} variant="bordered" classNames={{
+                            content: "font-bold",
+                        }}>
+                            {props.code}
                         </Chip>
-                        {/*<div className="ml-auto mr-0">*/}
-                        {/*    <AvatarGroup isBordered color="primary" size="sm" max={3}>*/}
-                        {/*        <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d"/>*/}
-                        {/*        <Avatar src="https://i.pravatar.cc/150?u=a04258a2462d826712d"/>*/}
-                        {/*        <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026704d"/>*/}
-                        {/*        <Avatar src="https://i.pravatar.cc/150?u=a04258114e29026302d"/>*/}
-                        {/*        <Avatar src="https://i.pravatar.cc/150?u=a04258114e29026702d"/>*/}
-                        {/*        <Avatar src="https://i.pravatar.cc/150?u=a04258114e29026708c"/>*/}
-                        {/*    </AvatarGroup>*/}
-                        {/*</div>*/}
                     </div>
-                </div>
-                <Tabs
-                    className="px-3 mt-3"
-                    aria-label="Options"
-                    color="primary"
-                    variant="underlined"
-                    classNames={{
-                        tabList: "gap-6 w-full relative rounded-none p-0",
-                        cursor: "w-full text-primary-500",
-                        tab: "max-w-fit px-0",
-                        tabContent: "group-data-[selected=true]:text-primary text-medium font-semibold h-6",
-                        panel: "px-3"
-                    }}
-                >
-                    <Tab
-                        title="Details"
-                    >
-                        <Typography className="font-semibold">Details</Typography>
-                    </Tab>
-                    <Tab
-                        title="History"
-                    >
-                        <Typography className="font-semibold">History</Typography>
-                    </Tab>
-                </Tabs>
+                </CardHeader>
+                <CardBody className="grid gap-4 p-6">
+                    <div className="grid gap-2">
+                        <div className="flex items-center space-x-2 text-pink-700">
+                            <Calendar className="h-5 w-5"/>
+                            <span className="font-semibold">Accrual Details</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex flex-col gap-2">Frequency: <Typography
+                                className="font-semibold">{capitalize(props.accrual_frequency)}</Typography></div>
+                            <div className="flex flex-col gap-2">Rate: <Typography
+                                className="font-semibold">{props.accrual_rate} days</Typography></div>
+                            <div className="flex flex-col gap-2">Max Accrual: <Typography
+                                className="font-semibold">{props.max_accrual} days</Typography></div>
+                            <div className="flex flex-col gap-2">Carry Over: <Typography
+                                className="font-semibold">{props.carry_over ? "Yes" : "No"}</Typography></div>
+                        </div>
+                    </div>
+                    <div className="grid gap-2">
+                        <div className="flex items-center space-x-2 text-pink-700">
+                            <Clock className="h-5 w-5"/>
+                            <span className="font-semibold">Duration</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex flex-col gap-2">Minimum: <Typography
+                                className="font-semibold">{props.min_duration} days</Typography></div>
+                            <div className="flex flex-col gap-2">Maximum: <Typography
+                                className="font-semibold">{props.max_duration} days</Typography></div>
+                        </div>
+                    </div>
+                    <div className="grid gap-2">
+                        <div className="flex items-center space-x-2 text-pink-700">
+                            <Users className="h-5 w-5"/>
+                            <span className="font-semibold">Eligibility</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="text-sm flex flex-col gap-2">Applicable to: <Typography
+                                className="font-semibold">{props.applicable_to_employee_types} Employees</Typography>
+                            </div>
+                            <div className="text-sm flex flex-col gap-2">Current Usage: <Typography
+                                className="font-semibold">{props.employee_count} Employee/s</Typography></div>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center space-x-2">
+                            <FileCheck className="h-5 w-5 text-green-600"/>
+                            <span><Typography
+                                className="font-semibold">{props.attachment_required ? "Attachment required" : "No attachment required"}</Typography></span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Bell className="h-5 w-5 text-yellow-600"/>
+                            <span><Typography
+                                className="font-semibold">{props.notice_required} days notice required</Typography></span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <DollarSign className="h-5 w-5 text-blue-600"/>
+                            <span><Typography
+                                className="font-semibold">{props.paid_leave ? "Paid Leave" : "Unpaid Leave"}</Typography></span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RefreshCcw className="h-5 w-5 text-purple-600"/>
+                            <span>Last updated: <Typography
+                                className="font-semibold">{new Date(props.updated_at).toLocaleDateString()}</Typography></span>
+                        </div>
+                    </div>
+                </CardBody>
             </>
             // <CardBody className="overflow-hidden">
             //     {/*{body(item)}*/}
             // </CardBody>
         ) : (<div className="grid place-items-center h-full"><Typography className="text-slate-700/50 font-semibold">No
             Row Selected</Typography></div>)}
-    </BorderCard>)
+    </Card>)
 }
