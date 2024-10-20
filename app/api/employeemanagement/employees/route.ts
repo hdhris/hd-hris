@@ -301,7 +301,7 @@ async function updateEmployee(
       birthdate: otherData.birthdate
         ? new Date(otherData.birthdate)
         : undefined,
-      updated_at: new Date(),
+      updated_at: new Date(), // Ensure this line is present
     },
   });
 

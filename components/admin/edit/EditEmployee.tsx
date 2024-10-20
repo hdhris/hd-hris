@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Divider,
-} from "@nextui-org/react";
+import { Divider } from "@nextui-org/react";
 import EditPersonalInformationForm from "./EditPersonalInformationForm";
 import EditEducationalBackgroundForm from "./EditEducationalBackgroundForm";
 import EditJobInformationForm from "./EditJobInformationForm";
@@ -195,7 +193,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       title: "Submitting",
       description: "Updating employee information...",
     });
-  
+
     try {
       let pictureUrl = typeof data.picture === "string" ? data.picture : "";
       if (data.picture instanceof File) {
@@ -213,7 +211,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         }
         pictureUrl = "";
       }
-  
+
       // Handle certificate uploads
       const updatedCertificates = await Promise.all(
         data.certificates.map(async (cert) => {
@@ -229,7 +227,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           return { fileName: cert.fileName, fileUrl: cert.url as string };
         })
       );
-  
+
       const educationalBackground = {
         elementary: data.elementary,
         highSchool: data.highSchool,
@@ -241,12 +239,16 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         highestDegree: data.highestDegree,
         certificates: updatedCertificates,
       };
-  
+
       const fullData = {
         ...data,
         picture: pictureUrl,
-        birthdate: data.birthdate ? new Date(data.birthdate).toISOString() : null,
+        birthdate: data.birthdate
+          ? new Date(data.birthdate).toISOString()
+          : null,
         hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
+        suffix: data.suffix || "",
+        extension: data.extension || "",
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
         addr_municipal: parseInt(data.addr_municipal, 10),
@@ -263,12 +265,12 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           },
         ],
       };
-  
+
       const response = await axios.put(
         `/api/employeemanagement/employees?id=${employeeData.id}`,
         fullData
       );
-  
+
       if (response.status === 200) {
         await onEmployeeUpdated();
         toast({
@@ -291,28 +293,23 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
   };
 
   return (
-    <Drawer
-      title="Edit Employee"
-      size="lg"
-      isOpen={isOpen}
-      onClose={onClose}
-    >
+    <Drawer title="Edit Employee" size="lg" isOpen={isOpen} onClose={onClose}>
       <Form {...methods}>
-        <form className="mb-4 space-y-4" id="drawer-form" onSubmit={methods.handleSubmit(handleFormSubmit)}>
-          {isLoading ? (
-            <div>Loading employee data...</div>
-          ) : (
-            <>
-              <h2>Personal Information</h2>
-              <EditPersonalInformationForm />
-              <Divider className="my-4" />
-              <h2>Educational Background</h2>
-              <EditEducationalBackgroundForm />
-              <Divider className="my-4" />
-              <h2>Job Information & Work Schedules</h2>
-              <EditJobInformationForm />
-            </>
-          )}
+        <form
+          className="mb-4 space-y-4"
+          id="drawer-form"
+          onSubmit={methods.handleSubmit(handleFormSubmit)}
+        >
+          <>
+            <h2>Personal Information</h2>
+            <EditPersonalInformationForm />
+            <Divider className="my-4" />
+            <h2>Educational Background</h2>
+            <EditEducationalBackgroundForm />
+            <Divider className="my-4" />
+            <h2>Job Information & Work Schedules</h2>
+            <EditJobInformationForm />
+          </>
         </form>
       </Form>
     </Drawer>

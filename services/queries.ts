@@ -5,7 +5,7 @@ import {Employee} from "@/types/employeee/EmployeeType";
 import {Signatory} from "@/types/audit/types";
 import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
 import { Department } from "@/types/employeee/DepartmentType";
-import { Schedules } from "@/types/attendance-time/AttendanceTypes";
+import { BatchSchedule, Schedules } from "@/types/attendance-time/AttendanceTypes";
 import { Branch } from "@/types/employeee/BranchType";
 import { Payhead, PayheadAffected } from "@/types/payroll/payheadType";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
@@ -93,6 +93,13 @@ export function useBranchesData() {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }
+
+export function useBatchSchedules() {
+    return useSWR<BatchSchedule[]>('/api/employeemanagement/batch_schedules', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
 
 
 export function useSchedule() {

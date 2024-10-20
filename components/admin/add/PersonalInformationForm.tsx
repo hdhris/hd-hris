@@ -13,6 +13,84 @@ const genderOptions = [
   { value: "F", label: "Female" },
 ];
 
+const suffixOptions = [
+  { value: "Jr.", label: "Jr." },
+  { value: "Sr.", label: "Sr." },
+  { value: "I", label: "I" },
+  { value: "II", label: "II" },
+  { value: "III", label: "III" },
+  { value: "IV", label: "IV" },
+  { value: "V", label: "V" },
+  { value: "VI", label: "VI" },
+  { value: "VII", label: "VII" },
+  { value: "VIII", label: "VIII" },
+  { value: "IX", label: "IX" },
+  { value: "X", label: "X" },
+];
+
+const extensionOptions = [
+  { value: "A.C.A.", label: "A.C.A." },
+  { value: "A.C.C.", label: "A.C.C." },
+  { value: "A.I.C.P.", label: "A.I.C.P." },
+  { value: "A.R.A.", label: "A.R.A." },
+  { value: "ATTY.", label: "ATTY." },
+  { value: "B.A.", label: "B.A." },
+  { value: "B.Sc.", label: "B.Sc." },
+  { value: "C.A.", label: "C.A." },
+  { value: "C.E.O.", label: "C.E.O." },
+  { value: "C.F.O.", label: "C.F.O." },
+  { value: "C.T.O.", label: "C.T.O." },
+  { value: "C.P.A.", label: "C.P.A." },
+  { value: "C.P.E.", label: "C.P.E." },
+  { value: "C.S.", label: "C.S." },
+  { value: "C.S.C.S.", label: "C.S.C.S." },
+  { value: "C.W.E.", label: "C.W.E." },
+  { value: "D.M.D.", label: "D.M.D." },
+  { value: "D.O.", label: "D.O." },
+  { value: "D.V.M.", label: "D.V.M." },
+  { value: "D.R.N.", label: "D.R.N." },
+  { value: "Dr.", label: "Dr." },
+  { value: "Esq.", label: "Esq." },
+  { value: "F.C.P.A.", label: "F.C.P.A." },
+  { value: "F.R.C.S.", label: "F.R.C.S." },
+  { value: "I.T.", label: "I.T." },
+  { value: "J.D.", label: "J.D." },
+  { value: "LL.B.", label: "LL.B." },
+  { value: "LL.M.", label: "LL.M." },
+  { value: "M.A.", label: "M.A." },
+  { value: "M.B.A.", label: "M.B.A." },
+  { value: "M.D.", label: "M.D." },
+  { value: "M.E.", label: "M.E." },
+  { value: "M.S.", label: "M.S." },
+  { value: "M.S.W.", label: "M.S.W." },
+  { value: "N.P.", label: "N.P." },
+  { value: "Ph.D.", label: "Ph.D." },
+  { value: "P.E.", label: "P.E." },
+  { value: "P.L.C.", label: "P.L.C." },
+  { value: "P.M.P.", label: "P.M.P." },
+  { value: "Prof.", label: "Prof." },
+  { value: "R.N.", label: "R.N." },
+  { value: "R.P.", label: "R.P." },
+  { value: "S.C.", label: "S.C." },
+  { value: "Sr.", label: "Sr." },
+  { value: "V.P.", label: "V.P." },
+  { value: "A.B.D.", label: "A.B.D." },
+  { value: "C.H.A.", label: "C.H.A." },
+  { value: "C.H.R.M.", label: "C.H.R.M." },
+  { value: "C.N.P.", label: "C.N.P." },
+  { value: "C.R.N.A.", label: "C.R.N.A." },
+  { value: "C.T.A.", label: "C.T.A." },
+  { value: "D.C.", label: "D.C." },
+  { value: "D.P.M.", label: "D.P.M." },
+  { value: "L.C.S.W.", label: "L.C.S.W." },
+  { value: "M.P.H.", label: "M.P.H." },
+  { value: "M.S.N.", label: "M.S.N." },
+  { value: "P.A.", label: "P.A." },
+  { value: "R.N.C.", label: "R.N.C." },
+  { value: "S.C.C.", label: "S.C.C." },
+  { value: "T.E.", label: "T.E." },
+];
+
 const PersonalInformationForm: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | undefined>(
     undefined
@@ -53,7 +131,7 @@ const PersonalInformationForm: React.FC = () => {
     }
   }, [setValue]);
 
-  const formFields: FormInputProps[] = [
+  const formNameFields: FormInputProps[] = [
     {
       name: "first_name",
       label: "First Name",
@@ -66,10 +144,11 @@ const PersonalInformationForm: React.FC = () => {
     },
     {
       name: "middle_name",
-      label: "Middle Name",
+      label: <div className="mt-4">Middle Name</div>,
       type: "text",
       config: {
         placeholder: "Enter middle name",
+        className: "pt-1",
       },
     },
     {
@@ -82,22 +161,28 @@ const PersonalInformationForm: React.FC = () => {
         placeholder: "Enter last name",
       },
     },
+  ];
+  const formSEFields: FormInputProps[] = [
     {
       name: "suffix",
       label: "Suffix",
-      type: "text",
+      type: "auto-complete",
       config: {
         placeholder: "Enter Suffix",
+        options: suffixOptions,
       },
     },
     {
       name: "extension",
       label: "Extension",
-      type: "text",
+      type: "auto-complete",
       config: {
         placeholder: "Enter Extension",
+        options: extensionOptions,
       },
     },
+  ];
+  const formGBFields: FormInputProps[] = [
     {
       name: "gender",
       label: "Gender",
@@ -117,6 +202,9 @@ const PersonalInformationForm: React.FC = () => {
         placeholder: "Select birthdate",
       },
     },
+  ];
+
+  const formcontactFields: FormInputProps[] = [
     {
       name: "email",
       label: "Email",
@@ -198,8 +286,20 @@ const PersonalInformationForm: React.FC = () => {
 
       <Divider />
       <Text className="text-medium font-semibold">Basic Information</Text>
-
-      <FormFields items={formFields} />
+      <div className="grid grid-cols-3 gap-4">
+        <FormFields items={formNameFields} />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <FormFields items={formSEFields} />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <FormFields items={formGBFields} />
+      </div>
+      <Divider />
+      <Text className="text-medium font-semibold">Contact</Text>
+      <div className="grid grid-cols-2 gap-4">
+        <FormFields items={formcontactFields} />
+      </div>
 
       <Divider />
       <Text className="text-medium font-semibold">Address</Text>
