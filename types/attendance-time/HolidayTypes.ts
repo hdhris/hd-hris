@@ -1,5 +1,5 @@
 export interface HolidayEvent {
-    id: string | number;
+    id: string | number | null;
     name: string;
     // description: string;
     start_date: string;
@@ -9,7 +9,7 @@ export interface HolidayEvent {
   }
 
   export interface TransHoliday {
-    id: number;
+    id: number | null;
     no_work: boolean;
     pay_rate_percentage: string;
     created_at: string; 

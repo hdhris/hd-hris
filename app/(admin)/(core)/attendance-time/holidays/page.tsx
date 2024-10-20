@@ -87,7 +87,7 @@ function Page() {
       <GridList items={holidayItems || []}>
         {(item) => (
           <GridCard
-            id={item.id}
+            id={item.id!}
             name={item.name}
             size="sm"
             onPress={() => {
@@ -143,9 +143,7 @@ function Page() {
           setOpen(false);
         }}
         selectedItem={selectedItem}
-        transItem={findByDateAndName(data, selectedItem) || data?.transHolidays.find(th=>{
-          return th.date === null && th.name === selectedItem?.type
-        }) || null}
+        transHolidays={data?.transHolidays || []}
       />
     </div>
   );
@@ -202,42 +200,3 @@ const searchConfig: SearchItemsProps<HolidayEvent>[] = [
   { key: "start_date", label: "Date" },
   { key: "type", label: "Type" },
 ];
-
-function findByDateAndName(data: any, selectedItem: any): TransHoliday | null {
-  function findBestMatch(target: any, criteria: number) {
-    let transHoliday: TransHoliday | null = null;
-    let highestNamePercentage = 0;
-    target.forEach((tg: any) => {
-      const percentage = getSimilarityPercentage(tg.name, selectedItem.name);
-      console.log(tg.name, selectedItem.name, percentage);
-      if (percentage > criteria && percentage > highestNamePercentage) {
-        highestNamePercentage = percentage;
-        transHoliday = tg;
-      }
-    });
-    return transHoliday;
-  }
-
-  if (!data?.transHolidays || !selectedItem) return null;
-  // First: Try to find by date (MM-DD format)
-  const foundByDate = data.transHolidays.filter(
-    (th: any) =>
-      toGMT8(th.date).format("MM-DD") ===
-      toGMT8(selectedItem?.created_at).format("MM-DD")
-  );
-  console.log(foundByDate);
-
-  // If found by date, check name similarity
-  if (foundByDate.length > 0) {
-    // If similarity is above 75%, return the found item
-    const bestDateMatch = findBestMatch(foundByDate, 50);
-    if (bestDateMatch) {
-      return bestDateMatch;
-    }
-  }
-
-  // If no match by date, fallback to finding a similar name with 90% threshold
-  const bestNameMatch = findBestMatch(data.transHolidays, 60);
-  // Return best match if found, otherwise null
-  return bestNameMatch || null;
-}
