@@ -28,3 +28,11 @@ export interface LeaveType {
 }
 
 
+export interface LeaveRequestPaginate {
+    data: LeaveType[];
+    currentPage: number
+    perPage: number
+    totalItems: number
+}
+
+

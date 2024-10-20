@@ -32,7 +32,7 @@ import {icon_color, icon_size} from "@/lib/utils";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
-import { joinNestedKeys } from '@/helper/objects/joinNestedKeys';
+import { joinNestedKeys, NestedKeys } from '@/helper/objects/joinNestedKeys';
 import {LuSearch} from 'react-icons/lu';
 import {valueOfObject} from '@/helper/objects/pathGetterObject';
 import Typography from "@/components/common/typography/Typography";
@@ -52,12 +52,6 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
     setSelectedKeys?: (keys: Selection) => void;
 }
 
-type NestedKeys<T> = {
-    [K in keyof T]: T[K] extends Record<string, any>
-        ? K | [K, NestedKeys<T[K]>]
-        : K; // Return the key itself if it's not an object
-}[keyof T];
-
 
 interface SearchProps<T> {
     searchingItemKey?: NestedKeys<T>[]; // e.g., [["details", "address"], ["details", "phone"]]
@@ -67,7 +61,7 @@ function genericSearch<T>(object: T, searchingItemKey: NestedKeys<T>[], query: s
     let searchable = false;
     searchingItemKey.forEach(property => {
         // const value = object[property];
-        let newProperty = Array.isArray(property) ? joinNestedKeys(property) : property;
+        let newProperty = joinNestedKeys([property]);
         // console.log("New Prop: ",newProperty)
         const value = valueOfObject(object, String(newProperty));
 
@@ -117,6 +111,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
     });
 
     const [page, setPage] = React.useState<number>(1);
+
     const hasSearchFilter = Boolean(filterValue);
     const isActionable = selectedKeys === 'all' || selectedKeys.size >= 2;
 
@@ -184,7 +179,6 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
 
                     return value;
                 }
-
                 return item[column as keyof T];
             };
 
@@ -272,7 +266,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                             variant="bordered"
                           >
                             {filter !== "all" && filter.size > 0
-                              ? `Filter by: ${Array.from(filterItems)
+                              ? `Filtered by: ${Array.from(filterItems)
                                   .filter((item) =>
                                     item.filtered.some((filteredItem) =>
                                       Array.from(filter).some((f) =>
@@ -282,7 +276,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                                   )
                                   .map((item) => item.category) // Return the `category` for each item that matches
                                   .join(", ")}` // Join them with commas
-                              : "Filter options"}
+                              : "Filtered options"}
                           </Button>
                         </DropdownTrigger>
                         <DropdownMenu
@@ -294,7 +288,6 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                           onSelectionChange={(keys) => {
                             const newFilter = new Set(filter); // Clone current filter
                             const selectedFilter = Array.from(keys) as string[];
-                            // console.log("Selected: ",selectedFilter)
 
                             // Ensure one selection per section
                             filterItems.forEach((item) => {
@@ -369,17 +362,28 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                   </div>
                 </div>
               </div>
-              <div className="flex justify-between items-center">
-                {counterName && (
-                  <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
+                <div className="flex justify-between items-center">
+                    {counterName && (
+                        <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
                     <span>
-                      <CountUp start={0} end={sortedItems.length} />{" "}
+                      <CountUp start={0} end={sortedItems.length}/>{" "}
                     </span>{" "}
-                    {counterName}
-                  </h1>
-                )}
-                {contentTop && contentTop}
-              </div>
+                            {counterName}
+                        </h1>
+                    )}
+                    {contentTop && contentTop}
+                    <label className="flex items-center text-default-400 text-small self-">
+                        Rows per page:
+                        <select
+                            className="bg-transparent outline-none text-default-400 text-small"
+                            onChange={onRowsPerPageChange}
+                        >
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                        </select>
+                    </label>
+                </div>
             </div>
           </Suspense>
         );

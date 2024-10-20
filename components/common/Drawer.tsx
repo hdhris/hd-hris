@@ -14,7 +14,7 @@ import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { cn } from "@nextui-org/react";
 
-interface DrawerProps {
+export interface DrawerProps {
     isOpen: boolean;
     onClose: (value: boolean) => void;
     children: ReactNode;
@@ -50,7 +50,7 @@ const Drawer = ({
     <Dialog
       open={isOpen}
       onClose={isDismissible ? onClose : () => {}}
-      className="relative z-10"
+      className="relative z-50"
     >
       <DialogBackdrop
         transition

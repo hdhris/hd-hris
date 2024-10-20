@@ -25,14 +25,14 @@ const LeaveTypeForm = () => {
             code: "",
             description: "",
             //accrual setting
-            accrualRate: 0,
+            accrualRate: undefined,
             accrualFrequency: "",
-            maxAccrual: 0,
+            maxAccrual: undefined,
             carryOver: false,
             //Leave Duration
-            minDuration: 0,
-            maxDuration: 0,
-            noticeRequired: 0,
+            minDuration: undefined,
+            maxDuration: undefined,
+            noticeRequired: undefined,
             //Additional Settings
             paidLeave: false,
             isActive: false,

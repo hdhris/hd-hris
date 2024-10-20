@@ -635,20 +635,23 @@ model trans_users {
 }
 
 model ref_holidays {
-  id                  Int              @id @default(autoincrement())
-  name                String?          @db.VarChar(45)
-  country_code        String?          @db.VarChar(10)
-  pay_rate_percentage Decimal?         @db.Decimal(5, 2)
-  month               String?          @db.VarChar(255)
-  day                 String?          @db.VarChar(255)
-  type                String?          @db.VarChar(10)
-  trans_holidays      trans_holidays[]
+  id         Int       @id @default(autoincrement())
+  name       String?   @db.VarChar(45)
+  type       String?   @db.VarChar(20)
+  created_at DateTime? @db.Timestamp(6)
+  updated_at DateTime? @db.Timestamp(6)
+  deleted_at DateTime? @db.Timestamp(6)
+  start_date DateTime? @db.Date
+  end_date   DateTime? @db.Date
 }
 
 model trans_holidays {
-  id            Int           @id @default(autoincrement())
-  holiday_id    Int?
-  observed_date DateTime?     @db.Date
-  no_work       Boolean?
-  ref_holidays  ref_holidays? @relation(fields: [holiday_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_holidays_ref_holidays_1")
+  id                  Int       @id @default(autoincrement())
+  no_work             Boolean?
+  pay_rate_percentage Decimal?  @db.Decimal(5, 2)
+  created_at          DateTime? @db.Timestamp(6)
+  updated_at          DateTime? @db.Timestamp(6)
+  deleted_at          DateTime? @db.Timestamp(6)
+  date                DateTime? @db.Date
+  name                String?   @unique
 }

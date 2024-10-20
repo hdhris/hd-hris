@@ -1,32 +1,76 @@
 "use client"
-import React from 'react';
-import TableData from "@/components/tabledata/TableData";
+import React, {useMemo, useState} from 'react';
 import {
-    filterLeaveTypes,
-    LeaveTypeTableConfiguration
+    filterLeaveTypes, LeaveTypeTableConfiguration
 } from "@/components/admin/leaves/leave-types/display/table/config/leave-type-table-config";
-import {useQuery} from "@/services/queries";
-import {LeaveType} from "@/types/leaves/LeaveTypes";
-import {filterTable} from "@/helper/filter/table/filter";
-import {parseBoolean} from "@/lib/utils/parser/parseClass";
+import {usePaginateQuery} from "@/services/queries";
+import {LeaveRequestPaginate} from "@/types/leaves/LeaveTypes";
+import DataDisplay from "@/components/common/data-display/data-display";
+import {Card, CardBody} from "@nextui-org/card";
+import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
+import LeaveTypeForm from "@/components/admin/leaves/leave-types/form/LeaveTypeForm";
 
 function LeaveTypeTable() {
-    const { data, isLoading} = useQuery<LeaveType[]>(
-        "/api/admin/leaves/leave-types",
-        3000
-    );
-    return (
-        <TableData
-            aria-label="Leave Type Table"
-            isLoading={isLoading}
-            config={LeaveTypeTableConfiguration}
-            filterItems={filterLeaveTypes}
-            items={data || []}
-            isCompact
-            isStriped
-            searchingItemKey={["name"]}
-        />
-    );
+    const [page, setPage] = useState<number>(1)
+    const [rows, setRows] = useState<number>(5)
+    const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/leave-types", page, rows);
+    const leaveData = useMemo(() => {
+        if (!data?.data) {
+            return []
+        } else {
+            return data.data
+        }
+    }, [data])
+
+    SetNavEndContent(() => <LeaveTypeForm/>)
+    return (<DataDisplay
+        title="Leave Types"
+        data={leaveData}
+        filterProps={{
+            filterItems: filterLeaveTypes
+        }}
+        sortProps={{
+            sortItems: [{
+                key: "id", name: "ID"
+            }, {key: "name", name: "Name"}, {key: "created_at", name: "Created At"}]
+
+        }}
+        searchProps={{
+            searchingItemKey: ["name"]
+        }}
+        rowSelectionProps={{
+            onRowChange: setRows
+        }}
+        paginationProps={{
+            loop: true, data_length: data?.totalItems!, onChange: setPage
+        }}
+        onTableDisplay={{
+            config: LeaveTypeTableConfiguration, isLoading, onRowAction: (key) => alert(key)
+        }}
+        onGridDisplay={(data) => {
+            return (<pre>{JSON.stringify(data, null, 2)}</pre>)
+        }}
+
+        onListDisplay={(data) => {
+            return (<Card className="w-full">
+                    <CardBody>{data.max_duration}</CardBody>
+                </Card>
+
+            )
+        }}
+
+
+        onExport={{
+            drawerProps: {
+                title: "Export",
+            }
+        }}
+        onImport={{
+            drawerProps: {
+                title: "Import",
+            }
+        }}
+    />);
 }
 
 export default LeaveTypeTable;

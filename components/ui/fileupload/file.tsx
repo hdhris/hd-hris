@@ -16,7 +16,6 @@ const variants = {
 };
 
 export type FileState = {
-  url?: any;
     file: File; key: string; // used to identify the file in the progress callback
     progress: 'PENDING' | 'COMPLETE' | 'ERROR' | number; abortController?: AbortController;
 };
@@ -62,7 +61,8 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
     const {
         getRootProps, getInputProps, fileRejections, isFocused, isDragAccept, isDragReject,
     } = useDropzone({
-        disabled, onDrop: (acceptedFiles) => {
+        disabled,
+        onDrop: (acceptedFiles) => {
             const files = acceptedFiles;
             setCustomError(undefined);
             if (dropzoneOptions?.maxFiles && (value?.length ?? 0) + files.length > dropzoneOptions.maxFiles) {

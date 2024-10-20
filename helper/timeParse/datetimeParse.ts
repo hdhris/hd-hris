@@ -22,7 +22,7 @@ export class Time {
   }
 
   // Getter for the ISO string
-  get isoString(): string {
+  get toISOString(): string {
     // return this._time;
     return this._time;
   }

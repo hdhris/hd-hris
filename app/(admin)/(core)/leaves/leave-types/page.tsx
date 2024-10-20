@@ -1,5 +1,6 @@
 import React from 'react';
 import LeaveTypesProvider from "@/components/admin/leaves/leave-types/provider/LeaveTypesProvider";
+import LeaveTypeTable from "@/components/admin/leaves/leave-types/display/LeaveTypeTable";
 
 // const getLeaveTypes = unstable_cache(async () => {
 //     return prisma.ref_leave_types.findMany({
@@ -25,13 +26,13 @@ async function Page() {
     //     });
     // });
 
-    // return (<LeaveTypesProvider>
+    return (<LeaveTypesProvider>
 
-    //         {/* <LeaveTypes/> */}
+            <LeaveTypeTable/>
 
-    //     </LeaveTypesProvider>
+        </LeaveTypesProvider>
 
-    // );
+    );
 
 }
 

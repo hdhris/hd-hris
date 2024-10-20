@@ -51,7 +51,7 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
                         ))}
                     </Tabs>
                 </div>
-                {endContent}
+                <div className='flex gap-2 items-center'>{endContent}</div>
             </div>
             <NavEndContext.Provider value={setEndContent}>
                 <div className="h-full overflow-auto">{children}</div>

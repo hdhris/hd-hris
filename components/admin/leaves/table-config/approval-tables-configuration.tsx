@@ -118,9 +118,9 @@ export const TableConfigurations: TableConfigProps<LeaveRequestTypes> = {
 
 export const FilterItems: FilterProps[] = [{
     filtered: [
-        {name: "Approved", uid: "approved"},
-        {name: "Rejected", uid: "rejected"},
-        {name: "Pending", uid: "pending"},
+        {name: "Approved", value: "Approved", key: "status"},
+        {name: "Rejected", value: "Rejected", key: "status"},
+        {name: "Pending", value: "Pending", key: "status"},
 
     ],
     category: "Status"

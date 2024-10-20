@@ -1,55 +1,73 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
-import {LeaveType} from "@/types/leaves/LeaveTypes";
-import {capitalize} from "@nextui-org/shared-utils";
+import { getPaginatedData } from "@/server/pagination/paginate"; // Import the reusable function
+import { LeaveType } from "@/types/leaves/LeaveTypes";
+import { capitalize } from "@nextui-org/shared-utils";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        const data = await prisma.ref_leave_types.findMany({
-            where: {
-                deleted_at: null
-            }
-        });
+        const { searchParams } = new URL(request.url);
+        const page = parseInt(searchParams.get('page') || '1');  // Default to page 1
+        const perPage = parseInt(searchParams.get('limit') || '5');  // Default to 5 results per page
 
+        // Use the reusable pagination function with Prisma model
+        const { data, totalItems, totalPages, currentPage } = await getPaginatedData<LeaveType>(
+            prisma.ref_leave_types,  // The Prisma model
+            page,
+            perPage,
+            { deleted_at: null },  // Filtering condition
+            { name: 'asc' }  // Order by name
+        );
+
+        // Further processing for employee count, mapping etc.
         const employee_count_leaves_types = await prisma.trans_leaves.groupBy({
-            by: ["type_id"], where: {
+            by: ["type_id"],
+            where: {
                 employee_id: {
                     not: null
                 }
-            }, _count: {
-                employee_id: true  // Counting distinct employee_id for each type
+            },
+            _count: {
+                employee_id: true
             }
-        })
+        });
+
+
         const result = data.map(leaveType => {
             const countData = employee_count_leaves_types.find((leave) => leave.type_id === leaveType.id);
             return {
                 id: leaveType.id,
-                accrual_frequency: capitalize(leaveType.accrual_frequency), // Adjust as needed for other options
-                accrual_rate: leaveType.accrual_rate,
-                applicable_to_employee_types: capitalize(leaveType.applicable_to_employee_types), // Adjust if needed
-                attachment_required: leaveType.attachment_required,
+                name: leaveType.name,
                 code: leaveType.code,
-                created_at: leaveType.created_at, // You might consider using Date if you want to handle dates directly
+                accrual_frequency: capitalize(leaveType.accrual_frequency),
                 description: leaveType.description,
+                accrual_rate: leaveType.accrual_rate,
+                applicable_to_employee_types: capitalize(leaveType.applicable_to_employee_types),
+                attachment_required: leaveType.attachment_required,
+                created_at: leaveType.created_at,
                 is_active: leaveType.is_active,
                 max_accrual: leaveType.max_accrual,
                 max_duration: leaveType.max_duration,
                 min_duration: leaveType.min_duration,
-                name: leaveType.name,
                 notice_required: leaveType.notice_required,
                 paid_leave: leaveType.paid_leave,
-                updated_at: leaveType.updated_at, // Same consideration as created_at
+                updated_at: leaveType.updated_at,
                 carry_over: leaveType.carry_over,
                 employee_count: countData ? countData._count.employee_id : 0
             };
         }) as unknown as LeaveType[];
-        return NextResponse.json(result)
+
+        return NextResponse.json({
+            data: result,
+            currentPage,
+            perPage,
+            totalItems,
+            // totalPages
+        });
     } catch (err) {
-        console.log("Error: ", err)
-        return NextResponse.error()
+        console.error("Error: ", err);
+        return NextResponse.error();
     }
-
-
 }

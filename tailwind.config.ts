@@ -10,7 +10,6 @@ const config = {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
     "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
-
   ],
   prefix: "",
   theme: {
@@ -96,7 +95,8 @@ const config = {
 
     },
   },
-  plugins: [nextui({
+  plugins: [
+      nextui({
     layout:{
       radius: {
         small: "0.125rem",
@@ -111,7 +111,8 @@ const config = {
         large: 'var(--font-size-lg)', // text-large
       },
     }
-  }), require("tailwindcss-animate"),
+  }),
+    require("tailwindcss-animate"),
   plugin(function ({ addUtilities }) {
     addUtilities({
       '.h-fit-navlayout': {

@@ -90,4 +90,3 @@ export interface LeaveRequest {
     trans_employees_leaves_approvedBy: EmployeeLeaveRequest;
     ref_leave_types: LeaveType
 }
-
