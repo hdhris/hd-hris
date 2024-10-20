@@ -653,5 +653,5 @@ model trans_holidays {
   updated_at          DateTime? @db.Timestamp(6)
   deleted_at          DateTime? @db.Timestamp(6)
   date                DateTime? @db.Date
-  name                String?   @unique
+  name                String?
 }

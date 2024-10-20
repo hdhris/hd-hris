@@ -338,7 +338,6 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                         </Case>
                         <Case of="switch">
                             <FormSwitch
-                                {...(item.config as SwitchProps)}
                                 id={item.name}
                                 aria-label={item.name}
                                 disabled={item.inputDisabled}
@@ -346,6 +345,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 size={size}
                                 {...field}
                                 isSelected={field.value}
+                                {...(item.config as SwitchProps)}
                             >
                                 {item.label}
                             </FormSwitch>

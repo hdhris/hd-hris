@@ -43,7 +43,7 @@ function Page() {
   >();
   const { data, isLoading } = useQuery<OvertimeEntry[]>(
     "/api/admin/attendance-time/overtime",
-    3000
+    { refreshInterval: 3000}
   );
   const config: TableConfigProps<OvertimeEntry> = {
     columns: [
@@ -52,7 +52,7 @@ function Page() {
       { uid: "name", name: "Name", sortable: true },
       { uid: "overtime", name: "Overtime", sortable: true },
       { uid: "duration", name: "Duration", sortable: true },
-      { uid: "action", name: "Action", sortable: true },
+      { uid: "action", name: "Action" },
     ],
     rowCell: (item, columnKey) => {
       switch (columnKey) {
@@ -228,7 +228,7 @@ function Page() {
           ["trans_employees_overtimes_approvedBy", "last_name"],
           "date",
         ]}
-        className="h-full"
+        className="h-fit-navlayout"
         selectionMode="single"
         aria-label="Overtime entries"
         onRowAction={(key) => {
