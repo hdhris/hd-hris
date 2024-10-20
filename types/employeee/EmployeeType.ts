@@ -80,3 +80,10 @@ export type Employee = EmployeeAll & {
   termination_json?: EmployeeTermination | null;
   educational_bg_json?: EmployeeEducationalBG | null;
 };
+
+export type EmployeePaginate = {
+  data: EmployeeAll[];
+  currentPage: number
+  perPage: number
+  totalItems: number
+};
