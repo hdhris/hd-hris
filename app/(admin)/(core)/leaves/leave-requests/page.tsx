@@ -8,6 +8,7 @@ import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {FilterItems, TableConfigurations} from "@/components/admin/leaves/table-config/approval-tables-configuration";
+import BorderCard from "@/components/common/BorderCard";
 
 // const getRequests = unstable_cache(async () => {
 //     return prisma.trans_leaves.findMany({
@@ -96,7 +97,14 @@ function Page() {
              sortItems: [{
                  name: "ID", key: "id"
              }]
-         }} />
+         }}
+
+        onListDisplay={(data) => {
+            return (
+                <BorderCard>{data.name}</BorderCard>
+            )
+        }}
+        />
 
     );
 }
