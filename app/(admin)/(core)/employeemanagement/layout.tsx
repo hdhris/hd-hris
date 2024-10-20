@@ -10,7 +10,7 @@ type TabKeys =
   | "resign"
   | "departments"
   | "jobposition";
-
+//
 const breadcrumbPaths: Record<TabKeys, { title: string; link: string }[]> = {
   employees: [
     { title: "Employee Management", link: "/employeemanagement" },

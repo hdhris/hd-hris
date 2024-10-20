@@ -18,7 +18,7 @@ export default page
 // import { TableConfigProps } from "@/types/table/TableDataTypes";
 // import { Avatar } from "@nextui-org/react";
 // import { TableActionButton } from "@/components/actions/ActionButton";
-
+//
 // const Page = () => {
 //   const [employees-leaves-status, setEmployees] = useState<Employee[]>([]);
 //   const [loading, setLoading] = useState(true);

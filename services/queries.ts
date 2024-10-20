@@ -78,24 +78,24 @@ export function useEmployeesData() {
 }
 
 export function useDepartmentsData() {
-    return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {
+    return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {//
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
 export function useJobpositionData() {
-    return useSWR<Department[]>('/api/employeemanagement/jobposition', fetcher, {
+    return useSWR<Department[]>('/api/employeemanagement/jobposition', fetcher, {//
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 export function useBranchesData() {
-    return useSWR<Branch[]>('/api/employeemanagement/branch', fetcher, {
+    return useSWR<Branch[]>('/api/employeemanagement/branch', fetcher, {//
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
 export function useBatchSchedules() {
-    return useSWR<BatchSchedule[]>('/api/employeemanagement/batch_schedules', fetcher, {
+    return useSWR<BatchSchedule[]>('/api/employeemanagement/batch_schedules', fetcher, {//
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }

@@ -10,7 +10,7 @@ import { useDepartmentsData } from "@/services/queries";
 import { Department } from "@/types/employeee/DepartmentType";
 import axios from "axios";
 import { Chip } from "@nextui-org/react";
-
+//
 const Page: React.FC = () => {
   const { data: departments, error, mutate } = useDepartmentsData();
   const [loading, setLoading] = useState(true);

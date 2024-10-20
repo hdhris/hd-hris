@@ -127,7 +127,7 @@ export async function PUT(req: NextRequest) {
     return handleError(error, "update");
   }
 }
-
+//
 // DELETE: Soft delete a branch
 export async function DELETE(req: NextRequest) {
   const url = new URL(req.url);
