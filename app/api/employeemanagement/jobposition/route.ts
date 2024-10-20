@@ -16,7 +16,7 @@ function logDatabaseOperation(operation: string, result: any) {
   console.log(`Database operation: ${operation}`);
   console.log('Result:', JSON.stringify(result, null, 2));
 }
-
+//
 // Error handling function
 function handleError(error: unknown, operation: string) {
   console.error(`Error during ${operation} operation:`, error);

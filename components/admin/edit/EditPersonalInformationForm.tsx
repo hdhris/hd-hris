@@ -12,7 +12,7 @@ const genderOptions = [
   { value: "M", label: "Male" },
   { value: "F", label: "Female" },
 ];
-
+//
 const suffixOptions = [
   { value: "Jr.", label: "Jr." },
   { value: "Sr.", label: "Sr." },

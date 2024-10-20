@@ -1,5 +1,5 @@
 export type Status = "active" | "terminated" | "resigned" | "suspended";
-
+//
 export type EmployeeAll = {
   created_at: string;
   updated_at: string;

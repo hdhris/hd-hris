@@ -44,7 +44,7 @@ const EditJobPosition: React.FC<EditJobPositionProps> = ({
       is_active: true,
     },
   });
-
+//
   const { data: jobPositions, error, isLoading } = useJobpositionData();
 
   useEffect(() => {

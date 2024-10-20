@@ -131,7 +131,7 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
       placeholder: "Enter branch name",
     },
   ];
-
+//
   return (
     <>
       <Add variant="flat" name="Add Branch" onClick={onOpen} />

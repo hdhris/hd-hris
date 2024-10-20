@@ -102,7 +102,7 @@ const JobInformationForm: React.FC = () => {
         options: jobOptions,
       },
     },
-    {
+    {//
       name: "branch_id",
       label: "Branch",
       type: "auto-complete",
