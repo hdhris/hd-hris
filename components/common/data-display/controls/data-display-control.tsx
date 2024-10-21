@@ -34,7 +34,8 @@ function DataDisplayControl<T>({
                                    isGrid,
                                    isList,
                                    onExport,
-                                   onImport
+                                   onImport,
+                                   onDeleteSelected
                                }: DataDisplayControlProps<T>) {
 
     const searchParams = useSearchParams();
@@ -100,13 +101,7 @@ function DataDisplayControl<T>({
     }
 
     const handleDeleteSelection = (keys: Selection) => {
-        const selected = Array.from(keys);
-
-        if (keys === "all") {
-            alert("All keys selected " + keys)
-        } else if(selected.length > 1){
-            alert("Keys selected " + selected)
-        }
+        onDeleteSelected(keys)
     }
 
     return (<div className={cn("flex flex-col h-full w-full px-2", className?.wrapper)}>
@@ -168,9 +163,8 @@ function DataDisplayControl<T>({
                 </Typography>
                 {selectedKeys && (selectedKeys === "all" || selectedKeys.size > 1) && (
                     <Button isIconOnly variant="light" onClick={() => handleDeleteSelection(selectedKeys)}>
-                        <LuTrash2 className={cn("text-danger", icon_size_sm)} />
-                    </Button>
-                )}
+                        <LuTrash2 className={cn("text-danger", icon_size_sm)}/>
+                    </Button>)}
             </div>
             {/* Pagination centered */}
             <div className={cn("flex-1 flex justify-center", className?.lower.paginationClassname)}>

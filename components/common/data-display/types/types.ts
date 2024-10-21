@@ -26,6 +26,7 @@ export interface DataDisplayControlProps<T> extends DataControlProps {
     isList: boolean
     onExport?: DataImportAndExportProps
     onImport?: DataImportAndExportProps
+    onDeleteSelected: (keys: Selection) => void
 }
 
 export interface DataTableProps<T> extends Omit<TableProps, "aria-label"> {

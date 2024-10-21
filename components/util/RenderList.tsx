@@ -1,5 +1,4 @@
 import React, {Key} from 'react';
-import {Selection} from "@nextui-org/react";
 
 interface RenderListProps<T> {
     items: T[];
@@ -8,19 +7,15 @@ interface RenderListProps<T> {
 }
 
 const RenderList = <T extends { key: string | number }, >({items, map, onClick}: RenderListProps<T>) => {
-    return (
-        <>
+    return (<>
             {items.map((item) => {
-                return (
-                    <React.Fragment key={item.key}>
+                return (<React.Fragment key={item.key}>
                         <span onClick={() => onClick && onClick(item.key)}>
                             {map(item, item.key)}
                         </span>
-                    </React.Fragment>
-                );
+                    </React.Fragment>);
             })}
-        </>
-    );
+        </>);
 };
 
 export default RenderList;

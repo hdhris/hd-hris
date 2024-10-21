@@ -27,9 +27,7 @@ async function Page() {
     // });
 
     return (<LeaveTypesProvider>
-
             <LeaveTypeTable/>
-
         </LeaveTypesProvider>
 
     );

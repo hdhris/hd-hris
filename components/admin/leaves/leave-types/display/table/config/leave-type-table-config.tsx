@@ -2,10 +2,9 @@
 
 import {ColumnsProps, TableConfigProps} from "@/types/table/TableDataTypes";
 import {LeaveType} from "@/types/leaves/LeaveTypes";
-import React, {Key} from "react";
+import React from "react";
 import {Case, Default, Switch} from "@/components/common/Switch";
 import Typography from "@/components/common/typography/Typography";
-import {TableActionButton} from "@/components/actions/ActionButton";
 import {Status} from "@/components/status/Status";
 import {LuCheckCheck, LuX} from "react-icons/lu";
 import {ChipProps, cn} from "@nextui-org/react";
@@ -14,7 +13,6 @@ import {Chip} from "@nextui-org/chip";
 import uniqolor from "uniqolor";
 import {rgba} from "color2k";
 import {FilterProps} from "@/types/table/default_config";
-import {useFormTable} from "@/components/providers/FormTableProvider";
 
 const LeaveTypesTableColumns: ColumnsProps[] = [{
     name: "Name", uid: "name", sortable: true
@@ -36,8 +34,7 @@ const employee_types_color_map: Record<string, ChipProps["color"]> = {
 
 
 export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
-    columns: LeaveTypesTableColumns,
-    rowCell: function (item: LeaveType, columnKey: React.Key) {
+    columns: LeaveTypesTableColumns, rowCell: function (item: LeaveType, columnKey: React.Key) {
         const key = columnKey as keyof LeaveType
         const cellValue = item[key]
         const color = uniqolor(item.code, {format: "rgb"}).color.replace("rgb(", "").replace(")", "").split(",")

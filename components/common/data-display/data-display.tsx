@@ -23,7 +23,7 @@ interface DataDisplayProps<T> extends RenderDisplayProps<T> {
 }
 
 type DataDisplayType<T> =
-    Omit<DataDisplayControlProps<T>, "children" | "isList" | "isGrid" | "isTable" | "isImport" | "isExport">
+    Omit<DataDisplayControlProps<T>, "children" | "isList" | "isGrid" | "isTable" | "isImport" | "isExport" | "onDeleteSelected">
     & DataDisplayProps<T>
 
 function DataDisplay<T extends { id: string | number }>({
@@ -54,6 +54,7 @@ function DataDisplay<T extends { id: string | number }>({
             isTable={!!rest.onTableDisplay}
             onExport={rest.onExport}
             onImport={rest.onImport}
+            onDeleteSelected={rest.onDeleteSelected!}
         >
             {(data: T[], sortDescriptor, onSortChange) => {
 
@@ -82,12 +83,12 @@ interface RenderDisplayProps<T> {
     onListDisplay?: (data: T, key: number | string) => ReactNode;
     onImport?: DataImportAndExportProps;
     onExport?: DataImportAndExportProps;
+    onDeleteSelected?: (keys: Selection) => void;
     data: T[];
-    query?: string
 }
 
 const RenderDisplay = <T extends { id: string | number }>({
-                                                              onTableDisplay, onGridDisplay, onListDisplay, data, query
+                                                              onTableDisplay, onGridDisplay, onListDisplay, data
                                                           }: RenderDisplayProps<T>) => {
 
     const newData = data.map(item => ({key: item.id, ...item}));

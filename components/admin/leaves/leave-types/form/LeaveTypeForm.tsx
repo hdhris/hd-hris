@@ -3,7 +3,7 @@ import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {cn} from "@nextui-org/react";
-import React, {FC, ReactNode, useCallback, useEffect, useState} from "react";
+import React, {FC, ReactNode, useEffect, useState} from "react";
 import Drawer from "@/components/common/Drawer";
 import {Form} from "@/components/ui/form";
 import {Section, Title} from "@/components/common/typography/Typography";
@@ -11,14 +11,16 @@ import {LeaveTypeSchema} from "@/helper/zodValidation/leaves/leave-types-form/Le
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import {LeaveType} from "@/types/leaves/LeaveTypes";
+import {AxiosError} from "axios";
 
 interface LeaveTypeFormProps {
     title?: string
     description?: string
-    data?: LeaveType
     onOpen: (value: boolean) => void
-    isOpen: boolean
+    isOpen: boolean,
+    data?: LeaveType
 }
+
 const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeFormProps) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const {toast} = useToast()
@@ -26,68 +28,75 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
     const form = useForm<z.infer<typeof LeaveTypeSchema>>({
         resolver: zodResolver(LeaveTypeSchema), defaultValues: {
             //general information
-            name: "",
-            code: "",
-            description: "",
-            //accrual setting
-            accrualRate: undefined,
-            accrualFrequency: "",
-            maxAccrual: undefined,
-            carryOver: false,
-            //Leave Duration
-            minDuration: undefined,
-            maxDuration: undefined,
-            noticeRequired: undefined,
-            //Additional Settings
-            paidLeave: false,
-            isActive: false,
-            attachmentRequired: false,
-            applicableToEmployeeTypes: "",
+            name: "", code: "", description: "", //accrual setting
+            accrualRate: 0, accrualFrequency: "", maxAccrual: 0, carryOver: false, //Leave Duration
+            minDuration: 0, maxDuration: 0, noticeRequired: 0, //Additional Settings
+            paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: "",
         }
     })
 
-    // useEffect(() => {
-    //     if(data){
-    //         console.log("Form Rendered")
-    //     }
-    //
-    //     // if(data){
-    //     //     form.reset({
-    //     //         name: data.name,
-    //     //         code: data.code,
-    //     //         description: data.description,
-    //     //         //accrual setting
-    //     //         accrualRate: data.accrual_rate,
-    //     //         accrualFrequency: data.accrual_frequency,
-    //     //         maxAccrual: data.max_accrual,
-    //     //         carryOver: data.carry_over,
-    //     //         //Leave Duration
-    //     //         minDuration: data.min_duration,
-    //     //         maxDuration: data.max_duration,
-    //     //         noticeRequired: data.notice_required,
-    //     //         //Additional Settings
-    //     //         paidLeave: data.paid_leave,
-    //     //         isActive: data.is_active,
-    //     //         attachmentRequired: data.attachment_required,
-    //     //     })
-    //     // }
-    // }, [data]);
+    useEffect(() => {
+        if (data) {
+            form.reset({
+                name: data.name,
+                code: data.code,
+                description: data.description,
+                accrualRate: data.accrual_rate,
+                accrualFrequency: data.accrual_frequency.toLowerCase(),
+                maxAccrual: data.max_accrual,
+                carryOver: data.carry_over,
+                minDuration: data.min_duration,
+                maxDuration: data.max_duration,
+                noticeRequired: data.notice_required,
+                paidLeave: data.paid_leave,
+                isActive: data.is_active,
+                attachmentRequired: data.attachment_required,
+                applicableToEmployeeTypes: data.applicable_to_employee_types.toLowerCase()
+            })
 
-    const onSubmit = async (data: any) => {
+            console.log("Data: ", form.getValues())
+        }
+    }, [data, form]);
+
+
+    const onSubmit = async (values: any) => {
         setIsLoading(true)
+        const items = {
+            id: data?.id,
+            ...values,
+        }
         try {
-            const rest = await axiosInstance.post("/api/admin/leaves/leave-types/create", data)
+            let rest
+            if(data?.id){
+                rest = await axiosInstance.post("/api/admin/leaves/leave-types/update", items)
+            } else{
+                rest = await axiosInstance.post("/api/admin/leaves/leave-types/create", values)
+            }
+
             if (rest.status === 200) {
                 toast({
                     title: "Success", description: "Leave type created successfully", variant: "success",
                 })
-                form.reset()
+                form.reset({
+                    name: "", code: "", description: "", //accrual setting
+                    accrualRate: 0, accrualFrequency: "", maxAccrual: 0, carryOver: false, //Leave Duration
+                    minDuration: 0, maxDuration: 0, noticeRequired: 0, //Additional Settings
+                    paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: ""
+                })
             }
         } catch (err) {
             console.log(err)
-            toast({
-                title: "Error", description: "Something went wrong", variant: "danger",
-            })
+            if(err instanceof AxiosError){
+                toast({
+                    title: "Error", description: err.response?.data.message, variant: "danger",
+                })
+            } else{
+                toast({
+                    title: "Error", description: "Something went wrong", variant: "danger",
+                })
+            }
+
+
         } finally {
             setIsLoading(false)
         }
@@ -113,7 +122,11 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         label: 'Description',
         description: "Provide additional details about this leave type.",
         isRequired: true,
-        placeholder: "Brief description of the leave type"
+        placeholder: "Brief description of the leave type",
+        config: {
+           maxLength: 255,
+            maxRows: 4,
+        }
 
     },]
     const accrualSettingForm: FormInputProps[] = [{
@@ -136,7 +149,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
             }, {
                 value: "monthly", label: "Monthly"
             }, {
-                value: "annually", label: "Annually"
+                value: "yearly", label: "Annually"
             }]
         }
     }, {
@@ -148,22 +161,21 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
     }, switchToggle({
         name: 'carryOver', label: 'Carry Over', description: "Does this leave can be carried over to the next year?"
     })]
-    const leaveDuration: FormInputProps[] = [
-        {
+    const leaveDuration: FormInputProps[] = [{
         name: "minDuration",
         type: "number",
-        label: "Minimum Duration (hours)",
+        label: "Minimum Duration (days)",
         placeholder: "e.g., 4",
         isRequired: true,
         description: "Minimum duration of leave that can be taken.",
     }, {
         name: "maxDuration",
         type: "number",
-        label: "Maximum Duration (hours)",
+        label: "Maximum Duration (days)",
         placeholder: "e.g., 8",
         isRequired: true,
         description: "Maximum duration of leave that can be taken.",
-    },{
+    }, {
         name: "noticeRequired",
         type: "number",
         label: "Notice Required (days)",
@@ -171,8 +183,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         isRequired: true,
         description: "Notice required before taking leave.",
     }]
-    const additionalSettings: FormInputProps[] = [
-        switchToggle({
+    const additionalSettings: FormInputProps[] = [switchToggle({
         name: 'paidLeave', label: 'Paid Leave', description: " Is this a paid leave type?"
     }), switchToggle({
         name: 'isActive', label: 'Active', description: "Defines if the leave type is marked as active or inactive."
@@ -210,13 +221,16 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} id="drawer-form">
                     <div className="flex flex-col gap-8 mb-4">
-                        <GroupForm title='General Information' description='Provide basic details like the name, code, and description to identify and explain the leave type.'>
+                        <GroupForm title='General Information'
+                                   description='Provide basic details like the name, code, and description to identify and explain the leave type.'>
                             <FormFields items={generalLeaveTypeForm}/>
                         </GroupForm>
-                        <GroupForm title='Accrual Settings' description='Define how leave is earned, including the rate, frequency, maximum limit, and whether it can be carried over to the next year.'>
+                        <GroupForm title='Accrual Settings'
+                                   description='Define how leave is earned, including the rate, frequency, maximum limit, and whether it can be carried over to the next year.'>
                             <FormFields items={accrualSettingForm}/>
                         </GroupForm>
-                        <GroupForm title='Leave Duration' description='Set rules for using the leave, such as the minimum/maximum hours allowed and the required notice period.'>
+                        <GroupForm title='Leave Duration'
+                                   description='Set rules for using the leave, such as the minimum/maximum hours allowed and the required notice period.'>
                             <FormFields items={leaveDuration}/>
                         </GroupForm>
                         <GroupForm title='Additional Settings'
