@@ -9,13 +9,14 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import LeaveTypeForm from "@/components/admin/leaves/leave-types/form/LeaveTypeForm";
 import Typography from "@/components/common/typography/Typography";
-import {Card} from "@nextui-org/react";
+import {Avatar, AvatarGroup, Card, Tooltip} from "@nextui-org/react";
 import {getColor, gradientColor, textColor} from "@/helper/background-color-generator/generator";
 import {isObjectEmpty} from "@/helper/objects/isObjectEmpty";
 import {Chip} from "@nextui-org/chip";
 import {CardBody, CardHeader} from "@nextui-org/card";
 import {Bell, Calendar, Clock, DollarSign, FileCheck, RefreshCcw, Users} from "lucide-react";
 import {capitalize} from "@nextui-org/shared-utils";
+import RenderList from "@/components/util/RenderList";
 
 
 function LeaveTypeTable() {
@@ -94,6 +95,11 @@ export default LeaveTypeTable;
 
 
 const LeaveTypesDetails = ({...props}: LeaveType) => {
+    const curr_emp = props.current_employees
+
+    const handleEmployeePicture = (key : Key) => {
+        alert(key)
+    }
     return (<Card {...gradientColor(props.code, props.name, 0.2)} className="w-[40%] overflow-hidden">
         {!isObjectEmpty(props) ? (<>
                 <CardHeader className="h-24 border-b bg-white bg-opacity-50 backdrop-blur-sm w-full">
@@ -148,8 +154,48 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
                             <div className="text-sm flex flex-col gap-2">Applicable to: <Typography
                                 className="font-semibold">{props.applicable_to_employee_types} Employees</Typography>
                             </div>
-                            <div className="text-sm flex flex-col gap-2">Current Usage: <Typography
-                                className="font-semibold">{props.employee_count} Employee/s</Typography></div>
+                            <div className="text-sm flex flex-col gap-2">Current Usage:
+                                {
+                                    curr_emp.length === 0 ? (<Typography className="font-semibold">No Employees</Typography>) : (
+                                        <AvatarGroup isBordered color="primary" max={3} classNames={{
+                                            count: "!size-6"
+                                        }} renderCount={(count) => {
+                                            return(
+                                                <div onClick={() => alert("more")} className="flex relative justify-center items-center box-border overflow-hidden align-middle z-0 outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 w-10 h-10 text-tiny bg-primary text-primary-foreground rounded-full ring-2 ring-offset-2 ring-offset-background dark:ring-offset-background-dark -ms-2 data-[hover=true]:-translate-x-3 rtl:data-[hover=true]:translate-x-3 transition-transform data-[focus-visible=true]:-translate-x-3 rtl:data-[focus-visible=true]:translate-x-3 ring-primary !size-6 outline">+{count}</div>
+                                            )
+                                        }}>
+                                            {
+                                                curr_emp.map(item => (
+                                                    <Tooltip key={item.id} content={item.name}>
+                                                        <Avatar onClick={() => handleEmployeePicture(item.id)} classNames={{
+                                                            base: "!size-6"
+                                                        }} alt={item.name} key={item.id} src={item.picture}/>
+                                                    </Tooltip>
+                                                ))
+                                            }
+                                            {/*<Tooltip content={item.name}>*/}
+                                            {/*    <Avatar classNames={{*/}
+                                            {/*        base: "!size-6"*/}
+                                            {/*    }} alt={item.name} key={key} src={item.picture}/>*/}
+                                            {/*</Tooltip>*/}
+                                            {/*<RenderList*/}
+                                            {/*    onClick={(key) => alert(Number(key))}*/}
+                                            {/*    items={props.current_employees.map((items) => ({key: items.id, ...items}))}*/}
+                                            {/*    map={(item, key) => {*/}
+                                            {/*        return (*/}
+                                            {/*            <Tooltip content={item.name}>*/}
+                                            {/*                <Avatar classNames={{*/}
+                                            {/*                    base: "!size-6"*/}
+                                            {/*                }} alt={item.name} key={key} src={item.picture}/>*/}
+                                            {/*            </Tooltip>)*/}
+
+                                            {/*    }}*/}
+                                            {/*/>*/}
+                                        </AvatarGroup>
+                                    )
+                                }
+
+                            </div>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">

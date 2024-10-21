@@ -40,7 +40,7 @@ function DataDisplayControl<T>({
     const searchParams = useSearchParams();
     const rowsSearchParams = Number(searchParams.get('rows') || 5)
     const displaySearchParams = searchParams.get('display') || 'table'
-    const {values, selectedKeys, display, setDisplay, setSortDescriptor} = useDataDisplayControl<T>()
+    const {values, selectedKeys, display, setDisplay} = useDataDisplayControl<T>()
     const {searchValue, onSearchChange, itemSearched} = useSearch<T>(values, searchProps.searchingItemKey)
     const {filteredItems, onFilterChange, filter} = useFilter<T>(itemSearched)
     const {paginatedData, onPageChange, totalPages, page, setRows, rows} = usePagination<T>(filteredItems, {
@@ -52,6 +52,12 @@ function DataDisplayControl<T>({
         setDisplay(displaySearchParams as DisplayType)
     }, [displaySearchParams, setDisplay]);
 
+    useEffect(() => {
+        if (rowSelectionProps?.onRowChange) {
+            rowSelectionProps?.onRowChange(Number(rows))
+            // setRows()
+        }
+    }, [rowSelectionProps, rows]);
     const handleOnSearch = useCallback((value: string) => {
         onSearchChange(value);
         onPageChange(1); // Reset to page 1 when a new search is triggered
@@ -65,10 +71,10 @@ function DataDisplayControl<T>({
     const handleOnRowsPerPageChange = (value: Selection) => {
         const newSearchParams = new URLSearchParams(searchParams.toString());
         const rowPerPage = value !== "all" && value.size > 0 ? Array.from(value)[0] : 5
-        if (rowSelectionProps?.onRowChange) {
-            rowSelectionProps?.onRowChange(Number(rowPerPage))
-            // setRows()
-        }
+        // if (rowSelectionProps?.onRowChange) {
+        //     rowSelectionProps?.onRowChange(Number(rowPerPage))
+        //     // setRows()
+        // }
         setRows(Number(rowPerPage))
 
         if (value !== 'all' && value.size > 0) {
@@ -142,7 +148,7 @@ return (<div className={cn("flex flex-col h-full w-full px-2", className?.wrappe
         </div>
     </div>
 
-    {children(sortedItems, sortDescriptor, setSortDescriptor)}
+    {children(sortedItems, sortDescriptor, onSortChange)}
 
     {/* Bottom pagination */}
     <div

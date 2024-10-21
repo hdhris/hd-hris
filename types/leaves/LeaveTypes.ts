@@ -1,5 +1,6 @@
 import React from "react";
 import {LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
+import {EmployeeDetails} from "@/types/employeee/EmployeeType";
 
 export interface LeaveTypesKey {
     key: React.Key,
@@ -24,7 +25,7 @@ export interface LeaveType {
     paid_leave: boolean;
     updated_at: string; // Same consideration as created_at
     carry_over: boolean;
-    employee_count: number;
+    current_employees: EmployeeDetails[];
 }
 
 

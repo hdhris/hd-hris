@@ -80,3 +80,10 @@ export type Employee = EmployeeAll & {
   termination_json?: EmployeeTermination | null;
   educational_bg_json?: EmployeeEducationalBG | null;
 };
+
+
+export interface EmployeeDetails {
+  id: number;                     // Unique identifier for the employee
+  name: string     // Extension (e.g., nickname), optional and can be null
+  picture?: string;              // URL to the employee's picture, optional
+}

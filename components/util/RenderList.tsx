@@ -1,22 +1,21 @@
-import React from 'react';
+import React, {Key} from 'react';
 import {Selection} from "@nextui-org/react";
 
 interface RenderListProps<T> {
     items: T[];
     map: (item: T, key: string | number) => React.ReactNode;
-    onClick?: (key: Selection) => void;
+    onClick?: (key: Key) => void;
 }
 
 const RenderList = <T extends { key: string | number }, >({items, map, onClick}: RenderListProps<T>) => {
     return (
         <>
             {items.map((item) => {
-                const selection: Selection = new Set([item.key.toString()]);
                 return (
                     <React.Fragment key={item.key}>
-                        <div onClick={() => onClick && onClick(selection)}>
+                        <span onClick={() => onClick && onClick(item.key)}>
                             {map(item, item.key)}
-                        </div>
+                        </span>
                     </React.Fragment>
                 );
             })}

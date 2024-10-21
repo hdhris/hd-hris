@@ -56,8 +56,9 @@ function DataDisplay<T extends { id: string | number }>({
             onImport={rest.onImport}
         >
             {(data: T[], sortDescriptor, onSortChange) => {
+
                 return (<RenderDisplay data={data} onTableDisplay={{
-                    ...rest.onTableDisplay, sortDescriptor, onSortChange
+                    ...rest.onTableDisplay, sortDescriptor: sortDescriptor, onSortChange:onSortChange
                 }}
                                        onGridDisplay={rest.onGridDisplay}
                                        onListDisplay={rest.onListDisplay}
