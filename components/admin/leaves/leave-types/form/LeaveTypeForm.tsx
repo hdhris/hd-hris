@@ -3,18 +3,23 @@ import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {cn} from "@nextui-org/react";
-import React, {FC, ReactNode, useState} from "react";
+import React, {FC, ReactNode, useCallback, useEffect, useState} from "react";
 import Drawer from "@/components/common/Drawer";
-import {Button} from "@nextui-org/button";
-import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {Form} from "@/components/ui/form";
 import {Section, Title} from "@/components/common/typography/Typography";
 import {LeaveTypeSchema} from "@/helper/zodValidation/leaves/leave-types-form/LeaveTypesForm";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
+import {LeaveType} from "@/types/leaves/LeaveTypes";
 
-const LeaveTypeForm = () => {
-    const [isOpen, setIsOpen] = useState(false)
+interface LeaveTypeFormProps {
+    title?: string
+    description?: string
+    data?: LeaveType
+    onOpen: (value: boolean) => void
+    isOpen: boolean
+}
+const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeFormProps) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const {toast} = useToast()
 
@@ -40,6 +45,33 @@ const LeaveTypeForm = () => {
             applicableToEmployeeTypes: "",
         }
     })
+
+    // useEffect(() => {
+    //     if(data){
+    //         console.log("Form Rendered")
+    //     }
+    //
+    //     // if(data){
+    //     //     form.reset({
+    //     //         name: data.name,
+    //     //         code: data.code,
+    //     //         description: data.description,
+    //     //         //accrual setting
+    //     //         accrualRate: data.accrual_rate,
+    //     //         accrualFrequency: data.accrual_frequency,
+    //     //         maxAccrual: data.max_accrual,
+    //     //         carryOver: data.carry_over,
+    //     //         //Leave Duration
+    //     //         minDuration: data.min_duration,
+    //     //         maxDuration: data.max_duration,
+    //     //         noticeRequired: data.notice_required,
+    //     //         //Additional Settings
+    //     //         paidLeave: data.paid_leave,
+    //     //         isActive: data.is_active,
+    //     //         attachmentRequired: data.attachment_required,
+    //     //     })
+    //     // }
+    // }, [data]);
 
     const onSubmit = async (data: any) => {
         setIsLoading(true)
@@ -167,13 +199,10 @@ const LeaveTypeForm = () => {
     })]
 
     return (<>
-        <Button {...uniformStyle()} onClick={() => setIsOpen(true)}>
-            Add Leave Type
-        </Button>
-        <Drawer isSubmitting={isLoading} isOpen={isOpen} onClose={setIsOpen} size="sm" title={<Title
+        <Drawer isSubmitting={isLoading} isOpen={isOpen} onClose={onOpen} size="sm" title={<Title
             className="ms-1"
-            heading="Add Leave Types"
-            subHeading="Define the details for the new leave type below."
+            heading={title || "Add Leave Types"}
+            subHeading={description || "Define the details for the new leave type below."}
             classNames={{
                 heading: "text-lg", subHeading: "font-normal"
             }}
@@ -220,6 +249,8 @@ const GroupForm: FC<GroupFormProps> = ({title, description, children, icon}) => 
         </div>
     </div>)
 }
+
+GroupForm.displayName = "GroupForm"
 
 
 interface SwitchToggle {

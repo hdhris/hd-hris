@@ -2,7 +2,7 @@
 
 import {ColumnsProps, TableConfigProps} from "@/types/table/TableDataTypes";
 import {LeaveType} from "@/types/leaves/LeaveTypes";
-import React from "react";
+import React, {Key} from "react";
 import {Case, Default, Switch} from "@/components/common/Switch";
 import Typography from "@/components/common/typography/Typography";
 import {TableActionButton} from "@/components/actions/ActionButton";
@@ -14,6 +14,7 @@ import {Chip} from "@nextui-org/chip";
 import uniqolor from "uniqolor";
 import {rgba} from "color2k";
 import {FilterProps} from "@/types/table/default_config";
+import {useFormTable} from "@/components/providers/FormTableProvider";
 
 const LeaveTypesTableColumns: ColumnsProps[] = [{
     name: "Name", uid: "name", sortable: true
@@ -35,7 +36,8 @@ const employee_types_color_map: Record<string, ChipProps["color"]> = {
 
 
 export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
-    columns: LeaveTypesTableColumns, rowCell: function (item: LeaveType, columnKey: React.Key) {
+    columns: LeaveTypesTableColumns,
+    rowCell: function (item: LeaveType, columnKey: React.Key) {
         const key = columnKey as keyof LeaveType
         const cellValue = item[key]
         const color = uniqolor(item.code, {format: "rgb"}).color.replace("rgb(", "").replace(")", "").split(",")
@@ -48,7 +50,7 @@ export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
                 <div className="rounded-full size-8 grid place-items-center " style={{
                     background: rgbaColor,
                 }}>
-                    <Typography className="font-semibold">{cellValue}</Typography>
+                    <Typography className="font-semibold">{String(cellValue)}</Typography>
                 </div>
 
             </Case>
@@ -74,13 +76,15 @@ export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
                     {item.is_active ? "Active" : "Inactive"}
                 </Status>
             </Case>
-            {/*<Case of="employee_count">*/}
-            {/*    <div className="rounded-full bg-slate-500/20 size-5 grid place-items-center ">*/}
-            {/*        <Typography className="font-semibold">{cellValue}</Typography>*/}
-            {/*    </div>*/}
+            {/*<Case of="actions">*/}
+            {/*    <TableActionButton*/}
+            {/*        name={item.name}*/}
+            {/*        onDelete={() => handleDelete(item.id)}*/}
+            {/*        onEdit={() => handleEdit(item.id)}*/}
+            {/*    />*/}
             {/*</Case>*/}
             <Default>
-                {cellValue}
+                {String(cellValue)}
             </Default>
         </Switch>)
     }
