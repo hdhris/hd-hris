@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface AttendanceLog {
     id: number;
     employee_id: number;

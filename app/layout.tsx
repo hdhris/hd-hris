@@ -10,9 +10,9 @@ import MaintenanceBreak from "@/components/maintainance/Maintenance";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import {Toaster} from "@/components/ui/toaster";
-import DbConnection from "@/components/DBConnection";
-import PrelineScript from "@/components/preline/PrelineScript";
-import Script from "next/script";
+// import DbConnection from "@/components/DBConnection";
+// import PrelineScript from "@/components/preline/PrelineScript";
+// import Script from "next/script";
 
 const inter = Inter({subsets: ["latin"]});
 const isMaintenanceMode = process.env.MAINTAINANCE_MODE;

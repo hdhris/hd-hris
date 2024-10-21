@@ -1,6 +1,7 @@
 import React from 'react';
 import {valueOfObject} from "@/helper/objects/pathGetterObject";
 import {NestedKeys} from "@/hooks/types/types"; // Import type if necessary
+import { joinNestedKeys } from '@/helper/objects/joinNestedKeys';
 
 function useSearch<T>(items: T[], searchingItemKey?: NestedKeys<T>[]) {
 
@@ -31,7 +32,7 @@ function useSearch<T>(items: T[], searchingItemKey?: NestedKeys<T>[]) {
 
     if (searchingItemKey) {
         itemSearched = items.filter(item => searchingItemKey.some(key => {
-            const value = valueOfObject(item, key as string); // valueOfObject can be a utility to get nested object values
+            const value = valueOfObject(item, joinNestedKeys([key])); // valueOfObject can be a utility to get nested object values
             return value?.toString().toLowerCase().includes(String(searchValue.toLowerCase()));
         }));
     }

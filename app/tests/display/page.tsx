@@ -225,9 +225,9 @@ function Page() {
             }, {key: "name", name: "Name"}, {key: "created_at", name: "Created At"}, {
                 key: "is_active", name: "Status"
             }],
-            initialValue: {
-                column: "id", direction: "ascending"
-            },
+            // initialValue: {
+            //     column: "id", direction: "ascending"
+            // },
 
         }}
         searchProps={{

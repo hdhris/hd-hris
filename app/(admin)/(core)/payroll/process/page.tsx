@@ -17,13 +17,13 @@ function Page() {
 
   const { data: payrollTable, isLoading: prtLoading } = useQuery<PayrollTable>(
     "/api/admin/payroll/process",
-    3000
+    { refreshInterval: 3000 }
   );
   const [isLoading, setIsLoading] = useState(false);
 
   SetNavEndContent(() => (
     <DatePickerUi
-      payrollDates={payrollTable?.pr_dates||[]}
+      payrollDates={payrollTable?.pr_dates || []}
       prtLoading={prtLoading}
       setIsLoading={setIsLoading}
       setPayrollData={setPayrollData}
@@ -153,19 +153,20 @@ function Page() {
 
   const filterItems: FilterProps[] = [
     {
-      filtered: payrollTable?.employees
-        ?.map((emp) => {
-          return {
-            name: emp.ref_job_classes.name,
-            key: 'ref_job_classes.id',
-            value: emp.ref_job_classes.id,
-          };
-        })
-        ?.filter(
-          (item, index, self) =>
-            index === self.findIndex((t) => t.value === item.value)
-        ) || [],
-      category: 'Roles',
+      filtered:
+        payrollTable?.employees
+          ?.map((emp) => {
+            return {
+              name: emp.ref_job_classes.name,
+              key: "ref_job_classes.id",
+              value: emp.ref_job_classes.id,
+            };
+          })
+          ?.filter(
+            (item, index, self) =>
+              index === self.findIndex((t) => t.value === item.value)
+          ) || [],
+      category: "Roles",
     },
   ];
 
@@ -177,7 +178,7 @@ function Page() {
       <TableData
         items={payrollTable?.employees || []}
         config={config}
-        searchingItemKey={["first_name","middle_name","last_name"]}
+        searchingItemKey={["first_name", "middle_name", "last_name"]}
         filterItems={filterItems}
         isHeaderSticky
         className="h-full"

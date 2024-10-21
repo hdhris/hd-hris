@@ -9,8 +9,6 @@ import GridList from "@/components/common/grid/GridList";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import Loading from "@/components/spinner/Loading";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
-import { useAxiosGet } from "@/lib/utils/axiosGetPost";
-import { getSimilarityPercentage } from "@/lib/utils/similarityPercentage";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
 import {
@@ -48,7 +46,7 @@ function Page() {
             setSelectedYear(Number(Array.from(key)[0]))
           }
           items={
-            data?.distinctYears.map((year) => ({
+            data?.yearsArray.map((year) => ({
               label: String(year),
               key: String(year),
             })) || []
@@ -171,6 +169,7 @@ const filterConfig: FilterItemsProps<HolidayEvent>[] = [
     ],
     key: "type",
     sectionName: "Type",
+    selectionMode: "multipleOR"
   },
   {
     filter: [
@@ -195,6 +194,7 @@ const filterConfig: FilterItemsProps<HolidayEvent>[] = [
     ],
     key: "start_date",
     sectionName: "Status",
+    selectionMode: "single",
   },
 ];
 const searchConfig: SearchItemsProps<HolidayEvent>[] = [
