@@ -22,6 +22,9 @@ import { useSchedule } from "@/services/queries";
 import showDialog from "@/lib/utils/confirmDialog";
 import ScheduleModal from "@/components/admin/attendance-time/schedule/create-edit-modal";
 import { BatchCard } from "@/components/admin/attendance-time/schedule/batchCard";
+import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
+import SearchFilter from "@/components/common/filter/SearchFilter";
+import { capitalize } from "lodash";
 
 const getRandomColor = (index: number) => {
   const colors = [
@@ -126,14 +129,52 @@ export default function Page() {
   const [selectedBatch, setSelectedBatch] = useState<BatchSchedule | null>(
     null
   );
-  // Form state
+  SetNavEndContent(() => {
+    return (
+      <>
+        <SearchFilter
+          items={data?.emp_sched || []}
+          searchConfig={[
+            {
+              key: ["trans_employees", "last_name"],
+              label: "Last Name",
+            },
+            {
+              key: ["trans_employees", "first_name"],
+              label: "First Name",
+            },
+            {
+              key: ["trans_employees", "middle_name"],
+              label: "Middle Name",
+            },
+          ]}
+          filterConfig={[
+            {
+              filter: days.map((day)=>{
+                return {
+                  label: capitalize(day),
+                  value: (item: EmployeeSchedule)=>{
+                    return item.days_json.includes(day)
+                  },
+                }
+              }),
+              key: "days_json",
+              sectionName: "Day of week",
+              selectionMode: "multipleAND",
+            }
+          ]}
+          setResults={setEmpScheduleData}
+        />
+      </>
+    );
+  });
 
   const handleDelete = async (id: Number | undefined) => {
     try {
       const result = await showDialog({
         title: "Confirm Delete",
         message: `Are you sure you want to delete schedule?`,
-        preferredAnswer: "no"
+        preferredAnswer: "no",
       });
       if (result === "yes") {
         await axios.post(
@@ -212,7 +253,7 @@ export default function Page() {
     });
     console.log(newColorMap);
     setColorMap(newColorMap);
-    setEmpScheduleData(data?.emp_sched!);
+    // setEmpScheduleData(data?.emp_sched!);
   }, [data]);
 
   // Card for Schedule Time (no border initially, but adds on hover)
@@ -298,55 +339,57 @@ export default function Page() {
         </Button>
       </div>
       <div className="h-full overflow-auto">
-      <table className="w-full h-full overflow-hidden table-fixed divide-y divide-gray-200">
-        <thead className="text-xs text-gray-500 sticky top-0">
-          <tr className="divide-x divide-gray-200">
-            <th className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-left w-[200px] max-w-[200px] z-50">
-              NAME
-            </th>
-            {days.map((day) => (
-              <th
-                key={day}
-                className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-center capitalize z-50"
-              >
-                {day.toUpperCase()}
+        <table className="w-full h-full table-fixed divide-y divide-gray-200">
+          <thead className="text-xs text-gray-500 sticky top-0 z-10">
+            <tr className="divide-x divide-gray-200">
+              <th className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-left w-[200px] max-w-[200px] z-50">
+                NAME
               </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 h-fit-navlayout overflow-auto">
-          {empScheduleData?.map((employee) => (
-            <tr
-              key={employee.id}
-              className="h-16 divide-x divide-gray-200 transition-all duration-100 hover:bg-gray-200"
-              onMouseEnter={() => setHoveredRowId(employee.id)}
-              onMouseLeave={() => setHoveredRowId(null)}
-            >
-              <td className="px-4 py-2 truncate text-sm font-semibold w-[200px] max-w-[200px]">
-                {`${employee.trans_employees.first_name} ${employee.trans_employees.last_name}`}
-              </td>
               {days.map((day) => (
-                <td
+                <th
                   key={day}
-                  className={`p-2 text-center text-sm font-semibold`}
+                  className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-center capitalize z-50"
                 >
-                  {batchData?.some(
-                    (batch) =>
-                      batch.id === employee.batch_id &&
-                      Array.isArray(employee.days_json) &&
-                      employee.days_json.includes(day.toLowerCase())
-                  )
-                    ? getScheduleCard(
-                        batchData.find((item) => item.id === employee.batch_id),
-                        employee.id
-                      )
-                    : ""}
-                </td>
+                  {day.toUpperCase()}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-gray-200 h-fit overflow-auto">
+            {empScheduleData?.map((employee) => (
+              <tr
+                key={employee.id}
+                className="h-16 divide-x divide-gray-200 transition-all duration-100 hover:bg-gray-200"
+                onMouseEnter={() => setHoveredRowId(employee.id)}
+                onMouseLeave={() => setHoveredRowId(null)}
+              >
+                <td className="px-4 py-2 truncate text-sm font-semibold w-[200px] max-w-[200px]">
+                  {`${employee.trans_employees.first_name} ${employee.trans_employees.last_name}`}
+                </td>
+                {days.map((day) => (
+                  <td
+                    key={day}
+                    className={`p-2 text-center text-sm font-semibold`}
+                  >
+                    {batchData?.some(
+                      (batch) =>
+                        batch.id === employee.batch_id &&
+                        Array.isArray(employee.days_json) &&
+                        employee.days_json.includes(day.toLowerCase())
+                    )
+                      ? getScheduleCard(
+                          batchData.find(
+                            (item) => item.id === employee.batch_id
+                          ),
+                          employee.id
+                        )
+                      : ""}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       <ScheduleModal
         onSave={handleSubmit}

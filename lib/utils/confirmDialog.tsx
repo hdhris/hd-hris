@@ -1,5 +1,5 @@
 "use client";
-import {ReactNode, useState} from "react";
+import {ReactNode, useEffect, useRef, useState} from "react";
 import {Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalProps,} from "@nextui-org/react";
 import ReactDOM from "react-dom/client";
 
@@ -17,6 +17,13 @@ const showDialog = async ({
     return new Promise((resolve) => {
         const Dialog = () => {
             const [isOpen, setIsOpen] = useState(true);
+            const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+            useEffect(() => {
+                if (isOpen && buttonRef.current) {
+                buttonRef.current.focus(); // Set focus to the button when modal opens
+                }
+            }, [isOpen]);
 
             const handleYes = () => {
                 setIsOpen(false);
@@ -63,6 +70,7 @@ const showDialog = async ({
                         <Button
                             color="danger"
                             variant={prefAnswer == "no" ? "solid" : "light"}
+                            ref={prefAnswer == "no" ? buttonRef : null}
                             onPress={handleNo}
                         >
                             No
@@ -70,6 +78,7 @@ const showDialog = async ({
                         <Button
                             color="primary"
                             variant={prefAnswer == "yes" ? "solid" : "light"}
+                            ref={prefAnswer == "yes" ? buttonRef : null}
                             onPress={handleYes}
                         >
                             Yes

@@ -17,6 +17,8 @@ export async function GET(
 ) {
   try {
     const year = Number(params.year);
+    const timeMin = `${year}-01-01T00:00:00Z`; // Start of the year
+    const timeMax = `${year + 1}-01-01T00:00:00Z`; // Start of the next year
     const calendarId = process.env.GOOGLE_CALENDAR_ID;
     const apiKey = process.env.GOOGLE_API_KEY;
 
@@ -26,7 +28,7 @@ export async function GET(
 
     // Fetching holiday data from Google Calendar API
     const { data } = await axios.get(
-      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}`
+      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}`
     );
 
     // Map and filter the relevant events
@@ -42,13 +44,19 @@ export async function GET(
         : "Observance",
     }));
 
-    const distinctYears = Array.from(
-      new Set(
-        fetchHolidays
-          .map((holiday) => toGMT8((holiday.start_date)).year()) // Get the year from start_date
-          .filter((year) => !isNaN(year)) // Filter out any invalid years
-      )
-    );
+    const currentYear = toGMT8().year();
+    const yearsArray = [
+      ...Array.from({ length: 5 }, (_, i) => currentYear - 5 + i), // Years down to 5
+      currentYear, // Current year
+      ...Array.from({ length: 5 }, (_, i) => currentYear + i + 1) // Years up to 5
+    ];
+    // const distinctYears = Array.from(
+    //   new Set(
+    //     fetchHolidays
+    //       .map((holiday) => toGMT8((holiday.start_date)).year()) // Get the year from start_date
+    //       .filter((year) => !isNaN(year)) // Filter out any invalid years
+    //   )
+    // );
 
     const googleHolidays = fetchHolidays.filter(
       (event: HolidayEvent) => toGMT8(event.start_date).get("year") === year
@@ -76,7 +84,7 @@ export async function GET(
     const transHolidays = await prisma.trans_holidays.findMany({
       where: {deleted_at: null}
     })
-    return NextResponse.json({combinedHolidays, distinctYears, transHolidays});
+    return NextResponse.json({combinedHolidays, yearsArray, transHolidays});
   } catch (error) {
     console.error("Error fetching holidays:", error);
     return NextResponse.json(

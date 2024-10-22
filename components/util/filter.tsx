@@ -57,10 +57,10 @@ function Filter({filterItems, onChange, filterValue, wrapperClassName}: DataFilt
                     onChange(newFilter)
                 }}
             >
-                {filterItems.map((item) => (<DropdownSection
+                {filterItems.map((item, index) => (<DropdownSection
                     key={item.category}
                     title={item.category}
-                    showDivider
+                    showDivider={index < filterItems.length-1}
                 >
                     {item.filtered.map((data) => (<DropdownItem
                         key={`${data.key}=${data.value}`}

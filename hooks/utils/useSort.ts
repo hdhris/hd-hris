@@ -11,7 +11,7 @@ export function useSort<T>(data: T[], {sort}: SortHookProps = {}) {
     const sortValueFromParams = searchParams.get('sort');
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>(sort || (sortValueFromParams ? JSON.parse(sortValueFromParams) : {
         column: "id",
-        direction: "ascending",
+        direction: "descending",
     }));
 
     

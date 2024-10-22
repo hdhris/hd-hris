@@ -19,6 +19,9 @@ import UserMail from "@/components/common/avatar/user-info-mail";
 import OvertimeModal from "@/components/admin/attendance-time/overtime/view-modal";
 import { objectIncludes } from "@/helper/objects/filterObject";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
+import DataDisplay from "@/components/common/data-display/data-display";
+import { joinNestedKeys } from "@/helper/objects/joinNestedKeys";
+import { NestedKeys } from "@/hooks/types/types";
 
 const statusColorMap: Record<string, "danger" | "success" | "default"> = {
   pending: "default",
@@ -43,10 +46,11 @@ function Page() {
   >();
   const { data, isLoading } = useQuery<OvertimeEntry[]>(
     "/api/admin/attendance-time/overtime",
-    { refreshInterval: 3000}
+    { refreshInterval: 3000 }
   );
   const config: TableConfigProps<OvertimeEntry> = {
     columns: [
+      { uid: "id", name: "ID", sortable: true },
       { uid: "request_date", name: "Request Date", sortable: true },
       { uid: "overtime_date", name: "Overtime Date", sortable: true },
       { uid: "name", name: "Name", sortable: true },
@@ -56,6 +60,10 @@ function Page() {
     ],
     rowCell: (item, columnKey) => {
       switch (columnKey) {
+        case "id":
+          return(
+            <p>{item.id}</p>
+          )
         case "name":
           return (
             <UserMail
@@ -212,31 +220,61 @@ function Page() {
     return null;
   };
 
+  function getKey(key: NestedKeys<OvertimeEntry>) {
+    return joinNestedKeys([key]);
+  }
   return (
     <>
-      <TableData
-        config={config}
-        items={data || []}
-        isLoading={isLoading}
-        isHeaderSticky
-        isStriped
-        searchingItemKey={[
-          ["trans_employees_overtimes", "last_name"],
-          ["trans_employees_overtimes", "first_name"],
-          ["trans_employees_overtimes", "middle_name"],
-          ["trans_employees_overtimes", "email"],
-          ["trans_employees_overtimes_approvedBy", "last_name"],
-          "date",
-        ]}
-        className="h-fit-navlayout"
-        selectionMode="single"
-        aria-label="Overtime entries"
-        onRowAction={(key) => {
-          const item = data?.find((item) => item.id === Number(key));
-          setSelectedOvertime(item);
-          console.log(item);
-          setVisible(true);
+      <DataDisplay
+        title={"Overtime entries"}
+        data={data || []}
+        searchProps={{
+          searchingItemKey: [
+            ["trans_employees_overtimes", "last_name"],
+            ["trans_employees_overtimes", "first_name"],
+            ["trans_employees_overtimes", "middle_name"],
+            ["trans_employees_overtimes", "email"],
+            ["trans_employees_overtimes_approvedBy", "last_name"],
+            "date",
+          ],
         }}
+        filterProps={{
+          filterItems: [
+            {
+              filtered: [
+                ...Array.from(
+                  new Map(
+                    data?.map(item => [
+                      item.trans_employees_overtimes.ref_departments.id,
+                      {
+                        name: item.trans_employees_overtimes.ref_departments.name,
+                        key: getKey(["trans_employees_overtimes", ["ref_departments", "id"]]),
+                        value: item.trans_employees_overtimes.ref_departments.id
+                      }
+                    ])
+                  ).values()
+                ),
+              ],
+              category: "Employee Department",
+            },
+          ],
+        }}
+        onTableDisplay={{
+          config: config,
+          isLoading,
+          onRowAction: (key) => {
+            const item = data?.find((item) => item.id === Number(key));
+            setSelectedOvertime(item);
+            console.log(item);
+            setVisible(true);
+          },
+        }}
+        sortProps={{
+          sortItems: [{
+              key: "created_at", name: "Request Date"
+          },{key:["trans_employees_overtimes","email"], name: "Email"}]
+
+      }}
       />
       <OvertimeModal
         visible={isVisible}

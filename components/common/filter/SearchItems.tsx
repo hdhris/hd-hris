@@ -8,7 +8,7 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 export interface SearchItemsProps<T> {
   key: NestedKeys<T>;
   label: string;
-};
+}
 
 interface SearchProps<T> {
   items: T[];
@@ -27,27 +27,29 @@ function SearchItems<T extends object>({
 
   const refresh = useCallback(
     (value: string) => {
-      const queries = value.toLowerCase().split(" ");
-      let result: T[] = [...items];
-      queries.forEach((query) => {
-        result = result.filter((item) =>
-          config.some((conf) =>
-            humanizeQuery(valueOfObject(item, joinNestedKeys([conf.key])))
-              .toLowerCase()
-              .includes(query)
-          )
-        );
-      });
-      setResults(result);
+      if (items && config) {
+        const queries = value.toLowerCase().split(" ");
+        let result: T[] = [...items];
+        queries.forEach((query) => {
+          result = result.filter((item) =>
+            config.some((conf) =>
+              humanizeQuery(valueOfObject(item, joinNestedKeys([conf.key])))
+                .toLowerCase()
+                .includes(query)
+            )
+          );
+        });
+        setResults(result);
+      }
     },
-    [items, config]
+    [items, config, setResults]
   );
 
   useEffect(() => {
     if (items.length > 0) {
       refresh(searchValue);
     }
-  }, [items, searchValue]);
+  }, [items,refresh, searchValue]);
 
   return (
     <Input

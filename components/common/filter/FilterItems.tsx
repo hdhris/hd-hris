@@ -11,21 +11,23 @@ import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { joinNestedKeys, NestedKeys } from "@/helper/objects/joinNestedKeys";
 import { valueOfObject } from "@/helper/objects/pathGetterObject";
 import DropdownList from "../Dropdown";
-import {IoChevronDown} from "react-icons/io5";
+import { IoChevronDown } from "react-icons/io5";
 
 export interface FilterItemsProps<T> {
-    filter: {
-        label: string; value: any | ((item: T) => boolean);
-    }[];
-    key: NestedKeys<T>;
-    sectionName: string;
+  filter: {
+    label: string;
+    value: any | ((item: T) => boolean);
+  }[];
+  key: NestedKeys<T>;
+  sectionName: string;
+  selectionMode?: "single" | "multipleOR" | "multipleAND";
 }
 
 interface FilterProps<T> {
-    items: T[];
-    config: FilterItemsProps<T>[];
-    setResults: (items: T[]) => void;
-    isLoading?: boolean;
+  items: T[];
+  config: FilterItemsProps<T>[];
+  setResults: (items: T[]) => void;
+  isLoading?: boolean;
 }
 
 function FilterItems<T>({
@@ -34,65 +36,129 @@ function FilterItems<T>({
   setResults,
   isLoading,
 }: FilterProps<T>) {
-  const [selectedKeys, setSelectedKeys] = useState<
-    Record<string, SharedSelection>
+  const [selectedSection, setSelectedSection] = useState<
+    Record<number, SharedSelection>
   >({});
   const refresh = useCallback(
-    (filter: typeof selectedKeys) => {
-      let results = [...items];
-      Object.entries(filter).forEach((keys) => {
-        Array.from(keys).forEach((section) => {
-          const [key, value] = String(Array.from(section)[0]).split(":");
-          const category = config.find((c) => joinNestedKeys([c.key]) === key);
-          if (category) {
-            const filter = category.filter.find(
-              (ft) => String(ft.value) === String(value)
-            );
-            results = results.filter((item) => {
-              if (typeof filter?.value === "function") {
-                return filter?.value(item);
-              } else {
-                // console.log("Object val: ", valueOfObject(item, key));
-                // console.log("Filter val: ", filter?.value);
-                return valueOfObject(item, key) === filter?.value;
+    (filter: typeof selectedSection) => {
+      if (items && config) {
+        let results = [...items];
+        Object.entries(filter).forEach((selecteds) => {
+          // console.log("Keys: ", keys);
+          // console.log("Key 2: ",Array.from(keys)[1])
+          Array.from(selecteds).forEach((selected) => {
+            const selectedSection = Array.from(selected);
+            // console.log(Array.from(selected));
+            if (selectedSection.length > 0) {
+              // console.log("Section: ", selectedSection);
+              const [key, values] = selectedSection.reduce<
+                [number | null, number[]]
+              >(
+                (acc, item) => {
+                  const [k, v] = String(item).split(":").map(Number);
+                  if (!isNaN(k) && !isNaN(v)) {
+                    if (acc[0] === null) acc[0] = k; // Set the key only once
+                    acc[1].push(v); // Push the valid value part
+                  }
+
+                  return acc;
+                },
+                [null, []] // Start with null for the key and an empty array for values
+              );
+
+              if (key !== null && values.length > 0) {
+                const category = config[Number(key)];
+                if (category) {
+                  const validFilters = category.filter.filter((ft, index) =>
+                    values.includes(index)
+                  );
+                  if (category.selectionMode === "multipleOR") {
+                    // Short-circuit evaluation if any filter passes
+                    results = results.filter((item) => {
+                      return validFilters.some((ft) => {
+                        if (typeof ft.value === "function") {
+                          return ft.value(item);
+                        } else {
+                          return (
+                            valueOfObject(
+                              item,
+                              joinNestedKeys([category.key])
+                            ) === ft.value
+                          );
+                        }
+                      });
+                    });
+                  } else {
+                    // multipleAND || single
+                    validFilters.forEach((vf) => {
+                      results = results.filter((item) => {
+                        if (typeof vf.value === "function") {
+                          return vf.value(item);
+                        } else {
+                          return (
+                            valueOfObject(
+                              item,
+                              joinNestedKeys([category.key])
+                            ) === vf.value
+                          );
+                        }
+                      });
+                    });
+                  }
+                }
               }
-            });
-          }
+            }
+          });
         });
-      });
-      setResults(results);
+        setResults(results);
+      }
     },
-    [items, config]
+    [items, config, setResults]
   );
   useEffect(() => {
-    if (items) {
-      refresh(selectedKeys);
+    if (items && selectedSection) {
+      refresh(selectedSection);
     }
-  }, [items, selectedKeys]);
-  const handleSelectChange = (sectionName: string, key: SharedSelection) => {
+  }, [items, refresh, selectedSection]);
+  const handleSelectChange = (sectionIndex: number, key: SharedSelection) => {
     // console.log(Array.from(key));
-    setSelectedKeys((prevKeys) => ({
+    setSelectedSection((prevKeys) => ({
       ...prevKeys,
-      [sectionName]: key,
+      [sectionIndex]: key,
     }));
   };
 
-  const getSectionName = (sectionName: string): ReactElement => {
-    if (selectedKeys && selectedKeys[sectionName]) {
-      const items = Array.from(selectedKeys[sectionName]);
+  const getSectionName = (
+    sectionName: string,
+    sectionIndex: number
+  ): ReactElement => {
+    if (selectedSection && selectedSection[sectionIndex]) {
+      const items = Array.from(selectedSection[sectionIndex]);
       if (items.length > 0) {
-        const [key, value] = String(items[0]).split(":");
-        const category = config.find((c) => joinNestedKeys([c.key]) === key);
+        const [key, values] = items.reduce<[number | null, number[]]>(
+          (acc, item) => {
+            const [k, v] = String(item).split(":").map(Number);
+            if (acc[0] === null) acc[0] = k; // Set the key only once
+            acc[1].push(v); // Push the value part
+            return acc;
+          },
+          [null, []] // Initial value: null for the key and empty array for values
+        );
+        const category = config[key!];
         if (category) {
-          const filter = category.filter.find(
-            (ft) => String(ft.value) === String(value)
-          );
+          const filter = category.filter.filter((ft, index) => {
+            return values.includes(index);
+          });
           return (
             <p className="text-gray-500 text-sm">
               {sectionName}
               {": "}
               <span className="font-semibold text-blue-500">
-                {filter?.label}
+                {filter
+                  .map((ft) => ft.label)
+                  .join(
+                    category.selectionMode === "multipleOR" ? " | " : " & "
+                  )}
               </span>
             </p>
           );
@@ -109,23 +175,23 @@ function FilterItems<T>({
 
   return (
     <div className="flex gap-2 items-center">
-      {config.map((section, index) => (
+      {config.map((section, sectionIndex) => (
         <DropdownList
-          key={index}
+          key={sectionIndex}
           closeOnSelect={false}
-          selectionMode="single"
-          selectedKeys={selectedKeys[section.sectionName] || []}
-          onSelectionChange={(keys) =>
-            handleSelectChange(section.sectionName, keys)
+          selectionMode={
+            section.selectionMode?.includes("multiple") ? "multiple" : "single"
           }
-          items={section.filter.map((item, index) => {
+          selectedKeys={selectedSection[sectionIndex] || []}
+          onSelectionChange={(keys) => handleSelectChange(sectionIndex, keys)}
+          items={section.filter.map((item, filterIndex) => {
             return {
-              key: `${joinNestedKeys([section.key])}:${item.value}`,
+              key: `${sectionIndex}:${filterIndex}`,
               label: item.label,
             };
           })}
           trigger={{
-            label: getSectionName(section.sectionName),
+            label: getSectionName(section.sectionName, sectionIndex),
             props: {
               ...uniformStyle({ color: "default", radius: "md" }),
               variant: "bordered",

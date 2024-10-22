@@ -1,6 +1,6 @@
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { getLocalTimeZone, parseDate } from "@internationalized/date";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDateFormatter } from "@react-aria/i18n";
 import {
   Button,
@@ -8,6 +8,7 @@ import {
   Link,
   Select,
   SelectItem,
+  SharedSelection,
 } from "@nextui-org/react";
 import { toast } from "@/components/ui/use-toast";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
@@ -40,52 +41,56 @@ function DatePickerUi({
     start: parseDate(toGMT8().format("YYYY-MM-DD")),
     end: parseDate(toGMT8().format("YYYY-MM-DD")),
   });
-  const handleYearChange = (e: any) => {
-    setSelectedYear(e.target.value);
+  const handleYearChange = (key: SharedSelection) => {
+    const year = Array.from(key)[0].toString();
+    setSelectedYear(year);
     setSelectedDate(
       String(
         payrollDates?.filter(
-          (item) => toGMT8(item.start_date).year() === Number(e.target.value)
+          (item) => toGMT8(item.start_date).year() === Number(year)
         )[0].id
       )
     );
   };
-  const handleDateChange = (e: any) => {
-    setSelectedDate(e.target.value);
+  const handleDateChange = (key: SharedSelection) => {
+    setSelectedDate(Array.from(key)[0].toString());
   };
-  function getProcessDate() {
-    return payrollDates?.find((i) => i.id === Number(selectedDate));
-  }
+  const getProcessDate = useMemo(() => {
+    if (payrollDates && selectedDate) {
+      return payrollDates?.find((i) => i.id === Number(selectedDate));
+    }
+  }, [payrollDates, selectedDate]);
   useEffect(() => {
     if (payrollDates) {
-      setSelectedYear(
-        toGMT8(payrollDates[0]?.start_date).format("YYYY")
-      );
+      setSelectedYear(toGMT8(payrollDates[0]?.start_date).format("YYYY"));
       setSelectedDate(String(payrollDates[0]?.id));
     }
   }, [payrollDates]);
   useEffect(() => {
-    const fetchPayrollData = async () => {
-      setIsLoading(true); // Start loading
-      try {
-        const response: AxiosResponse<PayrollTable> = await axiosInstance.get(
-          `/api/admin/payroll/process/${toGMT8(
-            getProcessDate()?.start_date
-          ).format("YYYY-MM-DD")},${toGMT8(getProcessDate()?.end_date).format(
-            "YYYY-MM-DD"
-          )}`
-        );
-        setPayrollData(response.data);
-      } catch (error) {
-        console.error("Error fetching payroll data:", error);
-        // setError("Failed to load payroll data.");
-      } finally {
-        setIsLoading(false); // End loading
-      }
-    };
+    if (getProcessDate && setIsLoading && setPayrollData) {
+      console.log("Flag");
+      const fetchPayrollData = async () => {
+        setIsLoading(true); // Start loading
+        try {
+          const response: AxiosResponse<PayrollTable> = await axiosInstance.get(
+            `/api/admin/payroll/process/${toGMT8(
+              getProcessDate.start_date
+            ).format("YYYY-MM-DD")},${toGMT8(
+              getProcessDate.end_date
+            ).format("YYYY-MM-DD")}`
+          );
+          setPayrollData(response.data);
+        } catch (error) {
+          console.error("Error fetching payroll data:", error);
+          // setError("Failed to load payroll data.");
+        } finally {
+          setIsLoading(false); // End loading
+        }
+      };
 
-    fetchPayrollData(); // Fetch data when component mounts or `selectedDate` changes
-  }, [selectedDate]);
+      fetchPayrollData();
+    }
+  }, [getProcessDate, setIsLoading, setPayrollData]);
   async function handleAddDate() {
     try {
       await axios.post("/api/admin/payroll/process/add-date", {
@@ -177,7 +182,7 @@ function DatePickerUi({
         </>
       ) : (
         <>
-          {!getProcessDate()?.is_processed && (
+          {!getProcessDate?.is_processed && (
             <Link
               className="text-blue-500 cursor-pointer"
               onClick={async () => {
@@ -204,7 +209,7 @@ function DatePickerUi({
             </Link>
           )}
           <p className="text-default-500 text-sm">
-            {getProcessDate()?.is_processed ? (
+            {getProcessDate?.is_processed ? (
               <span className="text-success">Proceessed</span>
             ) : (
               "Processing"
@@ -215,7 +220,7 @@ function DatePickerUi({
             variant="bordered"
             // placeholder="Select an animal"
             items={
-                payrollDates?.filter((item) => {
+              payrollDates?.filter((item) => {
                 const startYear = toGMT8(item.start_date).year();
                 const endYear = toGMT8(item.end_date).year();
                 return (
@@ -226,10 +231,10 @@ function DatePickerUi({
             }
             isLoading={prtLoading}
             disallowEmptySelection
-            selectedKeys={[selectedDate]}
+            selectedKeys={new Set([selectedDate])}
             className="w-36"
             {...uniformStyle()}
-            onChange={handleDateChange}
+            onSelectionChange={handleDateChange}
           >
             {(item) => (
               <SelectItem key={item.id}>{`${toGMT8(item.start_date).format(
@@ -244,17 +249,15 @@ function DatePickerUi({
             items={
               Array.from(
                 new Set(
-                    payrollDates?.map((item) =>
-                    toGMT8(item.start_date).year()
-                  )
+                  payrollDates?.map((item) => toGMT8(item.start_date).year())
                 )
               ).map((year) => ({ label: year.toString(), value: year })) || []
             }
             disallowEmptySelection
-            selectedKeys={[selectedYear]}
+            selectedKeys={new Set([selectedYear])}
             className="w-28"
             {...uniformStyle()}
-            onChange={handleYearChange}
+            onSelectionChange={handleYearChange}
           >
             {(item) => <SelectItem key={item.value}>{item.label}</SelectItem>}
           </Select>

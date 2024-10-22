@@ -18,7 +18,7 @@ import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
-import { useAxiosGet } from "@/lib/utils/axiosGetPost";
+import { useQuery } from "@/services/queries";
 
 const modeType = ["Password", "Fingerprint", "Card", "Face ID", "Other"];
 const punchType = ["IN", "OUT"];
@@ -56,17 +56,17 @@ const calculateStatus = (
 
 export default function Page() {
   const [date, setDate] = useState(parseDate(toGMT8().format("YYYY-MM-DD")));
-  const {
-    data: attendanceLog,
-    isLoading,
-    setApi,
-  } = useAxiosGet<AttendanceLog[]>(
+  const [api, setApi] = useState(
     `/api/admin/attendance-time/records/${toGMT8().format("YYYY-MM-DD")}`
   );
-  const { data, setApi: setInfoApi } = useAxiosGet<{
+  const [schedApi, setInfoApi] = useState(
+    "/api/admin/attendance-time/schedule"
+  );
+  const { data: attendanceLog, isLoading } = useQuery<AttendanceLog[]>(api);
+  const { data } = useQuery<{
     batch: BatchSchedule[];
     emp_sched: EmployeeSchedule[];
-  }>("/api/admin/attendance-time/schedule");
+  }>(schedApi);
 
   const [selectedKey, setSelectedKey] = useState<any>("");
 
@@ -162,12 +162,12 @@ export default function Page() {
           aria-label="Date (Controlled)"
           showMonthAndYearPickers
           value={date}
-          onChange={(value)=>{
-            setDate(value)
+          onChange={(value) => {
+            setDate(value);
             setApi(
-              `/api/admin/attendance-time/records/${toGMT8(value.toString()).format(
-                "YYYY-MM-DD"
-              )}`
+              `/api/admin/attendance-time/records/${toGMT8(
+                value.toString()
+              ).format("YYYY-MM-DD")}`
             );
             setInfoApi("/api/admin/attendance-time/schedule");
           }}

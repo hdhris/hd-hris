@@ -21,6 +21,6 @@ export interface HolidayEvent {
 
   export interface HolidayData {
     combinedHolidays: HolidayEvent[],
-    distinctYears: number[];
+    yearsArray: number[];
     transHolidays: TransHoliday[],
   }
