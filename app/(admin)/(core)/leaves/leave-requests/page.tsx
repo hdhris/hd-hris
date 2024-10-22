@@ -78,32 +78,28 @@ function Page() {
     >
         File Leave
     </Button>)
-    return (
-        <DataDisplay
-         data={allRequests || []}
-         title="Leave Requests"
-         filterProps={{
-             filterItems: FilterItems
-         }}
-         onTableDisplay={{
-             config: TableConfigurations,
-             isLoading,
-             layout: "auto"
-         }}
-         searchProps={{
-             searchingItemKey: ["name"]
-         }}
-         sortProps={{
-             sortItems: [{
-                 name: "ID", key: "id"
-             }]
-         }}
+    return (<DataDisplay
+            defaultDisplay="list"
+            data={allRequests || []}
+            title="Leave Requests"
+            filterProps={{
+                filterItems: FilterItems
+            }}
+            onTableDisplay={{
+                config: TableConfigurations, isLoading, layout: "auto"
+            }}
+            searchProps={{
+                searchingItemKey: ["name"]
+            }}
+            sortProps={{
+                sortItems: [{
+                    name: "ID", key: "id"
+                }]
+            }}
 
-        onListDisplay={(data) => {
-            return (
-                <BorderCard>{data.name}</BorderCard>
-            )
-        }}
+            onListDisplay={(data) => {
+                return (<BorderCard>{data.name}</BorderCard>)
+            }}
         />
 
     );
