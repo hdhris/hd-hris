@@ -235,13 +235,13 @@ function HolidayForm({
             type="submit"
             {...uniformStyle()}
           >
-            {selectedItem?.id ? "Create" : "Update"}
+            {!selectedItem?.id ? "Create" : "Update"}
           </Button>
         </div>
       }
     >
       <Form {...form}>
-        <form id="drawer-form" onSubmit={form.handleSubmit(handleSubmit)}>
+        <form id="drawer-form" className="space-y-2" onSubmit={form.handleSubmit(handleSubmit)}>
           <FormFields
             items={[
               {
