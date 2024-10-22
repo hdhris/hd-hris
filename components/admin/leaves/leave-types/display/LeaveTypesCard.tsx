@@ -9,11 +9,10 @@ import Body from "@/components/admin/leaves/leave-types/display/action-control/B
 import {useFormTable} from "@/components/providers/FormTableProvider";
 import {LeaveTypesKey} from "@/types/leaves/LeaveTypes";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
-import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
-import LeaveTypeForm from "@/components/admin/leaves/leave-types/form/LeaveTypeForm";
 import NoData from "@/components/common/no-data/NoData";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
+
 
 function LeaveTypesCard() {
 
@@ -50,12 +49,10 @@ function LeaveTypesCard() {
                     setLeaveTypes((prev) => prev.filter((item) => item.key !== deletedItem.key));
                     try {
                         // Send delete request
-                        const res =await axiosInstance.post("/api/admin/leaves/leave-types/delete", key);
-                        if(res.status === 200){
+                        const res = await axiosInstance.post("/api/admin/leaves/leave-types/delete", key);
+                        if (res.status === 200) {
                             toast({
-                                title: "Delete",
-                                description: "Leave type deleted successfully",
-                                variant: "success"
+                                title: "Delete", description: "Leave type deleted successfully", variant: "success"
                             })
                         }
                     } catch (error) {
@@ -80,7 +77,7 @@ function LeaveTypesCard() {
     }, [formData, leaveTypes]); // Ensure leaveTypes is included in the dependency array
 
 
-    SetNavEndContent(() => (<LeaveTypeForm/>));
+    // SetNavEndContent(() => (<LeaveTypeForm/>));
     if (isLoading) return <Loading/>
     if (!data && !isLoading || error) return <NoData/>
     // Effect for setting nav end content
@@ -89,10 +86,9 @@ function LeaveTypesCard() {
             <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] place-items-center gap-5">
                 <GridCard
                     data={leaveTypes?.sort((a, b) => a.name.localeCompare(b.name))}
-                    header={({key, name, is_active}) => (
-                        <Header id={key}
-                                name={name}
-                                is_active={is_active}/>)}
+                    header={({key, name, is_active}) => (<Header id={key}
+                                                                 name={name}
+                                                                 is_active={is_active}/>)}
                     body={({employee_count, min_duration, max_duration, code, carry_over}) => (
                         <Body employee_count={employee_count}
                               duration_range={`${min_duration} - ${max_duration}`}
