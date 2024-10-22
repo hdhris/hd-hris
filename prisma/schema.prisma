@@ -41,17 +41,18 @@ model dim_incident_reports {
 }
 
 model dim_leave_balances {
-  id                 Int              @id @default(autoincrement())
-  employee_id        Int?
-  year               Int?
-  allocated_days     Int?
-  used_days          Int?
-  remaining_days     Int?
-  carry_forward_days Int?
-  created_at         DateTime         @db.Timestamp(6)
-  updated_at         DateTime         @db.Timestamp(6)
-  deleted_at         DateTime?        @db.Timestamp(6)
-  trans_employees    trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_leave_balances_trans_employees_1")
+  id                 Int             @id @default(autoincrement())
+  employee_id        Int
+  year               Int
+  allocated_days     Decimal         @default(0) @db.Decimal(10, 2)
+  used_days          Decimal         @default(0) @db.Decimal(10, 2)
+  remaining_days     Decimal         @default(0) @db.Decimal(10, 2)
+  carry_forward_days Decimal         @default(0) @db.Decimal(10, 2)
+  created_at         DateTime        @db.Timestamp(6)
+  updated_at         DateTime        @db.Timestamp(6)
+  deleted_at         DateTime?       @db.Timestamp(6)
+  total_earned_days  Decimal         @default(0) @db.Decimal(10, 2)
+  trans_employees    trans_employees @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_leave_balances_trans_employees_1")
 }
 
 model dim_payhead_affecteds {
@@ -236,14 +237,14 @@ model ref_job_classes {
 }
 
 model ref_leave_types {
-  id                           Int            @id @default(autoincrement())
+  id                           Int                   @id @default(autoincrement())
   accrual_frequency            String
   accrual_rate                 Int
   applicable_to_employee_types String
   attachment_required          Boolean
   code                         String
-  created_at                   DateTime       @db.Timestamp(6)
-  deleted_at                   DateTime?      @db.Timestamp(6)
+  created_at                   DateTime              @db.Timestamp(6)
+  deleted_at                   DateTime?             @db.Timestamp(6)
   description                  String
   is_active                    Boolean
   max_accrual                  Int
@@ -252,8 +253,9 @@ model ref_leave_types {
   name                         String
   notice_required              Int
   paid_leave                   Boolean
-  updated_at                   DateTime?      @db.Timestamp(6)
+  updated_at                   DateTime?             @db.Timestamp(6)
   carry_over                   Boolean
+  fact_leave_earnings          fact_leave_earnings[]
   trans_leaves                 trans_leaves[]
 }
 
@@ -447,6 +449,8 @@ model trans_employees {
   dim_payhead_affecteds                                                  dim_payhead_affecteds[]
   dim_schedules                                                          dim_schedules[]
   dim_training_participants                                              dim_training_participants[]
+  fact_leave_earnings_fact_leave_earnings_employee_idTotrans_employees   fact_leave_earnings[]          @relation("fact_leave_earnings_employee_idTotrans_employees")
+  fact_leave_earnings_fact_leave_earnings_created_byTotrans_employees    fact_leave_earnings[]          @relation("fact_leave_earnings_created_byTotrans_employees")
   fact_performance_evaluations                                           fact_performance_evaluations[]
   log_attendances                                                        log_attendances[]
   sys_notifications                                                      sys_notifications[]
@@ -654,4 +658,21 @@ model trans_holidays {
   deleted_at          DateTime? @db.Timestamp(6)
   date                DateTime? @db.Date
   name                String?
+}
+
+model fact_leave_earnings {
+  id                                                               Int             @id @default(autoincrement())
+  employee_id                                                      Int
+  leave_type_id                                                    Int
+  earned_days                                                      Decimal         @db.Decimal(10, 2)
+  earning_date                                                     DateTime        @db.Date
+  accrual_period_start                                             DateTime        @db.Date
+  accrual_period_end                                               DateTime        @db.Date
+  created_at                                                       DateTime        @db.Timestamp(6)
+  created_by                                                       Int
+  ref_leave_types                                                  ref_leave_types @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_leave_earnings_ref_leave_types_1")
+  trans_employees_fact_leave_earnings_employee_idTotrans_employees trans_employees @relation("fact_leave_earnings_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_leave_earnings_trans_employees_1")
+  trans_employees_fact_leave_earnings_created_byTotrans_employees  trans_employees @relation("fact_leave_earnings_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_leave_earnings_trans_employees_2")
+
+  @@index([employee_id, leave_type_id], map: "idx_fact_leave_earnings_employee_leave_type")
 }

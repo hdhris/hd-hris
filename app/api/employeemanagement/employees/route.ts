@@ -76,12 +76,12 @@ function handleError(error: unknown, operation: string) {
     { status: 500 }
   );
 }
-
+// to show the data to terminal
 // Log Operations for Debugging
-function logDatabaseOperation(operation: string, result: any) {
-  console.log(`Database operation: ${operation}`);
-  console.log("Result:", JSON.stringify(result, null, 2));
-}
+// function logDatabaseOperation(operation: string, result: any) {
+//   console.log(`Database operation: ${operation}`);
+//   console.log("Result:", JSON.stringify(result, null, 2));
+// }
 
 // POST: Create a new employee
 export async function POST(req: NextRequest) {
@@ -158,7 +158,7 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
       });
     }
 
-    logDatabaseOperation("CREATE employee", employee);
+    // logDatabaseOperation("CREATE employee", employee);
     return employee;
   } catch (error) {
     console.error("Error creating employee:", error);
@@ -217,12 +217,12 @@ async function getEmployeeById(id: number, daysJson?: Record<string, boolean>) {
     },
   });
 
-  logDatabaseOperation("GET employee by ID", employee);
+  // logDatabaseOperation("GET employee by ID", employee);
   if (!employee) throw new Error("Employee not found");
   return employee;
 }
 
-// Fetch all employees-leaves-status
+// Fetch all employees
 async function getAllEmployees(daysJson?: Record<string, boolean>) {
   const employees = await prisma.trans_employees.findMany({
     where: {
@@ -248,7 +248,7 @@ async function getAllEmployees(daysJson?: Record<string, boolean>) {
     },
   });
 
-  logDatabaseOperation("GET all employees-leaves-status", employees);
+  // logDatabaseOperation("GET all employees", employees);
   return employees;
 }
 
@@ -326,7 +326,7 @@ async function updateEmployee(
     });
   }
 
-  logDatabaseOperation("UPDATE employee", employee);
+  // logDatabaseOperation("UPDATE employee", employee);
   return employee;
 }
 async function updateEmployeeStatus(
@@ -393,7 +393,7 @@ export async function DELETE(req: NextRequest) {
       where: { id: parseInt(id) },
       data: { deleted_at: new Date() },
     });
-    logDatabaseOperation("DELETE employee", employee);
+    // logDatabaseOperation("DELETE employee", employee);
     return NextResponse.json({ message: "Employee deleted successfully" });
   } catch (error) {
     return handleError(error, "delete");

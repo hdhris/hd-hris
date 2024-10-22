@@ -30,8 +30,8 @@ function useSearch<T>(items: T[], searchingItemKey?: NestedKeys<T>[]) {
         window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
     };
 
-    if (searchingItemKey) {
-        itemSearched = items.filter(item => searchingItemKey.some(key => {
+    if (searchingItemKey?.length! > 0) {
+        itemSearched = items.filter(item => searchingItemKey?.some(key => {
             const value = valueOfObject(item, joinNestedKeys([key])); // valueOfObject can be a utility to get nested object values
             return value?.toString().toLowerCase().includes(String(searchValue.toLowerCase()));
         }));

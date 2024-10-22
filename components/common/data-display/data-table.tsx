@@ -9,7 +9,7 @@ import {DataTableProps} from "@/components/common/data-display/types/types";
 function DataTable<T extends { id: string | number } >({
                           data, config, isLoading = false, emptyContent, ...props
                       }: DataTableProps<T>) {
-    const loadingState = isLoading && data.length === 0 ? "loading" : "idle";
+    const loadingState = isLoading ? "loading" : "idle";
     const emptyContentMessage = data.length === 0 && !isLoading ? emptyContent || 'No data found. Try to refresh' : null;
     return (<ScrollShadow size={20} className='flex-1'>
             <Table

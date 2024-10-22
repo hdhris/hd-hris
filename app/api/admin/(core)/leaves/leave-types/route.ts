@@ -3,6 +3,7 @@ import prisma from "@/prisma/prisma";
 import { getPaginatedData } from "@/server/pagination/paginate"; // Import the reusable function
 import { LeaveType } from "@/types/leaves/LeaveTypes";
 import { capitalize } from "@nextui-org/shared-utils";
+import {getEmpFullName} from "@/lib/utils/nameFormatter";
 
 export const dynamic = "force-dynamic";
 
@@ -10,10 +11,10 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get('page') || '1');  // Default to page 1
-        const perPage = parseInt(searchParams.get('limit') || '5');  // Default to 5 results per page
+        const perPage = parseInt(searchParams.get('limit') || '5');  // Default to 15 results per page
 
         // Use the reusable pagination function with Prisma model
-        const { data, totalItems, totalPages, currentPage } = await getPaginatedData<LeaveType>(
+        const { data, totalItems, currentPage } = await getPaginatedData<LeaveType>(
             prisma.ref_leave_types,  // The Prisma model
             page,
             perPage,
@@ -21,22 +22,64 @@ export async function GET(request: Request) {
             { name: 'asc' }  // Order by name
         );
 
-        // Further processing for employee count, mapping etc.
-        const employee_count_leaves_types = await prisma.trans_leaves.groupBy({
-            by: ["type_id"],
-            where: {
-                employee_id: {
-                    not: null
+        // Fetch employee counts and employee details concurrently
+        // Fetch employee counts and employee details concurrently
+        const [employeeCountData, employees] = await Promise.all([
+            prisma.trans_leaves.groupBy({
+                by: ["type_id", "employee_id"],
+                where: {
+                    employee_id: {
+                        not: null,
+                    },
+                },
+            }),
+            prisma.trans_employees.findMany({
+                select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    middle_name: true,
+                    prefix: true,
+                    suffix: true,
+                    extension: true,
+                    picture: true,
+                },
+                where: {
+                    deleted_at: null,
+                },
+            }),
+        ]);
+
+// Create a map for current employees by type_id for faster lookup
+        const employeeMap = new Map<number, number[]>();
+
+// Populate the map with employee IDs grouped by type_id
+        employeeCountData.forEach(empCount => {
+            if (empCount.type_id !== null && empCount.employee_id !== null) {
+                const typeId = empCount.type_id as number;
+                const employeeId = empCount.employee_id as number;
+
+                // If the map already has this type_id, push the employee_id to the existing array
+                if (employeeMap.has(typeId)) {
+                    employeeMap.get(typeId)?.push(employeeId);
+                } else {
+                    // Otherwise, create a new array with the employee_id
+                    employeeMap.set(typeId, [employeeId]);
                 }
-            },
-            _count: {
-                employee_id: true
             }
         });
 
-
+// Map the leave types with current employee details
         const result = data.map(leaveType => {
-            const countData = employee_count_leaves_types.find((leave) => leave.type_id === leaveType.id);
+            const currentEmployeesIds = employeeMap.get(leaveType.id) || [];
+            const empAvails = employees.filter(employee => currentEmployeesIds.includes(employee.id)).map((emp)=> {
+                return {
+                    id: emp.id,
+                    name: getEmpFullName(emp),
+                    picture: emp.picture
+                }
+
+            });
             return {
                 id: leaveType.id,
                 name: leaveType.name,
@@ -55,7 +98,7 @@ export async function GET(request: Request) {
                 paid_leave: leaveType.paid_leave,
                 updated_at: leaveType.updated_at,
                 carry_over: leaveType.carry_over,
-                employee_count: countData ? countData._count.employee_id : 0
+                current_employees: empAvails,
             };
         }) as unknown as LeaveType[];
 
@@ -64,7 +107,6 @@ export async function GET(request: Request) {
             currentPage,
             perPage,
             totalItems,
-            // totalPages
         });
     } catch (err) {
         console.error("Error: ", err);

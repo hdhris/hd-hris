@@ -3,9 +3,6 @@ import {NextRequest, NextResponse} from "next/server";
 import {z} from "zod";
 import prisma from "@/prisma/prisma";
 
-const LeaveType = z.object({
-    id: z.number().min(1, "Id must be greater than 0"),
-})
 
 export async function POST(request: NextRequest) {
     try {
@@ -15,14 +12,25 @@ export async function POST(request: NextRequest) {
         // Parse request body
         const data = await request.json();
 
-        console.log(data)
-        // Validate using Zod schema
-        const parsedData = LeaveType.safeParse(data);
+        // const hasEmployeeAvail = await prisma.trans_leaves.groupBy({
+        //     by: ['type_id'],
+        //     where: {
+        //         employee_id: {
+        //             not: null
+        //         }
+        //     }, _count: {
+        //         type_id: true
+        //     }
+        // })
+
+        console.log("Ids: ", data);
 
         // Update the leave type to mark as deleted
-        const result = await prisma.ref_leave_types.update({
+        await prisma.ref_leave_types.updateMany({
             where: {
-                id: data
+                id: {
+                    in: data
+                }
             },
             data: {
                 deleted_at: new Date()
@@ -33,11 +41,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             success: true,
             message: "Leave type deleted successfully.",
-            data: result
         });
 
     } catch (error: any) {
-        let errorMessage = "An unexpected error occurred.";
+        console.log("Error: ", error);
+        let errorMessage;
 
         // Handle Zod validation errors
         if (error instanceof z.ZodError) {

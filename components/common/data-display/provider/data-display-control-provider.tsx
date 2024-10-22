@@ -27,24 +27,27 @@ export const useDataDisplayControl = <T,>(): DataDisplayControlContext<T> => {
 interface DataDisplayControlProviderProps<T> {
     children: React.ReactNode
     values: T[]
+    defaultDisplay: DisplayType
 }
 
 
 
 
-export const DataDisplayControlProvider = <T,>({children, values}: DataDisplayControlProviderProps<T>) => {
+export const DataDisplayControlProvider = <T,>({children, values, defaultDisplay}: DataDisplayControlProviderProps<T>) => {
     // const {values} = useDataDisplay<T>()
     const [dataDisplay, setDataDisplay] = useState<T[]>(values);
     const [selectedKeys, setSelectedKeys] = useState<Selection | null>(null)
-    const [display, setDisplay] = useState<DisplayType>("table")
+    const [display, setDisplay] = useState<DisplayType>(defaultDisplay)
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor | null>(null)
+
 
     useEffect(() => {
         setDataDisplay(values);
     }, [values]); // Trigger the effect when `values` changes
 
-
-
+    useEffect(() => {
+        setDisplay(defaultDisplay);
+    }, [defaultDisplay]);
     return (
         <DataDisplayControlContext.Provider
             value={{

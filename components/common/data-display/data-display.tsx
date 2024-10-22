@@ -1,14 +1,12 @@
+"use client"
 import React, {ReactNode, useCallback, useEffect} from 'react';
 import DataDisplayControl from "@/components/common/data-display/controls/data-display-control";
 import {
-    DataDisplayControlProvider,
-    useDataDisplayControl
+    DataDisplayControlProvider, DisplayType, useDataDisplayControl
 } from "@/components/common/data-display/provider/data-display-control-provider";
 import DataTable from "@/components/common/data-display/data-table";
 import {
-    DataDisplayControlProps,
-    DataImportAndExportProps,
-    DataTableProps
+    DataDisplayControlProps, DataImportAndExportProps, DataTableProps
 } from "@/components/common/data-display/types/types";
 import {TableConfigProps} from "@/types/table/TableDataTypes";
 import {Case, Switch} from "@/components/common/Switch";
@@ -20,13 +18,15 @@ import {AnimatedList} from '@/components/ui/animated-list';
 
 interface DataDisplayProps<T> extends RenderDisplayProps<T> {
     data: T[]
+    defaultDisplay: DisplayType
 }
 
 type DataDisplayType<T> =
-    Omit<DataDisplayControlProps<T>, "children" | "isList" | "isGrid" | "isTable" | "isImport" | "isExport">
+    Omit<DataDisplayControlProps<T>, "children" | "isList" | "isGrid" | "isTable" | "isImport" | "isExport" | "onDeleteSelected">
     & DataDisplayProps<T>
 
 function DataDisplay<T extends { id: string | number }>({
+                                                            defaultDisplay,
                                                             data,
                                                             searchProps,
                                                             sortProps,
@@ -39,7 +39,7 @@ function DataDisplay<T extends { id: string | number }>({
                                                         }: DataDisplayType<T>) {
 
 
-    return (<DataDisplayControlProvider values={data}>
+    return (<DataDisplayControlProvider values={data} defaultDisplay={defaultDisplay}>
         <DataDisplayControl
             title={rest.title}
             className={className}
@@ -54,10 +54,11 @@ function DataDisplay<T extends { id: string | number }>({
             isTable={!!rest.onTableDisplay}
             onExport={rest.onExport}
             onImport={rest.onImport}
+            onDeleteSelected={rest.onDeleteSelected!}
         >
             {(data: T[], sortDescriptor, onSortChange) => {
                 return (<RenderDisplay data={data} onTableDisplay={{
-                    ...rest.onTableDisplay, sortDescriptor, onSortChange
+                    ...rest.onTableDisplay!, sortDescriptor: sortDescriptor, onSortChange: onSortChange
                 }}
                                        onGridDisplay={rest.onGridDisplay}
                                        onListDisplay={rest.onListDisplay}
@@ -70,33 +71,33 @@ function DataDisplay<T extends { id: string | number }>({
 
 export default DataDisplay;
 
-interface DataDisplayTableProps<T> extends DataTableProps<T> {
-    config: TableConfigProps<T>;
+interface DataDisplayTableProps<T> extends Omit<DataTableProps<T>, "config"> {
+    config?: TableConfigProps<T>;
 }
 
 
 interface RenderDisplayProps<T> {
-    onTableDisplay: Omit<DataDisplayTableProps<T>, "data">;
+    onTableDisplay?: Omit<DataDisplayTableProps<T>, "data">;
     onGridDisplay?: (data: T, key: number | string) => ReactNode;
     onListDisplay?: (data: T, key: number | string) => ReactNode;
     onImport?: DataImportAndExportProps;
     onExport?: DataImportAndExportProps;
+    onDeleteSelected?: (keys: Selection) => void;
     data: T[];
-    query?: string
 }
 
 const RenderDisplay = <T extends { id: string | number }>({
-                                                              onTableDisplay, onGridDisplay, onListDisplay, data, query
+                                                              onTableDisplay, onGridDisplay, onListDisplay, data
                                                           }: RenderDisplayProps<T>) => {
 
     const newData = data.map(item => ({key: item.id, ...item}));
 
+
     const {display} = useDataDisplayControl();
     return (<Switch expression={display}>
         <Case of="table">
-            <DataDisplayTable data={data} {...onTableDisplay} />
+            {onTableDisplay && <DataDisplayTable data={data} {...onTableDisplay} />}
         </Case>
-
         <Case of="grid">
             <ScrollShadow className="flex-1">
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] place-items-center gap-5">
@@ -148,7 +149,7 @@ const DataDisplayTable = <T extends { id: string | number }, >({data, config, ..
         isHeaderSticky
         removeWrapper
         data={data}
-        config={config}
+        config={config!}
         onSelectionChange={onSelectionChange}
 
         // onSortChange={setSortDescriptor}

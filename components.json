@@ -12,6 +12,6 @@
     },
     "aliases": {
       "components": "@/components",
-      "utils": "@nextui/react"
+      "utils": "@nextui-org/react"
     }
   }

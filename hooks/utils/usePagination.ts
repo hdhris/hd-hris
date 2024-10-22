@@ -51,7 +51,9 @@ export function usePagination<T>(data: T[], {rowsPerPage = 5, totalItems}: Pagin
         router.replace(`?${searchParams.toString()}`);
         setPage(newPage);
     };
+
+    // console.log("Total:", totalItems)
     return {
-        rows, page, totalPages, onPageChange, paginatedData, setRows
+        rows, page, totalPages, onPageChange, paginatedData, setRows, totalRows: totalItems
     };
 }

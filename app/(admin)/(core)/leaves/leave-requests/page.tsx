@@ -8,6 +8,7 @@ import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {FilterItems, TableConfigurations} from "@/components/admin/leaves/table-config/approval-tables-configuration";
+import BorderCard from "@/components/common/BorderCard";
 
 // const getRequests = unstable_cache(async () => {
 //     return prisma.trans_leaves.findMany({
@@ -77,26 +78,29 @@ function Page() {
     >
         File Leave
     </Button>)
-    return (
-        <DataDisplay
-         data={allRequests || []}
-         title="Leave Requests"
-         filterProps={{
-             filterItems: FilterItems
-         }}
-         onTableDisplay={{
-             config: TableConfigurations,
-             isLoading,
-             layout: "auto"
-         }}
-         searchProps={{
-             searchingItemKey: ["name"]
-         }}
-         sortProps={{
-             sortItems: [{
-                 name: "ID", key: "id"
-             }]
-         }} />
+    return (<DataDisplay
+            defaultDisplay="list"
+            data={allRequests || []}
+            title="Leave Requests"
+            filterProps={{
+                filterItems: FilterItems
+            }}
+            onTableDisplay={{
+                config: TableConfigurations, isLoading, layout: "auto"
+            }}
+            searchProps={{
+                searchingItemKey: ["name"]
+            }}
+            sortProps={{
+                sortItems: [{
+                    name: "ID", key: "id"
+                }]
+            }}
+
+            onListDisplay={(data) => {
+                return (<BorderCard>{data.name}</BorderCard>)
+            }}
+        />
 
     );
 }

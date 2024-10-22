@@ -5,7 +5,6 @@ import {LeaveType} from "@/types/leaves/LeaveTypes";
 import React from "react";
 import {Case, Default, Switch} from "@/components/common/Switch";
 import Typography from "@/components/common/typography/Typography";
-import {TableActionButton} from "@/components/actions/ActionButton";
 import {Status} from "@/components/status/Status";
 import {LuCheckCheck, LuX} from "react-icons/lu";
 import {ChipProps, cn} from "@nextui-org/react";
@@ -24,13 +23,9 @@ const LeaveTypesTableColumns: ColumnsProps[] = [{
 }, {
     name: "Duration Range", uid: "duration_range"
 }, {
-    name: "Employee Avails", uid: "employee_count", sortable: true
-}, {
     name: "Paid Leave", uid: "paid_leave"
 }, {
     name: "Status", uid: "is_active"
-}, {
-    name: "Action", uid: "action", sortable: true
 }]
 
 const employee_types_color_map: Record<string, ChipProps["color"]> = {
@@ -52,7 +47,7 @@ export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
                 <div className="rounded-full size-8 grid place-items-center " style={{
                     background: rgbaColor,
                 }}>
-                    <Typography className="font-semibold">{cellValue}</Typography>
+                    <Typography className="font-semibold">{String(cellValue)}</Typography>
                 </div>
 
             </Case>
@@ -78,24 +73,15 @@ export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
                     {item.is_active ? "Active" : "Inactive"}
                 </Status>
             </Case>
-            <Case of="action">
-                <TableActionButton
-                    name={item.name}
-                    onEdit={() => {
-
-                    }}
-                    onDelete={() => {
-
-                    }}
-                />
-            </Case>
-            <Case of="employee_count">
-                <div className="rounded-full bg-slate-500/20 size-5 grid place-items-center ">
-                    <Typography className="font-semibold">{cellValue}</Typography>
-                </div>
-            </Case>
+            {/*<Case of="actions">*/}
+            {/*    <TableActionButton*/}
+            {/*        name={item.name}*/}
+            {/*        onDelete={() => handleDelete(item.id)}*/}
+            {/*        onEdit={() => handleEdit(item.id)}*/}
+            {/*    />*/}
+            {/*</Case>*/}
             <Default>
-                {cellValue}
+                {String(cellValue)}
             </Default>
         </Switch>)
     }

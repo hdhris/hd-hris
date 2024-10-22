@@ -9,11 +9,11 @@ export interface DataImportAndExportProps {
     drawerProps: Omit<DrawerProps, "onClose" | "isOpen" | "children">
 }
 export interface DataDisplayControlProps<T> extends DataControlProps {
-    title: string
+    title?: string
     children: (data: T[], sortDescriptor?: SortDescriptor, onSortChange?: (value: SortDescriptor) => void) => ReactNode
-    searchProps: Omit<SearchProps<T>, "onChange">
-    filterProps: Omit<DataFilterProps, "onChange" | "filterValue">
-    sortProps: Omit<SortProps<T>, "onSortChange" | "initialValue">
+    searchProps?: Omit<SearchProps<T>, "onChange">
+    filterProps?: Omit<DataFilterProps, "onChange" | "filterValue">
+    sortProps?: Omit<SortProps<T>, "onSortChange" | "initialValue">
     paginationProps?: Omit<PaginationProps, "total"> & {
         data_length?: number
     }
@@ -26,6 +26,7 @@ export interface DataDisplayControlProps<T> extends DataControlProps {
     isList: boolean
     onExport?: DataImportAndExportProps
     onImport?: DataImportAndExportProps
+    onDeleteSelected: (keys: Selection) => void
 }
 
 export interface DataTableProps<T> extends Omit<TableProps, "aria-label"> {
