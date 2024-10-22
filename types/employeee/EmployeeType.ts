@@ -81,6 +81,13 @@ export type Employee = EmployeeAll & {
   educational_bg_json?: EmployeeEducationalBG | null;
 };
 
+export type EmployeePaginate = {
+  data: EmployeeAll[];
+  currentPage: number
+  perPage: number
+  totalItems: number
+};
+
 
 export interface EmployeeDetails {
   id: number;                     // Unique identifier for the employee

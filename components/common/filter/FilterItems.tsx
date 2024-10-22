@@ -1,8 +1,15 @@
-import {SharedSelection} from "@nextui-org/react";
-import React, {useCallback, useEffect, useState} from "react";
-import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
-import {joinNestedKeys, NestedKeys} from "@/helper/objects/joinNestedKeys";
-import {valueOfObject} from "@/helper/objects/pathGetterObject";
+import { Select, SelectItem, SharedSelection } from "@nextui-org/react";
+import React, {
+  useState,
+  useEffect,
+  Key,
+  useCallback,
+  useMemo,
+  ReactElement,
+} from "react";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import { joinNestedKeys, NestedKeys } from "@/helper/objects/joinNestedKeys";
+import { valueOfObject } from "@/helper/objects/pathGetterObject";
 import DropdownList from "../Dropdown";
 import {IoChevronDown} from "react-icons/io5";
 
@@ -21,89 +28,116 @@ interface FilterProps<T> {
     isLoading?: boolean;
 }
 
-function FilterItems<T>({items, config, setResults, isLoading}: FilterProps<T>) {
-    const [selectedKeys, setSelectedKeys] = useState<Record<string, SharedSelection>>({});
-    const refresh = useCallback((filter: typeof selectedKeys) => {
-        let results = [...items];
-        Object.entries(filter).forEach((keys) => {
-            Array.from(keys).forEach((section) => {
-                const [key, value] = String(Array.from(section)[0]).split(":");
-                const category = config.find((c) => joinNestedKeys([c.key]) === key);
-                if (category) {
-                    const filter = category.filter.find((ft) => String(ft.value) === String(value));
-                    results = results.filter((item) => {
-                        if (typeof filter?.value === "function") {
-                            return filter?.value(item);
-                        } else {
-                            // console.log("Object val: ", valueOfObject(item, key));
-                            // console.log("Filter val: ", filter?.value);
-                            return valueOfObject(item, key) === filter?.value;
-                        }
-                    });
-                }
+function FilterItems<T>({
+  items,
+  config,
+  setResults,
+  isLoading,
+}: FilterProps<T>) {
+  const [selectedKeys, setSelectedKeys] = useState<
+    Record<string, SharedSelection>
+  >({});
+  const refresh = useCallback(
+    (filter: typeof selectedKeys) => {
+      let results = [...items];
+      Object.entries(filter).forEach((keys) => {
+        Array.from(keys).forEach((section) => {
+          const [key, value] = String(Array.from(section)[0]).split(":");
+          const category = config.find((c) => joinNestedKeys([c.key]) === key);
+          if (category) {
+            const filter = category.filter.find(
+              (ft) => String(ft.value) === String(value)
+            );
+            results = results.filter((item) => {
+              if (typeof filter?.value === "function") {
+                return filter?.value(item);
+              } else {
+                // console.log("Object val: ", valueOfObject(item, key));
+                // console.log("Filter val: ", filter?.value);
+                return valueOfObject(item, key) === filter?.value;
+              }
             });
+          }
         });
-        setResults(results);
-    }, [items, config]);
-    useEffect(() => {
-        if (items) {
-            refresh(selectedKeys);
-        }
-    }, [items, selectedKeys]);
-    const handleSelectChange = (sectionName: string, key: SharedSelection) => {
-        // console.log(Array.from(key));
-        setSelectedKeys((prevKeys) => ({
-            ...prevKeys, [sectionName]: key,
-        }));
-    };
-    const getSectionName = useCallback((sectionName: string) => {
-        if (selectedKeys && selectedKeys[sectionName]) {
-            const items = Array.from(selectedKeys[sectionName]);
-            if (items.length > 0) {
-                const [key, value] = String(items[0]).split(":");
-                const category = config.find((c) => joinNestedKeys([c.key]) === key);
-                if (category) {
-                    const filter = category.filter.find((ft) => String(ft.value) === String(value));
-                    return (<p className="text-gray-500 text-sm">
-                        {sectionName}
-                        {": "}
-                        <span className="font-semibold text-blue-500">
-                  {filter?.label}
-                </span>
-                    </p>);
-                }
-            }
-            // console.log(items);
-        }
-        return (<p className="text-gray-500 text-sm">
-            Filter{" "}
-            <span className="font-semibold text-gray-700">{sectionName}</span>
-        </p>);
-    }, [selectedKeys]);
+      });
+      setResults(results);
+    },
+    [items, config]
+  );
+  useEffect(() => {
+    if (items) {
+      refresh(selectedKeys);
+    }
+  }, [items, selectedKeys]);
+  const handleSelectChange = (sectionName: string, key: SharedSelection) => {
+    // console.log(Array.from(key));
+    setSelectedKeys((prevKeys) => ({
+      ...prevKeys,
+      [sectionName]: key,
+    }));
+  };
 
-    return (<div className="flex gap-2 items-center">
-        {config.map((section, index) => (<DropdownList
-            key={index}
-            closeOnSelect={false}
-            selectionMode="single"
-            selectedKeys={selectedKeys[section.sectionName] || []}
-            onSelectionChange={(keys) => handleSelectChange(section.sectionName, keys)}
-            items={section.filter.map((item, index) => {
-                return {
-                    key: `${joinNestedKeys([section.key])}:${item.value}`, label: item.label,
-                };
-            })}
-            trigger={{
-                label: getSectionName(section.sectionName), props: {
-                    ...uniformStyle({color: "default", radius: "md"}),
-                    variant: "bordered",
-                    endContent: <IoChevronDown/>,
-                    className: "text-medium",
-                    isLoading: isLoading,
-                },
-            }}
-        />))}
-    </div>);
+  const getSectionName = (sectionName: string): ReactElement => {
+    if (selectedKeys && selectedKeys[sectionName]) {
+      const items = Array.from(selectedKeys[sectionName]);
+      if (items.length > 0) {
+        const [key, value] = String(items[0]).split(":");
+        const category = config.find((c) => joinNestedKeys([c.key]) === key);
+        if (category) {
+          const filter = category.filter.find(
+            (ft) => String(ft.value) === String(value)
+          );
+          return (
+            <p className="text-gray-500 text-sm">
+              {sectionName}
+              {": "}
+              <span className="font-semibold text-blue-500">
+                {filter?.label}
+              </span>
+            </p>
+          );
+        }
+      }
+    }
+    return (
+      <p className="text-gray-500 text-sm">
+        Filter{" "}
+        <span className="font-semibold text-gray-700">{sectionName}</span>
+      </p>
+    );
+  };
+
+  return (
+    <div className="flex gap-2 items-center">
+      {config.map((section, index) => (
+        <DropdownList
+          key={index}
+          closeOnSelect={false}
+          selectionMode="single"
+          selectedKeys={selectedKeys[section.sectionName] || []}
+          onSelectionChange={(keys) =>
+            handleSelectChange(section.sectionName, keys)
+          }
+          items={section.filter.map((item, index) => {
+            return {
+              key: `${joinNestedKeys([section.key])}:${item.value}`,
+              label: item.label,
+            };
+          })}
+          trigger={{
+            label: getSectionName(section.sectionName),
+            props: {
+              ...uniformStyle({ color: "default", radius: "md" }),
+              variant: "bordered",
+              endContent: <IoChevronDown />,
+              className: "text-medium",
+              isLoading: isLoading,
+            },
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 export default FilterItems;
