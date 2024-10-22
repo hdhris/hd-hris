@@ -44,7 +44,7 @@ function DataDisplayControl<T>({
     const {values, selectedKeys, display, setDisplay} = useDataDisplayControl<T>()
     const {searchValue, onSearchChange, itemSearched} = useSearch<T>(values, searchProps?.searchingItemKey || [])
     const {filteredItems, onFilterChange, filter} = useFilter<T>(itemSearched)
-    const {paginatedData, onPageChange, totalPages, page, setRows, rows} = usePagination<T>(filteredItems, {
+    const {paginatedData, onPageChange, totalPages, page, setRows, rows, totalRows} = usePagination<T>(filteredItems, {
         totalItems: paginationProps?.data_length || 1, rowsPerPage: rowsSearchParams
     })
     const {sortedItems, onSortChange, sortDescriptor} = useSort<T>(paginatedData)
@@ -72,6 +72,7 @@ function DataDisplayControl<T>({
         onPageChange(1)
     }
 
+    console.log("Length: ", paginationProps?.data_length)
     const handleOnRowsPerPageChange = (value: Selection) => {
         const newSearchParams = new URLSearchParams(searchParams.toString());
         const rowPerPage = value !== "all" && value.size > 0 ? Array.from(value)[0] : 5
@@ -129,7 +130,7 @@ function DataDisplayControl<T>({
         </div>
         <div className="flex justify-between pb-3 items-center">
             {title && <Typography className="text-medium font-semibold text-primary/50">
-                <CountUp start={0} end={paginationProps?.data_length!} prefix="Total of " suffix={` ${title}`}/>
+                <CountUp start={0} end={totalRows} prefix="Total of " suffix={` ${title}`}/>
                 {/*{ title ? Total < CountUp start={0} end={values.length}/>}*/}
                 {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
             </Typography>}
