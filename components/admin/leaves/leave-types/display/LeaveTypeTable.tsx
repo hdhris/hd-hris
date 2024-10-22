@@ -119,7 +119,7 @@ function LeaveTypeTable() {
 
             }}
             onDeleteSelected={async (keys) => {
-                handleLeaveTypeDeleteMultiple(keys)
+                await handleLeaveTypeDeleteMultiple(keys)
             }}
             searchProps={{
                 searchingItemKey: ["name"]
@@ -149,7 +149,7 @@ function LeaveTypeTable() {
                     title: "Import",
                 }
             }}
-        />
+            defaultDisplay="table"/>
 
         <LeaveTypesDetails {...leaveType!}/>
     </section>);
