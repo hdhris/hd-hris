@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get('page') || '1');  // Default to page 1
-        const perPage = parseInt(searchParams.get('limit') || '15');  // Default to 15 results per page
+        const perPage = parseInt(searchParams.get('limit') || '5');  // Default to 15 results per page
 
         // Use the reusable pagination function with Prisma model
         const { data, totalItems, currentPage } = await getPaginatedData<LeaveType>(
