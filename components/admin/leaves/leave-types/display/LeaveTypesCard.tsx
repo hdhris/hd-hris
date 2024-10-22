@@ -80,7 +80,7 @@ function LeaveTypesCard() {
     }, [formData, leaveTypes]); // Ensure leaveTypes is included in the dependency array
 
 
-    SetNavEndContent(() => (<LeaveTypeForm/>));
+    // SetNavEndContent(() => (<LeaveTypeForm/>));
     if (isLoading) return <Loading/>
     if (!data && !isLoading || error) return <NoData/>
     // Effect for setting nav end content

@@ -27,7 +27,7 @@ model dim_incident_reports {
   id                                                                Int              @id @default(autoincrement())
   employee_id                                                       Int?
   occurance_date                                                    DateTime?        @db.Date
-  type                                                              String?          @db.VarChar(10)
+  type                                                              String?
   location                                                          String?
   severity                                                          String?          @db.VarChar(10)
   description                                                       String?
