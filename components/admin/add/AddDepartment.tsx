@@ -96,7 +96,7 @@ const AddDepartment: React.FC<AddDepartmentProps> = ({ onDepartmentAdded }) => {
 
   return (
     <>
-      <Add variant="flat" name="Add Department" onClick={onOpen} />
+      <Add variant="solid" name="Add Department" onClick={onOpen} />
       <Drawer
         title="Add Employee"
         isOpen={isOpen}

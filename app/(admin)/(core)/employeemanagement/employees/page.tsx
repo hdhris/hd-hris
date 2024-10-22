@@ -18,10 +18,12 @@ import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 const Page: React.FC = () => {
   const { data: employees, mutate, error, isLoading } = useEmployeesData();
   const [sortedEmployees, setSortedEmployees] = useState<Employee[]>([]);
-  const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] =
+    React.useState<Employee | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = React.useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = React.useState<Employee | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] =
+    React.useState<Employee | null>(null);
 
   useEffect(() => {
     if (employees) {
@@ -48,7 +50,7 @@ const Page: React.FC = () => {
       <AddEmployee onEmployeeAdded={handleEmployeeUpdated} />
     </div>
   ));
-  
+
   const handleDelete = async (id: number, name: string) => {
     try {
       const result = await showDialog({
@@ -77,7 +79,7 @@ const Page: React.FC = () => {
     try {
       // First, manually call mutate to get fresh data
       const updatedData = await mutate();
-      
+
       // Then update the sorted employees with the fresh data
       if (updatedData) {
         const sorted = sortEmployeesByRecentActivity(updatedData);
@@ -112,14 +114,17 @@ const Page: React.FC = () => {
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
-      
+
       // Common styles for clickable cells
       const cellClasses = "cursor-pointer hover:bg-gray-50";
-      
+
       switch (key) {
         case "name":
           return (
-            <div className={`flex items-center gap-4 ${cellClasses}`} onClick={() => handleRowClick(employee)}>
+            <div
+              className={`flex items-center gap-4 ${cellClasses}`}
+              onClick={() => handleRowClick(employee)}
+            >
               <Avatar
                 src={employee.picture || ""}
                 alt={`${employee.first_name} ${employee.last_name}`}
@@ -132,19 +137,39 @@ const Page: React.FC = () => {
             </div>
           );
         case "department":
-          return <div className={cellClasses} onClick={() => handleRowClick(employee)}>{employee.ref_departments?.name || "N/A"}</div>;
+          return (
+            <div
+              className={cellClasses}
+              onClick={() => handleRowClick(employee)}
+            >
+              {employee.ref_departments?.name || "N/A"}
+            </div>
+          );
         case "position":
-          return <div className={cellClasses} onClick={() => handleRowClick(employee)}>{employee.ref_job_classes?.name || "N/A"}</div>;
+          return (
+            <div
+              className={cellClasses}
+              onClick={() => handleRowClick(employee)}
+            >
+              {employee.ref_job_classes?.name || "N/A"}
+            </div>
+          );
         case "contact":
           return (
-            <div className={`flex flex-col ${cellClasses}`} onClick={() => handleRowClick(employee)}>
+            <div
+              className={`flex flex-col ${cellClasses}`}
+              onClick={() => handleRowClick(employee)}
+            >
               <span>{employee.email || "N/A"}</span>
               <span>{employee.contact_no || "N/A"}</span>
             </div>
           );
         case "hiredate":
           return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
+            <div
+              className={cellClasses}
+              onClick={() => handleRowClick(employee)}
+            >
               {employee.hired_at
                 ? dayjs(employee.hired_at).format("MMM DD, YYYY")
                 : "N/A"}
@@ -160,7 +185,10 @@ const Page: React.FC = () => {
           }[status] as "success" | "danger" | "warning" | "default";
 
           return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
+            <div
+              className={cellClasses}
+              onClick={() => handleRowClick(employee)}
+            >
               <Chip color={statusColor} size="sm" variant="flat">
                 {status}
               </Chip>
@@ -200,22 +228,23 @@ const Page: React.FC = () => {
       category: "Department",
       filtered: sortedEmployees
         ? Array.from(new Set(sortedEmployees.map((e) => e.ref_departments?.name)))
-            .filter(Boolean)
+            .filter(Boolean) // Remove undefined values
             .map((dept) => ({
-              key: dept as string,
-              value: dept as string,
-              name: dept as string,
-              uid: dept as string,
+              key: "ref_departments.name",
+              value: dept || "", // Default to empty string if undefined
+              name: dept || "",
+              uid: dept || "",
             }))
         : [],
     },
   ];
+  
 
   return (
     <div className="p-4">
       <DataDisplay
-        data={sortedEmployees}
         title={`Employees (${sortedEmployees?.length || 0})`}//the count is the problem
+        data={sortedEmployees}
         filterProps={{
           filterItems: FilterItems,
         }}
@@ -224,12 +253,16 @@ const Page: React.FC = () => {
           isLoading,
           layout: "auto",
         }}
+        
         searchProps={{
           searchingItemKey: ["first_name", "last_name", "email", "contact_no"],
         }}
         sortProps={sortProps}
         onListDisplay={(employee) => (
-          <div className="w-full cursor-pointer" onClick={() => handleRowClick(employee)}>
+          <div
+            className="w-full cursor-pointer"
+            onClick={() => handleRowClick(employee)}
+          >
             <BorderCard className="p-4">
               <div className="flex items-center gap-4">
                 <Avatar
@@ -249,6 +282,18 @@ const Page: React.FC = () => {
             </BorderCard>
           </div>
         )}
+
+        onExport={{
+          drawerProps: {
+              title: "Export",
+          }
+      }}
+      onImport={{
+          drawerProps: {
+              title: "Import",
+          }
+        }}
+        
       />
 
       {selectedEmployee && (

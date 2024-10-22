@@ -37,10 +37,10 @@ function handleError(error: unknown, operation: string) {
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    console.log("Incoming data:", data);
+    // console.log("Incoming data:", data);
 
     const validatedData = departmentSchema.parse(data);
-    console.log("Validated data:", validatedData);
+    // console.log("Validated data:", validatedData);
 
     const department = await prisma.ref_departments.create({
       data: {
