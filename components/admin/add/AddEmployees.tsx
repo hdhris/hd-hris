@@ -176,7 +176,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         ],
       };
 
-      console.log("Sending data:", JSON.stringify(fullData, null, 2));
+      // console.log("Sending data:", JSON.stringify(fullData, null, 2));
 
       const response = await axios.post(
         "/api/employeemanagement/employees",

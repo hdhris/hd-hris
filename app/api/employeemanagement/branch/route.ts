@@ -34,10 +34,10 @@ function handleError(error: unknown, operation: string) {
 }
 
 // Log Operations for Debugging
-function logDatabaseOperation(operation: string, result: any) {
-  console.log(`Database operation: ${operation}`);
-  console.log("Result:", JSON.stringify(result, null, 2));
-}
+// function logDatabaseOperation(operation: string, result: any) {
+//   console.log(`Database operation: ${operation}`);
+//   console.log("Result:", JSON.stringify(result, null, 2));
+// }
 
 // POST: Create a new branch
 export async function POST(req: NextRequest) {
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    logDatabaseOperation("CREATE branch", branch);
+    // logDatabaseOperation("CREATE branch", branch);
     return NextResponse.json(branch, { status: 201 });
   } catch (error) {
     return handleError(error, "create");
@@ -86,7 +86,7 @@ async function getBranchById(id: number) {
     where: { id, deleted_at: null },
   });
 
-  logDatabaseOperation("GET branch by ID", branch);
+  // logDatabaseOperation("GET branch by ID", branch);
   if (!branch) throw new Error("Branch not found");
   return branch;
 }
@@ -97,7 +97,7 @@ async function getAllBranches() {
     where: { deleted_at: null },
   });
 
-  logDatabaseOperation("GET all branches", branches);
+  // logDatabaseOperation("GET all branches", branches);
   return branches;
 }
 
@@ -141,7 +141,7 @@ export async function DELETE(req: NextRequest) {
       data: { deleted_at: new Date() },
     });
 
-    logDatabaseOperation("DELETE branch", branch);
+    // logDatabaseOperation("DELETE branch", branch);
     return NextResponse.json({ message: "Branch deleted successfully" });
   } catch (error) {
     return handleError(error, "delete");

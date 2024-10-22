@@ -215,7 +215,7 @@ const Page: React.FC = () => {
     <div className="p-4">
       <DataDisplay
         data={sortedEmployees}
-        title={`Employees (${sortedEmployees?.length || 0})`}
+        title={`Employees (${sortedEmployees?.length || 0})`}//the count is the problem
         filterProps={{
           filterItems: FilterItems,
         }}
@@ -262,7 +262,7 @@ const Page: React.FC = () => {
           onEmployeeUpdated={handleEmployeeUpdated}
         />
       )}
-//
+
       {selectedEmployeeId && (
         <EditEmployee
           isOpen={isEditModalOpen}
