@@ -162,7 +162,8 @@ const Page: React.FC = () => {
   return (
     <div className="p-4">
       <DataDisplay
-        title={`Branches (${sortedBranches?.length || 0})`}
+      defaultDisplay="table"
+        title='Branches'
         data={sortedBranches}
         filterProps={{
           filterItems: FilterItems,
@@ -198,6 +199,9 @@ const Page: React.FC = () => {
             </BorderCard>
           </div>
         )}
+        paginationProps={{
+          data_length: sortedBranches?.length
+        }}
         onExport={{
           drawerProps: {
             title: "Export",

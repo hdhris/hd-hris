@@ -75,10 +75,10 @@ export type EmployeeResignation = {
 };
 
 export type Employee = EmployeeAll & {
-  suspension_json: EmployeeSuspension | null;
-  resignation_json: EmployeeResignation | null;
-  termination_json: EmployeeTermination | null;
-  educational_bg_json: EmployeeEducationalBG | null;
+  suspension_json?: EmployeeSuspension | null;
+  resignation_json?: EmployeeResignation | null;
+  termination_json?: EmployeeTermination | null;
+  educational_bg_json?: EmployeeEducationalBG | null;
 };
 
 export type EmployeePaginate = {
