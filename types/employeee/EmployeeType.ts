@@ -34,8 +34,8 @@ export type EmployeeAll = {
   email: string;
   contact_no: string;
   picture: string;
-  ref_job_classes?: { name: string }; // Add this line
-  ref_departments?: { name: string }; // Add this line
+  ref_job_classes: { name: string }; // Add this line
+  ref_departments: { name: string }; // Add this line
 };
 
 // Educational Background Type
@@ -75,10 +75,10 @@ export type EmployeeResignation = {
 };
 
 export type Employee = EmployeeAll & {
-  suspension_json?: EmployeeSuspension | null;
-  resignation_json?: EmployeeResignation | null;
-  termination_json?: EmployeeTermination | null;
-  educational_bg_json?: EmployeeEducationalBG | null;
+  suspension_json: EmployeeSuspension | null;
+  resignation_json: EmployeeResignation | null;
+  termination_json: EmployeeTermination | null;
+  educational_bg_json: EmployeeEducationalBG | null;
 };
 
 export type EmployeePaginate = {

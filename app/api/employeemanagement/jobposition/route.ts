@@ -12,10 +12,10 @@ const jobSchema = z.object({
 });
 
 // Helper function to log database operations
-function logDatabaseOperation(operation: string, result: any) {
-  console.log(`Database operation: ${operation}`);
-  console.log('Result:', JSON.stringify(result, null, 2));
-}
+// function logDatabaseOperation(operation: string, result: any) {
+//   console.log(`Database operation: ${operation}`);
+//   console.log('Result:', JSON.stringify(result, null, 2));
+// }
 //
 // Error handling function
 function handleError(error: unknown, operation: string) {
@@ -60,7 +60,7 @@ async function getJobById(id: number) {
     },
   });
   
-  logDatabaseOperation('GET job by ID', job);
+  // logDatabaseOperation('GET job by ID', job);
 
   if (!job) {
     throw new Error('Job not found');
@@ -79,7 +79,7 @@ async function getAllJobs() {
     },
   });
   
-  logDatabaseOperation('GET all jobs', jobs);
+  // logDatabaseOperation('GET all jobs', jobs);
   
   return jobs;
 }
@@ -107,7 +107,7 @@ async function createJob(data: z.infer<typeof jobSchema>) {
     },
   });
   
-  logDatabaseOperation('CREATE job', job);
+  // logDatabaseOperation('CREATE job', job);
   
   return job;
 }
@@ -140,7 +140,7 @@ async function updateJob(id: number, data: Partial<z.infer<typeof jobSchema>>) {
     },
   });
   
-  logDatabaseOperation('UPDATE job', job);
+  // logDatabaseOperation('UPDATE job', job);
   
   return job;
 }
@@ -168,5 +168,5 @@ async function softDeleteJob(id: number) {
     data: { deleted_at: new Date() }, // Set deleted_at to mark as deleted
   });
   
-  logDatabaseOperation('SOFT DELETE job', result);
+  // logDatabaseOperation('SOFT DELETE job', result);
 }

@@ -29,18 +29,18 @@ function handleError(error: unknown, operation: string) {
   );
 }
 
-function logDatabaseOperation(operation: string, result: any) {
-  console.log(`Database operation: ${operation}`);
-  console.log("Result:", JSON.stringify(result, null, 2));
-}
+// function logDatabaseOperation(operation: string, result: any) {
+//   console.log(`Database operation: ${operation}`);
+//   console.log("Result:", JSON.stringify(result, null, 2));
+// }
 
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    console.log("Incoming data:", data);
+    // console.log("Incoming data:", data);
 
     const validatedData = departmentSchema.parse(data);
-    console.log("Validated data:", validatedData);
+    // console.log("Validated data:", validatedData);
 
     const department = await prisma.ref_departments.create({
       data: {
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    logDatabaseOperation("CREATE department", department);
+    // logDatabaseOperation("CREATE department", department);
     return NextResponse.json(department, { status: 201 });
   } catch (error) {
     return handleError(error, "create");
@@ -88,7 +88,7 @@ async function getDepartmentById(id: number) {
     employeeCount: department._count.trans_employees
   };
 
-  logDatabaseOperation("GET department by ID", departmentWithCount);
+  // logDatabaseOperation("GET department by ID", departmentWithCount);
   return departmentWithCount;
 }
 
@@ -107,7 +107,7 @@ async function getAllDepartments() {
     employeeCount: dept._count.trans_employees
   }));
 
-  logDatabaseOperation("GET all departments", departmentsWithCount);
+  // logDatabaseOperation("GET all departments", departmentsWithCount);
   return departmentsWithCount;
 }
 
@@ -149,7 +149,7 @@ export async function DELETE(req: NextRequest) {
       data: { deleted_at: new Date() },
     });
 
-    logDatabaseOperation("SOFT DELETE department", department);
+    // logDatabaseOperation("SOFT DELETE department", department);
     return NextResponse.json({ message: "Department soft deleted successfully" });
   } catch (error) {
     return handleError(error, "delete");

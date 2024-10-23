@@ -1,6 +1,6 @@
 "use client";
 import { toast } from "@/components/ui/use-toast";
-import { useQuery } from "@/services/queries";
+import { usePaginateQuery, useQuery, useTableLength } from "@/services/queries";
 import axios from "axios";
 import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
@@ -30,6 +30,8 @@ const statusColorMap: Record<string, "danger" | "success" | "default"> = {
 };
 
 function Page() {
+  const [page, setPage] = useState<number>(1);
+  const [rows, setRows] = useState<number>(20);
   const userID = useEmployeeId();
   SetNavEndContent((router) => (
     <Button
@@ -44,13 +46,15 @@ function Page() {
   const [selectedOvertime, setSelectedOvertime] = useState<
     OvertimeEntry | undefined
   >();
-  const { data, isLoading } = useQuery<OvertimeEntry[]>(
+  const { data, isLoading } = usePaginateQuery<OvertimeEntry[]>(
     "/api/admin/attendance-time/overtime",
+    page,
+    rows,
     { refreshInterval: 3000 }
   );
+  const maxItem = useTableLength("trans_overtimes", { refreshInterval: 3000 });
   const config: TableConfigProps<OvertimeEntry> = {
     columns: [
-      { uid: "id", name: "ID", sortable: true },
       { uid: "request_date", name: "Request Date", sortable: true },
       { uid: "overtime_date", name: "Overtime Date", sortable: true },
       { uid: "name", name: "Name", sortable: true },
@@ -60,10 +64,6 @@ function Page() {
     ],
     rowCell: (item, columnKey) => {
       switch (columnKey) {
-        case "id":
-          return(
-            <p>{item.id}</p>
-          )
         case "name":
           return (
             <UserMail
@@ -228,40 +228,42 @@ function Page() {
       <DataDisplay
         title={"Overtime entries"}
         data={data || []}
-        searchProps={{
-          searchingItemKey: [
-            ["trans_employees_overtimes", "last_name"],
-            ["trans_employees_overtimes", "first_name"],
-            ["trans_employees_overtimes", "middle_name"],
-            ["trans_employees_overtimes", "email"],
-            ["trans_employees_overtimes_approvedBy", "last_name"],
-            "date",
-          ],
-        }}
-        filterProps={{
-          filterItems: [
-            {
-              filtered: [
-                ...Array.from(
-                  new Map(
-                    data?.map(item => [
-                      item.trans_employees_overtimes.ref_departments.id,
-                      {
-                        name: item.trans_employees_overtimes.ref_departments.name,
-                        key: getKey(["trans_employees_overtimes", ["ref_departments", "id"]]),
-                        value: item.trans_employees_overtimes.ref_departments.id
-                      }
-                    ])
-                  ).values()
-                ),
-              ],
-              category: "Employee Department",
-            },
-          ],
-        }}
+        // searchProps={{
+        //   searchingItemKey: [
+        //     ["trans_employees_overtimes", "last_name"],
+        //     ["trans_employees_overtimes", "first_name"],
+        //     ["trans_employees_overtimes", "middle_name"],
+        //     ["trans_employees_overtimes", "email"],
+        //     ["trans_employees_overtimes_approvedBy", "last_name"],
+        //     "date",
+        //   ],
+        // }}
+        // filterProps={{
+        //   filterItems: [
+        //     {
+        //       filtered: [
+        //         ...Array.from(
+        //           new Map(
+        //             data?.map(item => [
+        //               item.trans_employees_overtimes.ref_departments.id,
+        //               {
+        //                 name: item.trans_employees_overtimes.ref_departments.name,
+        //                 key: getKey(["trans_employees_overtimes", ["ref_departments", "id"]]),
+        //                 value: item.trans_employees_overtimes.ref_departments.id
+        //               }
+        //             ])
+        //           ).values()
+        //         ),
+        //       ],
+        //       category: "Employee Department",
+        //     },
+        //   ],
+        // }}
         onTableDisplay={{
           config: config,
+          classNames: { td: "[&:nth-child(n):not(:nth-child(3))]:w-[155px]" },
           isLoading,
+          layout: "auto",
           onRowAction: (key) => {
             const item = data?.find((item) => item.id === Number(key));
             setSelectedOvertime(item);
@@ -269,12 +271,15 @@ function Page() {
             setVisible(true);
           },
         }}
-        sortProps={{
-          sortItems: [{
-              key: "created_at", name: "Request Date"
-          },{key:["trans_employees_overtimes","email"], name: "Email"}]
-
-      }}
+        rowSelectionProps={{
+          onRowChange: setRows,
+        }}
+        defaultDisplay="table"
+        paginationProps={{
+          loop: true,
+          data_length: maxItem,
+          onChange: setPage,
+        }}
       />
       <OvertimeModal
         visible={isVisible}

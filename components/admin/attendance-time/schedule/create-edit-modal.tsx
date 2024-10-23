@@ -122,7 +122,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
       onClose={onClose}
     >
       <Form {...form}>
-        <form id="schedule-form" onSubmit={form.handleSubmit(handleSave)}>
+        <form id="schedule-form" className="space-y-4" onSubmit={form.handleSubmit(handleSave)}>
           <FormFields
             items={[
               {
@@ -145,6 +145,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
               {
                 name: "break_min",
                 label: "Break Minutes",
+                type: "number",
                 isRequired: true,
               },
               {

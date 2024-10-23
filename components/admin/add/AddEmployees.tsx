@@ -20,8 +20,128 @@ import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import Drawer from "@/components/common/Drawer";
 import { Form } from "@/components/ui/form";
 import Text from "@/components/Text";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
+}
+
+export const employeeSchema = z.object({
+  picture: z.union([z.instanceof(File), z.string()]).optional(),
+  first_name: z
+    .string()
+    .min(1, "First name is required")
+    .regex(/^[a-zA-Z\s]*$/, "First name should only contain letters"),
+  middle_name: z
+    .string()
+    .regex(/^[a-zA-Z\s]*$/, "Middle name should only contain letters")
+    .optional(),
+  last_name: z
+    .string()
+    .min(1, "Last name is required")
+    .regex(/^[a-zA-Z\s]*$/, "Last name should only contain letters"),
+  suffix: z
+    .string()
+
+    .optional(),
+  extension: z
+    .string()
+
+    .optional(),
+  gender: z.string().min(1, "Gender is required"),
+  email: z.string().email("Invalid email address"),
+  contact_no: z
+    .string()
+    .min(1, "Contact number is required")
+    .regex(
+      /^(09|\+639|9)\d{9}$/,
+      "Contact number should start with 09, +639, or 9 followed by 9 digits"
+    )
+    .transform((val) => {
+      // Remove leading "0" if number starts with "09"
+      if (val.startsWith("09")) {
+        return val.substring(1);
+      }
+      // Remove "+63" if number starts with "+639"
+      if (val.startsWith("+639")) {
+        return val.substring(3);
+      }
+      return val;
+    })
+    .refine(
+      (val) => val.length === 10,
+      "Contact number must be exactly 10 digits"
+    ),
+  birthdate: z.string().min(1, "Birthdate is required"),
+  addr_region: z.string().min(1, "Region is required"),
+  addr_province: z.string().min(1, "Province is required"),
+  addr_municipal: z.string().min(1, "Municipal is required"),
+  addr_baranggay: z.string().min(1, "Baranggay is required"),
+  elementary: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
+    .optional(),
+  highSchool: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
+    .optional(),
+  seniorHighSchool: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
+    .optional(),
+  seniorHighStrand: z
+    .string()
+    .regex(/^[a-zA-Z0-9\s]*$/, "Strand should only contain letters and numbers")
+    .optional(),
+  tvlCourse: z
+    .string()
+    .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
+    .optional(),
+  universityCollege: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
+    .optional(),
+  course: z
+    .string()
+    .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
+    .optional(),
+  highestDegree: z.string().optional(),
+  certificates: z
+  .array(
+    z.object({
+      name: z.string().optional(),
+      url: z.union([z.string(), z.instanceof(File), z.undefined()]),
+      fileName: z.string().optional()
+    })
+  )
+  .optional()
+  .default([]),
+  hired_at: z.string().min(1, "Hire date is required"),
+  department_id: z.string().min(1, "Department is required"),
+  job_id: z.string().min(1, "Job is required"),
+  branch_id: z.string().min(1, "Branch is required"),
+  batch_id: z.string().min(1, "Batch is required"),
+  days_json: z.record(z.boolean()).optional(),
+});
+
+
+interface Certificate {
+  name: string;
+  url: string | File;
+  fileName?: string;
 }
 
 interface EmployeeFormData {
@@ -47,7 +167,7 @@ interface EmployeeFormData {
   universityCollege: string;
   course: string;
   highestDegree: string;
-  certificates: Array<{ name: string; url: string | File }>;
+  certificates: Certificate[];
   hired_at: string;
   department_id: string;
   job_id: string;
@@ -56,13 +176,15 @@ interface EmployeeFormData {
   days_json: Record<string, boolean>;
 }
 
+
 const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { edgestore } = useEdgeStore();
-//
+  //
   const methods = useForm<EmployeeFormData>({
+    resolver: zodResolver(employeeSchema),
     defaultValues: {
       picture: "",
       first_name: "",
@@ -94,7 +216,10 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       batch_id: "",
       days_json: {},
     },
-    mode: "onChange",
+    mode: "onChange", // This enables real-time validation
+    reValidateMode: "onChange", // This ensures validation runs on every change
+    shouldUnregister: false, // Keeps form values when unmounting fields
+    criteriaMode: "all", // Shows all validation errors
   });
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
@@ -117,7 +242,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
 
       // Handle certificates
       const updatedCertificates = await Promise.all(
-        data.certificates.map(async (cert) => {
+        (data.certificates || []).map(async (cert) => {
+          if (!cert) return null;
+          
           if (cert.url instanceof File) {
             const result = await edgestore.publicFiles.upload({
               file: cert.url,
@@ -125,11 +252,19 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
                 temporary: false,
               },
             });
-            return { fileName: cert.name, fileUrl: result.url };
+            return {
+              fileName: cert.fileName || cert.name || result.url.split('/').pop() || '',
+              fileUrl: result.url
+            };
           }
-          return { fileName: cert.name, fileUrl: cert.url as string };
+          return {
+            fileName: cert.fileName || cert.name || '',
+            fileUrl: cert.url as string
+          };
         })
       );
+      
+      const filteredCertificates = updatedCertificates.filter(cert => cert !== null);
 
       // Build educational background
       const educationalBackground = {
@@ -141,7 +276,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         universityCollege: data.universityCollege,
         course: data.course,
         highestDegree: data.highestDegree,
-        certificates: updatedCertificates,
+        certificates: filteredCertificates,
       };
 
       // Prepare full data
@@ -176,7 +311,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         ],
       };
 
-      console.log("Sending data:", JSON.stringify(fullData, null, 2));
+      // console.log("Sending data:", JSON.stringify(fullData, null, 2));
 
       const response = await axios.post(
         "/api/employeemanagement/employees",
@@ -221,12 +356,15 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
 
   return (
     <>
-      <Add variant="flat" name="Add Employee" onClick={onOpen} />
+      <Add variant="solid" name="Add Employee" onClick={onOpen} />
       <Drawer
         title="Add New Employee"
         size="lg"
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={() => {
+          methods.reset();
+          onClose();
+        }}
       >
         <Form {...methods}>
           <form
@@ -236,7 +374,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
           >
             <PersonalInformationForm />
             <Divider className="my-6" />
-            <Text className="text-medium font-semibold">Educational Background</Text>
+            <Text className="text-medium font-semibold">
+              Educational Background
+            </Text>
             <EducationalBackgroundForm />
             <Divider className="my-6" />
             <h2>Job Information</h2>

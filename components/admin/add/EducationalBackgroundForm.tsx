@@ -193,7 +193,7 @@ const EducationalBackgroundForm = () => {
                             }
                           },
                         });
-                        console.log(res);
+                        // console.log(res);
                       } catch (err) {
                         console.error(err);
                         updateFileProgress(addedFileState.key, "ERROR");

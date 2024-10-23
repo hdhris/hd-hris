@@ -134,7 +134,7 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
 //
   return (
     <>
-      <Add variant="flat" name="Add Branch" onClick={onOpen} />
+      <Add variant="solid" name="Add Branch" onClick={onOpen} />
       <Drawer size="md" isOpen={isOpen} onClose={onClose} title="Edit Branch">
         <form id="drawer-form" onSubmit={methods.handleSubmit(onSubmit)}>
           <Form {...methods}>

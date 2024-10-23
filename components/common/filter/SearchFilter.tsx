@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
-import SearchItems from './SearchItems';
+import SearchItems, { SearchItemsProps } from './SearchItems';
 import FilterItems, { FilterItemsProps } from './FilterItems';
 import { NestedKeys } from '@/helper/objects/joinNestedKeys';
 
 interface SearchFilterProps<T>{
   items: T[];
   filterConfig?: FilterItemsProps<T>[];
-  searchConfig?: { key: NestedKeys<T>; label: string }[];
+  searchConfig?: SearchItemsProps<T>[];
   setResults: (items: T[]) => void;
   isLoading?: boolean;
 }
