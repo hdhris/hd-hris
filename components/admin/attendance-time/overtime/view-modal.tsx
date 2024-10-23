@@ -394,10 +394,10 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
           <DataDisplay
             data={recordData || []}
             // config={config}
+            isLoading={recordLoading}
             onTableDisplay={{
               config: config,
               classNames: { td: "w-fit" },
-              isLoading: recordLoading,
               layout: "auto",
               selectionMode: "single",
               disallowEmptySelection: true,
