@@ -164,6 +164,7 @@ const Page: React.FC = () => {
   return (
     <div className="p-4">
       <DataDisplay
+      defaultDisplay="table"
         title={`Job Positions (${sortedJobPositions?.length || 0})`}
         data={sortedJobPositions}
         filterProps={{
@@ -199,7 +200,11 @@ const Page: React.FC = () => {
               </div>
             </BorderCard>
           </div>
+          
         )}
+        paginationProps={{
+          data_length: sortedJobPositions?.length
+        }}
         onExport={{
           drawerProps: {
             title: "Export",
@@ -210,6 +215,9 @@ const Page: React.FC = () => {
             title: "Import",
           },
         }}
+        
+        
+
       />
 
       {selectedJobId !== null && (
