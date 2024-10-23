@@ -243,7 +243,8 @@ const Page: React.FC = () => {
   return (
     <div className="p-4">
       <DataDisplay
-        title={`Employees (${sortedEmployees?.length || 0})`}//the count is the problem
+        defaultDisplay="table"
+        title="Employees"//the count is the problem
         data={sortedEmployees}
         filterProps={{
           filterItems: FilterItems,
@@ -252,6 +253,9 @@ const Page: React.FC = () => {
           config: TableConfigurations,
           isLoading,
           layout: "auto",
+        }}
+        paginationProps={{
+          data_length: sortedEmployees?.length
         }}
         
         searchProps={{
