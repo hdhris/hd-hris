@@ -10,7 +10,7 @@ const RenderList = <T extends { key: string | number }, >({items, map, onClick}:
     return (<>
             {items.map((item) => {
                 return (<React.Fragment key={item.key}>
-                        <span onClick={() => onClick && onClick(item.key)}>
+                        <span key={item.key} onClick={() => onClick && onClick(item.key)}>
                             {map(item, item.key)}
                         </span>
                     </React.Fragment>);

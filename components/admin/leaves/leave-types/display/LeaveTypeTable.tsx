@@ -132,7 +132,6 @@ function LeaveTypeTable() {
             }}
             onTableDisplay={{
                 config: LeaveTypeTableConfiguration,
-                isLoading,
                 onRowAction: handleRowKey,
                 selectionMode: "multiple",
                 layout: "auto"

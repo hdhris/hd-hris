@@ -136,6 +136,11 @@ export function useLeaveTypes(){
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }
+export function useLeaveCreditEmployees(){
+    return useSWR('/api/admin/leaves/leave-credit/employee-leave-credits-status', fetcher, {
+        revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
 
 export function usePaginateQuery<T>(api: string, page: number, limit: number, options?: Omit<SWRConfiguration<T>, "keepPreviousData">) {
     return useSWR<T>(`${api}?page=${page}&limit=${limit}`, fetcher, {

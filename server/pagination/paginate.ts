@@ -6,6 +6,7 @@ export async function getPaginatedData<T>(
     page: number = 1,  // Current page, defaults to 1
     perPage: number = 5,  // Items per page, defaults to 5
     whereCondition: any = {},  // Filtering condition, defaults to an empty object
+    include?: any,
     orderBy: any = { id: "asc" }  // Default ordering
 ): Promise<{
     data: T[],
@@ -24,6 +25,7 @@ export async function getPaginatedData<T>(
     // Fetch paginated data based on the condition and pagination parameters
     const data = await model.findMany({
         where: whereCondition,
+        include: include,
         orderBy,
         take: perPage,
         skip

@@ -45,12 +45,12 @@ function DataDisplayControl<T>({
     const {searchValue, onSearchChange, itemSearched} = useSearch<T>(values, searchProps?.searchingItemKey || [])
     const {filteredItems, onFilterChange, filter} = useFilter<T>(itemSearched)
     const {paginatedData, onPageChange, totalPages, page, setRows, rows, totalRows} = usePagination<T>(filteredItems, {
-        totalItems: paginationProps?.data_length || 1, rowsPerPage: rowsSearchParams
+        totalItems: paginationProps?.data_length, rowsPerPage: rowsSearchParams
     })
     const {sortedItems, onSortChange, sortDescriptor} = useSort<T>(paginatedData)
 
 
-    const displayMethods = [isTable, isGrid, isList].filter(item => item === true).length
+    const displayMethods = [isTable, isGrid, isList].filter(item => item).length
 
     useEffect(() => {
         setDisplay(displaySearchParams as DisplayType)
@@ -72,7 +72,6 @@ function DataDisplayControl<T>({
         onPageChange(1)
     }
 
-    console.log("Length: ", paginationProps?.data_length)
     const handleOnRowsPerPageChange = (value: Selection) => {
         const newSearchParams = new URLSearchParams(searchParams.toString());
         const rowPerPage = value !== "all" && value.size > 0 ? Array.from(value)[0] : 5
