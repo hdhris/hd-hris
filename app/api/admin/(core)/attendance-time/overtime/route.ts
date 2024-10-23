@@ -1,16 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
+import { getPaginatedData } from "@/server/pagination/paginate";
 
 export const dynamic = "force-dynamic";
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1"); // Default to page 1
+    const perPage = parseInt(searchParams.get("limit") || "5"); // Default to 15 results per page
+    const skip = (page - 1) * perPage;
+
     const overtimes = await prisma.trans_overtimes.findMany({
       where: {
         deleted_at: null,
       },
-      include : {
-        trans_employees_overtimes : {
+      orderBy: {
+        created_at: "desc",
+      },
+      take: perPage,
+      skip: skip,
+      include: {
+        trans_employees_overtimes: {
           select: {
             id: true,
             last_name: true,
@@ -43,23 +54,25 @@ export async function GET() {
             },
           },
         },
-        trans_employees_overtimes_approvedBy : {
-          select : {
+        trans_employees_overtimes_approvedBy: {
+          select: {
             last_name: true,
             middle_name: true,
             first_name: true,
             picture: true,
             email: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
-    const overtimesWithFullNames = overtimes.map(overtime => {
+    const overtimesWithFullNames = overtimes.map((overtime) => {
       return {
         ...overtime,
         full_name: getEmpFullName(overtime.trans_employees_overtimes),
-        approvedBy_full_name: getEmpFullName(overtime.trans_employees_overtimes_approvedBy),
+        approvedBy_full_name: getEmpFullName(
+          overtime.trans_employees_overtimes_approvedBy
+        ),
       };
     });
 

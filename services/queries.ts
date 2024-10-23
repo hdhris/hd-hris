@@ -9,6 +9,7 @@ import {BatchSchedule, Schedules} from "@/types/attendance-time/AttendanceTypes"
 import {Branch} from "@/types/employeee/BranchType";
 import {Payhead, PayheadAffected} from "@/types/payroll/payheadType";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
+import prisma from "@/prisma/prisma";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -134,4 +135,10 @@ export function usePaginateQuery<T>(api: string, page: number, limit: number, op
         keepPreviousData: true,
         ...options,
     });
+}
+
+export function useTableLength(table: keyof typeof prisma, options?: Omit<SWRConfiguration, "keepPreviousData">): number | undefined {
+    return useSWR<{ totalCount: number }>(`/api/admin/get-table-count?tb=${String(table)}`, fetcher,{
+        keepPreviousData: true, ...options 
+    }).data?.totalCount;
 }

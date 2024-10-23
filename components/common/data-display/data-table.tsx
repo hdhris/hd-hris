@@ -15,7 +15,7 @@ function DataTable<T extends { id: string | number } >({
             <Table
                 aria-label="Data Table"
                 classNames={{
-                    base: "h-full", emptyWrapper: "h-full", loadingWrapper: "h-full",
+                    base: "h-full", emptyWrapper: "h-full", loadingWrapper: "h-full", ...props.classNames
                 }}
                 layout="fixed"
                 {...props}

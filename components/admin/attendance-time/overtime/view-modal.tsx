@@ -15,7 +15,7 @@ import {
 } from "@nextui-org/react";
 import { Form } from "@/components/ui/form";
 import FormFields from "@/components/common/forms/FormFields";
-import { z } from "zod";
+import { number, z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
@@ -36,6 +36,8 @@ import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import Drawer from "@/components/common/Drawer";
+import DataDisplay from "@/components/common/data-display/data-display";
+import { useQuery } from "@/services/queries";
 
 interface ScheduleModalProps {
   visible: boolean;
@@ -58,14 +60,17 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   overtimeData: data,
   isPending,
 }) => {
-
   const [overtimeData, setOvertimeData] = useState<OvertimeEntry>();
-  const [selectedKey, setSelectedKey] = useState(new Set([""]));
-  const [isLoading, setIsLoading] = useState(false);
-  const [recordData, setRecordData] = useState<OvertimeEntry[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(0);
+  const [selectedEntry, setSelectedEntry] = useState(0);
+  const { data: recordData, isLoading: recordLoading } = useQuery<OvertimeEntry[]>(
+    `/api/admin/attendance-time/overtime/preview?id=${selectedEmployee}`
+  );
   const [comment, setComment] = useState("");
   const [ratePH, setRatePH] = useState("0.0");
   const userID = useEmployeeId();
+
+  
   const fetchEmployeeOvertimeRecords = useCallback(
     async (entry: OvertimeEntry) => {
       console.log("FLAG");
@@ -76,19 +81,8 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
           String(entry.trans_employees_overtimes.ref_job_classes.pay_rate) ||
           "0"
       );
-      setIsLoading(true);
-      try {
-        const response: AxiosResponse<OvertimeEntry[]> =
-          await axiosInstance.get(
-            `/api/admin/attendance-time/overtime/preview?id=${entry?.employee_id}`
-          );
-        setRecordData(response.data);
-        setSelectedKey(new Set([String(entry?.id)]));
-      } catch (error) {
-        console.error("Error fetching schedules:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      setSelectedEntry(entry.id);
+      setSelectedEmployee(entry.employee_id);
     },
     [] // Depend on 'date' as it's used in the function
   );
@@ -309,7 +303,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
               <p className="text-small font-semibold text-default-600">
                 Rendered:
               </p>
-              <div  className=" space-y-2">
+              <div className=" space-y-2">
                 <Info
                   icon={<TbClock size={20} className="text-default-600" />}
                   content={
@@ -394,35 +388,38 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
             />
           </div> */}
         </div>
-        {isLoading ? (
+        {recordLoading ? (
           <Spinner label="Loading..." color="primary" className="w-full" />
         ) : (
-          <TableData
-            items={recordData}
-            config={config}
-            isHeaderSticky
-            className="h-full"
-            shadow="none"
-            counterName="History"
-            selectionMode="single"
-            aria-label="History"
-            disallowEmptySelection
-            selectedKeys={selectedKey}
-            onSelectionChange={(keys) => {
-              const record = recordData.find(
-                (item) => String(item.id) === Array.from(keys)[0]
-              );
-              setSelectedKey(new Set(Array.from(keys).map(String)));
-              setOvertimeData(record);
-              setComment(record?.comment || "");
-              setRatePH(
-                record?.rate_per_hour ||
-                  String(
-                    record?.trans_employees_overtimes.ref_job_classes?.pay_rate
-                  ) ||
-                  "0"
-              );
+          <DataDisplay
+            data={recordData || []}
+            // config={config}
+            onTableDisplay={{
+              config: config,
+              classNames: { td: "w-fit" },
+              isLoading: recordLoading,
+              layout: "auto",
+              selectionMode: "single",
+              disallowEmptySelection: true,
+              selectedKeys: new Set(selectedEntry.toString()),
+              onSelectionChange: (keys) => {
+                const record = recordData?.find(
+                  (item) => String(item.id) === Array.from(keys)[0]
+                );
+                setSelectedEntry(Number(Array.from(keys)[0]));
+                setOvertimeData(record);
+                setComment(record?.comment || "");
+                setRatePH(
+                  record?.rate_per_hour ||
+                    String(
+                      record?.trans_employees_overtimes.ref_job_classes
+                        ?.pay_rate
+                    ) ||
+                    "0"
+                );
+              },
             }}
+            defaultDisplay="table"
           />
         )}
       </div>
@@ -445,7 +442,7 @@ const Info = ({
       <div className="flex flex-col gap-1">
         <p className="font-semibold leading-none">{content}</p>
         <p className="text-tiny leading-none font-semibold text-gray-500">
-            {label}
+          {label}
         </p>
       </div>
     </div>
