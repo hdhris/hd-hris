@@ -1,47 +1,52 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import TableData from "@/components/tabledata/TableData";
+import { useBranchesData } from "@/services/queries";
+import { Branch } from "@/types/employeee/BranchType";
+import { Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
-import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { toast } from "@/components/ui/use-toast";
 import AddBranch from "@/components/admin/add/AddBranch";
 import EditBranch from "@/components/admin/edit/EditBranch";
-import { useBranchesData } from "@/services/queries";
-import { Branch } from "@/types/employeee/BranchType";
 import axios from "axios";
 import addressData from "@/components/common/forms/address/address.json";
-import { Chip } from "@nextui-org/react";
 import showDialog from "@/lib/utils/confirmDialog";
+import DataDisplay from "@/components/common/data-display/data-display";
+import BorderCard from "@/components/common/BorderCard";
+import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 
 const Page: React.FC = () => {
   const { data: branches, error, mutate } = useBranchesData();
-  const [loading, setLoading] = useState(true);
+  const [sortedBranches, setSortedBranches] = useState<Branch[]>([]);
   const [selectedBranchId, setSelectedBranchId] = useState<Branch | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-//
+
   useEffect(() => {
     if (branches) {
-      setLoading(false);
+      const sorted = sortBranchesByRecentActivity(branches);
+      setSortedBranches(sorted);
     }
   }, [branches]);
 
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch branches. Please try again.",
-        duration: 3000,
-      });
-      setLoading(false);
-    }
-  }, [error]);
+  const sortBranchesByRecentActivity = (branches: Branch[]) => {
+    return [...branches].sort((a, b) => {
+      const dateA = new Date(a.updated_at || a.created_at).getTime();
+      const dateB = new Date(b.updated_at || b.created_at).getTime();
+      return dateB - dateA;
+    });
+  };
+
+  SetNavEndContent(() => (
+    <div className="flex items-center gap-4">
+      <AddBranch onBranchAdded={handleBranchUpdated} />
+    </div>
+  ));
 
   const handleEdit = async (branch: Branch) => {
     setSelectedBranchId(branch);
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = async (id: number, name: string ) => {
+  const handleDelete = async (id: number, name: string) => {
     try {
       const result = await showDialog({
         title: "Confirm Delete",
@@ -49,24 +54,33 @@ const Page: React.FC = () => {
       });
       if (result === "yes") {
         await axios.delete(`/api/employeemanagement/branch?id=${id}`);
-        
-         toast({
+        toast({
           title: "Deleted",
-          description: "Employee deleted successfully!",
+          description: "Branch deleted successfully!",
           variant: "warning",
         });
         await mutate();
       }
     } catch (error) {
-      console.error("Error deleting branch:", error);
       toast({
         title: "Error",
-        description: "Failed to delete branch. Please try again." + error,
-        duration: 3000,
+        description: "Error: " + error,
+        variant: "danger",
       });
     }
   };
 
+  const handleBranchUpdated = async () => {
+    try {
+      const updatedData = await mutate();
+      if (updatedData) {
+        const sorted = sortBranchesByRecentActivity(updatedData);
+        setSortedBranches(sorted);
+      }
+    } catch (error) {
+      console.error("Error updating branch data:", error);
+    }
+  };
 
   const getMunicipalityName = (municipalityId: number | null): string => {
     if (!municipalityId) return "Unknown";
@@ -76,75 +90,124 @@ const Page: React.FC = () => {
     return municipality ? municipality.address_name : "Unknown";
   };
 
-  const config: TableConfigProps<Branch> = {
+  const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "municipality", name: "Municipality", sortable: false },
-      { uid: "is_active", name: "Status", sortable: true },
-      { uid: "actions", name: "Actions", sortable: false },
+      { uid: "municipality", name: "Municipality", sortable: true },
+      { uid: "status", name: "Status", sortable: true },
+      { uid: "actions", name: "Actions" },
     ],
-    rowCell: (item, columnKey) => {
-      switch (columnKey) {
+    rowCell: (branch: Branch, columnKey: React.Key): React.ReactElement => {
+      const key = columnKey as string;
+      const cellClasses = "cursor-pointer hover:bg-gray-50";
+
+      switch (key) {
         case "name":
-          return <span>{item.name}</span>;
-        case "municipality":
-          return <span>{getMunicipalityName(item.addr_municipal)}</span>;
-        case "is_active":
           return (
-            <Chip
-              className="capitalize"
-              color={item.is_active ? "success" : "danger"}
-              size="sm"
-              variant="flat"
-            >
-              {item.is_active ? "Active" : "Inactive"}
-            </Chip>
+            <div className={cellClasses}>
+              <span>{branch.name}</span>
+            </div>
+          );
+        case "municipality":
+          return (
+            <div className={cellClasses}>
+              {getMunicipalityName(branch.addr_municipal)}
+            </div>
+          );
+        case "status":
+          return (
+            <div className={cellClasses}>
+              <Chip
+                className="capitalize"
+                color={branch.is_active ? "success" : "danger"}
+                size="sm"
+                variant="flat"
+              >
+                {branch.is_active ? "Active" : "Inactive"}
+              </Chip>
+            </div>
           );
         case "actions":
           return (
             <TableActionButton
-              name={item.name ?? "Unknown"}
-              onEdit={() => handleEdit(item)}
-              onDelete={() => handleDelete(item.id, `${item.name}`)}
+              name={branch.name ?? "Unknown"}
+              onEdit={() => handleEdit(branch)}
+              onDelete={() => handleDelete(branch.id, `${branch.name}`)}
             />
           );
         default:
-          return <></>;
+          return <div>-</div>;
       }
     },
   };
 
-  const searchingItemKey: (keyof Branch)[] = ["name"];
-
-  const handleBranchUpdated = async () => {
-    try {
-      await mutate();
-    } catch (error) {
-      console.error("Error updating branch list:", error);
-    }
+  const sortProps = {
+    sortItems: [
+      { name: "Name", key: "name" as keyof Branch },
+      { name: "Created At", key: "created_at" as keyof Branch },
+      { name: "Updated At", key: "updated_at" as keyof Branch },
+    ],
   };
 
+  const FilterItems = [
+    {
+      category: "Status",
+      filtered: [
+        { key: "is_active", value: true, name: "Active", uid: "active" },
+        { key: "is_active", value: false, name: "Inactive", uid: "inactive" },
+      ],
+    },
+  ];
+
   return (
-    <div id="branch-page" className="mt-2">
-      <TableData
-        aria-label="Branch Table"
-        config={config}
-        items={branches || []}
-        searchingItemKey={searchingItemKey}
-        counterName="Branches"
-        isLoading={loading}
-        isHeaderSticky={true}
-        classNames={{
-          wrapper: "h-[27rem] overflow-y-auto",
+    <div className="p-4">
+      <DataDisplay
+        title={`Branches (${sortedBranches?.length || 0})`}
+        data={sortedBranches}
+        filterProps={{
+          filterItems: FilterItems,
         }}
-        contentTop={
-          <div className="flex items-center justify-between">
-            <div className="ml-4">
-              <AddBranch onBranchAdded={handleBranchUpdated} />
-            </div>
-            <div className="ml-auto mr-4"></div>
+        onTableDisplay={{
+          config: TableConfigurations,
+          isLoading: !branches && !error,
+          layout: "auto",
+        }}
+        searchProps={{
+          searchingItemKey: ["name"],
+        }}
+        sortProps={sortProps}
+        onListDisplay={(branch) => (
+          <div className="w-full">
+            <BorderCard className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="font-medium">{branch.name}</span>
+                  <span className="text-sm text-gray-500">
+                    {getMunicipalityName(branch.addr_municipal)}
+                  </span>
+                </div>
+                <Chip
+                  className="capitalize"
+                  color={branch.is_active ? "success" : "danger"}
+                  size="sm"
+                  variant="flat"
+                >
+                  {branch.is_active ? "Active" : "Inactive"}
+                </Chip>
+              </div>
+            </BorderCard>
           </div>
-        }
+        )}
+        onExport={{
+          drawerProps: {
+            title: "Export",
+          },
+        }}
+        onImport={{
+          drawerProps: {
+            title: "Import",
+          },
+        }}
       />
 
       {selectedBranchId !== null && (

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import {
   Modal,
@@ -15,7 +15,12 @@ import Add from "@/components/common/button/Add";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
-import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface AddJobPositionProps {
   onJobAdded: () => void;
@@ -48,7 +53,7 @@ const AddJobPosition: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     try {
       const response = await axios.post(
         "/api/employeemanagement/jobposition",
-        data  
+        data
       );
 
       if (response.status === 201) {
@@ -69,7 +74,9 @@ const AddJobPosition: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       if (axios.isAxiosError(error) && error.response) {
         toast({
           title: "Error",
-          description: error.response.data.message || "Failed to add job position. Please try again.",
+          description:
+            error.response.data.message ||
+            "Failed to add job position. Please try again.",
           duration: 3000,
         });
       } else {
@@ -86,7 +93,7 @@ const AddJobPosition: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
 
   return (
     <>
-      <Add variant="flat" name="Add Job Position" onClick={onOpen} />
+      <Add variant="solid" name="Add Job Position" onClick={onOpen} />
       <Modal size="md" isOpen={isOpen} onClose={onClose} isDismissable={false}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>
           <FormProvider {...methods}>
@@ -111,7 +118,9 @@ const AddJobPosition: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
                     />
                   </FormControl>
                   {methods.formState.errors.name && (
-                    <FormMessage>{methods.formState.errors.name.message}</FormMessage>
+                    <FormMessage>
+                      {methods.formState.errors.name.message}
+                    </FormMessage>
                   )}
                 </FormItem>
                 <FormItem>
@@ -120,10 +129,7 @@ const AddJobPosition: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
                       name="is_active"
                       control={methods.control}
                       render={({ field: { onChange, value } }) => (
-                        <Checkbox
-                          isSelected={value}
-                          onValueChange={onChange}
-                        >
+                        <Checkbox isSelected={value} onValueChange={onChange}>
                           Is Active
                         </Checkbox>
                       )}
