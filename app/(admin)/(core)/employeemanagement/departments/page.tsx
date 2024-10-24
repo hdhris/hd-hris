@@ -164,14 +164,15 @@ const Page: React.FC = () => {
   return (
     <div className="p-4">
       <DataDisplay
-        title={`Departments (${sortedDepartments?.length || 0})`}
+      defaultDisplay="table"
+        title='Departments'
         data={sortedDepartments}
         filterProps={{
           filterItems: FilterItems,
         }}
+      isLoading={!departments && !error}
         onTableDisplay={{
           config: TableConfigurations,
-          isLoading: !departments && !error,
           layout: "auto",
         }}
         searchProps={{
@@ -206,6 +207,9 @@ const Page: React.FC = () => {
             </BorderCard>
           </div>
         )}
+        paginationProps={{
+          data_length: sortedDepartments?.length
+        }}
         onExport={{
           drawerProps: {
             title: "Export",
@@ -216,6 +220,7 @@ const Page: React.FC = () => {
             title: "Import",
           },
         }}
+        
       />
 
       {selectedDepartmentId !== null && (

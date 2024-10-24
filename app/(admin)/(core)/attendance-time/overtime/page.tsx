@@ -224,6 +224,7 @@ function Page() {
       <DataDisplay
         title={"Overtime entries"}
         data={data || []}
+        isLoading={isLoading}
         // searchProps={{
         //   searchingItemKey: [
         //     ["trans_employees_overtimes", "last_name"],

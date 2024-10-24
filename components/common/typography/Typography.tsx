@@ -1,5 +1,6 @@
 import * as React from "react";
 import {cn} from "@nextui-org/react";
+import {ReactNode} from "react";
 
 interface TextProps<T extends React.ElementType> {
     as?: T;
@@ -33,8 +34,8 @@ export function Heading<T extends HeadingElements = "h1">({
 
 type TitleProps = {
     children?: React.ReactNode;
-    heading: string;
-    subHeading: string;
+    heading: ReactNode;
+    subHeading: ReactNode;
     className?: string;
     classNames?: {
         base?: string;
@@ -44,8 +45,8 @@ type TitleProps = {
 }
 
 interface SectionProps {
-    title: string;
-    subtitle: string;
+    title: ReactNode;
+    subtitle: ReactNode;
     children?: React.ReactNode;
     className?: string
     classNames?: TitleProps['classNames']

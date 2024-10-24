@@ -3,10 +3,10 @@ import {useRouter} from "next/navigation";
 
 interface PaginationProps {
     rowsPerPage?: number;
-    totalItems: number
+    totalItems?: number
 }
 
-export function usePagination<T>(data: T[], {rowsPerPage = 5, totalItems}: PaginationProps = {totalItems: 1}) {
+export function usePagination<T>(data: T[], {rowsPerPage = 5, totalItems = 1}: PaginationProps = {}) {
     const router = useRouter()
     const [page, setPage] = React.useState<number>(1);
     const [rows, setRows] = React.useState<number>(rowsPerPage);
