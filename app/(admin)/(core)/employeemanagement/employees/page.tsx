@@ -249,10 +249,10 @@ const Page: React.FC = () => {
         filterProps={{
           filterItems: FilterItems,
         }}
+        isLoading={isLoading}
         onTableDisplay={{
           config: TableConfigurations,
-          isLoading,
-          layout: "auto",
+                    layout: "auto",
         }}
         paginationProps={{
           data_length: sortedEmployees?.length

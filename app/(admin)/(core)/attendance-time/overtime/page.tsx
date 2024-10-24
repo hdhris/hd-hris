@@ -228,6 +228,7 @@ function Page() {
       <DataDisplay
         title={"Overtime entries"}
         data={data || []}
+        isLoading={isLoading}
         // searchProps={{
         //   searchingItemKey: [
         //     ["trans_employees_overtimes", "last_name"],
@@ -262,7 +263,6 @@ function Page() {
         onTableDisplay={{
           config: config,
           classNames: { td: "[&:nth-child(n):not(:nth-child(3))]:w-[155px]" },
-          isLoading,
           layout: "auto",
           onRowAction: (key) => {
             const item = data?.find((item) => item.id === Number(key));

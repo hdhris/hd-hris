@@ -19,7 +19,7 @@ export interface DrawerProps {
     onClose: (value: boolean) => void;
     children: ReactNode;
     footer?: ReactNode;
-    title: string | ReactNode;
+    title: ReactNode;
     isDismissible?: boolean;
     size?: "sm" | "md" | "lg";
     isSubmitting?: boolean

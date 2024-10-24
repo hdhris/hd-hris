@@ -4,6 +4,7 @@ import { Controller, useFormContext } from "react-hook-form";
 import { Autocomplete, AutocompleteItem, cn, User } from "@nextui-org/react";
 import { LuChevronsUpDown } from "react-icons/lu";
 import Typography from "@/components/common/typography/Typography";
+import {FormDescription} from "@/components/ui/form";
 
 export type Employee = {
     id: number;
@@ -78,13 +79,14 @@ function EmployeeListForm({employees, isLoading}: EmployeeListForm) {
                                 </AutocompleteItem>
                             )}
                         </Autocomplete>
-
                         {/* Display error message if employee_id has validation issues */}
                         {errors.employee_id && (
                             <Typography className="text-[0.8rem] font-medium text-red-500 mt-2">
                                 {errors.employee_id.message as string}
                             </Typography>
                         )}
+                        <FormDescription className="space-y-2">Select an Employee from the list.</FormDescription>
+
                     </>
                 )}
             />

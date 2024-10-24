@@ -170,9 +170,9 @@ const Page: React.FC = () => {
         filterProps={{
           filterItems: FilterItems,
         }}
+      isLoading={!departments && !error}
         onTableDisplay={{
           config: TableConfigurations,
-          isLoading: !departments && !error,
           layout: "auto",
         }}
         searchProps={{

@@ -54,7 +54,6 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 applicableToEmployeeTypes: data.applicable_to_employee_types.toLowerCase()
             })
 
-            console.log("Data: ", form.getValues())
         }
     }, [data, form]);
 

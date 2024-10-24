@@ -79,14 +79,15 @@ function Page() {
         File Leave
     </Button>)
     return (<DataDisplay
-            defaultDisplay="list"
+            isLoading={isLoading}
+            defaultDisplay="table"
             data={allRequests || []}
             title="Leave Requests"
             filterProps={{
                 filterItems: FilterItems
             }}
             onTableDisplay={{
-                config: TableConfigurations, isLoading, layout: "auto"
+                config: TableConfigurations, layout: "auto"
             }}
             searchProps={{
                 searchingItemKey: ["name"]

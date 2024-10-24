@@ -1,12 +1,16 @@
 "use client"
-import React, {ReactNode, useCallback, useEffect} from 'react';
+import React, {Key, ReactNode, useCallback, useEffect} from 'react';
 import DataDisplayControl from "@/components/common/data-display/controls/data-display-control";
 import {
-    DataDisplayControlProvider, DisplayType, useDataDisplayControl
+    DataDisplayControlProvider,
+    DisplayType,
+    useDataDisplayControl
 } from "@/components/common/data-display/provider/data-display-control-provider";
 import DataTable from "@/components/common/data-display/data-table";
 import {
-    DataDisplayControlProps, DataImportAndExportProps, DataTableProps
+    DataDisplayControlProps,
+    DataImportAndExportProps,
+    DataTableProps
 } from "@/components/common/data-display/types/types";
 import {TableConfigProps} from "@/types/table/TableDataTypes";
 import {Case, Switch} from "@/components/common/Switch";
@@ -14,11 +18,13 @@ import {Selection} from "@nextui-org/react";
 import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import RenderList from "@/components/util/RenderList";
 import {AnimatedList} from '@/components/ui/animated-list';
+import Loading from "@/components/spinner/Loading";
 
 
 interface DataDisplayProps<T> extends RenderDisplayProps<T> {
     data: T[]
     defaultDisplay: DisplayType
+
 }
 
 type DataDisplayType<T> =
@@ -35,6 +41,7 @@ function DataDisplay<T extends { id: string | number }>({
                                                             paginationProps,
                                                             buttonGroupProps,
                                                             rowSelectionProps,
+                                                            isLoading,
                                                             ...rest
                                                         }: DataDisplayType<T>) {
 
@@ -55,9 +62,10 @@ function DataDisplay<T extends { id: string | number }>({
             onExport={rest.onExport}
             onImport={rest.onImport}
             onDeleteSelected={rest.onDeleteSelected!}
+
         >
             {(data: T[], sortDescriptor, onSortChange) => {
-                return (<RenderDisplay data={data} onTableDisplay={{
+                return (<RenderDisplay data={data} isLoading={isLoading} onTableDisplay={{
                     ...rest.onTableDisplay!, sortDescriptor: sortDescriptor, onSortChange: onSortChange
                 }}
                                        onGridDisplay={rest.onGridDisplay}
@@ -77,7 +85,8 @@ interface DataDisplayTableProps<T> extends Omit<DataTableProps<T>, "config"> {
 
 
 interface RenderDisplayProps<T> {
-    onTableDisplay?: Omit<DataDisplayTableProps<T>, "data">;
+    isLoading?: boolean
+    onTableDisplay?: Omit<DataDisplayTableProps<T>, "data" | "isLoading">;
     onGridDisplay?: (data: T, key: number | string) => ReactNode;
     onListDisplay?: (data: T, key: number | string) => ReactNode;
     onImport?: DataImportAndExportProps;
@@ -87,21 +96,26 @@ interface RenderDisplayProps<T> {
 }
 
 const RenderDisplay = <T extends { id: string | number }>({
-                                                              onTableDisplay, onGridDisplay, onListDisplay, data
+                                                              onTableDisplay,
+                                                              onGridDisplay,
+                                                              onListDisplay,
+                                                              data,
+                                                              isLoading
                                                           }: RenderDisplayProps<T>) => {
 
     const newData = data.map(item => ({key: item.id, ...item}));
 
 
     const {display} = useDataDisplayControl();
-    return (<Switch expression={display}>
+    return (<>{isLoading ? (<Loading/>) : (<Switch expression={display}>
         <Case of="table">
             {onTableDisplay && <DataDisplayTable data={data} {...onTableDisplay} />}
         </Case>
         <Case of="grid">
-            <ScrollShadow className="flex-1">
+            <ScrollShadow className="flex-1 pr-2 pb-2" size={10}>
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] place-items-center gap-5">
                     <RenderList
+                        // onClick={(key) => console.log("Key: ", key)}
                         items={newData}
                         map={(item, key) => (<>
                             {onGridDisplay ? onGridDisplay(item, key) : <p>No grid display available</p>}
@@ -125,7 +139,7 @@ const RenderDisplay = <T extends { id: string | number }>({
                 </AnimatedList>
             </ScrollShadow>
         </Case>
-    </Switch>);
+    </Switch>)} </>);
 };
 
 
