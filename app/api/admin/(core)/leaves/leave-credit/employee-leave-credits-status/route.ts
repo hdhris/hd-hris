@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 
+export const dynamic = "force-dynamic";
 export async function GET() {
     try {
         // Fetch current year leave balances where deleted_at is null

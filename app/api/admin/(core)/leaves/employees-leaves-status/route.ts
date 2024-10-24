@@ -4,6 +4,7 @@ import {Prisma} from "@prisma/client";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {EmployeeLeave, EmployeeLeavesStatus, LeaveType} from "@/types/leaves/LeaveRequestTypes";
 
+export const dynamic = "force-dynamic";
 export async function GET() {
     const [emp, leaveTypes] = await Promise.all([await prisma.trans_employees.findMany({
         where: {
