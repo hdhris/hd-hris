@@ -19,11 +19,13 @@ export async function GET(request: Request): Promise<NextResponse> {
             data: allEmployees,
             totalItems
         } = await getPaginatedData<any>(prisma.trans_employees, page, perPage, {
-            deleted_at: null, dim_leave_balances: {
+            deleted_at: null,
+            dim_leave_balances: {
                 some: {
                     allocated_days: {
                         gt: 0,
-                    }, deleted_at: null
+                    },
+                    deleted_at: null
                 },
 
             }
@@ -52,14 +54,18 @@ export async function GET(request: Request): Promise<NextResponse> {
 
             const employeeData = await prisma.trans_employees.findUnique({
                 where: {
-                    id: employee_id
+                    id: employee_id,
                 }, include: {
                     ref_departments: true,
                     fact_leave_earnings_fact_leave_earnings_employee_idTotrans_employees: {
                         include: {
                             ref_leave_types: true,
                         },
-                    }, dim_leave_balances: true, trans_leaves_trans_leaves_employee_idTotrans_employees: true,
+                    }, dim_leave_balances: {
+                        where: {
+                            deleted_at: null
+                        }
+                    }, trans_leaves_trans_leaves_employee_idTotrans_employees: true,
                 },
             });
 
