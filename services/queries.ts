@@ -143,7 +143,7 @@ export function usePaginateQuery<T>(api: string, page: number, limit: number, op
 }
 
 export function useTableLength(table: keyof typeof prisma, options?: Omit<SWRConfiguration, "keepPreviousData">): number | undefined {
-    return useSWR<{ totalCount: number }>(`/api/admin/get-table-count?tb=${String(table)}`, fetcher,{
+    return useSWR<{ totalCount: number }>(`/api/admin/utils/get-table-count?tb=${String(table)}`, fetcher,{
         keepPreviousData: true, ...options 
     }).data?.totalCount;
 }

@@ -18,6 +18,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/incident",
+        destination: "/incident/reports",
+        permanent: true,
+      },
+      {
         source: "/employeemanagement",
         destination: "/employeemanagement/employees",
         permanent: true,

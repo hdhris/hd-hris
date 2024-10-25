@@ -19,6 +19,7 @@ import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { useQuery } from "@/services/queries";
+import DataDisplay from "@/components/common/data-display/data-display";
 
 const modeType = ["Password", "Fingerprint", "Card", "Face ID", "Other"];
 const punchType = ["IN", "OUT"];
@@ -141,19 +142,22 @@ export default function Page() {
 
   return (
     <div className="flex flex-row gap-1 h-full">
-      <TableData
-        config={config}
-        items={attendanceLog || []}
-        isLoading={isLoading}
-        classNames={{
-          wrapper: "h-fit-navlayout",
+      <DataDisplay
+        defaultDisplay="table"
+        onTableDisplay={{
+          config: config,
+          isLoading,
+          layout: "auto",
+          selectionMode: "single",
+          onRowAction: (key) => {
+            setSelectedKey(key as any);
+          },
         }}
-        isHeaderSticky
-        selectionMode="single"
-        aria-label="Attendance Records"
-        onRowAction={(key) => {
-          setSelectedKey(key as any);
+        paginationProps={{
+          data_length: attendanceLog?.length,
         }}
+        data={attendanceLog || []}
+        title="Attendance Logs"
       />
       <div className="flex flex-col gap-1">
         <Calendar
