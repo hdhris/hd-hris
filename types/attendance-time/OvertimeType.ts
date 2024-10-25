@@ -1,33 +1,3 @@
-interface Employee {
-  id: number;
-  first_name: string;
-  middle_name: string;
-  last_name: string;
-  email: string;
-  contact_no: string;
-  picture: string;
-  ref_departments: {
-    id: number;
-    name: string;
-  };
-  ref_branches: {
-    id: number;
-    name: string;
-  };
-  ref_job_classes: {
-    id: number;
-    name: string;
-    pay_rate: string;
-  };
-}
-
-interface Approver {
-  first_name: string;
-  middle_name: string;
-  last_name: string;
-  picture: string;
-  email: string;
-}
 
 // interface Employee {
 //   id: number;
@@ -47,6 +17,8 @@ interface Approver {
 //   };
 // }
 
+import { UserEmployee, UserReviewer } from "@/helper/include-emp-and-reviewr/include";
+
 export interface OvertimeEntry {
   employee_id: number;
   status: "pending" | "approved" | "rejected";
@@ -64,13 +36,13 @@ export interface OvertimeEntry {
   comment: string;
   rendered_mins: number;
   deleted_at: string | null; // Nullable for deleted entries
-  trans_employees_overtimes: Employee; // Employee details
-  trans_employees_overtimes_approvedBy: Approver; // Approver details
+  trans_employees_overtimes: UserEmployee; // Employee details
+  trans_employees_overtimes_approvedBy: UserReviewer; // Approver details
   full_name: string;
   approvedBy_full_name: string;
 };
 
 export interface OvertimeResponse {
   overtime: OvertimeEntry;
-  employees: Employee[];
+  employees: UserEmployee[];
 }

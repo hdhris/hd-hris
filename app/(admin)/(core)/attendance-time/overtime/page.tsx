@@ -222,7 +222,7 @@ function Page() {
   return (
     <>
       <DataDisplay
-        title={"Overtime entries"}
+        title="Overtime entries"
         data={data || []}
         isLoading={isLoading}
         // searchProps={{
@@ -269,7 +269,9 @@ function Page() {
         }}
         defaultDisplay="table"
         paginationProps={{
+          loop: true,
           data_length: data?.length,
+
         }}
       />
       <OvertimeModal
