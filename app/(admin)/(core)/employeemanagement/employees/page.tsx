@@ -161,7 +161,7 @@ const Page: React.FC = () => {
               onClick={() => handleRowClick(employee)}
             >
               <span>{employee.email || "N/A"}</span>
-              <span>{employee.contact_no || "N/A"}</span>
+              <span>+63{employee.contact_no || "N/A"}</span>
             </div>
           );
         case "hiredate":

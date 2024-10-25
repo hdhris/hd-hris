@@ -36,6 +36,11 @@ export type EmployeeAll = {
   picture: string;
   ref_job_classes: { name: string }; // Add this line
   ref_departments: { name: string }; // Add this line
+  ref_addresses_trans_employees_addr_regionToref_addresses: { address_name: string, address_code: number},
+  ref_addresses_trans_employees_addr_provinceToref_addresses: { address_name: string, address_code: number},
+  ref_addresses_trans_employees_addr_municipalToref_addresses: { address_name: string, address_code: number},
+  ref_addresses_trans_employees_addr_baranggayToref_addresses: { address_name: string, address_code: number},
+  
 };
 
 // Educational Background Type

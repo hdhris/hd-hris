@@ -59,7 +59,7 @@ export const employeeSchema = z.object({
       "Contact number should start with 09, +639, or 9 followed by 9 digits"
     )
     .transform((val) => {
-      // Remove leading "0" if number starts with "09"
+      
       if (val.startsWith("09")) {
         return val.substring(1);
       }
