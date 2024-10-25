@@ -45,6 +45,8 @@ const Cards = memo(function Cards({items, onDelete}: RequestCardProps) {
             }
         }
 
+        console.log("Delete id: ", id)
+
     };
 
     const handleEdit = (id: number) => {

@@ -50,7 +50,9 @@ export interface EmployeeLeave {
 export interface LeaveType {
     id: number;
     name: string;
-    duration_days: number;
+    min: number;
+    max: number;
+    isAttachmentRequired: boolean;
 }
 
 

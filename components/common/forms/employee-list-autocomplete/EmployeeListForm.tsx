@@ -16,9 +16,10 @@ export type Employee = {
 interface EmployeeListForm {
     employees: Employee[],
     isLoading?: boolean
+    onSelected?: (id: number) => void
 }
 
-function EmployeeListForm({employees, isLoading}: EmployeeListForm) {
+function EmployeeListForm({employees, isLoading, onSelected}: EmployeeListForm) {
     const user = React.useMemo(() => {
         // if(employees) return employees.sort((a, b) => a.name.localeCompare(b.name));
         if(employees) return employees;
@@ -43,7 +44,7 @@ function EmployeeListForm({employees, isLoading}: EmployeeListForm) {
                                     Pick an Employee
                                 </Typography>
                             }
-                            isClearable={false}
+                            isClearable
                             isRequired
                             radius="sm"
                             placeholder="Select an Employee"
@@ -60,6 +61,7 @@ function EmployeeListForm({employees, isLoading}: EmployeeListForm) {
                                 if (selectedItem) {
                                     setValue('employee_id', selectedItem.id);
                                     field.onChange(selectedItem.id);
+                                    onSelected && onSelected(selectedItem.id);
                                 } else{
                                     setValue('employee_id', "");
                                     field.onChange("");
