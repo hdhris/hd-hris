@@ -687,7 +687,7 @@ model sys_help_report {
   reporter_id                                                  Int?
   reviewer_id                                                  Int?
   description                                                  String?
-  updated_at                                                   DateTime?        @db.Timestamptz(6)
+  updated_at                                                   DateTime?        @default(now()) @db.Timestamptz(6)
   trans_employees_sys_help_report_reporter_idTotrans_employees trans_employees? @relation("sys_help_report_reporter_idTotrans_employees", fields: [reporter_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_employees_sys_help_report_reviewer_idTotrans_employees trans_employees? @relation("sys_help_report_reviewer_idTotrans_employees", fields: [reviewer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
