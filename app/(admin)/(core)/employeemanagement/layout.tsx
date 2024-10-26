@@ -11,28 +11,6 @@ type TabKeys =
   | "departments"
   | "jobposition";
 //
-const breadcrumbPaths: Record<TabKeys, { title: string; link: string }[]> = {
-  employees: [
-    { title: "Employee Management", link: "/employeemanagement" },
-    { title: "Employees", link: "/employeemanagement/employees" },
-  ],
-  suspend: [
-    { title: "Employee Management", link: "/employeemanagement" },
-    { title: "Suspend", link: "/employeemanagement/suspend" },
-  ],
-  resign: [
-    { title: "Employee Management", link: "/employeemanagement" },
-    { title: "Resign", link: "/employeemanagement/resign" },
-  ],
-  departments: [
-    { title: "Employee Management", link: "/employeemanagement" },
-    { title: "Department", link: "/employeemanagement/department" },
-  ],
-  jobposition: [
-    { title: "Employee Management", link: "/employeemanagement" },
-    { title: "position", link: "/employeemanagement/jobposition" },
-  ],
-};
 
 function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -81,9 +59,6 @@ function RootLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div>
-        <BreadcrumbComponent paths={breadcrumbPaths[activeTab]} />
-      </div>
       <NavigationTabs tabs={tabs} basePath="employeemanagement">
         {children}
       </NavigationTabs>
