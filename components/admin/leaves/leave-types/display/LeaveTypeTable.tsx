@@ -109,6 +109,7 @@ function LeaveTypeTable() {
         <DataDisplay
             title="Leave Types"
             data={leaveData}
+            isLoading={isLoading}
             filterProps={{
                 filterItems: filterLeaveTypes
             }}
