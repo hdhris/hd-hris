@@ -10,11 +10,13 @@ export const dynamic = "force-dynamic";
 export async function GET() {
     const [emp, leaveTypes] = await Promise.all([await prisma.trans_employees.findMany({
         where: {
-            deleted_at: null, resignation_json: {
-                equals: Prisma.DbNull
-            }, termination_json: {
-                equals: Prisma.DbNull
-            }, // trans_leaves_trans_leaves_employee_idTotrans_employees: {
+            deleted_at: null,
+            // resignation_json: {
+            //     equals: Prisma.DbNull
+            // }, termination_json: {
+            //     equals: Prisma.DbNull
+            // },
+            // trans_leaves_trans_leaves_employee_idTotrans_employees: {
             //     some: {
             //         start_date: {
             //             lte: new Date()
@@ -31,7 +33,8 @@ export async function GET() {
                 some: {
                     remaining_days: {
                         gt: 0
-                    }, deleted_at: null
+                    },
+                    deleted_at: null
                 }
             }
         }, select: {
@@ -43,6 +46,8 @@ export async function GET() {
             suffix: true,
             extension: true,
             picture: true,
+            resignation_json: true,
+            termination_json: true,
             ref_departments: {
                 select: {
                     name: true
@@ -52,7 +57,8 @@ export async function GET() {
                 where: {
                     remaining_days: {
                         gt: 0
-                    }, deleted_at: null
+                    },
+                    deleted_at: null
                 }
             },
             trans_leaves_trans_leaves_employee_idTotrans_employees: true
@@ -67,7 +73,9 @@ export async function GET() {
 
     // console.log("Leave Balance: ", emp.find((emp) => emp.id)?.dim_leave_balances)
 
-    const employees: EmployeeLeave[] = emp.map((emp: any) => ({
+    const employees: EmployeeLeave[] = emp.filter(item => {
+        return item.resignation_json === null && item.termination_json === null
+    }).map((emp: any) => ({
         id: emp.id,
         name: getEmpFullName(emp),
         picture: emp.picture,
