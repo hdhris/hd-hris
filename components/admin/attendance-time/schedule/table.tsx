@@ -69,7 +69,7 @@ export function scheduleTable(
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 h-fit overflow-auto">
-          {empScheduleData?.map((employee) => (
+          {empScheduleData.map((employee) => (
             <tr
               key={employee.id}
               className="h-16 divide-x divide-gray-200 transition-all duration-100 hover:bg-gray-200"
@@ -77,7 +77,7 @@ export function scheduleTable(
               onMouseLeave={() => setHoveredRowId(null)}
             >
               <td className="px-4 py-2 truncate text-sm font-semibold w-[200px] max-w-[200px]">
-                {`${employee.trans_employees.first_name} ${employee.trans_employees.last_name}`}
+                {`${employee?.trans_employees?.first_name} ${employee?.trans_employees?.last_name}`}
               </td>
               {days.map((day) => (
                 <td

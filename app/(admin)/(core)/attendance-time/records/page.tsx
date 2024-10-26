@@ -144,9 +144,9 @@ export default function Page() {
     <div className="flex flex-row gap-1 h-full">
       <DataDisplay
         defaultDisplay="table"
+        isLoading={isLoading}
         onTableDisplay={{
           config: config,
-          isLoading,
           layout: "auto",
           selectionMode: "single",
           onRowAction: (key) => {

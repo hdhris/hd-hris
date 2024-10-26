@@ -25,15 +25,15 @@ function Page() {
     "/api/admin/incident/reports",
     { refreshInterval: 5000 }
   );
-  SetNavEndContent(() => {
-    return (
-      <>
-        <Button {...uniformStyle()} onClick={() => setOpen(true)}>
-          File incident
-        </Button>
-      </>
-    );
-  });
+  // SetNavEndContent(() => {
+  //   return (
+  //     <>
+  //       <Button {...uniformStyle()} onClick={() => setOpen(true)}>
+  //         File incident
+  //       </Button>
+  //     </>
+  //   );
+  // });
 
   return (
     <>
@@ -66,7 +66,7 @@ function Page() {
         onClose={(b)=>{setOpen(b); setTimeout(()=>{
           setSelectedItem(null);
         },500)}}
-        isSubmitting={false}
+        // isSubmitting={false}
       />
     </>
   );
