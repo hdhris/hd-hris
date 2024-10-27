@@ -170,6 +170,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                     {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
                         <Case of="auto-complete">
                             <Autocomplete
+                                disableSelectorIconRotation
                                 placeholder={item.placeholder}
                                 {...(item.config as AutocompleteProps)}
                                 id={item.name}
@@ -264,7 +265,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 autoFocus={item.isFocus}
                                 onChange={(value) => {
                                     if (value) {
-                                        field.onChange(toGMT8(value.toDate(getLocalTimeZone())).format('YYYY-MM-DD'))
+                                        field.onChange(dayjs(value.toDate(getLocalTimeZone())).toISOString())
                                     }
                                 }}
                             />
@@ -280,11 +281,12 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 value={field.value?.start && field.value?.end && dayjs(field.value?.start).isValid() && dayjs(field.value?.end).isValid() ? {
                                     // start: parseAbsoluteToLocal(dayjs(field.value?.start).toISOString()),
                                     // end: parseAbsoluteToLocal(dayjs(field.value?.end).toISOString()),
-                                    start: parseDate(toGMT8(field.value?.start).format("YYYY-MM-DD")),
-                                    end: parseDate(toGMT8(field.value?.end).format("YYYY-MM-DD")),
+                                    start: parseAbsoluteToLocal(dayjs(field.value?.start).toISOString()),
+                                    end: parseAbsoluteToLocal(dayjs(field.value?.end).toISOString()),
                                 } : null}
                                 granularity={(item.config as any)?.granularity as Granularity || "day"}
                                 isRequired
+                                hideTimeZone={(item.config as any)?.hideTimeZone as boolean}
                                 onChange={(value) => {
                                     field.onChange({
                                         start: value?.start.toString(), end: value?.end.toString(),

@@ -131,7 +131,7 @@ export function useLeaveTypes(){
 }
 export function useLeaveCreditEmployees(){
     return useSWR('/api/admin/leaves/leave-credit/employee-leave-credits-status', fetcher, {
-        revalidateOnFocus: true, keepPreviousData: true
+        revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
     })
 }
 

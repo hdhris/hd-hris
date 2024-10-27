@@ -11,21 +11,28 @@ import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import Drawer from "@/components/common/Drawer";
 import {
+  AtSignIcon,
   Calendar,
-  Contact,
-  Contact2,
   Contact2Icon,
-  ContactRound,
   Mail,
   MapPin,
   MoreVertical,
+  Phone,
+  PhoneCallIcon,
   User,
 } from "lucide-react";
-//
+import { Employee } from "@/types/employeee/EmployeeType";
+import { BsCalendar2, BsGenderAmbiguous } from "react-icons/bs";
+import { Time } from "@/helper/timeParse/datetimeParse";
+import { BiTime } from "react-icons/bi";
+import { Worker } from "cluster";
+import { IoCodeWorking } from "react-icons/io5";
+import { MdWork } from "react-icons/md";
+
 interface ViewEmployeeProps {
   isOpen: boolean;
   onClose: () => void;
-  employee: any;
+  employee: Employee;
   onEmployeeUpdated: () => Promise<void>;
 }
 
@@ -35,6 +42,19 @@ const statusOptions = [
   { value: "resigned", label: "Resigned" },
   { value: "terminated", label: "Terminated" },
 ];
+
+const calculateAge = (birthdate: string): number => {
+  const birth = new Date(birthdate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+
+  return age;
+};
 
 const ViewEmployee: React.FC<ViewEmployeeProps> = ({
   isOpen,
@@ -112,23 +132,31 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
     },
   ];
 
+  const age = calculateAge(employee?.birthdate);
+
   return (
-    <Drawer title="Employee Information" size="md" isOpen={isOpen} onClose={onClose}>
+    <Drawer
+      title="Employee Information"
+      size="md"
+      isOpen={isOpen}
+      onClose={onClose}
+    >
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(handleStatusUpdate)}>
           <div className="px-6 py-4 flex-1 overflow-y-auto">
             <div className="flex flex-col items-center gap-2">
               <Avatar
                 src={employee?.picture}
-                className="w-20 h-20 text-large"
+                className="w-20 h-20 text-xl"
                 showFallback
                 fallback={
                   <LuUserCircle2 className="w-12 h-12 text-default-500" />
                 }
               />
               <Text className="text-lg font-semibold">
-                {`${employee?.first_name} ${employee?.middle_name || ""} ${
-                  employee?.last_name
+                {`${employee?.first_name} ${employee?.middle_name || ""} 
+                ${employee?.last_name}, ${employee.suffix || ""} ${
+                  employee.extension || ""
                 }`}
               </Text>
               <Text className="text-md text-gray-500">
@@ -137,18 +165,18 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
 
               <div className="flex gap-4 mt-2">
                 <Tooltip content={employee?.contact_no}>
-                  <Button className="w-2 h-10 p-0 flex items-center justify-center bg-gray-200 rounded-md">
-                    <Contact2Icon size={24} />
+                  <Button className="w-1 h-10 p-0 flex items-center justify-center bg-gray-500 rounded-md">
+                    <Phone color="white" size={24} />
                   </Button>
                 </Tooltip>
                 <Tooltip content={employee?.email}>
-                  <Button className="w-2 h-10 p-0 flex items-center justify-center bg-gray-200 rounded-md">
-                    <Mail size={24} />
+                  <Button className="w-1 h-10 p-0 flex items-center justify-center bg-gray-500 rounded-md">
+                    <AtSignIcon color="white" size={24} />
                   </Button>
                 </Tooltip>
                 <Tooltip content="More options">
-                  <Button className="w-2 h-10 p-0 flex items-center justify-center bg-gray-200 rounded-md">
-                    <MoreVertical />
+                  <Button className="w-1 h-10 p-0 flex items-center justify-center bg-gray-500 rounded-md">
+                    <MoreVertical color="white" />
                   </Button>
                 </Tooltip>
               </div>
@@ -159,13 +187,19 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
                 <div className="grid gap-4 mt-2">
                   <div>
                     <div className="flex items-center gap-4 mt-2">
-                      <User size={25} className="text-gray-500" />{" "}
-                      {/* Gender Icon */}
+                      <BsGenderAmbiguous size={25} className="text-gray-500" />
                       <Text className="text-medium font-semibold text-gray-500">
                         {employee?.gender === "M" ? "Male" : "Female"}
                       </Text>
                     </div>
-                    <hr className="border-t-1 border-gray-300 my-2 mx-6 pb-2" /> {/* Divider */}
+                    <hr className="border-t-1 border-gray-300 my-2 mx-6 pb-2" />
+                    <div className="flex items-center gap-4 mt-2">
+                      <BiTime size={25} className="text-gray-500" />
+                      <Text className="text-medium font-semibold text-gray-500">
+                        {age} years old
+                      </Text>
+                    </div>
+                    <hr className="border-t-1 border-gray-300 my-2 mx-6 pb-2" />
                     <div className="flex items-center gap-4 mt-2">
                       <Calendar size={25} className="text-gray-500" />{" "}
                       {/* Birthdate Icon */}
@@ -173,46 +207,57 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
                         {new Date(employee?.birthdate).toLocaleDateString()}
                       </Text>
                     </div>
-                    <hr className="border-t-1 border-gray-300 my-2 mx-6 pb-2" /> {/* Divider */}
+                    <hr className="border-t-1 border-gray-300 my-2 mx-6 pb-2" />
                     <div className="flex items-center gap-4 mt-2">
-                      <MapPin size={25} className="text-gray-500" />{" "}
+                      <MapPin size={25} className="text-gray-500" />
                       <Text className="text-medium font-semibold text-gray-500">
-                        {employee?.address}
+                        {
+                          employee
+                            ?.ref_addresses_trans_employees_addr_baranggayToref_addresses
+                            .address_name
+                        }
+                        ,{" "}
+                        {
+                          employee
+                            ?.ref_addresses_trans_employees_addr_municipalToref_addresses
+                            .address_name
+                        }
+                        ,{" "}
+                        {
+                          employee
+                            ?.ref_addresses_trans_employees_addr_provinceToref_addresses
+                            .address_name
+                        }
+                        ,{" "}
+                        {
+                          employee
+                            ?.ref_addresses_trans_employees_addr_regionToref_addresses
+                            .address_name
+                        }
                       </Text>
                     </div>
-                    <hr className="border-t-1 border-gray-300 my-2 mx-6 pb-2" /> {/* Divider */}
-                    <div className="flex items-center gap-4 mt-2">
-                      <Calendar size={25} className="text-gray-500" />{" "}
-                      {/* Birthdate Icon */}
-                      <Text className="text-medium font-semibold text-gray-500">
-                        {new Date(employee?.hired_at).toLocaleDateString()}
-                      </Text>
-                    </div>
-                    <hr className="border-t-1 border-gray-300 my-2 mx-6 pb-2" /> {/* Divider */}
+                    <hr className="border-t-1 border-gray-300 my-2 mx-6 pb-2" />
                   </div>
                 </div>
               </div>
 
               <div>
-                <Text className="text-medium font-semibold">
-                  Job Information
-                </Text>
-                <Divider className="my-2" />
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Text className="text-sm text-gray-500">Department</Text>
-                    <Text>{employee?.ref_departments?.name}</Text>
-                  </div>
-                  <div>
-                    <Text className="text-sm text-gray-500">Position</Text>
-                    <Text>{employee?.ref_job_classes?.name}</Text>
-                  </div>
+                <div className="flex items-center mb-4">
+                  <Text className="text-medium font-semibold">
+                    Job Information
+                  </Text>
                 </div>
+                <div className="flex items-center gap-4 mt-2">
+                  <MdWork size={25} className="text-gray-500" />
+                  <Text className="text-medium font-semibold text-gray-500">
+                    {employee?.ref_departments?.name}
+                  </Text>
+                </div>
+                <hr className="border-t-1 border-gray-300 my-2 mx-6 pb-2" />
               </div>
 
               <div>
                 <Text className="text-medium font-semibold">Danger Action</Text>
-                <Divider className="my-2" />
                 <div className="space-y-4">
                   <FormFields items={statusFields} />
                 </div>

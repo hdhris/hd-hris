@@ -1,53 +1,27 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import FormFields, {
-  FormInputProps,
-} from "@/components/common/forms/FormFields";
-import { Card, CardBody, CardHeader } from "@nextui-org/react";
+import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
+import { Divider, Spinner } from "@nextui-org/react";
 import Text from "@/components/Text";
-import { Divider } from "@nextui-org/react";
-import {
-  useDepartmentsData,
-  useJobpositionData,
-  useBranchesData,
-  useBatchSchedules,
-} from "@/services/queries";
-//
-const formatTimeTo12Hour = (time: string) => {
-  if (!time || typeof time !== "string") return "Invalid time";
-  const timeParts = time.split("T")[1]?.split("Z")[0];
-  if (!timeParts) return "Invalid time";
-  const [hours, minutes] = timeParts.split(":").map(Number);
-  if (
-    isNaN(hours) ||
-    isNaN(minutes) ||
-    hours < 0 ||
-    hours > 23 ||
-    minutes < 0 ||
-    minutes > 59
-  ) {
-    return "Invalid time";
-  }
-  const date = new Date();
-  date.setHours(hours);
-  date.setMinutes(minutes);
-  date.setSeconds(0);
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true,
-  }).format(date);
-};
+import { BatchCard } from "@/components/admin/attendance-time/schedule/batchCard"; 
+import { useDepartmentsData, useJobpositionData, useBranchesData, useBatchSchedules, useQuery } from "@/services/queries";
+import { BatchSchedule, Schedules } from "@/types/attendance-time/AttendanceTypes";
 
 const EditJobInformationForm: React.FC = () => {
   const { setValue, watch } = useFormContext();
   const selectedBatchId = watch("batch_id");
+  const [hoveredBatchId, setHoveredBatchId] = React.useState<number | null>(null);
+  const [selectedBatch, setSelectedBatch] = React.useState<BatchSchedule | null>(null);
+  const [visible, setVisible] = React.useState(false);
 
   // Fetch data using SWR hooks
   const { data: departments = [] } = useDepartmentsData();
   const { data: jobTitles = [] } = useJobpositionData();
   const { data: branches = [] } = useBranchesData();
-  const { data: batchSchedules = [] } = useBatchSchedules();
+  const { data, isLoading } = useQuery<Schedules>(
+    "/api/admin/attendance-time/schedule",
+    { refreshInterval: 3000 }
+  );
 
   // Create options arrays
   const departmentOptions = departments.reduce((acc: any[], dept) => {
@@ -113,61 +87,66 @@ const EditJobInformationForm: React.FC = () => {
     },
   ];
 
-  const handleBatchSelect = (batchId: string) => {
-    setValue("batch_id", batchId, {
-      shouldValidate: true,
-      shouldDirty: true,
-      shouldTouch: true,
-    });
-
-    // Initialize days_json with default values when batch is selected
-    setValue(
-      "days_json",
-      {
-        monday: false,
-        tuesday: false,
-        wednesday: false,
-        thursday: false,
-        friday: false,
-        saturday: false,
-        sunday: false,
-      },
-      {
+  React.useEffect(() => {
+    if (selectedBatch) {
+      setValue("batch_id", selectedBatch.id.toString(), {
         shouldValidate: true,
-      }
-    );
-  };
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+
+      setValue(
+        "days_json",
+        {
+          monday: false,
+          tuesday: false,
+          wednesday: false,
+          thursday: false,
+          friday: false,
+          saturday: false,
+          sunday: false,
+        },
+        {
+          shouldValidate: true,
+        }
+      );
+    }
+  }, [selectedBatch, setValue]);
+
 
   const renderBatchSchedules = () => {
-    if (!batchSchedules || batchSchedules.length === 0) {
+    if (!data?.batch || data.batch.length === 0) {
       return <p>No batch schedules available</p>;
     }
 
-    return batchSchedules.map((schedule) => {
+    return data.batch.map((schedule, index) => {
       if (!schedule || !schedule.id) return null;
 
-      const isSelected = selectedBatchId === schedule.id.toString();
+      const colorScheme = {
+        border: "border-green-500",
+        hover_border: "hover:border-green-500",
+        text: "text-gray-800",
+        bg: "bg-white"
+      };
 
       return (
-        <Card
+        <BatchCard
           key={schedule.id}
-          isPressable
-          onPress={() => handleBatchSelect(schedule.id.toString())}
-          className={isSelected ? "border-2 border-green-500" : ""}
-        >
-          <CardHeader className="font-bold">{schedule.name}</CardHeader>
-          <CardBody>
-            <p>
-              {formatTimeTo12Hour(schedule.clock_in)} -{" "}
-              {formatTimeTo12Hour(schedule.clock_out)}
-            </p>
-            <p>{schedule.shift_hours} hrs shift</p>
-            <p>{schedule.break_min} mins break</p>
-          </CardBody>
-        </Card>
+          item={schedule}
+          color={colorScheme}
+          isHovered={hoveredBatchId === schedule.id}
+          isSelected={selectedBatchId === schedule.id.toString()}
+          setHoveredBatchId={setHoveredBatchId}
+          setSelectedBatch={setSelectedBatch}
+          setVisible={setVisible}
+        />
       );
     });
   };
+
+  if (isLoading) {
+    return <Spinner>Loading...</Spinner>;
+  }
 
   return (
     <div className="space-y-6">
