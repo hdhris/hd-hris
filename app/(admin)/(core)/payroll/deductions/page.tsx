@@ -10,8 +10,11 @@ import { useRouter } from "next/dist/client/components/navigation";
 import axios from "axios";
 import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
-import React from "react";
+import React, { useState } from "react";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
+import SearchFilter from "@/components/common/filter/SearchFilter";
+import { FilterItemsProps } from "@/components/common/filter/FilterItems";
 
 const handleDelete = async (id: Number, name: string) => {
   try {
@@ -40,8 +43,9 @@ const handleDelete = async (id: Number, name: string) => {
 };
 
 function Page() {
-  const { data, isLoading } = usePayheads("deduction");
   const router = useRouter();
+  const { data, isLoading } = usePayheads("deduction");
+  const [deductions, setDeductions] = useState<Payhead[]>([]);
   const config: TableConfigProps<Payhead> = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
@@ -114,45 +118,67 @@ function Page() {
       }
     },
   };
-  const filterItems: FilterProps[] = [
+  const filterItems: FilterItemsProps<Payhead>[] = [
     {
-      filtered: [
-        { name: "Active", key: 'is_active', value: true},
-        { name: "Inactive", key: 'is_active', value: false },
+      filter: [
+        { label: "Active", value: true },
+        { label: "Inactive", value: false },
       ],
-      category: "Status",
+      key: "is_active",
+      sectionName: "Status",
     },
     {
-      filtered: [
-        { name: "Probationary", key: 'affected_json.mandatory.probationary', value: true },
-        { name: "Regular", key: 'affected_json.mandatory.regular', value: true },
+      filter: [
+        {
+          label: "Probationary",
+          value: (item: Payhead) => {
+            return item.affected_json.mandatory.probationary === true;
+          },
+        },
+        {
+          label: "Regular",
+          value: (item: Payhead) => {
+            return item.affected_json.mandatory.regular === true;
+          },
+        },
+        {
+          label: "Non-mandatory",
+          value: (item: Payhead) => {
+            return (
+              item.affected_json.mandatory.regular === false &&
+              item.affected_json.mandatory.probationary === false
+            );
+          },
+        },
       ],
-      category: "Mandatory",
+      key: ["affected_json", "mandatory"],
+      sectionName: "Mandatory",
     },
   ];
 
   return (
-    <div className="h-fit-navlayout">
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center mb-2">
+        <SearchFilter
+          searchConfig={[{ key: "name", label: "Name" }]}
+          filterConfig={filterItems}
+          items={data || []}
+          setResults={setDeductions}
+        />
+        <Button
+          {...uniformStyle()}
+          className=" w-fit"
+          onClick={() => router.push("/payroll/deductions/create")}
+        >
+          Create Deduction
+        </Button>
+      </div>
       <TableData
         config={config}
-        items={data || []}
+        items={deductions || []}
         isLoading={isLoading}
-        searchingItemKey={["name"]}
-        filterItems={filterItems}
-        counterName="Deductions"
-        className="h-full"
-        isHeaderSticky
+        title="Earnings"
         selectionMode="single"
-        aria-label="Deductions"
-        endContent={() => (
-          <Button
-            {...uniformStyle()}
-            className=" w-fit"
-            onClick={() => router.push("/payroll/deductions/create")}
-          >
-            Create Deduction
-          </Button>
-        )}
       />
     </div>
   );

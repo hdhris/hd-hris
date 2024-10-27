@@ -1,15 +1,13 @@
 'use client';
-import React, {Suspense, useEffect, useRef} from 'react';
+import React, {Suspense, useEffect, useRef, useState} from 'react';
 import {
     Button,
-    cn,
     Dropdown,
     DropdownItem,
     DropdownMenu,
     DropdownSection,
     DropdownTrigger,
     Input,
-    Pagination,
     ScrollShadow,
     Selection,
     SortDescriptor,
@@ -20,7 +18,8 @@ import {
     TableColumn,
     TableHeader,
     TableProps,
-    TableRow
+    TableRow,
+    Tooltip
 } from '@nextui-org/react';
 import Text from "@/components/Text";
 import {capitalize} from "@nextui-org/shared-utils";
@@ -29,13 +28,14 @@ import {TableConfigProps} from "@/types/table/TableDataTypes";
 import {FilterProps} from "@/types/table/default_config";
 import {ChevronDownIcon} from "@nextui-org/shared-icons";
 import {icon_color, icon_size} from "@/lib/utils";
+import {cn} from '@nextui-org/react'
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
-import { joinNestedKeys, NestedKeys } from '@/helper/objects/joinNestedKeys';
-import {LuSearch} from 'react-icons/lu';
-import {valueOfObject} from '@/helper/objects/pathGetterObject';
-import Typography from "@/components/common/typography/Typography";
+import { LuSearch, LuTrash2 } from 'react-icons/lu';
+import { valueOfObject } from '@/helper/objects/pathGetterObject';
+import { joinNestedKeys } from '@/helper/objects/joinNestedKeys';
+import Typography from '../common/typography/Typography';
 
 interface TableProp<T extends { id: string | number }> extends TableProps {
     config: TableConfigProps<T>;
@@ -52,6 +52,12 @@ interface TableProp<T extends { id: string | number }> extends TableProps {
     setSelectedKeys?: (keys: Selection) => void;
 }
 
+type NestedKeys<T> = {
+    [K in keyof T]: T[K] extends Record<string, any>
+        ? K | [K, NestedKeys<T[K]>]
+        : K; // Return the key itself if it's not an object
+}[keyof T];
+
 
 interface SearchProps<T> {
     searchingItemKey?: NestedKeys<T>[]; // e.g., [["details", "address"], ["details", "phone"]]
@@ -61,16 +67,13 @@ function genericSearch<T>(object: T, searchingItemKey: NestedKeys<T>[], query: s
     let searchable = false;
     searchingItemKey.forEach(property => {
         // const value = object[property];
-        let newProperty = joinNestedKeys([property]);
+        let newProperty = Array.isArray(property) ? joinNestedKeys(property) : property;
         // console.log("New Prop: ",newProperty)
         const value = valueOfObject(object, String(newProperty));
 
-        // console.log("Query: ",String(query).toLowerCase());
-        // console.log("Value: ",String(value).toLowerCase());
-        const isValid = String(value).toLowerCase().includes(query.toLowerCase())
-        if (isValid){
-            searchable = true;
-        }
+        // console.log("Query: ",String(query.toLowerCase()));
+        // console.log("Value: ",String(value));
+        searchable = String(value).toLowerCase().includes(query.toLowerCase())
     });
     return searchable;
 }
@@ -102,16 +105,12 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
     const searchValueFromParams = searchParams.get('search') || '';
     const filterValueFromParams = searchParams.get('filter') || '';
     const [get, set] = React.useState<Selection>(new Set([]));
-    const [selectedKeys, setSelectedKeys] = [selKeys || get, setSelKeys || set];
+    const [selectedKeys, setSelectedKeys] = [selKeys||get , setSelKeys||set];
     const [filterValue, setFilterValue] = React.useState(searchValueFromParams);
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [filter, setFilter] = React.useState<Selection>(() => {
         const values = filterValueFromParams.split(',');
         return values.length === 1 && values[0] === '' ? new Set([]) : new Set(values);
-    });
-
-    const [page, setPage] = React.useState<number>(1);
-
+      });
     const hasSearchFilter = Boolean(filterValue);
     const isActionable = selectedKeys === 'all' || selectedKeys.size >= 2;
 
@@ -131,12 +130,15 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                 } else {
                     if (filter instanceof Set && filter.size > 0) {
                         Array.from(filter).forEach((ft) => {
-                            const ftPart = ft.toString().split('=');
-                            filteredUsers = filteredUsers.filter((items) => {
-                                return String(valueOfObject(items, ftPart[0])) === ftPart[1]
-                            });
+                          filteredUsers = filteredUsers.filter((items) => {
+                            // console.log("Filter: ",ft);
+                            // console.log("Name: ", (items as any).name)
+                            // console.log("Value: ",String(valueOfObject(items,ft.toString().split('=')[0])))
+                            // console.log("Result: ",String(valueOfObject(items,ft.toString().split('=')[0])) === ft.toString().split('=')[1])
+                            return String(valueOfObject(items,ft.toString().split('=')[0])) === ft.toString().split('=')[1]
+                          });
                         });
-                    }
+                      }
                 }
             }
         } else {
@@ -145,12 +147,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
         return filteredUsers;
     }, [items, hasSearchFilter, filterConfig, filter, searchingItemKey, filterValue]);
 
-    const dataItems = React.useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
 
-        return filteredItems.slice(start, end);
-    }, [page, filteredItems, rowsPerPage]);
     const chipContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -163,7 +160,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
     }, [filter, getCurrentPath]);
 
     const sortedItems = React.useMemo(() => {
-        return [...dataItems].sort((a, b) => {
+        return [...filteredItems].sort((a, b) => {
             const getColumnValue = (item: T, column: keyof T | string): any => {
                 if (typeof column === 'string') {
                     const keys = column.split('.');
@@ -179,6 +176,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
 
                     return value;
                 }
+
                 return item[column as keyof T];
             };
 
@@ -188,14 +186,13 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
             const cmp = first < second ? -1 : first > second ? 1 : 0;
             return sortDescriptor.direction === 'descending' ? -cmp : cmp;
         });
-    }, [sortDescriptor, dataItems]);
+    }, [sortDescriptor, filteredItems]);
 
     const onSearchChange = React.useCallback((value?: string) => {
         if (value) {
             // router.push(`${getCurrentPath}?search=${value}`);
             router.push(`${getCurrentPath}?search=${value}${filter !== "all" && filter.size > 0 ? `&filter=${Array.from(filter).join(',')}` : ''}`);
             setFilterValue(value);
-            setPage(1);
         } else {
             setFilterValue("");
             router.push(`${getCurrentPath}${filter !== "all" && filter.size > 0 ? `?filter=${Array.from(filter).join(',')}` : ''}`);
@@ -209,10 +206,10 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
     }, [getCurrentPath, router, filter]);
 
 
-    const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        setRowsPerPage(Number(e.target.value));
-        setPage(1);
-    }, []);
+    const handleClose = (removeFilter: string) => {
+        const newFilter = Array.from(filter).filter(item => item !== removeFilter);
+        setFilter(new Set(newFilter));
+    };
 
     const topContent = React.useMemo(() => {
         return (
@@ -266,7 +263,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                             variant="bordered"
                           >
                             {filter !== "all" && filter.size > 0
-                              ? `Filtered by: ${Array.from(filterItems)
+                              ? `Filter by: ${Array.from(filterItems)
                                   .filter((item) =>
                                     item.filtered.some((filteredItem) =>
                                       Array.from(filter).some((f) =>
@@ -276,7 +273,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                                   )
                                   .map((item) => item.category) // Return the `category` for each item that matches
                                   .join(", ")}` // Join them with commas
-                              : "Filtered options"}
+                              : "Filter options"}
                           </Button>
                         </DropdownTrigger>
                         <DropdownMenu
@@ -288,6 +285,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                           onSelectionChange={(keys) => {
                             const newFilter = new Set(filter); // Clone current filter
                             const selectedFilter = Array.from(keys) as string[];
+                            // console.log("Selected: ",selectedFilter)
 
                             // Ensure one selection per section
                             filterItems.forEach((item) => {
@@ -362,119 +360,99 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                   </div>
                 </div>
               </div>
-                <div className="flex justify-between items-center">
-                    {counterName && (
-                        <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
-                    <span>
-                      <CountUp start={0} end={sortedItems.length}/>{" "}
-                    </span>{" "}
-                            {counterName}
-                        </h1>
-                    )}
-                    {contentTop && contentTop}
-                    <label className="flex items-center text-default-400 text-small self-">
-                        Rows per page:
-                        <select
-                            className="bg-transparent outline-none text-default-400 text-small"
-                            onChange={onRowsPerPageChange}
-                        >
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="15">15</option>
-                        </select>
-                    </label>
-                </div>
+              <div className="flex justify-between items-center">
+                {counterName && (
+                  <Typography className="text-medium font-semibold text-primary/50">
+                  <CountUp start={0} end={sortedItems.length} suffix={` ${counterName}`}/>
+                  {/*{ title ? Total < CountUp start={0} end={values.length}/>}*/}
+                  {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
+              </Typography>
+                  // <h1 className="leading-none text-2xs font-semibold text-gray-400 dark:text-white pb-1">
+                  //   <span>
+                  //     <CountUp start={0} end={sortedItems.length} />{" "}
+                  //   </span>{" "}
+                  //   {counterName}
+                  // </h1>
+                )}
+                {contentTop && contentTop}
+              </div>
             </div>
           </Suspense>
         );
-    }, [searchingItemKey, filterValue, onSearchChange, filterItems, filter, endContent, counterName, sortedItems.length, contentTop, onRowsPerPageChange, onClear, searchParams, router, getCurrentPath]);
-
+    }, [searchingItemKey, filterValue, onSearchChange, filterItems, filter, endContent, sortedItems.length, counterName, contentTop, onClear, searchParams, router, getCurrentPath]);
 
     const bottomContent = React.useMemo(() => {
-        const pages = Math.ceil(items.length / rowsPerPage);
-        return (//     <section className="py-2 px-2 flex justify-between items-center">
-            //     <div className='flex gap-4 items-center'>
-            //         <Text className="text-small font-semibold opacity-50">
-            //             {selectedKeys === "all" || selectedKeys.size===sortedItems.length ? `All ${counterName?.toLocaleLowerCase()} selected` : `${selectedKeys.size} of ${sortedItems.length} selected`}
-            //         </Text>
-            //         {onSelectToDelete && isActionable && (<Tooltip color="danger"
-            //                                                        content={`Delete ${selectedKeys === "all" ? "all users selected" : `${selectedKeys.size} users`}`}>
-            //             <span className="text-lg text-danger cursor-pointer active:opacity-50">
-            //                 <LuTrash2/>
-            //             </span>
-            //         </Tooltip>)}
-            //     </div>
-            // </section>
-            <div className="pt-2 px-2 flex justify-between items-center">
-                <Pagination
-                    loop
-                    showControls
-                    classNames={{
-                        cursor: "bg-foreground text-background",
-                    }}
-                    color="default"
-                    isDisabled={hasSearchFilter}
-                    page={page}
-                    total={pages}
-                    variant="light"
-                    onChange={setPage}
-                />
-                {selectionMode==="multiple" && <Typography className="text-small text-default-400">
-                    {selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${items.length} selected`}
-                </Typography>}
-            </div>);
-    }, [hasSearchFilter, items.length, page, rowsPerPage, selectedKeys, sortedItems.length]);
+        return (<section className="py-2 px-2 flex justify-between items-center">
+            <div className='flex gap-4 items-center'>
+                <Text className="text-small font-semibold opacity-50">
+                    {selectedKeys === "all" || selectedKeys.size===sortedItems.length ? `All ${counterName?.toLocaleLowerCase()} selected` : `${selectedKeys.size} of ${sortedItems.length} selected`}
+                </Text>
+                {onSelectToDelete && isActionable && (<Tooltip color="danger"
+                                                               content={`Delete ${selectedKeys === "all" ? "all users selected" : `${selectedKeys.size} users`}`}>
+                    <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                        <LuTrash2/>
+                    </span>
+                </Tooltip>)}
+            </div>
+        </section>);
+    }, [counterName, isActionable, onSelectToDelete, selectedKeys, sortedItems.length]);
 
     const loadingState = isLoading ? "loading" : "idle";
     const emptyContent = sortedItems.length === 0 && !isLoading && 'No data found. Try to refresh';
 
-    return (<div className="grid grid-rows-[auto,1fr,auto] h-full w-full">
+    return (
+    <div className="flex flex-col flex-1 overflow-hidden">
         {/* Show section if either one is not null */}
-        {(counterName || contentTop || endContent || filterItems || searchingItemKey) && <section>
+        {(counterName ||contentTop || endContent || filterItems || searchingItemKey) && <section>
             {topContent}
         </section>}
-        <div className='flex flex-col h-full overflow-y-hidden'>
-            <ScrollShadow size={20} className='flex-1'>
-                <Table
-                    sortDescriptor={sortDescriptor}
-                    onSortChange={setSortDescriptor}
-                    selectedKeys={selectedKeys}
-                    onSelectionChange={setSelectedKeys}
-                    selectionMode={selectionMode}
-                    removeWrapper
-                    isHeaderSticky
-                    classNames={{
-                        base: "h-full", emptyWrapper: "h-full", loadingWrapper: "h-full",
-                    }}
-                    {...props}
-                >
-                    <TableHeader columns={config.columns}>
-                        {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn
-                            key={column.uid}
-                            align={column.uid === "actions" ? "center" : "start"}
-                            allowsSorting={column.sortable}
-                        >
-                            {column.name.toUpperCase()}
-                        </TableColumn>)}
-                    </TableHeader>
-                    <TableBody
-                        emptyContent={emptyContent}
-                        items={sortedItems}
-                        loadingContent={<Loading/>}
-                        loadingState={loadingState}
-                    >
-                        {(item: T) => (<TableRow key={item.id} className='cursor-pointer'>
-                            {(columnKey: React.Key) => (<TableCell key={String(columnKey)} className='py-3'>
-                                {config.rowCell(item, columnKey)}
-                            </TableCell>)}
-                        </TableRow>)}
-                    </TableBody>
-                </Table>
-            </ScrollShadow>
-            {selectionMode === "multiple" && (<section className="bg-amber-500">{bottomContent}</section>)}
-        </div>
+        <ScrollShadow size={20} className='flex-1'>
+              <Table
+                  aria-label={props.title || counterName || "Table"}
+                  sortDescriptor={sortDescriptor}
+                  onSortChange={setSortDescriptor}
+                  selectedKeys={selectedKeys}
+                  onSelectionChange={setSelectedKeys}
+                  selectionMode={selectionMode}
+                  isHeaderSticky
+                  className='h-full'
+                  classNames={{
+                    base: 'h-full',
+                    table: 'h-fit',
+                    tbody: 'h-full',
+                    wrapper: 'h-full',
+                  }}
+                  {...props}
+              >
+                  <TableHeader columns={config.columns}>
+                      {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn
+                          key={column.uid}
+                          align={column.uid === "actions" ? "center" : "start"}
+                          allowsSorting={column.sortable}
+                      >
+                          {column.name.toUpperCase()}
+                      </TableColumn>)}
+                  </TableHeader>
+                  <TableBody
+                      emptyContent={emptyContent}
+                      items={sortedItems}
+                      loadingContent={isLoading ? (<Spinner
+                          color="primary"
+                          label="Loading..."
+                          className="flex-1"
+                      />) : null}
+                      loadingState={loadingState}
+                  >
+                      {(item: T) => (<TableRow key={item.id} className='cursor-pointer h-fit'>
+                          {(columnKey: React.Key) => (<TableCell key={String(columnKey)} className='py-3'>
+                              {config.rowCell(item, columnKey)}
+                          </TableCell>)}
+                      </TableRow>)}
+                  </TableBody>
+              </Table>
+          </ScrollShadow>
         <section>
-            {bottomContent}
+            {selectionMode === "multiple" && bottomContent}
         </section>
     </div>);
 }

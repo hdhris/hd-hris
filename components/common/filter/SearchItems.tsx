@@ -49,7 +49,7 @@ function SearchItems<T extends object>({
     if (items.length > 0) {
       refresh(searchValue);
     }
-  }, [items,refresh, searchValue]);
+  }, [items, searchValue]);
 
   return (
     <Input
