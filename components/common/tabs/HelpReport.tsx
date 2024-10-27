@@ -13,6 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
   ScrollShadow,
+  Spinner,
   Textarea,
   Tooltip,
 } from "@nextui-org/react";
@@ -67,6 +68,7 @@ function HelpReport() {
     }
     return 0;
   }, [reports]);
+
   const inputRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     if (adding) inputRef.current?.focus();
@@ -160,7 +162,7 @@ function HelpReport() {
         unresolved > 0 ? unresolved + " unresolved bugs" : "All bugs resolved"
       }`}</p>
     );
-  }, [adding, submitting, userInfo, newReport, inputRef]);
+  }, [adding, submitting, userInfo, newReport, inputRef, unresolved]);
 
   const topRightContent = useMemo(() => {
     return (
@@ -213,7 +215,9 @@ function HelpReport() {
             {topLeftContent}
             {topRightContent}
           </div>
-          {reports && reports.length ? (
+          {isLoading ? (
+            <Spinner className="w-72 my-5" size="sm"/>
+          ) : reports && reports.length ? (
             <ScrollShadow className="max-h-80">
               <div className="p-4 flex flex-col gap-1">
                 {reports.map((report, index) => (
