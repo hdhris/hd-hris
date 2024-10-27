@@ -63,14 +63,13 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   const [overtimeData, setOvertimeData] = useState<OvertimeEntry>();
   const [selectedEmployee, setSelectedEmployee] = useState(0);
   const [selectedEntry, setSelectedEntry] = useState(0);
-  const { data: recordData, isLoading: recordLoading } = useQuery<OvertimeEntry[]>(
-    `/api/admin/attendance-time/overtime/preview?id=${selectedEmployee}`
-  );
+  const { data: recordData, isLoading: recordLoading } = useQuery<
+    OvertimeEntry[]
+  >(`/api/admin/attendance-time/overtime/preview?id=${selectedEmployee}`);
   const [comment, setComment] = useState("");
   const [ratePH, setRatePH] = useState("0.0");
   const userID = useEmployeeId();
 
-  
   const fetchEmployeeOvertimeRecords = useCallback(
     async (entry: OvertimeEntry) => {
       console.log("FLAG");
@@ -255,7 +254,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
         )}
       </div>
       <div className="flex gap-4">
-        <div className="flex flex-col gap-4 w-[500px]">
+        <div className="flex flex-col gap-4 w-[350px]">
           <div className="flex w-full">
             <div className="flex-1 py-2">
               {/* {left} */}
@@ -391,36 +390,62 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
         {recordLoading ? (
           <Spinner label="Loading..." color="primary" className="w-full" />
         ) : (
-          <DataDisplay
-            data={recordData || []}
-            // config={config}
+          <TableData
+            items={recordData || []}
+            config={config}
             isLoading={recordLoading}
-            onTableDisplay={{
-              config: config,
-              classNames: { td: "w-fit" },
-              layout: "auto",
-              selectionMode: "single",
-              disallowEmptySelection: true,
-              selectedKeys: new Set(selectedEntry.toString()),
-              onSelectionChange: (keys) => {
-                const record = recordData?.find(
-                  (item) => String(item.id) === Array.from(keys)[0]
-                );
-                setSelectedEntry(Number(Array.from(keys)[0]));
-                setOvertimeData(record);
-                setComment(record?.comment || "");
-                setRatePH(
-                  record?.rate_per_hour ||
-                    String(
-                      record?.trans_employees_overtimes.ref_job_classes
-                        ?.pay_rate
-                    ) ||
-                    "0"
-                );
-              },
+            classNames={{ td: "w-fit" }}
+            layout="auto"
+            selectionMode="single"
+            disallowEmptySelection
+            removeWrapper
+            selectedKeys={new Set(selectedEntry.toString())}
+            onSelectionChange={(keys) => {
+              const record = recordData?.find(
+                (item) => String(item.id) === Array.from(keys)[0]
+              );
+              setSelectedEntry(Number(Array.from(keys)[0]));
+              setOvertimeData(record);
+              setComment(record?.comment || "");
+              setRatePH(
+                record?.rate_per_hour ||
+                  String(
+                    record?.trans_employees_overtimes.ref_job_classes?.pay_rate
+                  ) ||
+                  "0"
+              );
             }}
-            defaultDisplay="table"
           />
+          // <DataDisplay
+          //   data={recordData || []}
+          //   // config={config}
+          //   isLoading={recordLoading}
+          //   onTableDisplay={{
+          //     config: config,
+          //     classNames: { td: "w-fit" },
+          //     layout: "auto",
+          //     selectionMode: "single",
+          //     disallowEmptySelection: true,
+          //     selectedKeys: new Set(selectedEntry.toString()),
+          //     onSelectionChange: (keys) => {
+          //       const record = recordData?.find(
+          //         (item) => String(item.id) === Array.from(keys)[0]
+          //       );
+          //       setSelectedEntry(Number(Array.from(keys)[0]));
+          //       setOvertimeData(record);
+          //       setComment(record?.comment || "");
+          //       setRatePH(
+          //         record?.rate_per_hour ||
+          //           String(
+          //             record?.trans_employees_overtimes.ref_job_classes
+          //               ?.pay_rate
+          //           ) ||
+          //           "0"
+          //       );
+          //     },
+          //   }}
+          //   defaultDisplay="table"
+          // />
         )}
       </div>
     </Drawer>

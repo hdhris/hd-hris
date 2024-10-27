@@ -415,14 +415,15 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
                   onSelectionChange={setSelectedKeys}
                   selectionMode={selectionMode}
                   isHeaderSticky
+                  {...props}
                   className='h-full'
                   classNames={{
                     base: 'h-full',
                     table: 'h-fit',
                     tbody: 'h-full',
                     wrapper: 'h-full',
+                    ...props.classNames,
                   }}
-                  {...props}
               >
                   <TableHeader columns={config.columns}>
                       {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn
