@@ -15,9 +15,9 @@ function RootLayout({ children }: { children: ReactNode }) {
       path: "deductions"
     },
     {
-      key: "advance",
+      key: "cash-advance",
       title: "Cash Advance",
-      path: "advance"
+      path: "cash-advance"
     },
     {
       key: "process",

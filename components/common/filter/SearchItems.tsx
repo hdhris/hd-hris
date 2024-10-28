@@ -54,7 +54,7 @@ function SearchItems<T extends object>({
   return (
     <Input
       isDisabled={isLoading}
-      placeholder={`Search by ${config.map((item) => item.label).join(", ")}`}
+      placeholder={`Search by ${config.map((item) => item.label).filter((item) => item != "").join(", ")}`}
       variant="bordered"
       value={searchValue}
       onValueChange={setSearchValue}
