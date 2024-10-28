@@ -30,6 +30,10 @@ const nextConfig = {
         source: "/leaves",
         destination: "/leaves/leave-requests",
         permanent: true,
+      },{
+        source: "/benefits",
+        destination: "/benefits/membership",
+        permanent: true,
       },
     ];
   },
