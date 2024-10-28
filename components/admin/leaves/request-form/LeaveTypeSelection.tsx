@@ -6,13 +6,15 @@ import { Controller, useFormContext } from "react-hook-form";
 import { LuChevronsUpDown } from "react-icons/lu";
 import { LeaveType } from "@/types/leaves/LeaveRequestTypes";
 
-interface LeaveTypeSelectionProps {
+export interface LeaveTypeSelectionProps {
     leaveTypes: LeaveType[];
     isLoading?: boolean;
-    duration: (days: number | null) => void;
+    min: (days: number) => void;
+    max: (days: number) => void;
+    isAttachmentRequired: (value: boolean) => void
 }
 
-function LeaveTypeSelection({ duration, leaveTypes, isLoading }: LeaveTypeSelectionProps) {
+function LeaveTypeSelection({isAttachmentRequired, min, max, leaveTypes, isLoading }: LeaveTypeSelectionProps) {
     const { control, setValue, formState: { errors } } = useFormContext();
     const [searchTerm, setSearchTerm] = React.useState('');  // Add state for searchTerm
 
@@ -36,7 +38,7 @@ function LeaveTypeSelection({ duration, leaveTypes, isLoading }: LeaveTypeSelect
                             className={cn("text-sm font-medium inline-flex", errors.leave_type_id ? "text-red-500" : "")}>
                             Pick a Leave Type
                         </Typography>}
-                        isClearable={false}
+                        isClearable
                         aria-hidden="false"
                         isRequired
                         radius="sm"
@@ -55,11 +57,14 @@ function LeaveTypeSelection({ duration, leaveTypes, isLoading }: LeaveTypeSelect
                             if (selectedItem) {
                                 setValue('leave_type_id', selectedItem.id);
                                 field.onChange(selectedItem.id);  // Sync with react-hook-form
-                                duration(selectedItem.duration_days);  // Set the leave type duration
+                                min(selectedItem.min);
+                                max(selectedItem.max);  // Set the leave type duration
+                                isAttachmentRequired(selectedItem.isAttachmentRequired)
                             } else {
                                 setValue('leave_type_id', "");
                                 field.onChange("");  // Clear value
-                                duration(null);  // Clear duration
+                                min(0);
+                                max(0);  // Set the leave type duration
                             }
                         }}
                         {...field}

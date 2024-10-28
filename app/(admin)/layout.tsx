@@ -78,11 +78,11 @@ function RootLayout({children}: { children: ReactNode }) {
                                  showLabel={isSidebarOpen}/>
                     <SideBarItem label="Privileges" href="/privileges" icon={<LuPersonStanding/>}
                                  showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Incident Report" href="/incident-report" icon={<LuFileWarning/>}
+                    <SideBarItem label="Incident Report" href="/incident/" icon={<LuFileWarning/>}
                                  showLabel={isSidebarOpen}/>
                     <SideBarItem label="Training And Seminars" href="/training&seminars" icon={<LiaUsersSolid/>}
                                  showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Reports" href="/reports" icon={<BiStats/>} showLabel={isSidebarOpen}/>
+                    <SideBarItem label="Reports" href="/reports/" icon={<BiStats/>} showLabel={isSidebarOpen}/>
                 </SideBar>
 
             </div>

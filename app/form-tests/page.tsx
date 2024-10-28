@@ -117,10 +117,15 @@ function Page() {
                             hideTimeZone: true
                         }
                     }, {
-                        isRequired: true, name: "birth_date_picker", type: "date-picker", label: "Birth Date Picker",
+                        isRequired: true, name: "birth_date_picker", type: "date-picker", label: "Birth Date Picker", config: {
+                            granularity: "hour",
+                            hideTimeZone: true
+                        }
 
                     }, {
-                        isRequired: true, name: "holiday", type: "date-range-picker", label: "Holiday",
+                        isRequired: true, name: "holiday", type: "date-range-picker", label: "Holiday", config: {
+                            granularity: "hour"
+                        }
                     }, {
                         name: "price", type: "radio-group", label: "Price", config: {
 

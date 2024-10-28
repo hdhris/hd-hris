@@ -4,6 +4,7 @@ import {Button, Tab, Tabs} from "@nextui-org/react";
 import {usePathname, useRouter} from "next/navigation";
 import { NavEndContext } from '@/contexts/common/tabs/NavigationContext';
 import { IoIosArrowRoundBack } from 'react-icons/io';
+import HelpReport from './HelpReport';
 
 export interface TabItem {
     key: string;
@@ -33,7 +34,7 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
     return (
         <div className="flex flex-col space-y-4 h-full">
             <div className='flex justify-between items-center'>
-                <div className='flex gap-1'>
+                <div className='flex gap-1 items-center'>
                     {pathPart.length > 3 &&
                     <Button isIconOnly className='border-1 bg-white m-1' radius='md' size='sm' onClick={()=>{handleTabChange(pathPart[2])}}>
                         <IoIosArrowRoundBack size={20} />
@@ -50,6 +51,7 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
                             <Tab key={tab.key} title={tab.title}/>
                         ))}
                     </Tabs>
+                    <HelpReport/>
                 </div>
                 <div className='flex gap-2 items-center'>{endContent}</div>
             </div>

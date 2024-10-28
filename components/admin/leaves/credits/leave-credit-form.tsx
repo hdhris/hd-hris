@@ -44,12 +44,6 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
         },
     });
 
-    // useEffect(() => {
-    //     if (employee && isLoadingDelete) {
-    //         handleModalOpen(false)
-    //         console.log("Flag 1: ", isModalOpen)
-    //     }
-    // }, [employee, handleModalOpen, isLoadingDelete, isModalOpen]);
 
     useEffect(() => {
         if (isOpen !== isModalOpen) {
@@ -192,31 +186,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
             </form>
         </Form>
     </FormDrawer>)
-    // return (<Modal
-    //         isOpen={isModalOpen}
-    //         onOpenChange={handleModalOpen}
-    //         isDismissable={false}
-    //     >
-    //         <ModalContent>
-    //             <ModalHeader className="flex flex-col">
-    //                 <Typography>{title || "Add Leave Credit"}</Typography>
-    //                 <Typography
-    //                     className="font-normal text-sm">{description || "Steps to Set Up and Allocate Employee Leave Credits."}</Typography>
-    //             </ModalHeader>
-    //             <ModalBody className="pb-6">
-    //                 <Form {...form}>
-    //                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-    //                         <EmployeeListForm employees={employeeState!} isLoading={data.isLoading}/>
-    //                         <FormFields items={formFields}/>
-    //
-    //                         <div className="w-full flex justify-end">
-    //                             <Button type="submit" isLoading={isLoading} {...uniformStyle()}>Save</Button>
-    //                         </div>
-    //                     </form>
-    //                 </Form>
-    //             </ModalBody>
-    //         </ModalContent>
-    //     </Modal>);
+
 }
 
 export default LeaveCreditForm;

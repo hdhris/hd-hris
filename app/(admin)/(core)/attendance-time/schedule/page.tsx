@@ -19,7 +19,9 @@ import {
 import { Button, Spinner } from "@nextui-org/react";
 import axios from "axios";
 import { capitalize } from "lodash";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+
+const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
 const searchConfig: SearchItemsProps<EmployeeSchedule>[] = [
   {
@@ -35,21 +37,17 @@ const searchConfig: SearchItemsProps<EmployeeSchedule>[] = [
     label: "Middle Name",
   },
 ];
-const filterConfig: (days: string[]) => FilterItemsProps<EmployeeSchedule>[] = (
-  days: string[]
-) => {
-  return [
-    {
-      filter: days.map((day) => ({
-        label: capitalize(day),
-        value: (item: EmployeeSchedule) => item.days_json.includes(day),
-      })),
-      key: "days_json",
-      sectionName: "Day of week",
-      selectionMode: "multipleAND",
-    },
-  ];
-};
+const filterConfig: FilterItemsProps<EmployeeSchedule>[] = [
+  {
+    filter: days.map((day) => ({
+      label: capitalize(day),
+      value: (item: EmployeeSchedule) => item.days_json.includes(day),
+    })),
+    key: "days_json",
+    sectionName: "Day of week",
+    selectionMode: "multipleAND",
+  },
+];
 
 function Page() {
   const [hoveredBatchId, setHoveredBatchId] = useState<number | null>(null);
@@ -58,20 +56,20 @@ function Page() {
     "/api/admin/attendance-time/schedule",
     { refreshInterval: 3000 }
   );
+  const [tableData, setTableData] = useState<EmployeeSchedule[]>();
   const [isVisible, setVisible] = useState(false);
   const [isPending, setPending] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<BatchSchedule | null>(
     null
   );
-  const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
   SetNavEndContent(() => {
     return (
       <>
         <SearchFilter
           items={data?.emp_sched || []}
-          filterConfig={filterConfig(days)}
+          filterConfig={filterConfig}
           searchConfig={searchConfig}
-          setResults={() => {}}
+          setResults={setTableData}
           isLoading={isLoading}
         />
       </>
@@ -153,6 +151,22 @@ function Page() {
     setPending(false);
   };
 
+  const table = useMemo(() => {
+    if (data && data.batch) {
+      return scheduleTable(
+        days,
+        tableData || [],
+        data.batch || [],
+        hoveredRowId,
+        hoveredBatchId,
+        setHoveredRowId
+      );
+    }
+    return (
+      <Spinner className="w-full h-full" label="Loading..." color="primary" />
+    );
+  }, [tableData, data, hoveredRowId, hoveredBatchId]);
+
   if (isLoading || !data) {
     return (
       <Spinner
@@ -195,7 +209,7 @@ function Page() {
           </Button>
         </div>
         {/* right side */}
-        {scheduleTable(days, (data.emp_sched||[]), (data.batch||[]), hoveredRowId, hoveredBatchId, setHoveredRowId)}
+        {table}
       </div>
 
       <ScheduleModal

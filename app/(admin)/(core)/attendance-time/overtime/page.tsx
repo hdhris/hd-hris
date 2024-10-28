@@ -7,7 +7,6 @@ import React, { useState } from "react";
 import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
 import { Avatar, Button, Chip, Tooltip, User } from "@nextui-org/react";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
-import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
@@ -46,13 +45,10 @@ function Page() {
   const [selectedOvertime, setSelectedOvertime] = useState<
     OvertimeEntry | undefined
   >();
-  const { data, isLoading } = usePaginateQuery<OvertimeEntry[]>(
+  const { data, isLoading } = useQuery<OvertimeEntry[]>(
     "/api/admin/attendance-time/overtime",
-    page,
-    rows,
     { refreshInterval: 3000 }
   );
-  const maxItem = useTableLength("trans_overtimes", { refreshInterval: 3000 });
   const config: TableConfigProps<OvertimeEntry> = {
     columns: [
       { uid: "request_date", name: "Request Date", sortable: true },
@@ -226,7 +222,7 @@ function Page() {
   return (
     <>
       <DataDisplay
-        title={"Overtime entries"}
+        title="Overtime entries"
         data={data || []}
         isLoading={isLoading}
         // searchProps={{
@@ -271,14 +267,11 @@ function Page() {
             setVisible(true);
           },
         }}
-        rowSelectionProps={{
-          onRowChange: setRows,
-        }}
         defaultDisplay="table"
         paginationProps={{
           loop: true,
-          data_length: maxItem,
-          onChange: setPage,
+          data_length: data?.length,
+
         }}
       />
       <OvertimeModal

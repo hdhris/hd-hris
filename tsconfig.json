@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -12,7 +16,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-//    "customConditions": ["node"],
+    //    "customConditions": ["node"],
     "plugins": [
       {
         "name": "next"
@@ -20,17 +24,26 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/components/*": ["components/*"],
-      "typeRoots": ["node_modules/@types"]//
-    }
+      "@/*": [
+        "./*"
+      ],
+      "@/components/*": [
+        "components/*"
+      ],
+      "typeRoots": [
+        "node_modules/@types"
+      ] //
+    },
+    "target": "ES2017"
   },
-
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
-, "components/admin/add/AddBranch.tsx"  ],
-  "exclude": ["node_modules"]
+    ".next/types/**/*.ts",
+    "components/admin/add/AddBranch.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
