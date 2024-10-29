@@ -1,8 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useEmployeesData } from "@/services/queries";
+import TableData from "@/components/tabledata/TableData";
+import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Employee } from "@/types/employeee/EmployeeType";
-import { Avatar, Chip } from "@nextui-org/react";
+import { Avatar, Button, Selection, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/add/AddEmployees";
@@ -10,46 +12,52 @@ import EditEmployee from "@/components/admin/edit/EditEmployee";
 import ViewEmployee from "@/components/admin/add/ViewEmployee";
 import axios from "axios";
 import showDialog from "@/lib/utils/confirmDialog";
-import DataDisplay from "@/components/common/data-display/data-display";
-import BorderCard from "@/components/common/BorderCard";
-import dayjs from "dayjs";
-import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
-
+import { FilterProps } from "@/types/table/default_config";
+//
 const Page: React.FC = () => {
-  const { data: employees, mutate, error, isLoading } = useEmployeesData();
+  const { data: employees, mutate, error } = useEmployeesData();
+  const [loading, setLoading] = useState(true);
   const [sortedEmployees, setSortedEmployees] = useState<Employee[]>([]);
-  const [selectedEmployee, setSelectedEmployee] =
-    React.useState<Employee | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = React.useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] =
-    React.useState<Employee | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<any | null>(
+    null
+  );
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
 
   useEffect(() => {
     if (employees) {
       const sorted = sortEmployeesByRecentActivity(employees);
       setSortedEmployees(sorted);
+      setLoading(false);
     }
   }, [employees]);
 
-  const sortEmployeesByRecentActivity = (employees: Employee[]) => {
-    return [...employees].sort((a, b) => {
-      const dateA = new Date(a.updated_at || a.created_at).getTime();
-      const dateB = new Date(b.updated_at || b.created_at).getTime();
-      return dateB - dateA;
-    });
-  };
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch employees. Please try again.",
+        duration: 3000,
+      });
+      setLoading(false);
+    }
+  }, [error]);
 
   const handleEdit = (employee: Employee) => {
     setSelectedEmployeeId(employee);
     setIsEditModalOpen(true);
   };
 
-  SetNavEndContent(() => (
-    <div className="flex items-center gap-4">
-      <AddEmployee onEmployeeAdded={handleEmployeeUpdated} />
-    </div>
-  ));
+  const handleRowAction = (key: React.Key) => {
+    const employee = sortedEmployees.find((emp) => emp.id === Number(key));
+    if (employee) {
+      setSelectedEmployee(employee);
+      setIsViewModalOpen(true);
+    }
+  };
 
   const handleDelete = async (id: number, name: string) => {
     try {
@@ -75,16 +83,20 @@ const Page: React.FC = () => {
     }
   };
 
+  const sortEmployeesByRecentActivity = (employees: Employee[]) => {
+    return [...employees].sort((a, b) => {
+      const dateA = new Date(a.updated_at || a.created_at).getTime();
+      const dateB = new Date(b.updated_at || b.created_at).getTime();
+      return dateB - dateA;
+    });
+  };
+
   const handleEmployeeUpdated = async () => {
     try {
-      // First, manually call mutate to get fresh data
-      const updatedData = await mutate();
-
-      // Then update the sorted employees with the fresh data
-      if (updatedData) {
-        const sorted = sortEmployeesByRecentActivity(updatedData);
-        setSortedEmployees(sorted);
-      }
+      await mutate();
+      const sorted = sortEmployeesByRecentActivity(employees || []);
+      setSortedEmployees(sorted);
+      console.log("Employee data updated and sorted");
     } catch (error) {
       console.error("Error updating employee data:", error);
     }
@@ -97,131 +109,108 @@ const Page: React.FC = () => {
     return "Active";
   };
 
-  const handleRowClick = (employee: Employee) => {
-    setSelectedEmployee(employee);
-    setIsViewModalOpen(true);
-  };
-
-  const TableConfigurations = {
+  const config: TableConfigProps<Employee> = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "department", name: "Department", sortable: true },
-      { uid: "position", name: "Position", sortable: true },
-      { uid: "contact", name: "Contact" },
-      { uid: "hiredate", name: "Hired Date", sortable: true },
-      { uid: "status", name: "Status", sortable: true },
-      { uid: "actions", name: "Actions" },
+      { uid: "department", name: "Department", sortable: false },
+      { uid: "position", name: "Position", sortable: false },
+      { uid: "contact", name: "Contact", sortable: false },
+      { uid: "hiredate", name: "Hired Date", sortable: false },
+      { uid: "status", name: "Status", sortable: false },
+      { uid: "actions", name: "Actions", sortable: false },
     ],
-    rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
-      const key = columnKey as string;
-
-      // Common styles for clickable cells
-      const cellClasses = "cursor-pointer hover:bg-gray-50";
-
-      switch (key) {
+    rowCell: (item, columnKey) => {
+      switch (columnKey) {
         case "name":
           return (
-            <div
-              className={`flex items-center gap-4 ${cellClasses}`}
-              onClick={() => handleRowClick(employee)}
-            >
+            <div className="flex items-center">
               <Avatar
-                src={employee.picture || ""}
-                alt={`${employee.first_name} ${employee.last_name}`}
+                src={item.picture || ""}
+                alt={`${item.first_name} ${item.last_name}`}
+                className="w-10 h-10 rounded-full mr-10"
               />
               <span>
-                {employee.first_name} {employee.last_name}
-                {employee.suffix ? `, ${employee.suffix}` : ""}
-                {employee.extension ? ` ${employee.extension}` : ""}
+                {item.first_name} {item.last_name}
+                {item.suffix ? `, ${item.suffix}` : ""}
+                {item.extension ? ` ${item.extension}` : ""}
               </span>
             </div>
           );
-        case "department":
-          return (
-            <div
-              className={cellClasses}
-              onClick={() => handleRowClick(employee)}
-            >
-              {employee.ref_departments?.name || "N/A"}
-            </div>
-          );
         case "position":
-          return (
-            <div
-              className={cellClasses}
-              onClick={() => handleRowClick(employee)}
-            >
-              {employee.ref_job_classes?.name || "N/A"}
-            </div>
-          );
+          return <div>{item.ref_job_classes?.name || "N/A"}</div>;
+        case "department":
+          return <div>{item.ref_departments?.name || "N/A"}</div>;
         case "contact":
           return (
-            <div
-              className={`flex flex-col ${cellClasses}`}
-              onClick={() => handleRowClick(employee)}
-            >
-              <span>{employee.email || "N/A"}</span>
-              <span>+63{employee.contact_no || "N/A"}</span>
+            <div className="flex flex-col items-start">
+              <div>{item.email || "N/A"}</div>
+              <div>{item.contact_no || "N/A"}</div>
             </div>
           );
         case "hiredate":
           return (
-            <div
-              className={cellClasses}
-              onClick={() => handleRowClick(employee)}
-            >
-              {employee.hired_at
-                ? dayjs(employee.hired_at).format("MMM DD, YYYY")
+            <div>
+              {item.hired_at
+                ? new Date(item.hired_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })
                 : "N/A"}
             </div>
           );
         case "status":
-          const status = getEmployeeStatus(employee);
-          const statusColor = {
-            Active: "success",
-            Terminated: "danger",
-            Resigned: "default",
-            Suspended: "warning",
-          }[status] as "success" | "danger" | "warning" | "default";
-
+          const status = getEmployeeStatus(item);
+          let statusColorClass: "success" | "danger" | "warning" | "default" =
+            "default";
+          switch (status) {
+            case "Terminated":
+              statusColorClass = "danger";
+              break;
+            case "Resigned":
+              statusColorClass = "default";
+              break;
+            case "Suspended":
+              statusColorClass = "warning";
+              break;
+            case "Active":
+            default:
+              statusColorClass = "success";
+          }
           return (
-            <div
-              className={cellClasses}
-              onClick={() => handleRowClick(employee)}
+            <Chip
+              className="capitalize"
+              color={statusColorClass}
+              size="sm"
+              variant="flat"
             >
-              <Chip color={statusColor} size="sm" variant="flat">
-                {status}
-              </Chip>
-            </div>
+              {status}
+            </Chip>
           );
         case "actions":
           return (
-            <TableActionButton
-              name={`${employee.first_name} ${employee.last_name}`}
-              onEdit={() => handleEdit(employee)}
-              onDelete={() =>
-                handleDelete(
-                  employee.id,
-                  `${employee.first_name} ${employee.last_name}`
-                )
-              }
-            />
+            <div className="flex space-x-2">
+              <TableActionButton
+                name={`${item.first_name} ${item.last_name}`}
+                onEdit={() => handleEdit(item)}
+                onDelete={() =>
+                  handleDelete(item.id, `${item.first_name} ${item.last_name}`)
+                }
+              />
+            </div>
           );
         default:
-          return <div>-</div>;
+          return <></>;
       }
     },
   };
 
-  const sortProps = {
-    sortItems: [
-      { name: "First Name", key: "first_name" as keyof Employee },
-      { name: "Last Name", key: "last_name" as keyof Employee },
-      { name: "Created At", key: "created_at" as keyof Employee },
-      { name: "Updated At", key: "updated_at" as keyof Employee },
-      { name: "Hired Date", key: "hired_at" as keyof Employee },
-    ],
-  };
+  const searchingItemKey: (keyof Employee)[] = [
+    "first_name",
+    "last_name",
+    "email",
+    "contact_no",
+  ];
 
   const FilterItems = [
     {
@@ -238,87 +227,55 @@ const Page: React.FC = () => {
         : [],
     },
   ];
-  
 
+ 
   return (
-    <div className="p-4">
-      <DataDisplay
-        defaultDisplay="table"
-        title="Employees"//the count is the problem
-        data={sortedEmployees}
-        filterProps={{
-          filterItems: FilterItems,
-        }}
-        isLoading={isLoading}
-        onTableDisplay={{
-          config: TableConfigurations,
-                    layout: "auto",
-        }}
-        paginationProps={{
-          data_length: sortedEmployees?.length
-        }}
+    <div id="employee-page" className="h-fit-navlayout">
+      <TableData
+        aria-label="Employee Table"
+        config={config}
+        items={sortedEmployees}
+        searchingItemKey={searchingItemKey}
+        filterItems={FilterItems}
         
-        searchProps={{
-          searchingItemKey: ["first_name", "last_name", "email", "contact_no"],
+        onRowAction={(key) => {
+          const employee = sortedEmployees.find(
+            (emp) => emp.id === Number(key)
+          );
+          if (employee) {
+            setSelectedEmployee(employee);
+            setIsViewModalOpen(true);
+          }
         }}
-        sortProps={sortProps}
-        onListDisplay={(employee) => (
-          <div
-            className="w-full cursor-pointer"
-            onClick={() => handleRowClick(employee)}
-          >
-            <BorderCard className="p-4">
-              <div className="flex items-center gap-4">
-                <Avatar
-                  src={employee.picture || ""}
-                  alt={`${employee.first_name} ${employee.last_name}`}
-                />
-                <div className="flex flex-col">
-                  <span className="font-medium">
-                    {employee.first_name} {employee.last_name}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {employee.ref_departments?.name || "N/A"} -{" "}
-                    {employee.ref_job_classes?.name || "N/A"}
-                  </span>
-                </div>
-              </div>
-            </BorderCard>
+        counterName="Employees"
+        isLoading={loading}
+        isHeaderSticky={true}
+        classNames={{
+          wrapper: "h-full overflow-y-auto",
+        }}
+        endContent={() => (
+          <div className="flex items-center justify-between">
+            <div className="ml-4">
+              <AddEmployee onEmployeeAdded={handleEmployeeUpdated} />
+            </div>
+            <div className="ml-auto mr-4"></div>
           </div>
-        )}
-
-        onExport={{
-          drawerProps: {
-              title: "Export",
-          }
-      }}
-      onImport={{
-          drawerProps: {
-              title: "Import",
-          }
-        }}
-        
+         )}
       />
 
       {selectedEmployee && (
         <ViewEmployee
           isOpen={isViewModalOpen}
-          onClose={() => {
-            setIsViewModalOpen(false);
-            setSelectedEmployee(null);
-          }}
+          onClose={() => setIsViewModalOpen(false)}
           employee={selectedEmployee}
           onEmployeeUpdated={handleEmployeeUpdated}
         />
       )}
 
-      {selectedEmployeeId && (
+      {selectedEmployeeId !== null && (
         <EditEmployee
           isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedEmployeeId(null);
-          }}
+          onClose={() => setIsEditModalOpen(false)}
           employeeData={selectedEmployeeId}
           onEmployeeUpdated={handleEmployeeUpdated}
         />
