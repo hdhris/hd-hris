@@ -17,23 +17,27 @@ import { FaPlus } from "react-icons/fa";
 import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import { MdDelete } from "react-icons/md";
 import showDialog from "@/lib/utils/confirmDialog";
-import { PayrollTable } from "@/types/payroll/payrollType";
+import { PayrollTable, ProcessDate } from "@/types/payroll/payrollType";
 import { axiosInstance } from "@/services/fetcher";
+import { useQuery } from "@/services/queries";
 
 interface DatePickerUiProps {
-  payrollDates?: PayrollTable["pr_dates"];
-  prtLoading: boolean;
-  setIsLoading: (value: boolean) => void;
-  setPayrollData: (value: PayrollTable) => void;
+  // payrollDates?: PayrollTable["pr_dates"];
+  // prtLoading: boolean;
+  setProcessDate: (item: ProcessDate)=>void;
+  // setIsLoading: (value: boolean) => void;
+  // setPayrollData: (value: PayrollTable) => void;
 }
 
-function DatePickerUi({
-  payrollDates,
-  prtLoading,
-  setIsLoading,
-  setPayrollData,
+function DatePickerPayroll({
+  // payrollDates,
+  // prtLoading,
+  setProcessDate,
+  // setIsLoading,
+  // setPayrollData,
 }: DatePickerUiProps) {
   let formatter = useDateFormatter({ dateStyle: "long" });
+  const {data:payrollDates, isLoading} = useQuery<ProcessDate[]>('/api/admin/payroll/get-process-dates')
   const [selectedDate, setSelectedDate] = React.useState("");
   const [selectedYear, setSelectedYear] = React.useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -67,30 +71,31 @@ function DatePickerUi({
     }
   }, [payrollDates]);
   useEffect(() => {
-    if (getProcessDate && setIsLoading && setPayrollData) {
-      console.log("Flag");
-      const fetchPayrollData = async () => {
-        setIsLoading(true); // Start loading
-        try {
-          const response: AxiosResponse<PayrollTable> = await axiosInstance.get(
-            `/api/admin/payroll/process/${toGMT8(
-              getProcessDate.start_date
-            ).format("YYYY-MM-DD")},${toGMT8(
-              getProcessDate.end_date
-            ).format("YYYY-MM-DD")}`
-          );
-          setPayrollData(response.data);
-        } catch (error) {
-          console.error("Error fetching payroll data:", error);
-          // setError("Failed to load payroll data.");
-        } finally {
-          setIsLoading(false); // End loading
-        }
-      };
+    if (getProcessDate){  // && setIsLoading && setPayrollData) {
+      // console.log("Flag");
+      // const fetchPayrollData = async () => {
+      //   // setIsLoading(true); // Start loading
+      //   try {
+      //     const response: AxiosResponse<PayrollTable> = await axiosInstance.get(
+      //       `/api/admin/payroll/process/${toGMT8(
+      //         getProcessDate.start_date
+      //       ).format("YYYY-MM-DD")},${toGMT8(
+      //         getProcessDate.end_date
+      //       ).format("YYYY-MM-DD")}`
+      //     );
+      //     // setPayrollData(response.data);
+      //   } catch (error) {
+      //     console.error("Error fetching payroll data:", error);
+      //     // setError("Failed to load payroll data.");
+      //   } // finally {
+      //     // setIsLoading(false); // End loading
+      //   // }
+      // };
 
-      fetchPayrollData();
+      // fetchPayrollData();
+      setProcessDate(getProcessDate);
     }
-  }, [getProcessDate, setIsLoading, setPayrollData]);
+  }, [getProcessDate]); //, setIsLoading, setPayrollData]);
   async function handleAddDate() {
     try {
       await axios.post("/api/admin/payroll/process/add-date", {
@@ -229,7 +234,7 @@ function DatePickerUi({
                 );
               }) || []
             }
-            isLoading={prtLoading}
+            isLoading={isLoading}
             disallowEmptySelection
             selectedKeys={new Set([selectedDate])}
             className="w-36"
@@ -245,7 +250,7 @@ function DatePickerUi({
           <Select
             aria-label="Year Picker"
             variant="bordered"
-            isLoading={prtLoading}
+            isLoading={isLoading}
             items={
               Array.from(
                 new Set(
@@ -264,6 +269,7 @@ function DatePickerUi({
           <Button
             {...uniformStyle({ color: "danger" })}
             isIconOnly
+            isLoading={isLoading}
             onClick={handleDeleteDate}
           >
             <MdDelete size={15} />
@@ -271,6 +277,7 @@ function DatePickerUi({
           <Button
             {...uniformStyle()}
             isIconOnly
+            isLoading={isLoading}
             onClick={() => setIsAdding(true)}
           >
             <FaPlus />
@@ -281,4 +288,4 @@ function DatePickerUi({
   );
 }
 
-export default DatePickerUi;
+export default DatePickerPayroll;

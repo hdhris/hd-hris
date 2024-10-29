@@ -21,12 +21,12 @@ function RootLayout({ children }: { children: ReactNode }) {
     },
     {
       key: "process",
-      title: "Payroll Process",
+      title: "Pay slip",
       path: "process"
     },
     {
       key: "payslip",
-      title: "Pay slip",
+      title: "Payroll Process",
       path: "payslip"
     }
   ]
