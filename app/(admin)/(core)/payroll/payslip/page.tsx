@@ -34,7 +34,7 @@ function Page() {
           />
         )}
       </div>
-      <Card className="w-80 h-full m-2" shadow="sm">
+      <Card className="w-80 h-auto m-2" shadow="sm">
         <CardHeader>Payslip</CardHeader>
         <CardBody>
           <h1>Focused Employee: {focusedEmployee}</h1>
