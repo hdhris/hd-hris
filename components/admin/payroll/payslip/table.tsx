@@ -4,8 +4,9 @@ import {
   PayslipEmployee,
   PayslipPayhead,
 } from "@/types/payroll/payrollType";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { PayrollInputColumn } from "./input";
+import axios from "axios";
 
 interface PRPayslipTableType extends PayslipData {
   isProcessed: boolean;
@@ -16,21 +17,46 @@ export function PRPayslipTable({
   employees,
   deductions,
   earnings,
+  breakdowns,
   payrolls,
   isProcessed,
   setFocusedEmployee,
   setFocusedPayhead,
 }: PRPayslipTableType) {
 
+  const [willUpdate, setWillUpdate] = useState(false);
   const tableRef = useRef<HTMLTableElement>(null);
   const [records, setRecords] = useState<
     Record<number, Record<number, ["earning" | "deduction", string]>>
   >({});
 
-  const handleBlur = (employeeId: number, payheadId: number, value: number) => {
-    console.log(employeeId, payheadId, value);
-    // API call logic here, using employeeId, payheadId, and value
+  async function handleBlur(employeeId: number, payheadId: number, value: number) {
+    const payroll = payrolls.find(pr=>pr.employee_id===employeeId)
+    if(willUpdate){
+      await axios.post('/api/admin/payroll/payslip/update-payhead',{
+        payroll_id: payroll?.id,
+        payhead_id: payheadId,
+        amount: value,
+      })
+      // API call logic here, using employeeId, payheadId, and value
+    }
+    setWillUpdate(false);
   };
+
+  // :
+  useEffect(() => {
+    if (breakdowns) {
+      breakdowns.forEach((bd) => {
+        const payroll = payrolls.find((pr) => pr.id === bd.payroll_id);
+        handleRecording(payroll?.employee_id!, bd.payhead_id, [
+          earnings.find((e) => e.id === bd.payhead_id)
+            ? "earning"
+            : "deduction",
+          bd.amount,
+        ]);
+      });
+    }
+  }, [breakdowns, payrolls, earnings]);
 
   function isAffected(employee: PayslipEmployee, payhead: PayslipPayhead) {
     let mandatory = false;
@@ -67,6 +93,7 @@ export function PRPayslipTable({
     payheadId: number,
     value: ["earning" | "deduction", string]
   ) {
+    setWillUpdate(true);
     setRecords((prevRecords) => ({
       ...prevRecords,
       [employeeId]: {

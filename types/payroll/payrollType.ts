@@ -29,6 +29,15 @@ export interface Payroll {
   deleted_at: string | null; // ISO date string or null
 }
 
+export interface Breakdown {
+  payroll_id: number;
+  payhead_id: number;
+  amount: string;
+  id: number;
+  created_at: string;  // Using ISO string format for date fields
+  updated_at: string;
+}
+
 // interface Earning {
 //   calculation: string;
 //   created_at: string; // ISO date string
@@ -75,6 +84,7 @@ export interface PayslipEmployee extends UserEmployee {
 }
 export interface PayslipData {
   payrolls: Payroll[];
+  breakdowns: Breakdown[];
   employees: PayslipEmployee[];
   earnings: PayslipPayhead[];
   deductions: PayslipPayhead[];

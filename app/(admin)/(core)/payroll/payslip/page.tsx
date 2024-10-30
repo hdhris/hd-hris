@@ -28,6 +28,7 @@ function Page() {
             setFocusedPayhead={setFocusedPayhead}
             isProcessed={processDate ? processDate.is_processed : true}
             payrolls={data?.payrolls || []}
+            breakdowns={data?.breakdowns || []}
             employees={data?.employees || []}
             earnings={data?.earnings || []}
             deductions={data?.deductions || []}
