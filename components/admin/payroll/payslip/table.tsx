@@ -19,7 +19,7 @@ export function PRPayslipTable({
   setFocusedPayhead,
 }: PRPayslipTableType) {
   const tableRef = useRef<HTMLTableElement>(null);
-  const [records, setRecords] = useState<Record<number,Record<number,number>>>({})
+  const [records, setRecords] = useState<Record<number,Record<number,['earning'|'deduction', number]>>>({})
   const handleBlur = (employeeId: number, payheadId: number, value: number) => {
     console.log(employeeId, payheadId, value)
     // API call logic here, using employeeId, payheadId, and value
@@ -51,7 +51,7 @@ export function PRPayslipTable({
   }
 
 
-  function handleRecording(employeeId: number, payheadId: number, value: number) {
+  function handleRecording(employeeId: number, payheadId: number, value: ['earning'|'deduction', number]) {
     setRecords((prevRecords) => ({
       ...prevRecords,
       [employeeId]: {
@@ -61,11 +61,11 @@ export function PRPayslipTable({
     }));
   }
 
-  function getEmployeePayheadSum(employeeId: number): number {
+  function getEmployeePayheadSum(employeeId: number, type: 'earning'|'deduction'): number {
     const employeeRecords = records[employeeId];
     if (!employeeRecords) return 0;
   
-    return Object.values(employeeRecords).reduce((sum, payheadValue) => sum + payheadValue, 0);
+    return Object.values(employeeRecords).reduce((sum, payheadValue) => sum + (payheadValue[0]===type? payheadValue[1]:0), 0);
   }
   
 
@@ -90,7 +90,7 @@ export function PRPayslipTable({
           ))}
           <th 
               key={'total-earn'} 
-              className="sticky top-0 bg-[#f4f4f5] font-bold px-4 py-2 text-center capitalize z-40"
+              className="sticky top-0 bg-blue-300 font-bold px-4 py-2 text-center capitalize z-40"
           >
             TOTAL EARNINGS
           </th>
@@ -128,7 +128,7 @@ export function PRPayslipTable({
                   }}
                   value={String(records[employee.id]?.[earn.id] || "0")}
                   onChange={(e)=> {
-                    handleRecording(employee.id, earn.id, parseFloat(e.target.value)||0)
+                    handleRecording(employee.id, earn.id, ['earning',parseFloat(e.target.value)||0])
                   }}
                   readOnly={isProcessed}
                 />
@@ -137,7 +137,7 @@ export function PRPayslipTable({
             ))}
             <CustomInput
               placeholder={"0"}
-              value={getEmployeePayheadSum(employee.id)}
+              value={getEmployeePayheadSum(employee.id, 'earning')}
               readOnly={isProcessed}
             />
             {deductions.map((deduct) => (
@@ -154,7 +154,7 @@ export function PRPayslipTable({
                   }}
                   value={String(records[employee.id]?.[deduct.id] || "0")}
                   onChange={(e)=> {
-                    handleRecording(employee.id, deduct.id, parseFloat(e.target.value)||0)
+                    handleRecording(employee.id, deduct.id, ['deduction', parseFloat(e.target.value)||0])
                   }}
                   readOnly={isProcessed}
                 />
