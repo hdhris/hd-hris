@@ -1,11 +1,11 @@
 "use client";
-import DatePickerUi from "@/components/admin/payroll/proccess/PayrollDatePicker";
+import DatePickerPayroll from "@/components/admin/payroll/proccess/PayrollDatePicker";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import TableData from "@/components/tabledata/TableData";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { useQuery } from "@/services/queries";
-import { PayrollTable } from "@/types/payroll/payrollType";
+import { PayrollTable, ProcessDate } from "@/types/payroll/payrollType";
 import { FilterProps } from "@/types/table/default_config";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Chip, Spinner } from "@nextui-org/react";
@@ -15,18 +15,15 @@ import { IoMdCloseCircle } from "react-icons/io";
 function Page() {
   // const pageData = useQuery('');
 
-  const { data: payrollTable, isLoading: prtLoading } = useQuery<PayrollTable>(
+  const { data: payrollTable, isLoading } = useQuery<PayrollTable>(
     "/api/admin/payroll/process",
     { refreshInterval: 3000 }
   );
-  const [isLoading, setIsLoading] = useState(false);
-
+  // const [isLoading, setIsLoading] = useState(false);
+  const [processDate, setProcessDate] = useState<ProcessDate>();
   SetNavEndContent(() => (
-    <DatePickerUi
-      payrollDates={payrollTable?.pr_dates || []}
-      prtLoading={prtLoading}
-      setIsLoading={setIsLoading}
-      setPayrollData={setPayrollData}
+    <DatePickerPayroll
+      setProcessDate={setProcessDate}
     />
   ));
 
@@ -170,7 +167,7 @@ function Page() {
     },
   ];
 
-  if (isLoading || prtLoading) {
+  if (isLoading || (processDate===undefined)) {
     return <Spinner label="Loading..." className="w-full h-full" />;
   }
   return (

@@ -193,6 +193,7 @@ model ref_benefit_plans {
   updated_at                DateTime                @db.Timestamp(6)
   deleted_at                DateTime?               @db.Timestamp(6)
   is_active                 Boolean?
+  file_upload_path          String?
   dim_employee_benefits     dim_employee_benefits[]
 }
 
@@ -248,8 +249,8 @@ model ref_leave_types {
   description                  String
   is_active                    Boolean
   max_accrual                  Int
-  max_duration                 Int
-  min_duration                 Int
+  max_duration                 Decimal               @db.Decimal(10, 2)
+  min_duration                 Decimal               @db.Decimal(10, 2)
   name                         String
   notice_required              Int
   paid_leave                   Boolean
@@ -524,6 +525,8 @@ model trans_payhead_breakdowns {
   updated_at     DateTime        @db.Timestamp(6)
   ref_payheads   ref_payheads?   @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_breakdowns_trans_payhead_list1")
   trans_payrolls trans_payrolls? @relation(fields: [payroll_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_breakdowns_trans_payrolls_2")
+
+  @@unique([payhead_id, payroll_id], map: "payhead_and_payroll")
 }
 
 model trans_payroll_date {
@@ -549,6 +552,8 @@ model trans_payrolls {
   trans_payhead_breakdowns trans_payhead_breakdowns[]
   trans_employees          trans_employees            @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payroll_employees")
   trans_payroll_date       trans_payroll_date?        @relation(fields: [date_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payrolls_trans_payroll_date_2")
+
+  @@unique([employee_id, date_id], map: "emp_and_process_date")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

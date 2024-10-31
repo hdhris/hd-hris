@@ -1,4 +1,7 @@
-interface PRDate {
+import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { Payhead } from "./payheadType";
+
+export interface ProcessDate {
   id: number;
   start_date: string;
   end_date: string;
@@ -8,37 +11,81 @@ interface PRDate {
   deleted_at: string | null;
 }
 
-interface RefBranch {
-  id: number;
-  name: string;
-}
-
-interface RefJobClass {
-  id: number;
-  name: string;
-}
-
-interface RefDepartment {
-  id: number;
-  name: string;
-}
-
-interface Employee {
-  id: number;
-  last_name: string;
-  first_name: string;
-  middle_name: string;
-  prefix: string | null;
-  suffix: string | null;
-  extension: string | null;
-  picture: string;
-  email: string;
-  ref_branches: RefBranch | null;
-  ref_job_classes: RefJobClass;
-  ref_departments: RefDepartment;
-}
 
 export interface PayrollTable {
-  pr_dates: PRDate[];
-  employees: Employee[];
+  // pr_dates: PRDate[];
+  employees: UserEmployee[];
+}
+
+
+export interface Payroll {
+  employee_id: number;
+  gross_total_amount: string;
+  deduction_total_amount: string;
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+  id: number;
+  date_id: number;
+  deleted_at: string | null; // ISO date string or null
+}
+
+export interface Breakdown {
+  payroll_id: number;
+  payhead_id: number;
+  amount: string;
+  id: number;
+  created_at: string;  // Using ISO string format for date fields
+  updated_at: string;
+}
+
+// interface Earning {
+//   calculation: string;
+//   created_at: string; // ISO date string
+//   updated_at: string; // ISO date string
+//   deleted_at: string | null; // ISO date string or null
+//   id: number;
+//   is_active: boolean;
+//   name: string;
+//   type: string;
+//   affected_json: {
+//     mandatory: {
+//       probationary: boolean;
+//       regular: boolean;
+//     };
+//     department: number[];
+//     job_classes: number[];
+//   };
+// }
+
+// interface Deduction {
+//   calculation: string;
+//   created_at: string; // ISO date string
+//   updated_at: string; // ISO date string
+//   deleted_at: string | null; // ISO date string or null
+//   id: number;
+//   is_active: boolean;
+//   name: string;
+//   type: string;
+//   affected_json: {
+//     mandatory: {
+//       probationary: boolean;
+//       regular: boolean;
+//     };
+//     department: number[];
+//     job_classes: number[];
+//   };
+// }
+
+export type PayslipPayhead = Omit<Payhead,"dim_payhead_affecteds"|"type">
+export interface PayslipEmployee extends UserEmployee {
+  dim_payhead_affecteds: {
+    payhead_id: number;
+  }[];
+}
+export interface PayslipData {
+  payrolls: Payroll[];
+  breakdowns: Breakdown[];
+  employees: PayslipEmployee[];
+  earnings: PayslipPayhead[];
+  deductions: PayslipPayhead[];
 }

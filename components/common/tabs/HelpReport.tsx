@@ -271,7 +271,7 @@ function HelpReport() {
                             size: "sm",
                           })}
                           className="shadow-md"
-                          isDisabled={submitting}
+                          isDisabled={adding || reviewingID != -1}
                           isLoading={reviewingID === report.id}
                           isIconOnly
                           variant="flat"
