@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {Button} from "@nextui-org/button";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
@@ -16,6 +16,7 @@ import {Card} from "@nextui-org/react";
 import {CardBody, CardHeader} from "@nextui-org/card";
 import Typography from "@/components/common/typography/Typography";
 import {Chip} from "@nextui-org/chip";
+import BenefitPlanForm from "@/components/admin/benefits/plans/form/benefit-plan-form";
 
 
 const benefitPlans = [
@@ -152,6 +153,11 @@ function PlansDataDisplay() {
     //     const Icon = typeIcons[type] || AlertCircle
     //     return <Icon className="w-5 h-5" />
     // }
+    const [isOpen, setIsOpen] = useState<boolean>(false)
+
+    const onOpenDrawer = useCallback(() => {
+        setIsOpen(true)
+    }, [setIsOpen])
 
     const [page, setPage] = useState<number>(1)
     const [rows, setRows] = useState<number>(5)
@@ -185,10 +191,10 @@ function PlansDataDisplay() {
     SetNavEndContent(() => {
 
         return (<>
-            <Button {...uniformStyle()}>
+            <Button {...uniformStyle()} onClick={onOpenDrawer}>
                 Add New Plan
             </Button>
-            {/*<RequestForm onOpen={setIsOpen} isOpen={isOpen}/>*/}
+            <BenefitPlanForm onOpen={setIsOpen} isOpen={isOpen}/>
         </>)
     })
     return (<DataDisplay
@@ -221,22 +227,22 @@ function PlansDataDisplay() {
         // }}
         onGridDisplay={(plan) => {
             return (<Card className="w-[270px] border-1" shadow="none">
-                <CardHeader className="flex flex-col text-left">
-                    <Typography className="flex items-center gap-2">
+                <CardHeader className="flex-col items-start">
+                    <Typography className="flex items-center gap-2 font-semibold">
                         {/*<TypeIcon type={plan.type} />*/}
                         {plan.name}
                     </Typography>
-                    <Typography className="text-sm text-default-400/50">{plan.description}</Typography>
+                    <Typography className="text-sm !text-default-400/75">{plan.description}</Typography>
                 </CardHeader>
                 <CardBody>
                     <Chip color="secondary" className="mb-2">{plan.type}</Chip>
-                    <p className="text-sm mb-2">{plan.coverageDetails}</p>
+                    <Typography className="text-sm mb-2 truncate break-normal">{plan.coverageDetails}</Typography>
                     <div className="flex justify-between items-center mt-4">
                         <Button variant="bordered" size="sm" onClick={() => alert(plan)}>
                             View Details
                         </Button>
-                        <div className="text-sm text-muted-foreground">
-                            ${plan.employeeContribution}/mo
+                        <div className="text-xs text-muted-foreground">
+                            {plan.effectiveDate} - {plan.expirationDate}
                         </div>
                     </div>
                 </CardBody>
