@@ -2,7 +2,7 @@ import Drawer from "@/components/common/Drawer";
 import FormFields from "@/components/common/forms/FormFields";
 import { Form } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
-import { objectExcludes, objectIncludes } from "@/helper/objects/filterObject";
+import { objectIncludes } from "@/helper/objects/filterObject";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import {
   HolidayEvent,
@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, cn, Divider } from "@nextui-org/react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { findByDateAndName, switchLabel } from "./script";
@@ -219,7 +219,7 @@ function HolidayForm({
       isSubmitting={isSubmitting}
       footer={
         <div className="ms-auto flex gap-2 items-center">
-          {selectedItem?.id && (
+          {selectedItem?.id && typeof selectedItem.id === 'number' && (
             <Button
               variant="light"
               isLoading={isDeleting}

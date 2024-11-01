@@ -44,13 +44,9 @@ function FilterItems<T>({
       if (items && config) {
         let results = [...items];
         Object.entries(filter).forEach((selecteds) => {
-          // console.log("Keys: ", keys);
-          // console.log("Key 2: ",Array.from(keys)[1])
           Array.from(selecteds).forEach((selected) => {
             const selectedSection = Array.from(selected);
-            // console.log(Array.from(selected));
             if (selectedSection.length > 0) {
-              // console.log("Section: ", selectedSection);
               const [key, values] = selectedSection.reduce<
                 [number | null, number[]]
               >(
@@ -119,7 +115,7 @@ function FilterItems<T>({
     if (items && selectedSection) {
       refresh(selectedSection);
     }
-  }, [items, refresh, selectedSection]);
+  }, [items, selectedSection]);
   const handleSelectChange = (sectionIndex: number, key: SharedSelection) => {
     // console.log(Array.from(key));
     setSelectedSection((prevKeys) => ({

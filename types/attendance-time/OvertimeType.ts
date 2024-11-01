@@ -19,9 +19,16 @@
 
 import { UserEmployee, UserReviewer } from "@/helper/include-emp-and-reviewr/include";
 
+export type ApprovalStatusType = "pending" | "approved" | "rejected"; 
+export const approvalStatusColorMap: Record<string, "danger" | "success" | "default"> = {
+  pending: "default",
+  approved: "success",
+  rejected: "danger",
+};
+
 export interface OvertimeEntry {
   employee_id: number;
-  status: "pending" | "approved" | "rejected";
+  status: ApprovalStatusType;
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
   id: number;

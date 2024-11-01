@@ -6,13 +6,15 @@ import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
 export const dynamic = "force-dynamic";
 export async function GET() {
   try {
-    const employees = await prisma.trans_employees.findMany({
-        where : {
-            deleted_at: null,
+    const pr_dates = await prisma.trans_payroll_date.findMany({
+        where: {
+            deleted_at:null,
         },
-        ...emp_rev_include.employee_detail
-    })
-    return NextResponse.json({employees});
+        orderBy: {
+          start_date: 'desc', // Sort by start_date in descending order
+        },
+      });
+    return NextResponse.json(pr_dates);
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch data" },

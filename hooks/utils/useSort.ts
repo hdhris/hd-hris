@@ -8,6 +8,7 @@ interface SortHookProps {
 
 export function useSort<T>(data: T[], {sort}: SortHookProps = {}) {
     const searchParams = useSearchParams();
+    const router = useRouter()
     const sortValueFromParams = searchParams.get('sort');
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>(sort || (sortValueFromParams ? JSON.parse(sortValueFromParams) : {
         column: "id",
@@ -23,8 +24,9 @@ export function useSort<T>(data: T[], {sort}: SortHookProps = {}) {
         } else {
             newSearchParams.set('sort', JSON.stringify(sort));
         }
-        window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
-    }, [searchParams]);
+        router.push(`?${newSearchParams.toString()}`);
+        // window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
+    }, [router, searchParams]);
 
 
 

@@ -5,17 +5,9 @@ import {
   tableConfig,
 } from "@/components/admin/incident/reports/configs";
 import IncidentDrawer from "@/components/admin/incident/reports/incident-drawer";
-import UserMail from "@/components/common/avatar/user-info-mail";
 import DataDisplay from "@/components/common/data-display/data-display";
-import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
-import { SearchProps, SortProps } from "@/components/util/types/types";
-import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
-import { getEmpFullName } from "@/lib/utils/nameFormatter";
-import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
 import { IncidentReport } from "@/types/incident-reports/type";
-import { TableConfigProps } from "@/types/table/TableDataTypes";
-import { Avatar, Button, Chip, Tooltip } from "@nextui-org/react";
 import React, { useState } from "react";
 
 function Page() {

@@ -15,18 +15,18 @@ function RootLayout({ children }: { children: ReactNode }) {
       path: "deductions"
     },
     {
-      key: "advance",
+      key: "cash-advance",
       title: "Cash Advance",
-      path: "advance"
+      path: "cash-advance"
     },
     {
       key: "process",
-      title: "Payroll Process",
+      title: "Pay slip",
       path: "process"
     },
     {
       key: "payslip",
-      title: "Pay slip",
+      title: "Payroll Process",
       path: "payslip"
     }
   ]

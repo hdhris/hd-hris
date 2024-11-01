@@ -49,12 +49,12 @@ function SearchItems<T extends object>({
     if (items.length > 0) {
       refresh(searchValue);
     }
-  }, [items,refresh, searchValue]);
+  }, [items, searchValue]);
 
   return (
     <Input
       isDisabled={isLoading}
-      placeholder={`Search by ${config.map((item) => item.label).join(", ")}`}
+      placeholder={`Search by ${config.map((item) => item.label).filter((item) => item != "").join(", ")}`}
       variant="bordered"
       value={searchValue}
       onValueChange={setSearchValue}

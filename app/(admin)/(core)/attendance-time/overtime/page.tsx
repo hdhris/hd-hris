@@ -4,7 +4,7 @@ import { usePaginateQuery, useQuery, useTableLength } from "@/services/queries";
 import axios from "axios";
 import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
-import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
+import { approvalStatusColorMap, OvertimeEntry } from "@/types/attendance-time/OvertimeType";
 import { Avatar, Button, Chip, Tooltip, User } from "@nextui-org/react";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
@@ -21,12 +21,6 @@ import { useEmployeeId } from "@/hooks/employeeIdHook";
 import DataDisplay from "@/components/common/data-display/data-display";
 import { joinNestedKeys } from "@/helper/objects/joinNestedKeys";
 import { NestedKeys } from "@/hooks/types/types";
-
-const statusColorMap: Record<string, "danger" | "success" | "default"> = {
-  pending: "default",
-  approved: "success",
-  rejected: "danger",
-};
 
 function Page() {
   const [page, setPage] = useState<number>(1);
@@ -143,7 +137,7 @@ function Page() {
                   )
                 }
                 variant="flat"
-                color={statusColorMap[item.status]}
+                color={approvalStatusColorMap[item.status]}
                 className="capitalize"
               >
                 {item.status}
@@ -271,7 +265,6 @@ function Page() {
         paginationProps={{
           loop: true,
           data_length: data?.length,
-
         }}
       />
       <OvertimeModal

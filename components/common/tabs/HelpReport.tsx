@@ -13,12 +13,19 @@ import {
   PopoverContent,
   PopoverTrigger,
   ScrollShadow,
+  Spinner,
   Textarea,
   Tooltip,
 } from "@nextui-org/react";
 import axios from "axios";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { IoIosAdd, IoIosCheckmark, IoIosClose } from "react-icons/io";
 import { IoCheckmarkSharp } from "react-icons/io5";
 import { MdOutlineBugReport } from "react-icons/md";
@@ -46,6 +53,7 @@ interface EmployeeDetails {
 function HelpReport() {
   const [adding, setAdding] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [reviewingID, setReviewingID] = useState(-1);
   //   const inVisible = false;
   const pathname = usePathname();
   const [newReport, setNewReport] = useState("");
@@ -60,36 +68,45 @@ function HelpReport() {
     }
     return 0;
   }, [reports]);
+
   const inputRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
-    if(adding) inputRef.current?.focus();
-  }, [adding,inputRef]);
-  async function handleReviewed(id: number) {
-    setSubmitting(true);
-    try {
-      await axios.post("/api/admin/utils/help-report/update", {
-        reviewer_id: userInfo?.id,
-        id: id,
-      });
+    if (adding) inputRef.current?.focus();
+  }, [adding, inputRef]);
 
-      toast({
-        title: "Reviewed",
-        description: "Report reviewed successfully!",
-        variant: "success",
-      });
-      setNewReport("");
-      setAdding(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: String(error),
-        variant: "danger",
-      });
-    }
-    setSubmitting(false);
-  }
+  const handleReviewed = useCallback(
+    async (id: number) => {
+      setSubmitting(true);
+      setReviewingID(id);
+      try {
+        await axios.post("/api/admin/utils/help-report/update", {
+          reviewer_id: userInfo?.id,
+          id: id,
+        });
 
-  async function handleSubmitReport() {
+        toast({
+          title: "Reviewed",
+          description: "Report reviewed successfully!",
+          variant: "success",
+        });
+
+        setNewReport("");
+        setAdding(false);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: String(error),
+          variant: "danger",
+        });
+      } finally {
+        setSubmitting(false);
+        setReviewingID(-1);
+      }
+    },
+    [userInfo]
+  );
+
+  const handleSubmitReport = useCallback(async () => {
     setSubmitting(true);
     try {
       await axios.post("/api/admin/utils/help-report/create", {
@@ -97,6 +114,7 @@ function HelpReport() {
         pathname: pathname,
         description: newReport,
       });
+      // alert(newReport); // This should show the latest value
 
       toast({
         title: "Submitted",
@@ -113,7 +131,65 @@ function HelpReport() {
       });
     }
     setSubmitting(false);
-  }
+  }, [newReport, userInfo, pathname]);
+
+  const topLeftContent = useMemo(() => {
+    return adding ? (
+      <div className={`w-full p-4 flex gap-2 ${submitting && "opacity-50"}`}>
+        {userInfo && (
+          <Tooltip
+            content={userInfo ? getEmpFullName(userInfo) : "Invalid user"}
+          >
+            <Avatar
+              isBordered
+              alt={userInfo ? getEmpFullName(userInfo) : "Invalid user"}
+              className="flex-shrink-0"
+              size="sm"
+              src={userInfo?.picture}
+            />
+          </Tooltip>
+        )}
+        <Textarea
+          placeholder="Message"
+          value={newReport}
+          onValueChange={setNewReport}
+          isReadOnly={submitting}
+          ref={inputRef}
+        />
+      </div>
+    ) : (
+      <p className="!ms-3 my-auto w-full">{`${
+        unresolved > 0 ? unresolved + " unresolved bugs" : "All bugs resolved"
+      }`}</p>
+    );
+  }, [adding, submitting, userInfo, newReport, inputRef, unresolved]);
+
+  const topRightContent = useMemo(() => {
+    return (
+      <div className="flex flex-col gap-1">
+        <Button
+          isIconOnly
+          size="sm"
+          variant="light"
+          onClick={() => setAdding(!adding)}
+          isDisabled={submitting}
+        >
+          {adding ? <IoIosClose size={20} /> : <IoIosAdd size={20} />}
+        </Button>
+        {adding && (
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            onClick={handleSubmitReport}
+            isDisabled={submitting}
+          >
+            <IoIosCheckmark size={20} />
+          </Button>
+        )}
+      </div>
+    );
+  }, [adding, submitting, handleSubmitReport]);
   return (
     <Badge
       content=""
@@ -123,7 +199,6 @@ function HelpReport() {
     >
       <Popover
         placement="right-start"
-        showArrow={true}
         onClose={() => setAdding(false)}
       >
         <PopoverTrigger>
@@ -134,68 +209,15 @@ function HelpReport() {
             />
           </Button>
         </PopoverTrigger>
+
         <PopoverContent className="p-0">
           <div className="w-full flex justify-end">
-            {adding ? (
-              <div
-                className={`w-full p-4 flex gap-2 ${
-                  submitting && "opacity-50"
-                }`}
-              >
-                {userInfo && (
-                  <Tooltip
-                    content={
-                      userInfo ? getEmpFullName(userInfo) : "Invalid user"
-                    }
-                  >
-                    <Avatar
-                      isBordered
-                      alt={userInfo ? getEmpFullName(userInfo) : "Invalid user"}
-                      className="flex-shrink-0"
-                      size="sm"
-                      src={userInfo?.picture}
-                    />
-                  </Tooltip>
-                )}
-                <Textarea
-                  placeholder="Message"
-                  value={newReport}
-                  onValueChange={setNewReport}
-                  isReadOnly={submitting}
-                  ref={inputRef}
-                />
-              </div>
-            ) : (
-              <p className="!ms-3 my-auto w-full">{`${
-                unresolved > 0
-                  ? unresolved + " unresolved bugs"
-                  : "All bugs resolved"
-              }`}</p>
-            )}
-            <div className="flex flex-col gap-1">
-              <Button
-                isIconOnly
-                size="sm"
-                variant="light"
-                onClick={() => setAdding(!adding)}
-                isDisabled={submitting}
-              >
-                {adding ? <IoIosClose size={20} /> : <IoIosAdd size={20} />}
-              </Button>
-              {adding && (
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  onClick={handleSubmitReport}
-                  isDisabled={submitting}
-                >
-                  <IoIosCheckmark size={20} />
-                </Button>
-              )}
-            </div>
+            {topLeftContent}
+            {topRightContent}
           </div>
-          {reports && reports.length ? (
+          {isLoading ? (
+            <Spinner className="w-72 my-5" size="sm"/>
+          ) : reports && reports.length ? (
             <ScrollShadow className="max-h-80">
               <div className="p-4 flex flex-col gap-1">
                 {reports.map((report, index) => (
@@ -220,8 +242,8 @@ function HelpReport() {
                           }
                         />
                       </Tooltip>
-
-                      <p className="w-52">{report.description}</p>
+                      <p className="w-52 text-ellipsis overflow-hidden">{report.description}</p>
+                      <div className="bg-gray-500 w-[1px] h-8" />
                       {report.reviewer_id ? (
                         <Tooltip
                           content={getEmpFullName(
@@ -248,7 +270,9 @@ function HelpReport() {
                             color: "success",
                             size: "sm",
                           })}
-                          isLoading={submitting}
+                          className="shadow-md"
+                          isDisabled={adding || reviewingID != -1}
+                          isLoading={reviewingID === report.id}
                           isIconOnly
                           variant="flat"
                           onClick={() => handleReviewed(report.id)}
@@ -257,7 +281,9 @@ function HelpReport() {
                         </Button>
                       )}
                     </div>
-                    {index < reports.length - 1 && <Divider className="my-2" />}
+                    {index < reports.length - 1 && (
+                      <div className="my-2 h-[1px] bg-gray-300" />
+                    )}
                   </div>
                 ))}
               </div>

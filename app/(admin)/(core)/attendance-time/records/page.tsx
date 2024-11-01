@@ -142,7 +142,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-row gap-1 h-full">
-      <DataDisplay
+      {/* <DataDisplay
         defaultDisplay="table"
         isLoading={isLoading}
         onTableDisplay={{
@@ -154,10 +154,17 @@ export default function Page() {
           },
         }}
         paginationProps={{
+          loop: true,
           data_length: attendanceLog?.length,
         }}
         data={attendanceLog || []}
         title="Attendance Logs"
+      /> */}
+      <TableData
+        items={attendanceLog || []}
+        title="Attendance Logs"
+        config={config}
+        isLoading={isLoading}
       />
       <div className="flex flex-col gap-1">
         <Calendar
