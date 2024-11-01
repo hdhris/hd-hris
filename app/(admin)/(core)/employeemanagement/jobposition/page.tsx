@@ -11,17 +11,9 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import showDialog from "@/lib/utils/confirmDialog";
+import { JobPosition } from "@/types/employeee/JobType";
 
-interface JobPosition {
-  id: number;
-  name: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  trans_employees?: Array<{
-    id: number;
-  }>;
-}
+
 
 const Page: React.FC = () => {
   const { data: jobPositions, error, mutate } = useJobpositionData();
@@ -96,6 +88,7 @@ const Page: React.FC = () => {
       { uid: "name", name: "Name", sortable: true },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
       { uid: "status", name: "Status", sortable: true },
+      { uid: "pay_rate", name: "Payrate", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (job: JobPosition, columnKey: React.Key): React.ReactElement => {
@@ -128,6 +121,12 @@ const Page: React.FC = () => {
               </Chip>
             </div>
           );
+          case "pay_rate":
+            return (
+              <div className={cellClasses}>
+                <span>{job.pay_rate}</span>
+              </div>
+            );
         case "actions":
           return (
             <TableActionButton

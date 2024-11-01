@@ -1,5 +1,5 @@
-"use client"
-import React, { useEffect, useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   ModalContent,
@@ -7,15 +7,16 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  Input,
-  Checkbox,
   useDisclosure,
 } from "@nextui-org/react";
-import { useForm, Controller, FormProvider } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import { useJobpositionData } from "@/services/queries";
 import axios from "axios";
-import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { JobPosition } from "@/types/employeee/JobType";
 
 interface EditJobPositionProps {
   isOpen: boolean;
@@ -24,12 +25,21 @@ interface EditJobPositionProps {
   onJobUpdated: () => void;
 }
 
-interface JobPositionFormData {
-  name: string;
-  is_active: boolean;
-}
+const jobPositionSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Position name is required")
+    .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
+  pay_rate: z
+    .string()
+    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
+    .transform((val) => (val === "" ? "0.00" : val)),
+  is_active: z.boolean().default(true),
+});
 
-const EditJobPosition: React.FC<EditJobPositionProps> = ({
+type JobPositionFormData = z.infer<typeof jobPositionSchema>;
+
+const EditJob: React.FC<EditJobPositionProps> = ({
   isOpen,
   onClose,
   jobId,
@@ -37,23 +47,30 @@ const EditJobPosition: React.FC<EditJobPositionProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { data: jobPositions, error, isLoading } = useJobpositionData();
 
   const methods = useForm<JobPositionFormData>({
+    resolver: zodResolver(jobPositionSchema),
     defaultValues: {
       name: "",
+      pay_rate: "0.00",
       is_active: true,
     },
+    mode: "onChange",
   });
-//
-  const { data: jobPositions, error, isLoading } = useJobpositionData();
 
   useEffect(() => {
     if (isOpen && jobPositions && jobId) {
       const job = jobPositions.find((job) => job.id === jobId);
-
       if (job) {
+        // Handle pay_rate formatting whether it's a string or number
+        const payRate = typeof job.pay_rate === 'number' 
+          ? job.pay_rate.toFixed(2)
+          : parseFloat(job.pay_rate).toFixed(2) || "0.00";
+
         methods.reset({
           name: job.name,
+          pay_rate: payRate,
           is_active: job.is_active,
         });
       } else {
@@ -65,6 +82,47 @@ const EditJobPosition: React.FC<EditJobPositionProps> = ({
       }
     }
   }, [isOpen, jobPositions, jobId, methods, toast]);
+
+  const handlePayRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+      const formattedValue = value === "" ? "0.00" : 
+        value.includes('.') ? value.padEnd(value.indexOf('.') + 3, '0') : 
+        value + '.00';
+      methods.setValue('pay_rate', formattedValue, { shouldValidate: true });
+    }
+  };
+
+  const formFields: FormInputProps[] = [
+    {
+      name: "name",
+      label: "Position Name",
+      type: "text",
+      placeholder: "Enter position name",
+      isRequired: true,
+      description: "Position name should only contain letters",
+    },
+    {
+      name: "pay_rate",
+      label: "Pay Rate",
+      type: "text",
+      placeholder: "0.00",
+      description: "Pay rate must be 0 or greater (format: 0.00)",
+      config: {
+        onChange: handlePayRateChange,
+        value: methods.watch('pay_rate'),
+        pattern: "^\\d*\\.?\\d{0,2}$",
+      },
+    },
+    {
+      name: "is_active",
+      label: "Is Active",
+      type: "switch",
+      config: {
+        defaultSelected: true,
+      },
+    },
+  ];
 
   if (isLoading) {
     return <div>Loading job position data...</div>;
@@ -86,9 +144,14 @@ const EditJobPosition: React.FC<EditJobPositionProps> = ({
     });
 
     try {
+      const formattedData = {
+        ...data,
+        pay_rate: parseFloat(data.pay_rate).toFixed(2),
+      };
+
       const response = await axios.put(
         `/api/employeemanagement/jobposition?id=${jobId}`,
-        data
+        formattedData
       );
 
       if (response.status === 200) {
@@ -126,58 +189,43 @@ const EditJobPosition: React.FC<EditJobPositionProps> = ({
   };
 
   return (
-    <Modal size="md" isOpen={isOpen} onClose={onClose} isDismissable={false}>
-      <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)}>
+    <Modal 
+      size="md" 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      isDismissable={false}
+    >
+      <form onSubmit={methods.handleSubmit(onSubmit)}>
+        <FormProvider {...methods}>
           <ModalContent>
             <ModalHeader>Edit Job Position</ModalHeader>
             <ModalBody>
-              <Controller
-                name="name"
-                control={methods.control}
-                rules={{ required: "Position name is required" }}
-                render={({ field, fieldState: { error } }) => (
-                  <FormItem>
-                    <FormLabel>Position Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Enter position name"
-                        variant="bordered"
-                        isInvalid={!!error}
-                      />
-                    </FormControl>
-                    {error && <FormMessage>{error.message}</FormMessage>}
-                  </FormItem>
-                )}
-              />
-              <Controller
-                name="is_active"
-                control={methods.control}
-                render={({ field: { onChange, value } }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Checkbox isSelected={value} onValueChange={onChange}>
-                        Is Active
-                      </Checkbox>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <FormFields items={formFields} size="sm" />
             </ModalBody>
             <ModalFooter>
-              <Button color="danger" onClick={onClose} disabled={isSubmitting}>
+              <Button
+                color="danger"
+                onClick={() => {
+                  methods.reset();
+                  onClose();
+                }}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
-              <Button color="primary" type="submit" disabled={isSubmitting}>
+              <Button 
+                color="primary" 
+                type="submit"
+                disabled={isSubmitting || !methods.formState.isValid}
+              >
                 {isSubmitting ? "Saving..." : "Save"}
               </Button>
             </ModalFooter>
           </ModalContent>
-        </form>
-      </FormProvider>
+        </FormProvider>
+      </form>
     </Modal>
   );
 };
 
-export default EditJobPosition;
+export default EditJob;
