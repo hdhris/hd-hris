@@ -162,7 +162,7 @@ const Page: React.FC = () => {
     },
   ];
   return (
-    <div className="p-4">
+    <div className="h-[calc(100vh-150px)] overflow-hidden">
       <DataDisplay
       defaultDisplay="table"
         title='Departments'
@@ -173,6 +173,7 @@ const Page: React.FC = () => {
       isLoading={!departments && !error}
         onTableDisplay={{
           config: TableConfigurations,
+          className: "h-full overflow-auto",
           layout: "auto",
         }}
         searchProps={{
