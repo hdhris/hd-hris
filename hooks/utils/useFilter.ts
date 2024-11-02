@@ -1,11 +1,12 @@
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {Selection} from "@nextui-org/react";
 import {valueOfObject} from "@/helper/objects/pathGetterObject";
-import {usePathname, useRouter, useSearchParams} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 
 
 function useFilter<T>(items: T[]) {
     const searchParams = useSearchParams();
+    const router = useRouter()
     const filterValueFromParams = searchParams.get('filter') || '';
 
     const [filter, setFilter] = useState<Selection>(() => {
@@ -32,9 +33,10 @@ function useFilter<T>(items: T[]) {
         // Build new path with updated query parameters
 
         // Navigate to the new path
-        window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
+        router.push(`?${newSearchParams.toString()}`);
+        // window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
         setFilter(value); // Update the filter state
-    }, [searchParams]);
+    }, [router, searchParams]);
 
     const filteredItems = useMemo(() => {
         let filteredUsers: T[] = [...items]; // Start with the already searched items

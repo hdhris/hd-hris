@@ -2,14 +2,17 @@ import React from 'react';
 import {valueOfObject} from "@/helper/objects/pathGetterObject";
 import {NestedKeys} from "@/hooks/types/types"; // Import type if necessary
 import { joinNestedKeys } from '@/helper/objects/joinNestedKeys';
+import {useRouter, useSearchParams} from "next/navigation";
 
 function useSearch<T>(items: T[], searchingItemKey?: NestedKeys<T>[]) {
 
+    const router = useRouter();
+    const search = useSearchParams()
 
     let itemSearched = [...items];
     // Utility function to get the initial search value from URL
     const getInitialSearchValue = () => {
-        const currentSearchParams = new URLSearchParams(window.location.search);
+        const currentSearchParams = new URLSearchParams(search.toString());
         return currentSearchParams.get('query') || ''; // Replace 'query' with your actual query parameter name
     };
 
@@ -18,7 +21,7 @@ function useSearch<T>(items: T[], searchingItemKey?: NestedKeys<T>[]) {
     const onSearchChange = (value: string) => {
         setSearchValue(value);
 
-        const newSearchParams = new URLSearchParams(window.location.search);
+        const newSearchParams = new URLSearchParams(search.toString());
 
         if (value.trim() === '') {
             // If the input is empty, delete the query parameter
@@ -27,7 +30,8 @@ function useSearch<T>(items: T[], searchingItemKey?: NestedKeys<T>[]) {
             // Update the query parameter with the new value
             newSearchParams.set('query', value);
         }
-        window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
+        router.push(`?${newSearchParams.toString()}`);
+        // window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
     };
 
     if (searchingItemKey?.length! > 0) {

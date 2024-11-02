@@ -92,8 +92,8 @@ export async function GET() {
     const availableLeaves: LeaveType[] = leaveTypes.map((leave) => ({
         id: leave.id,
         name: leave.name,
-        min: leave.min_duration,
-        max: leave.max_duration,
+        min: toDecimals(leave.min_duration),
+        max: toDecimals(leave.max_duration),
         isAttachmentRequired: leave.attachment_required
     }))
 

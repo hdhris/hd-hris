@@ -26,14 +26,14 @@ import {
     RadioProps,
     SelectedItems,
     SelectProps,
-    Switch,
     SwitchProps,
     Textarea,
     TimeInput,
     TimeInputProps,
+    cn
 } from "@nextui-org/react";
 import {Case, Default, Switch as SwitchCase} from "@/components/common/Switch";
-import {getLocalTimeZone, parseAbsoluteToLocal, parseDate} from "@internationalized/date";
+import {getLocalTimeZone, parseAbsoluteToLocal} from "@internationalized/date";
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -41,7 +41,7 @@ import {Radio} from "@nextui-org/radio";
 import {Key} from "@react-types/shared";
 import {Granularity} from "@react-types/datepicker";
 import {Input} from "@/components/ui/input";
-import { toGMT8 } from "@/lib/utils/toGMT8";
+import {toGMT8} from "@/lib/utils/toGMT8";
 import FormSwitch from "@/components/ui/FormSwitch";
 
 // Load plugins
@@ -160,13 +160,13 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
         control={control}
         name={item.name}
         render={({field}) => {
-            return (<FormItem>
+            return (<FormItem className="w-full">
                 {item.label && item.type !== "checkbox" && item.type !== "group-checkbox" && item.type !== "switch" && (
                     <FormLabel htmlFor={item.name} className={item.inputClassName}>
                         {item.label}
                     </FormLabel>)}
                 {item.isRequired && <span className="ml-2 inline-flex text-destructive text-medium"> *</span>}
-                <FormControl className="space-y-2">
+                <FormControl className="space-y-2 w-full">
                     {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
                         <Case of="auto-complete">
                             <Autocomplete
@@ -178,6 +178,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 disabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
                                 {...field}
+                                size={size}
                                 variant="bordered"
                                 radius="sm"
                                 selectedKey={field.value ? String(field.value) : null}
@@ -213,13 +214,14 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 {...(item.config as CheckboxGroupProps)}
                                 label={item.label}
                                 id={item.name}
+                                size={size}
                                 aria-label={item.name}
                                 disabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
                                 // isSelected={field.value}
                                 {...field}
                                 value={String(field.value).split(',')}
-                                onValueChange={(value)=>field.onChange(value.join(','))}
+                                onValueChange={(value) => field.onChange(value.join(','))}
                             >
                                 {(item.config as any)?.options?.map((option: GroupInputOptions) => (
                                     <Checkbox key={option.value} value={option.value}
@@ -237,6 +239,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 {...field}
                                 {...(item.config as DateInputProps)}
                                 id={item.name}
+                                size={size}
                                 value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
                                 granularity={(item.config as any)?.granularity as Granularity || "day"}
                                 aria-label={item.name}
@@ -256,6 +259,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 radius="sm"
                                 classNames={DateStyle}
                                 {...field}
+                                size={size}
                                 {...(item.config as DatePickerProps)}
                                 value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
                                 id={item.name}
@@ -263,6 +267,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 aria-label={item.name}
                                 isDisabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
+                                className={cn("w-full", (item.config as any)?.className)}
                                 onChange={(value) => {
                                     if (value) {
                                         field.onChange(dayjs(value.toDate(getLocalTimeZone())).toISOString())
@@ -278,6 +283,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 autoFocus={item.isFocus}
                                 variant="bordered"
                                 radius="sm"
+                                size={size}
                                 value={field.value?.start && field.value?.end && dayjs(field.value?.start).isValid() && dayjs(field.value?.end).isValid() ? {
                                     // start: parseAbsoluteToLocal(dayjs(field.value?.start).toISOString()),
                                     // end: parseAbsoluteToLocal(dayjs(field.value?.end).toISOString()),
@@ -303,6 +309,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 isDisabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
                                 {...field}
+                                size={size}
                                 {...(item.config as RadioGroupProps)}
                             >
                                 {/*<Radio value="buenos-aires">Buenos Aires</Radio>*/}
@@ -324,6 +331,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 color="primary"
                                 variant="bordered"
                                 radius="sm"
+                                size={size}
                                 selectedKeys={new Set<Key>([field.value as Key]) || "all"} // Cast field.value to Key
                                 {...field}
                                 {...(item.config as Omit<SelectProps, "label">)}
@@ -363,6 +371,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 autoFocus={item.isFocus}
                                 variant="bordered"
                                 radius="sm"
+                                size={size}
                                 {...(item.config as TimeInputProps)}
                                 onChange={(value) => {
                                     field.onChange(toGMT8(value.toString().split('[')[0]).toISOString());
@@ -395,7 +404,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 radius="sm"
                                 placeholder={item.placeholder}
                                 size={size}
-                                value={item.type==="number" ? Number(field.value) : field.value}
+                                value={item.type === "number" ? Number(field.value) : field.value}
                                 classNames={InputStyle}
                                 endContent={item.endContent}
                                 startContent={item.startContent}

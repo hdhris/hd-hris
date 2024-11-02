@@ -241,10 +241,11 @@ const Page: React.FC = () => {
   
 
   return (
-    <div className="p-4">
+    <div className="h-[calc(100vh-150px)] overflow-hidden">
       <DataDisplay
         defaultDisplay="table"
-        title="Employees"//the count is the problem
+        title="Employees"
+        
         data={sortedEmployees}
         filterProps={{
           filterItems: FilterItems,
@@ -252,6 +253,7 @@ const Page: React.FC = () => {
         isLoading={isLoading}
         onTableDisplay={{
           config: TableConfigurations,
+          className: "h-full overflow-auto",
                     layout: "auto",
         }}
         paginationProps={{

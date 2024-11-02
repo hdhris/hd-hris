@@ -112,7 +112,7 @@ const RenderDisplay = <T extends { id: string | number }>({
             {onTableDisplay && <DataDisplayTable data={data} {...onTableDisplay} />}
         </Case>
         <Case of="grid">
-            <ScrollShadow className="flex-1 pr-2 pb-2" size={10}>
+            <ScrollShadow className="flex-1 px-2 pb-2" size={10}>
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] place-items-center gap-5">
                     <RenderList
                         // onClick={(key) => console.log("Key: ", key)}
