@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     console.log(body);
     const { payroll_id, payhead_id, amount } = body;
+    // throw new Error("Test");
     await prisma.trans_payhead_breakdowns.upsert({
       where: {
         payhead_id_payroll_id : {

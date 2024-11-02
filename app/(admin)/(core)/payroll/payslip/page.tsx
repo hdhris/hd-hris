@@ -16,7 +16,7 @@ function Page() {
       setProcessDate={setProcessDate}
     />
   ));
-  const { data, isLoading } = useQuery<PayslipData>(`/api/admin/payroll/payslip?date=${processDate?.id}`);
+  const { data, isLoading } = useQuery<PayslipData>(`/api/admin/payroll/payslip?date=${processDate?.id ?? 0}`);
   return (
     <div className="h-full flex gap-2">
       <div className="flex-1 overflow-auto m-2">
@@ -40,6 +40,7 @@ function Page() {
         <CardBody>
           <h1>Focused Employee: {focusedEmployee}</h1>
           <h1>Focused Payhead: {focusedPayhead}</h1>
+          <h1>Payroll id: {data?.payrolls?.find(pr=>pr.employee_id===focusedEmployee)?.id}</h1>
         </CardBody>
         <CardFooter></CardFooter>
       </Card>
