@@ -14,7 +14,7 @@ interface FormDrawer extends Omit<DrawerProps, "onClose">{
 
 function FormDrawer({...props}: FormDrawer) {
     return (
-        <Drawer {...props} isSubmitting={props.isLoading} isOpen={props.isOpen} onClose={props.onOpen} size="sm" title={
+        <Drawer {...props} isSubmitting={props.isLoading} isOpen={props.isOpen} onClose={props.onOpen} title={
             <Title
             className="ms-1"
             heading={props.title}

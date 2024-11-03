@@ -1,3 +1,4 @@
+'use client'
 import React, {useCallback, useEffect, useState} from 'react';
 import {useForm} from "react-hook-form";
 import {z} from "zod";
@@ -8,8 +9,11 @@ import FormDrawer from "@/components/common/forms/FormDrawer";
 import {EditCreditProp} from "@/app/(admin)/(core)/leaves/leave-credits/page";
 import {DrawerFormTypes} from "@/types/drawer-form/drawer-form-types";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
-import {FileUpload} from "@/components/ui/file-upload";
-import {Tab, Tabs} from "@nextui-org/react";
+import {Select, SelectItem, Tab, Tabs} from "@nextui-org/react";
+import {FileDropzone, FileState} from "@/components/ui/fileupload/file";
+import {usePapaParse} from 'react-papaparse';
+import {LuDownload} from "react-icons/lu";
+import Typography from "@/components/common/typography/Typography";
 
 interface BenefitPlanFormProps extends DrawerFormTypes {
     plan?: EditCreditProp
@@ -124,6 +128,7 @@ function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
     }, [form]);
     return (<FormDrawer isLoading={true} title={"Add New Benefit Plan"}
                         description={"Enter the details for the new employee benefit plan."}
+                        size="md"
         // footer={<div className="w-full flex justify-end gap-4">
         //     {employee && <Button onClick={() => handleDelete(employee.id)}
         //                          isLoading={isLoadingDelete}
@@ -139,7 +144,8 @@ function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
                     <FormFields items={effectiveDates} size="md"/>
                 </div>
                 <FormFields items={additional_settings}/>
-                {form.watch("has_reference_table") ? <ReferenceTableForm/> : <div className="flex gap-4"><FormFields items={plan_rates}/></div>}
+                {form.watch("has_reference_table") ? <ReferenceTableForm/> :
+                    <div className="flex gap-4"><FormFields items={plan_rates}/></div>}
             </form>
         </Form>
     </FormDrawer>);
@@ -148,12 +154,142 @@ function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
 export default BenefitPlanForm;
 
 
+const standardHeaders = [
+    "Minimum Compensation",
+    "Maximum Compensation",
+    "Regular Employee Compensation",
+    "WISP",
+    "Regular Employer Contribution",
+    "Regular Employee Contribution",
+    "EC Contribution",
+    "WISP Employer Contribution",
+    "WISP Employee Contribution"
+]
+
 const ReferenceTableForm = () => {
+    const [files, setFiles] = useState<FileState[]>([])
+    const [headers, setHeaders] = useState<string[]>([])
+    const {readString} = usePapaParse();
+    const [mapping, setMapping] = useState<Record<string, string>>({})
+    const [isComplete, setIsComplete] = useState(false)
+
+
+    const handleMapping = (standardHeader: string, uploadedHeader: string) => {
+        setMapping(prev => ({
+            ...prev,
+            [standardHeader]: uploadedHeader
+        }))
+    }
+
+    const checkMapping = () => {
+        const isMappingComplete = standardHeaders.every(header => mapping[header])
+        setIsComplete(isMappingComplete)
+    }
+
+    function updateFileProgress(key: string, progress: FileState['progress']) {
+        setFiles((fileStates) => {
+            const newFileStates = structuredClone(fileStates);
+            const fileState = newFileStates.find((fileState) => fileState.key === key,);
+            console.log("File State: ", fileState)
+            if (fileState) {
+                fileState.progress = progress;
+            }
+            return newFileStates;
+        });
+    }
+
     return (
         <Tabs>
-            <Tab title="Upload CSV"><FileUpload dropzoneOptions={{
-                accept: {'text/*': []}, maxSize: 1024 * 1024
-            }}/></Tab>
+            <Tab title="Upload CSV">
+                <FileDropzone
+                    value={files}
+                    onChange={(files) => {
+                        console.log("On Change: ", files)
+                        setFiles(files);
+                    }}
+                    dropzoneOptions={{
+                        accept: {"text/csv": [".csv"]}, maxFiles: 1
+                    }}
+                    onFilesAdded={async (addedFiles) => {
+                        setFiles([...files, ...addedFiles]);
+                        addedFiles.map(async (addedFileState) => {
+                            updateFileProgress(addedFileState.key, 'PENDING');
+                        })
+
+                        const reader = new FileReader();
+
+                        reader.onloadend = ({target}) => {
+                            readString(target?.result as string, {
+                                worker: true, header: true, skipEmptyLines: true, complete: (results) => {
+                                    setHeaders(results.meta?.fields!)
+                                    console.log('---------------------------');
+                                    console.log(results);
+                                    console.log('---------------------------');
+                                },
+                            })
+
+                        };
+                        //
+                        reader.readAsText(addedFiles.find(item => item.file)?.file!);
+
+                    }}/>
+
+                {headers.length > 0 ? headers.length === standardHeaders.length ? (
+                    standardHeaders.map((standardHeader) => (
+                        <div key={standardHeader} className="flex items-center justify-between space-y-4">
+                            <Typography className="text-sm">{standardHeader}</Typography>
+                            <Select
+                                variant="bordered"
+                                labelPlacement="outside"
+                                className="max-w-52 self-center"
+                            >
+                                {headers.map((header) => (
+                                    <SelectItem key={header} value={header}>
+                                        {header}
+                                    </SelectItem>
+                                ))}
+                            </Select>
+                        </div>
+                    ))
+                ) : (
+                    <p>Error</p>
+                ): (
+                    <></>
+                )}
+
+                {/*{standardHeaders.map(standardHeader => (*/}
+                {/*    <div key={standardHeader} className="flex items-center justify-between space-y-4">*/}
+                {/*        <Typography className="text-sm">{standardHeader}</Typography>*/}
+                {/*        <Select*/}
+                {/*            variant="bordered"*/}
+                {/*            labelPlacement="outside"*/}
+                {/*            className="max-w-52 self-center"*/}
+                {/*        >*/}
+                {/*            {headers.map((header) => (*/}
+                {/*                <SelectItem key={header} value={header}>*/}
+                {/*                    {header}*/}
+                {/*                </SelectItem>*/}
+                {/*            ))}*/}
+                {/*        </Select>*/}
+
+                {/*    </div>*/}
+                {/*))}*/}
+
+                {/*{headers.map(item => {*/}
+                {/*    return(*/}
+                {/*        <p key={item}>{item}</p>*/}
+                {/*    )*/}
+                {/*})}*/}
+
+            </Tab>
             <Tab title="Paste a CSV"></Tab>
+            <Tab title={
+                <div className="flex gap-2 items-center">
+                    <LuDownload/>
+                    <Typography className="!text-inherit">Download Template</Typography>
+                </div>
+            } href="/templates/CONTRIBUTION TABLE TEMPLATE.csv"></Tab>
         </Tabs>)
 }
+
+
