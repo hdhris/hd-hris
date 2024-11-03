@@ -11,6 +11,7 @@ import Drawer from "@/components/common/Drawer";
 import { Form } from "@/components/ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Text from "@/components/Text";
 
 export const employeeSchema = z.object({
   picture: z.union([z.instanceof(File), z.string()]).optional(),
@@ -112,16 +113,19 @@ export const employeeSchema = z.object({
   branch_id: z.string().min(1, "Branch is required"),
   batch_id: z.string().min(1, "Batch is required"),
   days_json: z
-  .union([z.string(), z.array(z.string())])
-  .transform((val) => {
-    // If val is a string, split by commas, trim each day, and remove empty strings
-    if (typeof val === "string") {
-      return val.split(",").map((day) => day.trim()).filter((day) => day);
-    }
-    // If it's already an array, return it as is
-    return val;
-  })
-  .pipe(z.array(z.string()).min(1, "At least one working day is required")),
+    .union([z.string(), z.array(z.string())])
+    .transform((val) => {
+      // If val is a string, split by commas, trim each day, and remove empty strings
+      if (typeof val === "string") {
+        return val
+          .split(",")
+          .map((day) => day.trim())
+          .filter((day) => day);
+      }
+      // If it's already an array, return it as is
+      return val;
+    })
+    .pipe(z.array(z.string()).min(1, "At least one working day is required")),
 });
 
 interface EditEmployeeProps {
@@ -226,14 +230,14 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       if (employeeData.dim_schedules?.[0]?.days_json) {
         try {
           const daysJson = employeeData.dim_schedules[0].days_json;
-          if (typeof daysJson === 'string') {
+          if (typeof daysJson === "string") {
             // Parse the JSON string
             daysArray = JSON.parse(daysJson);
           } else if (Array.isArray(daysJson)) {
             daysArray = daysJson;
           }
         } catch (error) {
-          console.error('Error parsing days_json:', error);
+          console.error("Error parsing days_json:", error);
           daysArray = [];
         }
       }
@@ -250,8 +254,6 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           fileName: cert.fileName,
         })
       );
-
-     
 
       methods.reset({
         picture: employeeData.picture || "",
@@ -447,13 +449,14 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           onSubmit={methods.handleSubmit(handleFormSubmit)}
         >
           <>
-            <h2>Personal Information</h2>
             <EditPersonalInformationForm />
             <Divider className="my-4" />
-            <h2>Educational Background</h2>
+            <Text className="text-medium font-semibold">
+              Educational Background
+            </Text>
             <EditEducationalBackgroundForm />
             <Divider className="my-4" />
-            <h2>Job Information & Work Schedules</h2>
+            <Text>Job Information</Text>
             <EditJobInformationForm />
           </>
         </form>

@@ -392,7 +392,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
             </Text>
             <EducationalBackgroundForm />
             <Divider className="my-6" />
-            <h2>Job Information</h2>
+            <Text>Job Information</Text>
             <JobInformationForm />
           </form>
         </Form>
