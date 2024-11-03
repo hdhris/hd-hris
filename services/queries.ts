@@ -10,6 +10,7 @@ import {Branch} from "@/types/employeee/BranchType";
 import {Payhead, PayheadAffected} from "@/types/payroll/payheadType";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import prisma from "@/prisma/prisma";
+import { JobPosition } from "@/types/employeee/JobType";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -84,7 +85,7 @@ export function useDepartmentsData() {
 }
 
 export function useJobpositionData() {
-    return useSWR<Department[]>('/api/employeemanagement/jobposition', fetcher, {//
+    return useSWR<JobPosition[]>('/api/employeemanagement/jobposition', fetcher, {//
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }

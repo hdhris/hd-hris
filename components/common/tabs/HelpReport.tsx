@@ -60,7 +60,7 @@ function HelpReport() {
   const userInfo = useUserInfo();
   const { data: reports, isLoading } = useQuery<HelpReport[]>(
     `/api/admin/utils/help-report?path=${encodeURIComponent(pathname)}`,
-    { refreshInterval: 5000 }
+    { refreshInterval: 60000 }
   );
   const unresolved = useMemo(() => {
     if (reports) {

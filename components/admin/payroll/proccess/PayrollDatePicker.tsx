@@ -22,19 +22,11 @@ import { axiosInstance } from "@/services/fetcher";
 import { useQuery } from "@/services/queries";
 
 interface DatePickerUiProps {
-  // payrollDates?: PayrollTable["pr_dates"];
-  // prtLoading: boolean;
   setProcessDate: (item: ProcessDate)=>void;
-  // setIsLoading: (value: boolean) => void;
-  // setPayrollData: (value: PayrollTable) => void;
 }
 
 function DatePickerPayroll({
-  // payrollDates,
-  // prtLoading,
   setProcessDate,
-  // setIsLoading,
-  // setPayrollData,
 }: DatePickerUiProps) {
   let formatter = useDateFormatter({ dateStyle: "long" });
   const {data:payrollDates, isLoading} = useQuery<ProcessDate[]>('/api/admin/payroll/get-process-dates')
