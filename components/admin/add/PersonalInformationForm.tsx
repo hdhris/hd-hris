@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from "react";
-import { useForm } from "react-hook-form";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { useForm, useFormContext } from "react-hook-form";
 import FormFields, {
   FormInputProps,
 } from "@/components/common/forms/FormFields";
@@ -91,15 +91,21 @@ const extensionOptions = [
   { value: "T.E.", label: "T.E." },
 ];
 
-const PersonalInformationForm: React.FC = () => {
-  const [imagePreview, setImagePreview] = useState<string | undefined>(
-    undefined
-  );
+const PersonalInformationForm = () => {
+  const { setValue, watch } = useFormContext(); // Use form context instead of creating new form
+  const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Watch the picture value to sync with form state
+  const pictureValue = watch("picture");
 
-  const form = useForm();
-  const { setValue } = form;
+  // Sync imagePreview with form state
+  useEffect(() => {
+    if (typeof pictureValue === "string" && pictureValue !== "") {
+      setImagePreview(pictureValue);
+    }
+  }, [pictureValue]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,11 +114,10 @@ const PersonalInformationForm: React.FC = () => {
         setFileError("File size must be less than 5MB");
         return;
       }
-
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        setValue("picture", file);
+        setValue("picture", file); // This will now properly update the form context
       };
       reader.readAsDataURL(file);
       setFileError("");
@@ -130,6 +135,7 @@ const PersonalInformationForm: React.FC = () => {
       fileInputRef.current.value = "";
     }
   }, [setValue]);
+
 
   const formNameFields: FormInputProps[] = [
     {
