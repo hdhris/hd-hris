@@ -181,9 +181,11 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 size={size}
                                 variant="bordered"
                                 radius="sm"
-                                selectedKey={field.value ? String(field.value) : null}
+                                inputValue={field.value ? String(field.value) : undefined}
                                 onSelectionChange={(value) => {
-                                    console.log("Value: ", value)
+                                    field.onChange(value)
+                                }}
+                                onInputChange={(value) => {
                                     field.onChange(value)
                                 }}
                             >

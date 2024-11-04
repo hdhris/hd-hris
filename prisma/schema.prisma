@@ -699,18 +699,18 @@ model sys_help_report {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ref_benefits_contribution_table {
-  id                             Int                @id(map: "ref_benefits_contribution_pkey") @default(autoincrement())
-  min_compensation               Decimal?           @db.Decimal
-  max_compensation               Decimal?           @db.Decimal
-  regular_employees_compensation Decimal?           @db.Decimal
-  wisp                           Decimal?           @db.Decimal
-  regular_er                     Decimal?           @db.Decimal
-  ecc                            Decimal?           @db.Decimal
-  regular_ee                     Decimal?           @db.Decimal
-  wisp_er                        Decimal?           @db.Decimal
-  wisp_ee                        Decimal?           @db.Decimal
-  created_at                     DateTime?          @default(now()) @db.Timestamptz(6)
-  updated_at                     DateTime?          @default(now()) @db.Timestamp(6)
-  plan_id                        Int?
-  ref_benefit_plans              ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                Int                @id(map: "ref_benefits_contribution_pkey") @default(autoincrement())
+  min_salary        Decimal?           @db.Decimal
+  max_salary        Decimal?           @db.Decimal
+  min_MSC           Decimal?           @db.Decimal
+  max_MSC           Decimal?           @db.Decimal
+  msc_step          Decimal?           @db.Decimal
+  ec_threshold      Decimal?           @db.Decimal
+  ec_low_rate       Decimal?           @db.Decimal
+  ec_high_rate      Decimal?           @db.Decimal
+  wisp_threshold    Decimal?           @db.Decimal
+  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?          @default(now()) @db.Timestamp(6)
+  plan_id           Int?
+  ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
