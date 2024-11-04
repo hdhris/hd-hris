@@ -33,6 +33,7 @@ function Page() {
     return (
       <>
         <SearchFilter
+          uniqueKey={'holiday-filter'}
           items={data?.combinedHolidays || []}
           filterConfig={filterConfig}
           searchConfig={searchConfig}

@@ -66,6 +66,7 @@ function Page() {
     return (
       <>
         <SearchFilter
+          uniqueKey={'schedule-filter'}
           items={data?.emp_sched || []}
           filterConfig={filterConfig}
           searchConfig={searchConfig}

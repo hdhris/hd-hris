@@ -58,10 +58,8 @@ function HelpReport() {
   const pathname = usePathname();
   const [newReport, setNewReport] = useState("");
   const userInfo = useUserInfo();
-  const { data: reports, isLoading } = useQuery<HelpReport[]>(
-    `/api/admin/utils/help-report?path=${encodeURIComponent(pathname)}`,
-    { refreshInterval: 60000 }
-  );
+  const [api, setApi] = useState(`/api/admin/utils/help-report?path=${encodeURIComponent(pathname)}`);
+  const { data: reports, isLoading } = useQuery<HelpReport[]>(api, { refreshInterval: 15000 });
   const unresolved = useMemo(() => {
     if (reports) {
       return reports.filter((rep) => rep.reviewer_id === null).length;
@@ -84,6 +82,7 @@ function HelpReport() {
           id: id,
         });
 
+        setApi(prev=> prev);
         toast({
           title: "Reviewed",
           description: "Report reviewed successfully!",
