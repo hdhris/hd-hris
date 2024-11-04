@@ -3,7 +3,7 @@ import {LeaveType} from "@/types/leaves/LeaveTypes";
 import {Title} from "@/components/common/typography/Typography";
 import Drawer, {DrawerProps} from "@/components/common/Drawer";
 
-interface FormDrawer extends Omit<DrawerProps, "onClose">{
+interface FormDrawer extends Omit<DrawerProps, "onClose" | "isSubmitting">{
     title: ReactNode
     description: ReactNode
     onOpen: (value: boolean) => void
