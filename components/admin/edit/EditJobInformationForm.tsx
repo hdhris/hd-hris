@@ -1,17 +1,30 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
 import { Divider, Spinner } from "@nextui-org/react";
 import Text from "@/components/Text";
-import { BatchCard } from "@/components/admin/attendance-time/schedule/batchCard"; 
-import { useDepartmentsData, useJobpositionData, useBranchesData, useBatchSchedules, useQuery } from "@/services/queries";
-import { BatchSchedule, Schedules } from "@/types/attendance-time/AttendanceTypes";
+import { BatchCard } from "@/components/admin/attendance-time/schedule/batchCard";
+import {
+  useDepartmentsData,
+  useJobpositionData,
+  useBranchesData,
+  useQuery,
+} from "@/services/queries";
+import {
+  BatchSchedule,
+  Schedules,
+} from "@/types/attendance-time/AttendanceTypes";
 
 const EditJobInformationForm: React.FC = () => {
   const { setValue, watch } = useFormContext();
   const selectedBatchId = watch("batch_id");
-  const [hoveredBatchId, setHoveredBatchId] = React.useState<number | null>(null);
-  const [selectedBatch, setSelectedBatch] = React.useState<BatchSchedule | null>(null);
+  const [hoveredBatchId, setHoveredBatchId] = React.useState<number | null>(
+    null
+  );
+  const [selectedBatch, setSelectedBatch] =
+    React.useState<BatchSchedule | null>(null);
   const [visible, setVisible] = React.useState(false);
 
   // Fetch data using SWR hooks
@@ -23,7 +36,6 @@ const EditJobInformationForm: React.FC = () => {
     { refreshInterval: 3000 }
   );
 
-  // Create options arrays
   const departmentOptions = departments.reduce((acc: any[], dept) => {
     if (dept && dept.id && dept.name) {
       acc.push({ value: dept.id.toString(), label: dept.name });
@@ -44,6 +56,10 @@ const EditJobInformationForm: React.FC = () => {
     }
     return acc;
   }, []);
+
+  // Get current days_json value and ensure it's an array
+  const currentDays = watch("days_json") || [];
+  const daysArray = Array.isArray(currentDays) ? currentDays : [];
 
   const formBasicFields: FormInputProps[] = [
     {
@@ -87,6 +103,34 @@ const EditJobInformationForm: React.FC = () => {
     },
   ];
 
+  const daysJsonField: FormInputProps = {
+    name: "days_json",
+    label: "Working Days",
+    type: "select",
+    config: {
+      placeholder: "Select Working Days",
+      selectionMode: "multiple",
+      options: [
+        { value: "mon", label: "Monday" },
+        { value: "tue", label: "Tuesday" },
+        { value: "wed", label: "Wednesday" },
+        { value: "thu", label: "Thursday" },
+        { value: "fri", label: "Friday" },
+        { value: "sat", label: "Saturday" },
+        { value: "sun", label: "Sunday" },
+      ],
+      defaultValue: daysArray,
+      selectedKeys: new Set(currentDays),
+      onChange: (e: { target: { value: string; }; }) => {
+        const selectedValues = Array.from(new Set(e.target.value.split(",")));
+        setValue("days_json", selectedValues, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      },
+    },
+  };
+
   React.useEffect(() => {
     if (selectedBatch) {
       setValue("batch_id", selectedBatch.id.toString(), {
@@ -94,58 +138,49 @@ const EditJobInformationForm: React.FC = () => {
         shouldDirty: true,
         shouldTouch: true,
       });
-
-      setValue(
-        "days_json",
-        {
-          monday: false,
-          tuesday: false,
-          wednesday: false,
-          thursday: false,
-          friday: false,
-          saturday: false,
-          sunday: false,
-        },
-        {
-          shouldValidate: true,
-        }
-      );
     }
   }, [selectedBatch, setValue]);
-
 
   const renderBatchSchedules = () => {
     if (!data?.batch || data.batch.length === 0) {
       return <p>No batch schedules available</p>;
     }
 
-    return data.batch.map((schedule, index) => {
+    return data.batch.map((schedule) => {
       if (!schedule || !schedule.id) return null;
 
+      const isSelected = selectedBatchId === schedule.id.toString();
       const colorScheme = {
         border: "border-green-500",
         hover_border: "hover:border-green-500",
         text: "text-gray-800",
-        bg: "bg-white"
+        bg: "bg-white",
       };
 
       return (
-        <BatchCard
-          key={schedule.id}
-          item={schedule}
-          color={colorScheme}
-          isHovered={hoveredBatchId === schedule.id}
-          isSelected={selectedBatchId === schedule.id.toString()}
-          setHoveredBatchId={setHoveredBatchId}
-          setSelectedBatch={setSelectedBatch}
-          setVisible={setVisible}
-        />
+        <div key={schedule.id} className="space-y-4">
+          <BatchCard
+            key={schedule.id}
+            item={schedule}
+            color={colorScheme}
+            isHovered={hoveredBatchId === schedule.id}
+            isSelected={selectedBatchId === schedule.id.toString()}
+            setHoveredBatchId={setHoveredBatchId}
+            setSelectedBatch={setSelectedBatch}
+            setVisible={setVisible}
+          />
+          {isSelected && (
+            <div className="flex flex-wrap space-x-4">
+              <FormFields items={[daysJsonField]} />
+            </div>
+          )}
+        </div>
       );
     });
   };
 
   if (isLoading) {
-    return <Spinner>Loading...</Spinner>;
+    return <div>Loading...</div>;
   }
 
   return (

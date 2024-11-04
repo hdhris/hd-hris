@@ -46,12 +46,26 @@ const employeeSchema = z.object({
     .array(
       z.object({
         batch_id: z.number(),
-        days_json: z.record(z.boolean()),
+        days_json: z
+          .union([z.string(), z.array(z.string())])
+          .transform((val: string | string[]) => {
+            if (typeof val === "string") {
+              // Split by comma, trim whitespace, and filter out any empty strings
+              return val
+                .split(",")
+                .map((day) => day.trim())
+                .filter((day) => day.length > 0);
+            }
+            // If already an array, clean and filter it directly
+            return val.filter((day) => day && day.trim().length > 0);
+          })
+          .refine((val) => val.length > 0, {
+            message: "At least one working day is required",
+          }),
       })
     )
     .optional(),
 });
-
 
 const statusUpdateSchema = z.object({
   status: z.enum(["active", "suspended", "resigned", "terminated"]),
@@ -88,7 +102,7 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     // console.log("Incoming data:", data);
-//
+    //
     // Validate the incoming data against the schema
     const validatedData = employeeSchema.parse(data);
     // console.log("Validated data:", validatedData);
@@ -150,8 +164,7 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
         data: schedules.map((schedule) => ({
           employee_id: employee.id, // Link schedules to the newly created employee
           batch_id: schedule.batch_id,
-          days_json: ["mon","tue","wed","thu","fri","sat"],
-          // days_json: schedule.days_json,
+          days_json: schedule.days_json,
           created_at: new Date(),
           updated_at: new Date(),
         })),
@@ -287,7 +300,6 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-
 async function updateEmployee(
   id: number,
   data: Partial<z.infer<typeof employeeSchema>>
@@ -319,7 +331,7 @@ async function updateEmployee(
       data: schedules.map((schedule) => ({
         employee_id: id,
         batch_id: schedule.batch_id,
-        days_json: ["mon","tue","wed","thu","fri","sat"],
+        days_json: schedule.days_json,
         created_at: new Date(),
         updated_at: new Date(),
       })),
@@ -334,7 +346,9 @@ async function updateEmployeeStatus(
   data: z.infer<typeof statusUpdateSchema>
 ) {
   const { status, reason, date } = data;
-  const formattedDate = date ? new Date(date).toISOString().split('T')[0] : null;
+  const formattedDate = date
+    ? new Date(date).toISOString().split("T")[0]
+    : null;
 
   let updateData: any = {
     updated_at: new Date(),
@@ -344,9 +358,8 @@ async function updateEmployeeStatus(
   };
 
   if (status !== "active") {
-    const statusData = reason && formattedDate 
-      ? { reason, date: formattedDate }
-      : null;
+    const statusData =
+      reason && formattedDate ? { reason, date: formattedDate } : null;
 
     switch (status) {
       case "suspended":
@@ -375,7 +388,6 @@ async function updateEmployeeStatus(
     throw new Error("Failed to update employee status: " + error);
   }
 }
-
 
 // DELETE: Soft delete an employee
 export async function DELETE(req: NextRequest) {

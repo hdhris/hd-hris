@@ -11,6 +11,7 @@ import Drawer from "@/components/common/Drawer";
 import { Form } from "@/components/ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Text from "@/components/Text";
 
 export const employeeSchema = z.object({
   picture: z.union([z.instanceof(File), z.string()]).optional(),
@@ -26,12 +27,8 @@ export const employeeSchema = z.object({
     .string()
     .min(1, "Last name is required")
     .regex(/^[a-zA-Z\s]*$/, "Last name should only contain letters"),
-  suffix: z
-    .string()
-    .optional(),
-  extension: z
-    .string()
-    .optional(),
+  suffix: z.string().optional(),
+  extension: z.string().optional(),
   gender: z.string().min(1, "Gender is required"),
   email: z.string().email("Invalid email address"),
   contact_no: z
@@ -42,11 +39,9 @@ export const employeeSchema = z.object({
       "Contact number should start with 09, +639, or 9 followed by 9 digits"
     )
     .transform((val) => {
-      // Remove leading "0" if number starts with "09"
       if (val.startsWith("09")) {
         return val.substring(1);
       }
-      // Remove "+63" if number starts with "+639"
       if (val.startsWith("+639")) {
         return val.substring(3);
       }
@@ -101,25 +96,36 @@ export const employeeSchema = z.object({
     .string()
     .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
     .optional(),
-  highestDegree: z
-    .string()
-    .optional(),
-   certificates: z
-  .array(
-    z.object({
-      name: z.string().optional(),  // Make name optional
-      url: z.union([z.string(), z.instanceof(File), z.undefined()]),  // Allow undefined
-      fileName: z.string().optional()  // Make fileName optional
-    })
-  )
-  .optional()  // Make the whole array optional
-  .default([]),  // Provide default empty array
+  highestDegree: z.string().optional(),
+  certificates: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
+        fileName: z.string().optional(),
+      })
+    )
+    .optional()
+    .default([]),
   hired_at: z.string().min(1, "Hire date is required"),
   department_id: z.string().min(1, "Department is required"),
   job_id: z.string().min(1, "Job is required"),
   branch_id: z.string().min(1, "Branch is required"),
   batch_id: z.string().min(1, "Batch is required"),
-  days_json: z.record(z.boolean()).optional(),
+  days_json: z
+    .union([z.string(), z.array(z.string())])
+    .transform((val) => {
+      // If val is a string, split by commas, trim each day, and remove empty strings
+      if (typeof val === "string") {
+        return val
+          .split(",")
+          .map((day) => day.trim())
+          .filter((day) => day);
+      }
+      // If it's already an array, return it as is
+      return val;
+    })
+    .pipe(z.array(z.string()).min(1, "At least one working day is required")),
 });
 
 interface EditEmployeeProps {
@@ -158,13 +164,13 @@ interface EmployeeFormData {
   universityCollege: string;
   course: string;
   highestDegree: string;
+  certificates: Certificate[];
   hired_at: string;
   department_id: string;
-  branch_id: string;
   job_id: string;
+  branch_id: string;
   batch_id: string;
-  days_json: Record<string, boolean>;
-  certificates: Certificate[];
+  days_json: string[];
 }
 
 const EditEmployee: React.FC<EditEmployeeProps> = ({
@@ -205,12 +211,12 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       department_id: "",
       job_id: "",
       batch_id: "",
-      days_json: {},
+      days_json: [],
     },
-    mode: "onChange", // This enables real-time validation
-    reValidateMode: "onBlur", // This ensures validation runs on every change
-    shouldUnregister: false, // Keeps form values when unmounting fields
-    criteriaMode: "all", // Shows all validation errors
+    mode: "onChange",
+    reValidateMode: "onBlur",
+    shouldUnregister: false,
+    criteriaMode: "all",
   });
 
   const fetchEmployeeData = useCallback(async () => {
@@ -218,6 +224,22 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
     try {
       if (!employeeData || !employeeData.id) {
         throw new Error("Employee data not found or invalid");
+      }
+
+      let daysArray: string[] = [];
+      if (employeeData.dim_schedules?.[0]?.days_json) {
+        try {
+          const daysJson = employeeData.dim_schedules[0].days_json;
+          if (typeof daysJson === "string") {
+            // Parse the JSON string
+            daysArray = JSON.parse(daysJson);
+          } else if (Array.isArray(daysJson)) {
+            daysArray = daysJson;
+          }
+        } catch (error) {
+          console.error("Error parsing days_json:", error);
+          daysArray = [];
+        }
       }
 
       const educationalBg =
@@ -268,15 +290,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         batch_id:
           employeeData.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() ||
           "",
-        days_json: employeeData.schedules?.[0]?.days_json || {
-          Monday: false,
-          Tuesday: false,
-          Wednesday: false,
-          Thursday: false,
-          Friday: false,
-          Saturday: false,
-          Sunday: false,
-        },
+        days_json: daysArray,
       });
 
       toast({
@@ -318,9 +332,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         });
         pictureUrl = result.url;
       } else if (data.picture === "") {
-        // If the picture is empty, it means the user wants to remove it
         if (employeeData.picture) {
-          // Delete the old picture from EdgeStore
           await edgestore.publicFiles.delete({
             url: employeeData.picture,
           });
@@ -328,31 +340,33 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         pictureUrl = "";
       }
 
-      // Handle certificate uploads
-    const updatedCertificates = await Promise.all(
-      (data.certificates || []).map(async (cert) => {
-        if (!cert) return null;
-        
-        if (cert.url instanceof File) {
-          const result = await edgestore.publicFiles.upload({
-            file: cert.url,
-            options: {
-              temporary: false,
-            },
-          });
-          return {
-            fileName: cert.fileName || cert.name || result.url.split('/').pop() || '',
-            fileUrl: result.url
-          };
-        }
-        return {
-          fileName: cert.fileName || cert.name || '',
-          fileUrl: cert.url as string
-        };
-      })
-    );
+      const updatedCertificates = await Promise.all(
+        (data.certificates || []).map(async (cert) => {
+          if (!cert) return null;
 
-    const filteredCertificates = updatedCertificates.filter(cert => cert !== null);
+          if (cert.url instanceof File) {
+            const result = await edgestore.publicFiles.upload({
+              file: cert.url,
+              options: {
+                temporary: false,
+              },
+            });
+            return {
+              fileName:
+                cert.fileName || cert.name || result.url.split("/").pop() || "",
+              fileUrl: result.url,
+            };
+          }
+          return {
+            fileName: cert.fileName || cert.name || "",
+            fileUrl: cert.url as string,
+          };
+        })
+      );
+
+      const filteredCertificates = updatedCertificates.filter(
+        (cert) => cert !== null
+      );
 
       const educationalBackground = {
         elementary: data.elementary,
@@ -365,7 +379,6 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         highestDegree: data.highestDegree,
         certificates: filteredCertificates,
       };
-      
 
       const fullData = {
         ...data,
@@ -388,7 +401,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         schedules: [
           {
             batch_id: parseInt(data.batch_id, 10),
-            days_json: data.days_json,
+            days_json: data.days_json, // Make sure days_json is passed as is
           },
         ],
       };
@@ -418,7 +431,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       setIsSubmitting(false);
     }
   };
-  //
+
   return (
     <Drawer
       title="Edit Employee"
@@ -436,13 +449,14 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           onSubmit={methods.handleSubmit(handleFormSubmit)}
         >
           <>
-            <h2>Personal Information</h2>
             <EditPersonalInformationForm />
             <Divider className="my-4" />
-            <h2>Educational Background</h2>
+            <Text className="text-medium font-semibold">
+              Educational Background
+            </Text>
             <EditEducationalBackgroundForm />
             <Divider className="my-4" />
-            <h2>Job Information & Work Schedules</h2>
+            <Text>Job Information</Text>
             <EditJobInformationForm />
           </>
         </form>

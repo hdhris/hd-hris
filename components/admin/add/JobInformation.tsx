@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import FormFields, {
   FormInputProps,
@@ -58,6 +58,18 @@ const JobInformationForm: React.FC = () => {
     return acc;
   }, []);
 
+  const currentDays = watch("days_json") || [];
+  const daysArray = Array.isArray(currentDays) ? currentDays : [];
+
+  useEffect(() => {
+    if (selectedBatch) {
+      setValue("batch_id", selectedBatch.id.toString(), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [selectedBatch, setValue]);
+
   const formBasicFields: FormInputProps[] = [
     {
       name: "department_id",
@@ -100,6 +112,35 @@ const JobInformationForm: React.FC = () => {
       },
     },
   ];
+
+  const daysJsonField: FormInputProps = {
+    name: "days_json",
+    label: "Working Days",
+    type: "select",
+    config: {
+      placeholder: "Select Working Days",
+      selectionMode: "multiple",
+      options: [
+        { value: "mon", label: "Monday" },
+        { value: "tue", label: "Tuesday" },
+        { value: "wed", label: "Wednesday" },
+        { value: "thu", label: "Thursday" },
+        { value: "fri", label: "Friday" },
+        { value: "sat", label: "Saturday" },
+        { value: "sun", label: "Sunday" },
+      ],
+      defaultValue: daysArray,
+      selectedKeys: new Set(currentDays),
+      onChange: (e: { target: { value: string; }; }) => {
+        const selectedValues = Array.from(new Set(e.target.value.split(",")));
+        setValue("days_json", selectedValues, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      },
+    },
+  };
+
   React.useEffect(() => {
     if (selectedBatch) {
       setValue("batch_id", selectedBatch.id.toString(), {
@@ -108,21 +149,21 @@ const JobInformationForm: React.FC = () => {
         shouldTouch: true,
       });
 
-      setValue(
-        "days_json",
-        {
-          monday: false,
-          tuesday: false,
-          wednesday: false,
-          thursday: false,
-          friday: false,
-          saturday: false,
-          sunday: false,
-        },
-        {
-          shouldValidate: true,
-        }
-      );
+      // setValue(
+      //   "days_json",
+      //   {
+      //     monday: false,
+      //     tuesday: false,
+      //     wednesday: false,
+      //     thursday: false,
+      //     friday: false,
+      //     saturday: false,
+      //     sunday: false,
+      //   },
+      //   {
+      //     shouldValidate: true,
+      //   }
+      // );
     }
   }, [selectedBatch, setValue]);
 
@@ -134,6 +175,7 @@ const JobInformationForm: React.FC = () => {
     return data.batch.map((schedule) => {
       if (!schedule || !schedule.id) return null;
 
+      const isSelected = selectedBatchId === schedule.id.toString();
       const colorScheme = {
         border: "border-green-500",
         hover_border: "hover:border-green-500",
@@ -142,16 +184,23 @@ const JobInformationForm: React.FC = () => {
       };
 
       return (
-        <BatchCard
-          key={schedule.id}
-          item={schedule}
-          color={colorScheme}
-          isHovered={hoveredBatchId === schedule.id}
-          isSelected={selectedBatchId === schedule.id.toString()}
-          setHoveredBatchId={setHoveredBatchId}
-          setSelectedBatch={setSelectedBatch}
-          setVisible={setVisible}
-        />
+        <div key={schedule.id} className="space-y-4">
+          <BatchCard
+            key={schedule.id}
+            item={schedule}
+            color={colorScheme}
+            isHovered={hoveredBatchId === schedule.id}
+            isSelected={selectedBatchId === schedule.id.toString()}
+            setHoveredBatchId={setHoveredBatchId}
+            setSelectedBatch={setSelectedBatch}
+            setVisible={setVisible}
+          />
+          {isSelected && (
+            <div className="flex flex-wrap space-x-4">
+              <FormFields items={[daysJsonField]} />
+            </div>
+          )}
+        </div>
       );
     });
   };

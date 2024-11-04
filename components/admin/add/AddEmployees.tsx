@@ -59,7 +59,6 @@ export const employeeSchema = z.object({
       "Contact number should start with 09, +639, or 9 followed by 9 digits"
     )
     .transform((val) => {
-      
       if (val.startsWith("09")) {
         return val.substring(1);
       }
@@ -120,23 +119,35 @@ export const employeeSchema = z.object({
     .optional(),
   highestDegree: z.string().optional(),
   certificates: z
-  .array(
-    z.object({
-      name: z.string().optional(),
-      url: z.union([z.string(), z.instanceof(File), z.undefined()]),
-      fileName: z.string().optional()
-    })
-  )
-  .optional()
-  .default([]),
+    .array(
+      z.object({
+        name: z.string().optional(),
+        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
+        fileName: z.string().optional(),
+      })
+    )
+    .optional()
+    .default([]),
   hired_at: z.string().min(1, "Hire date is required"),
   department_id: z.string().min(1, "Department is required"),
   job_id: z.string().min(1, "Job is required"),
   branch_id: z.string().min(1, "Branch is required"),
   batch_id: z.string().min(1, "Batch is required"),
-  days_json: z.record(z.boolean()).optional(),
+  days_json: z
+    .union([z.string(), z.array(z.string())])
+    .transform((val) => {
+      // If val is a string, split by commas, trim each day, and remove empty strings
+      if (typeof val === "string") {
+        return val
+          .split(",")
+          .map((day) => day.trim())
+          .filter((day) => day);
+      }
+      // If it's already an array, return it as is
+      return val;
+    })
+    .pipe(z.array(z.string()).min(1, "At least one working day is required")),
 });
-
 
 interface Certificate {
   name: string;
@@ -173,9 +184,8 @@ interface EmployeeFormData {
   job_id: string;
   branch_id: string;
   batch_id: string;
-  days_json: Record<string, boolean>;
+  days_json: string[];
 }
-
 
 const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -214,7 +224,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       job_id: "",
       branch_id: "",
       batch_id: "",
-      days_json: {},
+      days_json: [],
     },
     mode: "onChange", // This enables real-time validation
     reValidateMode: "onChange", // This ensures validation runs on every change
@@ -228,23 +238,23 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       title: "Submitting",
       description: "Adding new employee...",
     });
-
     try {
-      let pictureUrl = "";
+      // Handle picture upload similar to edit
+      let pictureUrl = typeof data.picture === "string" ? data.picture : "";
       if (data.picture instanceof File) {
         const result = await edgestore.publicFiles.upload({
           file: data.picture,
         });
         pictureUrl = result.url;
       } else {
-        pictureUrl = data.picture; // If it's already a URL or default picture
+        pictureUrl = ""; 
       }
 
       // Handle certificates
       const updatedCertificates = await Promise.all(
         (data.certificates || []).map(async (cert) => {
           if (!cert) return null;
-          
+
           if (cert.url instanceof File) {
             const result = await edgestore.publicFiles.upload({
               file: cert.url,
@@ -253,18 +263,21 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
               },
             });
             return {
-              fileName: cert.fileName || cert.name || result.url.split('/').pop() || '',
-              fileUrl: result.url
+              fileName:
+                cert.fileName || cert.name || result.url.split("/").pop() || "",
+              fileUrl: result.url,
             };
           }
           return {
-            fileName: cert.fileName || cert.name || '',
-            fileUrl: cert.url as string
+            fileName: cert.fileName || cert.name || "",
+            fileUrl: cert.url as string,
           };
         })
       );
-      
-      const filteredCertificates = updatedCertificates.filter(cert => cert !== null);
+
+      const filteredCertificates = updatedCertificates.filter(
+        (cert) => cert !== null
+      );
 
       // Build educational background
       const educationalBackground = {
@@ -305,8 +318,8 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         batch_id: parseInt(data.batch_id, 10),
         schedules: [
           {
-            batch_id: parseInt(data.batch_id, 10),
             days_json: data.days_json,
+            batch_id: parseInt(data.batch_id, 10),
           },
         ],
       };
@@ -379,7 +392,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
             </Text>
             <EducationalBackgroundForm />
             <Divider className="my-6" />
-            <h2>Job Information</h2>
+            <Text>Job Information</Text>
             <JobInformationForm />
           </form>
         </Form>
