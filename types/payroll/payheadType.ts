@@ -17,6 +17,7 @@ export interface Payhead {
   is_active: boolean;
   name: string;
   type: 'earning' | 'deduction';
+  variable?: string;
   affected_json: AffectedJson;
   dim_payhead_affecteds: Affected[];
 }

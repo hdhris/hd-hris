@@ -39,9 +39,9 @@ function Page() {
   const [selectedOvertime, setSelectedOvertime] = useState<
     OvertimeEntry | undefined
   >();
-  const { data, isLoading } = useQuery<OvertimeEntry[]>(
+  const { data, isLoading, mutate } = useQuery<OvertimeEntry[]>(
     "/api/admin/attendance-time/overtime",
-    { refreshInterval: 3000 }
+    { refreshInterval: 60000 }
   );
   const config: TableConfigProps<OvertimeEntry> = {
     columns: [
@@ -191,6 +191,7 @@ function Page() {
             "rate_per_hour",
           ])
         );
+        mutate();
         toast({
           title: isApproved ? "Approved" : "Rejected",
           description: "Overtime has been " + value.status,

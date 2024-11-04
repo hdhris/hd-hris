@@ -24,9 +24,7 @@ function Page() {
   const [open, setOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState(toGMT8().get("year"));
   const [selectedItem, setSelectedItem] = useState<HolidayEvent | null>(null);
-  const { data, isLoading } = useQuery<HolidayData>(
-    `/api/admin/attendance-time/holidays/${selectedYear}`, {refreshInterval: 3000}
-  );
+  const { data, isLoading, mutate } = useQuery<HolidayData>(`/api/admin/attendance-time/holidays/${selectedYear}`);
   const [holidayItems, setHolidayItems] = useState<HolidayEvent[]>([]);
 
   SetNavEndContent(() => {
@@ -64,7 +62,6 @@ function Page() {
           }}
           onAction={(key) =>
             setSelectedYear(Number(key))
-            // setApi(`/api/admin/attendance-time/holidays/${String(key)}`)
           }
         />
         <Button
@@ -139,6 +136,7 @@ function Page() {
         )}
       </GridList>
       <HolidayForm
+        onUpdate={mutate}
         isOpen={open}
         onClose={() => {
           setOpen(false);

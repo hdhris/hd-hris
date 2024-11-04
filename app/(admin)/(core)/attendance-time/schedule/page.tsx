@@ -52,10 +52,7 @@ const filterConfig: FilterItemsProps<EmployeeSchedule>[] = [
 function Page() {
   const [hoveredBatchId, setHoveredBatchId] = useState<number | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
-  const { data, isLoading } = useQuery<Schedules>(
-    "/api/admin/attendance-time/schedule",
-    { refreshInterval: 3000 }
-  );
+  const { data, isLoading, mutate } = useQuery<Schedules>("/api/admin/attendance-time/schedule");
   const [tableData, setTableData] = useState<EmployeeSchedule[]>();
   const [isVisible, setVisible] = useState(false);
   const [isPending, setPending] = useState(false);
@@ -91,12 +88,12 @@ function Page() {
             id: id,
           }
         );
+        mutate();
         toast({
           title: "Deleted",
           description: "Schedule deleted successfully!",
           variant: "default",
         });
-
         setSelectedBatch(null);
         setVisible(false);
       }
@@ -121,6 +118,7 @@ function Page() {
           is_active: batch.is_active,
           break_min: batch.break_min,
         });
+        mutate();
         toast({
           title: "Updated",
           description: "Schedule updated successfully!",
@@ -135,6 +133,7 @@ function Page() {
           is_active: batch.is_active,
           break_min: batch.break_min,
         });
+        mutate();
         toast({
           title: "Created",
           description: "Schedule created successfully!",

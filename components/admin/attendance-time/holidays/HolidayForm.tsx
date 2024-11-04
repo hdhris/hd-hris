@@ -22,6 +22,7 @@ import showDialog from "@/lib/utils/confirmDialog";
 function HolidayForm({
   isOpen,
   onClose,
+  onUpdate,
   selectedItem: data,
   transHolidays,
 }: {
@@ -29,8 +30,8 @@ function HolidayForm({
   onClose: () => void;
   selectedItem: HolidayEvent | null;
   transHolidays: TransHoliday[];
+  onUpdate: () => void;
 }) {
-  const router = useRouter();
   const [selectedItem, setSelectedItem] = useState<HolidayEvent | null>(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -145,6 +146,7 @@ function HolidayForm({
         description: `Holiday ${isNew ? "created" : "updated"} successfully!`,
         variant: "success",
       });
+      onUpdate();
       onClose();
     } catch (error) {
       toast({
@@ -172,6 +174,7 @@ function HolidayForm({
         description: `Holiday deleted successfully!`,
         variant: "default",
       });
+      onUpdate();
       onClose();
     } catch (error) {
       toast({
