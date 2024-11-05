@@ -15,6 +15,7 @@ export interface Payhead {
   deleted_at?: string;
   id: number;
   is_active: boolean;
+  is_overwritable: boolean;
   name: string;
   type: 'earning' | 'deduction';
   variable?: string;

@@ -6,34 +6,53 @@ import {
   PopoverTrigger,
   Textarea,
 } from "@nextui-org/react";
-import React, { useState } from "react";
-import { calcbuttons, isNumeric, var_buttons } from "./buttons";
+import React, { useMemo } from "react";
+import { calcbuttons, isNumeric, isValidAdjacent, var_buttons } from "./buttons";
 import { FaCalculator } from "react-icons/fa";
+import { BaseValueProp, calculateAllPayheads, VariableFormulaProp } from "@/helper/payroll/calculations";
 
 function PayheadCalculator({
   input,
   setInput,
+  payheadVariables,
+  setInvalid,
 }: {
   input: string;
   setInput: (value: string) => void;
+  payheadVariables?: string[];
+  setInvalid: (value: boolean) => void;
 }) {
-  // const [input, setInput] = useState<string>("");
-  // const [result, setResult] = useState<number | string>(0);
 
-  // Array to store calculator button values, including backspace ("←")
+  const isValidExpression = useMemo(()=>{
+    if(input.trim() === "") return true
+    const baseVariables: BaseValueProp = {
+      rate_p_hr: 1,
+      total_shft_hr: 2,
+      payroll_days: 3,
+      ...payheadVariables?.reduce((acc, variable, index) => {
+        acc[variable] = index;
+        return acc;
+      }, {} as Record<string, number>)
+    };
+
+    const vals = calculateAllPayheads(baseVariables, [{id: 9999, formula: input, variable:"x"}]);
+    if(vals.length){
+      setInvalid(false);
+      return true;
+    }
+    
+    return false;
+  },[input, payheadVariables, setInvalid])
 
   const handleButtonClick = (value: string) => {
     if (value === "C") {
       handleClear();
     }
-    // else if (value === "=") {
-    //   handleCalculate();
-    // }
     else if (value === "←") {
       handleBackspace();
     } else {
       const newVal =
-        (isNumeric(value) && isNumeric(input.slice(-1))) || input === ""
+        (isValidAdjacent(value) && isValidAdjacent(input.slice(-1))) || input === ""
           ? value
           : ` ${value}`;
       setInput(input + newVal);
@@ -46,17 +65,12 @@ function PayheadCalculator({
   };
 
   const handleBackspace = () => {
-    let val = input.trim(); // Remove leading and trailing spaces
+    let val = input.trim();
+    // const isLastCharNumber = (char: string) => /\d/.test(char);
 
-    // Check if the last character is a digit
-    const isLastCharNumber = (char: string) => /\d/.test(char);
-
-    // If there's at least one character in the input
     if (val.length > 0) {
       const lastChar = val[val.length - 1];
-
-      // If the last character is a number, remove just that character
-      if (isLastCharNumber(lastChar)) {
+      if (isValidAdjacent(lastChar)) {
         val = val.slice(0, -1);
       } else {
         // If the last character is not a number, remove until a space is reached
@@ -70,19 +84,8 @@ function PayheadCalculator({
         }
       }
     }
-
-    setInput(val); // Update the input state with the modified value
+    setInput(val); 
   };
-
-  //   const handleCalculate = () => {
-  //     try {
-  //       const calculation = new Function(`return ${input}`)();
-  //       setResult(calculation);
-  //       setInput(calculation.toString());
-  //     } catch (error) {
-  //       setResult("Error");
-  //     }
-  //   };
 
   return (
     <div className="flex gap-2">
@@ -91,8 +94,9 @@ function PayheadCalculator({
         value={input}
         onValueChange={setInput}
         variant="bordered"
-        color="primary"
+        color={!isValidExpression ? "danger" : "primary"}
         readOnly
+        isInvalid={!isValidExpression}
       />
       <Popover key="calculator" color="secondary" placement="right">
         <PopoverTrigger>
@@ -122,6 +126,17 @@ function PayheadCalculator({
                   size="sm"
                   radius="lg"
                   key={`var-${index}`}
+                  onClick={() => handleButtonClick(button)}
+                >
+                  {button}
+                </Button>
+              ))}
+              {payheadVariables && payheadVariables.map((button, index) => (
+                <Button
+                  className="col-span-2 w-full"
+                  size="sm"
+                  radius="lg"
+                  key={`payhead-${index}`}
                   onClick={() => handleButtonClick(button)}
                 >
                   {button}
