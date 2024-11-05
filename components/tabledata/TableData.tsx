@@ -161,6 +161,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
 
     const sortedItems = React.useMemo(() => {
         return [...filteredItems].sort((a, b) => {
+            if(props.sortDescriptor && props.onSortChange) return 0;
             const getColumnValue = (item: T, column: keyof T | string): any => {
                 if (typeof column === 'string') {
                     const keys = column.split('.');
@@ -186,7 +187,7 @@ function DataTable<T extends { id: string | number }>({  // T extends { id: stri
             const cmp = first < second ? -1 : first > second ? 1 : 0;
             return sortDescriptor.direction === 'descending' ? -cmp : cmp;
         });
-    }, [sortDescriptor, filteredItems]);
+    }, [sortDescriptor, filteredItems, props.sortDescriptor, props.onSortChange]);
 
     const onSearchChange = React.useCallback((value?: string) => {
         if (value) {

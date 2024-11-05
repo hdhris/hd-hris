@@ -110,7 +110,7 @@ export function PRPayslipTable({
         setTimeout(() => setOnErrors(onErrors + 1), 3000); // Adjust the delay as needed
       }
     }
-  }, [onErrors, records, payslipData.payrolls]);
+  }, [onErrors, records, payslipData]);
 
   useEffect(() => {
     reUpdateBatch();
@@ -135,7 +135,8 @@ export function PRPayslipTable({
         );
       });
     }
-  }, []); // payslipData.breakdowns, payslipData.payrolls, payslipData.earnings
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Dont include payslipData.breakdowns, payslipData.payrolls, payslipData.earnings
 
   function isAffected(employee: PayslipEmployee, payhead: PayslipPayhead) {
     let mandatory = false;

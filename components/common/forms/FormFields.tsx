@@ -222,8 +222,6 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 autoFocus={item.isFocus}
                                 // isSelected={field.value}
                                 {...field}
-                                value={String(field.value).split(',')}
-                                onValueChange={(value) => field.onChange(value.join(','))}
                             >
                                 {(item.config as any)?.options?.map((option: GroupInputOptions) => (
                                     <Checkbox key={option.value} value={option.value}
@@ -357,6 +355,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 size={size}
                                 {...field}
                                 isSelected={field.value}
+                                onValueChange={field.onChange}
                                 {...(item.config as SwitchProps)}
                             >
                                 {item.label}

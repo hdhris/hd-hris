@@ -15,13 +15,15 @@ interface SearchProps<T> {
   config: SearchItemsProps<T>[];
   setResults: (items: T[]) => void;
   isLoading?: boolean;
+  uniqueKey?: string | number;
 }
 
-function SearchItems<T extends object>({
+function SearchItems<T>({
   items,
   config,
   setResults,
   isLoading,
+  uniqueKey,
 }: SearchProps<T>) {
   const [searchValue, setSearchValue] = useState("");
 
@@ -49,7 +51,13 @@ function SearchItems<T extends object>({
     if (items.length > 0) {
       refresh(searchValue);
     }
-  }, [items, searchValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, searchValue]); // Dont include refresh
+
+
+  useEffect(() => {
+    setSearchValue("");
+  }, [uniqueKey]); // If different module uses the same component on path change
 
   return (
     <Input

@@ -1,7 +1,5 @@
 import {useEffect, useState} from "react";
 import {useSession} from "next-auth/react";
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
-import { useQuery } from "@/services/queries";
 
 
 export function useEmployeeId() {
@@ -15,9 +13,4 @@ export function useEmployeeId() {
     }, [data])
 
     return id
-}
-
-export function useUserInfo(): UserEmployee | undefined {
-    const id = useEmployeeId();
-    return useQuery<UserEmployee>(`/api/admin/utils/get-user-info?userID=${id}`).data;
 }

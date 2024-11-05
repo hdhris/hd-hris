@@ -21,7 +21,7 @@ import {Avatar} from "@nextui-org/avatar";
 import {topDepartmentList, topEmployeeList} from "@/sampleData/admin/dashboard/TopEmployeeList";
 import BorderCard from "@/components/common/BorderCard";
 import {Button} from "@nextui-org/button";
-import AddEmployees from "@/components/admin/add/AddEmployees";
+import AddEmployees from "@/components/admin/employeescomponent/add/AddEmployees";
 
 
 const DashboardStats = () => {

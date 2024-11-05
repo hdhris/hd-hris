@@ -65,15 +65,6 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
 
 export default NavigationTabs;
 
-// export function setNavEndContent(children: ReactNode){
-//     const setEndContent = React.useContext(NavEndContext);
-//     React.useEffect(() => {
-//         setEndContent(<>{children}</>);
-
-//         return () => setEndContent(<div/>);
-//     }, [setEndContent]);
-// }
-
 export function SetNavEndContent(contentCallback: (router?: ReturnType<typeof useRouter>) => ReactElement) {
     const router = useRouter();
     const setEndContent = useContext(NavEndContext);
@@ -81,6 +72,6 @@ export function SetNavEndContent(contentCallback: (router?: ReturnType<typeof us
     useEffect(() => {
         setEndContent(contentCallback(router || undefined)); // Pass the router or undefined to the callback
 
-        return () => setEndContent(<div />); // Clean up on unmount
+        return () => setEndContent(<></>); // Clean up on unmount
     }, [setEndContent, router, contentCallback]);
 }
