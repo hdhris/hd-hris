@@ -9,7 +9,7 @@ interface FormDrawer extends Omit<DrawerProps, "onClose" | "isSubmitting">{
     onOpen: (value: boolean) => void
     isOpen: boolean,
     children: React.ReactNode
-    isLoading: boolean
+    isLoading?: boolean
 }
 
 function FormDrawer({...props}: FormDrawer) {

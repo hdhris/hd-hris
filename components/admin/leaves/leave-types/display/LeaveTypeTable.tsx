@@ -24,6 +24,7 @@ import {isEqual} from "lodash";
 import showDialog from "@/lib/utils/confirmDialog";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
+import EmployeesAvatar from "@/components/common/avatar/employees-avatar";
 
 
 function LeaveTypeTable() {
@@ -279,39 +280,7 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
                                     className="font-semibold">{props.applicable_to_employee_types} Employees</Typography>
                                 </div>
                                 <div className="text-sm flex flex-col gap-2">Current Usage:
-                                    {curr_emp.length === 0 ? (
-                                        <Typography className="font-semibold">No Employees</Typography>) : (
-                                        <AvatarGroup isBordered color="primary" max={3} classNames={{
-                                            count: "!size-6"
-                                        }} renderCount={(count) => {
-                                            return (<div onClick={() => alert("more")}
-                                                         className="flex relative justify-center items-center box-border overflow-hidden align-middle z-0 outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 w-10 h-10 text-tiny bg-primary text-primary-foreground rounded-full ring-2 ring-offset-2 ring-offset-background dark:ring-offset-background-dark -ms-2 data-[hover=true]:-translate-x-3 rtl:data-[hover=true]:translate-x-3 transition-transform data-[focus-visible=true]:-translate-x-3 rtl:data-[focus-visible=true]:translate-x-3 ring-primary !size-6 outline">+{count}</div>)
-                                        }}>
-                                            {curr_emp.map(item => (<Tooltip key={item.id} content={item.name}>
-                                                <Avatar onClick={() => handleEmployeePicture(item.id)}
-                                                        classNames={{
-                                                            base: "!size-6"
-                                                        }} alt={item.name} key={item.id} src={item.picture}/>
-                                            </Tooltip>))}
-                                            {/*<Tooltip content={item.name}>*/}
-                                            {/*    <Avatar classNames={{*/}
-                                            {/*        base: "!size-6"*/}
-                                            {/*    }} alt={item.name} key={key} src={item.picture}/>*/}
-                                            {/*</Tooltip>*/}
-                                            {/*<RenderList*/}
-                                            {/*    onClick={(key) => alert(Number(key))}*/}
-                                            {/*    items={props.current_employees.map((items) => ({key: items.id, ...items}))}*/}
-                                            {/*    map={(item, key) => {*/}
-                                            {/*        return (*/}
-                                            {/*            <Tooltip content={item.name}>*/}
-                                            {/*                <Avatar classNames={{*/}
-                                            {/*                    base: "!size-6"*/}
-                                            {/*                }} alt={item.name} key={key} src={item.picture}/>*/}
-                                            {/*            </Tooltip>)*/}
-
-                                            {/*    }}*/}
-                                            {/*/>*/}
-                                        </AvatarGroup>)}
+                                    <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>
 
                                 </div>
                             </div>

@@ -25,7 +25,6 @@ function Page() {
     const {toast} = useToast()
     const [page, setPage] = useState<number>(1)
     const [rows, setRows] = useState<number>(5)
-    const [leaveType, setLeaveType] = useState<LeaveCredits>()
     const [editCredit, setEditCredit] = useState<EditCreditProp>()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isEdit, setIsEdit] = useState<boolean>(false)

@@ -1,5 +1,7 @@
+import {EmployeeDetails} from "@/types/employeee/EmployeeType";
 
 export interface BenefitAdditionalDetails {
+    planId: number
     minSalary?: number;
     maxSalary?: number;
     minMSC?: number;
@@ -24,6 +26,7 @@ export interface BenefitPlan {
     description: string;
     isActive: boolean;
     benefitAdditionalDetails?: BenefitAdditionalDetails;
+    employees_avails?: EmployeeDetails[]
     createdAt: string;
     updatedAt: string;
 }

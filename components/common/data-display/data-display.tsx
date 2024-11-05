@@ -61,6 +61,7 @@ function DataDisplay<T extends { id: string | number }>({
             isTable={!!rest.onTableDisplay}
             onExport={rest.onExport}
             onImport={rest.onImport}
+            isSelectionDeleted={rest.isSelectionDeleted}
             onDeleteSelected={rest.onDeleteSelected!}
 
         >

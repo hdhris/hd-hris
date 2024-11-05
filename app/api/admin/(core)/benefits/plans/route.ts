@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
-import { getPaginatedData } from "@/server/pagination/paginate"; // Import the reusable function
+import paginationHandler, { getPaginatedData } from "@/server/pagination/paginate"; // Import the reusable function
 import { LeaveType } from "@/types/leaves/LeaveTypes";
 import { capitalize } from "@nextui-org/shared-utils";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
@@ -13,8 +13,23 @@ import dayjs from "dayjs";
 
 export const dynamic = "force-dynamic";
 
+interface SalaryPlan {
+    id: number;
+    min_salary: number;
+    max_salary: number;
+    min_MSC: number;
+    max_MSC: number;
+    msc_step: number;
+    ec_threshold: number;
+    ec_low_rate: number;
+    ec_high_rate: number;
+    wisp_threshold: number;
+    created_at: string; // ISO 8601 formatted date
+    updated_at: string; // ISO 8601 formatted date
+    plan_id: number;
+}
 
-export interface PlansDataProps{
+interface PlansDataProps{
     id: number;
     name: string;
     type: string;
@@ -29,56 +44,154 @@ export interface PlansDataProps{
     updated_at: string; // ISO date string
     deleted_at?: string | null; // ISO date string or null
     is_active: boolean;
-    ref_benefits_contribution_advance_settings: BenefitAdditionalDetails[]
+    ref_benefits_contribution_advance_settings: SalaryPlan[]
 }
 export async function GET(request: Request) {
     try {
         const {page, perPage} = paginateUrl(request.url)
 
-        // const data = await prisma.ref_benefit_plans.findMany({
-        //     where: {
-        //         deleted_at: null
-        //     }, include: {
-        //         ref_benefits_contribution_advance_settings: true
+        // const { data, totalItems, currentPage } = await getPaginatedData<PlansDataProps>(
+        //     prisma.ref_benefit_plans,  // The Prisma model
+        //     page,
+        //     perPage,
+        //     { deleted_at: null },  // Filtering condition
+        //     { ref_benefits_contribution_advance_settings: true },  // Include nested details
+        //     { created_at: 'asc' }  // Order by creation date
+        // );
+       const { data, totalItems, currentPage } = await paginationHandler.getPaginatedData<PlansDataProps>({
+           model: prisma.ref_benefit_plans,
+           page,
+           perPage,
+           whereCondition: {
+               deleted_at: null
+           },
+           include: {
+               ref_benefits_contribution_advance_settings: true
+           }, orderBy: {
+               created_at: "asc"
+           }
+       })
+
+        // Fetch associated employees concurrently
+        const [employeeEnrollments, employees] = await Promise.all([
+            prisma.dim_employee_benefits.groupBy({
+                by: ["plan_id", "employee_id"],
+                where: {
+                    employee_id: { not: null },
+                },
+            }),
+            prisma.trans_employees.findMany({
+                select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    middle_name: true,
+                    prefix: true,
+                    suffix: true,
+                    extension: true,
+                    picture: true,
+                },
+                where: {
+                    deleted_at: null,
+                },
+            }),
+        ]);
+
+
+        // const benefitPlans = data.map((plan):  BenefitPlan => {
+        //     return {
+        //         benefitAdditionalDetails: plan.ref_benefits_contribution_advance_settings.map(details => {
+        //             return{
+        //                 planId: details.plan_id,
+        //                 minSalary: details.min_salary,
+        //                 maxSalary: details.max_salary,
+        //                 minMSC: details.min_MSC,
+        //                 maxMSC: details.max_MSC,
+        //                 mscStep: details.msc_step,
+        //                 ecThreshold: details.ec_threshold,
+        //                 ecLowRate: details.ec_low_rate,
+        //                 ecHighRate: details.ec_high_rate,
+        //                 wispThreshold: details.wisp_threshold,
+        //             }
+        //         })[0],
+        //         coverageDetails: plan.coverage_details,
+        //         description: plan.description,
+        //         effectiveDate:  dayjs(plan.effective_date).format("YYYY-MM-DD"),
+        //         eligibilityCriteria: plan.eligibility_criteria_json,
+        //         employeeContribution: toDecimals(plan.employee_contribution),
+        //         employerContribution: toDecimals(plan.employer_contribution),
+        //         expirationDate: dayjs(plan.expiration_date).format("YYYY-MM-DD"),
+        //         id: plan.id,
+        //         name: plan.name,
+        //         type: plan.type,
+        //         isActive: plan.is_active,
+        //         createdAt: plan.created_at,
+        //         updatedAt: plan.updated_at
         //     }
         // })
-        // Prisma model
-        const { data, totalItems, currentPage } = await getPaginatedData<PlansDataProps>(
-            prisma.ref_benefit_plans,  // The Prisma model
-            page,
-            perPage,
-            { deleted_at: null },  // Filtering condition
-            // {benefits_contribution_advance_settings: true},
-            {
-                ref_benefits_contribution_advance_settings: true
-            },
-            { created_at: 'asc' }  // Order by name
-        );
 
-        const benefitPlans = data.map((plan):  BenefitPlan => {
+        // Create a map for employees by plan_id for faster lookup
+        const employeeMap = new Map<number, number[]>();
+        employeeEnrollments.forEach(enrollment => {
+            if (enrollment.plan_id !== null && enrollment.employee_id !== null) {
+                const planId = enrollment.plan_id as number;
+                const employeeId = enrollment.employee_id as number;
+
+                if (employeeMap.has(planId)) {
+                    employeeMap.get(planId)?.push(employeeId);
+                } else {
+                    employeeMap.set(planId, [employeeId]);
+                }
+            }
+        });
+
+// Map the benefit plans with enrolled employee details
+        const benefitPlans = data.map(plan => {
+            const enrolledEmployeeIds = employeeMap.get(plan.id) || [];
+            const enrolledEmployees = employees
+                .filter(emp => enrolledEmployeeIds.includes(emp.id))
+                .map(emp => ({
+                    id: emp.id,
+                    name: getEmpFullName(emp),
+                    picture: emp.picture,
+                }));
+
             return {
-                benefitAdditionalDetails: plan.ref_benefits_contribution_advance_settings[0],
+                benefitAdditionalDetails: plan.ref_benefits_contribution_advance_settings.map(details => ({
+                    planId: details.plan_id,
+                    minSalary: details.min_salary,
+                    maxSalary: details.max_salary,
+                    minMSC: details.min_MSC,
+                    maxMSC: details.max_MSC,
+                    mscStep: details.msc_step,
+                    ecThreshold: details.ec_threshold,
+                    ecLowRate: details.ec_low_rate,
+                    ecHighRate: details.ec_high_rate,
+                    wispThreshold: details.wisp_threshold,
+                }))[0],
                 coverageDetails: plan.coverage_details,
                 description: plan.description,
-                effectiveDate:  dayjs(plan.effective_date).format("YYYY-MM-DD"),
+                effectiveDate: dayjs(plan.effective_date).format('YYYY-MM-DD'),
                 eligibilityCriteria: plan.eligibility_criteria_json,
                 employeeContribution: toDecimals(plan.employee_contribution),
                 employerContribution: toDecimals(plan.employer_contribution),
-                expirationDate: dayjs(plan.expiration_date).format("YYYY-MM-DD"),
+                expirationDate: dayjs(plan.expiration_date).format('YYYY-MM-DD'),
                 id: plan.id,
                 name: plan.name,
                 type: plan.type,
                 isActive: plan.is_active,
                 createdAt: plan.created_at,
-                updatedAt: plan.updated_at
-            }
-        })
+                updatedAt: plan.updated_at,
+                employees_avails: enrolledEmployees,  // Added property for enrolled employees
+            };
+        });
+
         return NextResponse.json({
             data: benefitPlans,
             totalItems,
-            currentPage
+            currentPage,
         });
-        // Use the reusable pagination function with Prisma model
+
 //         const { data, totalItems, currentPage } = await getPaginatedData<LeaveType>(
 //             prisma.ref_leave_types,  // The Prisma model
 //             page,
@@ -179,3 +292,5 @@ export async function GET(request: Request) {
         return NextResponse.error();
     }
 }
+
+
