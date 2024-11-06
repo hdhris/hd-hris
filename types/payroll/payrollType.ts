@@ -1,5 +1,6 @@
 import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { Payhead } from "./payheadType";
+import { VariableAmountProp } from "@/helper/payroll/calculations";
 
 export interface ProcessDate {
   id: number;
@@ -88,4 +89,7 @@ export interface PayslipData {
   employees: PayslipEmployee[];
   earnings: PayslipPayhead[];
   deductions: PayslipPayhead[];
+  calculatedAmountList:  {
+    [employeeId: number]: VariableAmountProp[];
+  }
 }

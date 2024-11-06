@@ -3,26 +3,41 @@ import {
   PayslipData,
   PayslipEmployee,
   PayslipPayhead,
+  ProcessDate,
 } from "@/types/payroll/payrollType";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { PayrollInputColumn } from "./input";
 import axios from "axios";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-import { cn } from "@nextui-org/react";
+import { cn, Spinner } from "@nextui-org/react";
+import {
+  loadFromSession,
+  removeFromSession,
+  saveToSession,
+} from "@/lib/utils/sessionStorage";
+import { isAffected } from "./util";
+import { useQuery } from "@/services/queries";
 
-interface PRPayslipTableType extends PayslipData {
-  isProcessed: boolean;
+interface PRPayslipTableType {
+  processDate: ProcessDate;
   setFocusedEmployee: (id: number | null) => void;
   setFocusedPayhead: (id: number | null) => void;
 }
 export function PRPayslipTable({
-  isProcessed,
+  processDate,
   setFocusedEmployee,
   setFocusedPayhead,
-  ...payslipData
 }: PRPayslipTableType) {
-  const [willUpdate, setWillUpdate] = useState(false);
+  const cacheKey = "unpushedPayrollBatch";
+  const cachedUnpushed = loadFromSession<batchDataType>(cacheKey);
   const tableRef = useRef<HTMLTableElement>(null);
+  const [willUpdate, setWillUpdate] = useState(false);
   const [updatedPayhead, setUpdatedPayheadMap] = useState<Map<string, boolean>>(
     new Map()
   );
@@ -30,42 +45,60 @@ export function PRPayslipTable({
     Record<number, Record<number, ["earning" | "deduction", string]>>
   >({});
   const [onErrors, setOnErrors] = useState(0);
-
+  const [onRetry, setOnRetry] = useState(false);
+  const { data: payslipData, isLoading } = useQuery<PayslipData>(
+    (() => {
+      if (!cachedUnpushed && processDate) {
+        if (processDate.is_processed)
+          return `/api/admin/payroll/payslip/get-processed?date=${processDate.id}`;
+        else
+          return `/api/admin/payroll/payslip/get-unprocessed?date=${processDate.id}`;
+      }
+      return null;
+    })()
+  );
   const requestQueue: {
     employeeId: number;
     payheadId: number;
     value: number;
   }[] = [];
+  const dontInput = useMemo(() => {
+    return processDate.is_processed || onErrors > 0 || onRetry;
+  }, [processDate]);
 
-  // Function to process requests in the queue
-  const processQueue = async () => {
-    while (requestQueue.length > 0) {
-      const { employeeId, payheadId, value } = requestQueue.shift()!;
-      if(!(onErrors>0)){
-        const payroll = payslipData.payrolls.find((pr) => pr.employee_id === employeeId);
-        try {
-          console.log("Updating");
-          await axios.post("/api/admin/payroll/payslip/update-payhead", {
-            payroll_id: payroll?.id,
-            payhead_id: payheadId,
-            amount: value,
-          });
-          setUpdatedPayheadMap((prevMap) => {
-            const newMap = new Map(prevMap);
-            newMap.set(`${employeeId}:${payheadId}`, true);
-            return newMap;
-          });
-        } catch (error) {
-          if (!onErrors) {
-            setOnErrors(1);
+  // Function to process update requests in the queue
+  const processQueue = useCallback(async () => {
+    if (payslipData) {
+      while (requestQueue.length > 0) {
+        const { employeeId, payheadId, value } = requestQueue.shift()!;
+        if (!onErrors) {
+          const payroll = payslipData.payrolls.find(
+            (pr) => pr.employee_id === employeeId
+          );
+          try {
+            await axios.post("/api/admin/payroll/payslip/update-payhead", {
+              payroll_id: payroll?.id,
+              payhead_id: payheadId,
+              amount: value,
+            });
+            setUpdatedPayheadMap((prevMap) => {
+              const newMap = new Map(prevMap);
+              newMap.set(`${employeeId}:${payheadId}`, true);
+              return newMap;
+            });
+          } catch (error) {
+            if (!onErrors) {
+              setOnErrors(1);
+            }
           }
         }
       }
     }
-  };
+  }, [onErrors, payslipData, requestQueue]);
 
   // Add to queue and start processing if it's the first request
   const handleBlur = (employeeId: number, payheadId: number, value: number) => {
+    if (processDate.is_processed) return;
     if (willUpdate) {
       requestQueue.push({ employeeId, payheadId, value });
       if (requestQueue.length === 1) processQueue();
@@ -73,101 +106,68 @@ export function PRPayslipTable({
     }
   };
 
-  const reUpdateBatch = useCallback(async () => {
-    if(onErrors > 0 && onErrors < 10){
-      try {
-        const result = Object.entries(records).flatMap(([employee, payheads]) => {
-          return Object.entries(payheads).map(([payheadId, details]) => {
-            const payroll = payslipData.payrolls.find(
-              (pr) => pr.employee_id === Number(employee)
-            )
-            const breakdown = payslipData.breakdowns.find(
-              bd=>bd.payhead_id===Number(payheadId) && bd.payroll_id===payroll?.id
-            )
-            return {
-              payroll_id: payroll?.id, // Use optional chaining
-              payhead_id: parseInt(payheadId),
-              amount: parseFloat(details[1]),
-              created_at: breakdown?.created_at,
-              updated_at: toGMT8().toISOString(),
-            };
-          });
+  const batchData = useMemo(() => {
+    if (payslipData) {
+      const result = Object.entries(records).flatMap(([employee, payheads]) => {
+        return Object.entries(payheads).map(([payheadId, details]) => {
+          const payroll = payslipData.payrolls.find(
+            (pr) => pr.employee_id === Number(employee)
+          );
+          const breakdown = payslipData.breakdowns.find(
+            (bd) =>
+              bd.payhead_id === Number(payheadId) &&
+              bd.payroll_id === payroll?.id
+          );
+          return {
+            payroll_id: payroll?.id, // Use optional chaining
+            payhead_id: parseInt(payheadId),
+            amount: parseFloat(details[1]),
+            created_at: breakdown?.created_at || toGMT8().toISOString(),
+            updated_at: toGMT8().toISOString(),
+          };
         });
-  
-        await axios.post("/api/admin/payroll/payslip/update-batch", result);
-        // If whole batch is reupdated, remove reds
-        Object.entries(records).forEach(([employee, payheads]) => {
-          Object.entries(payheads).forEach(([payheadId, details]) => {
-            setUpdatedPayheadMap((prevMap) => {
-              const newMap = new Map(prevMap);
-              newMap.set(`${employee}:${payheadId}`, true);
-              return newMap;
-            });
-          });
-        });
-        setOnErrors(0); // Reset error state on successful upload
-      } catch (error) {
-        setTimeout(() => setOnErrors(onErrors + 1), 3000); // Adjust the delay as needed
-      }
-    }
-  }, [onErrors, records, payslipData]);
-
-  useEffect(() => {
-    reUpdateBatch();
-  }, [reUpdateBatch]);
-
-  // First loading
-  useEffect(() => {
-    if (payslipData.breakdowns) {
-      console.log("First load")
-      payslipData.breakdowns.forEach((bd) => {
-        const payroll = payslipData.payrolls.find((pr) => pr.id === bd.payroll_id);
-        handleRecording(
-          payroll?.employee_id!,
-          bd.payhead_id,
-          [
-            payslipData.earnings.find((e) => e.id === bd.payhead_id)
-              ? "earning"
-              : "deduction",
-            bd.amount,
-          ],
-          true
-        );
       });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Dont include payslipData.breakdowns, payslipData.payrolls, payslipData.earnings
 
-  function isAffected(employee: PayslipEmployee, payhead: PayslipPayhead) {
-    let mandatory = false;
-    // Find mandatory level...
-    // if(payhead.affected_json.mandatory.probationary || payhead.affected_json.mandatory.regular){
-    //   mandatory = true;
-    //    Probi and Regu not yet implemented
-    // }
-    if (payhead?.affected_json?.department?.length) {
-      mandatory = true;
-      if (
-        !payhead.affected_json.department.includes(employee.ref_departments.id)
-      ) {
-        return false;
+      return result;
+    }
+
+    return [];
+  }, [records, payslipData]);
+
+  type batchDataType = typeof batchData;
+
+  const updateDataOnError = useCallback(
+    async (items: batchDataType) => {
+      await axios.post("/api/admin/payroll/payslip/update-batch", items);
+      // If whole batch is reupdated, remove red flags
+      Object.entries(records).forEach(([employee, payheads]) => {
+        Object.entries(payheads).forEach(([payheadId, details]) => {
+          setUpdatedPayheadMap((prevMap) => {
+            const newMap = new Map(prevMap);
+            newMap.set(`${employee}:${payheadId}`, true);
+            return newMap;
+          });
+        });
+      });
+      setOnErrors(0); // Reset error state on successful upload
+    },
+    [records]
+  );
+
+  useEffect(() => {
+    if (onErrors > 0) {
+      if (onErrors < 10) {
+        try {
+          updateDataOnError(batchData);
+        } catch (error) {
+          setTimeout(() => setOnErrors((prev) => prev + 1), 1000); // Adjust the delay as needed
+        }
+      } else {
+        saveToSession(cacheKey, batchData); // Save to session storage
       }
     }
-    if (payhead.affected_json.job_classes.length) {
-      mandatory = true;
-      if (
-        !payhead.affected_json.job_classes.includes(employee.ref_job_classes.id)
-      ) {
-        return false;
-      }
-    }
-    if (mandatory) return true;
+  }, [onErrors, updateDataOnError, batchData]);
 
-    // If not mandatory, find if affected...
-    return employee.dim_payhead_affecteds.some(
-      (affect) => affect.payhead_id === payhead.id
-    );
-  }
   function handleRecording(
     employeeId: number,
     payheadId: number,
@@ -189,22 +189,84 @@ export function PRPayslipTable({
       return newMap;
     });
   }
-  function getEmployeePayheadSum(
-    employeeId: number,
-    type: "earning" | "deduction"
-  ): number {
-    const employeeRecords = records[employeeId];
-    if (!employeeRecords) return 0;
 
-    return Object.values(employeeRecords).reduce(
-      (sum, payheadValue) =>
-        sum + parseFloat(payheadValue[0] === type ? payheadValue[1] : "0") || 0,
-      0
-    );
-  }
-  function getRecordAmount(employeeId: number, payheadId: number): string {
-    return String(records[employeeId]?.[payheadId]?.[1] || "");
-  }
+  // Initial loaders
+  useEffect(() => {
+    if (cachedUnpushed) {
+      setOnRetry(true);
+      let retryCount = 0;
+      const maxRetries = 10;
+      const retryDelay = 3000; // 3 seconds
+      async function push() {
+        try {
+          await updateDataOnError(cachedUnpushed!);
+          removeFromSession(cacheKey);
+          // mutate(`/api/admin/payroll/payslip?date=${processDate.id}`);
+          setOnRetry(false);
+          console.log("Pushed");
+        } catch {
+          if (retryCount < maxRetries) {
+            retryCount += 1;
+            setTimeout(push, retryDelay); // Retry after a delay
+          } else {
+            console.error("Max retry limit reached, could not update data.");
+          }
+        }
+      }
+      push();
+    } else if (payslipData) {
+      console.log("Loaded");
+      // console.log(payslipData.employees);
+      payslipData.breakdowns.forEach((bd) => {
+        const payroll = payslipData.payrolls.find(
+          (pr) => pr.id === bd.payroll_id
+        );
+        handleRecording(
+          payroll?.employee_id!,
+          bd.payhead_id,
+          [
+            payslipData.earnings.find((e) => e.id === bd.payhead_id)
+              ? "earning"
+              : "deduction",
+            bd.amount,
+          ],
+          true
+        );
+      });
+    }
+  }, [cachedUnpushed, payslipData, processDate]);
+
+  const getEmployeePayheadSum = useMemo(() => {
+    return (employeeId: number, type: "earning" | "deduction"): number => {
+      const employeeRecords = records[employeeId];
+      if (!employeeRecords) return 0;
+
+      return Object.values(employeeRecords).reduce(
+        (sum, payheadValue) =>
+          sum + parseFloat(payheadValue[0] === type ? payheadValue[1] : "0") ||
+          0,
+        0
+      );
+    };
+  }, [records]);
+
+  const getRecordAmount = useMemo(() => {
+    return (employeeId: number, payheadId: number): string => {
+      return String(records[employeeId]?.[payheadId]?.[1] || "");
+    };
+  }, [records]);
+
+  const getFormulatedAmount = useMemo(() => {
+    return (employeeId: number, itemId: number): number => {
+      if (!payslipData) return 0;
+
+      const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
+      if (!employeeAmounts) return 0;
+
+      const item = employeeAmounts.find((entry) => entry.id === itemId);
+      return item ? item.amount : 0;
+    };
+  }, [payslipData]);
 
   if (onErrors >= 10) {
     return (
@@ -217,13 +279,17 @@ export function PRPayslipTable({
     );
   }
 
+  if (isLoading || !payslipData) {
+    return <Spinner label="Preparing..." className="w-full h-full" />;
+  }
+
   return (
     <>
       <table
         ref={tableRef}
         className="w-auto h-full table-fixed divide-y divide-gray-200"
       >
-        <thead className="text-xs text-gray-500 sticky top-0 z-50">
+        <thead className="text-xs text-gray-500 sticky top-0 z-50 h-11">
           <tr className="divide-x divide-gray-200">
             <th
               key={"name"}
@@ -283,6 +349,7 @@ export function PRPayslipTable({
               {payslipData.earnings.map((earn) =>
                 isAffected(employee, earn) ? (
                   <PayrollInputColumn
+                    placeholder={earn.is_overwritable ? String(getFormulatedAmount(employee.id, earn.id)):"0"}
                     uniqueKey={`${employee.id}-${earn.id}`}
                     key={`${employee.id}-${earn.id}`}
                     employeeId={employee.id}
@@ -292,7 +359,7 @@ export function PRPayslipTable({
                     type="earning"
                     handleRecording={handleRecording}
                     value={getRecordAmount(employee.id, earn.id)}
-                    readOnly={isProcessed || onErrors > 0}
+                    readOnly={dontInput || !earn.is_overwritable}
                     unUpdated={
                       updatedPayhead.get(`${employee.id}:${earn.id}`) != null &&
                       !updatedPayhead.get(`${employee.id}:${earn.id}`)
@@ -319,6 +386,7 @@ export function PRPayslipTable({
               {payslipData.deductions.map((deduct) =>
                 isAffected(employee, deduct) ? (
                   <PayrollInputColumn
+                    placeholder={deduct.is_overwritable ? String(getFormulatedAmount(employee.id, deduct.id)):"0"}
                     uniqueKey={`${employee.id}-${deduct.id}`}
                     key={`${employee.id}-${deduct.id}`}
                     employeeId={employee.id}
@@ -328,7 +396,7 @@ export function PRPayslipTable({
                     type="deduction"
                     handleRecording={handleRecording}
                     value={getRecordAmount(employee.id, deduct.id)}
-                    readOnly={isProcessed || onErrors > 0}
+                    readOnly={dontInput || !deduct.is_overwritable}
                     unUpdated={
                       updatedPayhead.get(`${employee.id}:${deduct.id}`) !=
                         null &&
@@ -375,10 +443,21 @@ export function PRPayslipTable({
           "rounded-md border-2 p-2 text-tiny",
           "sticky bottom-0 left-0 z-50",
           "transition-all ease-in-out",
-          onErrors ? "visible" : "invisible h-0"
+          onErrors && !onRetry ? "visible" : "invisible h-0"
         )}
       >
-        {`Low connection, reconnecting (${onErrors})...`}
+        {`No connection, reconnecting (${onErrors})...`}
+      </div>
+      <div
+        className={cn(
+          "bg-orange-100 border-orange-500 text-orange-500",
+          "rounded-md border-2 p-2 text-tiny",
+          "sticky bottom-0 left-0 z-50",
+          "transition-all ease-in-out",
+          onRetry ? "visible" : "invisible h-0"
+        )}
+      >
+        {`Restoring unpushed data...`}
       </div>
     </>
   );

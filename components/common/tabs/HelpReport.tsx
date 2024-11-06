@@ -106,7 +106,7 @@ function HelpReport() {
         setReportID(-1);
       }
     },
-    [userInfo]
+    [userInfo, mutate]
   );
 
   const handleSubmitReport = useCallback(async () => {
@@ -135,7 +135,7 @@ function HelpReport() {
       });
     }
     setSubmitting(false);
-  }, [newReport, userInfo, pathname]);
+  }, [newReport, userInfo, pathname, mutate]);
 
   const topLeftContent = useMemo(() => {
     return adding ? (

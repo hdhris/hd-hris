@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
 
 export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
@@ -14,34 +15,12 @@ export async function GET(req: NextRequest) {
         employee_id: id,
       },
       include: {
-        trans_employees_overtimes: {
-          select: {
-            last_name: true,
-            middle_name: true,
-            first_name: true,
-            prefix: true,
-            suffix: true,
-            extension: true,
-            picture: true,
-            email: true,
-            ref_job_classes : {
-              select : {
-                id: true,
-                name: true,
-                pay_rate: true,
-              }
-            }
-          },
+        trans_employees_trans_overtimes_employee_idTotrans_employees: {
+          ...emp_rev_include.employee_detail
         },
-        trans_employees_overtimes_approvedBy : {
-            select : {
-              last_name: true,
-              middle_name: true,
-              first_name: true,
-              picture: true,
-              email: true,
-            }
-          }
+        trans_employees_trans_overtimes_approved_byTotrans_employees : {
+          ...emp_rev_include.reviewer_detail
+        }
       },
     });
 

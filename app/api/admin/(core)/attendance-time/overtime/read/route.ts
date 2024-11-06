@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
-import { toGMT8 } from "@/lib/utils/toGMT8";
+import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
 
 export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
@@ -18,27 +18,7 @@ export async function GET(req: NextRequest) {
       where: {
         deleted_at: null,
       },
-      select: {
-        id: true,
-        picture: true,
-        last_name: true,
-        first_name: true,
-        middle_name: true,
-        email: true,
-        ref_departments: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        ref_job_classes: {
-          select: {
-            id: true,
-            name: true,
-            pay_rate: true,
-          },
-        },
-      },
+      ...emp_rev_include.employee_detail,
     });
     
     return NextResponse.json({overtime,employees});

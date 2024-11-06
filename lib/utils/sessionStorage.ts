@@ -1,6 +1,6 @@
 import { toGMT8 } from "./toGMT8";
 
-export function saveToSession<T>(key: string, data: T, id: string, expiration?: number) {
+export function saveToSession<T>(key: string, data: T, id?: string, expiration?: number) {
   const dataToSave = {
     data,
     expiration: toGMT8().add(expiration||10, "minute").toISOString(),
@@ -11,15 +11,17 @@ export function saveToSession<T>(key: string, data: T, id: string, expiration?: 
 
 export function loadFromSession<T>(
   key: string,
-  currentId: string
+  currentId?: string
 ): T | undefined {
   const stored = sessionStorage.getItem(key);
   if (!stored) return undefined; // Change to undefined
 
   const parsed = JSON.parse(stored);
-  if (parsed.id !== currentId || toGMT8().isAfter(toGMT8(parsed.expiration))) {
-    sessionStorage.removeItem(key);
-    return undefined; // Change to undefined
+  if (parsed.id && currentId){
+    if (parsed.id !== currentId || toGMT8().isAfter(toGMT8(parsed.expiration))) {
+      sessionStorage.removeItem(key);
+      return undefined; // Change to undefined
+    }
   }
   return parsed.data as T;
 }
