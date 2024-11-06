@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect, useCallback } from "react";
 import { Divider } from "@nextui-org/react";
 import EditPersonalInformationForm from "./EditPersonalInformationForm";

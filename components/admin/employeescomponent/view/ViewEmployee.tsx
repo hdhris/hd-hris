@@ -1,3 +1,4 @@
+"use client"
 import React from "react";
 import { Avatar, Divider, Button, Tooltip } from "@nextui-org/react";
 import { useForm, FormProvider } from "react-hook-form";
