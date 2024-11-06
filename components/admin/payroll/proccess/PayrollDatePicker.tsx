@@ -12,13 +12,12 @@ import {
 } from "@nextui-org/react";
 import { toast } from "@/components/ui/use-toast";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { FaPlus } from "react-icons/fa";
 import { IoCheckmarkSharp, IoCloseSharp } from "react-icons/io5";
 import { MdDelete } from "react-icons/md";
 import showDialog from "@/lib/utils/confirmDialog";
-import { PayrollTable, ProcessDate } from "@/types/payroll/payrollType";
-import { axiosInstance } from "@/services/fetcher";
+import { ProcessDate } from "@/types/payroll/payrollType";
 import { useQuery } from "@/services/queries";
 
 interface DatePickerUiProps {
@@ -63,31 +62,9 @@ function DatePickerPayroll({
     }
   }, [payrollDates]);
   useEffect(() => {
-    if (getProcessDate){  // && setIsLoading && setPayrollData) {
-      // console.log("Flag");
-      // const fetchPayrollData = async () => {
-      //   // setIsLoading(true); // Start loading
-      //   try {
-      //     const response: AxiosResponse<PayrollTable> = await axiosInstance.get(
-      //       `/api/admin/payroll/process/${toGMT8(
-      //         getProcessDate.start_date
-      //       ).format("YYYY-MM-DD")},${toGMT8(
-      //         getProcessDate.end_date
-      //       ).format("YYYY-MM-DD")}`
-      //     );
-      //     // setPayrollData(response.data);
-      //   } catch (error) {
-      //     console.error("Error fetching payroll data:", error);
-      //     // setError("Failed to load payroll data.");
-      //   } // finally {
-      //     // setIsLoading(false); // End loading
-      //   // }
-      // };
-
-      // fetchPayrollData();
-      setProcessDate(getProcessDate);
-    }
-  }, [getProcessDate]); //, setIsLoading, setPayrollData]);
+    if (getProcessDate) setProcessDate(getProcessDate);
+  }, [getProcessDate, setProcessDate]);
+  
   async function handleAddDate() {
     try {
       await axios.post("/api/admin/payroll/process/add-date", {

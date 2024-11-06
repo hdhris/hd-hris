@@ -5,9 +5,9 @@ import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
-import AddEmployee from "@/components/admin/add/AddEmployees";
-import EditEmployee from "@/components/admin/edit/EditEmployee";
-import ViewEmployee from "@/components/admin/add/ViewEmployee";
+import AddEmployee from "@/components/admin/employeescomponent/add/AddEmployees";
+import EditEmployee from "@/components/admin/employeescomponent/edit/EditEmployee";
+import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 import axios from "axios";
 import showDialog from "@/lib/utils/confirmDialog";
 import DataDisplay from "@/components/common/data-display/data-display";
@@ -24,7 +24,7 @@ const Page: React.FC = () => {
   const [isViewModalOpen, setIsViewModalOpen] = React.useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] =
     React.useState<Employee | null>(null);
-
+//
   useEffect(() => {
     if (employees) {
       const sorted = sortEmployeesByRecentActivity(employees);

@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useJobpositionData } from "@/services/queries";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
-import AddJobPosition from "@/components/admin/add/AddJob";
-import EditJobPosition from "@/components/admin/edit/EditJob";
+import AddJobPosition from "@/components/admin/employeescomponent/add/AddJob";
+import EditJobPosition from "@/components/admin/employeescomponent/edit/EditJob";
 import axios from "axios";
 import { Chip } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
@@ -82,7 +82,7 @@ const Page: React.FC = () => {
       console.error("Error updating job position data:", error);
     }
   };
-
+//
   const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },

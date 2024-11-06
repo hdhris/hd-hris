@@ -63,7 +63,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
   const [overtimeData, setOvertimeData] = useState<OvertimeEntry>();
   const [selectedEmployee, setSelectedEmployee] = useState(0);
   const [selectedEntry, setSelectedEntry] = useState(0);
-  const { data: recordData, isLoading: recordLoading } = useQuery<
+  const { data: recordData, isLoading: recordLoading, mutate } = useQuery<
     OvertimeEntry[]
   >(`/api/admin/attendance-time/overtime/preview?id=${selectedEmployee}`);
   const [comment, setComment] = useState("");
@@ -72,7 +72,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
 
   const fetchEmployeeOvertimeRecords = useCallback(
     async (entry: OvertimeEntry) => {
-      console.log("FLAG");
+      // console.log("FLAG");
       setOvertimeData(entry);
       setComment(entry?.comment || "");
       setRatePH(

@@ -4,8 +4,8 @@ import { useDepartmentsData } from "@/services/queries";
 import { Department } from "@/types/employeee/DepartmentType";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
-import AddDepartment from "@/components/admin/add/AddDepartment";
-import EditDepartment from "@/components/admin/edit/EditDepartment";
+import AddDepartment from "@/components/admin/employeescomponent/add/AddDepartment";
+import EditDepartment from "@/components/admin/employeescomponent/edit/EditDepartment";
 import axios from "axios";
 import { Chip } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
@@ -33,7 +33,7 @@ const Page: React.FC = () => {
       return dateB - dateA;
     });
   };
-
+//
   SetNavEndContent(() => (
     <div className="flex items-center gap-4">
       <AddDepartment onDepartmentAdded={handleDepartmentUpdated} />

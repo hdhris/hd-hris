@@ -5,8 +5,8 @@ import { Branch } from "@/types/employeee/BranchType";
 import { Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
-import AddBranch from "@/components/admin/add/AddBranch";
-import EditBranch from "@/components/admin/edit/EditBranch";
+import AddBranch from "@/components/admin/employeescomponent/add/AddBranch";
+import EditBranch from "@/components/admin/employeescomponent/edit/EditBranch";
 import axios from "axios";
 import addressData from "@/components/common/forms/address/address.json";
 import showDialog from "@/lib/utils/confirmDialog";
@@ -34,7 +34,7 @@ const Page: React.FC = () => {
       return dateB - dateA;
     });
   };
-
+//
   SetNavEndContent(() => (
     <div className="flex items-center gap-4">
       <AddBranch onBranchAdded={handleBranchUpdated} />

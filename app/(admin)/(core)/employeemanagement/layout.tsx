@@ -30,5 +30,5 @@ function RootLayout({children}: { children: React.ReactNode }) {
         </NavigationTabs>
     );
 }
-
+//
 export default RootLayout;

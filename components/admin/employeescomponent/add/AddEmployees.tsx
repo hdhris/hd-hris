@@ -22,7 +22,7 @@ import { Form } from "@/components/ui/form";
 import Text from "@/components/Text";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+//
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
 }
@@ -133,20 +133,21 @@ export const employeeSchema = z.object({
   job_id: z.string().min(1, "Job is required"),
   branch_id: z.string().min(1, "Branch is required"),
   batch_id: z.string().min(1, "Batch is required"),
-  days_json: z
-    .union([z.string(), z.array(z.string())])
-    .transform((val) => {
-      // If val is a string, split by commas, trim each day, and remove empty strings
-      if (typeof val === "string") {
-        return val
-          .split(",")
-          .map((day) => day.trim())
-          .filter((day) => day);
-      }
-      // If it's already an array, return it as is
-      return val;
-    })
-    .pipe(z.array(z.string()).min(1, "At least one working day is required")),
+  // days_json: z
+  //   .union([z.string(), z.array(z.string())])
+  //   .transform((val) => {
+  //     // If val is a string, split by commas, trim each day, and remove empty strings
+  //     if (typeof val === "string") {
+  //       return val
+  //         .split(",")
+  //         .map((day) => day.trim())
+  //         .filter((day) => day);
+  //     }
+  //     // If it's already an array, return it as is
+  //     return val;
+  //   })
+  //   .pipe(z.array(z.string()).min(1, "At least one working day is required")),
+  days_json: z.array(z.string())
 });
 
 interface Certificate {
