@@ -91,7 +91,7 @@ async function getDepartmentById(id: number) {
   // logDatabaseOperation("GET department by ID", departmentWithCount);
   return departmentWithCount;
 }
-
+ 
 async function getAllDepartments() {
   const departments = await prisma.ref_departments.findMany({
     where: { deleted_at: null },
@@ -107,7 +107,7 @@ async function getAllDepartments() {
     employeeCount: dept._count.trans_employees
   }));
 
-  // logDatabaseOperation("GET all departments", departmentsWithCount); yes
+  // logDatabaseOperation("GET all departments", departmentsWithCount);
   return departmentsWithCount;
 }
 
