@@ -59,8 +59,8 @@ function Page() {
             <UserMail
               key={item.full_name}
               name={item.full_name}
-              email={item.trans_employees_overtimes.email}
-              picture={item.trans_employees_overtimes.picture}
+              email={item.trans_employees_overtimes?.email}
+              picture={item.trans_employees_overtimes?.picture}
             />
           );
         case "request_date":
@@ -118,7 +118,7 @@ function Page() {
                     approved_by: userID!,
                     status: "approved",
                     rate_per_hour: String(
-                      item.trans_employees_overtimes.ref_job_classes.pay_rate
+                      item.trans_employees_overtimes.ref_job_classes?.pay_rate
                     ),
                   });
                 }}

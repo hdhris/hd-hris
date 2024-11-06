@@ -3,7 +3,7 @@ import {z} from "zod";
 export const PlanFormSchema = z.object({
     name: z.string().min(2, { message: "Name must be at least 2 characters." }),
     plan_type: z.string(),
-    eligibility_criteria: z.string().min(2, { message: "Eligibility criteria is required." }),
+    // eligibility_criteria: z.string().min(2, { message: "Eligibility criteria is required." }),
     advance_setting: z.boolean().default(false),
     coverage_details: z.string().min(10, { message: "Coverage details must be at least 10 characters." }),
     employer_contribution: z.number().min(0, { message: "Employer contribution must be a positive number." }).optional(),

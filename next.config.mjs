@@ -34,7 +34,8 @@ const nextConfig = {
         permanent: true,
       },{
         source: "/benefits",
-        destination: "/benefits/membership",
+        // destination: "/benefits/membership",
+        destination: "/benefits/plans",
         permanent: true,
       },
     ];

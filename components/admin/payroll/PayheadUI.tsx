@@ -19,7 +19,7 @@ import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { string, z } from "zod";
+import { z } from "zod";
 import TableData from "@/components/tabledata/TableData";
 import { ListDropDown } from "./ListBoxDropDown";
 import showDialog from "@/lib/utils/confirmDialog";
@@ -28,6 +28,7 @@ import FormFields from "@/components/common/forms/FormFields";
 import PayheadCalculator from "./Calculator/Calculator";
 import { switchLabel } from "../attendance-time/holidays/script";
 import { capitalize } from "lodash";
+import { useQuery } from "@/services/queries";
 
 interface PayheadFormProps {
   label: string;
@@ -41,8 +42,10 @@ const formSchema = z.object({
     .string()
     .min(3, { message: "Name must be at least 3 characters." })
     .max(20, { message: "Character limit reached." }),
-  calculation: z.string(),
-  is_active: z.boolean(),
+  calculation: z.string().optional(),
+  is_active: z.boolean().optional(),
+  is_overwritable: z.boolean().optional(),
+  variable: z.string().max(14).optional(),
 });
 
 export const PayheadForm: React.FC<PayheadFormProps> = ({
@@ -66,7 +69,12 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
   });
   const [isFiltered, setIsFiltered] = useState(false);
   const [isPending, setPending] = useState(false);
-
+  const { data: variables } = useQuery<string[]>(
+    `/api/admin/utils/get-payhead-variables?id=${
+      allData?.data?.payhead?.id || null
+    }`
+  );
+  const [isInvalid, setInvalid] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -159,7 +167,6 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
   }
 
   const setDataAtLoad = useCallback(() => {
-    console.log("Flag: setDataAtLoad", data);
     if (data?.payhead) {
       const employeeIds = data.affected.map((affected) =>
         String(affected.employee_id)
@@ -169,6 +176,8 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
         name: data.payhead.name,
         calculation: data.payhead.calculation,
         is_active: data.payhead.is_active,
+        is_overwritable: data.payhead.is_overwritable,
+        variable: data.payhead.variable,
       });
       if (data.payhead.affected_json) {
         setMandatory(data.payhead.affected_json.mandatory);
@@ -281,11 +290,21 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                       Component(field) {
                         return (
                           <PayheadCalculator
+                            setInvalid={setInvalid}
                             input={field.value}
                             setInput={field.onChange}
+                            payheadVariables={variables}
                           />
                         );
                       },
+                    },
+                    {
+                      name: "is_overwritable",
+                      type: "switch",
+                      label: switchLabel(
+                        "Writable",
+                        `Amount can be overwritten over given calculated input`
+                      ),
                     },
                     {
                       name: "is_active",
@@ -295,77 +314,101 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                         `${capitalize(type)} will be effective on next payroll`
                       ),
                     },
+                    {
+                      name: "mandatory_list",
+                      Component: () => (
+                        <ListDropDown
+                          items={[
+                            { name: "Probationary", id: 1 },
+                            { name: "Regular", id: 2 },
+                          ]}
+                          triggerName="Mandatory Status"
+                          selectedKeys={
+                            new Set(
+                              [
+                                mandatory?.probationary ? "1" : undefined,
+                                mandatory?.regular ? "2" : undefined,
+                              ].filter(
+                                (key): key is string => key !== undefined
+                              )
+                            )
+                          }
+                          onSelectionChange={(keys) => {
+                            const values = Array.from(keys);
+                            setMandatory({
+                              probationary: values.includes("1"),
+                              regular: values.includes("2"),
+                            });
+                          }}
+                          togglable={true}
+                          reversable={true}
+                        />
+                      ),
+                    },
+                    {
+                      name: "department_list",
+                      Component: () => (
+                        <ListDropDown
+                          items={data.departments || []}
+                          triggerName="Departments"
+                          selectedKeys={selectedDepartment}
+                          onSelectionChange={(keys) => {
+                            setSelectedDepartment(keys);
+                            setSelectedJobs(
+                              new Set(
+                                data.job_classes
+                                  .filter((job) =>
+                                    Array.from(keys).includes(
+                                      String(job.department_id)
+                                    )
+                                  )
+                                  .map((job) => String(job.id))
+                              )
+                            );
+                          }}
+                          togglable={true}
+                          reversable={true}
+                        />
+                      ),
+                    },
+                    {
+                      name: "role_list",
+                      Component: () => (
+                        <ListDropDown
+                          items={
+                            data.job_classes.filter((job) => {
+                              return Array.from(selectedDepartment).includes(
+                                String(job.department_id)
+                              );
+                            }) || []
+                          }
+                          triggerName="Roles"
+                          selectedKeys={selectedJobs}
+                          onSelectionChange={setSelectedJobs}
+                          togglable={true}
+                          reversable={true}
+                          sectionConfig={data.departments
+                            .map((dep) => {
+                              return {
+                                name: dep.name,
+                                key: "department_id",
+                                id: dep.id,
+                              };
+                            })
+                            .filter((dep) => {
+                              return Array.from(selectedDepartment).includes(
+                                String(dep.id)
+                              );
+                            })}
+                        />
+                      ),
+                    },
+                    {
+                      name: "variable",
+                      label: "Variable ( intended for reusability )",
+                      isRequired: false,
+                    },
                   ]}
-                />
-                <ListDropDown
-                  items={[
-                    { name: "Probationary", id: 1 },
-                    { name: "Regular", id: 2 },
-                  ]}
-                  triggerName="Mandatory Status"
-                  selectedKeys={
-                    new Set(
-                      [
-                        mandatory?.probationary ? "1" : undefined,
-                        mandatory?.regular ? "2" : undefined,
-                      ].filter((key): key is string => key !== undefined)
-                    )
-                  }
-                  onSelectionChange={(keys) => {
-                    const values = Array.from(keys);
-                    setMandatory({
-                      probationary: values.includes("1"),
-                      regular: values.includes("2"),
-                    });
-                  }}
-                  togglable={true}
-                  reversable={true}
-                />
-                <ListDropDown
-                  items={data.departments || []}
-                  triggerName="Departments"
-                  selectedKeys={selectedDepartment}
-                  onSelectionChange={(keys) => {
-                    setSelectedDepartment(keys);
-                    setSelectedJobs(
-                      new Set(
-                        data.job_classes
-                          .filter((job) =>
-                            Array.from(keys).includes(String(job.department_id))
-                          )
-                          .map((job) => String(job.id))
-                      )
-                    );
-                  }}
-                  togglable={true}
-                  reversable={true}
-                />
-                <ListDropDown
-                  items={
-                    data.job_classes.filter((job) => {
-                      return Array.from(selectedDepartment).includes(
-                        String(job.department_id)
-                      );
-                    }) || []
-                  }
-                  triggerName="Roles"
-                  selectedKeys={selectedJobs}
-                  onSelectionChange={setSelectedJobs}
-                  togglable={true}
-                  reversable={true}
-                  sectionConfig={data.departments
-                    .map((dep) => {
-                      return {
-                        name: dep.name,
-                        key: "department_id",
-                        id: dep.id,
-                      };
-                    })
-                    .filter((dep) => {
-                      return Array.from(selectedDepartment).includes(
-                        String(dep.id)
-                      );
-                    })}
                 />
               </form>
             </Form>
@@ -374,6 +417,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
         <CardFooter>
           <Button
             isLoading={isPending}
+            isDisabled={isInvalid}
             color="primary"
             className="w-full"
             type="submit"

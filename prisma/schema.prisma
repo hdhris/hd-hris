@@ -179,22 +179,21 @@ model ref_batch_schedules {
 }
 
 model ref_benefit_plans {
-  id                              Int                               @id @default(autoincrement())
-  name                            String?                           @db.VarChar(45)
-  type                            String?                           @db.VarChar(10)
-  eligibility_criteria_json       Json?                             @db.Json
-  coverage_details                String?
-  employer_contribution           Decimal?                          @db.Decimal(10, 2)
-  employee_contribution           Decimal?                          @db.Decimal(10, 2)
-  effective_date                  DateTime?                         @db.Date
-  expiration_date                 DateTime?                         @db.Date
-  description                     String?
-  created_at                      DateTime                          @db.Timestamp(6)
-  updated_at                      DateTime                          @db.Timestamp(6)
-  deleted_at                      DateTime?                         @db.Timestamp(6)
-  is_active                       Boolean?
-  dim_employee_benefits           dim_employee_benefits[]
-  ref_benefits_contribution_table ref_benefits_contribution_table[]
+  id                                         Int                                          @id @default(autoincrement())
+  name                                       String?                                      @db.VarChar(45)
+  type                                       String?                                      @db.VarChar(10)
+  coverage_details                           String?
+  employer_contribution                      Decimal?                                     @db.Decimal(10, 2)
+  employee_contribution                      Decimal?                                     @db.Decimal(10, 2)
+  effective_date                             DateTime?                                    @db.Date
+  expiration_date                            DateTime?                                    @db.Date
+  description                                String?
+  created_at                                 DateTime                                     @db.Timestamp(6)
+  updated_at                                 DateTime                                     @db.Timestamp(6)
+  deleted_at                                 DateTime?                                    @db.Timestamp(6)
+  is_active                                  Boolean?
+  dim_employee_benefits                      dim_employee_benefits[]
+  ref_benefits_contribution_advance_settings ref_benefits_contribution_advance_settings[]
 }
 
 model ref_branches {
@@ -270,6 +269,9 @@ model ref_payheads {
   name                     String?                    @db.VarChar(45)
   type                     String?                    @db.VarChar(10)
   affected_json            Json?                      @db.Json
+  variable                 String?                    @db.VarChar(15)
+  is_overwritable          Boolean?
+  system_only              Boolean?
   dim_payhead_affecteds    dim_payhead_affecteds[]
   trans_payhead_breakdowns trans_payhead_breakdowns[]
 }
@@ -369,7 +371,7 @@ model trans_cash_advance_disbursements {
   disbursed_at                  DateTime?                       @db.Timestamp(6)
   amount                        Decimal?                        @db.Decimal(10, 2)
   payment_method                String?                         @db.VarChar(10)
-  status                        String?                         @db.VarChar(10)
+  repayment_status              String?                         @db.VarChar(10)
   created_at                    DateTime                        @db.Timestamp(6)
   updated_at                    DateTime                        @db.Timestamp(6)
   deleted_at                    DateTime?                       @db.Timestamp(6)
@@ -442,6 +444,7 @@ model trans_employees {
   suspension_json                                                        Json?                          @db.Json
   resignation_json                                                       Json?                          @db.Json
   termination_json                                                       Json?                          @db.Json
+  is_regular                                                             Boolean?
   acl_user_access_control                                                acl_user_access_control[]
   dim_employee_benefits                                                  dim_employee_benefits[]
   dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
@@ -698,7 +701,7 @@ model sys_help_report {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model ref_benefits_contribution_table {
+model ref_benefits_contribution_advance_settings {
   id                Int                @id(map: "ref_benefits_contribution_pkey") @default(autoincrement())
   min_salary        Decimal?           @db.Decimal
   max_salary        Decimal?           @db.Decimal
@@ -712,5 +715,5 @@ model ref_benefits_contribution_table {
   created_at        DateTime?          @default(now()) @db.Timestamptz(6)
   updated_at        DateTime?          @default(now()) @db.Timestamp(6)
   plan_id           Int?
-  ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ref_benefits_contribution_table_plan_id_fkey")
 }

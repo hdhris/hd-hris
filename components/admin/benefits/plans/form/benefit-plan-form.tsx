@@ -9,15 +9,18 @@ import FormDrawer from "@/components/common/forms/FormDrawer";
 import {EditCreditProp} from "@/app/(admin)/(core)/leaves/leave-credits/page";
 import {DrawerFormTypes} from "@/types/drawer-form/drawer-form-types";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
-import {LeaveTypeSchema} from "@/helper/zodValidation/leaves/leave-types-form/LeaveTypesForm";
+import {axiosInstance} from "@/services/fetcher";
+import {useToast} from "@/components/ui/use-toast";
 
 interface BenefitPlanFormProps extends DrawerFormTypes {
     plan?: EditCreditProp
 }
 
 function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
+    const {toast} = useToast()
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [has_ref_table, setHas_ref_table] = useState(false)
+    const [isAdvanceSetting, setIsAdvanceSetting] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const handleModalOpen = useCallback((value: boolean) => {
         setIsModalOpen(value);
         onOpen(value);
@@ -29,15 +32,61 @@ function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
         }
     }, [isModalOpen, isOpen]);
 
+    const PlanFormValidation = isAdvanceSetting ? PlanFormSchema.extend({
+        minSalary: z.number({
+            required_error: "Minimum salary is required", invalid_type_error: "Minimum salary must be a number"
+        }),
+        maxSalary: z.number({
+            required_error: "Maximum salary is required", invalid_type_error: "Maximum salary must be a number"
+        }),
+        minMSC: z.number({
+            required_error: "Minimum MSC is required", invalid_type_error: "Minimum MSC must be a number"
+        }),
+        maxMSC: z.number({
+            required_error: "Maximum MSC is required", invalid_type_error: "Maximum MSC must be a number"
+        }),
+        mscStep: z.number({required_error: "MSC step is required", invalid_type_error: "MSC step must be a number"}),
+        ecThreshold: z.number({
+            required_error: "EC threshold is required", invalid_type_error: "EC threshold must be a number"
+        }),
+        ecLowRate: z.number({
+            required_error: "EC low rate is required", invalid_type_error: "EC low rate must be a number"
+        }),
+        ecHighRate: z.number({
+            required_error: "EC high rate is required", invalid_type_error: "EC high rate must be a number"
+        }),
+        wispThreshold: z.number({
+            required_error: "WISP threshold is required", invalid_type_error: "WISP threshold must be a number"
+        }),
+    }).refine(data => data.maxMSC >= data.mscStep, {
+        message: "Maximum MSC must be greater than or equal to MSC step", path: ["maxMSC"]
+    })
+        .refine(data => data.maxSalary >= data.minSalary, {
+            message: "Maximum salary must be greater than or equal to Minimum salary", path: ["maxSalary"]
+        }) : PlanFormSchema
 
 
-    const form = useForm<z.infer<typeof PlanFormSchema>>({
-        resolver: zodResolver(PlanFormSchema), defaultValues: {        }
+    const form = useForm<z.infer<typeof PlanFormValidation>>({
+        resolver: zodResolver(PlanFormValidation), defaultValues: {}
     })
 
 
-    const onSubmit = async (values: any) => {
-        console.log(values);
+    const onSubmit = async (values: z.infer<typeof PlanFormValidation>) => {
+        try {
+            setIsLoading(true)
+            const res = await axiosInstance.post("/api/admin/benefits/plans/create", values)
+            if (res.status === 200) {
+                toast({
+                    title: "Success", description: "Plan created successfully", variant: "success"
+                })
+            }
+        } catch (error) {
+            toast({
+                title: "Error", description: "Error creating plan", variant: "danger"
+            })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     const basicInfoFields: FormInputProps[] = [{
@@ -55,46 +104,56 @@ function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
         isRequired: true,
         config: {
             options: [{value: "health", label: "Health"}, {value: "dental", label: "Dental"}, {
-                value: "vision",
-                label: "Vision"
+                value: "vision", label: "Vision"
             }, {value: "life", label: "Life"}, {value: "retirement", label: "Retirement"}, {
-                value: "disability",
-                label: "Disability"
-            }],
-            allowsCustomValue: true,
+                value: "disability", label: "Disability"
+            }], allowsCustomValue: true, menuTrigger: "input",
+            maxLength: 10
         }
     }, {
         name: 'description',
         label: 'Description',
         placeholder: "Provide a brief description of the benefit plan",
         type: "text-area",
+        config: {
+            maxLength: 150
+        },
         isRequired: true
+
     }, {
         name: 'coverage_details',
         label: 'Coverage Details',
         placeholder: "Describe the coverage provided by this plan",
         type: "text-area",
-        isRequired: true
-    }, {
-        name: 'eligibility_criteria',
-        label: 'Eligibility Criteria',
-        placeholder: "e.g., Full-time employees with 1 year of service",
-        description: "Enter the criteria that must be met to be eligible for this plan.",
-        isRequired: true
-    }];
+        isRequired: true,
+    }
+        // , {
+        //     name: 'eligibility_criteria',
+        //     label: 'Eligibility Criteria',
+        //     placeholder: "e.g., Full-time employees with 1 year of service",
+        //     description: "Enter the criteria that must be met to be eligible for this plan.",
+        //     isRequired: true
+        // }
+    ];
 
     const effectiveDateFields: FormInputProps[] = [{
         name: 'effective_date',
         label: 'Effective Date',
         placeholder: "Select an effective date",
         type: "date-picker",
-        isRequired: true
+        isRequired: true,
+        config: {
+            showMonthAndYearPickers: true
+        }
     }, {
         name: 'expiration_date',
         label: 'Expiration Date',
         placeholder: "Select an expiration date",
         type: "date-picker",
-        isRequired: true
+        isRequired: true,
+        config: {
+            showMonthAndYearPickers: true
+        }
     }];
 
     const additionalSettingsFields: FormInputProps[] = [{
@@ -105,63 +164,95 @@ function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
     }];
 
     const planRatesFields: FormInputProps[] = [{
-        name: "employer_rate",
-        label: "Employer Rate",
+        name: "employer_contribution",
+        label: "Employer Rate (%)",
+        type: "number",
         description: "Enter the employer rate for this plan",
         isRequired: true
     }, {
-        name: "employee_rate",
-        label: "Employee Rate",
+        name: "employee_contribution",
+        label: "Employee Rate (%)",
+        type: "number",
         description: "Enter the employee rate for this plan",
         isRequired: true
     }];
 
-    // const advancedSettingsFields: FormInputProps[] = [{
-    //     name: 'minSalary', label: 'Minimum Salary', description: "Enter the minimum salary", isRequired: true
-    // }, {
-    //     name: 'maxSalary', label: 'Maximum Salary', description: "Enter the maximum salary", isRequired: true
-    // }, {
-    //     name: 'minMSC', label: 'Minimum MSC', description: "Enter the minimum MSC", isRequired: true
-    // }, {
-    //     name: 'maxMSC', label: 'Maximum MSC', description: "Enter the maximum MSC", isRequired: true
-    // }, {
-    //     name: 'mscStep', label: 'MSC Step', description: "Enter the step value for MSC", isRequired: true
-    // }, {
-    //     name: 'ecThreshold', label: 'EC Threshold', description: "Enter the EC threshold", isRequired: true
-    // }, {
-    //     name: 'ecLowRate', label: 'EC Low Rate', description: "Enter the low EC rate", isRequired: true
-    // }, {
-    //     name: 'ecHighRate', label: 'EC High Rate', description: "Enter the high EC rate", isRequired: true
-    // }, {
-    //     name: 'wispThreshold', label: 'WISP Threshold', description: "Enter the WISP threshold", isRequired: true
-    // }];
 
-    return (<FormDrawer isSubmitting={true} isLoading={false} title="Add New Benefit Plan"
+    const advancedSettingsFields: FormInputProps[] = [{
+        name: 'minSalary',
+        label: 'Minimum Salary',
+        type: "number",
+        description: "Enter the minimum salary",
+        isRequired: true
+    }, {
+        name: 'maxSalary',
+        label: 'Maximum Salary',
+        type: "number",
+        description: "Enter the maximum salary",
+        isRequired: true
+    }, {
+        name: 'minMSC', label: 'Minimum MSC', type: "number", description: "Enter the minimum MSC", isRequired: true
+    }, {
+        name: 'maxMSC', label: 'Maximum MSC', type: "number", description: "Enter the maximum MSC", isRequired: true
+    }, {
+        name: 'mscStep',
+        label: 'MSC Step',
+        type: "number",
+        description: "Enter the step value for MSC",
+        isRequired: true
+    }, {
+        name: 'ecThreshold',
+        label: 'EC Threshold',
+        type: "number",
+        description: "Enter the EC threshold",
+        isRequired: true
+    }, {
+        name: 'ecLowRate', label: 'EC Low Rate', type: "number", description: "Enter the low EC rate", isRequired: true
+    }, {
+        name: 'ecHighRate',
+        label: 'EC High Rate',
+        type: "number",
+        description: "Enter the high EC rate",
+        isRequired: true
+    }, {
+        name: 'wispThreshold',
+        label: 'WISP Threshold',
+        type: "number",
+        description: "Enter the WISP threshold",
+        isRequired: true
+    }];
+
+    return (<FormDrawer isLoading={isLoading} title="Add New Benefit Plan"
                         description="Enter the details for the new employee benefit plan."
                         onOpen={handleModalOpen} isOpen={isModalOpen}>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="drawer-form">
-                    <FormFields items={basicInfoFields}/>
-                    <div className="flex gap-4">
-                        <FormFields items={effectiveDateFields} size="md"/>
-                    </div>
-                    <FormFields items={additionalSettingsFields}/>
-                    <div className="flex gap-4">
-                        <FormFields items={planRatesFields} />
-                    </div>
-                    {/*<FormFields items={[{*/}
-                    {/*    name: "advance_setting",*/}
-                    {/*    type: "switch",*/}
-                    {/*    label: "Advance Settings",*/}
-                    {/*    description: "Toggle this if you want to enable advanced settings."*/}
-                    {/*}]}/>*/}
-                    {/*{form.watch("advance_setting") && (<div className="space-y-4">*/}
-                    {/*        <FormFields items={advancedSettingsFields}/>*/}
-                    {/*    </div>)}*/}
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="drawer-form">
+                <FormFields items={basicInfoFields}/>
+                <div className="flex gap-4">
+                    <FormFields items={effectiveDateFields} size="md"/>
+                </div>
+                <FormFields items={additionalSettingsFields}/>
+                <div className="flex gap-4">
+                    <FormFields items={planRatesFields}/>
+                </div>
+                <FormFields items={[{
+                    name: "advance_setting",
+                    type: "switch",
+                    label: "Advance Settings",
+                    description: "Toggle this if you want to enable advanced settings.",
+                    config: {
+                        onValueChange: (value: boolean) => {
+                            setIsAdvanceSetting(value)
+                        }
+                    }
+                }]}/>
+                {form.watch("advance_setting") && (<div className="space-y-4">
+                    <FormFields items={advancedSettingsFields}/>
+                </div>)}
 
-                </form>
-            </Form>
-        </FormDrawer>);
+            </form>
+        </Form>
+    </FormDrawer>);
 }
 
 export default BenefitPlanForm;
