@@ -7,7 +7,7 @@ const page = () => {
     </div>
   )
 }
-//
+
 export default page
 
 // "use client"; // Ensure this component is a client component

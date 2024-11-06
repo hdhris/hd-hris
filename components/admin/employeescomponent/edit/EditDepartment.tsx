@@ -28,7 +28,7 @@ interface DepartmentFormData {
   color: string;
   is_active: boolean;
 }
-//
+
 const EditDepartment: React.FC<EditDepartmentProps> = ({
   isOpen,
   onClose,

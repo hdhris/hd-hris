@@ -26,7 +26,7 @@ const JobInformationForm: React.FC = () => {
   const [selectedBatch, setSelectedBatch] =
     React.useState<BatchSchedule | null>(null);
   const [visible, setVisible] = React.useState(false);
-//
+
   // Fetch data using SWR hooks with default empty arrays
   const { data: departments = [] } = useDepartmentsData();
   const { data: jobTitles = [] } = useJobpositionData();

@@ -539,7 +539,7 @@ model trans_payroll_date {
   deleted_at     DateTime?        @db.Timestamp(6)
   trans_payrolls trans_payrolls[]
 }
-
+//
 model trans_payrolls {
   employee_id              Int
   gross_total_amount       Decimal?                   @db.Decimal(10, 2)

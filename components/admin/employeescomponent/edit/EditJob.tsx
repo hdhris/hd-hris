@@ -24,7 +24,7 @@ interface EditJobPositionProps {
   jobId: number;
   onJobUpdated: () => void;
 }
-//
+
 const jobPositionSchema = z.object({
   name: z
     .string()
