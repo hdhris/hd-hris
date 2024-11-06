@@ -128,7 +128,7 @@ export function PayrollInputColumn({...props}: {
   uniqueKey?: string | number;
   payheadId?: number;
   employeeId?: number;
-  setFocusedPayhead: (id: number) => void;
+  setFocusedPayhead?: (id: number) => void;
   type?: "earning" | "deduction";
   unUpdated?: boolean;
   value: string | number;
@@ -154,7 +154,7 @@ export function PayrollInputColumn({...props}: {
         value={props.value}
         placeholder={props.placeholder || "0"}
         onFocus={() =>
-          props.payheadId && props.setFocusedPayhead(props.payheadId)
+          props.payheadId && props.setFocusedPayhead && props.setFocusedPayhead(props.payheadId)
         }
         onBlur={(e) =>
           props.payheadId &&

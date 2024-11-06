@@ -23,16 +23,19 @@ import {
 } from "@/lib/utils/sessionStorage";
 import { isAffected } from "./util";
 import { useQuery } from "@/services/queries";
+import { viewPayslipType } from "@/app/(admin)/(core)/payroll/payslip/page";
 
 interface PRPayslipTableType {
   processDate: ProcessDate;
-  setFocusedEmployee: (id: number | null) => void;
-  setFocusedPayhead: (id: number | null) => void;
+  // setFocusedEmployee: (id: number | null) => void;
+  // setFocusedPayhead: (id: number | null) => void;
+  setPayslip: (item: viewPayslipType) => void;
 }
 export function PRPayslipTable({
   processDate,
-  setFocusedEmployee,
-  setFocusedPayhead,
+  // setFocusedEmployee,
+  // setFocusedPayhead,
+  setPayslip,
 }: PRPayslipTableType) {
   const cacheKey = "unpushedPayrollBatch";
   const cachedUnpushed = loadFromSession<batchDataType>(cacheKey);
@@ -190,6 +193,75 @@ export function PRPayslipTable({
     });
   }
 
+  const getRecordAmount = useMemo(() => {
+    return (employeeId: number, payheadId: number): string => {
+      return String(records[employeeId]?.[payheadId]?.[1] || "");
+    };
+  }, [records]);
+
+  const getEmployeePayheadSum = useMemo(() => {
+    return (employeeId: number, type: "earning" | "deduction"): number => {
+      const employeeRecords = records[employeeId];
+      if (!employeeRecords) return 0;
+
+      return Object.values(employeeRecords).reduce(
+        (sum, payheadValue) =>
+          sum + parseFloat(payheadValue[0] === type ? payheadValue[1] : "0") ||
+          0,
+        0
+      );
+    };
+  }, [records]);
+
+  const getFormulatedAmount = useMemo(() => {
+    return (employeeId: number, itemId: number): number => {
+      if (!payslipData) return 0;
+
+      const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
+      if (!employeeAmounts) return 0;
+
+      const item = employeeAmounts.find((entry) => entry.id === itemId);
+      return item ? item.amount : 0;
+    };
+  }, [payslipData]);
+
+  const handleFocuses = useCallback((empID: number)=>{
+    type ListItem = { label: string; number: string };
+    const employeeRecords = records[empID];
+    const earnings: ListItem[] = [];
+    const deductions: ListItem[] = [];
+    // console.log(employeeRecords);
+
+    Object.entries(employeeRecords).forEach(([payheadID, [type, amount]]) => {
+      if (type === "earning") {
+        const item: ListItem = { label: payslipData?.earnings.find(e=>e.id===Number(payheadID))?.name!, number: amount };
+        earnings.push(item);
+      } else if (type === "deduction") {
+        const item: ListItem = { label: payslipData?.deductions.find(e=>e.id===Number(payheadID))?.name!, number: amount };
+        deductions.push(item);
+      }
+    });
+    setPayslip((() => {
+      const employee = payslipData?.employees.find(emp => emp.id === empID)!;
+    
+      return {
+        data: {
+          name: getEmpFullName(employee),
+          role: employee.ref_job_classes.name,
+        },
+        earnings: {
+          total: getEmployeePayheadSum(employee.id, "earning"),
+          list: earnings,
+        },
+        deductions: {
+          total: getEmployeePayheadSum(employee.id, "deduction"),
+          list: deductions,
+        },
+        net: getEmployeePayheadSum(employee.id, "earning") - getEmployeePayheadSum(employee.id, "deduction"),
+      }
+    })()); 
+  },[setPayslip,records,payslipData])
+
   // Initial loaders
   useEffect(() => {
     if (cachedUnpushed) {
@@ -235,38 +307,6 @@ export function PRPayslipTable({
       });
     }
   }, [cachedUnpushed, payslipData, processDate]);
-
-  const getEmployeePayheadSum = useMemo(() => {
-    return (employeeId: number, type: "earning" | "deduction"): number => {
-      const employeeRecords = records[employeeId];
-      if (!employeeRecords) return 0;
-
-      return Object.values(employeeRecords).reduce(
-        (sum, payheadValue) =>
-          sum + parseFloat(payheadValue[0] === type ? payheadValue[1] : "0") ||
-          0,
-        0
-      );
-    };
-  }, [records]);
-
-  const getRecordAmount = useMemo(() => {
-    return (employeeId: number, payheadId: number): string => {
-      return String(records[employeeId]?.[payheadId]?.[1] || "");
-    };
-  }, [records]);
-
-  const getFormulatedAmount = useMemo(() => {
-    return (employeeId: number, itemId: number): number => {
-      if (!payslipData) return 0;
-
-      const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
-      if (!employeeAmounts) return 0;
-
-      const item = employeeAmounts.find((entry) => entry.id === itemId);
-      return item ? item.amount : 0;
-    };
-  }, [payslipData]);
 
   if (onErrors >= 10) {
     return (
@@ -338,7 +378,7 @@ export function PRPayslipTable({
             <tr
               className="divide-x"
               key={employee.id}
-              onFocus={() => setFocusedEmployee(employee.id)}
+              onFocus={() => handleFocuses(employee.id)}
             >
               <td
                 key={`${employee.id}-name`}
@@ -354,7 +394,7 @@ export function PRPayslipTable({
                     key={`${employee.id}-${earn.id}`}
                     employeeId={employee.id}
                     payheadId={earn.id}
-                    setFocusedPayhead={setFocusedPayhead}
+                    // setFocusedPayhead={setFocusedPayhead}
                     handleBlur={handleBlur}
                     type="earning"
                     handleRecording={handleRecording}
@@ -378,7 +418,7 @@ export function PRPayslipTable({
                 className="bg-blue-50"
                 uniqueKey={`${employee.id}-total-earn`}
                 key={`${employee.id}-total-earn`}
-                setFocusedPayhead={setFocusedPayhead}
+                // setFocusedPayhead={setFocusedPayhead}
                 handleBlur={handleBlur}
                 value={getEmployeePayheadSum(employee.id, "earning")}
                 readOnly
@@ -391,7 +431,7 @@ export function PRPayslipTable({
                     key={`${employee.id}-${deduct.id}`}
                     employeeId={employee.id}
                     payheadId={deduct.id}
-                    setFocusedPayhead={setFocusedPayhead}
+                    // setFocusedPayhead={setFocusedPayhead}
                     handleBlur={handleBlur}
                     type="deduction"
                     handleRecording={handleRecording}
@@ -416,7 +456,7 @@ export function PRPayslipTable({
                 uniqueKey={`${employee.id}-total-deduct`}
                 key={`${employee.id}-total-deduct`}
                 className="bg-red-50"
-                setFocusedPayhead={setFocusedPayhead}
+                // setFocusedPayhead={setFocusedPayhead}
                 handleBlur={handleBlur}
                 value={getEmployeePayheadSum(employee.id, "deduction")}
                 readOnly
@@ -425,7 +465,7 @@ export function PRPayslipTable({
                 uniqueKey={`${employee.id}-total-salary`}
                 key={`${employee.id}-total-salary`}
                 className="bg-green-50"
-                setFocusedPayhead={setFocusedPayhead}
+                // setFocusedPayhead={setFocusedPayhead}
                 handleBlur={handleBlur}
                 value={
                   getEmployeePayheadSum(employee.id, "earning") -

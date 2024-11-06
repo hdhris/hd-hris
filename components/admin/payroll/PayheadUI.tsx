@@ -42,10 +42,10 @@ const formSchema = z.object({
     .string()
     .min(3, { message: "Name must be at least 3 characters." })
     .max(20, { message: "Character limit reached." }),
-  calculation: z.string(),
-  is_active: z.boolean(),
-  is_overwritable: z.boolean(),
-  variable: z.string(),
+  calculation: z.string().optional(),
+  is_active: z.boolean().optional(),
+  is_overwritable: z.boolean().optional(),
+  variable: z.string().max(14).optional(),
 });
 
 export const PayheadForm: React.FC<PayheadFormProps> = ({
