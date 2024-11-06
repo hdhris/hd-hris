@@ -57,6 +57,7 @@ export function calculateAllPayheads(
   
     return calculatedAmount;
   } catch(error) {
+    console.error(error)
     return []
   }
 }

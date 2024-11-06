@@ -1,4 +1,5 @@
 import { PayslipEmployee, PayslipPayhead } from "@/types/payroll/payrollType";
+import { Decimal } from "@prisma/client/runtime/library";
 
 export function isAffected(employee: PayslipEmployee, payhead: PayslipPayhead) {
   try{
@@ -33,3 +34,15 @@ export function isAffected(employee: PayslipEmployee, payhead: PayslipPayhead) {
     return false;
   }
 }
+
+//51 Basic Salary
+//53 Cash Disbursement
+//54 Cash Repayment
+// const payheads = new Set();
+// export function isPayheadSystemAffected(payhead: PayslipPayhead, employee: PayslipEmployee, affectedMap:  Map<number|null, unknown>){
+//   const systemPayheadsWithKeys = [53, 54]
+//   if (systemPayheadsWithKeys.includes(payhead.id)){
+//     return affectedMap.has(employee.id)
+//   }
+//   return true;
+// }

@@ -271,6 +271,7 @@ model ref_payheads {
   affected_json            Json?                      @db.Json
   variable                 String?                    @db.VarChar(15)
   is_overwritable          Boolean?
+  system_only              Boolean?
   dim_payhead_affecteds    dim_payhead_affecteds[]
   trans_payhead_breakdowns trans_payhead_breakdowns[]
 }
@@ -370,7 +371,7 @@ model trans_cash_advance_disbursements {
   disbursed_at                  DateTime?                       @db.Timestamp(6)
   amount                        Decimal?                        @db.Decimal(10, 2)
   payment_method                String?                         @db.VarChar(10)
-  status                        String?                         @db.VarChar(10)
+  repayment_status              String?                         @db.VarChar(10)
   created_at                    DateTime                        @db.Timestamp(6)
   updated_at                    DateTime                        @db.Timestamp(6)
   deleted_at                    DateTime?                       @db.Timestamp(6)

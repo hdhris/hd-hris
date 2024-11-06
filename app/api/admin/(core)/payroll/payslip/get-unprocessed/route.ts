@@ -32,7 +32,9 @@ export async function GET(req: NextRequest) {
           dim_payhead_affecteds: { select: { payhead_id: true } },
         },
       }),
-      prisma.ref_payheads.findMany({ where: { deleted_at: null, is_active: true } }),
+      prisma.ref_payheads.findMany({
+        where: { deleted_at: null, is_active: true }, orderBy: { created_at: "asc" },
+      }),
     ]); // Fetch undeleted and active payheads.
 
     // Initialize payroll entries and clean up outdated data
@@ -84,6 +86,61 @@ export async function GET(req: NextRequest) {
 
     // Filter employees to include only those associated with active payrolls.
     const employees = empData.filter((emp) => payrollsMap.has(emp.id));
+    const employeeIds = Array.from(payrolls.keys());
+
+        // Execute both queries concurrently
+    const [cashToDisburse, cashToRepay] = await Promise.all([
+      prisma.trans_cash_advances.findMany({
+        where: {
+          employee_id: { in: employeeIds },
+          status: "approved",
+          trans_cash_advance_disbursements: {
+            none: {}, // No disbursement should be present for these records
+          },
+        },
+        select: {
+          id: true,
+          employee_id: true,
+          amount_requested: true,
+        },
+      }),
+
+      prisma.trans_cash_advance_disbursements.findMany({
+        where: {
+          repayment_status: "to_be_paid",
+          trans_cash_advances: {
+            employee_id: { in: employeeIds },
+          },
+        },
+        select: {
+          id: true,
+          amount: true,
+          trans_cash_advances: {
+            select: {
+              employee_id: true,
+            },
+          },
+          trans_cash_advance_repayments : {
+            select : {
+              amount_repaid : true,
+            }
+          }
+        },
+      }),
+    ]);
+    const cashDisburseMap = new Map(
+      cashToDisburse.map((ctd) => [
+        ctd.employee_id, // Key
+        ctd.amount_requested,
+      ]) // RequestedID: AmountRequested
+    );
+    // return NextResponse.json({cashToDisburse, cashToRepay});
+    const cashRepayMap = new Map(
+      cashToRepay.map((ctr) => [
+        ctr.trans_cash_advances?.employee_id!, // Key
+        (ctr.amount?.toNumber()??0) - ctr.trans_cash_advance_repayments.reduce((sum, repayment) => sum +(repayment?.amount_repaid?.toNumber()??0), 0),
+      ]) // DisbursedID: AmountDisbursed
+    );
 
     // Calculate amounts and generate breakdowns in chunks
     // Initializes `calculatedAmountList` to store payhead amounts for each employee.
@@ -95,13 +152,28 @@ export async function GET(req: NextRequest) {
         rate_p_hr: parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0,
         total_shft_hr: 80,
         payroll_days: toGMT8(dateInfo?.end_date!).diff(toGMT8(dateInfo?.start_date!), 'day'),
+        c_disbursement: cashDisburseMap.get(emp.id)?.toNumber()??0,
+        c_repayment: cashRepayMap.get(emp.id!)??0,
       };
 
       // Filter applicable payheads for calculation based on employee and payhead data.
+      //51 Basic Salary
+      //53 Cash Disbursement
+      //54 Cash Repayment
       const applicableFormulatedPayheads: VariableFormulaProp[] = dataPH
-        .filter((ph) => String(ph.calculation) !== "")
-        .filter((ph) => isAffected(tryParse(emp), tryParse(ph)))
-        .map((ph) => ({ id: ph.id, variable: String(ph.variable), formula: String(ph.calculation) }));
+        .filter((ph) => {
+          return (
+            String(ph.calculation) !== "" &&
+            isAffected(tryParse(emp), tryParse(ph)) &&
+            (ph.id === 53 ? cashDisburseMap.has(emp.id) : true) &&
+            (ph.id === 54 ? cashRepayMap.has(emp.id) : true)
+          );
+        })
+        .map((ph) => ({
+          id: ph.id,
+          variable: String(ph.variable),
+          formula: String(ph.calculation),
+        }));
 
       // Calculate amounts and update `calculatedAmountList` with results for each employee.
       const calculatedAmount = calculateAllPayheads(baseVariables, applicableFormulatedPayheads).filter((ca) => ca.id);

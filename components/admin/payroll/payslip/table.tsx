@@ -41,6 +41,7 @@ export function PRPayslipTable({
   const cachedUnpushed = loadFromSession<batchDataType>(cacheKey);
   const tableRef = useRef<HTMLTableElement>(null);
   const [willUpdate, setWillUpdate] = useState(false);
+  const [lastProcessDateID, setLastProcessDateID] = useState(-1);
   const [updatedPayhead, setUpdatedPayheadMap] = useState<Map<string, boolean>>(
     new Map()
   );
@@ -213,6 +214,18 @@ export function PRPayslipTable({
     };
   }, [records]);
 
+  const isSystemPayheadAffected = useMemo(()=>{
+    return (employeeId: number, itemId: number): boolean => {
+      if (!payslipData) return false;
+
+      const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
+      if (!employeeAmounts) return false;
+
+      const item = employeeAmounts.find((entry) => entry.id === itemId);
+      return !!item;
+    };
+  },[payslipData])
+
   const getFormulatedAmount = useMemo(() => {
     return (employeeId: number, itemId: number): number => {
       if (!payslipData) return 0;
@@ -287,6 +300,11 @@ export function PRPayslipTable({
       }
       push();
     } else if (payslipData) {
+      if(processDate.id === lastProcessDateID){
+        console.log("Unchanged date, will not reupdate...");
+        return
+      }
+      setLastProcessDateID(processDate.id);
       console.log("Loaded");
       // console.log(payslipData.employees);
       payslipData.breakdowns.forEach((bd) => {
@@ -306,7 +324,7 @@ export function PRPayslipTable({
         );
       });
     }
-  }, [cachedUnpushed, payslipData, processDate]);
+  }, [cachedUnpushed, payslipData, processDate, lastProcessDateID]);
 
   if (onErrors >= 10) {
     return (
@@ -387,9 +405,15 @@ export function PRPayslipTable({
                 {getEmpFullName(employee)}
               </td>
               {payslipData.earnings.map((earn) =>
-                isAffected(employee, earn) ? (
+                (earn.system_only ? (
+                  isSystemPayheadAffected(employee.id, earn.id)
+                ) : isAffected(employee, earn)) ? (
                   <PayrollInputColumn
-                    placeholder={earn.is_overwritable ? String(getFormulatedAmount(employee.id, earn.id)):"0"}
+                    placeholder={
+                      earn.is_overwritable
+                        ? String(getFormulatedAmount(employee.id, earn.id))
+                        : "0"
+                    }
                     uniqueKey={`${employee.id}-${earn.id}`}
                     key={`${employee.id}-${earn.id}`}
                     employeeId={employee.id}
@@ -424,9 +448,15 @@ export function PRPayslipTable({
                 readOnly
               />
               {payslipData.deductions.map((deduct) =>
-                isAffected(employee, deduct) ? (
+                (deduct.system_only ? (
+                  isSystemPayheadAffected(employee.id, deduct.id)
+                ) : isAffected(employee, deduct))? (
                   <PayrollInputColumn
-                    placeholder={deduct.is_overwritable ? String(getFormulatedAmount(employee.id, deduct.id)):"0"}
+                    placeholder={
+                      deduct.is_overwritable
+                        ? String(getFormulatedAmount(employee.id, deduct.id))
+                        : "0"
+                    }
                     uniqueKey={`${employee.id}-${deduct.id}`}
                     key={`${employee.id}-${deduct.id}`}
                     employeeId={employee.id}
