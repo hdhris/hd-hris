@@ -123,7 +123,7 @@ export async function PUT(req: Request) {
     return handleError(error, 'update');
   }
 }
-//
+
 // DELETE - Soft delete a job class
 export async function DELETE(req: Request) {
   const url = new URL(req.url);

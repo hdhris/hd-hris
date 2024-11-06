@@ -100,7 +100,7 @@ async function getAllBranches() {
   // logDatabaseOperation("GET all branches", branches);
   return branches;
 }
-//
+
 // PUT: Update branch
 export async function PUT(req: NextRequest) {
   const url = new URL(req.url);

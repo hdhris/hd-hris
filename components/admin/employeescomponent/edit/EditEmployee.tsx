@@ -128,7 +128,7 @@ export const employeeSchema = z.object({
   //   .pipe(z.array(z.string()).min(1, "At least one working day is required")),
   days_json: z.array(z.string())
 });
-//
+
 interface EditEmployeeProps {
   isOpen: boolean;
   onClose: () => void;

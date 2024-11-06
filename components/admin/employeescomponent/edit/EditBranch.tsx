@@ -30,7 +30,7 @@ interface BranchFormData {
   addr_municipal: string;
   addr_baranggay: string;
 }
-//
+
 const EditBranch: React.FC<EditBranchProps> = ({
   isOpen,
   onClose,
