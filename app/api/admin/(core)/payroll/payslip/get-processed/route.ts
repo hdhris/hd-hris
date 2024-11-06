@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
-import { toGMT8 } from "@/lib/utils/toGMT8";
 
 export const dynamic = "force-dynamic";
 
@@ -29,12 +28,13 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    const payrollMap = new Map(payrolls.map((pr) => [pr.employee_id, pr.id]))
     const breakdowns = await prisma.trans_payhead_breakdowns.findMany({
-      where: { payroll_id: { in: payrolls.map((pr) => pr.id) } },
+      where: { payroll_id: { in: Array.from(payrollMap.values()) } },
     });
 
     // Fetch all employees linked to payrolls
-    const employeeIDs = [...new Set(payrolls.map((pr) => pr.employee_id))]
+    const employeeIDs = Array.from(payrollMap.keys());
     const payheadIDs = [...new Set(breakdowns.map((bd) => bd.payhead_id!))];
 
     const [payheads, employees] = await Promise.all([
