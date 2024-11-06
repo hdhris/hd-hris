@@ -35,7 +35,8 @@ function DataDisplayControl<T>({
                                    isList,
                                    onExport,
                                    onImport,
-                                   onDeleteSelected
+                                   onDeleteSelected,
+                                   isSelectionDeleted = true,
                                }: DataDisplayControlProps<T>) {
 
     const searchParams = useSearchParams();
@@ -165,7 +166,7 @@ function DataDisplayControl<T>({
                 <Typography className="text-medium font-semibold text-primary/50">
                     {selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}
                 </Typography>
-                {selectedKeys && (selectedKeys === "all" || selectedKeys.size > 1) && (
+                {selectedKeys && (selectedKeys === "all" || selectedKeys.size > 1) && isSelectionDeleted && (
                     <Button isIconOnly variant="light" onClick={() => handleDeleteSelection(selectedKeys)}>
                         <LuTrash2 className={cn("text-danger", icon_size_sm)}/>
                     </Button>)}
@@ -182,32 +183,28 @@ function DataDisplayControl<T>({
             </div>}
 
             <div className={cn("flex justify-end", className?.lower.buttonClassname)}>
-                {
-                    displayMethods > 1 && (
-                        <ButtonGroup variant="light" color="primary" isIconOnly {...buttonGroupProps}>
-                            {isTable && (<Tooltip content="Table">
-                                <Button onClick={() => handleOnDisplayChange("table")}
-                                        variant={display === "table" ? "flat" : "light"}>
-                                    <LuTable2 className={cn("text-slate-700", icon_size_sm)}/>
-                                </Button>
-                            </Tooltip>)}
+                {displayMethods > 1 && (<ButtonGroup variant="light" color="primary" isIconOnly {...buttonGroupProps}>
+                        {isTable && (<Tooltip content="Table">
+                            <Button onClick={() => handleOnDisplayChange("table")}
+                                    variant={display === "table" ? "flat" : "light"}>
+                                <LuTable2 className={cn("text-slate-700", icon_size_sm)}/>
+                            </Button>
+                        </Tooltip>)}
 
-                            {isGrid && (<Tooltip content="Grid">
-                                <Button onClick={() => handleOnDisplayChange("grid")}
-                                        variant={display === "grid" ? "flat" : "light"}>
-                                    <LuLayoutGrid className={cn("text-slate-700", icon_size_sm)}/>
-                                </Button>
-                            </Tooltip>)}
+                        {isGrid && (<Tooltip content="Grid">
+                            <Button onClick={() => handleOnDisplayChange("grid")}
+                                    variant={display === "grid" ? "flat" : "light"}>
+                                <LuLayoutGrid className={cn("text-slate-700", icon_size_sm)}/>
+                            </Button>
+                        </Tooltip>)}
 
-                            {isList && (<Tooltip content="List">
-                                <Button onClick={() => handleOnDisplayChange("list")}
-                                        variant={display === "list" ? "flat" : "light"}>
-                                    <LuLayoutList className={cn("text-slate-700", icon_size_sm)}/>
-                                </Button>
-                            </Tooltip>)}
-                        </ButtonGroup>
-                    )
-                }
+                        {isList && (<Tooltip content="List">
+                            <Button onClick={() => handleOnDisplayChange("list")}
+                                    variant={display === "list" ? "flat" : "light"}>
+                                <LuLayoutList className={cn("text-slate-700", icon_size_sm)}/>
+                            </Button>
+                        </Tooltip>)}
+                    </ButtonGroup>)}
 
             </div>
 

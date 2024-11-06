@@ -53,7 +53,7 @@ const showDialog = async ({
                 }}
             >
                 <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1 text-small">
+                    <ModalHeader className="flex flex-col gap-1 font-semibold">
                         {title}
                     </ModalHeader>
                     <ModalBody>

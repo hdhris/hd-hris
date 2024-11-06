@@ -32,6 +32,6 @@ export async function POST(req: NextRequest) {
     // console.log(batch);
     return NextResponse.json({ status: 200 });
   } catch (error) {
-    console.error(error);
+    console.log(error);
   }
 }

@@ -124,10 +124,11 @@ class CustomInput extends React.Component<
 export default CustomInput;
 
 export function PayrollInputColumn({...props}: {
+  placeholder?: string;
   uniqueKey?: string | number;
   payheadId?: number;
   employeeId?: number;
-  setFocusedPayhead: (id: number) => void;
+  setFocusedPayhead?: (id: number) => void;
   type?: "earning" | "deduction";
   unUpdated?: boolean;
   value: string | number;
@@ -143,22 +144,36 @@ export function PayrollInputColumn({...props}: {
   return (
     <td key={props.uniqueKey} className="z-30">
       <CustomInput
-        className={cn("border-1", props.unUpdated? "border-red-500":"border-gray-50",props.className)}
+        className={cn(
+          "border-1",
+          props.unUpdated ? "border-red-500" : "border-gray-50",
+          props.readOnly && "text-gray-400",
+          props.className,
+        )}
         readOnly={props.readOnly}
         value={props.value}
-        placeholder={"0"}
-        onFocus={() => props.payheadId && props.setFocusedPayhead(props.payheadId)}
+        placeholder={props.placeholder || "0"}
+        onFocus={() =>
+          props.payheadId && props.setFocusedPayhead && props.setFocusedPayhead(props.payheadId)
+        }
         onBlur={(e) =>
           props.payheadId &&
           props.employeeId &&
-          props.handleBlur(props.employeeId, props.payheadId, parseFloat(e.target.value) || 0)
+          props.handleBlur(
+            props.employeeId,
+            props.payheadId,
+            parseFloat(e.target.value) || 0
+          )
         }
         onChange={(e) =>
           props.payheadId &&
           props.employeeId &&
           props.type &&
           props.handleRecording &&
-          props.handleRecording(props.employeeId, props.payheadId, [props.type, e.target.value])
+          props.handleRecording(props.employeeId, props.payheadId, [
+            props.type,
+            e.target.value,
+          ])
         }
       />
     </td>
