@@ -22,7 +22,7 @@ interface EditDepartmentProps {
   departmentId: number;
   onDepartmentUpdated: () => void;
 }
-
+//
 interface DepartmentFormData {
   name: string;
   color: string;

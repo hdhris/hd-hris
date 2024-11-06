@@ -22,7 +22,7 @@ const EducationalBackgroundForm = () => {
   const highSchool = watch("highSchool");
   const seniorHighSchool = watch("seniorHighSchool");
   const universityCollege = watch("universityCollege");
-
+//
   useEffect(() => {
     setShowStrand(!!seniorHighSchool);
   }, [seniorHighSchool]);
