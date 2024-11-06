@@ -156,7 +156,7 @@ function Page() {
             return {
               name: emp.ref_job_classes.name,
               key: "ref_job_classes.id",
-              value: emp.ref_job_classes.id,
+              value: emp.ref_job_classes.id!,
             };
           })
           ?.filter(

@@ -3,7 +3,6 @@ import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import { usePayheads } from "@/services/queries";
 import { Payhead } from "@/types/payroll/payheadType";
-import { FilterProps } from "@/types/table/default_config";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Button, Chip, Selection } from "@nextui-org/react";
 import { useRouter } from "next/dist/client/components/navigation";
@@ -12,7 +11,6 @@ import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
-import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import SearchFilter from "@/components/common/filter/SearchFilter";
 import { FilterItemsProps } from "@/components/common/filter/FilterItems";
 

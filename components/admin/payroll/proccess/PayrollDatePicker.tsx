@@ -1,6 +1,6 @@
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { getLocalTimeZone, parseDate } from "@internationalized/date";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDateFormatter } from "@react-aria/i18n";
 import {
   Button,
@@ -28,25 +28,22 @@ function DatePickerPayroll({
   setProcessDate,
 }: DatePickerUiProps) {
   let formatter = useDateFormatter({ dateStyle: "long" });
-  const {data:payrollDates, isLoading} = useQuery<ProcessDate[]>('/api/admin/payroll/get-process-dates')
-  const [selectedDate, setSelectedDate] = React.useState("");
+  const {data:payrollDates, isLoading, mutate} = useQuery<ProcessDate[]>('/api/admin/payroll/get-process-dates')
   const [selectedYear, setSelectedYear] = React.useState("");
+  const [selectedDate, setSelectedDate] = React.useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [rangeValue, setRangeValue] = React.useState({
     start: parseDate(toGMT8().format("YYYY-MM-DD")),
     end: parseDate(toGMT8().format("YYYY-MM-DD")),
   });
-  const handleYearChange = (key: SharedSelection) => {
+  const handleYearChange = useCallback((key: SharedSelection) => {
     const year = Array.from(key)[0].toString();
     setSelectedYear(year);
     setSelectedDate(
-      String(
-        payrollDates?.filter(
-          (item) => toGMT8(item.start_date).year() === Number(year)
-        )[0].id
-      )
+      String(payrollDates?.find((pd) => toGMT8(pd.start_date).year() === Number(year))?.id)
     );
-  };
+  },[payrollDates]);
+
   const handleDateChange = (key: SharedSelection) => {
     setSelectedDate(Array.from(key)[0].toString());
   };
@@ -55,11 +52,14 @@ function DatePickerPayroll({
       return payrollDates?.find((i) => i.id === Number(selectedDate));
     }
   }, [payrollDates, selectedDate]);
+
   useEffect(() => {
     if (payrollDates) {
-      setSelectedYear(toGMT8(payrollDates[0]?.start_date).format("YYYY"));
-      setSelectedDate(String(payrollDates[0]?.id));
+      const year = toGMT8(payrollDates[0]?.start_date).format("YYYY");
+      if(selectedDate=="" || selectedYear!=year) setSelectedDate(String(payrollDates[0]?.id));
+      setSelectedYear(year);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payrollDates]);
   useEffect(() => {
     if (getProcessDate) setProcessDate(getProcessDate);
@@ -114,6 +114,32 @@ function DatePickerPayroll({
       });
     }
   }
+  async function handleDeploy(){
+    const result = await showDialog({
+      title: "Deploy Payroll",
+      message: "This action can't be undone",
+      preferredAnswer: "no",
+    })
+    if(result==="no") return
+    try {
+      await axios.post("/api/admin/payroll/process/update-date", {
+        id: Number(selectedDate),
+      });
+      mutate();
+      toast({
+        title: "Proccessed",
+        description: "Date has been marked proccessed!",
+        variant: "success",
+      });
+      setIsAdding(false);
+    } catch (error) {
+      toast({
+        title: "Error marking",
+        description: String(error),
+        variant: "danger",
+      });
+    }
+  }
 
   return (
     <div className="flex gap-2 items-center">
@@ -132,7 +158,7 @@ function DatePickerPayroll({
             value={rangeValue}
             onChange={(value) => {
               setRangeValue(value);
-              console.log(value);
+              // console.log(value);
             }}
             {...uniformStyle({ color: "default" })}
             className="w-fit h-fit"
@@ -156,39 +182,22 @@ function DatePickerPayroll({
         </>
       ) : (
         <>
-          {!getProcessDate?.is_processed && (
-            <Link
-              className="text-blue-500 cursor-pointer"
-              onClick={async () => {
-                try {
-                  await axios.post("/api/admin/payroll/process/update-date", {
-                    id: Number(selectedDate),
-                  });
-                  toast({
-                    title: "Proccessed",
-                    description: "Date has been marked proccessed!",
-                    variant: "success",
-                  });
-                  setIsAdding(false);
-                } catch (error) {
-                  toast({
-                    title: "Error marking",
-                    description: String(error),
-                    variant: "danger",
-                  });
-                }
-              }}
+          {!getProcessDate?.is_processed && !isLoading && (
+            <Button
+              {...uniformStyle()}
+              className="bg-blue-500"
+              onClick={handleDeploy}
             >
-              Mark as processed
-            </Link>
+              Deploy now
+            </Button>
           )}
-          <p className="text-default-500 text-sm">
+          {!isLoading && <p className="text-default-500 text-sm">
             {getProcessDate?.is_processed ? (
-              <span className="text-success">Proceessed</span>
+              <span className="text-success">Deployed</span>
             ) : (
               "Processing"
             )}
-          </p>
+          </p>}
           <Select
             aria-label="Date Picker"
             variant="bordered"
@@ -216,7 +225,7 @@ function DatePickerPayroll({
               )} - ${toGMT8(item.end_date).format("MMM DD")}`}</SelectItem>
             )}
           </Select>
-          <Select
+          <Select  // select a year
             aria-label="Year Picker"
             variant="bordered"
             isLoading={isLoading}
@@ -235,7 +244,7 @@ function DatePickerPayroll({
           >
             {(item) => <SelectItem key={item.value}>{item.label}</SelectItem>}
           </Select>
-          <Button
+          <Button // Delete date
             {...uniformStyle({ color: "danger" })}
             isIconOnly
             isLoading={isLoading}
@@ -243,7 +252,7 @@ function DatePickerPayroll({
           >
             <MdDelete size={15} />
           </Button>
-          <Button
+          <Button  // Add date
             {...uniformStyle()}
             isIconOnly
             isLoading={isLoading}
