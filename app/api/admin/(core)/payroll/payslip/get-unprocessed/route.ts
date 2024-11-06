@@ -78,6 +78,14 @@ export async function GET(req: NextRequest) {
               date_id: dateInfo?.id,  // Ensure we are deleting associated with the payroll
             },
           },
+          {
+            ref_payheads: {
+              deleted_at : { not: null },
+            },
+            trans_payrolls: {
+              date_id: dateInfo?.id,  // Ensure we are deleting associated with the payroll
+            },
+          },
         ],
       },
     });
