@@ -35,7 +35,7 @@ interface ViewEmployeeProps {
   employee: Employee;
   onEmployeeUpdated: () => Promise<void>;
 }
-
+//KMS
 const statusOptions = [
   { value: "active", label: "Active" },
   { value: "suspended", label: "Suspended" },

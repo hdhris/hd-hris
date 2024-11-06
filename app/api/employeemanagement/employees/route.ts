@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
     return handleError(error, "create");
   }
 }
-
+//
 // Function to create an employee
 async function createEmployee(data: z.infer<typeof employeeSchema>) {
   const { schedules, job_id, department_id, ...rest } = data;

@@ -107,7 +107,7 @@ async function getAllDepartments() {
     employeeCount: dept._count.trans_employees
   }));
 
-  // logDatabaseOperation("GET all departments", departmentsWithCount);
+  // logDatabaseOperation("GET all departments", departmentsWithCount); yes
   return departmentsWithCount;
 }
 

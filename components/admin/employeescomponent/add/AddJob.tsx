@@ -21,7 +21,7 @@ import { JobPosition } from "@/types/employeee/JobType";
 interface AddJobPositionProps {
   onJobAdded: () => void;
 }
-
+//
 const jobPositionSchema = z.object({
   name: z
     .string()
