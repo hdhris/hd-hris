@@ -59,8 +59,8 @@ function Page() {
             <UserMail
               key={item.full_name}
               name={item.full_name}
-              email={item.trans_employees_trans_overtimes_employee_idTotrans_employees.email}
-              picture={item.trans_employees_trans_overtimes_employee_idTotrans_employees.picture}
+              email={item.trans_employees_overtimes?.email}
+              picture={item.trans_employees_overtimes?.picture}
             />
           );
         case "request_date":
@@ -118,7 +118,7 @@ function Page() {
                     approved_by: userID!,
                     status: "approved",
                     rate_per_hour: String(
-                      item.trans_employees_trans_overtimes_employee_idTotrans_employees.ref_job_classes.pay_rate
+                      item.trans_employees_overtimes.ref_job_classes?.pay_rate
                     ),
                   });
                 }}
@@ -142,7 +142,7 @@ function Page() {
               >
                 {item.status}
               </Chip>
-              {item.trans_employees_trans_overtimes_approved_byTotrans_employees && (
+              {item.trans_employees_overtimes_approvedBy && (
                 <Tooltip
                   className="pointer-events-auto"
                   content={item.approvedBy_full_name}
@@ -152,7 +152,7 @@ function Page() {
                     radius="full"
                     size="sm"
                     src={
-                      item?.trans_employees_trans_overtimes_approved_byTotrans_employees?.picture ?? ""
+                      item?.trans_employees_overtimes_approvedBy?.picture ?? ""
                     }
                   />
                 </Tooltip>
@@ -173,7 +173,7 @@ function Page() {
     const response = await showDialog({
       title: `${isApproved ? "Appoval" : "Rejection"}`,
       message: `Do you confirm to ${isApproved ? "approve" : "reject"} ${
-        value.trans_employees_trans_overtimes_employee_idTotrans_employees.last_name
+        value.trans_employees_overtimes.last_name
       }'s overtime application?`,
       preferredAnswer: isApproved ? "yes" : "no",
     });

@@ -15,10 +15,10 @@ export async function GET(req: NextRequest) {
         employee_id: id,
       },
       include: {
-        trans_employees_trans_overtimes_employee_idTotrans_employees: {
+        trans_employees_overtimes: {
           ...emp_rev_include.employee_detail
         },
-        trans_employees_trans_overtimes_approved_byTotrans_employees : {
+        trans_employees_overtimes_approvedBy : {
           ...emp_rev_include.reviewer_detail
         }
       },

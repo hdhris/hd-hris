@@ -43,8 +43,8 @@ export interface OvertimeEntry {
   comment: string;
   rendered_mins: number;
   deleted_at: string | null; // Nullable for deleted entries
-  trans_employees_trans_overtimes_employee_idTotrans_employees: UserEmployee; // Employee details
-  trans_employees_trans_overtimes_approved_byTotrans_employees: UserReviewer; // Approver details
+  trans_employees_overtimes: UserEmployee; // Employee details
+  trans_employees_overtimes_approvedBy: UserReviewer; // Approver details
   full_name: string;
   approvedBy_full_name: string;
 };

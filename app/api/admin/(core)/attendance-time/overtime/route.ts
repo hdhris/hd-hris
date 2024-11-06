@@ -16,10 +16,10 @@ export async function GET(request: Request) {
         created_at: "desc",
       },
       include: {
-        trans_employees_trans_overtimes_employee_idTotrans_employees: {
+        trans_employees_overtimes: {
           ...emp_rev_include.employee_detail
         },
-        trans_employees_trans_overtimes_approved_byTotrans_employees: {
+        trans_employees_overtimes_approvedBy: {
           ...emp_rev_include.reviewer_detail
         },
       },
@@ -28,9 +28,9 @@ export async function GET(request: Request) {
     const overtimesWithFullNames = overtimes.map((overtime) => {
       return {
         ...overtime,
-        full_name: getEmpFullName(overtime.trans_employees_trans_overtimes_employee_idTotrans_employees),
+        full_name: getEmpFullName(overtime.trans_employees_overtimes),
         approvedBy_full_name: getEmpFullName(
-          overtime.trans_employees_trans_overtimes_approved_byTotrans_employees
+          overtime.trans_employees_overtimes_approvedBy
         ),
       };
     });
