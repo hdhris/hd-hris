@@ -21,14 +21,15 @@ export async function GET(req: NextRequest) {
 
     // Get the date-process information
     // Helps to more info about the payroll-process information
-    const dateInfo = await prisma.trans_payroll_date.findFirst({
+    const [dateInfo, empData] = await Promise.all([
+        prisma.trans_payroll_date.findFirst({
       where: {
         id: dateID,
       },
-    });
+    }),
 
     // Fetch only the employees who aren't deleted.
-    const empData = await prisma.trans_employees.findMany({
+    await prisma.trans_employees.findMany({
       where: {
          deleted_at: null,
       },
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-    });
+    })])
 
     // Initialize payroll for all employees
     await prisma.trans_payrolls.createMany({
