@@ -109,7 +109,7 @@ export async function PUT(req: NextRequest) {
   if (!id) {
     return NextResponse.json({ error: "Branch ID is required" }, { status: 400 });
   }
-
+//
   try {
     const data = await req.json();
     const validatedData = branchSchema.parse(data);

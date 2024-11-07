@@ -179,7 +179,7 @@ console.log(data)
     throw error; // Re-throw to be handled in the outer catch
   }
 }
-
+//
 // GET: Fetch employees-leaves-status
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);

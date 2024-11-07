@@ -17,7 +17,7 @@ import FormFields, { FormInputProps } from "@/components/common/forms/FormFields
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JobPosition } from "@/types/employeee/JobType";
-
+//
 interface EditJobPositionProps {
   isOpen: boolean;
   onClose: () => void;

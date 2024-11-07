@@ -26,7 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
 }
-
+//
 export const employeeSchema = z.object({
   picture: z.union([z.instanceof(File), z.string()]).optional(),
   first_name: z
@@ -325,7 +325,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         ],
       };
 
-      // console.log("Sending data:", JSON.stringify(fullData, null, 2));
+      console.log("Sending data:", JSON.stringify(fullData, null, 2));
 
       const response = await axios.post(
         "/api/employeemanagement/employees",
