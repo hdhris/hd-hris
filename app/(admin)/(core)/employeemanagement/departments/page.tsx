@@ -18,7 +18,7 @@ const Page: React.FC = () => {
   const [sortedDepartments, setSortedDepartments] = useState<Department[]>([]);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
+//
   useEffect(() => {
     if (departments) {
       const sorted = sortDepartmentsByRecentActivity(departments);

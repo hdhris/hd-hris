@@ -82,7 +82,7 @@ const Page: React.FC = () => {
       console.error("Error updating job position data:", error);
     }
   };
-
+//
   const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },

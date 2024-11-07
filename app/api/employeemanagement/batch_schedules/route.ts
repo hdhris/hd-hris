@@ -17,7 +17,7 @@ export async function GET() {
         clock_out: true,
       },
     });//
-
+//
     return NextResponse.json(batchSchedules);
   } catch (error) {
     console.error("Error fetching batch schedules:", error);
