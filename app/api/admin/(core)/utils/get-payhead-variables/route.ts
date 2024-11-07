@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
         return (
           ph.id != id &&
           toGMT8(ph.created_at!).isBefore(toGMT8(current?.created_at!)) && // Dependent on older variables
-          ph.variable != null
+          ph.variable != null || ph.variable != ""
         );
       })
       .map((ph) => ph.variable);
