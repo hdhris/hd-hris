@@ -16,8 +16,10 @@ function PayheadCalculator({
   setInput,
   payheadVariables,
   setInvalid,
+  system_only = false,
 }: {
   input: string;
+  system_only?: boolean;
   setInput: (value: string) => void;
   payheadVariables?: string[];
   setInvalid: (value: boolean) => void;
@@ -25,16 +27,18 @@ function PayheadCalculator({
 
   const isValidExpression = useMemo(()=>{
     if(input.trim() === "") return true
+    // type ExtendedBaseValueProp = BaseValueProp & { [key: string]: number };
     const baseVariables: BaseValueProp = {
       rate_p_hr: 1,
-      total_shft_hr: 2,
-      payroll_days: 3,
+      total_shft_hr: 1,
+      payroll_days: 1,
       ...payheadVariables?.reduce((acc, variable, index) => {
         acc[variable] = index;
         return acc;
       }, {} as Record<string, number>)
     };
 
+    if (system_only) return true;
     const vals = calculateAllPayheads(baseVariables, [{id: 9999, formula: input, variable:"x"}]);
     if(vals.length){
       setInvalid(false);
@@ -96,11 +100,12 @@ function PayheadCalculator({
         variant="bordered"
         color={!isValidExpression ? "danger" : "primary"}
         readOnly
+        isDisabled={system_only}
         isInvalid={!isValidExpression}
       />
-      <Popover key="calculator" color="secondary" placement="right">
+      <Popover key="calculator" color="secondary" placement="right" hidden>
         <PopoverTrigger>
-          <Button variant="flat" isIconOnly>
+          <Button variant="flat" isIconOnly isDisabled={system_only}>
             <FaCalculator />
           </Button>
         </PopoverTrigger>
