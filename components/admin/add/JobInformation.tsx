@@ -74,7 +74,7 @@ const JobInformationForm: React.FC = () => {
     {
       name: "department_id",
       label: "Department",
-      type: "auto-complete",
+      type: "select",
       isRequired: true,
       config: {
         placeholder: "Select Department",
@@ -93,7 +93,7 @@ const JobInformationForm: React.FC = () => {
     {
       name: "job_id",
       label: "Job Position",
-      type: "auto-complete",
+      type: "select",
       isRequired: true,
       config: {
         placeholder: "Select Job Position",
@@ -104,7 +104,7 @@ const JobInformationForm: React.FC = () => {
       //
       name: "branch_id",
       label: "Branch",
-      type: "auto-complete",
+      type: "select",
       isRequired: true,
       config: {
         placeholder: "Select Branch",
