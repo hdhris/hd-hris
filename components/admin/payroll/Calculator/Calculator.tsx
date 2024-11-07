@@ -46,7 +46,7 @@ function PayheadCalculator({
     }
     
     return false;
-  },[input, payheadVariables, setInvalid])
+  },[input, payheadVariables, setInvalid, system_only])
 
   const handleButtonClick = (value: string) => {
     if (value === "C") {
