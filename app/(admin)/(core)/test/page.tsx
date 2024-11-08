@@ -5,8 +5,8 @@ import Component from "@/app/(admin)/(core)/test/sss-calculator";
 async function TestPlayground() {
   return (
     // <PayheadCalculator/>
-    // <></>
-      <Component/>
+    <></>
+    //   <Component/>
   )
 }
 
