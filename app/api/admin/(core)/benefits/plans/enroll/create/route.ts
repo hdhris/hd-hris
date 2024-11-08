@@ -69,7 +69,15 @@ export async function POST(req: NextRequest) {
         // console.log("Your Contribution: ", contribution)
 
 
-        await prisma.dim_employee_benefits.createMany({
+        // const createDeduction = await prisma.ref_payheads.createMany({
+        //     data: data.deduction_id.map((deductionId: any) => ({
+        //         deduction_id: deductionId,
+        //         plan_id: data.plan_id,
+        //         created_at: new Date(),
+        //         updated_at: new Date()
+        //     }))
+        // })
+        const createBenefits = await prisma.dim_employee_benefits.createMany({
             data: data.employee_id.map((employeeId: any) => ({
                 employee_id: employeeId,
                 plan_id: data.plan_id,
