@@ -8,8 +8,7 @@ export async function POST(req: NextRequest) {
     try {
         hasContentType(req)
         const body = await req.json();
-        console.log("Body: ", body)
-        await prisma.ref_benefit_plans.create({
+        const createdPlan = prisma.ref_benefit_plans.create({
             data: {
                 name: body.name,
                 type: body.plan_type,
@@ -24,6 +23,20 @@ export async function POST(req: NextRequest) {
                 updated_at: toGMT8(new Date()).toISOString(),
             }
         })
+
+        const createDeduction = prisma.ref_payheads.create({
+            data: {
+                name: body.name,
+                type: "deduction",
+                created_at: toGMT8().toISOString(),
+                updated_at: toGMT8().toISOString(),
+                is_active: body.is_active,
+                calculation: body.name.toLowerCase().replace(/[aeiou]/g, "").replace(/ /g, "_").slice(0, 12),
+                system_only: true,
+                is_overwritable: false,
+            }
+        })
+        await prisma.$transaction([createdPlan, createDeduction])
          // await prisma.$transaction(async (prisma) => {
          //            const plan = await prisma.ref_benefit_plans.create({
          //                data: {

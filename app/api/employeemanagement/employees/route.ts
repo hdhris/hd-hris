@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
 // Function to create an employee
 async function createEmployee(data: z.infer<typeof employeeSchema>) {
   const { schedules, job_id, department_id, ...rest } = data;
-
+console.log(data)
   try {
     // 1. Create the employee record
     const employee = await prisma.trans_employees.create({
