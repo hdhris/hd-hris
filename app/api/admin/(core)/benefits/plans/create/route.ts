@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
         hasContentType(req)
         const body = await req.json();
 
+
         const createDeduction = prisma.ref_payheads.create({
             data: {
                 name: body.name,
