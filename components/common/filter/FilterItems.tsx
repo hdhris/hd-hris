@@ -28,6 +28,7 @@ interface FilterProps<T> {
   config: FilterItemsProps<T>[];
   setResults: (items: T[]) => void;
   isLoading?: boolean;
+  uniqueKey?: string | number;
 }
 
 function FilterItems<T>({
@@ -35,6 +36,7 @@ function FilterItems<T>({
   config,
   setResults,
   isLoading,
+  uniqueKey,
 }: FilterProps<T>) {
   const [selectedSection, setSelectedSection] = useState<
     Record<number, SharedSelection>
@@ -115,7 +117,13 @@ function FilterItems<T>({
     if (items && selectedSection) {
       refresh(selectedSection);
     }
-  }, [items, selectedSection]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, selectedSection]); // DO NOT ADD REFRESH
+
+  useEffect(() => {
+    setSelectedSection({});
+  }, [uniqueKey]); // If different module uses the same component on path change
+  
   const handleSelectChange = (sectionIndex: number, key: SharedSelection) => {
     // console.log(Array.from(key));
     setSelectedSection((prevKeys) => ({

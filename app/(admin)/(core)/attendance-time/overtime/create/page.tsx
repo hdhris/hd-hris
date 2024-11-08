@@ -94,11 +94,11 @@ function Page() {
         label="File Leave"
         form={form}
         onSubmit={handleSubmit}
+        className="w-fit"
         classNames={{
           body: {
-            form: "grid grid-cols-2 gap-2",
-          },
-          footer: 'w-fit ms-auto'
+            form: "grid grid-col-2 gap-2",
+          }
         }}
       >
         <div className="col-span-2">
@@ -138,6 +138,9 @@ function Page() {
               label: "Rate Per Hour",
               type: "number",
               isRequired: true,
+              config: {
+                isDisabled: true,
+              }
             },
             {
               name: "reason",

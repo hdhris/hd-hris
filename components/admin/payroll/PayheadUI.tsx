@@ -19,13 +19,16 @@ import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { string, z } from "zod";
+import { z } from "zod";
 import TableData from "@/components/tabledata/TableData";
 import { ListDropDown } from "./ListBoxDropDown";
 import showDialog from "@/lib/utils/confirmDialog";
 import { toast } from "@/components/ui/use-toast";
-import BorderedSwitch from "@/components/common/BorderedSwitch";
 import FormFields from "@/components/common/forms/FormFields";
+import PayheadCalculator from "./Calculator/Calculator";
+import { switchLabel } from "../attendance-time/holidays/script";
+import { capitalize } from "lodash";
+import { useQuery } from "@/services/queries";
 
 interface PayheadFormProps {
   label: string;
@@ -39,14 +42,17 @@ const formSchema = z.object({
     .string()
     .min(3, { message: "Name must be at least 3 characters." })
     .max(20, { message: "Character limit reached." }),
-  calculation: z.string(),
-  is_active: z.boolean(),
+  calculation: z.string().optional(),
+  is_active: z.boolean().optional(),
+  is_overwritable: z.boolean().optional(),
+  variable: z.string().max(14).optional(),
 });
 
 export const PayheadForm: React.FC<PayheadFormProps> = ({
   label,
   onSubmit,
   allData,
+  type,
 }) => {
   const [selectedDepartment, setSelectedDepartment] = useState<Selection>(
     new Set([])
@@ -63,7 +69,15 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
   });
   const [isFiltered, setIsFiltered] = useState(false);
   const [isPending, setPending] = useState(false);
-
+  const { data: variables } = useQuery<string[]>(
+    `/api/admin/utils/get-payhead-variables?id=${
+      allData?.data?.payhead?.id || null
+    }`
+  );
+  useEffect(()=>{
+    console.log(variables);
+  },[variables])
+  const [isInvalid, setInvalid] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -102,7 +116,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
     },
   };
 
-  async function handleSubmit(value: any) {
+  async function handleSubmit(value: z.infer<typeof formSchema>) {
     if (!isFiltered && Array.from(selectedEmployees).length === 0) {
       toast({
         title: "Employee Selection",
@@ -115,7 +129,8 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
     if (Array.from(selectedDepartment).length === 0) {
       const response = await showDialog({
         title: "Department Selection",
-        message: "No department is selected. The payhead will be applied to all departments automatically.\n\nWould you like to proceed?",
+        message:
+          "No department is selected. The payhead will be applied to all departments automatically.\n\nWould you like to proceed?",
       });
       if (response === "no") {
         return;
@@ -124,7 +139,8 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
     if (Array.from(selectedJobs).length === 0) {
       const response = await showDialog({
         title: "Role Selection",
-        message: "No role is selected. The payhead will be applied to all roles automatically.\n\nWould you like to proceed?",
+        message:
+          "No role is selected. The payhead will be applied to all roles automatically.\n\nWould you like to proceed?",
       });
       if (response === "no") {
         return;
@@ -154,7 +170,6 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
   }
 
   const setDataAtLoad = useCallback(() => {
-    console.log("Flag: setDataAtLoad");
     if (data?.payhead) {
       const employeeIds = data.affected.map((affected) =>
         String(affected.employee_id)
@@ -164,6 +179,8 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
         name: data.payhead.name,
         calculation: data.payhead.calculation,
         is_active: data.payhead.is_active,
+        is_overwritable: data.payhead.is_overwritable,
+        variable: data.payhead.variable,
       });
       if (data.payhead.affected_json) {
         setMandatory(data.payhead.affected_json.mandatory);
@@ -198,18 +215,18 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
 
   useEffect(() => {
     if (data) setDataAtLoad();
-  }, [data,setDataAtLoad]);
+  }, [data, setDataAtLoad]);
 
-  const validateMandatory = useCallback((value: {
-    probationary: boolean;
-    regular: boolean;
-  })=>{
+  const validateMandatory = useCallback(
+    (value: { probationary: boolean; regular: boolean }) => {
       return (
         (value.probationary === true && value.regular === false) ||
         (value.probationary === false && value.regular === true) ||
         (value.probationary === true && value.regular === true)
       );
-  },[]);
+    },
+    []
+  );
 
   const filteredDeptAndJobsOrIsMandatory = useCallback(() => {
     if (selectedDepartment && selectedJobs && data) {
@@ -234,7 +251,12 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
 
   useEffect(() => {
     filteredDeptAndJobsOrIsMandatory();
-  }, [selectedDepartment, selectedJobs, mandatory, filteredDeptAndJobsOrIsMandatory]);
+  }, [
+    selectedDepartment,
+    selectedJobs,
+    mandatory,
+    filteredDeptAndJobsOrIsMandatory,
+  ]);
 
   if (isLoading || !data) {
     return (
@@ -251,104 +273,147 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
       <Card className="h-full mx-2 min-w-80 shadow-sm">
         <CardHeader>{label}</CardHeader>
         <CardBody className="pt-0">
-          <ScrollShadow>
+          <ScrollShadow className="-me-3 pe-3">
             <Form {...form}>
               <form
                 id="payhead-form"
                 onSubmit={form.handleSubmit(handleSubmit)}
+                className="space-y-2"
               >
-                  <FormFields
-                    items={[
-                      {
-                        name: "name",
-                        label: "Name",
-                        isRequired: true,
+                <FormFields
+                  items={[
+                    {
+                      name: "name",
+                      label: "Name",
+                      isRequired: true,
+                    },
+                    {
+                      name: "calculation",
+                      label: "Calculation",
+                      Component(field) {
+                        return (
+                          <PayheadCalculator
+                            payhead={data.payhead}
+                            setInvalid={setInvalid}
+                            input={field.value}
+                            setInput={field.onChange}
+                            payheadVariables={variables}
+                          />
+                        );
                       },
-                      {
-                        name: "calculation",
-                        label: "Calculation",
-                        isRequired: true,
-                      },
-                      {
-                        name: "is_active",
-                        type: "checkbox",
-                        label: "Active",
-                        description: "Effective on next payroll",
-                      },
-                    ]}
-                  />
-                  <ListDropDown
-                    items={[
-                      { name: "Probationary", id: 1 },
-                      { name: "Regular", id: 2 },
-                    ]}
-                    triggerName="Mandatory Status"
-                    selectedKeys={
-                      new Set(
-                        [
-                          mandatory?.probationary ? "1" : undefined,
-                          mandatory?.regular ? "2" : undefined,
-                        ].filter((key): key is string => key !== undefined)
-                      )
-                    }
-                    onSelectionChange={(keys) => {
-                      const values = Array.from(keys);
-                      setMandatory({
-                        probationary: values.includes("1"),
-                        regular: values.includes("2"),
-                      });
-                    }}
-                    togglable={true}
-                    reversable={true}
-                  />
-                  <ListDropDown
-                    items={data.departments || []}
-                    triggerName="Departments"
-                    selectedKeys={selectedDepartment}
-                    onSelectionChange={(keys) => {
-                      setSelectedDepartment(keys);
-                      setSelectedJobs(
-                        new Set(
-                          data.job_classes
-                            .filter((job) =>
-                              Array.from(keys).includes(
-                                String(job.department_id)
+                    },
+                    {
+                      name: "is_overwritable",
+                      type: "switch",
+                      label: switchLabel(
+                        "Writable",
+                        `Amount can be overwritten over given calculated input`
+                      ),
+                    },
+                    {
+                      name: "is_active",
+                      type: "switch",
+                      label: switchLabel(
+                        "Active",
+                        `${capitalize(type)} will be effective on next payroll`
+                      ),
+                    },
+                    {
+                      name: "mandatory_list",
+                      Component: () => (
+                        <ListDropDown
+                          items={[
+                            { name: "Probationary", id: 1 },
+                            { name: "Regular", id: 2 },
+                          ]}
+                          triggerName="Mandatory Status"
+                          selectedKeys={
+                            new Set(
+                              [
+                                mandatory?.probationary ? "1" : undefined,
+                                mandatory?.regular ? "2" : undefined,
+                              ].filter(
+                                (key): key is string => key !== undefined
                               )
                             )
-                            .map((job) => String(job.id))
-                        )
-                      );
-                    }}
-                    togglable={true}
-                    reversable={true}
-                  />
-                  <ListDropDown
-                    items={
-                      data.job_classes.filter((job) => {
-                        return Array.from(selectedDepartment).includes(
-                          String(job.department_id)
-                        );
-                      }) || []
-                    }
-                    triggerName="Roles"
-                    selectedKeys={selectedJobs}
-                    onSelectionChange={setSelectedJobs}
-                    togglable={true}
-                    reversable={true}
-                    sectionConfig={data.departments
-                      .map((dep) => {
-                        return {
-                          name: dep.name,
-                          key: "department_id",
-                          id: dep.id,
-                        };
-                      })
-                      .filter((dep) => {
-                        return Array.from(selectedDepartment).includes(
-                          String(dep.id)
-                        );
-                      })}
-                  />
+                          }
+                          onSelectionChange={(keys) => {
+                            const values = Array.from(keys);
+                            setMandatory({
+                              probationary: values.includes("1"),
+                              regular: values.includes("2"),
+                            });
+                          }}
+                          togglable={true}
+                          reversable={true}
+                        />
+                      ),
+                    },
+                    {
+                      name: "department_list",
+                      Component: () => (
+                        <ListDropDown
+                          items={data.departments || []}
+                          triggerName="Departments"
+                          selectedKeys={selectedDepartment}
+                          onSelectionChange={(keys) => {
+                            setSelectedDepartment(keys);
+                            setSelectedJobs(
+                              new Set(
+                                data.job_classes
+                                  .filter((job) =>
+                                    Array.from(keys).includes(
+                                      String(job.department_id)
+                                    )
+                                  )
+                                  .map((job) => String(job.id))
+                              )
+                            );
+                          }}
+                          togglable={true}
+                          reversable={true}
+                        />
+                      ),
+                    },
+                    {
+                      name: "role_list",
+                      Component: () => (
+                        <ListDropDown
+                          items={
+                            data.job_classes.filter((job) => {
+                              return Array.from(selectedDepartment).includes(
+                                String(job.department_id)
+                              );
+                            }) || []
+                          }
+                          triggerName="Roles"
+                          selectedKeys={selectedJobs}
+                          onSelectionChange={setSelectedJobs}
+                          togglable={true}
+                          reversable={true}
+                          sectionConfig={data.departments
+                            .map((dep) => {
+                              return {
+                                name: dep.name,
+                                key: "department_id",
+                                id: dep.id,
+                              };
+                            })
+                            .filter((dep) => {
+                              return Array.from(selectedDepartment).includes(
+                                String(dep.id)
+                              );
+                            })}
+                        />
+                      ),
+                    },
+                    {
+                      name: "variable",
+                      label: "Variable ( intended for reusability )",
+                      isRequired: false,
+                    },
+                  ]}
+                />
               </form>
             </Form>
           </ScrollShadow>
@@ -356,6 +421,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
         <CardFooter>
           <Button
             isLoading={isPending}
+            isDisabled={isInvalid}
             color="primary"
             className="w-full"
             type="submit"
@@ -366,66 +432,66 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
         </CardFooter>
       </Card>
       <TableData
-          config={config}
-          items={data.employees || []}
-          isLoading={isLoading}
-          selectedKeys={isFiltered ? new Set([]) : selectedEmployees}
-          disabledKeys={disabledKeys}
-          searchingItemKey={["first_name", "middle_name", "last_name"]}
-          onSelectionChange={setSelectedEmployees}
-          counterName="Employees"
-          className="flex-1 w-full h-full"
-          removeWrapper
-          isHeaderSticky
-          color={"primary"}
-          selectionMode={isFiltered ? "single" : "multiple"}
-          aria-label="Employees"
-          filterItems={
-            !isFiltered
-              ? [
-                  {
-                    filtered: data.departments.map((dep) => {
-                      return {
-                        name: dep.name,
-                        value: "dep_" + dep.id,
-                        key: ""
-                      };
-                    }),
-                    category: "Department",
-                  },
-                  {
-                    filtered: data.job_classes.map((job) => {
-                      return {
-                        name: job.name,
-                        value: "job_" + job.id,
-                        key: ""
-                      };
-                    }),
-                    category: "Roles",
-                  },
-                ]
-              : undefined
-          }
-          filterConfig={(keys) => {
-            let filteredItems: AffectedEmployee[] = [...data.employees!];
+        config={config}
+        items={data.employees || []}
+        isLoading={isLoading}
+        selectedKeys={isFiltered ? new Set([]) : selectedEmployees}
+        disabledKeys={disabledKeys}
+        searchingItemKey={["first_name", "middle_name", "last_name"]}
+        onSelectionChange={setSelectedEmployees}
+        counterName="Employees"
+        className="flex-1 w-full h-full"
+        removeWrapper
+        isHeaderSticky
+        color={"primary"}
+        selectionMode={isFiltered ? "single" : "multiple"}
+        aria-label="Employees"
+        filterItems={
+          !isFiltered
+            ? [
+                {
+                  filtered: data.departments.map((dep) => {
+                    return {
+                      name: dep.name,
+                      value: "dep_" + dep.id,
+                      key: "",
+                    };
+                  }),
+                  category: "Department",
+                },
+                {
+                  filtered: data.job_classes.map((job) => {
+                    return {
+                      name: job.name,
+                      value: "job_" + job.id,
+                      key: "",
+                    };
+                  }),
+                  category: "Roles",
+                },
+              ]
+            : undefined
+        }
+        filterConfig={(keys) => {
+          let filteredItems: AffectedEmployee[] = [...data.employees!];
 
-            if (keys !== "all" && keys.size > 0) {
-              console.log(Array.from(keys));
-              Array.from(keys).forEach((key) => {
-                const [uid, value] = (key as string).split("_");
-                filteredItems = filteredItems.filter((items) => {
-                  if (uid.includes("dep")) {
-                    return items.ref_departments.id === Number(value);
-                  } else if (uid.includes("job")) {
-                    return items.ref_job_classes.id === Number(value);
-                  }
-                });
+          if (keys !== "all" && keys.size > 0) {
+            console.log(Array.from(keys));
+            Array.from(keys).forEach((key) => {
+              const [uid, value] = (key as string).split("_");
+              filteredItems = filteredItems.filter((items) => {
+                if (uid.includes("dep")) {
+                  return items.ref_departments.id === Number(value);
+                } else if (uid.includes("job")) {
+                  return items.ref_job_classes.id === Number(value);
+                }
               });
-            }
+            });
+          }
 
-            return filteredItems;
-          }}
-        />
+          return filteredItems;
+        }}
+      />
     </div>
   );
 };

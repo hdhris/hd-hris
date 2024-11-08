@@ -39,9 +39,9 @@ function Page() {
   const [selectedOvertime, setSelectedOvertime] = useState<
     OvertimeEntry | undefined
   >();
-  const { data, isLoading } = useQuery<OvertimeEntry[]>(
+  const { data, isLoading, mutate } = useQuery<OvertimeEntry[]>(
     "/api/admin/attendance-time/overtime",
-    { refreshInterval: 3000 }
+    { refreshInterval: 60000 }
   );
   const config: TableConfigProps<OvertimeEntry> = {
     columns: [
@@ -59,8 +59,8 @@ function Page() {
             <UserMail
               key={item.full_name}
               name={item.full_name}
-              email={item.trans_employees_overtimes.email}
-              picture={item.trans_employees_overtimes.picture}
+              email={item.trans_employees_overtimes?.email}
+              picture={item.trans_employees_overtimes?.picture}
             />
           );
         case "request_date":
@@ -118,7 +118,7 @@ function Page() {
                     approved_by: userID!,
                     status: "approved",
                     rate_per_hour: String(
-                      item.trans_employees_overtimes.ref_job_classes.pay_rate
+                      item.trans_employees_overtimes.ref_job_classes?.pay_rate
                     ),
                   });
                 }}
@@ -191,6 +191,7 @@ function Page() {
             "rate_per_hour",
           ])
         );
+        mutate();
         toast({
           title: isApproved ? "Approved" : "Rejected",
           description: "Overtime has been " + value.status,

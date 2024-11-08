@@ -4,6 +4,8 @@ const nextConfig = {
     APP_NAME: process.env.APP_NAME,
     AES_SECRET: process.env.AES_SECRET,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
   async redirects() {
     return [
@@ -32,7 +34,8 @@ const nextConfig = {
         permanent: true,
       },{
         source: "/benefits",
-        destination: "/benefits/membership",
+        // destination: "/benefits/membership",
+        destination: "/benefits/plans",
         permanent: true,
       },
     ];

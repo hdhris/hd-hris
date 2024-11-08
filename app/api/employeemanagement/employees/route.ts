@@ -46,22 +46,23 @@ const employeeSchema = z.object({
     .array(
       z.object({
         batch_id: z.number(),
-        days_json: z
-          .union([z.string(), z.array(z.string())])
-          .transform((val: string | string[]) => {
-            if (typeof val === "string") {
-              // Split by comma, trim whitespace, and filter out any empty strings
-              return val
-                .split(",")
-                .map((day) => day.trim())
-                .filter((day) => day.length > 0);
-            }
-            // If already an array, clean and filter it directly
-            return val.filter((day) => day && day.trim().length > 0);
-          })
-          .refine((val) => val.length > 0, {
-            message: "At least one working day is required",
-          }),
+        // days_json: z
+        //   .union([z.string(), z.array(z.string())])
+        //   .transform((val: string | string[]) => {
+        //     if (typeof val === "string") {
+        //       // Split by comma, trim whitespace, and filter out any empty strings
+        //       return val
+        //         .split(",")
+        //         .map((day) => day.trim())
+        //         .filter((day) => day.length > 0);
+        //     }
+        //     // If already an array, clean and filter it directly
+        //     return val.filter((day) => day && day.trim().length > 0);
+        //   })
+        //   .refine((val) => val.length > 0, {
+        //     message: "At least one working day is required",
+        //   }),
+        days_json: z.array(z.string())
       })
     )
     .optional(),
@@ -120,7 +121,7 @@ export async function POST(req: NextRequest) {
 // Function to create an employee
 async function createEmployee(data: z.infer<typeof employeeSchema>) {
   const { schedules, job_id, department_id, ...rest } = data;
-
+console.log(data)
   try {
     // 1. Create the employee record
     const employee = await prisma.trans_employees.create({

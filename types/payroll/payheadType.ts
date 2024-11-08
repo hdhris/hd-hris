@@ -15,8 +15,11 @@ export interface Payhead {
   deleted_at?: string;
   id: number;
   is_active: boolean;
+  is_overwritable: boolean;
+  system_only: boolean;
   name: string;
   type: 'earning' | 'deduction';
+  variable?: string;
   affected_json: AffectedJson;
   dim_payhead_affecteds: Affected[];
 }

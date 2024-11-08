@@ -1,14 +1,12 @@
 import { toast } from "@/components/ui/use-toast";
-import { useUserInfo } from "@/hooks/employeeIdHook";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import { useUserInfo } from "@/lib/utils/getEmployeInfo";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { useQuery } from "@/services/queries";
 import {
   Avatar,
   Badge,
   Button,
-  Divider,
-  Input,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -53,14 +51,18 @@ interface EmployeeDetails {
 function HelpReport() {
   const [adding, setAdding] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [reviewingID, setReviewingID] = useState(-1);
+  const [reportID, setReportID] = useState(-1);
   //   const inVisible = false;
   const pathname = usePathname();
   const [newReport, setNewReport] = useState("");
   const userInfo = useUserInfo();
-  const { data: reports, isLoading } = useQuery<HelpReport[]>(
+  const {
+    data: reports,
+    isLoading,
+    mutate,
+  } = useQuery<HelpReport[]>(
     `/api/admin/utils/help-report?path=${encodeURIComponent(pathname)}`,
-    { refreshInterval: 5000 }
+    { refreshInterval: 60000 }
   );
   const unresolved = useMemo(() => {
     if (reports) {
@@ -77,7 +79,7 @@ function HelpReport() {
   const handleReviewed = useCallback(
     async (id: number) => {
       setSubmitting(true);
-      setReviewingID(id);
+      setReportID(id);
       try {
         await axios.post("/api/admin/utils/help-report/update", {
           reviewer_id: userInfo?.id,
@@ -92,6 +94,7 @@ function HelpReport() {
 
         setNewReport("");
         setAdding(false);
+        mutate();
       } catch (error) {
         toast({
           title: "Error",
@@ -100,10 +103,10 @@ function HelpReport() {
         });
       } finally {
         setSubmitting(false);
-        setReviewingID(-1);
+        setReportID(-1);
       }
     },
-    [userInfo]
+    [userInfo, mutate]
   );
 
   const handleSubmitReport = useCallback(async () => {
@@ -123,6 +126,7 @@ function HelpReport() {
       });
       setNewReport("");
       setAdding(false);
+      mutate();
     } catch (error) {
       toast({
         title: "Error",
@@ -131,7 +135,7 @@ function HelpReport() {
       });
     }
     setSubmitting(false);
-  }, [newReport, userInfo, pathname]);
+  }, [newReport, userInfo, pathname, mutate]);
 
   const topLeftContent = useMemo(() => {
     return adding ? (
@@ -197,10 +201,7 @@ function HelpReport() {
       color="danger"
       placement="top-right"
     >
-      <Popover
-        placement="right-start"
-        onClose={() => setAdding(false)}
-      >
+      <Popover placement="right-start" onClose={() => setAdding(false)}>
         <PopoverTrigger>
           <Button isIconOnly variant="light" radius="md" disableAnimation>
             <MdOutlineBugReport
@@ -216,7 +217,7 @@ function HelpReport() {
             {topRightContent}
           </div>
           {isLoading ? (
-            <Spinner className="w-72 my-5" size="sm"/>
+            <Spinner className="w-72 my-5" size="sm" />
           ) : reports && reports.length ? (
             <ScrollShadow className="max-h-80">
               <div className="p-4 flex flex-col gap-1">
@@ -242,7 +243,9 @@ function HelpReport() {
                           }
                         />
                       </Tooltip>
-                      <p className="w-52 text-ellipsis overflow-hidden">{report.description}</p>
+                      <p className="w-52 text-ellipsis overflow-hidden">
+                        {report.description}
+                      </p>
                       <div className="bg-gray-500 w-[1px] h-8" />
                       {report.reviewer_id ? (
                         <Tooltip
@@ -271,8 +274,8 @@ function HelpReport() {
                             size: "sm",
                           })}
                           className="shadow-md"
-                          isDisabled={adding || reviewingID != -1}
-                          isLoading={reviewingID === report.id}
+                          isDisabled={adding || reportID != -1}
+                          isLoading={reportID === report.id}
                           isIconOnly
                           variant="flat"
                           onClick={() => handleReviewed(report.id)}

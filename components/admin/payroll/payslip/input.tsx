@@ -1,3 +1,4 @@
+import { cn } from "@nextui-org/react";
 import React from "react";
 
 // interface CustomInputProps {
@@ -122,23 +123,14 @@ class CustomInput extends React.Component<
 
 export default CustomInput;
 
-export function PayrollInputColumn({
-  uniqueKey,
-  payheadId,
-  employeeId,
-  setFocusedPayhead,
-  handleBlur,
-  value,
-  type,
-  handleRecording,
-  readOnly,
-  className,
-}: {
+export function PayrollInputColumn({...props}: {
+  placeholder?: string;
   uniqueKey?: string | number;
   payheadId?: number;
   employeeId?: number;
-  setFocusedPayhead: (id: number) => void;
+  setFocusedPayhead?: (id: number) => void;
   type?: "earning" | "deduction";
+  unUpdated?: boolean;
   value: string | number;
   handleBlur: (employeeId: number, payheadId: number, value: number) => void;
   handleRecording?: (
@@ -150,25 +142,39 @@ export function PayrollInputColumn({
   className?: string;
 }) {
   return (
-    <td key={uniqueKey} className="z-30">
+    <td key={props.uniqueKey} className="z-30">
       <CustomInput
-        className={className}
-        placeholder={"0"}
-        onFocus={() => payheadId && setFocusedPayhead(payheadId)}
+        className={cn(
+          "border-1",
+          props.unUpdated ? "border-red-500" : "border-gray-50",
+          props.readOnly && "text-gray-400",
+          props.className,
+        )}
+        readOnly={props.readOnly}
+        value={props.value}
+        placeholder={props.placeholder || "0"}
+        onFocus={() =>
+          props.payheadId && props.setFocusedPayhead && props.setFocusedPayhead(props.payheadId)
+        }
         onBlur={(e) =>
-          payheadId &&
-          employeeId &&
-          handleBlur(employeeId, payheadId, parseFloat(e.target.value) || 0)
+          props.payheadId &&
+          props.employeeId &&
+          props.handleBlur(
+            props.employeeId,
+            props.payheadId,
+            parseFloat(e.target.value) || 0
+          )
         }
-        value={value}
         onChange={(e) =>
-          payheadId &&
-          employeeId &&
-          type &&
-          handleRecording &&
-          handleRecording(employeeId, payheadId, [type, e.target.value])
+          props.payheadId &&
+          props.employeeId &&
+          props.type &&
+          props.handleRecording &&
+          props.handleRecording(props.employeeId, props.payheadId, [
+            props.type,
+            e.target.value,
+          ])
         }
-        readOnly={readOnly}
       />
     </td>
   );
