@@ -69,7 +69,6 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
   });
   const [isFiltered, setIsFiltered] = useState(false);
   const [isPending, setPending] = useState(false);
-  const [systemOnly, setSystemOnly] = useState(false);
   const { data: variables } = useQuery<string[]>(
     `/api/admin/utils/get-payhead-variables?id=${
       allData?.data?.payhead?.id || null
@@ -183,7 +182,6 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
         is_overwritable: data.payhead.is_overwritable,
         variable: data.payhead.variable,
       });
-      setSystemOnly(data.payhead.system_only);
       if (data.payhead.affected_json) {
         setMandatory(data.payhead.affected_json.mandatory);
         if (data.payhead.affected_json.department.length > 0) {
@@ -295,10 +293,10 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                       Component(field) {
                         return (
                           <PayheadCalculator
+                            payhead={data.payhead}
                             setInvalid={setInvalid}
                             input={field.value}
                             setInput={field.onChange}
-                            system_only={systemOnly}
                             payheadVariables={variables}
                           />
                         );

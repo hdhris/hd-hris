@@ -9,44 +9,60 @@ import {
 import React, { useMemo } from "react";
 import { calcbuttons, isNumeric, isValidAdjacent, var_buttons } from "./buttons";
 import { FaCalculator } from "react-icons/fa";
-import { BaseValueProp, calculateAllPayheads, VariableFormulaProp } from "@/helper/payroll/calculations";
+import { BaseValueProp, calculateAllPayheads } from "@/helper/payroll/calculations";
 
 function PayheadCalculator({
+  payhead,
   input,
   setInput,
   payheadVariables,
   setInvalid,
-  system_only = false,
 }: {
+  payhead: {
+    id: number;
+    system_only?: boolean;
+  };
   input: string;
-  system_only?: boolean;
   setInput: (value: string) => void;
   payheadVariables?: string[];
   setInvalid: (value: boolean) => void;
 }) {
 
+  // Ignore system variables that can update calculations
+  // 51 : Basic Salary
+  const isDisabled = useMemo(()=>{
+    if(payhead)
+      return [51].includes(payhead.id)===false && payhead.system_only;
+
+    return false;
+  },[payhead]);
+
   const isValidExpression = useMemo(()=>{
-    if(input.trim() === "") return true
+    if(input.trim() === ""){
+      setInvalid(false);
+      return true
+    }
     // type ExtendedBaseValueProp = BaseValueProp & { [key: string]: number };
     const baseVariables: BaseValueProp = {
       rate_p_hr: 1,
       total_shft_hr: 1,
       payroll_days: 1,
       ...payheadVariables?.reduce((acc, variable, index) => {
-        acc[variable] = index;
+        acc[variable] = 1;
         return acc;
       }, {} as Record<string, number>)
     };
 
-    if (system_only) return true;
-    const vals = calculateAllPayheads(baseVariables, [{id: 9999, formula: input, variable:"x"}]);
+    if (isDisabled) return true;
+    const vals = calculateAllPayheads(baseVariables, [{payhead_id: -1, formula: input, variable:"x"}], true);
     if(vals.length){
       setInvalid(false);
       return true;
     }
     
+    setInvalid(true);
     return false;
-  },[input, payheadVariables, setInvalid, system_only])
+  },[input, payheadVariables, setInvalid])
 
   const handleButtonClick = (value: string) => {
     if (value === "C") {
@@ -100,12 +116,12 @@ function PayheadCalculator({
         variant="bordered"
         color={!isValidExpression ? "danger" : "primary"}
         readOnly
-        isDisabled={system_only}
+        isDisabled={isDisabled}
         isInvalid={!isValidExpression}
       />
-      <Popover key="calculator" color="secondary" placement="right" hidden>
+      <Popover key="calculator" color="secondary" placement="right">
         <PopoverTrigger>
-          <Button variant="flat" isIconOnly isDisabled={system_only}>
+          <Button variant="flat" isIconOnly isDisabled={isDisabled}>
             <FaCalculator />
           </Button>
         </PopoverTrigger>

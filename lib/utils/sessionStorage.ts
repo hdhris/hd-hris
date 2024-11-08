@@ -1,9 +1,9 @@
 import { toGMT8 } from "./toGMT8";
 
-export function saveToSession<T>(key: string, data: T, id?: string, expiration?: number) {
+export function saveToSession<T>(key: string, data: T, id?: string, expiration: number = 10) {
   const dataToSave = {
     data,
-    expiration: toGMT8().add(expiration||10, "minute").toISOString(),
+    expiration: toGMT8().add(expiration, "minute").toISOString(),
     id,
   };
   sessionStorage.setItem(key, JSON.stringify(dataToSave));
