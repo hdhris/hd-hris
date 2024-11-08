@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
         hasContentType(req)
         const data = await req.json()
 
-        console.log("Creating Data: ", data)
+        // console.log("Creating Data: ", data)
 
         //this is a static monthly salary
 

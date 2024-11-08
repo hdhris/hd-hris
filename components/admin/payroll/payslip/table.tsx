@@ -21,6 +21,7 @@ import {
 } from "@/lib/utils/sessionStorage";
 import { useQuery } from "@/services/queries";
 import { viewPayslipType } from "@/app/(admin)/(core)/payroll/payslip/page";
+import {numberWithCommas} from "@/lib/utils/numberFormat";
 
 interface PRPayslipTableType {
   processDate: ProcessDate;
@@ -459,7 +460,7 @@ export function PRPayslipTable({
                 key={`${employee.id}-total-earn`}
                 // setFocusedPayhead={setFocusedPayhead}
                 handleBlur={handleBlur}
-                value={getEmployeePayheadSum(employee.id, "earning")}
+                value={numberWithCommas(getEmployeePayheadSum(employee.id, "earning"))}
                 readOnly
               />
               {payslipData.deductions.map((deduct) =>
@@ -509,8 +510,7 @@ export function PRPayslipTable({
                 // setFocusedPayhead={setFocusedPayhead}
                 handleBlur={handleBlur}
                 value={getEmployeePayheadSum(employee.id, "deduction")}
-                readOnly
-              />
+                readOnly/>
               <PayrollInputColumn
                 uniqueKey={`${employee.id}-total-salary`}
                 key={`${employee.id}-total-salary`}
@@ -518,8 +518,8 @@ export function PRPayslipTable({
                 // setFocusedPayhead={setFocusedPayhead}
                 handleBlur={handleBlur}
                 value={
-                  getEmployeePayheadSum(employee.id, "earning") -
-                  getEmployeePayheadSum(employee.id, "deduction")
+                  numberWithCommas(getEmployeePayheadSum(employee.id, "earning") -
+                  getEmployeePayheadSum(employee.id, "deduction"))
                 }
                 readOnly
               />

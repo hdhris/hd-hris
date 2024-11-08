@@ -101,8 +101,8 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
 
 
     const onSubmit = async (values: z.infer<typeof PlanFormValidation>) => {
+        setIsLoading(true)
         try {
-            setIsLoading(true)
             const res = await axiosInstance.post("/api/admin/benefits/plans/create", values)
             if (res.status === 200) {
                 toast({
@@ -253,7 +253,7 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
 
     return (<FormDrawer isLoading={isLoading} title={title || "Add New Benefit Plan"}
                         description={rest.description || "Enter the details for the new employee benefit plan."}
-                        onOpen={handleModalOpen} isOpen={isModalOpen}>
+                        onOpen={handleModalOpen} isOpen={isModalOpen} >
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="drawer-form">
                 <FormFields items={basicInfoFields}/>
