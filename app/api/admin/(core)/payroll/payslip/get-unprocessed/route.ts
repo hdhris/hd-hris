@@ -37,7 +37,9 @@ export async function GET(req: NextRequest) {
         },
       }),
       prisma.ref_payheads.findMany({
-        where: { deleted_at: null, is_active: true }, orderBy: { created_at: "asc" },
+        where: { deleted_at: null, is_active: true },
+        include: { ref_benefit_plans: { select: { deduction_id: true } } },
+        orderBy: { created_at: "asc" },
       }),
     ]); // Fetch undeleted and active payheads.
 
@@ -90,7 +92,7 @@ export async function GET(req: NextRequest) {
 
     // Filter employees to include only those associated with active payrolls.
     const employees = empData.filter((emp) => payrollsMap.has(emp.id));
-    const employeeIds = Array.from(payrolls.keys());
+    const employeeIds = Array.from(payrollsMap.keys());
 
     // Execute both queries concurrently
     const [cashToDisburse, cashToRepay] = await Promise.all([
@@ -161,7 +163,7 @@ export async function GET(req: NextRequest) {
     // Generate contributions
     const benefits_plans_data = await prisma.dim_employee_benefits.findMany({
       where : {
-        id : { in: employeeIds },
+        employee_id: { in: employeeIds },
         ref_benefit_plans : { is_active: true, deleted_at: null },
       },
       select: {
@@ -193,7 +195,6 @@ export async function GET(req: NextRequest) {
       }
     })
     const benefitDeductionMap = new Map(benefits_plans_data.map(bp=> [bp.ref_benefit_plans?.id, bp.ref_benefit_plans?.deduction_id]));
-    const benefitDeductionIDs = new Set(benefitDeductionMap.values());
     const employeeBenefitsMap = benefits_plans_data.reduce(
       (acc, { trans_employees, ref_benefit_plans }) => {
         const employeeId = trans_employees?.id!;
@@ -248,7 +249,7 @@ export async function GET(req: NextRequest) {
             isAffected(tryParse(emp), tryParse(ph)) &&
             (ph.id === 53 ? cashDisburseMap.has(emp.id) : true) &&
             (ph.id === 54 ? cashRepayMap.has(emp.id) : true) &&
-            !benefitDeductionIDs.has(ph.id) // Benefits already calculated, ignore.
+            (ph.ref_benefit_plans.length === 0) // Benefits already calculated, ignore.
           );
         }).map((ph) => ({
           link_id: (()=>{

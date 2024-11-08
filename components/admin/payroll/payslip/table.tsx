@@ -26,7 +26,7 @@ interface PRPayslipTableType {
   processDate: ProcessDate;
   // setFocusedEmployee: (id: number | null) => void;
   // setFocusedPayhead: (id: number | null) => void;
-  setPayslip: (item: viewPayslipType) => void;
+  setPayslip: (item: viewPayslipType | null) => void;
 }
 export function PRPayslipTable({
   processDate,
@@ -66,9 +66,10 @@ export function PRPayslipTable({
     payheadId: number;
     value: number;
   }[] = [];
+  
   const dontInput = useMemo(() => {
     return processDate.is_processed || onErrors > 0 || onRetry;
-  }, [processDate]);
+  }, [processDate, onErrors, onRetry]);
 
   // Function to process update requests in the queue
   const processQueue = useCallback(async () => {
@@ -245,6 +246,10 @@ export function PRPayslipTable({
   }, [payslipData]);
 
   const handleFocuses = useCallback((empID: number)=>{
+    if (isLoading){
+      setPayslip(null);
+      return;
+    }
     type ListItem = { label: string; number: string };
     const employeeRecords = records[empID];
     const earnings: ListItem[] = [];
@@ -281,7 +286,7 @@ export function PRPayslipTable({
         net: getEmployeePayheadSum(employee.id, "earning") - getEmployeePayheadSum(employee.id, "deduction"),
       }
     })()); 
-  },[setPayslip,records,payslipData])
+  },[setPayslip,records,payslipData, isLoading])
 
   // Initial loaders
   useEffect(() => {
