@@ -192,7 +192,8 @@ export async function GET(req: NextRequest) {
         }
       }
     })
-    const benefitDeductionIDs = new Set(benefits_plans_data.map(bp=> bp.ref_benefit_plans?.deduction_id));
+    const benefitDeductionMap = new Map(benefits_plans_data.map(bp=> [bp.ref_benefit_plans?.id, bp.ref_benefit_plans?.deduction_id]));
+    const benefitDeductionIDs = new Set(benefitDeductionMap.values());
     const employeeBenefitsMap = benefits_plans_data.reduce(
       (acc, { trans_employees, ref_benefit_plans }) => {
         const employeeId = trans_employees?.id!;
@@ -231,7 +232,7 @@ export async function GET(req: NextRequest) {
           };
           return {
             link_id: benefit.id,
-            payhead_id: 1,
+            payhead_id: benefitDeductionMap.get(benefit.id)!,
             variable: benefit.name,
             amount: new Benefit(benefit).getContribution(calculateAllPayheads(baseVariables, [getBasicSalary])[0].amount),
           };
@@ -247,7 +248,7 @@ export async function GET(req: NextRequest) {
             isAffected(tryParse(emp), tryParse(ph)) &&
             (ph.id === 53 ? cashDisburseMap.has(emp.id) : true) &&
             (ph.id === 54 ? cashRepayMap.has(emp.id) : true) &&
-            (benefitDeductionIDs.has(ph.id) ? employeeBenefitsMap[emp.id] : true)
+            !benefitDeductionIDs.has(ph.id) // Benefits already calculated, ignore.
           );
         }).map((ph) => ({
           link_id: (()=>{
@@ -273,6 +274,7 @@ export async function GET(req: NextRequest) {
       calculatedAmountList[emp.id] = [...calculatedAmount, ...calculateContributions];
     });
 
+    return NextResponse.json(calculatedAmountList);
     // Insert calculated breakdowns into `trans_payhead_breakdowns` table.
     await prisma.trans_payhead_breakdowns.createMany({
       data: Object.entries(calculatedAmountList).flatMap(([empId, payheads]) => {

@@ -227,7 +227,7 @@ export function PRPayslipTable({
       const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
       if (!employeeAmounts) return false;
 
-      const item = employeeAmounts.find((entry) => entry.id === itemId);
+      const item = employeeAmounts.find((entry) => entry.payhead_id === itemId);
       return !!item;
     };
   },[payslipData])
@@ -239,7 +239,7 @@ export function PRPayslipTable({
       const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
       if (!employeeAmounts) return 0;
 
-      const item = employeeAmounts.find((entry) => entry.id === itemId);
+      const item = employeeAmounts.find((entry) => entry.payhead_id === itemId);
       return item ? item.amount : 0;
     };
   }, [payslipData]);
