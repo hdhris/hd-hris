@@ -107,7 +107,11 @@ function Page() {
               name={item.name}
               onEdit={() => router.push(`/payroll/earnings/${item.id}`)}
               onDelete={() => {
-                handleDelete(item.id, item.name);
+                if(item.system_only){
+                  toast({title:"System variable cannot be deleted"});
+                } else {
+                  handleDelete(item.id, item.name);
+                }
               }}
             />
           );

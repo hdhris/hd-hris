@@ -105,11 +105,11 @@ function Page() {
                       </p>
                       {/* <p className="ps-4 text-sm font-bold">{item.amount}</p> */}
                     </div>
-                    <Divider className={index < payslip.earnings.list.length-1 ? "w-52" : ""} />
+                    {index < payslip.earnings.list.length-1 && <Divider className="w-52"/>} 
                   </div>
                 );
               })}
-              {/* <Divider className="w-20 ms-auto h-[2px]" /> */}
+              <Divider/>
               <p className="ms-auto me-4 text-small font-semibold">{payslip.earnings.total}</p>
               <div className="ms-4">
                 <p className="text-sm font-semibold text-gray-500 my-2">
@@ -129,11 +129,11 @@ function Page() {
                         </p>
                         {/* <p className="ps-4 text-sm font-bold">{item.amount}</p> */}
                       </div>
-                      <Divider className={index < payslip.deductions.list.length-1 ? "w-52" : ""} />
+                      {index < payslip.deductions.list.length-1 && <Divider className="w-52"/>} 
                     </div>
                   );
                 })}
-                {/* <Divider className="w-20 ms-auto h-[2px]" /> */}
+              <Divider/>
               <p className="w-fit ms-auto me-4 text-small font-semibold">{payslip.deductions.total}</p>
               </div>
               <div className="mt-5">

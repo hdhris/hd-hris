@@ -35,7 +35,7 @@ export function useUserInfo(): UserEmployee | undefined {
         const data: UserEmployee = await response.json();
         if(data){
           setUserInfo(data);
-          saveToSession(cacheKey, data, String(id));
+          saveToSession(cacheKey, data, String(id), (60 * 24));
         }
       } catch (err) {
         setError(err as Error);

@@ -77,7 +77,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
       setComment(entry?.comment || "");
       setRatePH(
         entry?.rate_per_hour ||
-          String(entry.trans_employees_trans_overtimes_employee_idTotrans_employees.ref_job_classes.pay_rate) ||
+          String(entry.trans_employees_overtimes.ref_job_classes.pay_rate) ||
           "0"
       );
       setSelectedEntry(entry.id);
@@ -222,12 +222,12 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
             isBordered
             radius="full"
             size="md"
-            src={overtimeData?.trans_employees_trans_overtimes_employee_idTotrans_employees?.picture ?? ""}
+            src={overtimeData?.trans_employees_overtimes?.picture ?? ""}
             className="m-2"
           />
           <div>
             <p className="text-small font-semibold">
-              {getEmpFullName(overtimeData?.trans_employees_trans_overtimes_employee_idTotrans_employees!)}
+              {getEmpFullName(overtimeData?.trans_employees_overtimes!)}
             </p>
             <p className="text-tiny font-normal">
               {toGMT8(overtimeData?.created_at).format("ddd, MMM DD YYYY")}
@@ -235,17 +235,17 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
           </div>
         </div>
 
-        {overtimeData?.trans_employees_trans_overtimes_approved_byTotrans_employees && (
+        {overtimeData?.trans_employees_overtimes_approvedBy && (
           <div className="me-4">
             <UserMail
               name={`${
-                overtimeData.trans_employees_trans_overtimes_approved_byTotrans_employees.last_name
-              }, ${overtimeData.trans_employees_trans_overtimes_approved_byTotrans_employees.first_name.slice(
+                overtimeData.trans_employees_overtimes_approvedBy.last_name
+              }, ${overtimeData.trans_employees_overtimes_approvedBy.first_name.slice(
                 0,
                 1
               )}.`}
               picture={
-                overtimeData?.trans_employees_trans_overtimes_approved_byTotrans_employees.picture
+                overtimeData?.trans_employees_overtimes_approvedBy.picture
               }
               description="Reviewer"
               size="sm"
@@ -410,7 +410,7 @@ const OvertimeModal: React.FC<ScheduleModalProps> = ({
               setRatePH(
                 record?.rate_per_hour ||
                   String(
-                    record?.trans_employees_trans_overtimes_employee_idTotrans_employees.ref_job_classes?.pay_rate
+                    record?.trans_employees_overtimes.ref_job_classes?.pay_rate
                   ) ||
                   "0"
               );

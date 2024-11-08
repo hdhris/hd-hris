@@ -192,7 +192,9 @@ model ref_benefit_plans {
   updated_at                                 DateTime                                     @db.Timestamp(6)
   deleted_at                                 DateTime?                                    @db.Timestamp(6)
   is_active                                  Boolean?
+  deduction_id                               Int?
   dim_employee_benefits                      dim_employee_benefits[]
+  ref_payheads                               ref_payheads?                                @relation(fields: [deduction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ref_benefits_contribution_advance_settings ref_benefits_contribution_advance_settings[]
 }
 
@@ -271,7 +273,9 @@ model ref_payheads {
   affected_json            Json?                      @db.Json
   variable                 String?                    @db.VarChar(15)
   is_overwritable          Boolean?
+  system_only              Boolean?
   dim_payhead_affecteds    dim_payhead_affecteds[]
+  ref_benefit_plans        ref_benefit_plans[]
   trans_payhead_breakdowns trans_payhead_breakdowns[]
 }
 
@@ -370,7 +374,7 @@ model trans_cash_advance_disbursements {
   disbursed_at                  DateTime?                       @db.Timestamp(6)
   amount                        Decimal?                        @db.Decimal(10, 2)
   payment_method                String?                         @db.VarChar(10)
-  status                        String?                         @db.VarChar(10)
+  repayment_status              String?                         @db.VarChar(10)
   created_at                    DateTime                        @db.Timestamp(6)
   updated_at                    DateTime                        @db.Timestamp(6)
   deleted_at                    DateTime?                       @db.Timestamp(6)

@@ -74,6 +74,9 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
       allData?.data?.payhead?.id || null
     }`
   );
+  useEffect(()=>{
+    console.log(variables);
+  },[variables])
   const [isInvalid, setInvalid] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -290,6 +293,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                       Component(field) {
                         return (
                           <PayheadCalculator
+                            payhead={data.payhead}
                             setInvalid={setInvalid}
                             input={field.value}
                             setInput={field.onChange}
