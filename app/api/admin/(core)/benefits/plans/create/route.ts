@@ -8,6 +8,24 @@ export async function POST(req: NextRequest) {
     try {
         hasContentType(req)
         const body = await req.json();
+
+        const createDeduction = prisma.ref_payheads.create({
+            data: {
+                name: body.name,
+                type: "deduction",
+                created_at: toGMT8().toISOString(),
+                updated_at: toGMT8().toISOString(),
+                is_active: body.is_active,
+                calculation: "get_contribution",
+                system_only: true,
+                is_overwritable: false,
+                affected_json: {mandatory:{ probationary:true, regular:true }, // Will filter upon fetching dim_employee_benefits
+                                department:[], // Default to all,
+                                job_classes:[], // Default to all,
+                               },
+            }
+        })
+
         const createdPlan = prisma.ref_benefit_plans.create({
             data: {
                 name: body.name,
@@ -19,24 +37,12 @@ export async function POST(req: NextRequest) {
                 expiration_date: body.expiration_date,
                 description: body.description,
                 is_active: body.is_active,
+                deduction_id: (await createDeduction).id,
                 created_at: toGMT8(new Date()).toISOString(),
                 updated_at: toGMT8(new Date()).toISOString(),
             }
         })
-
-        const createDeduction = prisma.ref_payheads.create({
-            data: {
-                name: body.name,
-                type: "deduction",
-                created_at: toGMT8().toISOString(),
-                updated_at: toGMT8().toISOString(),
-                is_active: body.is_active,
-                calculation: body.name.toLowerCase().replace(/[aeiou]/g, "").replace(/ /g, "_").slice(0, 12),
-                system_only: true,
-                is_overwritable: false,
-            }
-        })
-        await prisma.$transaction([createdPlan, createDeduction])
+        await prisma.$transaction([createDeduction, createdPlan])
          // await prisma.$transaction(async (prisma) => {
          //            const plan = await prisma.ref_benefit_plans.create({
          //                data: {

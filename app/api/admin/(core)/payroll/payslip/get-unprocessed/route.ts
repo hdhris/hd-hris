@@ -274,7 +274,7 @@ export async function GET(req: NextRequest) {
       calculatedAmountList[emp.id] = [...calculatedAmount, ...calculateContributions];
     });
 
-    return NextResponse.json(calculatedAmountList);
+    // return NextResponse.json(calculatedAmountList);
     // Insert calculated breakdowns into `trans_payhead_breakdowns` table.
     await prisma.trans_payhead_breakdowns.createMany({
       data: Object.entries(calculatedAmountList).flatMap(([empId, payheads]) => {
