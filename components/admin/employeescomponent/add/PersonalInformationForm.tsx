@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 import FormFields, {
@@ -12,7 +13,7 @@ const genderOptions = [
   { value: "M", label: "Male" },
   { value: "F", label: "Female" },
 ];
-
+//
 const suffixOptions = [
   { value: "Jr.", label: "Jr." },
   { value: "Sr.", label: "Sr." },

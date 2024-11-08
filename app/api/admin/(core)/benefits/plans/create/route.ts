@@ -42,7 +42,24 @@ export async function POST(req: NextRequest) {
                 updated_at: toGMT8(new Date()).toISOString(),
             }
         })
-        await prisma.$transaction([createDeduction, createdPlan])
+
+            const advance_setting = body.advance_setting && prisma.ref_benefits_contribution_advance_settings.create({
+                data: {
+                    min_salary: Number(body.minSalary),
+                    max_salary: Number(body.maxSalary),
+                    min_MSC: Number(body.minMSC),
+                    max_MSC: Number(body.maxMSC),
+                    msc_step: Number(body.mscStep),
+                    ec_threshold: Number(body.ecThreshold),
+                    ec_low_rate: Number(body.ecLowRate),
+                    ec_high_rate: Number(body.ecHighRate),
+                    wisp_threshold: Number(body.wispThreshold),
+                    created_at: toGMT8(new Date()).toISOString(),
+                    updated_at: toGMT8(new Date()).toISOString(),
+                    plan_id: (await createdPlan).id
+                }
+            })
+        await prisma.$transaction([createDeduction, createdPlan, advance_setting])
          // await prisma.$transaction(async (prisma) => {
          //            const plan = await prisma.ref_benefit_plans.create({
          //                data: {

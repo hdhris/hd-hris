@@ -1,3 +1,4 @@
+"use client"
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import FormFields, {
@@ -16,7 +17,7 @@ import {
   BatchSchedule,
   Schedules,
 } from "@/types/attendance-time/AttendanceTypes";
-
+//
 const EditJobInformationForm: React.FC = () => {
   const { setValue, watch } = useFormContext();
   const selectedBatchId = watch("batch_id");

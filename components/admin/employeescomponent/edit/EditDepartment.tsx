@@ -1,3 +1,4 @@
+"use client"
 import React, { useEffect, useState } from "react";
 import {
   Modal,
@@ -22,7 +23,7 @@ interface EditDepartmentProps {
   departmentId: number;
   onDepartmentUpdated: () => void;
 }
-
+//
 interface DepartmentFormData {
   name: string;
   color: string;

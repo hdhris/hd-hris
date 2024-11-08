@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Divider,
@@ -21,7 +22,7 @@ interface EditBranchProps {
   branchData: Branch;
   onBranchUpdated: () => void;
 }
-
+//
 interface BranchFormData {
   name: string;
   status: string;

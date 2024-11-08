@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import {
   Modal,
@@ -26,7 +27,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
 }
-
+//
 export const employeeSchema = z.object({
   picture: z.union([z.instanceof(File), z.string()]).optional(),
   first_name: z

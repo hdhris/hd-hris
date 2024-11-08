@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import {
   Modal,
@@ -22,7 +23,7 @@ import {
   Form,
 } from "@/components/ui/form";
 import Drawer from "@/components/common/Drawer";
-
+//
 interface AddDepartmentProps {
   onDepartmentAdded: () => void;
 }

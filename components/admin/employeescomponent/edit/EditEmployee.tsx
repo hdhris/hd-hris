@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect, useCallback } from "react";
 import { Divider } from "@nextui-org/react";
 import EditPersonalInformationForm from "./EditPersonalInformationForm";
@@ -12,7 +13,7 @@ import { Form } from "@/components/ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Text from "@/components/Text";
-
+//
 export const employeeSchema = z.object({
   picture: z.union([z.instanceof(File), z.string()]).optional(),
   first_name: z
