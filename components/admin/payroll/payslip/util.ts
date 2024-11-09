@@ -38,11 +38,3 @@ export function isAffected(employee: PayslipEmployee, payhead: PayslipPayhead) {
 //51 Basic Salary
 //53 Cash Disbursement
 //54 Cash Repayment
-// const payheads = new Set();
-// export function isPayheadSystemAffected(payhead: PayslipPayhead, employee: PayslipEmployee, affectedMap:  Map<number|null, unknown>){
-//   const systemPayheadsWithKeys = [53, 54]
-//   if (systemPayheadsWithKeys.includes(payhead.id)){
-//     return affectedMap.has(employee.id)
-//   }
-//   return true;
-// }

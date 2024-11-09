@@ -23,6 +23,7 @@ import { viewPayslipType } from "@/app/(admin)/(core)/payroll/payslip/page";
 import {numberWithCommas} from "@/lib/utils/numberFormat";
 import { axiosInstance } from "@/services/fetcher";
 import useSWR from "swr";
+import { stageTable } from "@/app/(admin)/(core)/payroll/payslip/stage";
 
 interface PRPayslipTableType {
   processDate: ProcessDate;
@@ -53,14 +54,22 @@ export function PRPayslipTable({
   const [onErrors, setOnErrors] = useState(0);
   const [onRetry, setOnRetry] = useState(false);
   const fetcher = async (url: string | null) => {
+    // if(processDate === lastProcessDateState){
+    //   console.log("Fetcher: Unchanged date, will not reupdate...");
+    //   return
+    // }
+    // setLastProcessDateState(processDate);
     if(url){
       if (url?.includes('unprocessed')) {
-        const response = await fetch(
-          `/api/admin/payroll/payslip/get-unprocessed?date=${processDate.id}&stage=1`
-        );
-        if (!response.ok) throw new Error(`An error has occured. ${response.statusText}`);
-        return axiosInstance.get(`/api/admin/payroll/payslip/get-unprocessed?date=${processDate.id}&stage=2`).then((res) => res.data);
-
+        // const response = await fetch(
+        //   `/api/admin/payroll/payslip/get-unprocessed?date=${processDate.id}&stage=1`
+        // );
+        const stage_one = await axios.post('/api/admin/payroll/payslip/get-unprocessed', { dateID: processDate.id, stageNumber: 1 });
+        const { payrolls, employees, dataPH } = stage_one.data.result;
+        const stage_two = await axios.post('/api/admin/payroll/payslip/get-unprocessed', { dateID: processDate.id, stageNumber: 2 });
+        const { cashToDisburse, cashToRepay, benefits_plans_data } = stage_two.data.result;
+        const final_stage =  await stageTable(processDate, {payrolls, employees, dataPH}, { cashToDisburse, cashToRepay, benefits_plans_data });
+        return final_stage;
       } else {
         // Fetch from the provided API URL
         return axiosInstance.get(url).then((res) => res.data);
