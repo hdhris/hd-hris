@@ -14,11 +14,22 @@ import {icon_color, icon_size_sm} from "@/lib/utils";
 import {numberWithCommas} from "@/lib/utils/numberFormat";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import EnrollEmployeeForm from "@/components/admin/benefits/plans/form/enroll-employee-form";
+import RenderList from "@/components/util/RenderList";
+import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 
 export default function PlanDetails({...props}: BenefitPlan) {
     const [isOpenEnrollment, setIsOpenEnrollment] = useState<boolean>(false)
 
     const details = props.benefitAdditionalDetails ? props.benefitAdditionalDetails : null
+
+    const enrolled = props.employees_avails?.map(emp => {
+            return {
+                key: emp.id,
+                picture: emp.picture!,
+                name: emp.name
+            }
+        }
+    )
     return (<>
         <BorderCard className="w-[40%] overflow-hidden pb-10">
             <div className="flex justify-between w-full">
@@ -35,7 +46,7 @@ export default function PlanDetails({...props}: BenefitPlan) {
                 panel: "h-[70%]"
             }}>
                 <Tab key="basic_info" title="Basic Info">
-                    <div className="rounded border-1 my-2 px-2 flex flex-col gap-2">
+                    <div className="rounded border-1 my-2 px-2 flex flex-col gap-2 overflow-hidden">
                         <div className="flex justify-between items-center">
                             <div className="flex flex-col gap-2 p-4 w-fit items-center">
                                 <Typography className="font-semibold text-medium">Employee Rate %</Typography>
@@ -52,15 +63,7 @@ export default function PlanDetails({...props}: BenefitPlan) {
                                 </div>
                             </div>
                         </div>
-                        <div className="h-40 pb-2">
-                            <div className="flex justify-between items-center">
-                                <Typography className="font-semibold text-medium">Enrolled Employees</Typography>
-                                <Button {...uniformStyle()} onClick={() => setIsOpenEnrollment(true)}>Enroll Employee</Button>
-                            </div>
-                            <ScrollShadow className="h-full p-4">
-                                <EmployeesAvatar employees={props.employees_avails!} max={undefined} isGrid/>
-                            </ScrollShadow>
-                        </div>
+
                     </div>
 
                     <Divider/>
@@ -77,6 +80,36 @@ export default function PlanDetails({...props}: BenefitPlan) {
                     <Typography
                         className="text-default-400/50 text-medium indent-4 text-justify">{props.coverageDetails}</Typography>
                 </Tab>
+                <Tab key="enrolled" title="Enrolled">
+                    <div className="h-full overflow-auto"> {/* Changed overflow from hidden to auto */}
+                        <div className="flex justify-between items-center mb-2">
+                            <Typography className="font-semibold text-medium">Enrolled Employees</Typography>
+                            <Button {...uniformStyle()} onClick={() => setIsOpenEnrollment(true)}>
+                                Enroll Employee
+                            </Button>
+                        </div>
+                        {/* Ensure ScrollShadow container has overflow set to auto */}
+                        <ScrollShadow className="p-4 w-full h-[85%] mb-4 overflow-y-auto">
+                            <RenderList
+                                items={enrolled!}
+                                onClick={(key) => alert("Avatar ID: "+ key)}
+                                map={(item) => {
+                                    const users = {
+                                        id: item.key,
+                                        ...item
+                                    }
+                                    return <UserAvatarTooltip user={users}/>
+                                }}/>
+                            {/*<EmployeesAvatar*/}
+                            {/*    employees={props.employees_avails!}*/}
+                            {/*    max={props.employees_avails?.length!}*/}
+                            {/*    isBordered*/}
+                            {/*    isGrid*/}
+                            {/*/>*/}
+                        </ScrollShadow>
+                    </div>
+                </Tab>
+
                 {details && <Tab key="thresholds" title="Thresholds">
                     <ScrollShadow className="h-full space-y-8 pb-5 pr-5">
                         {[{
