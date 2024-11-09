@@ -29,15 +29,22 @@ export const advanceCalculator = (monthlySalary: number, data: AdvanceCalculator
 
     // Find MSC based on salary range
     let msc: number;
-    if(monthlySalary < minSalary && monthlySalary > maxSalary) {
-        if (monthlySalary > minSalary) {
-            msc = minMSC;
-        } else{
-            msc = maxMSC;
-        }
+    if (monthlySalary < minSalary) {
+        msc = minMSC
+    } else if (monthlySalary > maxSalary) {
+        msc = maxMSC
     } else {
-        msc = Math.round(monthlySalary / mscStep) * mscStep;
+        msc = Math.round(monthlySalary / mscStep) * mscStep
     }
+    // if(monthlySalary < minSalary && monthlySalary > maxSalary) {
+    //     if (monthlySalary > minSalary) {
+    //         msc = minMSC;
+    //     } else{
+    //         msc = maxMSC;
+    //     }
+    // } else {
+    //     msc = Math.round(monthlySalary / mscStep) * mscStep;
+    // }
 
     // Calculate regular contributions
     const baseAmount = Math.min(msc, wispThreshold);
