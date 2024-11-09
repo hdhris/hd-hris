@@ -19,9 +19,10 @@ import {
   removeFromSession,
   saveToSession,
 } from "@/lib/utils/sessionStorage";
-import { useQuery } from "@/services/queries";
 import { viewPayslipType } from "@/app/(admin)/(core)/payroll/payslip/page";
 import {numberWithCommas} from "@/lib/utils/numberFormat";
+import { axiosInstance } from "@/services/fetcher";
+import useSWR from "swr";
 
 interface PRPayslipTableType {
   processDate: ProcessDate;
@@ -51,7 +52,22 @@ export function PRPayslipTable({
   >({});
   const [onErrors, setOnErrors] = useState(0);
   const [onRetry, setOnRetry] = useState(false);
-  const { data: payslipData, isLoading } = useQuery<PayslipData>(
+  const fetcher = async (url: string | null) => {
+    if(url){
+      if (url?.includes('unprocessed')) {
+        const response = await fetch(
+          `/api/admin/payroll/payslip/get-unprocessed?date=${processDate.id}&stage=1`
+        );
+        if (!response.ok) throw new Error(`An error has occured. ${response.statusText}`);
+        return axiosInstance.get(`/api/admin/payroll/payslip/get-unprocessed?date=${processDate.id}&stage=2`).then((res) => res.data);
+
+      } else {
+        // Fetch from the provided API URL
+        return axiosInstance.get(url).then((res) => res.data);
+      }
+    }
+  };
+  const { data: payslipData, isLoading } = useSWR<PayslipData>(
     (() => {
       if (!cachedUnpushed && processDate) {
         if (processDate.is_processed)
@@ -60,7 +76,8 @@ export function PRPayslipTable({
           return `/api/admin/payroll/payslip/get-unprocessed?date=${processDate.id}`;
       }
       return null;
-    })()
+    })(),
+    fetcher
   );
   const requestQueue: {
     employeeId: number;
@@ -222,17 +239,17 @@ export function PRPayslipTable({
     };
   }, [records]);
 
-  const isSystemPayheadAffected = useMemo(()=>{
-    return (employeeId: number, itemId: number): boolean => {
-      if (!payslipData) return false;
+  // const isSystemPayheadAffected = useMemo(()=>{
+  //   return (employeeId: number, itemId: number): boolean => {
+  //     if (!payslipData) return false;
 
-      const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
-      if (!employeeAmounts) return false;
+  //     const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
+  //     if (!employeeAmounts) return false;
 
-      const item = employeeAmounts.find((entry) => entry.payhead_id === itemId);
-      return !!item;
-    };
-  },[payslipData])
+  //     const item = employeeAmounts.find((entry) => entry.payhead_id === itemId);
+  //     return !!item;
+  //   };
+  // },[payslipData])
 
   const getFormulatedAmount = useMemo(() => {
     return (employeeId: number, itemId: number): number => {
