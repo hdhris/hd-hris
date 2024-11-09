@@ -81,18 +81,18 @@ export interface ContributionSetting {
   id: number;
   deduction_id: number;
   name: string;
-  employee_contribution: Decimal;
-  employer_contribution: Decimal;
+  employee_contribution: number;
+  employer_contribution: number;
   ref_benefits_contribution_advance_settings?: {
-    min_salary: Decimal;
-    max_salary: Decimal;
-    min_MSC: Decimal;
-    max_MSC: Decimal;
-    msc_step: Decimal;
-    ec_threshold: Decimal;
-    ec_low_rate: Decimal;
-    ec_high_rate: Decimal;
-    wisp_threshold: Decimal;
+    min_salary: number;
+    max_salary: number;
+    min_MSC: number;
+    max_MSC: number;
+    msc_step: number;
+    ec_threshold: number;
+    ec_low_rate: number;
+    ec_high_rate: number;
+    wisp_threshold: number;
   }[];
 }
 
@@ -116,25 +116,25 @@ export class Benefit {
         const advanceRates = this.data.ref_benefits_contribution_advance_settings[0];
 
         const rates = {
-          minSalary: advanceRates.min_salary.toNumber(),
-          maxSalary: advanceRates.max_salary.toNumber(),
-          minMSC: advanceRates.min_MSC.toNumber(),
-          maxMSC: advanceRates.max_MSC.toNumber(),
-          mscStep: advanceRates.msc_step.toNumber(),
-          regularEmployeeRate: this.data.employee_contribution.toNumber(),
-          regularEmployerRate: this.data.employer_contribution.toNumber(),
-          ecThreshold: advanceRates.ec_threshold.toNumber(),
-          ecLowRate: advanceRates.ec_low_rate.toNumber(),
-          ecHighRate: advanceRates.ec_high_rate.toNumber(),
-          wispThreshold: advanceRates.wisp_threshold.toNumber(),
+          minSalary: advanceRates.min_salary,
+          maxSalary: advanceRates.max_salary,
+          minMSC: advanceRates.min_MSC,
+          maxMSC: advanceRates.max_MSC,
+          mscStep: advanceRates.msc_step,
+          regularEmployeeRate: this.data.employee_contribution,
+          regularEmployerRate: this.data.employer_contribution,
+          ecThreshold: advanceRates.ec_threshold,
+          ecLowRate: advanceRates.ec_low_rate,
+          ecHighRate: advanceRates.ec_high_rate,
+          wispThreshold: advanceRates.wisp_threshold,
         };
 
         contribution = advanceCalculator(salary, rates).employeeShare;
       } else {
         const basic = basicCalculator(
           salary,
-          this.data.employer_contribution.toNumber(),
-          this.data.employee_contribution.toNumber()
+          this.data.employer_contribution,
+          this.data.employee_contribution
         );
         contribution = basic.employee_contribution //+ basic.employer_contribution;
       }

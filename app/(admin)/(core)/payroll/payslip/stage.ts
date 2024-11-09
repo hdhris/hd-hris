@@ -98,6 +98,7 @@ export async function stageTable(
       toGMT8(dateInfo?.start_date!),
       "day"
     );
+    console.log("Calculating All Payheads...");
     employees.forEach((emp) => {
       // Define base variables for payroll calculations.
       // const contribution = new Benefit(benefitMap.get(emp.id) as any).getContribution;
@@ -110,7 +111,6 @@ export async function stageTable(
       };
 
       // Filter applicable payheads for calculation based on employee and payhead data.
-      console.log("Calculating Contributions...");
       const calculateContributions: VariableAmountProp[] = employeeBenefitsMap[
         emp.id
       ]
@@ -133,7 +133,6 @@ export async function stageTable(
       //51 Basic Salary
       //53 Cash Disbursement
       //54 Cash Repayment
-      console.log("Calculating Earnings and Deductions...");
       const applicableFormulatedPayheads: VariableFormulaProp[] = dataPH
         .filter((ph) => {
           return (
@@ -182,7 +181,8 @@ export async function stageTable(
       { dateID: dateInfo.id, stageNumber: 3, calculatedAmountList }
     );
     console.log("Loading...");
-    const breakdowns: Breakdown[] = stage_three.data;
+    const breakdowns: Breakdown[] = stage_three.data.result.breakdowns;
+    console.log(breakdowns);
     const breakdownPayheadIds = new Set(breakdowns.map((bd) => bd.payhead_id!));
     const payheads = dataPH.filter((dph) => breakdownPayheadIds.has(dph.id));
     const earnings = payheads.filter((p) => p.type === "earning");
