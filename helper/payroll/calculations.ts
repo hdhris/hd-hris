@@ -29,8 +29,7 @@ export function calculateAllPayheads(
   unCalculateAmount: VariableFormulaProp[],
   surpressErrorMsg: boolean = false,
 ): VariableAmountProp[] {
-  try {
-    let calculatedAmount: VariableAmountProp[] = [];
+  let calculatedAmount: VariableAmountProp[] = [];
 
     // Convert baseVariables to the format with null ids
     const baseVariables = Object.entries(baseVariablesAmounts).map(([variable, amount]) => ({
@@ -48,23 +47,26 @@ export function calculateAllPayheads(
         link_id: ua.link_id,
         payhead_id: ua.payhead_id,
         variable: ua.variable,
-        amount: parser.evaluate(
-          ua.formula,
-          variables.reduce((acc, { variable, amount }) => {
-            acc[variable] = amount ; // Set the variable name as the key and amount as the value
-            return acc; // Return the accumulator for the next iteration
-          }, {} as Record<string, number>) // Type assertion for the accumulator
-        )
+        amount: (()=>{
+          try {
+            return parser.evaluate(
+              ua.formula,
+              variables.reduce((acc, { variable, amount }) => {
+                acc[variable] = amount ; // Set the variable name as the key and amount as the value
+                return acc; // Return the accumulator for the next iteration
+              }, {} as Record<string, number>) // Type assertion for the accumulator
+            )
+          } catch(error) {
+            if(!surpressErrorMsg) console.error(error,ua.payhead_id);
+            return 0;
+          }
+        })()
       }
   
       calculatedAmount.push(newVar);
     });
   
     return calculatedAmount;
-  } catch(error) {
-    if(!surpressErrorMsg) console.error(error);
-    return []
-  }
 }
 
 

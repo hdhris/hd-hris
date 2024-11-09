@@ -53,7 +53,7 @@ export type viewPayslipType = {
 function Page() {
   const [focusedEmployee, setFocusedEmployee] = useState<number | null>(null);
   const [focusedPayhead, setFocusedPayhead] = useState<number | null>(null);
-  const [payslip, setPayslip] = useState<viewPayslipType>()
+  const [payslip, setPayslip] = useState<viewPayslipType | null>(null)
   const [processDate, setProcessDate] = useState<ProcessDate>();
   const userInfo = useUserInfo();
   SetNavEndContent(() => <DatePickerPayroll setProcessDate={setProcessDate} />);

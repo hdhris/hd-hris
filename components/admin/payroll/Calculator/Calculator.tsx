@@ -62,7 +62,7 @@ function PayheadCalculator({
     
     setInvalid(true);
     return false;
-  },[input, payheadVariables, setInvalid])
+  },[input, payheadVariables, setInvalid, isDisabled])
 
   const handleButtonClick = (value: string) => {
     if (value === "C") {
