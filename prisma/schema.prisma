@@ -192,7 +192,9 @@ model ref_benefit_plans {
   updated_at                                 DateTime                                     @db.Timestamp(6)
   deleted_at                                 DateTime?                                    @db.Timestamp(6)
   is_active                                  Boolean?
+  deduction_id                               Int?
   dim_employee_benefits                      dim_employee_benefits[]
+  ref_payheads                               ref_payheads?                                @relation(fields: [deduction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ref_benefits_contribution_advance_settings ref_benefits_contribution_advance_settings[]
 }
 
@@ -273,6 +275,7 @@ model ref_payheads {
   is_overwritable          Boolean?
   system_only              Boolean?
   dim_payhead_affecteds    dim_payhead_affecteds[]
+  ref_benefit_plans        ref_benefit_plans[]
   trans_payhead_breakdowns trans_payhead_breakdowns[]
 }
 

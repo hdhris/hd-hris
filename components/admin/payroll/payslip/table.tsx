@@ -1,8 +1,6 @@
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import {
   PayslipData,
-  PayslipEmployee,
-  PayslipPayhead,
   ProcessDate,
 } from "@/types/payroll/payrollType";
 import React, {
@@ -21,15 +19,16 @@ import {
   removeFromSession,
   saveToSession,
 } from "@/lib/utils/sessionStorage";
-import { isAffected } from "./util";
-import { useQuery } from "@/services/queries";
 import { viewPayslipType } from "@/app/(admin)/(core)/payroll/payslip/page";
+import {numberWithCommas} from "@/lib/utils/numberFormat";
+import { axiosInstance } from "@/services/fetcher";
+import useSWR from "swr";
 
 interface PRPayslipTableType {
   processDate: ProcessDate;
   // setFocusedEmployee: (id: number | null) => void;
   // setFocusedPayhead: (id: number | null) => void;
-  setPayslip: (item: viewPayslipType) => void;
+  setPayslip: (item: viewPayslipType | null) => void;
 }
 export function PRPayslipTable({
   processDate,
@@ -41,7 +40,10 @@ export function PRPayslipTable({
   const cachedUnpushed = loadFromSession<batchDataType>(cacheKey);
   const tableRef = useRef<HTMLTableElement>(null);
   const [willUpdate, setWillUpdate] = useState(false);
-  const [lastProcessDateID, setLastProcessDateID] = useState(-1);
+  const [lastProcessDateState, setLastProcessDateState] = useState({
+    id: -1,
+    is_processed: false,
+  });
   const [updatedPayhead, setUpdatedPayheadMap] = useState<Map<string, boolean>>(
     new Map()
   );
@@ -50,7 +52,22 @@ export function PRPayslipTable({
   >({});
   const [onErrors, setOnErrors] = useState(0);
   const [onRetry, setOnRetry] = useState(false);
-  const { data: payslipData, isLoading } = useQuery<PayslipData>(
+  const fetcher = async (url: string | null) => {
+    if(url){
+      if (url?.includes('unprocessed')) {
+        const response = await fetch(
+          `/api/admin/payroll/payslip/get-unprocessed?date=${processDate.id}&stage=1`
+        );
+        if (!response.ok) throw new Error(`An error has occured. ${response.statusText}`);
+        return axiosInstance.get(`/api/admin/payroll/payslip/get-unprocessed?date=${processDate.id}&stage=2`).then((res) => res.data);
+
+      } else {
+        // Fetch from the provided API URL
+        return axiosInstance.get(url).then((res) => res.data);
+      }
+    }
+  };
+  const { data: payslipData, isLoading } = useSWR<PayslipData>(
     (() => {
       if (!cachedUnpushed && processDate) {
         if (processDate.is_processed)
@@ -59,16 +76,18 @@ export function PRPayslipTable({
           return `/api/admin/payroll/payslip/get-unprocessed?date=${processDate.id}`;
       }
       return null;
-    })()
+    })(),
+    fetcher
   );
   const requestQueue: {
     employeeId: number;
     payheadId: number;
     value: number;
   }[] = [];
+  
   const dontInput = useMemo(() => {
     return processDate.is_processed || onErrors > 0 || onRetry;
-  }, [processDate]);
+  }, [processDate, onErrors, onRetry]);
 
   // Function to process update requests in the queue
   const processQueue = useCallback(async () => {
@@ -195,10 +214,16 @@ export function PRPayslipTable({
   }
 
   const getRecordAmount = useMemo(() => {
-    return (employeeId: number, payheadId: number): string => {
-      return String(records[employeeId]?.[payheadId]?.[1] || "");
+    return (employeeId: number, payheadId: number): string | null => {
+      const breakdown = records[employeeId];
+      if(!breakdown) return null;
+
+      const payhead = breakdown[payheadId];
+      if(!payhead) return null;
+      return payhead[1];
     };
   }, [records]);
+
 
   const getEmployeePayheadSum = useMemo(() => {
     return (employeeId: number, type: "earning" | "deduction"): number => {
@@ -214,17 +239,17 @@ export function PRPayslipTable({
     };
   }, [records]);
 
-  const isSystemPayheadAffected = useMemo(()=>{
-    return (employeeId: number, itemId: number): boolean => {
-      if (!payslipData) return false;
+  // const isSystemPayheadAffected = useMemo(()=>{
+  //   return (employeeId: number, itemId: number): boolean => {
+  //     if (!payslipData) return false;
 
-      const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
-      if (!employeeAmounts) return false;
+  //     const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
+  //     if (!employeeAmounts) return false;
 
-      const item = employeeAmounts.find((entry) => entry.id === itemId);
-      return !!item;
-    };
-  },[payslipData])
+  //     const item = employeeAmounts.find((entry) => entry.payhead_id === itemId);
+  //     return !!item;
+  //   };
+  // },[payslipData])
 
   const getFormulatedAmount = useMemo(() => {
     return (employeeId: number, itemId: number): number => {
@@ -233,24 +258,30 @@ export function PRPayslipTable({
       const employeeAmounts = payslipData?.calculatedAmountList?.[employeeId];
       if (!employeeAmounts) return 0;
 
-      const item = employeeAmounts.find((entry) => entry.id === itemId);
+      const item = employeeAmounts.find((entry) => entry.payhead_id === itemId);
       return item ? item.amount : 0;
     };
   }, [payslipData]);
 
   const handleFocuses = useCallback((empID: number)=>{
+    if (isLoading){
+      setPayslip(null);
+      return;
+    }
     type ListItem = { label: string; number: string };
     const employeeRecords = records[empID];
     const earnings: ListItem[] = [];
     const deductions: ListItem[] = [];
     // console.log(employeeRecords);
 
+    const earningNames = new Map(payslipData?.earnings.map(earn=>[earn.id, earn.name]))
+    const deductionNames = new Map(payslipData?.deductions.map(deduct=>[deduct.id, deduct.name]))
     Object.entries(employeeRecords).forEach(([payheadID, [type, amount]]) => {
       if (type === "earning") {
-        const item: ListItem = { label: payslipData?.earnings.find(e=>e.id===Number(payheadID))?.name!, number: amount };
+        const item: ListItem = { label: earningNames.get(Number(payheadID))!, number: amount };
         earnings.push(item);
       } else if (type === "deduction") {
-        const item: ListItem = { label: payslipData?.deductions.find(e=>e.id===Number(payheadID))?.name!, number: amount };
+        const item: ListItem = { label: deductionNames.get(Number(payheadID))!, number: amount };
         deductions.push(item);
       }
     });
@@ -273,7 +304,7 @@ export function PRPayslipTable({
         net: getEmployeePayheadSum(employee.id, "earning") - getEmployeePayheadSum(employee.id, "deduction"),
       }
     })()); 
-  },[setPayslip,records,payslipData])
+  },[setPayslip,records,payslipData, isLoading])
 
   // Initial loaders
   useEffect(() => {
@@ -300,31 +331,28 @@ export function PRPayslipTable({
       }
       push();
     } else if (payslipData) {
-      if(processDate.id === lastProcessDateID){
+      if(processDate === lastProcessDateState){
         console.log("Unchanged date, will not reupdate...");
         return
       }
-      setLastProcessDateID(processDate.id);
+      setLastProcessDateState(processDate);
       console.log("Loaded");
       // console.log(payslipData.employees);
+      const payrollMap = new Map(payslipData.payrolls.map(pr=> [pr.id, pr.employee_id]));
+      const earningsSet = new Set(payslipData.earnings.map((e) => e.id));
       payslipData.breakdowns.forEach((bd) => {
-        const payroll = payslipData.payrolls.find(
-          (pr) => pr.id === bd.payroll_id
-        );
         handleRecording(
-          payroll?.employee_id!,
+          payrollMap.get(bd.payroll_id)!,
           bd.payhead_id,
           [
-            payslipData.earnings.find((e) => e.id === bd.payhead_id)
-              ? "earning"
-              : "deduction",
+            earningsSet.has(bd.payhead_id) ? "earning" : "deduction",
             bd.amount,
           ],
           true
         );
       });
     }
-  }, [cachedUnpushed, payslipData, processDate, lastProcessDateID]);
+  }, [cachedUnpushed, payslipData, processDate, lastProcessDateState]);
 
   if (onErrors >= 10) {
     return (
@@ -405,9 +433,14 @@ export function PRPayslipTable({
                 {getEmpFullName(employee)}
               </td>
               {payslipData.earnings.map((earn) =>
-                (earn.system_only ? (
-                  isSystemPayheadAffected(employee.id, earn.id)
-                ) : isAffected(employee, earn)) ? (
+                // (
+                //   !processDate.is_processed
+                //     ? earn.system_only
+                //       ? isSystemPayheadAffected(employee.id, earn.id)
+                //       : isAffected(employee, earn)
+                //     : true
+                // )
+                getRecordAmount(employee.id, earn.id)!==null ? (
                   <PayrollInputColumn
                     placeholder={
                       earn.is_overwritable
@@ -422,7 +455,7 @@ export function PRPayslipTable({
                     handleBlur={handleBlur}
                     type="earning"
                     handleRecording={handleRecording}
-                    value={getRecordAmount(employee.id, earn.id)}
+                    value={getRecordAmount(employee.id, earn.id)!}
                     readOnly={dontInput || !earn.is_overwritable}
                     unUpdated={
                       updatedPayhead.get(`${employee.id}:${earn.id}`) != null &&
@@ -444,13 +477,18 @@ export function PRPayslipTable({
                 key={`${employee.id}-total-earn`}
                 // setFocusedPayhead={setFocusedPayhead}
                 handleBlur={handleBlur}
-                value={getEmployeePayheadSum(employee.id, "earning")}
+                value={numberWithCommas(getEmployeePayheadSum(employee.id, "earning"))}
                 readOnly
               />
               {payslipData.deductions.map((deduct) =>
-                (deduct.system_only ? (
-                  isSystemPayheadAffected(employee.id, deduct.id)
-                ) : isAffected(employee, deduct))? (
+                // (
+                //   !processDate.is_processed
+                //     ? deduct.system_only
+                //       ? isSystemPayheadAffected(employee.id, deduct.id)
+                //       : isAffected(employee, deduct)
+                //     : true
+                // )
+                getRecordAmount(employee.id, deduct.id)!==null ? (
                   <PayrollInputColumn
                     placeholder={
                       deduct.is_overwritable
@@ -465,7 +503,7 @@ export function PRPayslipTable({
                     handleBlur={handleBlur}
                     type="deduction"
                     handleRecording={handleRecording}
-                    value={getRecordAmount(employee.id, deduct.id)}
+                    value={getRecordAmount(employee.id, deduct.id)!}
                     readOnly={dontInput || !deduct.is_overwritable}
                     unUpdated={
                       updatedPayhead.get(`${employee.id}:${deduct.id}`) !=
@@ -489,8 +527,7 @@ export function PRPayslipTable({
                 // setFocusedPayhead={setFocusedPayhead}
                 handleBlur={handleBlur}
                 value={getEmployeePayheadSum(employee.id, "deduction")}
-                readOnly
-              />
+                readOnly/>
               <PayrollInputColumn
                 uniqueKey={`${employee.id}-total-salary`}
                 key={`${employee.id}-total-salary`}
@@ -498,8 +535,8 @@ export function PRPayslipTable({
                 // setFocusedPayhead={setFocusedPayhead}
                 handleBlur={handleBlur}
                 value={
-                  getEmployeePayheadSum(employee.id, "earning") -
-                  getEmployeePayheadSum(employee.id, "deduction")
+                  numberWithCommas(getEmployeePayheadSum(employee.id, "earning") -
+                  getEmployeePayheadSum(employee.id, "deduction"))
                 }
                 readOnly
               />

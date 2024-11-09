@@ -11,12 +11,13 @@ import {DrawerFormTypes} from "@/types/drawer-form/drawer-form-types";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
+import {BenefitPlan} from "@/types/benefits/plans/plansTypes";
 
 interface BenefitPlanFormProps extends DrawerFormTypes {
-    plan?: EditCreditProp
+    plan?: BenefitPlan
 }
 
-function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
+function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) {
     const {toast} = useToast()
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isAdvanceSetting, setIsAdvanceSetting] = useState<boolean>(false)
@@ -25,13 +26,6 @@ function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
         setIsModalOpen(value);
         onOpen(value);
     }, [onOpen]);
-
-    useEffect(() => {
-        if (isOpen !== isModalOpen) {
-            setIsModalOpen(isOpen);
-        }
-    }, [isModalOpen, isOpen]);
-
     const PlanFormValidation = isAdvanceSetting ? PlanFormSchema.extend({
         minSalary: z.number({
             required_error: "Minimum salary is required", invalid_type_error: "Minimum salary must be a number"
@@ -70,10 +64,45 @@ function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
         resolver: zodResolver(PlanFormValidation), defaultValues: {}
     })
 
+    useEffect(() => {
+        if (isOpen !== isModalOpen) {
+            setIsModalOpen(isOpen);
+        }
+    }, [isModalOpen, isOpen]);
+
+    useEffect(() => {
+        console.log(plan)
+        if(title && plan){
+            form.reset({
+                name: plan.name,
+                plan_type: plan.type,
+                description: plan.description,
+                coverage_details: plan.coverageDetails,
+                effective_date: plan.effectiveDate,
+                expiration_date: plan.expirationDate,
+                is_active: plan.isActive,
+                employer_contribution: plan.employerContribution,
+                employee_contribution: plan.employeeContribution,
+                advance_setting: !!plan.benefitAdditionalDetails,
+                minSalary: plan.benefitAdditionalDetails?.minSalary,
+                maxSalary: plan.benefitAdditionalDetails?.maxSalary,
+                minMSC: plan.benefitAdditionalDetails?.minMSC,
+                maxMSC: plan.benefitAdditionalDetails?.maxMSC,
+                mscStep: plan.benefitAdditionalDetails?.mscStep,
+                ecThreshold: plan.benefitAdditionalDetails?.ecThreshold,
+                ecLowRate: plan.benefitAdditionalDetails?.ecLowRate,
+                ecHighRate: plan.benefitAdditionalDetails?.ecHighRate,
+                wispThreshold: plan.benefitAdditionalDetails?.wispThreshold
+            })
+        }
+    }, [title, plan, form]);
+
+
+
 
     const onSubmit = async (values: z.infer<typeof PlanFormValidation>) => {
+        setIsLoading(true)
         try {
-            setIsLoading(true)
             const res = await axiosInstance.post("/api/admin/benefits/plans/create", values)
             if (res.status === 200) {
                 toast({
@@ -222,9 +251,9 @@ function BenefitPlanForm({title, plan, onOpen, isOpen}: BenefitPlanFormProps) {
         isRequired: true
     }];
 
-    return (<FormDrawer isLoading={isLoading} title="Add New Benefit Plan"
-                        description="Enter the details for the new employee benefit plan."
-                        onOpen={handleModalOpen} isOpen={isModalOpen}>
+    return (<FormDrawer isLoading={isLoading} title={title || "Add New Benefit Plan"}
+                        description={rest.description || "Enter the details for the new employee benefit plan."}
+                        onOpen={handleModalOpen} isOpen={isModalOpen} >
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="drawer-form">
                 <FormFields items={basicInfoFields}/>

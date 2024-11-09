@@ -8,6 +8,25 @@ export async function POST(req: NextRequest) {
     try {
         hasContentType(req)
         const body = await req.json();
+
+
+        const createDeduction = prisma.ref_payheads.create({
+            data: {
+                name: body.name,
+                type: "deduction",
+                created_at: toGMT8().toISOString(),
+                updated_at: toGMT8().toISOString(),
+                is_active: body.is_active,
+                calculation: "get_contribution",
+                system_only: true,
+                is_overwritable: false,
+                affected_json: {mandatory:{ probationary:true, regular:true }, // Will filter upon fetching dim_employee_benefits
+                                department:[], // Default to all,
+                                job_classes:[], // Default to all,
+                               },
+            }
+        })
+
         const createdPlan = prisma.ref_benefit_plans.create({
             data: {
                 name: body.name,
@@ -19,24 +38,29 @@ export async function POST(req: NextRequest) {
                 expiration_date: body.expiration_date,
                 description: body.description,
                 is_active: body.is_active,
+                deduction_id: (await createDeduction).id,
                 created_at: toGMT8(new Date()).toISOString(),
                 updated_at: toGMT8(new Date()).toISOString(),
             }
         })
 
-        const createDeduction = prisma.ref_payheads.create({
-            data: {
-                name: body.name,
-                type: "deduction",
-                created_at: toGMT8().toISOString(),
-                updated_at: toGMT8().toISOString(),
-                is_active: body.is_active,
-                calculation: body.name.toLowerCase().replace(/[aeiou]/g, "").replace(/ /g, "_").slice(0, 12),
-                system_only: true,
-                is_overwritable: false,
-            }
-        })
-        await prisma.$transaction([createdPlan, createDeduction])
+            const advance_setting = body.advance_setting && prisma.ref_benefits_contribution_advance_settings.create({
+                data: {
+                    min_salary: Number(body.minSalary),
+                    max_salary: Number(body.maxSalary),
+                    min_MSC: Number(body.minMSC),
+                    max_MSC: Number(body.maxMSC),
+                    msc_step: Number(body.mscStep),
+                    ec_threshold: Number(body.ecThreshold),
+                    ec_low_rate: Number(body.ecLowRate),
+                    ec_high_rate: Number(body.ecHighRate),
+                    wisp_threshold: Number(body.wispThreshold),
+                    created_at: toGMT8(new Date()).toISOString(),
+                    updated_at: toGMT8(new Date()).toISOString(),
+                    plan_id: (await createdPlan).id
+                }
+            })
+        await prisma.$transaction([createDeduction, createdPlan, advance_setting])
          // await prisma.$transaction(async (prisma) => {
          //            const plan = await prisma.ref_benefit_plans.create({
          //                data: {

@@ -34,18 +34,18 @@ export async function GET(req: NextRequest) {
     });
 
     // Fetch all employees linked to payrolls
+    const payheadIDs = Array.from(new Set(breakdowns.map((bd) => bd.payhead_id!)));
     const employeeIDs = Array.from(payrollMap.keys());
-    const payheadIDs = [...new Set(breakdowns.map((bd) => bd.payhead_id!))];
-
+    
     const [payheads, employees] = await Promise.all([
       prisma.ref_payheads.findMany({
-        where: { id: { in: payheadIDs }, deleted_at: null, is_active: true },
+        where: { id: { in: payheadIDs } },
+        orderBy: { created_at: "asc" },
       }),
       prisma.trans_employees.findMany({
         where: { id: { in: employeeIDs } },
         select: {
           ...emp_rev_include.employee_detail.select,
-          deleted_at: true,
           dim_payhead_affecteds: { select: { payhead_id: true } },
         },
       }),
