@@ -5,6 +5,7 @@ import {
   Benefit,
   calculateAllPayheads,
   ContributionSetting,
+  static_formula,
   VariableAmountProp,
   VariableFormulaProp,
 } from "@/helper/payroll/calculations";
@@ -29,16 +30,17 @@ export async function stageTable(
   stage_two: {
     cashToDisburse: CashToDisburse[];
     cashToRepay: CashToRepay[];
-    benefits_plans_data: BenefitsPlanData[];
-  }
+    benefitsPlansData: BenefitsPlanData[];
+  },
+  setStageMsg: (msg:string)=>void,
 ): Promise<PayslipData> {
   try {
-    console.log(stage_one, stage_two);
+    // console.log(stage_one, stage_two);
     const { payrolls, employees, dataPH } = stage_one;
-    const { cashToDisburse, cashToRepay, benefits_plans_data } =
+    const { cashToDisburse, cashToRepay, benefitsPlansData } =
       convertToNumber(stage_two);
 
-    console.log("Preparing Cash Advances...");
+    // console.log("Preparing cash advances...");
     const cashDisburseMap = new Map(
       cashToDisburse.map((ctd) => [
         ctd.employee_id, // Key
@@ -68,14 +70,14 @@ export async function stageTable(
       ])
     );
 
-    console.log("Preparing Contributions...");
+    // console.log("Preparing contributions...");
     const benefitDeductionMap = new Map(
-      benefits_plans_data.map((bp) => [
+        benefitsPlansData.map((bp) => [
         bp.ref_benefit_plans?.id,
         bp.ref_benefit_plans?.deduction_id,
       ])
     );
-    const employeeBenefitsMap = benefits_plans_data.reduce(
+    const employeeBenefitsMap = benefitsPlansData.reduce(
       (acc, { trans_employees, ref_benefit_plans }) => {
         const employeeId = trans_employees?.id!;
         if (!acc[employeeId]) {
@@ -93,12 +95,12 @@ export async function stageTable(
     // Initializes `calculatedAmountList` to store payhead amounts for each employee.
     let calculatedAmountList: Record<number, VariableAmountProp[]> = {};
 
-    const basicSalaryFormula = dataPH.find((ph) => ph.id === 51)?.calculation!;
+    const basicSalaryFormula = dataPH.find((ph) => ph.id === 1)?.calculation!;
     const payrollDays = toGMT8(dateInfo?.end_date!).diff(
       toGMT8(dateInfo?.start_date!),
       "day"
     );
-    console.log("Calculating All Payheads...");
+    // console.log("Calculating some gross and deduction...");
     employees.forEach((emp) => {
       // Define base variables for payroll calculations.
       // const contribution = new Benefit(benefitMap.get(emp.id) as any).getContribution;
@@ -106,8 +108,8 @@ export async function stageTable(
         rate_p_hr: parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0,
         total_shft_hr: 80,
         payroll_days: payrollDays,
-        get_disbursement: cashDisburseMap.get(emp.id) ?? 0,
-        get_repayment: cashRepayMap.get(emp.id!) ?? 0,
+        [static_formula.cash_advance_disbursement]: cashDisburseMap.get(emp.id) ?? 0,
+        [static_formula.cash_advance_repayment]: cashRepayMap.get(emp.id!) ?? 0,
       };
 
       // Filter applicable payheads for calculation based on employee and payhead data.
@@ -130,27 +132,27 @@ export async function stageTable(
             };
           })
         : [];
-      //51 Basic Salary
-      //53 Cash Disbursement
-      //54 Cash Repayment
+      //1 Basic Salary
+      //2 Cash Disbursement
+      //3 Cash Repayment
       const applicableFormulatedPayheads: VariableFormulaProp[] = dataPH
         .filter((ph) => {
           return (
             String(ph.calculation) !== "" &&
             isAffected(tryParse(emp), tryParse(ph)) &&
-            (ph.id === 53 ? cashDisburseMap.has(emp.id) : true) &&
-            (ph.id === 54 ? cashRepayMap.has(emp.id) : true) &&
+            (ph.calculation === static_formula.cash_advance_disbursement ? cashDisburseMap.has(emp.id) : true) &&
+            (ph.calculation === static_formula.cash_advance_repayment ? cashRepayMap.has(emp.id) : true) &&
             ph.ref_benefit_plans.length === 0 // Benefits already calculated, ignore.
           );
         })
         .map((ph) => ({
           link_id: (() => {
-            if (ph.id === 53) {
+            if (ph.calculation === static_formula.cash_advance_disbursement) {
               if (cashAdvancementIDMap.has(emp.id)) {
                 return cashAdvancementIDMap.get(emp.id);
               }
             }
-            if (ph.id === 54) {
+            if (ph.calculation === static_formula.cash_advance_repayment) {
               if (cashRepaymentIDMap.has(emp.id)) {
                 return cashRepaymentIDMap.get(emp.id);
               }
@@ -175,14 +177,14 @@ export async function stageTable(
 
     // return NextResponse.json(calculatedAmountList);
     // Insert calculated breakdowns into `trans_payhead_breakdowns` table.
-    console.log("Preparing breakdowns...");
+    // console.log("Preparing breakdowns...");
+    setStageMsg("Getting ready...");
     const stage_three = await axios.post(
       "/api/admin/payroll/payslip/get-unprocessed",
       { dateID: dateInfo.id, stageNumber: 3, calculatedAmountList }
     );
-    console.log("Loading...");
+    // console.log("Loading...");
     const breakdowns: Breakdown[] = stage_three.data.result.breakdowns;
-    console.log(breakdowns);
     const breakdownPayheadIds = new Set(breakdowns.map((bd) => bd.payhead_id!));
     const payheads = dataPH.filter((dph) => breakdownPayheadIds.has(dph.id));
     const earnings = payheads.filter((p) => p.type === "earning");
@@ -206,7 +208,7 @@ export async function stageTable(
 interface PayrollData {
   cashToDisburse: CashToDisburse[];
   cashToRepay: CashToRepay[];
-  benefits_plans_data: BenefitsPlanData[];
+  benefitsPlansData: BenefitsPlanData[];
 }
 
 interface CashToDisburse {
@@ -261,7 +263,7 @@ function convertToNumber(data: PayrollData): PayrollData {
       amount: Number(item.amount),
       trans_cash_advances: { ...item.trans_cash_advances },
     })),
-    benefits_plans_data: data.benefits_plans_data.map((plan: any) => ({
+    benefitsPlansData: data.benefitsPlansData.map((plan: any) => ({
       trans_employees: { ...plan.trans_employees },
       ref_benefit_plans: {
         ...plan.ref_benefit_plans,

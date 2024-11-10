@@ -3,6 +3,7 @@ import {hasContentType} from "@/helper/content-type/content-type-check";
 import prisma from "@/prisma/prisma";
 import {BenefitPlan} from "@/types/benefits/plans/plansTypes";
 import {toGMT8} from "@/lib/utils/toGMT8";
+import { static_formula } from "@/helper/payroll/calculations";
 
 export async function POST(req: NextRequest) {
     try {
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
                 created_at: toGMT8().toISOString(),
                 updated_at: toGMT8().toISOString(),
                 is_active: body.is_active,
-                calculation: "get_contribution",
+                calculation: static_formula.benefit_contribution,
                 system_only: true,
                 is_overwritable: false,
                 affected_json: {mandatory:{ probationary:true, regular:true }, // Will filter upon fetching dim_employee_benefits

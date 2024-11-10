@@ -5,7 +5,6 @@ import { useDateFormatter } from "@react-aria/i18n";
 import {
   Button,
   DateRangePicker,
-  Link,
   Select,
   SelectItem,
   SharedSelection,
@@ -28,7 +27,18 @@ function DatePickerPayroll({
   setProcessDate,
 }: DatePickerUiProps) {
   let formatter = useDateFormatter({ dateStyle: "long" });
-  const {data:payrollDates, isLoading, mutate} = useQuery<ProcessDate[]>('/api/admin/payroll/get-process-dates')
+  const {data:payrollDates, isLoading, mutate} = useQuery<ProcessDate[]>('/api/admin/payroll/get-process-dates',
+    {
+      refreshInterval: 1000,
+      // refreshInterval: 0,
+      // refreshWhenHidden: false,
+      // refreshWhenOffline: false,
+      // revalidateIfStale: false,
+      // revalidateOnFocus: false,
+      // // revalidateOnMount: false,
+      // revalidateOnReconnect: false,
+    }
+  )
   const [selectedYear, setSelectedYear] = React.useState("");
   const [selectedDate, setSelectedDate] = React.useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -75,6 +85,7 @@ function DatePickerPayroll({
           rangeValue.end.toDate(getLocalTimeZone())
         ).toISOString(),
       });
+      mutate();
       toast({
         title: "Added",
         description: "Date added successfully!",
@@ -100,6 +111,7 @@ function DatePickerPayroll({
         await axios.post("/api/admin/payroll/process/delete-date", {
           id: Number(selectedDate),
         });
+        mutate();
         toast({
           title: "Deleted",
           description: "Date deleted successfully!",
