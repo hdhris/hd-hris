@@ -46,7 +46,7 @@ function DataDisplayControl<T>({
     const {searchValue, onSearchChange, itemSearched} = useSearch<T>(values, searchProps?.searchingItemKey || [])
     const {filteredItems, onFilterChange, filter} = useFilter<T>(itemSearched)
     const {paginatedData, onPageChange, totalPages, page, setRows, rows, totalRows} = usePagination<T>(filteredItems, {
-        totalItems: paginationProps?.data_length, rowsPerPage: rowsSearchParams
+        totalItems: paginationProps?.data_length ?? 0, rowsPerPage: rowsSearchParams
     })
     const {sortedItems, onSortChange, sortDescriptor} = useSort<T>(paginatedData)
 
@@ -135,8 +135,8 @@ function DataDisplayControl<T>({
                 {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
             </Typography>}
             {paginationProps && <div className="flex mr-0 ml-auto items-center gap-2">
-                <Typography className="text-medium font-semibold text-primary/50 w-[125px]">
-                    Rows per page
+                <Typography className="text-medium font-semibold text-primary/50">
+                    Show
                 </Typography>
                 <Select
                     aria-label="Rows Per Page"
@@ -154,6 +154,9 @@ function DataDisplayControl<T>({
                     <SelectItem key={15}>15</SelectItem>
                     <SelectItem key={20}>20</SelectItem>
                 </Select>
+                <Typography className="text-medium font-semibold text-primary/50">
+                     entries
+                </Typography>
             </div>}
         </div>
 
