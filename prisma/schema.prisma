@@ -560,6 +560,7 @@ model trans_payrolls {
   trans_payroll_date       trans_payroll_date?        @relation(fields: [date_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payrolls_trans_payroll_date_2")
 
   @@unique([employee_id, date_id], map: "emp_and_process_date")
+  @@index([date_id])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
