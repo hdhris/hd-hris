@@ -1,10 +1,10 @@
-"use client"
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import FormFields, {
   FormInputProps,
 } from "@/components/common/forms/FormFields";
-import { Divider, Spinner } from "@nextui-org/react";
+import { Divider } from "@nextui-org/react";
 import Text from "@/components/Text";
 import { BatchCard } from "@/components/admin/attendance-time/schedule/batchCard";
 import {
@@ -18,7 +18,7 @@ import {
   Schedules,
 } from "@/types/attendance-time/AttendanceTypes";
 //
-const EditJobInformationForm: React.FC = () => {
+const JobInformationForm: React.FC = () => {
   const { setValue, watch } = useFormContext();
   const selectedBatchId = watch("batch_id");
   const [hoveredBatchId, setHoveredBatchId] = React.useState<number | null>(
@@ -28,7 +28,7 @@ const EditJobInformationForm: React.FC = () => {
     React.useState<BatchSchedule | null>(null);
   const [visible, setVisible] = React.useState(false);
 
-  //latest
+  // Fetch data using SWR hooks with default empty arrays
   const { data: departments = [] } = useDepartmentsData();
   const { data: jobTitles = [] } = useJobpositionData();
   const { data: branches = [] } = useBranchesData();
@@ -37,6 +37,7 @@ const EditJobInformationForm: React.FC = () => {
     { refreshInterval: 3000 }
   );
 
+  // Create options arrays
   const departmentOptions = departments.reduce((acc: any[], dept) => {
     if (dept && dept.id && dept.name) {
       acc.push({ value: dept.id.toString(), label: dept.name });
@@ -58,9 +59,19 @@ const EditJobInformationForm: React.FC = () => {
     return acc;
   }, []);
 
-  // Get current days_json value and ensure it's an array
   const currentDays = watch("days_json") || [];
-  const daysArray = Array.isArray(currentDays) ? currentDays : [];
+  const daysArray = Array.isArray(currentDays)
+    ? currentDays
+    : [];
+
+  useEffect(() => {
+    if (selectedBatch) {
+      setValue("batch_id", selectedBatch.id.toString(), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [selectedBatch, setValue]);
 
   const formBasicFields: FormInputProps[] = [
     {
@@ -80,6 +91,7 @@ const EditJobInformationForm: React.FC = () => {
       isRequired: true,
       config: {
         placeholder: "Select hire date",
+        defaultValue: new Date().toISOString(),
       },
     },
     {
@@ -93,6 +105,21 @@ const EditJobInformationForm: React.FC = () => {
       },
     },
     {
+      name: "is_regular",
+      label: "Work Status",
+      type: "select",
+      isRequired: true,
+
+      config: {
+        placeholder: "Select Work Status",
+        options: [
+          { label: "Regular", value: "true" },
+          { label: "Probitionary", value: "false" },
+        ],
+      },
+    },
+    {
+      //
       name: "branch_id",
       label: "Branch",
       type: "select",
@@ -122,7 +149,7 @@ const EditJobInformationForm: React.FC = () => {
       ],
       defaultValue: daysArray,
       selectedKeys: new Set(currentDays),
-      onChange: (e: { target: { value: string; }; }) => {
+      onChange: (e: { target: { value: string } }) => {
         const selectedValues = Array.from(new Set(e.target.value.split(",")));
         setValue("days_json", selectedValues, {
           shouldValidate: true,
@@ -139,6 +166,22 @@ const EditJobInformationForm: React.FC = () => {
         shouldDirty: true,
         shouldTouch: true,
       });
+
+      // setValue(
+      //   "days_json",
+      //   {
+      //     monday: false,
+      //     tuesday: false,
+      //     wednesday: false,
+      //     thursday: false,
+      //     friday: false,
+      //     saturday: false,
+      //     sunday: false,
+      //   },
+      //   {
+      //     shouldValidate: true,
+      //   }
+      // );
     }
   }, [selectedBatch, setValue]);
 
@@ -202,4 +245,4 @@ const EditJobInformationForm: React.FC = () => {
   );
 };
 
-export default EditJobInformationForm;
+export default JobInformationForm;
