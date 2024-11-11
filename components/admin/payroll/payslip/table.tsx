@@ -13,7 +13,7 @@ import React, {
 import { PayrollInputColumn } from "./input";
 import axios from "axios";
 import { cn, Spinner } from "@nextui-org/react";
-import { viewPayslipType } from "@/app/(admin)/(core)/payroll/payslip/page";
+import { systemPayhead, viewPayslipType } from "@/app/(admin)/(core)/payroll/payslip/page";
 import {numberWithCommas} from "@/lib/utils/numberFormat";
 import { axiosInstance } from "@/services/fetcher";
 import useSWR from "swr";
@@ -25,11 +25,13 @@ interface PRPayslipTableType {
   // setFocusedEmployee: (id: number | null) => void;
   // setFocusedPayhead: (id: number | null) => void;
   setPayslip: (item: viewPayslipType | null) => void;
+  setTobeDeployed: (item: unknown) => void;
 }
 export function PRPayslipTable({
   processDate,
   // setFocusedEmployee,
   // setFocusedPayhead,
+  setTobeDeployed,
   setPayslip,
 }: PRPayslipTableType) {
   // const cacheKey = "unpushedPayrollBatch";
@@ -216,11 +218,6 @@ export function PRPayslipTable({
     };
   }, [payslipData]);
 
-  type systemPayhead = {
-    link_id: number;
-    amount: number;
-    payroll_id: number;
-  }
   const toBeDeployed = useMemo(() => {
     const cashToDisburse: systemPayhead[] = [];
     const cashToRepay: systemPayhead[] = [];
@@ -241,7 +238,6 @@ export function PRPayslipTable({
 
       const payrollIdMap = new Map(payslipData.payrolls.map((pr) => [pr.employee_id, pr.id]));
       const payheadCalMap = new Map([...payslipData.earnings, ...payslipData.deductions].map((ph) => [ph.id, ph.calculation]));
-      console.log(payheadCalMap);
       Object.entries(records).forEach(([employee, payheads]) => {
         
         const calculatedData = remappedCalculatedAmountList.get(employee);
@@ -275,9 +271,14 @@ export function PRPayslipTable({
       });
     }
 
-    console.log({cashToDisburse,cashToRepay,benefitContribution});
     return {cashToDisburse,cashToRepay,benefitContribution};
   }, [payslipData, records]);
+
+  useEffect(()=>{
+    if(setTobeDeployed && toBeDeployed){
+      setTobeDeployed(toBeDeployed);
+    }
+  },[toBeDeployed, setTobeDeployed])
 
   const handleFocuses = useCallback((empID: number)=>{
     if (isLoading){

@@ -26,8 +26,8 @@ export interface LoanDisbursement {
   cash_advance_id: number;
   disbursed_at: string;
   amount: string;
-  payment_method: "earning" | "cash" | "bank_transfer" | "other";
-  repayment_status: "to_be_paid" | "fully_paid" | "cancelled"; // Add other potential statuses
+  payment_method: "payroll" | "cash" | "bank_transfer" | "other";
+  repayment_status: "to_be_paid" | "full_paid" | "cancelled"; // Add other potential statuses
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -37,9 +37,9 @@ export interface LoanDisbursement {
 export interface LoanRepayment {
   id: number;
   disbursement_id: number;
-  repayment_at: string;
+  repaid_at: string;
   amount_repaid: string;
-  payment_method: "deduction" | "cash" | "bank_transfer" | "other";
+  payment_method: "payroll" | "cash" | "bank_transfer" | "other";
   // status: string | null;
   created_at: string;
   updated_at: string;

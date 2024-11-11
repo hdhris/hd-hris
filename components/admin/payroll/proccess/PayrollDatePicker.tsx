@@ -21,11 +21,10 @@ import { useQuery } from "@/services/queries";
 
 interface DatePickerUiProps {
   setProcessDate: (item: ProcessDate)=>void;
+  onDeploy?: ()=>void;
 }
 
-function DatePickerPayroll({
-  setProcessDate,
-}: DatePickerUiProps) {
+function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
   let formatter = useDateFormatter({ dateStyle: "long" });
   const {data:payrollDates, isLoading, mutate} = useQuery<ProcessDate[]>('/api/admin/payroll/get-process-dates',
     {
@@ -127,6 +126,8 @@ function DatePickerPayroll({
     }
   }
   async function handleDeploy(){
+    onDeploy && onDeploy();
+    return;
     const result = await showDialog({
       title: "Deploy Payroll",
       message: "This action can't be undone",
@@ -143,6 +144,7 @@ function DatePickerPayroll({
         description: "Date has been marked proccessed!",
         variant: "success",
       });
+      // onDeploy && onDeploy();
       setIsAdding(false);
     } catch (error) {
       toast({
@@ -194,7 +196,7 @@ function DatePickerPayroll({
         </>
       ) : (
         <>
-          {!getProcessDate?.is_processed && !isLoading && (
+          {!getProcessDate?.is_processed && !isLoading && onDeploy && (
             <Button
               {...uniformStyle()}
               className="bg-blue-500"
