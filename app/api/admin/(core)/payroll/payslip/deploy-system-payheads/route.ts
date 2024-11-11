@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
     };
 
     const currentTimestamp = toGMT8().toISOString();
+    const cashRepayAmountMap = new Map(cashToRepay.map(ctr=> [ctr.link_id, ctr.amount]));
 
     // Retrieve disbursed map and determine repayment status
     const getDisbursedMap = await prisma.trans_cash_advance_disbursements.findMany({
@@ -29,11 +30,12 @@ export async function POST(req: NextRequest) {
     }).then((db) =>
       new Map(
         db.map((item) => {
-          const totalRepaid = item.trans_cash_advance_repayments.reduce(
+          const lastRepaid = item.trans_cash_advance_repayments.reduce(
             (sum, repayment) => sum.plus(repayment.amount_repaid || new Decimal(0)),
             new Decimal(0)
           );
-          const status = totalRepaid.toNumber() >= (item.amount?.toNumber() || 0) ? "full_paid" : "to_be_paid";
+          const totalRepaid = lastRepaid.toNumber() + cashRepayAmountMap.get(item.id)!;
+          const status = totalRepaid >= (item.amount?.toNumber() || 0) ? "full_paid" : "to_be_paid";
           return [item.id, status];
         })
       )

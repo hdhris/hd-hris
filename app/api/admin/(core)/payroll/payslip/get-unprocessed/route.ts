@@ -84,11 +84,12 @@ async function stage_one(prisma: PrismaClient, dateID: number){
               },  // Deleted employees' breakdowns
             },
             {
-              ref_payheads: { is_overwritable: false },
-              trans_payrolls: { date_id: dateID },
-            },
-            {
-              ref_payheads: { deleted_at: { not: null } },
+              ref_payheads: {
+                OR: [
+                  { is_overwritable: false },
+                  { deleted_at: { not: null } },
+                ]
+              },
               trans_payrolls: { date_id: dateID },
             },
           ],

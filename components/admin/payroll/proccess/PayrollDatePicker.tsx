@@ -131,6 +131,8 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
     setIsSubmitting(false);
   }
   async function handleDeploy(){
+    // onDeploy && onDeploy();
+    // return;
     const result = await showDialog({
       title: "Deploy Payroll",
       message: "This action can't be undone",
