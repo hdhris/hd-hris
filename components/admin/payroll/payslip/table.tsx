@@ -223,7 +223,7 @@ export function PRPayslipTable({
     const cashToRepay: systemPayhead[] = [];
     const benefitContribution: systemPayhead[] = [];
 
-    if (payslipData && Object.keys(records).length) {    
+    if (!processDate.is_processed && payslipData && Object.keys(records).length) {    
       const remappedCalculatedAmountList =  new Map(
           Object.entries(payslipData.calculatedAmountList).map(([empId, variableAmountProps]) => [
             empId,

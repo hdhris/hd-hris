@@ -41,6 +41,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
   const [selectedYear, setSelectedYear] = React.useState("");
   const [selectedDate, setSelectedDate] = React.useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [rangeValue, setRangeValue] = React.useState({
     start: parseDate(toGMT8().format("YYYY-MM-DD")),
     end: parseDate(toGMT8().format("YYYY-MM-DD")),
@@ -76,6 +77,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
   
   async function handleAddDate() {
     try {
+      setIsSubmitting(true);
       await axios.post("/api/admin/payroll/process/add-date", {
         start_date: toGMT8(
           rangeValue.start.toDate(getLocalTimeZone())
@@ -98,6 +100,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
         variant: "danger",
       });
     }
+    setIsSubmitting(false);
   }
   async function handleDeleteDate() {
     try {
@@ -107,6 +110,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
         preferredAnswer: "no",
       });
       if (response === "yes") {
+        setIsSubmitting(true);
         await axios.post("/api/admin/payroll/process/delete-date", {
           id: Number(selectedDate),
         });
@@ -124,17 +128,18 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
         variant: "danger",
       });
     }
+    setIsSubmitting(false);
   }
   async function handleDeploy(){
-    onDeploy && onDeploy();
-    return;
     const result = await showDialog({
       title: "Deploy Payroll",
       message: "This action can't be undone",
       preferredAnswer: "no",
     })
-    if(result==="no") return
+    if(!(result==="yes")) return
     try {
+      setIsSubmitting(true);
+      onDeploy && onDeploy();
       await axios.post("/api/admin/payroll/process/update-date", {
         id: Number(selectedDate),
       });
@@ -145,7 +150,6 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
         variant: "success",
       });
       // onDeploy && onDeploy();
-      setIsAdding(false);
     } catch (error) {
       toast({
         title: "Error marking",
@@ -153,6 +157,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
         variant: "danger",
       });
     }
+    setIsSubmitting(false);
   }
 
   return (
@@ -182,6 +187,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
             {...uniformStyle({ color: "success" })}
             isIconOnly
             onClick={handleAddDate}
+            isLoading={isLoading || isSubmitting}
           >
             <IoCheckmarkSharp className="size-5 text-white" />
           </Button>
@@ -189,6 +195,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
             variant="flat"
             {...uniformStyle({ color: "danger" })}
             isIconOnly
+            isLoading={isLoading || isSubmitting}
             onClick={() => setIsAdding(false)}
           >
             <IoCloseSharp className="size-5 text-danger-500" />
@@ -201,6 +208,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
               {...uniformStyle()}
               className="bg-blue-500"
               onClick={handleDeploy}
+              isLoading={isLoading || isSubmitting}
             >
               Deploy now
             </Button>
@@ -261,7 +269,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
           <Button // Delete date
             {...uniformStyle({ color: "danger" })}
             isIconOnly
-            isLoading={isLoading}
+            isLoading={isLoading || isSubmitting}
             onClick={handleDeleteDate}
           >
             <MdDelete size={15} />
@@ -269,7 +277,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
           <Button  // Add date
             {...uniformStyle()}
             isIconOnly
-            isLoading={isLoading}
+            isLoading={isLoading || isSubmitting}
             onClick={() => setIsAdding(true)}
           >
             <FaPlus />
