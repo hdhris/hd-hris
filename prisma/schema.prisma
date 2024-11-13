@@ -365,7 +365,9 @@ model trans_benefit_contributions {
   created_at            DateTime               @db.Timestamp(6)
   updated_at            DateTime               @db.Timestamp(6)
   deleted_at            DateTime?              @db.Timestamp(6)
+  payroll_id            Int?
   dim_employee_benefits dim_employee_benefits? @relation(fields: [employee_benefit_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_benefit_contributions_dim_employee_benefits_1")
+  trans_payrolls        trans_payrolls?        @relation(fields: [payroll_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model trans_cash_advance_disbursements {
@@ -378,21 +380,25 @@ model trans_cash_advance_disbursements {
   created_at                    DateTime                        @db.Timestamp(6)
   updated_at                    DateTime                        @db.Timestamp(6)
   deleted_at                    DateTime?                       @db.Timestamp(6)
+  payroll_id                    Int?
   trans_cash_advances           trans_cash_advances?            @relation(fields: [cash_advance_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advance_disbursements_trans_cash_advances_1")
+  trans_payrolls                trans_payrolls?                 @relation(fields: [payroll_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_cash_advance_repayments trans_cash_advance_repayments[]
 }
 
 model trans_cash_advance_repayments {
   id                               Int                               @id @default(autoincrement())
   disbursement_id                  Int?
-  repayment_at                     DateTime?                         @db.Timestamp(6)
+  repaid_at                        DateTime?                         @db.Timestamp(6)
   amount_repaid                    Decimal?                          @db.Decimal(10, 2)
   payment_method                   String?                           @db.VarChar(10)
   status                           String?                           @db.VarChar(10)
   created_at                       DateTime                          @db.Timestamp(6)
   updated_at                       DateTime                          @db.Timestamp(6)
   deleted_at                       DateTime?                         @db.Timestamp(6)
+  payroll_id                       Int?
   trans_cash_advance_disbursements trans_cash_advance_disbursements? @relation(fields: [disbursement_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advance_repayments_trans_cash_advance_disbursemen")
+  trans_payrolls                   trans_payrolls?                   @relation(fields: [payroll_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model trans_cash_advances {
@@ -547,17 +553,20 @@ model trans_payroll_date {
 }
 
 model trans_payrolls {
-  employee_id              Int
-  gross_total_amount       Decimal?                   @db.Decimal(10, 2)
-  deduction_total_amount   Decimal?                   @db.Decimal(10, 2)
-  created_at               DateTime                   @db.Timestamp(6)
-  updated_at               DateTime                   @db.Timestamp(6)
-  id                       Int                        @id @default(autoincrement())
-  date_id                  Int?
-  deleted_at               DateTime?                  @db.Timestamp(6)
-  trans_payhead_breakdowns trans_payhead_breakdowns[]
-  trans_employees          trans_employees            @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payroll_employees")
-  trans_payroll_date       trans_payroll_date?        @relation(fields: [date_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payrolls_trans_payroll_date_2")
+  employee_id                      Int
+  gross_total_amount               Decimal?                           @db.Decimal(10, 2)
+  deduction_total_amount           Decimal?                           @db.Decimal(10, 2)
+  created_at                       DateTime                           @db.Timestamp(6)
+  updated_at                       DateTime                           @db.Timestamp(6)
+  id                               Int                                @id @default(autoincrement())
+  date_id                          Int?
+  deleted_at                       DateTime?                          @db.Timestamp(6)
+  trans_benefit_contributions      trans_benefit_contributions[]
+  trans_cash_advance_disbursements trans_cash_advance_disbursements[]
+  trans_cash_advance_repayments    trans_cash_advance_repayments[]
+  trans_payhead_breakdowns         trans_payhead_breakdowns[]
+  trans_employees                  trans_employees                    @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payroll_employees")
+  trans_payroll_date               trans_payroll_date?                @relation(fields: [date_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payrolls_trans_payroll_date_2")
 
   @@unique([employee_id, date_id], map: "emp_and_process_date")
   @@index([date_id])

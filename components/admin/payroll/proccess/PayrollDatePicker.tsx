@@ -5,7 +5,6 @@ import { useDateFormatter } from "@react-aria/i18n";
 import {
   Button,
   DateRangePicker,
-  Link,
   Select,
   SelectItem,
   SharedSelection,
@@ -22,16 +21,27 @@ import { useQuery } from "@/services/queries";
 
 interface DatePickerUiProps {
   setProcessDate: (item: ProcessDate)=>void;
+  onDeploy?: ()=>void;
 }
 
-function DatePickerPayroll({
-  setProcessDate,
-}: DatePickerUiProps) {
+function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
   let formatter = useDateFormatter({ dateStyle: "long" });
-  const {data:payrollDates, isLoading, mutate} = useQuery<ProcessDate[]>('/api/admin/payroll/get-process-dates')
+  const {data:payrollDates, isLoading, mutate} = useQuery<ProcessDate[]>('/api/admin/payroll/get-process-dates',
+    {
+      refreshInterval: 1000,
+      // refreshInterval: 0,
+      // refreshWhenHidden: false,
+      // refreshWhenOffline: false,
+      // revalidateIfStale: false,
+      // revalidateOnFocus: false,
+      // // revalidateOnMount: false,
+      // revalidateOnReconnect: false,
+    }
+  )
   const [selectedYear, setSelectedYear] = React.useState("");
   const [selectedDate, setSelectedDate] = React.useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [rangeValue, setRangeValue] = React.useState({
     start: parseDate(toGMT8().format("YYYY-MM-DD")),
     end: parseDate(toGMT8().format("YYYY-MM-DD")),
@@ -67,6 +77,7 @@ function DatePickerPayroll({
   
   async function handleAddDate() {
     try {
+      setIsSubmitting(true);
       await axios.post("/api/admin/payroll/process/add-date", {
         start_date: toGMT8(
           rangeValue.start.toDate(getLocalTimeZone())
@@ -75,6 +86,7 @@ function DatePickerPayroll({
           rangeValue.end.toDate(getLocalTimeZone())
         ).toISOString(),
       });
+      mutate();
       toast({
         title: "Added",
         description: "Date added successfully!",
@@ -88,6 +100,7 @@ function DatePickerPayroll({
         variant: "danger",
       });
     }
+    setIsSubmitting(false);
   }
   async function handleDeleteDate() {
     try {
@@ -97,9 +110,11 @@ function DatePickerPayroll({
         preferredAnswer: "no",
       });
       if (response === "yes") {
+        setIsSubmitting(true);
         await axios.post("/api/admin/payroll/process/delete-date", {
           id: Number(selectedDate),
         });
+        mutate();
         toast({
           title: "Deleted",
           description: "Date deleted successfully!",
@@ -113,15 +128,20 @@ function DatePickerPayroll({
         variant: "danger",
       });
     }
+    setIsSubmitting(false);
   }
   async function handleDeploy(){
+    // onDeploy && onDeploy();
+    // return;
     const result = await showDialog({
       title: "Deploy Payroll",
       message: "This action can't be undone",
       preferredAnswer: "no",
     })
-    if(result==="no") return
+    if(!(result==="yes")) return
     try {
+      setIsSubmitting(true);
+      onDeploy && onDeploy();
       await axios.post("/api/admin/payroll/process/update-date", {
         id: Number(selectedDate),
       });
@@ -131,7 +151,7 @@ function DatePickerPayroll({
         description: "Date has been marked proccessed!",
         variant: "success",
       });
-      setIsAdding(false);
+      // onDeploy && onDeploy();
     } catch (error) {
       toast({
         title: "Error marking",
@@ -139,6 +159,7 @@ function DatePickerPayroll({
         variant: "danger",
       });
     }
+    setIsSubmitting(false);
   }
 
   return (
@@ -168,6 +189,7 @@ function DatePickerPayroll({
             {...uniformStyle({ color: "success" })}
             isIconOnly
             onClick={handleAddDate}
+            isLoading={isLoading || isSubmitting}
           >
             <IoCheckmarkSharp className="size-5 text-white" />
           </Button>
@@ -175,6 +197,7 @@ function DatePickerPayroll({
             variant="flat"
             {...uniformStyle({ color: "danger" })}
             isIconOnly
+            isLoading={isLoading || isSubmitting}
             onClick={() => setIsAdding(false)}
           >
             <IoCloseSharp className="size-5 text-danger-500" />
@@ -182,11 +205,12 @@ function DatePickerPayroll({
         </>
       ) : (
         <>
-          {!getProcessDate?.is_processed && !isLoading && (
+          {!getProcessDate?.is_processed && !isLoading && onDeploy && (
             <Button
               {...uniformStyle()}
               className="bg-blue-500"
               onClick={handleDeploy}
+              isLoading={isLoading || isSubmitting}
             >
               Deploy now
             </Button>
@@ -247,7 +271,7 @@ function DatePickerPayroll({
           <Button // Delete date
             {...uniformStyle({ color: "danger" })}
             isIconOnly
-            isLoading={isLoading}
+            isLoading={isLoading || isSubmitting}
             onClick={handleDeleteDate}
           >
             <MdDelete size={15} />
@@ -255,7 +279,7 @@ function DatePickerPayroll({
           <Button  // Add date
             {...uniformStyle()}
             isIconOnly
-            isLoading={isLoading}
+            isLoading={isLoading || isSubmitting}
             onClick={() => setIsAdding(true)}
           >
             <FaPlus />

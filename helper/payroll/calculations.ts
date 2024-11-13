@@ -1,6 +1,12 @@
 import { Parser } from "expr-eval";
 const parser = new Parser();
 
+export const static_formula = {
+  cash_advance_disbursement : 'get_disbursement',
+  cash_advance_repayment : 'get_repayment',
+  benefit_contribution : 'get_contribution',
+} 
+
 export type BaseValueProp = {
   rate_p_hr: number;
   total_shft_hr: number;
