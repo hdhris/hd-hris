@@ -1,17 +1,17 @@
 import React from 'react';
-import {Avatar, Tooltip} from "@nextui-org/react";
+import {Avatar, AvatarProps, Tooltip, TooltipProps} from "@nextui-org/react";
 import {EmployeeDetails} from "@/types/employeee/EmployeeType";
 
 interface UserAvatarTooltipProps{
     user: EmployeeDetails
+    tooltipProps?: Omit<TooltipProps, "content">
+    avatarProps?: Omit<AvatarProps, "alt" | "src">
 }
-function UserAvatarTooltip({user}: UserAvatarTooltipProps) {
+function UserAvatarTooltip({user, ...rest}: UserAvatarTooltipProps) {
     return (
-        <Tooltip key={user.id} content={user.name}>
+        <Tooltip key={user.id} content={user.name} {...rest.tooltipProps}>
             <Avatar
-                classNames={{
-                    base: '!size-6',
-                }}
+                {...rest.avatarProps}
                 alt={user.name}
                 src={user.picture}
             />

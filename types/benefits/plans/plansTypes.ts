@@ -1,6 +1,7 @@
 import {EmployeeDetails} from "@/types/employeee/EmployeeType";
 
 export interface BenefitAdditionalDetails {
+    id: number
     planId: number
     minSalary?: number;
     maxSalary?: number;
@@ -29,6 +30,7 @@ export interface BenefitPlan {
     employees_avails?: EmployeeDetails[]
     createdAt: string;
     updatedAt: string;
+    deduction_id: number
 }
 
 export interface BenefitPlanPaginated{

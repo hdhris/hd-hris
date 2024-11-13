@@ -31,7 +31,7 @@ const toastVariants = cva("group pointer-events-auto relative flex w-full items-
             danger: "group border-danger bg-danger text-danger-foreground",
         },
     }, defaultVariants: {
-        variant: "default",
+        variant: "success",
     },
 })
 

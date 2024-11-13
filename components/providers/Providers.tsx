@@ -7,15 +7,17 @@ import SWRProvider from "@/components/providers/SWRProvider";
 import {useRouter} from 'next/navigation'
 import {EdgeStoreProvider} from "@/lib/edgestore/edgestore";
 
-export function Providers({children, className}: { children: React.ReactNode, className?: string }) {
+export function Providers({children}: { children: React.ReactNode}) {
     const router = useRouter();
-    return (<EdgeStoreProvider>
+    return (
+        <EdgeStoreProvider>
         <SessionProvider>
             <SWRProvider>
-                <NextUIProvider navigate={router.push}>
+                <NextUIProvider navigate={router.push} aria-hidden="false">
                     {children}
                 </NextUIProvider>
             </SWRProvider>
         </SessionProvider>
-    </EdgeStoreProvider>)
+    </EdgeStoreProvider>
+    )
 }

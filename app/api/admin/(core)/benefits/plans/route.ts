@@ -1,14 +1,9 @@
-import { NextResponse } from "next/server";
+import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
-import paginationHandler, { getPaginatedData } from "@/server/pagination/paginate"; // Import the reusable function
-import { LeaveType } from "@/types/leaves/LeaveTypes";
-import { capitalize } from "@nextui-org/shared-utils";
+import paginationHandler from "@/server/pagination/paginate"; // Import the reusable function
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {paginateUrl} from "@/server/pagination/paginate-url";
-import {BenefitAdditionalDetails, BenefitPlan} from "@/types/benefits/plans/plansTypes";
-import {undefined} from "zod";
-import {toDecimals} from "@/helper/numbers/toDecimals";
-import { Decimal } from "@prisma/client/runtime/library";
+import {Decimal} from "@prisma/client/runtime/library";
 import dayjs from "dayjs";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +24,7 @@ interface SalaryPlan {
     plan_id: number;
 }
 
-interface PlansDataProps{
+interface PlansDataProps {
     id: number;
     name: string;
     type: string;
@@ -45,90 +40,42 @@ interface PlansDataProps{
     deleted_at?: string | null; // ISO date string or null
     is_active: boolean;
     ref_benefits_contribution_advance_settings: SalaryPlan[]
+    deduction_id: number
 }
+
 export async function GET(request: Request) {
     try {
         const {page, perPage} = paginateUrl(request.url)
 
-        // const { data, totalItems, currentPage } = await getPaginatedData<PlansDataProps>(
-        //     prisma.ref_benefit_plans,  // The Prisma model
-        //     page,
-        //     perPage,
-        //     { deleted_at: null },  // Filtering condition
-        //     { ref_benefits_contribution_advance_settings: true },  // Include nested details
-        //     { created_at: 'asc' }  // Order by creation date
-        // );
-       const { data, totalItems, currentPage } = await paginationHandler.getPaginatedData<PlansDataProps>({
-           model: prisma.ref_benefit_plans,
-           page,
-           perPage,
-           whereCondition: {
-               deleted_at: null
-           },
-           include: {
-               ref_benefits_contribution_advance_settings: true
-           }, orderBy: {
-               created_at: "asc"
-           }
-       })
+        const {data, totalItems, currentPage} = await paginationHandler.getPaginatedData<PlansDataProps>({
+            model: prisma.ref_benefit_plans, page, perPage, whereCondition: {
+                deleted_at: null
+            }, include: {
+                ref_benefits_contribution_advance_settings: true
+            }, orderBy: {
+                created_at: "asc"
+            }
+        })
 
         // Fetch associated employees concurrently
-        const [employeeEnrollments, employees] = await Promise.all([
-            prisma.dim_employee_benefits.groupBy({
-                by: ["plan_id", "employee_id"],
-                where: {
-                    employee_id: { not: null },
-                },
-            }),
-            prisma.trans_employees.findMany({
-                select: {
-                    id: true,
-                    first_name: true,
-                    last_name: true,
-                    middle_name: true,
-                    prefix: true,
-                    suffix: true,
-                    extension: true,
-                    picture: true,
-                },
-                where: {
-                    deleted_at: null,
-                },
-            }),
-        ]);
-
-
-        // const benefitPlans = data.map((plan):  BenefitPlan => {
-        //     return {
-        //         benefitAdditionalDetails: plan.ref_benefits_contribution_advance_settings.map(details => {
-        //             return{
-        //                 planId: details.plan_id,
-        //                 minSalary: details.min_salary,
-        //                 maxSalary: details.max_salary,
-        //                 minMSC: details.min_MSC,
-        //                 maxMSC: details.max_MSC,
-        //                 mscStep: details.msc_step,
-        //                 ecThreshold: details.ec_threshold,
-        //                 ecLowRate: details.ec_low_rate,
-        //                 ecHighRate: details.ec_high_rate,
-        //                 wispThreshold: details.wisp_threshold,
-        //             }
-        //         })[0],
-        //         coverageDetails: plan.coverage_details,
-        //         description: plan.description,
-        //         effectiveDate:  dayjs(plan.effective_date).format("YYYY-MM-DD"),
-        //         eligibilityCriteria: plan.eligibility_criteria_json,
-        //         employeeContribution: toDecimals(plan.employee_contribution),
-        //         employerContribution: toDecimals(plan.employer_contribution),
-        //         expirationDate: dayjs(plan.expiration_date).format("YYYY-MM-DD"),
-        //         id: plan.id,
-        //         name: plan.name,
-        //         type: plan.type,
-        //         isActive: plan.is_active,
-        //         createdAt: plan.created_at,
-        //         updatedAt: plan.updated_at
-        //     }
-        // })
+        const [employeeEnrollments, employees] = await Promise.all([prisma.dim_employee_benefits.groupBy({
+            by: ["plan_id", "employee_id"], where: {
+                employee_id: {not: null}, terminated_at: null
+            },
+        }), prisma.trans_employees.findMany({
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                middle_name: true,
+                prefix: true,
+                suffix: true,
+                extension: true,
+                picture: true,
+            }, where: {
+                deleted_at: null,
+            },
+        }),]);
 
         // Create a map for employees by plan_id for faster lookup
         const employeeMap = new Map<number, number[]>();
@@ -151,13 +98,12 @@ export async function GET(request: Request) {
             const enrolledEmployees = employees
                 .filter(emp => enrolledEmployeeIds.includes(emp.id))
                 .map(emp => ({
-                    id: emp.id,
-                    name: getEmpFullName(emp),
-                    picture: emp.picture,
+                    id: emp.id, name: getEmpFullName(emp), picture: emp.picture,
                 }));
 
             return {
                 benefitAdditionalDetails: plan.ref_benefits_contribution_advance_settings.map(details => ({
+                    id: details.id,
                     planId: details.plan_id,
                     minSalary: details.min_salary,
                     maxSalary: details.max_salary,
@@ -173,8 +119,8 @@ export async function GET(request: Request) {
                 description: plan.description,
                 effectiveDate: dayjs(plan.effective_date).format('YYYY-MM-DD'),
                 eligibilityCriteria: plan.eligibility_criteria_json,
-                employeeContribution: toDecimals(plan.employee_contribution),
-                employerContribution: toDecimals(plan.employer_contribution),
+                employeeContribution: plan.employee_contribution.toNumber(),
+                employerContribution: plan.employer_contribution.toNumber(),
                 expirationDate: dayjs(plan.expiration_date).format('YYYY-MM-DD'),
                 id: plan.id,
                 name: plan.name,
@@ -183,13 +129,12 @@ export async function GET(request: Request) {
                 createdAt: plan.created_at,
                 updatedAt: plan.updated_at,
                 employees_avails: enrolledEmployees,  // Added property for enrolled employees
+                deduction_id: plan.deduction_id
             };
         });
 
         return NextResponse.json({
-            data: benefitPlans,
-            totalItems,
-            currentPage,
+            data: benefitPlans, totalItems, currentPage,
         });
 
 //         const { data, totalItems, currentPage } = await getPaginatedData<LeaveType>(

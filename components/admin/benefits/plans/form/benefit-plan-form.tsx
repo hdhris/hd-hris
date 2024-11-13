@@ -6,7 +6,6 @@ import {PlanFormSchema} from "@/helper/zodValidation/benefits/plans/plan-form-sc
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Form} from "@/components/ui/form";
 import FormDrawer from "@/components/common/forms/FormDrawer";
-import {EditCreditProp} from "@/app/(admin)/(core)/leaves/leave-credits/page";
 import {DrawerFormTypes} from "@/types/drawer-form/drawer-form-types";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {axiosInstance} from "@/services/fetcher";
@@ -71,47 +70,59 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
     }, [isModalOpen, isOpen]);
 
     useEffect(() => {
-        console.log(plan)
-        if(title && plan){
+        if (title && plan) {
             form.reset({
-                name: plan.name,
-                plan_type: plan.type,
-                description: plan.description,
-                coverage_details: plan.coverageDetails,
-                effective_date: plan.effectiveDate,
-                expiration_date: plan.expirationDate,
-                is_active: plan.isActive,
-                employer_contribution: plan.employerContribution,
-                employee_contribution: plan.employeeContribution,
+                name: plan.name || "",
+                plan_type: plan.type || "",
+                description: plan.description || "",
+                coverage_details: plan.coverageDetails || "",
+                effective_date: plan.effectiveDate || "",
+                expiration_date: plan.expirationDate || "",
+                is_active: plan.isActive ?? false, // Assuming a boolean
+                employer_contribution: plan.employerContribution ?? 0,
+                employee_contribution: plan.employeeContribution ?? 0,
                 advance_setting: !!plan.benefitAdditionalDetails,
-                minSalary: plan.benefitAdditionalDetails?.minSalary,
-                maxSalary: plan.benefitAdditionalDetails?.maxSalary,
-                minMSC: plan.benefitAdditionalDetails?.minMSC,
-                maxMSC: plan.benefitAdditionalDetails?.maxMSC,
-                mscStep: plan.benefitAdditionalDetails?.mscStep,
-                ecThreshold: plan.benefitAdditionalDetails?.ecThreshold,
-                ecLowRate: plan.benefitAdditionalDetails?.ecLowRate,
-                ecHighRate: plan.benefitAdditionalDetails?.ecHighRate,
-                wispThreshold: plan.benefitAdditionalDetails?.wispThreshold
-            })
+                minSalary: plan.benefitAdditionalDetails?.minSalary ?? 0,
+                maxSalary: plan.benefitAdditionalDetails?.maxSalary ?? 0,
+                minMSC: plan.benefitAdditionalDetails?.minMSC ?? 0,
+                maxMSC: plan.benefitAdditionalDetails?.maxMSC ?? 0,
+                mscStep: plan.benefitAdditionalDetails?.mscStep ?? 0,
+                ecThreshold: plan.benefitAdditionalDetails?.ecThreshold ?? 0,
+                ecLowRate: plan.benefitAdditionalDetails?.ecLowRate ?? 0,
+                ecHighRate: plan.benefitAdditionalDetails?.ecHighRate ?? 0,
+                wispThreshold: plan.benefitAdditionalDetails?.wispThreshold ?? 0
+            });
         }
     }, [title, plan, form]);
 
 
-
-
     const onSubmit = async (values: z.infer<typeof PlanFormValidation>) => {
+        // console.log("Plan: ", plan)
+        const data = plan && {
+            benefitAdditionalDetails: {
+                id: plan.benefitAdditionalDetails?.planId || undefined
+            }, deduction_id: plan.deduction_id, id: plan.id, ...values
+        }
+
         setIsLoading(true)
         try {
-            const res = await axiosInstance.post("/api/admin/benefits/plans/create", values)
+
+            let res
+            if (plan) {
+                res = await axiosInstance.post("/api/admin/benefits/plans/update", data)
+            } else {
+                res = await axiosInstance.post("/api/admin/benefits/plans/create", values)
+            }
             if (res.status === 200) {
                 toast({
-                    title: "Success", description: "Plan created successfully", variant: "success"
+                    title: "Success",
+                    description: `Plan ${plan ? "updating" : "creating"} successfully`,
+                    variant: "success"
                 })
             }
         } catch (error) {
             toast({
-                title: "Error", description: "Error creating plan", variant: "danger"
+                title: "Error", description: `Error ${plan ? "updating" : "creating"} plan`, variant: "danger"
             })
         } finally {
             setIsLoading(false)
@@ -136,8 +147,7 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
                 value: "vision", label: "Vision"
             }, {value: "life", label: "Life"}, {value: "retirement", label: "Retirement"}, {
                 value: "disability", label: "Disability"
-            }], allowsCustomValue: true, menuTrigger: "input",
-            maxLength: 10
+            }], allowsCustomValue: true, menuTrigger: "input", maxLength: 10
         }
     }, {
         name: 'description',
@@ -253,7 +263,7 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
 
     return (<FormDrawer isLoading={isLoading} title={title || "Add New Benefit Plan"}
                         description={rest.description || "Enter the details for the new employee benefit plan."}
-                        onOpen={handleModalOpen} isOpen={isModalOpen} >
+                        onOpen={handleModalOpen} isOpen={isModalOpen}>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="drawer-form">
                 <FormFields items={basicInfoFields}/>

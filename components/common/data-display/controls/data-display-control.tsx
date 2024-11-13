@@ -13,7 +13,8 @@ import {Button} from "@nextui-org/button";
 import {LuLayoutGrid, LuLayoutList, LuTable2, LuTrash2} from "react-icons/lu";
 import {icon_size_sm} from "@/lib/utils";
 import {
-    DisplayType, useDataDisplayControl
+    DisplayType,
+    useDataDisplayControl
 } from "@/components/common/data-display/provider/data-display-control-provider";
 import {DataDisplayControlProps} from "@/components/common/data-display/types/types";
 import CountUp from "react-countup";
@@ -45,8 +46,8 @@ function DataDisplayControl<T>({
     const {values, selectedKeys, display, setDisplay} = useDataDisplayControl<T>()
     const {searchValue, onSearchChange, itemSearched} = useSearch<T>(values, searchProps?.searchingItemKey || [])
     const {filteredItems, onFilterChange, filter} = useFilter<T>(itemSearched)
-    const {paginatedData, onPageChange, totalPages, page, setRows, rows, totalRows} = usePagination<T>(filteredItems, {
-        totalItems: paginationProps?.data_length ?? 0, rowsPerPage: rowsSearchParams
+    const {paginatedData, onPageChange, totalPages, page, setRows, rows} = usePagination<T>(filteredItems, {
+        totalItems: paginationProps?.data_length, rowsPerPage: rowsSearchParams
     })
     const {sortedItems, onSortChange, sortDescriptor} = useSort<T>(paginatedData)
 
@@ -130,7 +131,7 @@ function DataDisplayControl<T>({
         </div>
         <div className="flex justify-between pb-3 items-center">
             {title && <Typography className="text-medium font-semibold text-primary/50">
-                <CountUp start={0} end={totalRows} prefix="Total of " suffix={` ${title}`}/>
+                <CountUp start={0} end={paginationProps?.data_length || 0} prefix="Total of " suffix={` ${title}`}/>
                 {/*{ title ? Total < CountUp start={0} end={values.length}/>}*/}
                 {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
             </Typography>}
@@ -155,7 +156,7 @@ function DataDisplayControl<T>({
                     <SelectItem key={20}>20</SelectItem>
                 </Select>
                 <Typography className="text-medium font-semibold text-primary/50">
-                     entries
+                    entries
                 </Typography>
             </div>}
         </div>
@@ -187,27 +188,27 @@ function DataDisplayControl<T>({
 
             <div className={cn("flex justify-end", className?.lower.buttonClassname)}>
                 {displayMethods > 1 && (<ButtonGroup variant="light" color="primary" isIconOnly {...buttonGroupProps}>
-                        {isTable && (<Tooltip content="Table">
-                            <Button onClick={() => handleOnDisplayChange("table")}
-                                    variant={display === "table" ? "flat" : "light"}>
-                                <LuTable2 className={cn("text-slate-700", icon_size_sm)}/>
-                            </Button>
-                        </Tooltip>)}
+                    {isTable && (<Tooltip content="Table">
+                        <Button onClick={() => handleOnDisplayChange("table")}
+                                variant={display === "table" ? "flat" : "light"}>
+                            <LuTable2 className={cn("text-slate-700", icon_size_sm)}/>
+                        </Button>
+                    </Tooltip>)}
 
-                        {isGrid && (<Tooltip content="Grid">
-                            <Button onClick={() => handleOnDisplayChange("grid")}
-                                    variant={display === "grid" ? "flat" : "light"}>
-                                <LuLayoutGrid className={cn("text-slate-700", icon_size_sm)}/>
-                            </Button>
-                        </Tooltip>)}
+                    {isGrid && (<Tooltip content="Grid">
+                        <Button onClick={() => handleOnDisplayChange("grid")}
+                                variant={display === "grid" ? "flat" : "light"}>
+                            <LuLayoutGrid className={cn("text-slate-700", icon_size_sm)}/>
+                        </Button>
+                    </Tooltip>)}
 
-                        {isList && (<Tooltip content="List">
-                            <Button onClick={() => handleOnDisplayChange("list")}
-                                    variant={display === "list" ? "flat" : "light"}>
-                                <LuLayoutList className={cn("text-slate-700", icon_size_sm)}/>
-                            </Button>
-                        </Tooltip>)}
-                    </ButtonGroup>)}
+                    {isList && (<Tooltip content="List">
+                        <Button onClick={() => handleOnDisplayChange("list")}
+                                variant={display === "list" ? "flat" : "light"}>
+                            <LuLayoutList className={cn("text-slate-700", icon_size_sm)}/>
+                        </Button>
+                    </Tooltip>)}
+                </ButtonGroup>)}
 
             </div>
 
