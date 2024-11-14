@@ -5,6 +5,7 @@ import { useRouter } from "next/dist/client/components/navigation";
 import { PayheadForm } from "@/components/admin/payroll/PayheadUI";
 import axios from "axios";
 import { AffectedJson } from "@/types/payroll/payheadType";
+import PayheadUpsert from "@/components/admin/payroll/PayheadUpsert";
 
 function Page() {
   const { data, isLoading } = useNewPayhead();
@@ -41,6 +42,9 @@ function Page() {
         onSubmit={onSubmit}
         allData={{data:data!, isLoading:isLoading}}
       />
+    // <PayheadUpsert
+      
+    // />
   );
 }
 

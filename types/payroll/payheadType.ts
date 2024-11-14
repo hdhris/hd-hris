@@ -1,9 +1,11 @@
+import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+
 export interface AffectedJson {
   mandatory : {
     probationary : boolean;
     regular : boolean;
   }
-  department : number[];
+  departments : number[];
   job_classes : number[];
 }
 
@@ -21,36 +23,37 @@ export interface Payhead {
   type: 'earning' | 'deduction';
   variable?: string;
   affected_json: AffectedJson;
-  dim_payhead_affecteds: Affected[];
+  dim_payhead_affecteds: EmployeeAffected[];
 }
-  export interface Affected {
+  export interface EmployeeAffected {
     id: number;
     payhead_id: number;
     employee_id: number;
     created_at: string;
     updated_at: string;
+    default_amount: number;
   }
   
-  export interface AffectedEmployee {
-    id: number,
-    picture: string;
-    last_name: string;
-    first_name: string;
-    middle_name: string;
-    ref_departments: {
-      id : number;
-      name : string;
-    };
-    ref_job_classes: {
-      id : number;
-      department_id: number;
-      name : string;
-    };
-  }
+  // export interface AffectedEmployee {
+  //   id: number,
+  //   picture: string;
+  //   last_name: string;
+  //   first_name: string;
+  //   middle_name: string;
+  //   ref_departments: {
+  //     id : number;
+  //     name : string;
+  //   };
+  //   ref_job_classes: {
+  //     id : number;
+  //     department_id: number;
+  //     name : string;
+  //   };
+  // }
   
   export interface PayheadAffected {
-    affected: Affected[];
-    employees: AffectedEmployee[];
+    affected: EmployeeAffected[];
+    employees: UserEmployee[];
     payhead: Payhead;
     departments : {
       id: number;

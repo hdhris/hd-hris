@@ -36,6 +36,7 @@ export function calculateAllPayheads(
   surpressErrorMsg: boolean = false,
 ): VariableAmountProp[] {
   let calculatedAmount: VariableAmountProp[] = [];
+  let isError = false;
 
     // Convert baseVariables to the format with null ids
     const baseVariables = Object.entries(baseVariablesAmounts).map(([variable, amount]) => ({
@@ -64,6 +65,7 @@ export function calculateAllPayheads(
             )
           } catch(error) {
             if(!surpressErrorMsg) console.error(error,ua.payhead_id);
+            isError = true;
             return 0;
           }
         })()
@@ -72,7 +74,7 @@ export function calculateAllPayheads(
       calculatedAmount.push(newVar);
     });
   
-    return calculatedAmount;
+    return !isError ? calculatedAmount : [];
 }
 
 
