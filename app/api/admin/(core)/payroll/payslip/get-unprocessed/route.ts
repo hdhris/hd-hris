@@ -88,6 +88,11 @@ async function stage_one(prisma: PrismaClient, dateID: number){
                 OR: [
                   { is_overwritable: false },
                   { deleted_at: { not: null } },
+                  { ref_benefit_plans: { some: {
+                    effective_date: {
+                      
+                    }
+                  }} }
                 ]
               },
               trans_payrolls: { date_id: dateID },

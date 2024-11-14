@@ -137,7 +137,7 @@ export class Benefit {
           wispThreshold: advanceRates.wisp_threshold,
         };
 
-        contribution = advanceCalculator(salary, rates).employeeShare;
+        contribution = advanceCalculator(salary, rates).employeeShare + (advanceCalculator(salary, rates).wispEmployee ?? 0);
       } else {
         const basic = basicCalculator(
           salary,
