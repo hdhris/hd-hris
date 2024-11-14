@@ -100,7 +100,7 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
         // console.log("Plan: ", plan)
         const data = plan && {
             benefitAdditionalDetails: {
-                id: plan.benefitAdditionalDetails?.planId || undefined
+                id: plan.benefitAdditionalDetails?.id || undefined
             }, deduction_id: plan.deduction_id, id: plan.id, ...values
         }
 
