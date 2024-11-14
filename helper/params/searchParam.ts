@@ -1,0 +1,1 @@
+export type awaitSearchParams = Promise<{ [key: string]: string | string[] | undefined }>
