@@ -33,6 +33,7 @@ const employeeSchema = z.object({
   prefix: z.string().max(10).optional(),
   statutory_no_json: z.any().optional(),
   family_bg_json: z.any().optional(),
+  is_regular: z.boolean(),
   educational_bg_json: z.any().optional(),
   civil_service_eligibility_json: z.any().optional(),
   work_experience_json: z.any().optional(),
@@ -317,7 +318,7 @@ async function updateEmployee(
       updated_at: new Date(), // Ensure this line is present
     },
   });
-
+  console.log(data)
   if (job_id) {
     await prisma.trans_employees.update({
       where: { id },

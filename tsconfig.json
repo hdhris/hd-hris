@@ -41,7 +41,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "components/admin/employeescomponent/add/AddBranch.tsx"
+    "components/admin/employeescomponent/store/AddBranch.tsx"
   ],
   "exclude": [
     "node_modules"
