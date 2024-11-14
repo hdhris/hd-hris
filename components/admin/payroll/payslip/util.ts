@@ -6,9 +6,9 @@ export function isAffected(employee: PayslipEmployee, payhead: PayslipPayhead) {
     const affected = payhead?.affected_json;
     // Find mandatory level...
 
-    if (affected.department?.length) {
+    if (affected.departments?.length) {
       // If by department affected
-      if (!affected.department.includes(employee?.ref_departments?.id!))
+      if (!affected.departments.includes(employee?.ref_departments?.id!))
         return false;
     }
     if (affected.job_classes.length) {
