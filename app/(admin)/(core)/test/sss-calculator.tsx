@@ -22,13 +22,13 @@ export default function Component() {
 
     const sssData = useMemo(() => {
         return {
-            minSalary: 3250,
-            maxSalary: 24750,
-            minMSC: 3000,
-            maxMSC: 20000,
+            minSalary: 4250,
+            maxSalary: 29750,
+            minMSC: 4000,
+            maxMSC: 30000,
             mscStep: 500,
             regularEmployeeRate: 0.045,
-            regularEmployerRate: 0.085,
+            regularEmployerRate: 0.095,
             ecThreshold: 14500,
             ecLowRate: 10,
             ecHighRate: 30,
@@ -40,17 +40,13 @@ export default function Component() {
         const { minSalary, maxSalary, minMSC, maxMSC, mscStep, regularEmployeeRate, regularEmployerRate, ecThreshold, ecLowRate, ecHighRate, wispThreshold } = sssData
 
         // Find MSC based on salary range
-        let msc: number;
-        if(monthlySalary < minSalary && monthlySalary > maxSalary) {
-            alert("Within range")
-            if (monthlySalary > minSalary) {
-                msc = minMSC;
-            } else{
-                msc = maxMSC;
-            }
+        let msc = 0
+        if (monthlySalary <= minSalary) {
+            msc = minMSC
+        } else if (monthlySalary >= maxSalary) {
+            msc = maxMSC
         } else {
-            alert("Outside range" + mscStep)
-            msc = Math.round(monthlySalary / mscStep) * mscStep;
+            msc = Math.floor(monthlySalary / mscStep) * mscStep
         }
 
         // Calculate regular contributions
@@ -73,6 +69,16 @@ export default function Component() {
         // Calculate total
         const total = employeeShare + employerShare + ecShare + wispEmployee + wispEmployer
 
+        console.log("SSS: ", sssData)
+        console.log("Data: ", {
+            msc,
+            employeeShare,
+            employerShare,
+            ecShare,
+            wispEmployee,
+            wispEmployer,
+            total
+        })
         setResults({
             msc,
             employeeShare,
