@@ -59,10 +59,10 @@ function Page() {
           return item.dim_payhead_affecteds.length === 0 ? (
             <div className="flex gap-2">
               {item.affected_json &&
-                item.affected_json.department.length > 0 && (
+                item.affected_json.departments.length > 0 && (
                   <Chip color="default" variant="bordered">
-                    <strong>{item.affected_json.department.length}</strong>{" "}
-                    {item.affected_json.department.length >= 2
+                    <strong>{item.affected_json.departments.length}</strong>{" "}
+                    {item.affected_json.departments.length >= 2
                       ? "Departments"
                       : "Department"}
                   </Chip>
