@@ -1,5 +1,5 @@
 'use client'
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useForm} from "react-hook-form";
 import {z} from "zod";
 import {PlanFormSchema} from "@/helper/zodValidation/benefits/plans/plan-form-schema";
@@ -8,7 +8,6 @@ import {Form} from "@/components/ui/form";
 import FormDrawer from "@/components/common/forms/FormDrawer";
 import {DrawerFormTypes} from "@/types/drawer-form/drawer-form-types";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
-import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import {BenefitPlan} from "@/types/benefits/plans/plansTypes";
 
@@ -25,6 +24,32 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
         setIsModalOpen(value);
         onOpen(value);
     }, [onOpen]);
+
+    const planDetails = useMemo(() => {
+        if (title && plan) {
+            return {
+                name: plan.name || "",
+                plan_type: plan.type || "",
+                description: plan.description || "",
+                coverage_details: plan.coverageDetails || "",
+                effective_date: plan.effectiveDate || "",
+                expiration_date: plan.expirationDate || "",
+                is_active: plan.isActive ?? false, // Assuming a boolean
+                employer_contribution: plan.employerContribution ?? 0,
+                employee_contribution: plan.employeeContribution ?? 0,
+                advance_setting: !!plan.benefitAdditionalDetails,
+                minSalary: plan.benefitAdditionalDetails?.minSalary ?? 0,
+                maxSalary: plan.benefitAdditionalDetails?.maxSalary ?? 0,
+                minMSC: plan.benefitAdditionalDetails?.minMSC ?? 0,
+                maxMSC: plan.benefitAdditionalDetails?.maxMSC ?? 0,
+                mscStep: plan.benefitAdditionalDetails?.mscStep ?? 0,
+                ecThreshold: plan.benefitAdditionalDetails?.ecThreshold ?? 0,
+                ecLowRate: plan.benefitAdditionalDetails?.ecLowRate ?? 0,
+                ecHighRate: plan.benefitAdditionalDetails?.ecHighRate ?? 0,
+                wispThreshold: plan.benefitAdditionalDetails?.wispThreshold ?? 0
+            }
+        }
+    }, [title, plan])
     const PlanFormValidation = isAdvanceSetting ? PlanFormSchema.extend({
         minSalary: z.number({
             required_error: "Minimum salary is required", invalid_type_error: "Minimum salary must be a number"
@@ -60,7 +85,8 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
 
 
     const form = useForm<z.infer<typeof PlanFormValidation>>({
-        resolver: zodResolver(PlanFormValidation), defaultValues: {}
+        resolver: zodResolver(PlanFormValidation), defaultValues: {
+        }
     })
 
     useEffect(() => {
@@ -99,34 +125,41 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
     const onSubmit = async (values: z.infer<typeof PlanFormValidation>) => {
         // console.log("Plan: ", plan)
         const data = plan && {
-            benefitAdditionalDetails: {
-                id: plan.benefitAdditionalDetails?.id || undefined
-            }, deduction_id: plan.deduction_id, id: plan.id, ...values
+            // // benefitAdditionalDetails: {
+            // //     id: plan.benefitAdditionalDetails?.id || undefined,
+            // //     values.advance_setting ? ...values.
+            // // },
+            // deduction_id: plan.deduction_id,
+            // id: plan.id,
+            //
+            ...values
         }
 
-        setIsLoading(true)
-        try {
-
-            let res
-            if (plan) {
-                res = await axiosInstance.post("/api/admin/benefits/plans/update", data)
-            } else {
-                res = await axiosInstance.post("/api/admin/benefits/plans/create", values)
-            }
-            if (res.status === 200) {
-                toast({
-                    title: "Success",
-                    description: `Plan ${plan ? "updating" : "creating"} successfully`,
-                    variant: "success"
-                })
-            }
-        } catch (error) {
-            toast({
-                title: "Error", description: `Error ${plan ? "updating" : "creating"} plan`, variant: "danger"
-            })
-        } finally {
-            setIsLoading(false)
-        }
+        console.log("Values: ", values)
+        console.log("Data: ", data)
+        // setIsLoading(true)
+        // try {
+        //
+        //     let res
+        //     if (plan) {
+        //         res = await axiosInstance.post("/api/admin/benefits/plans/update", data)
+        //     } else {
+        //         res = await axiosInstance.post("/api/admin/benefits/plans/create", values)
+        //     }
+        //     if (res.status === 200) {
+        //         toast({
+        //             title: "Success",
+        //             description: `Plan ${plan ? "updating" : "creating"} successfully`,
+        //             variant: "success"
+        //         })
+        //     }
+        // } catch (error) {
+        //     toast({
+        //         title: "Error", description: `Error ${plan ? "updating" : "creating"} plan`, variant: "danger"
+        //     })
+        // } finally {
+        //     setIsLoading(false)
+        // }
     }
 
     const basicInfoFields: FormInputProps[] = [{

@@ -189,12 +189,14 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                     field.onChange(value)
                                 }}
                             >
-                                {(item.config as any)?.options?.map((option: GroupInputOptions) => (
-                                    <AutocompleteItem key={option.value}
-                                                      {...((item.config as any)?.autocompleteItem as Omit<AutocompleteItemProps, "key">)}
-                                    >
-                                        {option.label}
-                                    </AutocompleteItem>))}
+                                {(item.config as any)?.options?.map((option: GroupInputOptions) => {
+                                    return(
+                                        <AutocompleteItem key={option.value}
+                                                          {...((item.config as any)?.autocompleteItem as Omit<AutocompleteItemProps, "key">)}
+                                        >
+                                            {option.label}
+                                        </AutocompleteItem>)
+                                })}
                             </Autocomplete>
                         </Case>
                         <Case of="checkbox">

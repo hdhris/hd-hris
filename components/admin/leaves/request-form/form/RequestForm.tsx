@@ -72,16 +72,13 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
     const minMax = React.useMemo(() => {
 
         const remainingLeaves = user?.employees.find(emp => emp.id === employeeIdSelected)?.leave_balances.remaining_days ?? 0
-
-        console.log("Emp: ", user?.employees)
-        console.log("Remaining: ", remainingLeaves)
         if (remainingLeaves > maxLeave) {
             return Array.from({length: maxLeave - minLeave + 1}).map((_, i) => ({
-                label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`), value: String(minLeave + i)
+                label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`), value: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`)
             }))
         } else {
             return Array.from({length: remainingLeaves - minLeave + 1}).map((_, i) => ({
-                label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`), value: String(minLeave + i)
+                label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`), value:  String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`)
             }))
         }
         // return Array.from({length: maxLeave - minLeave + 1}).map((_, i) => ({
@@ -91,7 +88,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
 
     const LeaveRequestForm: FormInputProps[] = [{
         isRequired: true, name: "days_of_leave", type: "auto-complete", label: "Days of Leave", config: {
-            options: minMax, isClearable: true, isDisabled: !form.watch("leave_type_id") || minMax.length === 0,
+            options: minMax, isClearable: true, isDisabled: !form.watch("leave_type_id") || minMax.length === 0
         }
 
     }, {
@@ -111,12 +108,20 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
     }]
 
     async function onSubmit(values: z.infer<typeof LeaveRequestFormValidation>) {
-        console.log("Values: ", values)
+        // console.log("Values: ", values)
+
         const items = {
             id: employee?.id, ...values,
+            leave_type_id: values.leave_type_id,
+            days_of_leave: values.days_of_leave.split(" ")[0],
+            leave_date:  values.leave_date,
+            comment:  values.comment,
+            reason:  values.reason
         }
 
-        // console.log("Values: ", values)
+
+
+        console.log("Items: ", items)
         try {
             setIsSubmitting(true)
             if (employee?.id) {
@@ -136,7 +141,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
                     })
                 }
             } else {
-                const res = await axiosInstance.post("/api/admin/leaves/requests/create", values)
+                const res = await axiosInstance.post("/api/admin/leaves/requests/create", items)
                 if (res.status === 200) {
                     toast({
                         title: "Success", description: "Leave credit created successfully", variant: "success",
