@@ -149,7 +149,8 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     });
                     // console.timeEnd("UpsertUser");
 
-                    user.id = String(googleAuth.id);
+                    user.id = String(existingUser?.id);
+                    console.log("user id: ", user.id)
                     if (existingUser) {
                         user.email = existingUser.email;
                         user.name = existingUser.name;
@@ -164,6 +165,8 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     return true;
                 } else {
                     // console.time("DeviceUpdate");
+                    console.log("Account: ", account)
+                    console.log("User: ", user)
                     await devices(user.id!);
                     // console.timeEnd("DeviceUpdate");
 
@@ -187,6 +190,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
             if (user) {
                 return {
                     ...token,
+                    employee_id: user.employee_id,
                     image: user.image,
                     id: user.id,
                     name: user.name,

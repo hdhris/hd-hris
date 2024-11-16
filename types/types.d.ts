@@ -1,10 +1,12 @@
 import {DefaultSession, DefaultUser} from "next-auth";
+import {Key} from "react";
 
 declare module "next-auth" {
     interface Session {
         accessToken: string;
         user: {
             id: string;
+            employee_id: Key
             name: string
             role: string; image: string
             privilege: string;
@@ -15,6 +17,7 @@ declare module "next-auth" {
 
     interface Session {
         id: string;
+        employee_id: Key
         name: string
         role: string;
         image: string
@@ -24,6 +27,7 @@ declare module "next-auth" {
 
     interface User extends DefaultUser {
         id: string;
+        employee_id: Key
         name: string
         role: string;
         image: string
@@ -33,6 +37,7 @@ declare module "next-auth" {
 
     interface User extends DefaultUser {
         id: string;
+        employee_id: Key
         name: string
         role: string;
         image: string
@@ -44,6 +49,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
     interface JWT {
         id: string;
+        employee_id: Key
         name: string
         role: string;
         image: string;

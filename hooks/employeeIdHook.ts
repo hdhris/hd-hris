@@ -7,9 +7,9 @@ export function useEmployeeId() {
     const {data} = useSession()
 
     useEffect(() => {
-       if(data?.user?.id) {
-           setId(Number(data.user?.id))
-       }
+        if(data?.user?.employee_id) {
+            setId(Number(data.user?.employee_id))
+        }
     }, [data])
 
     return id

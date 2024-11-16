@@ -56,6 +56,8 @@ function HelpReport() {
   const pathname = usePathname();
   const [newReport, setNewReport] = useState("");
   const userInfo = useUserInfo();
+  console.log("User Info: ", userInfo)
+
   const {
     data: reports,
     isLoading,

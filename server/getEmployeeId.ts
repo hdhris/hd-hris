@@ -7,5 +7,5 @@ export async function getEmployeeId() {
     if (!session) {
         return null
     }
-   return session.user.id
+   return session.user.employee_id
 }
