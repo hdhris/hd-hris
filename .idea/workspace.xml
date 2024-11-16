@@ -4,15 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="fix too much time response in oath">
-      <change beforePath="$PROJECT_DIR$/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/auth.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/tabs/HelpReport.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/tabs/HelpReport.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/defaults_configurations/devices.ts" beforeDir="false" afterPath="$PROJECT_DIR$/defaults_configurations/devices.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hooks/employeeIdHook.ts" beforeDir="false" afterPath="$PROJECT_DIR$/hooks/employeeIdHook.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utils/authUtils/authUtils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/authUtils/authUtils.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utils/getEmployeInfo.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/getEmployeInfo.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/getEmployeeId.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/getEmployeeId.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/types.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/types.d.ts" afterDir="false" />
+    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="fixed user id based string">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,21 +15,21 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Xero-John"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Xero-John&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Xero-John/HD-HRIS.git",
-    "accountId": "b5f152ec-cbe8-4d2b-9411-9380cee4dc5f"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Xero-John/HD-HRIS.git&quot;,
+    &quot;accountId&quot;: &quot;b5f152ec-cbe8-4d2b-9411-9380cee4dc5f&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="2orjtfoc6TkW47v3EFx466xV4kN" />
   <component name="ProjectViewState">
     <option name="autoscrollToSource" value="true" />
@@ -47,7 +40,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "com.codeium.enabled": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "john",
     "last_opened_file_path": "C:/Users/Xero/WebstormProjects/HD-HRIS/HD-HRIS-MOBILE",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -111,6 +104,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fixing issues in the leave" />
     <MESSAGE value="fix too much time response in oath" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix too much time response in oath" />
+    <MESSAGE value="fixed user id based string" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed user id based string" />
   </component>
 </project>
