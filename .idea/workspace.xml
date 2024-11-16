@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="fixed user id based string">
+    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="nextui@2.4.8">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tailwind.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tailwind.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,7 +100,7 @@
       <updated>1731634804821</updated>
       <workItem from="1731634806423" duration="13723000" />
       <workItem from="1731744363430" duration="7989000" />
-      <workItem from="1731755801318" duration="581000" />
+      <workItem from="1731755801318" duration="3209000" />
     </task>
     <task id="LOCAL-00001" summary="fixing issues in the leave">
       <option name="closed" value="true" />
@@ -119,7 +118,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731731999987</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="nextui@2.4.8">
+      <option name="closed" value="true" />
+      <created>1731757467017</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1731757467017</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -140,6 +147,7 @@
     <MESSAGE value="fixing issues in the leave" />
     <MESSAGE value="fix too much time response in oath" />
     <MESSAGE value="fixed user id based string" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed user id based string" />
+    <MESSAGE value="nextui@2.4.8" />
+    <option name="LAST_COMMIT_MESSAGE" value="nextui@2.4.8" />
   </component>
 </project>
