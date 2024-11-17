@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="nextui@2.4.8">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/login/OAthLogin.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/login/OAthLogin.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,6 +83,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS-WEB" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -101,6 +106,7 @@
       <workItem from="1731634806423" duration="13723000" />
       <workItem from="1731744363430" duration="7989000" />
       <workItem from="1731755801318" duration="3209000" />
+      <workItem from="1731856774635" duration="303000" />
     </task>
     <task id="LOCAL-00001" summary="fixing issues in the leave">
       <option name="closed" value="true" />
