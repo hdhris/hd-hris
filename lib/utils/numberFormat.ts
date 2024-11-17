@@ -1,19 +1,14 @@
-const numberWithCommas = (x: number) => {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+const numberWithCommas = (n: number) => {
+    return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 20 });
 }
 
 const ordinalSuffix = (i: number) => {
-    const j = i % 10, k = i % 100;
-    if (j === 1 && k !== 11) {
-        return i + "st";
-    }
-    if (j === 2 && k !== 12) {
-        return i + "nd";
-    }
-    if (j === 3 && k !== 13) {
-        return i + "rd";
-    }
-    return i + "th";
+    const value = parseInt(String(i),10);
+    const suffixes = ["th", "st", "nd", "rd"];
+    const remainder = value % 100;
+    const suffix =
+    remainder >= 11 && remainder <= 13 ? "th" : suffixes[(value % 10) as keyof typeof suffixes] || "th";
+    return `${value}${suffix}`;
 }
 
 const getRandomInt = (min: number, max: number) => {
@@ -23,19 +18,11 @@ const getRandomInt = (min: number, max: number) => {
 }
 
 const compactNumber = (x: number) => {
-    if (x < 1000) return x.toString();
-
-    const suffixes = ["", "K", "M", "B", "T"];
-    const magnitude = Math.floor(Math.log10(x) / 3);
-    const suffixIndex = Math.max(0, Math.min(suffixes.length - 1, magnitude));
-
-    let shortenedValue = x / Math.pow(1000, suffixIndex);
-
-    if (shortenedValue % 1 !== 0) {
-        shortenedValue = parseFloat(shortenedValue.toFixed(1));
-    }
-
-    return shortenedValue.toString() + suffixes[suffixIndex];
+    return new Intl.NumberFormat("en-US", {
+        notation: "compact",
+        compactDisplay: "short",
+        maximumFractionDigits: 1,
+      }).format(x);
 };
 
 

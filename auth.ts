@@ -7,7 +7,6 @@ import {LoginValidation} from "@/helper/zodValidation/LoginValidation";
 import GoogleProvider from "next-auth/providers/google";
 import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 import {UserPrivileges} from "@/types/JSON/user-privileges";
-import dayjs from "dayjs";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {devices} from "@/defaults_configurations/devices";
 
@@ -36,57 +35,74 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
         },
     }),], callbacks: {
         async signIn({ account, user }) {
+            // // console.time("signInProcess");
+
             try {
                 if (account?.provider === "google") {
-                    // Check if user email exists in the employees-leaves-status table
-                    const googleAuth = await prisma.trans_employees.findUnique({
-                        where: {
-                            email: user.email || undefined,
-                        }
-                    });
+                    // // console.time("GoogleAuthCheck");
+
+                    const results = await prisma.$transaction([
+                        prisma.trans_employees.findUnique({
+                            where: { email: user.email || undefined },
+                        }),
+                        prisma.trans_users.findUnique({
+                            where: { email: user.email! },
+                        }),
+                    ]);
+
+                    const googleAuth = results[0];
+                    const existingUser = results[1];
 
                     if (!googleAuth) {
                         console.error("Unauthorized login attempt.");
+                        // // console.timeEnd("GoogleAuthCheck");
                         return false;
                     }
 
-                    // Check the access control with the correct user ID
+                    // Fetch access control details, privileges, and related data
                     const access_control = await prisma.acl_user_access_control.findFirst({
-                        where: {
-                            employee_id: googleAuth.id,
-                        },
+                        where: { employee_id: googleAuth.id },
                         include: {
                             sys_privileges: true,
-                            trans_users: true
-                        }
+                            trans_users: true,
+                        },
                     });
 
-                    if (!access_control) {
-                        console.log("You are not authorized");
+                    // // console.timeEnd("GoogleAuthCheck");
+
+                    // if (!access_control) {
+                    //     console.error("Access control not found.");
+                    //     return false;
+                    // }
+
+
+                    if (!googleAuth || !access_control) {
+                        console.error("Unauthorized login attempt or access control missing.");
                         return false;
                     }
 
                     if (access_control.banned_til) {
                         const isBanned = toGMT8(access_control.banned_til).isAfter(new Date());
-                        console.log("You are banned");
-                        return !isBanned;
+                        if (isBanned) {
+                            console.log("You are banned");
+                            return false;
+                        }
                     }
 
-                    // Process user role and return user data
                     const privileges = access_control.sys_privileges;
                     const accessibility = processJsonObject<UserPrivileges>(privileges?.accessibility);
-                    const role = !accessibility?.web_access;
+                    if (!accessibility?.web_access) {
+                        console.log("No web access");
+                        return false;
+                    }
 
-                    const existingUser = await prisma.trans_users.findUnique({
-                        where: { email: user.email! },
-                    });
-
-                    const id = await prisma.auth_accounts.upsert({
+                    // console.time("UpsertUser");
+                    await prisma.auth_accounts.upsert({
                         where: {
                             provider_provider_account_id: {
                                 provider: account.provider,
-                                provider_account_id: account.providerAccountId
-                            }
+                                provider_account_id: account.providerAccountId,
+                            },
                         },
                         create: {
                             provider: account.provider,
@@ -107,10 +123,10 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                                         name: user.name!,
                                         image: user.image,
                                         updatedAt: new Date(),
-                                        createdAt: new Date()
-                                    }
-                                }
-                            }
+                                        createdAt: new Date(),
+                                    },
+                                },
+                            },
                         },
                         update: {
                             access_token: account.access_token,
@@ -123,39 +139,47 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                                 update: {
                                     where: { email: user.email! },
                                     data: {
-                                        name: existingUser?.name === null ? user.name! : existingUser?.name, // Update only if current name is null
-                                        image: existingUser?.image === null ? user.image : existingUser?.image, // Update only if current image is null
-                                        updatedAt: new Date()
-                                    }
-                                }
-                            }
-                        }
+                                        name: existingUser?.name || user.name!,
+                                        image: existingUser?.image || user.image,
+                                        updatedAt: new Date(),
+                                    },
+                                },
+                            },
+                        },
                     });
+                    // console.timeEnd("UpsertUser");
 
-                    user.id = String(googleAuth.id);
-
-                    //Update the user in the session
-                    if(existingUser) {
+                    user.id = String(existingUser?.id);
+                    console.log("user id: ", user.id)
+                    if (existingUser) {
                         user.email = existingUser.email;
                         user.name = existingUser.name;
                         user.image = existingUser.image;
                     }
-                    await devices(id.userId)
 
-                    return !role;
+                    // console.time("DeviceUpdate");
+                    await devices(user.id);
+                    // console.timeEnd("DeviceUpdate");
 
+                    // console.timeEnd("signInProcess");
+                    return true;
                 } else {
+                    // console.time("DeviceUpdate");
+                    console.log("Account: ", account)
+                    console.log("User: ", user)
+                    await devices(user.id!);
+                    // console.timeEnd("DeviceUpdate");
 
-                    // Handle other providers
-                    await devices(user.id!)
+                    // console.timeEnd("signInProcess");
                     return true;
                 }
             } catch (error) {
                 console.error("Login error:", error);
+                // console.timeEnd("signInProcess");
                 return false;
             }
-        },
-    authorized({request: {nextUrl}, auth}) {
+        }
+        , authorized({request: {nextUrl}, auth}) {
             const isLoggedIn = !!auth?.user
             const {pathname} = nextUrl
             if (pathname.startsWith('/auth/signin') && isLoggedIn) {
@@ -166,6 +190,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
             if (user) {
                 return {
                     ...token,
+                    employee_id: user.employee_id,
                     image: user.image,
                     id: user.id,
                     name: user.name,

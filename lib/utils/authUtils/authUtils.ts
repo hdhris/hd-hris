@@ -56,7 +56,8 @@ export const getUserData = async (username: string, password: string) => {
     if (role) throw new Error('Only admin can login');
 
     return {
-        id: access_control.employee_id,
+        id: auth.trans_users.id,
+        employee_id: access_control.employee_id,
         name: auth.trans_users.name, // Use actual user name if available
         role,
         image: auth.trans_users.image || '',

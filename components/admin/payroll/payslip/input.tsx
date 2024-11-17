@@ -17,9 +17,12 @@ class CustomInput extends React.Component<
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.preventDefault();
       this.handleVerticalNavigation(e);
+
     } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-      e.preventDefault();
-      this.handleHorizontalNavigation(e);
+      if (e.ctrlKey){
+        e.preventDefault();
+        this.handleHorizontalNavigation(e);
+      }
     }
   };
 

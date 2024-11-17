@@ -165,7 +165,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                     <FormLabel htmlFor={item.name} className={item.inputClassName}>
                         {item.label}
                     </FormLabel>)}
-                {item.isRequired && <span className="ml-2 inline-flex text-destructive text-medium"> *</span>}
+                {item.isRequired && <span className="ml-2 inline text-destructive text-medium"> *</span>}
                 <FormControl className="space-y-2 w-full">
                     {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
                         <Case of="auto-complete">
@@ -189,12 +189,14 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                     field.onChange(value)
                                 }}
                             >
-                                {(item.config as any)?.options?.map((option: GroupInputOptions) => (
-                                    <AutocompleteItem key={option.value}
-                                                      {...((item.config as any)?.autocompleteItem as Omit<AutocompleteItemProps, "key">)}
-                                    >
-                                        {option.label}
-                                    </AutocompleteItem>))}
+                                {(item.config as any)?.options?.map((option: GroupInputOptions) => {
+                                    return(
+                                        <AutocompleteItem key={option.value}
+                                                          {...((item.config as any)?.autocompleteItem as Omit<AutocompleteItemProps, "key">)}
+                                        >
+                                            {option.label}
+                                        </AutocompleteItem>)
+                                })}
                             </Autocomplete>
                         </Case>
                         <Case of="checkbox">

@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({
                 success: false,
                 message: "Missing required fields. Please provide employee ID, leave date, days of leave, reason, and leave type ID."
-            });
+            }, {status: 400});
         }
 
         // Get the current user session
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({
                 success: false,
                 message: "Reviewer not found. Ensure you are logged in with the correct account."
-            });
+            }, {status: 400});
         }
 
         // Start the transaction

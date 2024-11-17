@@ -77,11 +77,17 @@ export interface Breakdown {
 //   };
 // }
 
-export type PayslipPayhead = Omit<Payhead,"dim_payhead_affecteds"|"type">
+type Benefit = {
+  ref_benefit_plans: {
+    deduction_id: number;
+  }[];
+}
+export type PayslipPayhead = Omit<Payhead,"dim_payhead_affecteds"> & Benefit;
 export interface PayslipEmployee extends UserEmployee {
   dim_payhead_affecteds: {
     payhead_id: number;
   }[];
+  
 }
 export interface PayslipData {
   payrolls: Payroll[];

@@ -14,7 +14,9 @@ import {
   cn,
   Spinner,
 } from "@nextui-org/react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import {numberWithCommas} from "@/lib/utils/numberFormat";
+import axios from "axios";
 
 const data = {
   name: 'Michael Angelo Supetran',
@@ -49,13 +51,30 @@ export type viewPayslipType = {
   net: number;
 }
 
+export type systemPayhead = {
+  link_id: number;
+  amount: number;
+  payroll_id: number;
+}
+
 function Page() {
   const [focusedEmployee, setFocusedEmployee] = useState<number | null>(null);
   const [focusedPayhead, setFocusedPayhead] = useState<number | null>(null);
-  const [payslip, setPayslip] = useState<viewPayslipType>()
+  const [payslip, setPayslip] = useState<viewPayslipType | null>(null)
   const [processDate, setProcessDate] = useState<ProcessDate>();
+  const [toBeDeployed, setTobeDeployed] = useState<unknown>();
   const userInfo = useUserInfo();
-  SetNavEndContent(() => <DatePickerPayroll setProcessDate={setProcessDate} />);
+
+  const deployNow = useCallback(async()=>{
+    if(toBeDeployed){
+      try{
+        await axios.post('/api/admin/payroll/payslip/deploy-system-payheads', toBeDeployed);
+      } catch (error){
+        console.error(error);
+      }
+    }
+  },[toBeDeployed])
+  SetNavEndContent(() => <DatePickerPayroll setProcessDate={setProcessDate} onDeploy={deployNow}/>);
 
   if (processDate === undefined) {
     return <Spinner label="Loading..." className="w-full h-full" />;
@@ -70,6 +89,7 @@ function Page() {
         <PRPayslipTable
           processDate={processDate}
           setPayslip={setPayslip}
+          setTobeDeployed={setTobeDeployed}
           // setFocusedEmployee={setFocusedEmployee}
           // setFocusedPayhead={setFocusedPayhead}
         />
@@ -100,7 +120,7 @@ function Page() {
                         <span>:</span>
                       </p>
                       <p className="w-14 ms-5 flex justify-between text-sm font-semibold">
-                        {item.number}
+                        {numberWithCommas(Number(item.number))}
                         <span>:</span>
                       </p>
                       {/* <p className="ps-4 text-sm font-bold">{item.amount}</p> */}
@@ -110,7 +130,7 @@ function Page() {
                 );
               })}
               <Divider/>
-              <p className="ms-auto me-4 text-small font-semibold">{payslip.earnings.total}</p>
+              <p className="ms-auto me-4 text-small font-semibold">{numberWithCommas(payslip.earnings.total)}</p>
               <div className="ms-4">
                 <p className="text-sm font-semibold text-gray-500 my-2">
                   Deduction
@@ -124,7 +144,7 @@ function Page() {
                           <span>:</span>
                         </p>
                         <p className="w-14 ms-5 flex justify-between text-sm font-semibold">
-                          {item.number}
+                          {numberWithCommas(Number(item.number))}
                           <span>:</span>
                         </p>
                         {/* <p className="ps-4 text-sm font-bold">{item.amount}</p> */}
@@ -134,7 +154,7 @@ function Page() {
                   );
                 })}
               <Divider/>
-              <p className="w-fit ms-auto me-4 text-small font-semibold">{payslip.deductions.total}</p>
+              <p className="w-fit ms-auto me-4 text-small font-semibold">{numberWithCommas(payslip.deductions.total)}</p>
               </div>
               <div className="mt-5">
                 <div className="flex items-center">
@@ -145,7 +165,7 @@ function Page() {
                   </p> */}
                 </div>
                 <Divider />
-                <p className="w-fit ms-auto me-4 text-small font-bold">₱ {payslip.net}</p>
+                <p className="w-fit ms-auto me-4 text-small font-bold">₱ {numberWithCommas(payslip.net)}</p>
               </div>
               {/* <h1>Focused Employee: {focusedEmployee}</h1>
           <h1>Focused Payhead: {focusedPayhead}</h1> */}

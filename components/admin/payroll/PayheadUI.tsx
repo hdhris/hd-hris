@@ -11,7 +11,6 @@ import {
   ScrollShadow,
 } from "@nextui-org/react";
 import {
-  AffectedEmployee,
   AffectedJson,
   PayheadAffected,
 } from "@/types/payroll/payheadType";
@@ -29,6 +28,7 @@ import PayheadCalculator from "./Calculator/Calculator";
 import { switchLabel } from "../attendance-time/holidays/script";
 import { capitalize } from "lodash";
 import { useQuery } from "@/services/queries";
+import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
 
 interface PayheadFormProps {
   label: string;
@@ -87,7 +87,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
     },
   });
 
-  const config: TableConfigProps<AffectedEmployee> = {
+  const config: TableConfigProps<UserEmployee> = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
       { uid: "role", name: "Role", sortable: true },
@@ -156,7 +156,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
         : Array.from(selectedEmployees).map(Number),
       {
         mandatory: mandatory,
-        department:
+        departments:
           Array.from(selectedDepartment).length != data.departments.length
             ? Array.from(selectedDepartment).map(Number)
             : [],
@@ -184,9 +184,9 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
       });
       if (data.payhead.affected_json) {
         setMandatory(data.payhead.affected_json.mandatory);
-        if (data.payhead.affected_json.department.length > 0) {
+        if (data.payhead.affected_json.departments.length > 0) {
           setSelectedDepartment(
-            new Set(data.payhead.affected_json.department.map(String))
+            new Set(data.payhead.affected_json.departments.map(String))
           );
         } else {
           setSelectedDepartment(
@@ -251,12 +251,8 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
 
   useEffect(() => {
     filteredDeptAndJobsOrIsMandatory();
-  }, [
-    selectedDepartment,
-    selectedJobs,
-    mandatory,
-    filteredDeptAndJobsOrIsMandatory,
-  ]);
+    
+  }, [filteredDeptAndJobsOrIsMandatory]);
 
   if (isLoading || !data) {
     return (
@@ -297,7 +293,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
                             setInvalid={setInvalid}
                             input={field.value}
                             setInput={field.onChange}
-                            payheadVariables={variables}
+                            // payheadVariables={variables}
                           />
                         );
                       },
@@ -473,7 +469,7 @@ export const PayheadForm: React.FC<PayheadFormProps> = ({
             : undefined
         }
         filterConfig={(keys) => {
-          let filteredItems: AffectedEmployee[] = [...data.employees!];
+          let filteredItems: UserEmployee[] = [...data.employees!];
 
           if (keys !== "all" && keys.size > 0) {
             console.log(Array.from(keys));

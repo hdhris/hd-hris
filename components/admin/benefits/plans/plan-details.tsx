@@ -3,9 +3,8 @@ import {Button, Card, Chip, cn, Divider, Tab, Tabs, Tooltip} from "@nextui-org/r
 import {BenefitPlan} from "@/types/benefits/plans/plansTypes";
 import Typography from "@/components/common/typography/Typography";
 import PlanTypeChip from "@/components/admin/benefits/plans/plan-type-chip";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import dayjs from "dayjs";
-import EmployeesAvatar from "@/components/common/avatar/employees-avatar";
 import BorderCard from "@/components/common/BorderCard";
 import {Info, Percent, Wallet} from "lucide-react";
 import {CardBody} from "@nextui-org/card";
@@ -14,11 +13,73 @@ import {icon_color, icon_size_sm} from "@/lib/utils";
 import {numberWithCommas} from "@/lib/utils/numberFormat";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import EnrollEmployeeForm from "@/components/admin/benefits/plans/form/enroll-employee-form";
+import RenderList from "@/components/util/RenderList";
+import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
+import useSearch from "@/hooks/utils/useSearch";
+import Search from "@/components/util/search";
+import {
+    ContextMenu,
+    ContextMenuContent,
+    ContextMenuItem,
+    ContextMenuSeparator,
+    ContextMenuTrigger
+} from "@/components/ui/context-menu";
+import showDialog from "@/lib/utils/confirmDialog";
+import {EmployeeDetails} from "@/types/employeee/EmployeeType";
+import {axiosInstance} from "@/services/fetcher";
+import {useToast} from "@/components/ui/use-toast";
 
 export default function PlanDetails({...props}: BenefitPlan) {
     const [isOpenEnrollment, setIsOpenEnrollment] = useState<boolean>(false)
-
+    const {toast} = useToast()
+    const [employeesEnrolled, setEmployeesEnrolled] = useState<EmployeeDetails[]>( [])
     const details = props.benefitAdditionalDetails ? props.benefitAdditionalDetails : null
+
+    useEffect(() => {
+        if(props.employees_avails) setEmployeesEnrolled(props.employees_avails)
+    }, [props.employees_avails])
+    const handleTerminate = async (key: number, plan_id: number, name: string) => {
+        const res = await showDialog({
+            title: "Terminate Confirmation",
+            message: <Typography>Do you want to terminate <span className="font-semibold">{name}</span>? This process
+                can&apos;t be undone.</Typography>
+        });
+
+
+        if (res === "yes") {
+            // Store the previous state in case we need to revert it
+            const previousEmployees = [...employeesEnrolled];
+
+            // Optimistically update the state
+            setEmployeesEnrolled((prevState) => prevState.filter((item) => item.id !== key));
+
+            try {
+                const response = await axiosInstance.post("/api/admin/benefits/plans/terminate", { key, plan_id });
+
+                if (response.status === 200) {
+                    toast({
+                        title: "Success",
+                        description: `${name} has been terminated successfully.`,
+                        variant: "success"
+                    });
+                }
+            } catch (error) {
+                // Revert the state if an error occurs
+                setEmployeesEnrolled(previousEmployees);
+
+                // Display an error message to the user
+                toast({
+                    title: "Error",
+                    description: `Failed to terminate ${name}. Please try again.`,
+                    variant: "danger",
+                });
+
+                console.error("Termination error:", error);
+            }
+        }
+
+    }
+    const {searchValue, onSearchChange, itemSearched, searchingItemKey} = useSearch(employeesEnrolled!, ["name"])
     return (<>
         <BorderCard className="w-[40%] overflow-hidden pb-10">
             <div className="flex justify-between w-full">
@@ -35,7 +96,7 @@ export default function PlanDetails({...props}: BenefitPlan) {
                 panel: "h-[70%]"
             }}>
                 <Tab key="basic_info" title="Basic Info">
-                    <div className="rounded border-1 my-2 px-2 flex flex-col gap-2">
+                    <div className="rounded border-1 my-2 px-2 flex flex-col gap-2 overflow-hidden">
                         <div className="flex justify-between items-center">
                             <div className="flex flex-col gap-2 p-4 w-fit items-center">
                                 <Typography className="font-semibold text-medium">Employee Rate %</Typography>
@@ -52,15 +113,7 @@ export default function PlanDetails({...props}: BenefitPlan) {
                                 </div>
                             </div>
                         </div>
-                        <div className="h-40 pb-2">
-                            <div className="flex justify-between items-center">
-                                <Typography className="font-semibold text-medium">Enrolled Employees</Typography>
-                                <Button {...uniformStyle()} onClick={() => setIsOpenEnrollment(true)}>Enroll Employee</Button>
-                            </div>
-                            <ScrollShadow className="h-full p-4">
-                                <EmployeesAvatar employees={props.employees_avails!} max={undefined} isGrid/>
-                            </ScrollShadow>
-                        </div>
+
                     </div>
 
                     <Divider/>
@@ -77,6 +130,52 @@ export default function PlanDetails({...props}: BenefitPlan) {
                     <Typography
                         className="text-default-400/50 text-medium indent-4 text-justify">{props.coverageDetails}</Typography>
                 </Tab>
+                <Tab key="enrolled" title="Enrolled">
+                    <div className="h-full overflow-hiden"> {/* Changed overflow from hidden to auto */}
+                        <div className="flex justify-between items-center mb-2">
+                            <Typography className="font-semibold text-medium">Enrolled Employees</Typography>
+                            <Button {...uniformStyle()} onClick={() => setIsOpenEnrollment(true)}>
+                                Enroll Employee
+                            </Button>
+                        </div>
+                        {/* Ensure ScrollShadow container has overflow set to auto */}
+                        <Search value={searchValue} onChange={onSearchChange} searchingItemKey={searchingItemKey!}
+                                className="h-12 w-full"/>
+
+                        <ScrollShadow className="p-4 w-full h-[70%] mb-4 overflow-y-auto">
+                            <div className="flex gap-4 w-full flex-wrap">
+                                <RenderList
+                                    items={itemSearched.map(item => ({key: item.id, ...item}))}
+                                    map={(users) => {
+
+                                        return <ContextMenu>
+                                            <ContextMenuTrigger>
+                                                <UserAvatarTooltip user={users} avatarProps={{
+                                                    size: "md"
+                                                }}/>
+                                            </ContextMenuTrigger>
+                                            <ContextMenuContent className="rounded">
+                                                <ContextMenuItem onClick={async () => {
+                                                    await handleTerminate(users.key, props.id, users.name)
+                                                }}><Typography><span className="font-semibold">Terminate</span> {users.name}</Typography></ContextMenuItem>
+                                                <ContextMenuSeparator/>
+                                                <ContextMenuItem>View Details</ContextMenuItem>
+                                            </ContextMenuContent>
+                                        </ContextMenu>
+                                    }}/>
+
+                            </div>
+
+                            {/*<EmployeesAvatar*/}
+                            {/*    employees={props.employees_avails!}*/}
+                            {/*    max={props.employees_avails?.length!}*/}
+                            {/*    isBordered*/}
+                            {/*    isGrid*/}
+                            {/*/>*/}
+                        </ScrollShadow>
+                    </div>
+                </Tab>
+
                 {details && <Tab key="thresholds" title="Thresholds">
                     <ScrollShadow className="h-full space-y-8 pb-5 pr-5">
                         {[{

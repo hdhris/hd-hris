@@ -27,20 +27,31 @@ export const advanceCalculator = (monthlySalary: number, data: AdvanceCalculator
         wispThreshold
     } = data;
 
+    // console.log("Salary: ", monthlySalary)
+    // console.log("Data: ", data)
     // Find MSC based on salary range
-    let msc = 0;
+    let msc: number;
     if (monthlySalary < minSalary) {
-        msc = minMSC;
+        msc = minMSC
     } else if (monthlySalary > maxSalary) {
-        msc = maxMSC;
+        msc = maxMSC
     } else {
-        msc = Math.floor(monthlySalary / mscStep) * mscStep;
+        msc = Math.round(monthlySalary / mscStep) * mscStep
     }
+    // if(monthlySalary < minSalary && monthlySalary > maxSalary) {
+    //     if (monthlySalary > minSalary) {
+    //         msc = minMSC;
+    //     } else{
+    //         msc = maxMSC;
+    //     }
+    // } else {
+    //     msc = Math.round(monthlySalary / mscStep) * mscStep;
+    // }
 
     // Calculate regular contributions
     const baseAmount = Math.min(msc, wispThreshold);
-    const employeeShare = baseAmount * regularEmployeeRate / 100;
-    const employerShare = baseAmount * regularEmployerRate / 100;
+    const employeeShare = baseAmount * (regularEmployeeRate / 100);
+    const employerShare = baseAmount * (regularEmployerRate / 100);
 
     // Calculate EC
     const ecShare = msc <= ecThreshold ? ecLowRate : ecHighRate;
@@ -50,8 +61,8 @@ export const advanceCalculator = (monthlySalary: number, data: AdvanceCalculator
     let wispEmployer = 0;
     if (msc > wispThreshold) {
         const excess = msc - wispThreshold;
-        wispEmployee = excess * regularEmployeeRate;
-        wispEmployer = excess * regularEmployerRate;
+        wispEmployee = excess * (regularEmployeeRate / 100);
+        wispEmployer = excess * (regularEmployerRate / 100);
     }
 
     // Calculate total
