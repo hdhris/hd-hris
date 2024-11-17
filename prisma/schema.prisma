@@ -61,6 +61,7 @@ model dim_payhead_affecteds {
   employee_id     Int?
   created_at      DateTime?        @db.Timestamp(6)
   updated_at      DateTime?        @db.Timestamp(6)
+  default_amount  Decimal?         @db.Decimal
   trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_affecteds_trans_employees1")
   ref_payheads    ref_payheads?    @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_affecteds_trans_payhead_list1")
 }
@@ -262,21 +263,22 @@ model ref_leave_types {
 }
 
 model ref_payheads {
-  calculation              Json?                      @db.Json
-  created_at               DateTime?                  @db.Timestamp(6)
-  updated_at               DateTime?                  @db.Timestamp(6)
-  deleted_at               DateTime?                  @db.Timestamp(6)
-  id                       Int                        @id @default(autoincrement())
-  is_active                Boolean?
-  name                     String?                    @db.VarChar(45)
-  type                     String?                    @db.VarChar(10)
-  affected_json            Json?                      @db.Json
-  variable                 String?                    @db.VarChar(15)
-  is_overwritable          Boolean?
-  system_only              Boolean?
-  dim_payhead_affecteds    dim_payhead_affecteds[]
-  ref_benefit_plans        ref_benefit_plans[]
-  trans_payhead_breakdowns trans_payhead_breakdowns[]
+  calculation                  Json?                          @db.Json
+  created_at                   DateTime?                      @db.Timestamp(6)
+  updated_at                   DateTime?                      @db.Timestamp(6)
+  deleted_at                   DateTime?                      @db.Timestamp(6)
+  id                           Int                            @id @default(autoincrement())
+  is_active                    Boolean?
+  name                         String?                        @db.VarChar(45)
+  type                         String?                        @db.VarChar(10)
+  affected_json                Json?                          @db.Json
+  variable                     String?                        @db.VarChar(15)
+  is_overwritable              Boolean?
+  system_only                  Boolean?
+  dim_payhead_affecteds        dim_payhead_affecteds[]
+  dim_payhead_specific_amounts dim_payhead_specific_amounts[]
+  ref_benefit_plans            ref_benefit_plans[]
+  trans_payhead_breakdowns     trans_payhead_breakdowns[]
 }
 
 model ref_performance_criterias {
@@ -460,6 +462,7 @@ model trans_employees {
   dim_incident_reports_dim_incident_reports_reported_byTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_reported_byTotrans_employees")
   dim_leave_balances                                                     dim_leave_balances[]
   dim_payhead_affecteds                                                  dim_payhead_affecteds[]
+  dim_payhead_specific_amounts                                           dim_payhead_specific_amounts[]
   dim_schedules                                                          dim_schedules[]
   dim_training_participants                                              dim_training_participants[]
   fact_leave_earnings_fact_leave_earnings_employee_idTotrans_employees   fact_leave_earnings[]          @relation("fact_leave_earnings_employee_idTotrans_employees")
@@ -729,4 +732,16 @@ model ref_benefits_contribution_advance_settings {
   updated_at        DateTime?          @default(now()) @db.Timestamp(6)
   plan_id           Int?
   ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ref_benefits_contribution_table_plan_id_fkey")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dim_payhead_specific_amounts {
+  id              BigInt           @id @default(autoincrement())
+  created_at      DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?        @default(now()) @db.Timestamp(6)
+  payhead_id      Int?
+  employee_id     Int?
+  amount          Decimal?         @db.Decimal
+  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_payheads    ref_payheads?    @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

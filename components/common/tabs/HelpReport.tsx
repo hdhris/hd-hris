@@ -56,7 +56,7 @@ function HelpReport() {
   const pathname = usePathname();
   const [newReport, setNewReport] = useState("");
   const userInfo = useUserInfo();
-  console.log("User Info: ", userInfo)
+  // console.log("User Info: ", userInfo)
 
   const {
     data: reports,
@@ -228,7 +228,7 @@ function HelpReport() {
                     <div className="flex gap-2 items-start">
                       <Tooltip
                         content={getEmpFullName(
-                          report.trans_employees_sys_help_report_reporter_idTotrans_employees
+                          report?.trans_employees_sys_help_report_reporter_idTotrans_employees
                         )}
                       >
                         <Avatar
@@ -264,8 +264,8 @@ function HelpReport() {
                             size="sm"
                             src={
                               report
-                                .trans_employees_sys_help_report_reviewer_idTotrans_employees
-                                .picture
+                                ?.trans_employees_sys_help_report_reviewer_idTotrans_employees
+                                ?.picture
                             }
                           />
                         </Tooltip>

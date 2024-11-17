@@ -2,24 +2,28 @@
 import CardForm from "@/components/common/forms/CardForm";
 import FormFields from "@/components/common/forms/FormFields";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { switchLabel } from "../attendance-time/holidays/script";
 import { useQuery } from "@/services/queries";
 import { PayheadAffected } from "@/types/payroll/payheadType";
 import PayheadCalculator from "./Calculator/Calculator";
-import { Spinner, Selection, Avatar } from "@nextui-org/react";
+import { Spinner, Input, cn } from "@nextui-org/react";
 import { capitalize } from "lodash";
 import { ListDropDown } from "./ListBoxDropDown";
-import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
-import TableData from "@/components/tabledata/TableData";
+import UserMail from "@/components/common/avatar/user-info-mail";
+import { getEmpFullName } from "@/lib/utils/nameFormatter";
 
 function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payhead_type?: string }) {
     const { data: payheadAffected, isLoading } = useQuery<PayheadAffected>(
         `/api/admin/payroll/payhead/read?id=${payhead_id}`
     );
+    const [filteredEmployees, setFilteredEmployees] = useState<UserEmployee[]>([]);
+    const [selectedEmployees, setSelectedEmployees] = useState<Set<number>>(new Set());
+    const [amountRecords, setAmountRecords] = useState<{ employee_id: number; amount: number }[]>([]);
+    const [isMandatory, setIsMandatory] = useState(false);
     const [isInvalid, setIsInvalid] = useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -33,44 +37,87 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                 mandatory: { probationary: false, regular: false },
                 departments: [],
                 job_classes: [],
+                employees: [],
             },
-            dim_payhead_affecteds: [],
         },
         values: payheadAffected?.payhead,
     });
 
-    async function handleSubmit(value: z.infer<typeof formSchema>) {
-        console.log(value);
+    function updateAmountRecords(employee_id: number, amount: number) {
+        if (amount > 0) {
+            setAmountRecords(prev => {
+                const exists = prev.some(item => item.employee_id === employee_id);
+                if (exists) {
+                    return prev.map(item => (item.employee_id === employee_id ? { ...item, amount } : item));
+                } else {
+                    return [...prev, { employee_id, amount }];
+                }
+            });
+        } else {
+            setAmountRecords((prev) => prev.filter((prv) => prv.employee_id != employee_id));
+        }
     }
+    const getAmountRecords = useCallback(
+        (employee_id: number): string => {
+            const value =  String(amountRecords.find((ar) => ar.employee_id === employee_id)?.amount || "");
+            return value;
+        },
+        [amountRecords]
+    );
 
-    const config: TableConfigProps<UserEmployee> = {
-        columns: [
-            { uid: "name", name: "Name", sortable: true },
-            { uid: "role", name: "Role", sortable: true },
-        ],
-        rowCell: (item, columnKey) => {
-            switch (columnKey) {
-                case "name":
-                    return (
-                        <div className="flex items-center space-x-2">
-                            <Avatar src={item.picture} />
-                            <p className="capitalize">{`${item.first_name} ${item.middle_name} ${item.last_name}`}</p>
-                        </div>
-                    );
-                case "role":
-                    return (
-                        <div>
-                            <p>{item.ref_job_classes ? item.ref_job_classes.name : "None"}</p>
-                            <p className=" text-gray-500">
-                                {item.ref_departments ? item.ref_departments.name : "None"}
-                            </p>
-                        </div>
-                    );
-                default:
-                    return <></>;
+    const selectEmployee = useCallback(
+        (id: number) => {
+            setSelectedEmployees((prev) => {
+                const updated = new Set(prev);
+                if (updated.has(id)) {
+                    updated.delete(id);
+                } else {
+                    updated.add(id);
+                }
+                return updated;
+            });
+        },
+        [selectedEmployees]
+    );
+
+    const handleSubmit = useCallback(async(value: z.infer<typeof formSchema>)=>{
+        if(isMandatory)
+            value.affected_json.employees = [] // Automatically involve every employees
+        else
+            value.affected_json.employees = [...selectedEmployees]
+
+        if(value.affected_json.departments.length === payheadAffected?.departments.length)
+            value.affected_json.departments = [] // Automatically involve every departments
+
+        if(value.affected_json.job_classes.length === payheadAffected?.job_classes.length)
+            value.affected_json.job_classes = [] // Automatically involve every job/roles
+        
+        console.log(value, amountRecords);
+    },[amountRecords, selectedEmployees, payheadAffected])
+
+    const filterEmployees = useCallback(
+        (employees: UserEmployee[]) => {
+            if (employees && form) {
+                const mandatory = form.getValues("affected_json.mandatory");
+                setIsMandatory(mandatory.probationary || mandatory.regular);
+                setFilteredEmployees(
+                    employees?.filter((emp) => {
+                        if (mandatory.regular && mandatory.probationary) return true;
+                        if (mandatory.regular) return emp.is_regular;
+                        if (mandatory.probationary) return !emp.is_regular;
+
+                        return true;
+                    })
+                );
             }
         },
-    };
+        [form]
+    );
+
+    useEffect(() => {
+        // On load
+        if (payheadAffected) filterEmployees(payheadAffected.employees);
+    }, [payheadAffected]);
 
     if (isLoading) {
         return <Spinner label="Loading..." className="flex-1" />;
@@ -130,8 +177,8 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                                     selectedKeys={
                                         new Set(
                                             [
-                                                field?.value?.probationary ? "1" : undefined,
-                                                field?.value?.regular ? "2" : undefined,
+                                                field?.value?.probationary ? 1 : undefined,
+                                                field?.value?.regular ? 1 : undefined,
                                             ].filter((key) => key !== undefined)
                                         )
                                     }
@@ -141,6 +188,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                                             probationary: values.includes("1"),
                                             regular: values.includes("2"),
                                         });
+                                        filterEmployees(payheadAffected?.employees || []);
                                     }}
                                     togglable={true}
                                     reversable={true}
@@ -177,7 +225,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                                     triggerName="Roles"
                                     selectedKeys={new Set(field.value)}
                                     onSelectionChange={(keys) => {
-                                        field.onChange(Array.from(keys));
+                                        field.onChange(Array.from(keys).map(Number));
                                     }}
                                     togglable={true}
                                     reversable={true}
@@ -203,67 +251,47 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                     ]}
                 />
             </CardForm>
-            <TableData
-                config={config}
-                items={payheadAffected?.employees || []}
-                isLoading={isLoading}
-                // selectedKeys={isFiltered ? new Set([]) : selectedEmployees}
-                // disabledKeys={disabledKeys}
-                searchingItemKey={["first_name", "middle_name", "last_name"]}
-                // onSelectionChange={setSelectedEmployees}
-                counterName="Employees"
-                className="flex-1 w-full h-full"
-                removeWrapper
-                isHeaderSticky
-                color={"primary"}
-                // selectionMode={isFiltered ? "single" : "multiple"}
-                aria-label="Employees"
-                // filterItems={
-                //     !isFiltered
-                //         ? [
-                //               {
-                //                   filtered: data.departments.map((dep) => {
-                //                       return {
-                //                           name: dep.name,
-                //                           value: "dep_" + dep.id,
-                //                           key: "",
-                //                       };
-                //                   }),
-                //                   category: "Department",
-                //               },
-                //               {
-                //                   filtered: data.job_classes.map((job) => {
-                //                       return {
-                //                           name: job.name,
-                //                           value: "job_" + job.id,
-                //                           key: "",
-                //                       };
-                //                   }),
-                //                   category: "Roles",
-                //               },
-                //           ]
-                //         : undefined
-                // }
-                filterConfig={(keys) => {
-                    let filteredItems: UserEmployee[] = [...payheadAffected?.employees!];
-
-                    if (keys !== "all" && keys.size > 0) {
-                        console.log(Array.from(keys));
-                        Array.from(keys).forEach((key) => {
-                            const [uid, value] = (key as string).split("_");
-                            filteredItems = filteredItems.filter((items) => {
-                                if (uid.includes("dep")) {
-                                    return items.ref_departments.id === Number(value);
-                                } else if (uid.includes("job")) {
-                                    return items.ref_job_classes.id === Number(value);
-                                }
-                            });
-                        });
-                    }
-
-                    return filteredItems;
-                }}
-            />
+            <div className="w-full h-full overflow-auto ">
+                <div className="min-w-[750px] space-y-1 h-fit">
+                    {filteredEmployees.map((item: UserEmployee) => (
+                        <div
+                            key={item.id}
+                            className={cn(
+                                "p-4 border-2 cursor-pointer",
+                                isMandatory
+                                    ? "border-gray-50"
+                                    : selectedEmployees.has(item.id)
+                                    ? "border-blue-500"
+                                    : "border-gray-50"
+                            )}
+                        >
+                            <div className="flex flex-row gap-4">
+                                <div className="flex-1">
+                                    <UserMail
+                                        name={getEmpFullName(item)}
+                                        picture={item.picture}
+                                        email={item.email}
+                                        onClick={() => selectEmployee(item.id)}
+                                    />
+                                </div>
+                                <div className="w-48 text-small">
+                                    <p>{item.ref_job_classes ? item.ref_job_classes.name : "None"}</p>
+                                    <p className=" text-gray-500">
+                                        {item.ref_departments ? item.ref_departments.name : "None"}
+                                    </p>
+                                </div>
+                                <Input
+                                    variant="bordered"
+                                    type="number"
+                                    className="w-20"
+                                    value={getAmountRecords(item.id)}
+                                    onValueChange={(value) => updateAmountRecords(item.id, Number(value))}
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
@@ -286,15 +314,6 @@ const formSchema = z.object({
         }),
         departments: z.array(z.number()),
         job_classes: z.array(z.number()),
+        employees: z.array(z.number()),
     }),
-    dim_payhead_affecteds: z.array(
-        z.object({
-            id: z.number(),
-            payhead_id: z.number(),
-            employee_id: z.number(),
-            created_at: z.string(),
-            updated_at: z.string(),
-            default_amount: z.number(),
-        })
-    ),
 });

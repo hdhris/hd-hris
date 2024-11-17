@@ -31,10 +31,7 @@ function UserMail({ name, email, description, picture, message, onClick, size, c
                         className="text-blue-500"
                         onPress={(e) => {
                             window.open(
-                                `https://mail.google.com/mail/u/0/?fs=1&to=${email}&su=${subject.replaceAll(
-                                    " ",
-                                    "%20"
-                                )}&body=${body.replaceAll(" ", "%20")}&tf=cm`,
+                                `https://mail.google.com/mail/u/0/?fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}&tf=cm`,
                                 "emailWindow",
                                 "width=600,height=400,top=100,left=100"
                             );
