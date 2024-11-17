@@ -12,6 +12,8 @@ export async function devices(user_id: string) {
         ]);
         // console.timeEnd("Fetch IP and User-Agent");
 
+        console.log("Ip Response: ", ipResponse);
+        console.log("Region: ", userAgent)
         const ua = parse(userAgent);
         const ip_address = ipResponse.ip;
         const { country_code, country_name, region, city } = ipResponse;
@@ -24,9 +26,8 @@ export async function devices(user_id: string) {
         // Fetch user and existing device data concurrently
         // console.time("Fetch User and Existing Device");
         const [user, existingDevice] = await Promise.all([
-            prisma.trans_users.findUnique({
-                where: { id: user_id },
-                include: { acl_user_access_control: true },
+            prisma.acl_user_access_control.findUnique({
+                where: { user_id: user_id },
             }),
             prisma.sec_devices.findFirst({
                 where: {
@@ -59,7 +60,7 @@ export async function devices(user_id: string) {
                     os,
                     os_version,
                     login_count: 1,
-                    acl_user_access_control_id: user.acl_user_access_control?.id!,
+                    acl_user_access_control_id: user.id,
                 },
             });
             // console.timeEnd("Create New Device");
@@ -69,6 +70,16 @@ export async function devices(user_id: string) {
             await prisma.sec_devices.update({
                 where: { id: existingDevice.id },
                 data: {
+                    ip_address,
+                    created_at: new Date(),
+                    country_code,
+                    country_name,
+                    region,
+                    city,
+                    platform_type: type,
+                    platform,
+                    os,
+                    os_version,
                     updated_at: new Date(),
                     login_count: { increment: 1 },
                 },
