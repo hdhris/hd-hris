@@ -83,16 +83,16 @@ type Benefit = {
   }[];
 }
 export type PayslipPayhead = Omit<Payhead,"dim_payhead_affecteds"> & Benefit;
-export interface PayslipEmployee extends UserEmployee {
-  dim_payhead_affecteds: {
-    payhead_id: number;
-  }[];
-  
-}
+// export interface PayslipEmployee extends UserEmployee {
+//   dim_payhead_affecteds: {
+//     payhead_id: number;
+//   }[];
+// }
+
 export interface PayslipData {
   payrolls: Payroll[];
   breakdowns: Breakdown[];
-  employees: PayslipEmployee[];
+  employees: UserEmployee[];
   earnings: PayslipPayhead[];
   deductions: PayslipPayhead[];
   calculatedAmountList:  {

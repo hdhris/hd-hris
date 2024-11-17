@@ -41,8 +41,8 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
     uniqueKey,
     triggerName,
     items,
-    selectedKeys: getter,
-    onSelectionChange: setter,
+    selectedKeys: selectedKeys,
+    onSelectionChange: setSelectedKeys,
     topContent,
     togglable,
     reversable,
@@ -53,13 +53,18 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
     triggerProps,
     sectionConfig,
 }: ListDropDownProps<T>) {
-    const [selectedKeys, setSelectedKeys] = [getter, setter];
+    // const [selectedKeys, setSelectedKeys] = [getter, setter];
     // const [prevSelecteKeys, setPrevSelecteKeys] = useState<Selection[]>([]);
     const prevSelecteKeys: Selection[] = [];
 
     function saveLastKeyAndSetNewKeys(keys: Selection) {
         prevSelecteKeys.push(selectedKeys);
-        setSelectedKeys(keys);
+
+        const castedKeys = Array.from(keys).map(key =>
+            typeof items[0]?.id === 'number' ? Number(key) : String(key)
+        );
+        // console.log(castedKeys);
+        setSelectedKeys(new Set(castedKeys));
     }
     // useEffect(()=>{console.log(selectedKeys)},[selectedKeys])
 
@@ -102,7 +107,7 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
                     <Listbox
                         aria-label="Departments"
                         selectionMode="multiple"
-                        selectedKeys={selectedKeys}
+                        selectedKeys={new Set(Array.from(selectedKeys).map(String))}
                         onSelectionChange={saveLastKeyAndSetNewKeys}
                         {...listboxProps}
                     >
@@ -112,7 +117,7 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
                                       key={item.id}
                                       textValue={item.name}
                                       className={`text-small ${
-                                          Array.from(selectedKeys).includes(String(item.id)) ? "text-blue-500" : ""
+                                          Array.from(selectedKeys).includes(item.id) ? "text-blue-500" : ""
                                       }`}
                                   >
                                       {item.name}
@@ -129,7 +134,7 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
                                                       key={item.id}
                                                       textValue={item.name}
                                                       className={`text-small ${
-                                                          Array.from(selectedKeys).includes(String(item.id))
+                                                          Array.from(selectedKeys).includes(item.id)
                                                               ? "text-blue-500"
                                                               : ""
                                                       }`}
@@ -158,11 +163,7 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
                                     saveLastKeyAndSetNewKeys(new Set([]));
                                 } else {
                                     saveLastKeyAndSetNewKeys(
-                                        new Set(
-                                            items.map((item: T) => {
-                                                return String(item.id);
-                                            })
-                                        )
+                                        new Set([...items.map((item: T) => item.id)])
                                     );
                                 }
                             }}

@@ -45,7 +45,14 @@ async function stage_one(prisma: PrismaClient, dateID: number){
   try {
 
     const [payrolls, dataPH, employees] = await Promise.all([
-      prisma.trans_payrolls.findMany({ where: { date_id: dateID } }),
+      prisma.trans_payrolls.findMany({
+        where: {
+          date_id: dateID,
+          trans_employees: {
+            deleted_at: null,
+          }
+        }
+      }),
       prisma.ref_payheads.findMany({
         where: { deleted_at: null, is_active: true },
         include: { ref_benefit_plans: { select: { deduction_id: true } } },
@@ -60,6 +67,7 @@ async function stage_one(prisma: PrismaClient, dateID: number){
         },
       }),
     ])
+    const employeeIDs = new Set(payrolls.map(pr=> pr.employee_id));
 
     await Promise.all([
       prisma.trans_payrolls.createMany({
@@ -86,13 +94,18 @@ async function stage_one(prisma: PrismaClient, dateID: number){
             {
               ref_payheads: {
                 OR: [
+                  { is_active: false },
                   { is_overwritable: false },
                   { deleted_at: { not: null } },
                   { ref_benefit_plans: { some: {
-                    effective_date: {
-                      
-                    }
-                  }} }
+                      OR: [
+                      { is_active: false },
+                      {
+                        effective_date: { gt: toGMT8().toISOString() },
+                        expiration_date: { lt: toGMT8().toISOString() },
+                      }
+                    ]
+                  }}},
                 ]
               },
               trans_payrolls: { date_id: dateID },
@@ -161,7 +174,12 @@ async function stage_two(prisma: PrismaClient, dateID: number){
       prisma.dim_employee_benefits.findMany({
         where : {
           employee_id: { in: employeeIds },
-          ref_benefit_plans : { is_active: true, deleted_at: null },
+          ref_benefit_plans : {
+            is_active: true,
+            deleted_at: null,
+            effective_date: { lte: toGMT8().toISOString() },
+            expiration_date: { gte: toGMT8().toISOString() },
+          },
         },
         select: {
           trans_employees : {
