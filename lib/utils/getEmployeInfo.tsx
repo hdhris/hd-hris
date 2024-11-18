@@ -20,7 +20,7 @@ export function useUserInfo(): UserEmployee | undefined {
       setLoading(true);
       try {
         // Load cached data first
-        console.log("User Id: ", id)
+        // console.log("User Id: ", id);
         const cachedData = loadFromSession<UserEmployee>(cacheKey, String(id));
         if (cachedData) {
           setUserInfo(cachedData);

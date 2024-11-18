@@ -1,4 +1,5 @@
 import { isAffected } from "@/components/admin/payroll/payslip/util";
+import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { tryParse } from "@/helper/objects/jsonParserType";
 import {
   BaseValueProp,
@@ -14,7 +15,6 @@ import {
   Breakdown,
   Payroll,
   PayslipData,
-  PayslipEmployee,
   PayslipPayhead,
   ProcessDate,
 } from "@/types/payroll/payrollType";
@@ -24,7 +24,7 @@ export async function stageTable(
   dateInfo: ProcessDate,
   stage_one: {
     payrolls: Payroll[];
-    employees: PayslipEmployee[];
+    employees: UserEmployee[];
     dataPH: PayslipPayhead[];
   },
   stage_two: {

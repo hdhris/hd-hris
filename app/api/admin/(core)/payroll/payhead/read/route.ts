@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         let idString = searchParams.get("id");
         const id = idString ? Number(idString) : null;
-        const [payhead, affected, employees, departments, job_classes] = await Promise.all([
+        const [payhead, employees, departments, job_classes, amount_records] = await Promise.all([
             id
                 ? prisma.ref_payheads.findFirst({
                       where: {
@@ -17,14 +17,6 @@ export async function GET(req: NextRequest) {
                       },
                   })
                 : null,
-            prisma.dim_payhead_affecteds.findMany({
-                where: {
-                    payhead_id: id,
-                    trans_employees: {
-                        deleted_at: null,
-                    },
-                },
-            }),
             prisma.trans_employees.findMany({
                 where: {
                     deleted_at: null,
@@ -58,11 +50,16 @@ export async function GET(req: NextRequest) {
                     department_id: true,
                 },
             }),
+            prisma.dim_payhead_specific_amounts.findMany({
+                where: {
+                    payhead_id: id,
+                },
+            }),
         ]);
         if (payhead) {
-            return NextResponse.json({ payhead, affected, employees, departments, job_classes });
+            return NextResponse.json({ payhead, employees, departments, job_classes, amount_records });
         } else {
-            return NextResponse.json({ affected, employees, departments, job_classes });
+            return NextResponse.json({ employees, departments, job_classes });
         }
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch data:" + error }, { status: 500 });

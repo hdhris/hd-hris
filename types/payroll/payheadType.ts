@@ -5,8 +5,9 @@ export interface AffectedJson {
     probationary : boolean;
     regular : boolean;
   }
-  departments : number[];
-  job_classes : number[];
+  departments : number[] | "all";
+  job_classes : number[] | "all";
+  employees: number[] | "all";
 }
 
 
@@ -23,7 +24,6 @@ export interface Payhead {
   type: 'earning' | 'deduction';
   variable?: string;
   affected_json: AffectedJson;
-  dim_payhead_affecteds: EmployeeAffected[];
 }
   export interface EmployeeAffected {
     id: number;
@@ -33,24 +33,8 @@ export interface Payhead {
     updated_at: string;
     default_amount: number;
   }
-  
-  // export interface AffectedEmployee {
-  //   id: number,
-  //   picture: string;
-  //   last_name: string;
-  //   first_name: string;
-  //   middle_name: string;
-  //   ref_departments: {
-  //     id : number;
-  //     name : string;
-  //   };
-  //   ref_job_classes: {
-  //     id : number;
-  //     department_id: number;
-  //     name : string;
-  //   };
-  // }
-  
+
+  // Main return of the api
   export interface PayheadAffected {
     affected: EmployeeAffected[];
     employees: UserEmployee[];
@@ -63,6 +47,14 @@ export interface Payhead {
       id : number;
       name : string;
       department_id : number;
+    }[],
+    amount_records: {
+      id: number;
+      created_at: string;
+      updated_at: string;
+      payhead_id: number;
+      employee_id: number;
+      amount: number;
     }[],
   }
   

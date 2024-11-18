@@ -165,8 +165,6 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     return true;
                 } else {
                     // console.time("DeviceUpdate");
-                    console.log("Account: ", account)
-                    console.log("User: ", user)
                     await devices(user.id!);
                     // console.timeEnd("DeviceUpdate");
 
