@@ -23,6 +23,7 @@ import { Form } from "@/components/ui/form";
 import Text from "@/components/Text";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { mutate } from "swr";
 
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
@@ -351,6 +352,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
           duration: 3000,
         });
 
+        mutate("/api/employeemanagement/employees");
         setTimeout(() => {
           onClose();
         }, 500);
