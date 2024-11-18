@@ -253,7 +253,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
         if (invalidParams)
             return (
                 <div className="h-full w-full flex flex-col justify-center items-center">
-                    <h1 className="text-red-500 font-semibold">This shouldn't happend :/</h1>
+                    <h1 className="text-red-500 font-semibold">This shouldn&apos;t happend :/</h1>
                     <p className="text-gray-500 text-sm">We have encountered an invalid payhead attribute</p>
                 </div>
             );
