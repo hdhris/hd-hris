@@ -17,7 +17,7 @@ export async function GET(request: Request): Promise<NextResponse> {
         const [employees, total_leave_credits, years] = await Promise.all([prisma.trans_employees.findMany({
             where: {
                 deleted_at: null, dim_leave_balances: {
-                    some: {year},
+                    some: {year, deleted_at: null},
                 },
             }, select: {
                 id: true, first_name: true, last_name: true, picture: true, ref_departments: {
@@ -25,7 +25,9 @@ export async function GET(request: Request): Promise<NextResponse> {
                         name: true,
                     },
                 }, dim_leave_balances: {
-                    where: {deleted_at: null}, select: {
+                    where: {deleted_at: null},
+                    orderBy: {created_at: "desc"},
+                    select: {
                         id: true,
                         allocated_days: true,
                         remaining_days: true,
@@ -86,7 +88,11 @@ export async function GET(request: Request): Promise<NextResponse> {
                     leave_type: {
                         id: leaveBalance.ref_leave_types.id, name: leaveBalance.ref_leave_types.name,
                     },
+                    created_at: leaveBalance.created_at,
+                    updated_at: leaveBalance.updated_at,
+                    deleted_at: leaveBalance.deleted_at,
                 })),
+
                 created_at: latestCreatedAt,
                 updated_at: latestUpdatedAt,
                 deleted_at: latestDeletedAt,

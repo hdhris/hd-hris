@@ -9,8 +9,11 @@ export async function POST(req: NextRequest) {
 
         const data = await req.json(); // Parse the incoming JSON data
 
+
         // Validate the incoming data using the Zod schema
         const parsedData = LeaveCreditFormSchema.safeParse(data);
+        // console.log("Parsed: ", parsedData.data?.leave_credits.map(item => Number(item.leave_type_id)));
+        console.log("Parsed: ", parsedData.data);
         if (!parsedData.success) {
             return NextResponse.json(
                 {
@@ -22,17 +25,27 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Create a new leave balance entry in the database
-        await prisma.dim_leave_balances.create({
-            data: {
+        const addData = [];
+
+        for (let i = 0; i < parsedData.data.leave_credits.length; i++) {
+            const leaveType = parsedData.data.leave_credits[i];
+            const leaveTypeData = {
                 employee_id: parsedData.data.employee_id,
                 year: new Date().getFullYear(),
-                allocated_days: parsedData.data.allocated_days,
-                remaining_days: parsedData.data.allocated_days,
-                carry_forward_days: parsedData.data.carry_forward_days,
+                leave_type_id: Number(leaveType.leave_type_id),
+                allocated_days: leaveType.allocated_days,
+                remaining_days: leaveType.allocated_days,
+                carry_forward_days: leaveType.carry_forward_days,
                 created_at: new Date(),
                 updated_at: new Date(),
-            },
+            };
+            addData.push(leaveTypeData);
+        }
+
+
+        // Create a new leave balance entry in the database
+        await prisma.dim_leave_balances.createMany({
+            data: addData
         });
 
         // Return a success response

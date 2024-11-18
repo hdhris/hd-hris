@@ -36,7 +36,7 @@ export interface LeaveRequestPaginate {
 export interface LeaveTypeForEmployee{
     id: number;
     name: string;
-    applicable_to_employee_types: "all" | "regular" | "probationary";
+    applicable_to_employee_types?: "all" | "regular" | "probationary";
 }
 
 

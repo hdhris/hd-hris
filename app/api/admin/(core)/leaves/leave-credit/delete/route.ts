@@ -7,9 +7,19 @@ export async function POST(req: NextRequest) {
         hasContentType(req)
         const data = await req.json();
         // console.log("Data: ", data);
-        await prisma.dim_leave_balances.update({
+
+        // const getLeaveCreditId = await prisma.dim_leave_balances.findMany({
+        //     where: {
+        //         employee_id: data,
+        //         deleted_at: null
+        //     },
+        //     select: {
+        //         id: true
+        //     }
+        // })
+        await prisma.dim_leave_balances.updateMany({
             where:{
-                id: data
+                employee_id: data
             },
             data: {
                 deleted_at: new Date()

@@ -16,25 +16,29 @@ export async function POST(req: NextRequest) {
                 {
                     success: false,
                     message: "Validation error",
-                    errors: parsedData.error.errors.map(error => error.message), // Map to user-friendly error messages
+                    errors: parsedData.error.errors.map((error) => error.message), // Map to user-friendly error messages
                 },
                 { status: 400 }
             );
         }
 
-        // Create a new leave balance entry in the database
-        await prisma.dim_leave_balances.update({
-            where: {
-                id: data.id
-            },
-            data: {
-                year: new Date().getFullYear(),
-                allocated_days: parsedData.data.allocated_days,
-                remaining_days: parsedData.data.allocated_days,
-                carry_forward_days: parsedData.data.carry_forward_days,
-                updated_at: new Date(),
-            },
+        const updatePromises = parsedData.data.leave_credits.map((leaveType, index) => {
+            return prisma.dim_leave_balances.update({
+                where: {
+                    id: data.id[index], // Match the correct ID for each record
+                },
+                data: {
+                    year: new Date().getFullYear(),
+                    allocated_days: leaveType.allocated_days,
+                    remaining_days: leaveType.allocated_days,
+                    carry_forward_days: leaveType.carry_forward_days,
+                    updated_at: new Date(),
+                },
+            });
         });
+
+        // Execute all updates
+        await Promise.all(updatePromises);
 
         // Return a success response
         return NextResponse.json({
@@ -45,9 +49,12 @@ export async function POST(req: NextRequest) {
         console.error("Error updating leave credit:", error);
 
         // Return a generic error message for unexpected errors
-        return NextResponse.json({
-            success: false,
-            message: "An unexpected error occurred. Please try again later.",
-        }, { status: 500 });
+        return NextResponse.json(
+            {
+                success: false,
+                message: "An unexpected error occurred. Please try again later.",
+            },
+            { status: 500 }
+        );
     }
 }
