@@ -1,158 +1,119 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
-import {getEmpFullName} from "@/lib/utils/nameFormatter";
-import {toDecimals} from "@/helper/numbers/toDecimals";
-import dayjs from "dayjs";
-import {getPaginatedData} from "@/server/pagination/paginate";
-import {EmployeeLeaveCredits, LeaveCredits, LeaveEarning, UsedLeave} from "@/types/leaves/leave-credits-types";
+import { getEmpFullName } from "@/lib/utils/nameFormatter";
+import {EmployeeLeaveCredits, LeaveCredits} from "@/types/leaves/leave-credits-types";
 
 export const dynamic = "force-dynamic";
 
-
 export async function GET(request: Request): Promise<NextResponse> {
     try {
-        const {searchParams} = new URL(request.url);
-        const page = parseInt(searchParams.get('page') || '1'); // Default to page 1
-        const perPage = parseInt(searchParams.get('limit') || '5'); // Default to 5 results per page
+        const { searchParams } = new URL(request.url);
+        const page = Math.max(Number(searchParams.get("page")) || 1, 1); // Ensure positive page number
+        const perPage = Math.max(Number(searchParams.get("limit")) || 5, 1); // Ensure positive limit
+        const year = Number(searchParams.get("year")) || new Date().getFullYear();
 
-        const {
-            data: allEmployees,
-            totalItems
-        } = await getPaginatedData<any>(prisma.trans_employees, page, perPage, {
-            deleted_at: null,
-            dim_leave_balances: {
-                some: {
-                    allocated_days: {
-                        gt: 0,
-                    },
-                    deleted_at: null
+        const [employees, total_leave_credits] = await Promise.all([prisma.trans_employees.findMany({
+            where: {
+                deleted_at: null,
+                dim_leave_balances: {
+                    some: { year },
                 },
-
-            }
-        }, {
-            dim_leave_balances: true,
-        }, {id: "desc"})
-
-        // Group leave earnings
-        const groupedLeaveEarnings = await prisma.fact_leave_earnings.groupBy({
-            by: ['employee_id'], orderBy: {
-                employee_id: 'desc',
-            }, _count: {
-                id: true,
             },
-        });
-
-        // Create a mapping of earned leave credits
-        const leaveCreditsMap: Record<string, any> = {};
-        for (const earning of groupedLeaveEarnings) {
-            leaveCreditsMap[earning.employee_id] = earning;
-        }
-
-        // Map through all employees and gather their leave data
-        const leave_credits: LeaveCredits[] = await Promise.all(allEmployees.map(async (employee) => {
-            const employee_id = leaveCreditsMap[employee.id] ? employee.id : employee.dim_leave_balances?.find((id: any) => id.employee_id)?.employee_id; // Fallback to dim_leave_balances if no earnings
-
-            const employeeData = await prisma.trans_employees.findUnique({
-                where: {
-                    id: employee_id,
-                }, include: {
-                    ref_departments: true,
-                    fact_leave_earnings_fact_leave_earnings_employee_idTotrans_employees: {
-                        include: {
-                            ref_leave_types: true,
-                        },
-                    }, dim_leave_balances: {
-                        where: {
-                            deleted_at: null
-                        }
-                    }, trans_leaves_trans_leaves_employee_idTotrans_employees: true,
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                picture: true,
+                ref_departments: {
+                    select: {
+                        name: true,
+                    },
                 },
-            });
+                dim_leave_balances: {
+                    where: { deleted_at: null },
+                    select: {
+                        id: true,
+                        allocated_days: true,
+                        remaining_days: true,
+                        carry_forward_days: true,
+                        used_days: true,
+                        created_at: true,
+                        updated_at: true,
+                        deleted_at: true,
+                        ref_leave_types: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+            take: perPage,
+            skip: (page - 1) * perPage,
+        }),
+        prisma.dim_leave_balances.aggregate({
+            where: {
+                year,
+                deleted_at: null
+            },
+            _count: {
+                id: true
+            }
+        })])
 
-            const leaveTypes = employeeData?.fact_leave_earnings_fact_leave_earnings_employee_idTotrans_employees.map(leaveType => leaveType.ref_leave_types);
 
-            const emp = getEmpFullName(employeeData);
 
-            // Create a mapping of leave_type_id to their respective earned_days
-            const earningsMap: Record<string, LeaveEarning> = {};
-            employeeData?.fact_leave_earnings_fact_leave_earnings_employee_idTotrans_employees.forEach(item => {
-                const leaveTypeId = item.leave_type_id;
-                const leaveTypeName = item.ref_leave_types?.name;
-                const earnedDays = toDecimals(item.earned_days);
-
-                if (earningsMap[leaveTypeId]) {
-                    earningsMap[leaveTypeId].earned_days += earnedDays;
-                } else {
-                    earningsMap[leaveTypeId] = {
-                        leave_type_name: leaveTypeName,
-                        leave_type_code: item.ref_leave_types?.code,
-                        earned_days: earnedDays,
-                        date_earned: item.earning_date,
-                    };
+        const employeeLeaveCredits: LeaveCredits[] = employees.map((employee) => {
+            // Determine the latest created_at, updated_at, and deleted_at dates
+            const { latestCreatedAt, latestUpdatedAt, latestDeletedAt } = employee.dim_leave_balances.reduce(
+                (acc, balance) => {
+                    acc.latestCreatedAt = new Date(Math.max(acc.latestCreatedAt.getTime(), new Date(balance.created_at!).getTime()));
+                    acc.latestUpdatedAt = new Date(Math.max(acc.latestUpdatedAt.getTime(), new Date(balance.updated_at).getTime()));
+                    if (balance.deleted_at) {
+                        acc.latestDeletedAt = new Date(Math.max(acc.latestDeletedAt?.getTime() || 0, new Date(balance.deleted_at).getTime()));
+                    }
+                    return acc;
+                },
+                {
+                    latestCreatedAt: new Date(0), // Start from the Unix epoch
+                    latestUpdatedAt: new Date(0),
+                    latestDeletedAt: null as Date | null,
                 }
-            });
-
-            // Same logic for used leaves
-            const usedLeavesMap: Record<string, UsedLeave> = {};
-            employeeData?.trans_leaves_trans_leaves_employee_idTotrans_employees.forEach(item => {
-                const daysOfLeave = dayjs(item.end_date).diff(dayjs(item.start_date), 'day') + 1; // Include start date
-                const leaveTypeId = item.type_id!;
-                const leaveTypeName = leaveTypes?.find(leaveType => leaveType?.id === leaveTypeId);
-
-                if (usedLeavesMap[leaveTypeId]) {
-                    usedLeavesMap[leaveTypeId].used_days += daysOfLeave; // Use daysOfLeave instead of earnedDays
-                } else {
-                    usedLeavesMap[leaveTypeId] = {
-                        leave_type_name: leaveTypeName?.name || '',
-                        leave_type_code: leaveTypeName?.code || '',
-                        used_days: daysOfLeave,
-                        approval_date: item.approval_at!,
-                        created_at: item.created_at,
-                        status: item.status!,
-                    };
-                }
-            });
-
-            // Convert the earningsMap to an array
-            const leave_earnings = Object.values(earningsMap);
-            const used_leaves = Object.values(usedLeavesMap);
-            const leave_balances = employeeData?.dim_leave_balances.map(({
-                                                                             total_earned_days,
-                                                                             allocated_days,
-                                                                             remaining_days,
-                                                                             used_days,
-                                                                             carry_forward_days,
-                                                                             ...balance
-                                                                         }) => ({
-                allocated_days: toDecimals(allocated_days),
-                remaining_days: toDecimals(remaining_days),
-                carry_forward_days: toDecimals(carry_forward_days),
-                used_days: toDecimals(used_days),
-                total_earned_days: toDecimals(total_earned_days), ...balance,
-            }));
+            );
 
             return {
-                id: leave_balances?.find(id => id.id)?.id!,
-                name: emp,
-                picture: employeeData?.picture!,
-                department: employeeData?.ref_departments?.name!,
-                leave_balance: leave_balances!,
-                used_leaves: {
-                    leave_type: used_leaves,
-                },
-                earnings: {
-                    leave_type: leave_earnings,
-                },
+                id: employee.id,
+                name: getEmpFullName(employee),
+                picture: employee.picture,
+                department: employee.ref_departments?.name ?? "",
+                leave_balance: employee.dim_leave_balances.map((leaveBalance) => ({
+                    id: leaveBalance.id,
+                    allocated_days: leaveBalance.allocated_days.toNumber(),
+                    remaining_days: leaveBalance.remaining_days.toNumber(),
+                    carry_forward_days: leaveBalance.carry_forward_days.toNumber(),
+                    used_days: leaveBalance.used_days.toNumber(),
+                    leave_type: {
+                        id: leaveBalance.ref_leave_types.id,
+                        name: leaveBalance.ref_leave_types.name,
+                    },
+                })),
+                created_at: latestCreatedAt,
+                updated_at: latestUpdatedAt,
+                deleted_at: latestDeletedAt,
             };
-        }));
+        });
 
-        return NextResponse.json({
-            data: leave_credits, totalItems
-        } as EmployeeLeaveCredits);
+
+        return NextResponse.json({ data: employeeLeaveCredits, totalItems: total_leave_credits._count.id } as EmployeeLeaveCredits);
     } catch (err) {
         console.error("Error: ", err);
-        return NextResponse.json({
-            message: `Error: ${err}`,
-        });
+        return NextResponse.json(
+            {
+                error: "Failed to fetch leave credits.",
+                details: err instanceof Error ? err.message : String(err),
+            },
+            { status: 500 }
+        );
     }
 }

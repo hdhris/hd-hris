@@ -6,9 +6,6 @@ export const LeaveTypeSchema = z.object({
     name: z.string().min(1, {message: "Name is required"}).transform(data => toPascalCase(data)),
     code: z.string().min(1, {message: "Code is required"}).transform((data) => data.toUpperCase()),
     description: z.string().min(1, {message: "Description is required"}), //accrual setting
-    accrualRate: z.number().optional(),
-    accrualFrequency: z.string().optional(),
-    maxAccrual: z.number().optional(),
     carryOver: z.boolean(), //Leave Duration
     minDuration: z.number({
         required_error: "Min Duration is required",

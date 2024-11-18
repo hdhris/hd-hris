@@ -4,13 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="fixing login">
-      <change afterPath="$PROJECT_DIR$/helper/pluralize/pluralize.ts" afterDir="false" />
+    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="adding pluralization of words">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/leaves/leave-types/display/LeaveTypeTable.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/leave-types/display/LeaveTypeTable.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/leaves/LeaveTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/LeaveTypes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/update/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/update/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/leave-types/form/LeaveTypeForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/leave-types/form/LeaveTypeForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/zodValidation/leaves/leave-types-form/LeaveTypesForm.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/leaves/leave-types-form/LeaveTypesForm.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prisma/prisma.ts" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/prisma.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/leave-credits-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/leave-credits-types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -125,7 +129,7 @@
       <workItem from="1731744363430" duration="7989000" />
       <workItem from="1731755801318" duration="3209000" />
       <workItem from="1731856774635" duration="10658000" />
-      <workItem from="1731898896730" duration="3186000" />
+      <workItem from="1731898896730" duration="13483000" />
     </task>
     <task id="LOCAL-00001" summary="fixing issues in the leave">
       <option name="closed" value="true" />
@@ -167,7 +171,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731867512672</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="adding pluralization of words">
+      <option name="closed" value="true" />
+      <created>1731902792173</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1731902792173</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -191,6 +203,7 @@
     <MESSAGE value="nextui@2.4.8" />
     <MESSAGE value="revert db" />
     <MESSAGE value="fixing login" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixing login" />
+    <MESSAGE value="adding pluralization of words" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding pluralization of words" />
   </component>
 </project>

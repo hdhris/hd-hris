@@ -28,8 +28,8 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
     const form = useForm<z.infer<typeof LeaveTypeSchema>>({
         resolver: zodResolver(LeaveTypeSchema), defaultValues: {
             //general information
-            name: "", code: "", description: "", //accrual setting
-            accrualRate: 0, accrualFrequency: "", maxAccrual: 0, carryOver: false, //Leave Duration
+            name: "", code: "", description: "",
+            carryOver: false, //Leave Duration
             minDuration: 0, maxDuration: 0, noticeRequired: 0, //Additional Settings
             paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: "",
         }
@@ -41,9 +41,6 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 name: data.name,
                 code: data.code,
                 description: data.description,
-                accrualRate: data.accrual_rate,
-                accrualFrequency: data.accrual_frequency.toLowerCase(),
-                maxAccrual: data.max_accrual,
                 carryOver: data.carry_over,
                 minDuration: data.min_duration,
                 maxDuration: data.max_duration,
@@ -77,8 +74,8 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                     title: "Success", description: "Leave type created successfully", variant: "success",
                 })
                 form.reset({
-                    name: "", code: "", description: "", //accrual setting
-                    accrualRate: 0, accrualFrequency: "", maxAccrual: 0, carryOver: false, //Leave Duration
+                    name: "", code: "", description: "",
+                    carryOver: false, //Leave Duration
                     minDuration: 0, maxDuration: 0, noticeRequired: 0, //Additional Settings
                     paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: ""
                 })
@@ -128,38 +125,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         }
 
     },]
-    const accrualSettingForm: FormInputProps[] = [{
-        name: 'accrualRate',
-        type: "number",
-        label: 'Accrual Rate',
-        description: "Rate at which leave is accrued.",
-        placeholder: "e.g., 2",
-    }, {
-        name: "accrualFrequency",
-        type: "select",
-        label: "Accrual Frequency",
-        description: "How often leave is accrued.",
-        placeholder: "e.g., Monthly, Weekly, etc.",
-        config: {
-            options: [{
-                value: "daily", label: "Daily"
-            }, {
-                value: "weekly", label: "Weekly"
-            }, {
-                value: "monthly", label: "Monthly"
-            }, {
-                value: "yearly", label: "Annually"
-            }]
-        }
-    }, {
-        name: "maxAccrual",
-        type: "number",
-        label: "Maximum Accrual",
-        placeholder: "e.g., 12",
-        description: "Maximum amount of leave that can be accrued.",
-    }, switchToggle({
-        name: 'carryOver', label: 'Carry Over', description: "Does this leave can be carried over to the next year?"
-    })]
+
     const leaveDuration: FormInputProps[] = [{
         name: "minDuration",
         type: "number",
@@ -203,6 +169,9 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
             }]
         }
     }, switchToggle({
+        name: 'carryOver', label: 'Carry Over', description: "Does this leave can be carried over to the next year?"
+    }),
+        switchToggle({
         name: "attachmentRequired",
         label: "Attachment Required",
         description: "  Is an attachment (e.g., medical certificate) required?"
@@ -223,10 +192,6 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                         <GroupForm title='General Information'
                                    description='Provide basic details like the name, code, and description to identify and explain the leave type.'>
                             <FormFields items={generalLeaveTypeForm}/>
-                        </GroupForm>
-                        <GroupForm title='Accrual Settings'
-                                   description='Define how leave is earned, including the rate, frequency, maximum limit, and whether it can be carried over to the next year.'>
-                            <FormFields items={accrualSettingForm}/>
                         </GroupForm>
                         <GroupForm title='Leave Duration'
                                    description='Set rules for using the leave, such as the minimum/maximum hours allowed and the required notice period.'>

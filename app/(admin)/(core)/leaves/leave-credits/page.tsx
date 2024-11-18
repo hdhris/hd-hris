@@ -118,15 +118,15 @@ function Page() {
             data={leaveCredit}
             onGridDisplay={(data) => {
                 return (<LeaveCreditCard
-                        onSelect={handleSelect}
-                        department={data.department}
-                        earnings={data.earnings}
-                        id={data.id}
-                        leave_balance={data.leave_balance}
-                        name={data.name}
-                        picture={data.picture}
-                        used_leaves={data.used_leaves}
-                    />);
+                    onSelect={handleSelect}
+                    department={data.department}
+                    id={data.id}
+                    leave_balance={data.leave_balance}
+                    name={data.name}
+                    picture={data.picture}
+                    created_at={data.created_at}
+                    updated_at={data.updated_at}
+                    deleted_at={data.deleted_at}                />);
             }}
             // filterProps={{
             //     filterItems: filterLeaveTypes
@@ -178,8 +178,8 @@ export default Page;
 const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (emp: EditCreditProp) => void }) => {
     const [percent, setPercent] = useState<number>(0)
 
-    const maxLeaveCredit = (employee.leave_balance?.reduce((a, b) => b.allocated_days + b.total_earned_days, 0))!
-
+    const maxLeaveCredit = (employee.leave_balance?.filter(balance => balance.allocated_days).reduce((a, b) => a + b.allocated_days, 0))!
+    const remaining = employee.leave_balance?.filter(item => item.remaining_days)?.reduce((a, b) => a + b.remaining_days, 0)
     const edited = {
         name: employee.name,
         id: employee.id,
@@ -220,19 +220,19 @@ const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (e
                 <AnimatedCircularProgressBar
                     max={maxLeaveCredit}
                     min={0}
-                    value={employee.leave_balance?.find(item => item.remaining_days)?.remaining_days || 0}
+                    value={remaining || 0}
                     gaugePrimaryColor={colorCode}
                     gaugeSecondaryColor={"rgba(0, 0, 0, 0.1)"}
                     onValueChange={setPercent}
                     explain="Leave Balance %"
                 />
-                <div className="flex justify-around w-full mt-3">
+                <div className="flex justify-between w-full mt-3">
                     <Tooltip content="Allocated Days">
                         <div className="flex flex-col gap-1 items-center">
                             <LuCalendarDays className={cn("", icon_size, icon_color)}/>
                             <Typography className="text-xl font-bold flex flex-col items-center w-16">
                                 <CountUp start={0}
-                                         end={employee.leave_balance?.find(item => item.allocated_days)?.allocated_days!}
+                                         end={maxLeaveCredit}
                                          decimals={2}/>
                                 <Typography as="span"
                                             className="font-normal text-slate-700/50 text-sm">day/s</Typography>
@@ -244,19 +244,7 @@ const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (e
                             <LuCalendarClock className={cn("", icon_size, icon_color)}/>
                             <Typography className="text-xl font-bold flex flex-col items-center w-16">
                                 <CountUp start={0}
-                                         end={employee.leave_balance?.find(item => item.remaining_days)?.remaining_days!}
-                                         decimals={2}/>
-                                <Typography as="span"
-                                            className="font-normal text-slate-700/50 text-sm">day/s</Typography>
-                            </Typography>
-                        </div>
-                    </Tooltip>
-                    <Tooltip content="Earned Days">
-                        <div className="flex flex-col gap-1 items-center">
-                            <LuCalendarPlus className={cn("", icon_size, icon_color)}/>
-                            <Typography className="text-xl font-bold flex flex-col items-center w-16">
-                                <CountUp start={0}
-                                         end={employee.leave_balance?.find(item => item.total_earned_days)?.total_earned_days!}
+                                         end={remaining!}
                                          decimals={2}/>
                                 <Typography as="span"
                                             className="font-normal text-slate-700/50 text-sm">day/s</Typography>
