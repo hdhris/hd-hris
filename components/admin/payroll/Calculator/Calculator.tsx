@@ -7,6 +7,7 @@ import { BaseValueProp, calculateAllPayheads } from "@/helper/payroll/calculatio
 import { useQuery } from "@/services/queries";
 
 function PayheadCalculator({
+    id,
     payhead,
     input,
     setInput,
@@ -16,6 +17,7 @@ function PayheadCalculator({
         id: number;
         system_only: boolean;
     };
+    id?: string;
     input: string;
     setInput: (value: string) => void;
     setInvalid: (value: boolean) => void;
@@ -101,6 +103,8 @@ function PayheadCalculator({
     return (
         <div className="flex gap-2">
             <Textarea
+                id={id}
+                name={id}
                 type="text"
                 value={input || ""}
                 onValueChange={setInput}

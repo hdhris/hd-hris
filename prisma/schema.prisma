@@ -720,7 +720,7 @@ model ref_benefits_contribution_advance_settings {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model dim_payhead_specific_amounts {
-  id              BigInt           @id @default(autoincrement())
+  id              Int           @id @default(autoincrement())
   created_at      DateTime         @default(now()) @db.Timestamptz(6)
   updated_at      DateTime?        @default(now()) @db.Timestamp(6)
   payhead_id      Int?
@@ -728,4 +728,6 @@ model dim_payhead_specific_amounts {
   amount          Decimal?         @db.Decimal
   trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ref_payheads    ref_payheads?    @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([payhead_id, employee_id], map: "employee_payhead")
 }

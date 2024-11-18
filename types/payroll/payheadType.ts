@@ -5,9 +5,9 @@ export interface AffectedJson {
     probationary : boolean;
     regular : boolean;
   }
-  departments : number[];
-  job_classes : number[];
-  employees: number[];
+  departments : number[] | "all";
+  job_classes : number[] | "all";
+  employees: number[] | "all";
 }
 
 
@@ -47,6 +47,14 @@ export interface Payhead {
       id : number;
       name : string;
       department_id : number;
+    }[],
+    amount_records: {
+      id: number;
+      created_at: string;
+      updated_at: string;
+      payhead_id: number;
+      employee_id: number;
+      amount: number;
     }[],
   }
   
