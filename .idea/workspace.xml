@@ -6,18 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="adjusting route in leave credits">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/employees-leaves-status/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/employees-leaves-status/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/employee-leave-credits-status/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/employee-leave-credits-status/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/leaves/credits/leave-credit-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/credits/leave-credit-form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/data-display/controls/data-display-control.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/data-display/controls/data-display-control.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/data-display/data-display.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/data-display/data-display.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/data-display/types/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/data-display/types/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/employee-list-autocomplete/EmployeeListForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/employee-list-autocomplete/EmployeeListForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/queries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/queries.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/leaves/LeaveTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/LeaveTypes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/leaves/leave-credits-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/leave-credits-types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,26 +77,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;john&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Xero/WebstormProjects/HD-HRIS/HD-HRIS-MOBILE&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Xero\\WebstormProjects\\HD-HRIS\\HD-HRIS-WEB\\node_modules\\typescript\\lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "com.codeium.enabled": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Xero/WebstormProjects/HD-HRIS/HD-HRIS-MOBILE",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Users\\Xero\\WebstormProjects\\HD-HRIS\\HD-HRIS\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS-WEB" />
@@ -217,6 +206,7 @@
     <MESSAGE value="fixing login" />
     <MESSAGE value="adding pluralization of words" />
     <MESSAGE value="adjusting route in leave credits" />
-    <option name="LAST_COMMIT_MESSAGE" value="adjusting route in leave credits" />
+    <MESSAGE value="small changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="small changes" />
   </component>
 </project>
