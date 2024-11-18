@@ -38,6 +38,7 @@ function DataDisplayControl<T>({
                                    onImport,
                                    onDeleteSelected,
                                    isSelectionDeleted = true,
+                                   addFunction
                                }: DataDisplayControlProps<T>) {
 
     const searchParams = useSearchParams();
@@ -111,7 +112,7 @@ function DataDisplayControl<T>({
 
     return (<div className={cn("flex flex-col h-full w-full px-2", className?.wrapper)}>
         <div className={cn("sticky top-0 z-10 pb-3 flex justify-between items-center", className?.upper)}>
-            <div className="flex justify-start gap-3">
+            <div className="flex justify-start items-center gap-3">
                 {searchProps &&
                     <Search value={searchValue} onChange={handleOnSearch} {...searchProps} className="flex-1"/>}
                 {filterProps && <Filter
@@ -124,6 +125,7 @@ function DataDisplayControl<T>({
                     initialValue={sortDescriptor}
                     {...sortProps}
                 />}
+                {addFunction && addFunction}
             </div>
             <div className="flex justify-end gap-3">
                 <DataMigration onImport={onImport!} onExport={onExport!}/>

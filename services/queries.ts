@@ -74,30 +74,30 @@ export function useBackupLogs() {
 
 export function useEmployeesData() {
     return useSWR<Employee[]>('/api/employeemanagement/employees', fetcher, {
-        revalidateOnFocus: false, refreshInterval: 3000
+        // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
 export function useDepartmentsData() {
     return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {//
-        revalidateOnFocus: false, refreshInterval: 3000
+        // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
 export function useJobpositionData() {
     return useSWR<JobPosition[]>('/api/employeemanagement/jobposition', fetcher, {//
-        revalidateOnFocus: false, refreshInterval: 3000
+        // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 export function useBranchesData() {
     return useSWR<Branch[]>('/api/employeemanagement/branch', fetcher, {//
-        revalidateOnFocus: false, refreshInterval: 3000
+        // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
 export function useBatchSchedules() {
     return useSWR<BatchSchedule[]>('/api/employeemanagement/batch_schedules', fetcher, {//
-        revalidateOnFocus: false, refreshInterval: 3000
+        // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
@@ -142,8 +142,8 @@ export function useLeaveCreditEmployees(){
     })
 }
 
-export function usePaginateQuery<T>(api: string, page: number, limit: number, options?: Omit<SWRConfiguration<T>, "keepPreviousData">) {
-    return useSWR<T>(`${api}?page=${page}&limit=${limit}`, fetcher, {
+export function usePaginateQuery<T>(api: string, page: number, limit: number, options?: Omit<SWRConfiguration<T>, "keepPreviousData">, params?: string) {
+    return useSWR<T>(`${api}?page=${page}&limit=${limit}${params}`, fetcher, {
         keepPreviousData: true,
         ...options,
     });

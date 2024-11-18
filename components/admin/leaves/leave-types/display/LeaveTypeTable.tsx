@@ -25,6 +25,7 @@ import showDialog from "@/lib/utils/confirmDialog";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import EmployeesAvatar from "@/components/common/avatar/employees-avatar";
+import {pluralize} from "@/helper/pluralize/pluralize";
 
 
 function LeaveTypeTable() {
@@ -241,23 +242,23 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
                             </Button>
                         </div>
 
-                        <div className="grid gap-2">
-                            <div className="flex items-center space-x-2 text-pink-700">
-                                <Calendar className="h-5 w-5"/>
-                                <span className="font-semibold">Accrual Details</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                                <div className="flex flex-col gap-2">Frequency: <Typography
-                                    className="font-semibold">{capitalize(props.accrual_frequency)}</Typography>
-                                </div>
-                                <div className="flex flex-col gap-2">Rate: <Typography
-                                    className="font-semibold">{props.accrual_rate} days</Typography></div>
-                                <div className="flex flex-col gap-2">Max Accrual: <Typography
-                                    className="font-semibold">{props.max_accrual} days</Typography></div>
-                                <div className="flex flex-col gap-2">Carry Over: <Typography
-                                    className="font-semibold">{props.carry_over ? "Yes" : "No"}</Typography></div>
-                            </div>
-                        </div>
+                        {/*<div className="grid gap-2">*/}
+                        {/*    <div className="flex items-center space-x-2 text-pink-700">*/}
+                        {/*        <Calendar className="h-5 w-5"/>*/}
+                        {/*        <span className="font-semibold">Accrual Details</span>*/}
+                        {/*    </div>*/}
+                        {/*    /!*<div className="grid grid-cols-2 gap-2 text-sm">*!/*/}
+                        {/*    /!*    <div className="flex flex-col gap-2">Frequency: <Typography*!/*/}
+                        {/*    /!*        className="font-semibold">{capitalize(props.accrual_frequency)}</Typography>*!/*/}
+                        {/*    /!*    </div>*!/*/}
+                        {/*    /!*    <div className="flex flex-col gap-2">Rate: <Typography*!/*/}
+                        {/*    /!*        className="font-semibold">{props.accrual_rate} days</Typography></div>*!/*/}
+                        {/*    /!*    <div className="flex flex-col gap-2">Max Accrual: <Typography*!/*/}
+                        {/*    /!*        className="font-semibold">{props.max_accrual} days</Typography></div>*!/*/}
+                        {/*    /!*    <div className="flex flex-col gap-2">Carry Over: <Typography*!/*/}
+                        {/*    /!*        className="font-semibold">{props.carry_over ? "Yes" : "No"}</Typography></div>*!/*/}
+                        {/*    /!*</div>*!/*/}
+                        {/*</div>*/}
                         <div className="grid gap-2">
                             <div className="flex items-center space-x-2 text-pink-700">
                                 <Clock className="h-5 w-5"/>
@@ -265,9 +266,9 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
                             </div>
                             <div className="grid grid-cols-2 gap-2 text-sm">
                                 <div className="flex flex-col gap-2">Minimum: <Typography
-                                    className="font-semibold">{props.min_duration} days</Typography></div>
+                                    className="font-semibold">{pluralize(props.min_duration, "day")}</Typography></div>
                                 <div className="flex flex-col gap-2">Maximum: <Typography
-                                    className="font-semibold">{props.max_duration} days</Typography></div>
+                                    className="font-semibold">{pluralize(props.max_duration, "day")}</Typography></div>
                             </div>
                         </div>
                         <div className="grid gap-2">
@@ -294,7 +295,7 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
                             <div className="flex items-center space-x-2">
                                 <Bell className="h-5 w-5 text-yellow-600"/>
                                 <span><Typography
-                                    className="font-semibold">{props.notice_required} days notice required</Typography></span>
+                                    className="font-semibold">{pluralize(props.notice_required, "day")} notice required</Typography></span>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <DollarSign className="h-5 w-5 text-blue-600"/>

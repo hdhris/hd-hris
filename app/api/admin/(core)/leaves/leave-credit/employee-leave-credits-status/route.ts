@@ -14,7 +14,8 @@ export async function GET() {
         });
 
         // Fetch employees who do not have leave balances for the current year
-        const employees = await prisma?.trans_employees.findMany({
+        const [employees, leave_types] = await Promise.all([
+            prisma.trans_employees.findMany({
             where: {
                 deleted_at: null, // Exclude deleted employees
                 id: {
@@ -24,7 +25,17 @@ export async function GET() {
             include: {
                 ref_departments: true, // Include department data
             },
-        });
+        }),
+            prisma.ref_leave_types.findMany({
+                    where: {
+                        is_active: true,
+                        deleted_at: null
+                    }, select: {
+                        id: true, name: true, applicable_to_employee_types: true
+                    },
+                })
+
+            ])
 
         // Format the employee data for a user-friendly response
         const data = employees.map((emp) => {
@@ -33,10 +44,16 @@ export async function GET() {
                 name: getEmpFullName(emp), // Full name formatted from employee data
                 picture: emp.picture,
                 department: emp.ref_departments?.name ?? "No department", // Default to "No department" if department name is missing
+                is_regular: emp.is_regular
             };
         });
 
-        return NextResponse.json(data);
+
+
+        return NextResponse.json({
+            employees: data,
+            leave_types
+        });
     } catch (error) {
         console.error("Failed to fetch employees or leave balances:", error);
 

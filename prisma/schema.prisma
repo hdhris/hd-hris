@@ -556,6 +556,19 @@ model trans_payroll_date {
   trans_payrolls trans_payrolls[]
 }
 
+model trans_users {
+  id                      String                   @id(map: "User_pkey") @default(dbgenerated("gen_random_uuid()"))
+  name                    String
+  email                   String                   @unique(map: "User_email_key")
+  emailVerified           DateTime?
+  image                   String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime?
+  acl_user_access_control acl_user_access_control?
+  auth_accounts           auth_accounts[]
+  auth_credentials        auth_credentials?
+}
+
 model trans_payrolls {
   employee_id                      Int
   gross_total_amount               Decimal?                           @db.Decimal(10, 2)
@@ -636,7 +649,7 @@ model auth_accounts {
   token_type          String?     @db.VarChar
   id_token            String?
   type                String?     @db.VarChar
-  trans_users         trans_users @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Account_userId_fkey")
+  trans_users         trans_users @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([provider, provider_account_id])
 }
@@ -648,19 +661,6 @@ model sec_sessions {
   createdAt    DateTime @default(now())
   updatedAt    DateTime
   id           Int      @id @default(autoincrement())
-}
-
-model trans_users {
-  id                      String                   @id(map: "User_pkey") @default(dbgenerated("gen_random_uuid()"))
-  name                    String
-  email                   String                   @unique(map: "User_email_key")
-  emailVerified           DateTime?
-  image                   String?
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime?
-  acl_user_access_control acl_user_access_control?
-  auth_accounts           auth_accounts[]
-  auth_credentials        auth_credentials?
 }
 
 model ref_holidays {

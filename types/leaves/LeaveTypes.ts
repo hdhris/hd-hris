@@ -9,15 +9,12 @@ export interface LeaveTypesKey {
 
 export interface LeaveType {
     id: number;
-    accrual_frequency: 'Annually' | 'Monthly' | 'Weekly' |'Daily'; // Adjust as needed for other options
-    accrual_rate: number;
     applicable_to_employee_types: 'regular' | 'probationary'; // Adjust if needed
     attachment_required: boolean;
     code: string;
     created_at: string; // You might consider using Date if you want to handle dates directly
     description: string;
     is_active: boolean;
-    max_accrual: number;
     max_duration: number;
     min_duration: number;
     name: string;
@@ -34,6 +31,12 @@ export interface LeaveRequestPaginate {
     currentPage: number
     perPage: number
     totalItems: number
+}
+
+export interface LeaveTypeForEmployee{
+    id: number;
+    name: string;
+    applicable_to_employee_types: "all" | "regular" | "probationary";
 }
 
 

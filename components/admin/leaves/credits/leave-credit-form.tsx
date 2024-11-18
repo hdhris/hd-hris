@@ -15,6 +15,7 @@ import {EditCreditProp} from "@/app/(admin)/(core)/leaves/leave-credits/page";
 import FormDrawer from "@/components/common/forms/FormDrawer";
 import {Button} from "@nextui-org/button";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
+import {LeaveTypeForEmployee} from "@/types/leaves/LeaveTypes";
 
 interface LeaveCreditFormProps {
     title?: string
@@ -29,6 +30,8 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
     const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
     const [employeeState, setEmployeeState] = useState<Employee[]>([]); // Initialize with employee prop if available
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [leaveTypes, setLeaveTypes] = useState<LeaveTypeForEmployee[]>([])
+    const [employeeLeaveType, setEmployeeLeaveType] = useState<LeaveTypeForEmployee[] | null>()
 
     // Handle modal open/close state changes
     const handleModalOpen = useCallback((value: boolean) => {
@@ -65,14 +68,14 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
             });
 
         } else if (data && data.data) {
-            setEmployeeState(data.data);
+            setEmployeeState(data.data.employees);
+            setLeaveTypes(data.data.leave_types)
         }
     }, [data, employee, isOpen]);
 
     useEffect(() => {
         // Reset the form with employee details
         if (employee) {
-
             form.reset({
                 employee_id: employee.id,
                 allocated_days: employee.allocated_days,
@@ -131,6 +134,16 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
         }
     }
 
+    const handleOnSelectEmployee = (id: number) => {
+        const is_regular = employeeState.find(emp => emp.id === id)?.is_regular
+
+        const all_leave_type = leaveTypes.filter(leave_type => leave_type.applicable_to_employee_types === 'all')
+        if(is_regular){
+            const leave_type = leaveTypes.filter(leave_type => leave_type.applicable_to_employee_types === 'regular')
+            console.log("Leaves Types: ", [leave_type, all_leave_type])
+        }
+    }
+   
     const handleDelete = useCallback(async (id: Key) => {
         setIsLoadingDelete(true)
         try {
@@ -177,7 +190,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                         onOpen={handleModalOpen} isOpen={isModalOpen}>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="drawer-form">
-                <EmployeeListForm employees={employeeState!} isLoading={data.isLoading}/>
+                <EmployeeListForm employees={employeeState!} isLoading={data.isLoading} onSelected={handleOnSelectEmployee}/>
                 <FormFields items={formFields}/>
 
                 {/*<div className="w-full flex justify-end">*/}

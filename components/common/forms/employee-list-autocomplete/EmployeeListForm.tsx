@@ -11,6 +11,7 @@ export type Employee = {
     name: string;
     picture: string;
     department: string;
+    is_regular?: boolean
 };
 
 interface EmployeeListForm {

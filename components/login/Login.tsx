@@ -82,9 +82,9 @@ function Userlogin() {
         setError("");
         setLoading(true);
 
-        // const enc = new SimpleAES()
-        // const password = await enc.encryptData("password")
-        // console.log(password)
+        const enc = new SimpleAES()
+        const password = await enc.encryptData("password")
+        console.log(password)
         try {
             const loginResponse = await login(values);
             if (loginResponse.success) {
