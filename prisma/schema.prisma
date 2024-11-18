@@ -458,7 +458,7 @@ model trans_employees {
   resignation_json                                                       Json?                          @db.Json
   termination_json                                                       Json?                          @db.Json
   is_regular                                                             Boolean?
-  acl_user_access_control                                                acl_user_access_control[]
+  acl_user_access_control                                                acl_user_access_control?
   dim_employee_benefits                                                  dim_employee_benefits[]
   dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
   dim_incident_reports_dim_incident_reports_reported_byTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_reported_byTotrans_employees")
@@ -590,7 +590,7 @@ model auth_credentials {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model acl_user_access_control {
   id              Int              @id @default(autoincrement())
-  employee_id     Int?
+  employee_id     Int?             @unique
   privilege_id    Int
   banned_til      DateTime?        @db.Timestamptz(6)
   created_at      DateTime         @default(now()) @db.Timestamptz(6)
@@ -598,7 +598,7 @@ model acl_user_access_control {
   user_id         String?          @unique
   trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   sys_privileges  sys_privileges   @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  trans_users     trans_users?     @relation(fields: [user_id], references: [id], onDelete: NoAction)
+  trans_users     trans_users?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   sec_devices     sec_devices[]
 }
 
@@ -636,19 +636,18 @@ model auth_accounts {
   token_type          String?     @db.VarChar
   id_token            String?
   type                String?     @db.VarChar
-  trans_users         trans_users @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Account_userId_fkey")
+  trans_users         trans_users @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Account_userId_fkey")
 
   @@id([provider, provider_account_id])
 }
 
 model sec_sessions {
-  sessionToken String      @unique(map: "Session_sessionToken_key")
+  sessionToken String   @unique(map: "Session_sessionToken_key")
   userId       String
   expires      DateTime
-  createdAt    DateTime    @default(now())
+  createdAt    DateTime @default(now())
   updatedAt    DateTime
-  id           Int         @id @default(autoincrement())
-  trans_users  trans_users @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Session_userId_fkey")
+  id           Int      @id @default(autoincrement())
 }
 
 model trans_users {
@@ -662,7 +661,6 @@ model trans_users {
   acl_user_access_control acl_user_access_control?
   auth_accounts           auth_accounts[]
   auth_credentials        auth_credentials?
-  sec_sessions            sec_sessions[]
 }
 
 model ref_holidays {
@@ -720,7 +718,7 @@ model ref_benefits_contribution_advance_settings {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model dim_payhead_specific_amounts {
-  id              Int           @id @default(autoincrement())
+  id              Int              @id @default(autoincrement())
   created_at      DateTime         @default(now()) @db.Timestamptz(6)
   updated_at      DateTime?        @default(now()) @db.Timestamp(6)
   payhead_id      Int?
