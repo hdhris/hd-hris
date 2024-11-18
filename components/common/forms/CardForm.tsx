@@ -9,6 +9,7 @@ type CardFormProps<T extends object> = {
     label: string;
     children?: ReactNode;
     form: UseFormReturn<T>;
+    unSubmittable?: boolean;
     className?: string;
     classNames?: {
         header?: string;
@@ -33,6 +34,7 @@ function CardForm<T extends object>({
     className,
     classNames,
     startButton,
+    unSubmittable,
 }: CardFormProps<T>) {
     const [isPending, setIsPending] = useState(false);
 
@@ -65,7 +67,7 @@ function CardForm<T extends object>({
                         {startButton.name}
                     </Button>
                 )}
-                <Button isLoading={isPending} color="primary" className="w-full" type="submit" form="card-form">
+                <Button isLoading={isPending} color="primary" isDisabled={unSubmittable} className="w-full" type="submit" form="card-form">
                     Submit
                 </Button>
             </CardFooter>

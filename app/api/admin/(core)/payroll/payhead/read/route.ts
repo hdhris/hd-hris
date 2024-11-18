@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         let idString = searchParams.get("id");
         const id = idString ? Number(idString) : null;
-        const [payhead, employees, departments, job_classes, amounts] = await Promise.all([
+        const [payhead, employees, departments, job_classes, amount_records] = await Promise.all([
             id
                 ? prisma.ref_payheads.findFirst({
                       where: {
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
             }),
         ]);
         if (payhead) {
-            return NextResponse.json({ payhead, employees, departments, job_classes, amounts });
+            return NextResponse.json({ payhead, employees, departments, job_classes, amount_records });
         } else {
             return NextResponse.json({ employees, departments, job_classes });
         }

@@ -13,7 +13,7 @@ async function ManagePayhead({
         <div className="flex w-full h-full">
             <PayheadUpsert
                 payhead_id={payheadID as string}
-                payhead_type="earning" //payhead_type={payheadType as string}
+                payhead_type="deduction" //payhead_type={payheadType as string}
             />
             {/* <h1>{payheadType}</h1> */}
         </div>

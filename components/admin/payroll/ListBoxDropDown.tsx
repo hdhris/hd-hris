@@ -13,7 +13,7 @@ import {
     PopoverTrigger,
     PopoverContent,
 } from "@nextui-org/react";
-import { Key, ReactNode } from "react";
+import { Key, ReactNode, useState } from "react";
 
 type ListDropDownProps<T extends object> = {
     uniqueKey?: Key;
@@ -54,8 +54,8 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
     sectionConfig,
 }: ListDropDownProps<T>) {
     // const [selectedKeys, setSelectedKeys] = [getter, setter];
-    // const [prevSelecteKeys, setPrevSelecteKeys] = useState<Selection[]>([]);
-    const prevSelecteKeys: Selection[] = [];
+    const [prevSelecteKeys, setPrevSelecteKeys] = useState<Selection[]>([]);
+    // const prevSelecteKeys: Selection[] = [];
 
     function saveLastKeyAndSetNewKeys(keys: Selection) {
         prevSelecteKeys.push(selectedKeys);
@@ -71,6 +71,7 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
     return (
         <Popover
             key={uniqueKey || "List"}
+            id={String(uniqueKey)}
             placement="right-end"
             backdrop="opaque"
             showArrow
