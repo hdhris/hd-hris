@@ -151,7 +151,7 @@ const PersonalInformationForm = () => {
     },
     {
       name: "middle_name",
-      label: <div className="mt-4">Middle Name</div>,
+      label: <div className="mt-2">Middle Name</div>,
       type: "text",
       config: {
         placeholder: "Enter middle name",
@@ -173,7 +173,7 @@ const PersonalInformationForm = () => {
     {
       name: "suffix",
       label: "Suffix",
-      type: "auto-complete",
+      type: "select",
       config: {
         placeholder: "Enter Suffix",
         options: suffixOptions,
@@ -182,7 +182,7 @@ const PersonalInformationForm = () => {
     {
       name: "extension",
       label: "Extension",
-      type: "auto-complete",
+      type: "select",
       config: {
         placeholder: "Enter Extension",
         options: extensionOptions,

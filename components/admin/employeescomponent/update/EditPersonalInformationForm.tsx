@@ -154,7 +154,7 @@ const EditPersonalInformationForm: React.FC = () => {
     },
     {
       name: "middle_name",
-      label: <div className="mt-4">Middle Name</div>,
+      label: <div className="mt-2">Middle Name</div>,
       type: "text",
       config: {
         placeholder: "Enter middle name",
