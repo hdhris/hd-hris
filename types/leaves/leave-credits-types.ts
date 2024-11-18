@@ -59,4 +59,5 @@ export interface LeaveCredits {
 export interface EmployeeLeaveCredits {
     data: LeaveCredits[],
     totalItems: number,
+    years: number[]
 }

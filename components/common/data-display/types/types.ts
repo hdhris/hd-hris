@@ -10,6 +10,7 @@ export interface DataImportAndExportProps {
 }
 export interface DataDisplayControlProps<T> extends DataControlProps {
     title?: string
+    addFunction?: ReactNode
     children: (data: T[], sortDescriptor?: SortDescriptor, onSortChange?: (value: SortDescriptor) => void) => ReactNode
     searchProps?: Omit<SearchProps<T>, "onChange">
     filterProps?: Omit<DataFilterProps, "onChange" | "filterValue">

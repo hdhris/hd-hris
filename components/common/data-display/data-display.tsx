@@ -63,6 +63,7 @@ function DataDisplay<T extends { id: string | number }>({
             onImport={rest.onImport}
             isSelectionDeleted={rest.isSelectionDeleted}
             onDeleteSelected={rest.onDeleteSelected!}
+            addFunction={rest.addFunction}
 
         >
             {(data: T[], sortDescriptor, onSortChange) => {

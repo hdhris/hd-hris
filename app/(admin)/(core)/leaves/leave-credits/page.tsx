@@ -15,6 +15,8 @@ import {icon_color, icon_size} from "@/lib/utils";
 import CountUp from "react-countup";
 import LeaveCreditForm from "@/components/admin/leaves/credits/leave-credit-form";
 import {Employee} from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
+import {IoChevronDown} from "react-icons/io5";
+import DropdownList from "@/components/common/Dropdown";
 
 
 export interface EditCreditProp extends Employee{
@@ -25,12 +27,13 @@ function Page() {
     const {toast} = useToast()
     const [page, setPage] = useState<number>(1)
     const [rows, setRows] = useState<number>(5)
+    const [year, setYear] = useState<number>(new Date().getFullYear())
     const [editCredit, setEditCredit] = useState<EditCreditProp>()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isEdit, setIsEdit] = useState<boolean>(false)
     const {data, isLoading} = usePaginateQuery<EmployeeLeaveCredits>("/api/admin/leaves/leave-credit", page, rows, {
         refreshInterval: 3000
-    });
+    }, `&year=${year}`);
     const leaveCredit = useMemo(() => {
         if (data?.data) {
 
@@ -104,6 +107,7 @@ function Page() {
     // }
 
     const handleSelect = (edited: EditCreditProp) => {
+        console.log("Edited: ", edited)
         setIsEdit(true)
         setEditCredit(edited)
     }
@@ -112,6 +116,34 @@ function Page() {
     return (<section className='w-full h-full flex gap-4'>
         <DataDisplay
             // onSelect={(key) => alert(Number(key))}
+            addFunction={
+                <DropdownList
+                    selectionMode="single"
+                    selectedKeys={new Set([String(year)])}
+                    onSelectionChange={(key) =>
+                        setYear(Number(Array.from(key)[0]))
+                    }
+                    items={
+                        data?.years.map((year) => ({
+                            label: String(year),
+                            key: String(year),
+                        })) || []
+                    }
+                    trigger={{
+                        label: (
+                            <p className="font-semibold text-blue-500">{year}</p>
+                        ),
+                        props: {
+                            ...uniformStyle({ color: "default", radius: "md" }),
+                            variant: "bordered",
+                            endContent: <IoChevronDown />,
+                        },
+                    }}
+                    onAction={(key) =>
+                        setYear(Number(key))
+                    }
+                />
+            }
             isLoading={isLoading}
             title="Leave Types"
             defaultDisplay="grid"
@@ -126,7 +158,7 @@ function Page() {
                     picture={data.picture}
                     created_at={data.created_at}
                     updated_at={data.updated_at}
-                    deleted_at={data.deleted_at}                />);
+                    deleted_at={data.deleted_at}/>);
             }}
             // filterProps={{
             //     filterItems: filterLeaveTypes
