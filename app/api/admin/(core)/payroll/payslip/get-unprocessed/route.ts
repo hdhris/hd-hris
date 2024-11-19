@@ -132,6 +132,7 @@ async function stage_one(prisma: PrismaClient, dateID: number){
                   }
                 },
               },
+              ref_payheads: { calculation: static_formula.cash_advance_disbursement }
             },
             {
               trans_payrolls: {
@@ -147,6 +148,7 @@ async function stage_one(prisma: PrismaClient, dateID: number){
                   }
                 },
               },
+              ref_payheads: { calculation: static_formula.cash_advance_repayment }
             },
           ],
         },
