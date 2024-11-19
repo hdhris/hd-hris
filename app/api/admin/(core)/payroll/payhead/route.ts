@@ -11,9 +11,6 @@ export async function GET(req: NextRequest) {
           type: type,
           deleted_at: null,
         },
-        include : {
-          dim_payhead_affecteds : true
-        }
     })
     return NextResponse.json(payheads);
   } catch (error) {

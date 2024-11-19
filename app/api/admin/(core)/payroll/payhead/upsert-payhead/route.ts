@@ -6,7 +6,7 @@ import { Payhead } from "@/types/payroll/payheadType";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { data, amountRecords }: { data: Payhead; amountRecords: { employee_id: number; amount: number }[] } = body;
+    const { data, amountRecords }: { data: Omit<Payhead, "dim_payhead_specific_amounts">; amountRecords: { employee_id: number; amount: number }[] } = body;
 
     // Ensure data and amountRecords are valid
     if (!data || !amountRecords) {

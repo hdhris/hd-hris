@@ -19,6 +19,7 @@ import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import SearchFilter from "@/components/common/filter/SearchFilter";
 import { useRouter } from "next/navigation";
+import { static_formula } from "@/helper/payroll/calculations";
 
 function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payhead_type?: string }) {
     const { data: payheadAffected, isLoading } = useQuery<PayheadAffected>(
@@ -29,6 +30,32 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
     const [amountRecords, setAmountRecords] = useState<Map<number, number>>(new Map());
     const [filteredEmployees, setFilteredEmployees] = useState<UserEmployee[]>([]);
     const [isInvalid, setIsInvalid] = useState(false);
+    const strictLevel = useMemo(()=>{
+        // 0: No restriction
+        // 1: Don't allow variable changes
+        // 2: Also, don't affected changes
+        // 3: Don't allow all changes
+
+        // Payhead IDs
+        // 1: Basic Salary
+        // 2: Cash Disburse
+        // 2: Cash Repay
+        // 3: Benefits
+        const calculatorSpecialCaseForSystem = [1];
+        if(payheadAffected?.payhead){
+            const payhead = payheadAffected.payhead;
+
+            // Payheads associated to benefits
+            if(payhead.calculation === static_formula.benefit_contribution)
+                return 3;
+            if(payhead.system_only)
+                if(!calculatorSpecialCaseForSystem.includes(payhead.id))
+                    return 2
+                else
+                    return 1
+        }
+        return 0;
+    },[payheadAffected]);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -115,9 +142,10 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
 
     // First load
     useEffect(() => {
-        if (payheadAffected) {
-            if (payheadAffected.amount_records && payheadAffected.amount_records.length > 0) {
-                payheadAffected.amount_records.forEach((record) => {
+        if (payheadAffected?.payhead) {
+            const amount_records = payheadAffected.payhead?.dim_payhead_specific_amounts;
+            if (amount_records && amount_records.length > 0) {
+                amount_records.forEach((record) => {
                     updateAmountRecords(record?.employee_id, record?.amount);
                 });
             }
@@ -214,7 +242,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                 toast({ title: `${error}`, variant: "danger" });
             }
         },
-        [amountRecords, selectedEmployees, payheadAffected, filteredRoles, isMandatory, unSubmittable]
+        [amountRecords, selectedEmployees, payheadAffected, filteredRoles, isMandatory, unSubmittable, payhead_type, router]
     );
 
     const totalAffectedEmployees = useMemo(() => {
@@ -245,7 +273,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
         if (payheadAffected?.payhead && payhead_type != payheadAffected?.payhead?.type) return true;
 
         return false;
-    }, [payhead_id, payhead_type, payheadAffected]);
+    }, [payhead_type, payheadAffected]);
 
     if (isLoading) {
         return <Spinner label="Loading..." className="flex-1" />;
@@ -253,7 +281,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
         if (invalidParams)
             return (
                 <div className="h-full w-full flex flex-col justify-center items-center">
-                    <h1 className="text-red-500 font-semibold">This shouldn&apos;t happend :/</h1>
+                    <h1 className="text-red-500 font-semibold">This should not happend :/</h1>
                     <p className="text-gray-500 text-sm">We have encountered an invalid payhead attribute</p>
                 </div>
             );
@@ -266,6 +294,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                 onSubmit={handleSubmit}
                 className="w-fit"
                 classNames={{ body: { form: "space-y-4" } }}
+                unSubmittable={strictLevel===3}
             >
                 <FormFields
                     items={[
@@ -273,10 +302,12 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                             name: "name",
                             label: "Name",
                             isRequired: true,
+                            config: { isDisabled: strictLevel >= 2 },
                         },
                         {
                             name: "calculation",
                             label: "Calculation",
+                            config: { isDisabled: strictLevel >= 2 },
                             Component: (field) => {
                                 return (
                                     <PayheadCalculator
@@ -292,11 +323,13 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                         {
                             name: "is_overwritable",
                             type: "switch",
+                            config: { isDisabled: strictLevel >= 3 },
                             label: switchLabel("Writable", `Amount can be overwritten over given calculated input`),
                         },
                         {
                             name: "is_active",
                             type: "switch",
+                            config: { isDisabled: strictLevel >= 3 },
                             label: switchLabel(
                                 "Active",
                                 `${capitalize(payhead_type)} will be effective on next payroll`
@@ -306,6 +339,9 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                             name: "affected_json.mandatory",
                             Component: (field) => (
                                 <ListDropDown
+                                    triggerProps={{
+                                        isDisabled: strictLevel >= 2
+                                    }}
                                     items={[
                                         { name: "Probationary", id: "mandatory" },
                                         { name: "Regular", id: "regular" },
@@ -335,6 +371,9 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                             name: "affected_json.departments",
                             Component: (field) => (
                                 <ListDropDown
+                                    triggerProps={{
+                                        isDisabled: strictLevel >= 2
+                                    }}
                                     items={payheadAffected?.departments || []}
                                     triggerName="Departments"
                                     selectedKeys={
@@ -354,6 +393,9 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                             name: "affected_json.job_classes",
                             Component: (field) => (
                                 <ListDropDown
+                                    triggerProps={{
+                                        isDisabled: strictLevel >= 2
+                                    }}
                                     items={filteredRoles}
                                     triggerName="Roles"
                                     selectedKeys={
@@ -388,6 +430,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                         },
                         {
                             name: "variable",
+                            config: { isDisabled: strictLevel >= 1 },
                             label: "Variable ( intended for reusability )",
                             isRequired: false,
                         },
@@ -429,6 +472,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                             key={item.id}
                             className={cn(
                                 "p-4 border-2 cursor-pointer",
+                                strictLevel >= 2 && "opacity-50",
                                 isMandatory
                                     ? "border-gray-50"
                                     : selectedEmployees.includes(item.id)
@@ -444,7 +488,10 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                                         name={getEmpFullName(item)}
                                         picture={item.picture}
                                         email={item.email}
-                                        onClick={() => selectEmployee(item.id)}
+                                        onClick={() => {
+                                            if(strictLevel < 2)
+                                                selectEmployee(item.id)
+                                        }}
                                     />
                                 </div>
                                 <div className="w-48 text-small">

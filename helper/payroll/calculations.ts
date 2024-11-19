@@ -137,7 +137,7 @@ export class Benefit {
           wispThreshold: advanceRates.wisp_threshold,
         };
 
-        console.log("Name: ", this.data.name, " Calc: ", advanceCalculator(salary, rates))
+        // console.log("Name: ", this.data.name, " Calc: ", advanceCalculator(salary, rates))
         contribution = advanceCalculator(salary, rates).employeeShare + (advanceCalculator(salary, rates).wispEmployee ?? 0);
       } else {
         const basic = basicCalculator(
@@ -145,7 +145,7 @@ export class Benefit {
           this.data.employer_contribution,
           this.data.employee_contribution
         );
-        console.log("Name: ", this.data.name, " Basic Calc: ", basic)
+        // console.log("Name: ", this.data.name, " Basic Calc: ", basic)
         contribution = basic.employee_contribution //+ basic.employer_contribution;
       }
 

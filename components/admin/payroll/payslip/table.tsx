@@ -159,7 +159,7 @@ export function PRPayslipTable({
         [payheadId]: value,
       },
     }));
-    console.log("Will update");
+    console.log("Value changed");
     setWillUpdate(!isAlreadyUpdated || true);
     setUpdatedPayheadMap((prevMap) => {
       const newMap = new Map(prevMap);
@@ -272,7 +272,7 @@ export function PRPayslipTable({
     }
 
     return {cashToDisburse,cashToRepay,benefitContribution};
-  }, [payslipData, records]);
+  }, [payslipData, records, processDate]);
 
   useEffect(()=>{
     if(setTobeDeployed && toBeDeployed){
@@ -336,6 +336,7 @@ export function PRPayslipTable({
       // console.log(payslipData.employees);
       const payrollMap = new Map(payslipData.payrolls.map(pr=> [pr.id, pr.employee_id]));
       const earningsSet = new Set(payslipData.earnings.map((e) => e.id));
+      setRecords({}); // Clear records
       payslipData.breakdowns.forEach((bd) => {
         handleRecording(
           payrollMap.get(bd.payroll_id)!,
