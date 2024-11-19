@@ -23,8 +23,9 @@ export async function POST(req: NextRequest) {
                     is_overwritable: false,
                     affected_json: {
                         mandatory: { probationary: true, regular: true },
-                        department: [],
-                        job_classes: [],
+                        departments: "all",
+                        job_classes: "all",
+                        employees: "all",
                     },
                 },
             });

@@ -8,13 +8,16 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         let idString = searchParams.get("id");
         const id = idString ? Number(idString) : null;
-        const [payhead, employees, departments, job_classes, amount_records] = await Promise.all([
+        const [payhead, employees, departments, job_classes] = await Promise.all([
             id
                 ? prisma.ref_payheads.findFirst({
                       where: {
                           id: id,
                           deleted_at: null,
                       },
+                      include: {
+                        dim_payhead_specific_amounts: true,
+                      }
                   })
                 : null,
             prisma.trans_employees.findMany({
@@ -50,14 +53,9 @@ export async function GET(req: NextRequest) {
                     department_id: true,
                 },
             }),
-            prisma.dim_payhead_specific_amounts.findMany({
-                where: {
-                    payhead_id: id,
-                },
-            }),
         ]);
         if (payhead) {
-            return NextResponse.json({ payhead, employees, departments, job_classes, amount_records });
+            return NextResponse.json({ payhead, employees, departments, job_classes });
         } else {
             return NextResponse.json({ employees, departments, job_classes });
         }

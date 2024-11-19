@@ -24,6 +24,7 @@ export interface Payhead {
   type: 'earning' | 'deduction';
   variable?: string;
   affected_json: AffectedJson;
+  dim_payhead_specific_amounts: PayheadSpecificAmount[],
 }
   export interface EmployeeAffected {
     id: number;
@@ -32,6 +33,15 @@ export interface Payhead {
     created_at: string;
     updated_at: string;
     default_amount: number;
+  }
+
+  export interface PayheadSpecificAmount {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    payhead_id: number;
+    employee_id: number;
+    amount: number;
   }
 
   // Main return of the api
@@ -47,14 +57,6 @@ export interface Payhead {
       id : number;
       name : string;
       department_id : number;
-    }[],
-    amount_records: {
-      id: number;
-      created_at: string;
-      updated_at: string;
-      payhead_id: number;
-      employee_id: number;
-      amount: number;
     }[],
   }
   

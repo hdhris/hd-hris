@@ -82,12 +82,8 @@ type Benefit = {
     deduction_id: number;
   }[];
 }
-export type PayslipPayhead = Omit<Payhead,"dim_payhead_affecteds"> & Benefit;
-// export interface PayslipEmployee extends UserEmployee {
-//   dim_payhead_affecteds: {
-//     payhead_id: number;
-//   }[];
-// }
+
+export type PayslipPayhead = Payhead & Benefit;
 
 export interface PayslipData {
   payrolls: Payroll[];

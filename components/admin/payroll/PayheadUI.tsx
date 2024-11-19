@@ -79,7 +79,7 @@ function PayheadUI({ payhead_type }: { payhead_type: string }) {
                             onEdit={() => router.push(`/payroll/${payhead_type}s/manage?id=${item.id}`)}
                             onDelete={() => {
                                 if (item.system_only) {
-                                    toast({ title: "System variable cannot be deleted" });
+                                    toast({ title: "System variable cannot be deleted", variant: "warning" });
                                 } else {
                                     handleDelete(item.id, item.name);
                                 }

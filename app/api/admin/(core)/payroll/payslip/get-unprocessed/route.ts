@@ -3,6 +3,7 @@ import prisma from "@/prisma/prisma";
 import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import {
+  static_formula,
   VariableAmountProp,
 } from "@/helper/payroll/calculations";
 import { Parser } from "expr-eval";
@@ -48,14 +49,15 @@ async function stage_one(prisma: PrismaClient, dateID: number){
       prisma.trans_payrolls.findMany({
         where: {
           date_id: dateID,
-          trans_employees: {
-            deleted_at: null,
-          }
+          trans_employees: { deleted_at: null },
         }
       }),
       prisma.ref_payheads.findMany({
         where: { deleted_at: null, is_active: true },
-        include: { ref_benefit_plans: { select: { deduction_id: true } } },
+        include: {
+          ref_benefit_plans: { select: { deduction_id: true } },
+          dim_payhead_specific_amounts: true,
+        },
         orderBy: { created_at: "asc" },
       }),
       prisma.trans_employees.findMany({
@@ -63,13 +65,18 @@ async function stage_one(prisma: PrismaClient, dateID: number){
         select: {
           ...emp_rev_include.employee_detail.select, // Employee general information
           deleted_at: true,
-          dim_payhead_affecteds: { select: { payhead_id: true } },
         },
       }),
     ])
     const employeeIDs = new Set(payrolls.map(pr=> pr.employee_id));
 
     await Promise.all([
+      // Remove payroll entries associated with deleted employees.
+      prisma.trans_payrolls.deleteMany({
+        where: { date_id: dateID, trans_employees:{deleted_at:{ not:null }}},
+      }),
+
+      // Initialize payrolls with un-deleted employees.
       prisma.trans_payrolls.createMany({
         data: employees.map((emp) => ({
           employee_id: emp.id,
@@ -97,6 +104,7 @@ async function stage_one(prisma: PrismaClient, dateID: number){
                   { is_active: false },
                   { is_overwritable: false },
                   { deleted_at: { not: null } },
+                  { dim_payhead_affecteds: { none: {} } },
                   { ref_benefit_plans: { some: {
                       OR: [
                       { is_active: false },
@@ -110,13 +118,38 @@ async function stage_one(prisma: PrismaClient, dateID: number){
               },
               trans_payrolls: { date_id: dateID },
             },
+            {
+              trans_payrolls: {
+                date_id: dateID,
+                trans_employees: {
+                  trans_cash_advances_trans_cash_advances_employee_idTotrans_employees: {
+                    none: {
+                      status: "approved",
+                      trans_cash_advance_disbursements: {
+                        none: {}, // No disbursement should be present for these records
+                      },
+                    }
+                  }
+                },
+              },
+            },
+            {
+              trans_payrolls: {
+                date_id: dateID,
+                trans_cash_advance_disbursements: {
+                  none: {
+                    repayment_status: "to_be_paid",
+                    trans_cash_advances: {
+                      trans_employees_trans_cash_advances_employee_idTotrans_employees: {
+                        deleted_at: null,
+                      }
+                    },
+                  }
+                },
+              },
+            },
           ],
         },
-      }),
-
-      // Remove payroll entries associated with deleted employees.
-      prisma.trans_payrolls.deleteMany({
-        where: { date_id: dateID, trans_employees: { deleted_at: { not: null } } },
       }),
     ]);
 
@@ -134,6 +167,7 @@ async function stage_two(prisma: PrismaClient, dateID: number){
     
     // Execute both queries concurrently
     const [cashToDisburse, cashToRepay, benefitsPlansData] = await Promise.all([
+      // Generate cash to disburse
       prisma.trans_cash_advances.findMany({
         where: {
           employee_id: { in: employeeIds },
@@ -148,6 +182,8 @@ async function stage_two(prisma: PrismaClient, dateID: number){
           amount_requested: true,
         },
       }),
+      
+      // Generate cash to repay
       prisma.trans_cash_advance_disbursements.findMany({
         where: {
           repayment_status: "to_be_paid",
@@ -170,6 +206,7 @@ async function stage_two(prisma: PrismaClient, dateID: number){
           }
         },
       }),
+      
       // Generate contributions
       prisma.dim_employee_benefits.findMany({
         where : {

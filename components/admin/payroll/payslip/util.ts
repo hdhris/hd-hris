@@ -1,36 +1,49 @@
-import { PayslipEmployee, PayslipPayhead } from "@/types/payroll/payrollType";
-import { Decimal } from "@prisma/client/runtime/library";
+import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { PayslipPayhead } from "@/types/payroll/payrollType";
 
-export function isAffected(employee: PayslipEmployee, payhead: PayslipPayhead) {
+export function isAffected(employee: UserEmployee, payhead: PayslipPayhead) {
   try{
-    const affected = payhead?.affected_json;
-    // Find mandatory level...
+    const mandatory = payhead.affected_json.mandatory;
+    const department = payhead.affected_json.departments;
+    const roles = payhead.affected_json.job_classes;
+    const employees = payhead.affected_json.employees;
 
-    if (affected.departments?.length) {
-      // If by department affected
-      if (!affected.departments.includes(employee?.ref_departments?.id!))
-        return false;
-    }
-    if (affected.job_classes.length) {
-      // If by role affected as well
-      if (!affected.job_classes.includes(employee?.ref_job_classes?.id!))
-        return false;
+    // If not automatically for every employee
+    if(department != "all"){
+      // Return false if also not included in the selected departments
+      if(!department.includes(employee.ref_departments.id))  return false
     }
 
-    if (affected.mandatory.probationary) {
-      if (!employee.is_regular) return true;
-    }
-    if (affected.mandatory.regular) {
-      if (employee.is_regular) return true;
+    // If not automatically for every employee
+    if(roles != "all"){
+      // Return false if also not included in the selected roles
+      if(!roles.includes(employee.ref_job_classes.id))  return false
     }
 
-    // If not mandatory, check if affected selectively...
-    return employee.dim_payhead_affecteds.some(
-      (affect) => affect.payhead_id === payhead.id
-    );
+    // If either is mandatory
+    if(mandatory.probationary || mandatory.regular){
+      
+      // Return false if for only probi
+      if(mandatory.probationary && !mandatory.regular && employee.is_regular) return false
+
+      // Return false if for only reg
+      if(!mandatory.probationary && mandatory.regular && !employee.is_regular) return false
+
+    // If not mandatory, check if included in the selected employees
+    } else {
+
+      // If not automatically for every employee
+      if(employees != "all"){
+        // Return false if also not included in the selected employees
+        if(!employees.includes(employee.id))  return false
+      }
+
+    }
+
+    // If all constraints has passed, return true
+    return true;
+
   } catch (error){
-    // console.log(error);
-    // console.log(employee);
     return false;
   }
 }

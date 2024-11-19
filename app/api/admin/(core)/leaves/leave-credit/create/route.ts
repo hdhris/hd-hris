@@ -23,17 +23,17 @@ export async function POST(req: NextRequest) {
         }
 
         // Create a new leave balance entry in the database
-        await prisma.dim_leave_balances.create({
-            data: {
-                employee_id: parsedData.data.employee_id,
-                year: new Date().getFullYear(),
-                allocated_days: parsedData.data.allocated_days,
-                remaining_days: parsedData.data.allocated_days,
-                carry_forward_days: parsedData.data.carry_forward_days,
-                created_at: new Date(),
-                updated_at: new Date(),
-            },
-        });
+        // await prisma.dim_leave_balances.create({
+        //     data: {
+        //         employee_id: parsedData.data.employee_id,
+        //         year: new Date().getFullYear(),
+        //         allocated_days: parsedData.data.allocated_days,
+        //         remaining_days: parsedData.data.allocated_days,
+        //         carry_forward_days: parsedData.data.carry_forward_days,
+        //         created_at: new Date(),
+        //         updated_at: new Date(),
+        //     },
+        // });
 
         // Return a success response
         return NextResponse.json({

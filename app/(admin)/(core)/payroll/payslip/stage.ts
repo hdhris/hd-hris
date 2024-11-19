@@ -100,6 +100,8 @@ export async function stageTable(
       toGMT8(dateInfo?.start_date!),
       "day"
     );
+
+    const amountRecordsMap = new Map(dataPH.map(dph=> [dph.id, new Map(dph.dim_payhead_specific_amounts.map(psa => [psa.employee_id, psa.amount]))]));
     // console.log("Calculating some gross and deduction...");
     employees.forEach((emp) => {
       // Define base variables for payroll calculations.
@@ -142,7 +144,7 @@ export async function stageTable(
             isAffected(tryParse(emp), tryParse(ph)) &&
             (ph.calculation === static_formula.cash_advance_disbursement ? cashDisburseMap.has(emp.id) : true) &&
             (ph.calculation === static_formula.cash_advance_repayment ? cashRepayMap.has(emp.id) : true) &&
-            ph.ref_benefit_plans.length === 0 // Benefits already calculated, ignore.
+            ph.calculation != static_formula.benefit_contribution // Benefits already calculated, ignore.
           );
         })
         .map((ph) => ({
@@ -161,7 +163,10 @@ export async function stageTable(
           })(),
           payhead_id: ph.id,
           variable: String(ph.variable),
-          formula: String(ph.calculation),
+          formula: (()=>{
+            const amountRecord = amountRecordsMap.get(ph.id)?.get(emp.id);
+            return String(amountRecord ?? ph.calculation)
+          })(),
         }));
 
       // Calculate amounts and update `calculatedAmountList` with results for each employee.

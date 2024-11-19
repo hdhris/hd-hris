@@ -17,6 +17,8 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import {numberWithCommas} from "@/lib/utils/numberFormat";
 import axios from "axios";
+import { toast } from "@/components/ui/use-toast";
+import { title } from "process";
 
 const data = {
   name: 'Michael Angelo Supetran',
@@ -68,6 +70,7 @@ function Page() {
   const deployNow = useCallback(async()=>{
     if(toBeDeployed){
       try{
+        toast({title:'Deploying...'});
         await axios.post('/api/admin/payroll/payslip/deploy-system-payheads', toBeDeployed);
       } catch (error){
         console.error(error);
