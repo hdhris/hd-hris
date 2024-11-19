@@ -34,6 +34,8 @@ export async function GET(
         timestamp : "desc",
       }
     })) as unknown as AttendanceLog[];
+    // Reuse employee IDs for references below
+    const employeeIDsFromLogs = attendanceLog.map((al) => al.employee_id);
 
     /////////////////////////////////////////////////////////////////////
     // Organize and sort all attendance logs into each of employee's logs
@@ -54,18 +56,26 @@ export async function GET(
       where: {
         trans_employees: {
           id: {
-            in: attendanceLog.map((al) => al.employee_id),
+            in: employeeIDsFromLogs,
           },
         },
       },
     });
+    // Reuse employee schedule map for references below
+    const employeeScheduleMap = new Map(employeeSchedule.map(es => [es.employee_id!, es]));
     const batchSchedule = await prisma.ref_batch_schedules.findMany({
       where: {
-        id : {
-          in : employeeSchedule.map(es => es.batch_id!),
+        dim_schedules: {
+          some: {
+            employee_id: {
+              in: [...employeeScheduleMap.keys()],
+            }
+          }
         }
       }
     });
+    // Reuse batch schedule map for references below
+    const batchScheduleMap = new Map(batchSchedule.map(bs => [bs.id, bs]));
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Arrange and label the time log for each entry and return the overall information
@@ -86,12 +96,8 @@ export async function GET(
     Object.entries(organizedLogs).forEach(([empId, logs]) => {
       const employeeId = Number(empId);
       // Fetch an individual employee's schedule info
-      const daySchedule = employeeSchedule.find(
-        (es) => es.employee_id === employeeId
-      );
-      const timeSchedule = batchSchedule.find(
-        (bs) => bs.id === daySchedule?.batch_id
-      );
+      const daySchedule = employeeScheduleMap.get(employeeId);
+      const timeSchedule = batchScheduleMap.get(daySchedule?.batch_id || 0);
 
       // Skip if the current individual has invalid schedule
       if (!daySchedule || !timeSchedule) return;
@@ -325,7 +331,7 @@ export async function GET(
     const employees = await prisma.trans_employees.findMany({
       where: {
         id: {
-          in: attendanceLog.map((al) => al.employee_id),
+          in: employeeIDsFromLogs,
         },
       },
       ...emp_rev_include.employee_detail,

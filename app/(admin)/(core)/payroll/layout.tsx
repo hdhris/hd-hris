@@ -19,11 +19,11 @@ function RootLayout({ children }: { children: ReactNode }) {
       title: "Cash Advance",
       path: "cash-advance"
     },
-    {
-      key: "process",
-      title: "Pay slip",
-      path: "process"
-    },
+    // {
+    //   key: "process",
+    //   title: "Pay slip",
+    //   path: "process"
+    // },
     {
       key: "payslip",
       title: "Payroll Process",
