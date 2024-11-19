@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { SharedSelection } from "@nextui-org/react";
-import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { FileState, FileDropzone } from "@/components/ui/fileupload/file";
 import { Divider } from "@nextui-org/react";
@@ -13,7 +15,14 @@ const EducationalBackgroundForm = () => {
   const { watch, setValue } = useFormContext();
   const [showStrand, setShowStrand] = useState(false);
   const [showCourse, setShowCourse] = useState(false);
-  const [fileStates, setFileStates] = useState<FileState[]>([]);
+  const [showMastersCertificates, setShowMastersCertificates] = useState(false);
+  const [showDoctoratesCertificates, setShowDoctoratesCertificates] =
+    useState(false);
+  const [basicFileStates, setBasicFileStates] = useState<FileState[]>([]);
+  const [mastersFileStates, setMastersFileStates] = useState<FileState[]>([]);
+  const [doctorateFileStates, setDoctorateFileStates] = useState<FileState[]>(
+    []
+  );
   const { edgestore } = useEdgeStore();
   const [select, setSelect] = useState<string>("");
 
@@ -22,7 +31,9 @@ const EducationalBackgroundForm = () => {
   const highSchool = watch("highSchool");
   const seniorHighSchool = watch("seniorHighSchool");
   const universityCollege = watch("universityCollege");
-//
+  const masters = watch("masters");
+  const doctorate = watch("doctorate");
+
   useEffect(() => {
     setShowStrand(!!seniorHighSchool);
   }, [seniorHighSchool]);
@@ -32,16 +43,45 @@ const EducationalBackgroundForm = () => {
   }, [universityCollege]);
 
   useEffect(() => {
-    let highestDegree = "Elementary School";
+    setShowMastersCertificates(!!masters);
+  }, [masters]);
+
+  useEffect(() => {
+    setShowDoctoratesCertificates(!!doctorate);
+  }, [doctorate]);
+
+  useEffect(() => {
+    let highestDegree = "Nothing Input";
+    if (elementary) highestDegree = "Elementary";
     if (highSchool) highestDegree = "High School";
     if (seniorHighSchool) highestDegree = "Senior High School";
     if (universityCollege) highestDegree = "University/College";
+    if (masters) highestDegree = "Masters";
+    if (doctorate) highestDegree = "Doctorate";
     setValue("highestDegree", highestDegree);
-  }, [elementary, highSchool, seniorHighSchool, universityCollege, setValue]);
+  }, [
+    elementary,
+    highSchool,
+    seniorHighSchool,
+    universityCollege,
+    masters,
+    doctorate,
+    setValue,
+  ]);
 
-  function updateFileProgress(key: string, progress: FileState["progress"]) {
-    setFileStates((fileStates) => {
-      const newFileStates = structuredClone(fileStates);
+  function updateFileProgress(
+    key: string,
+    progress: FileState["progress"],
+    fileType: "basic" | "masters" | "doctorate"
+  ) {
+    const setFileStates = {
+      basic: setBasicFileStates,
+      masters: setMastersFileStates,
+      doctorate: setDoctorateFileStates,
+    }[fileType];
+
+    setFileStates((currentFileStates) => {
+      const newFileStates = structuredClone(currentFileStates);
       const fileState = newFileStates.find(
         (fileState) => fileState.key === key
       );
@@ -51,7 +91,7 @@ const EducationalBackgroundForm = () => {
       return newFileStates;
     });
   }
-//
+
   const handleSelect = (key: SharedSelection) => {
     if (key.anchorKey === "tvl") {
       setSelect(key as string);
@@ -141,12 +181,117 @@ const EducationalBackgroundForm = () => {
       },
     },
     {
+      name: "masters",
+      label: "Masters",
+      type: "text",
+      placeholder: "Enter Masters Institution",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    {
+      name: "mastersCourse",
+      label: "Masters Course",
+      type: "text",
+      isVisible: !!masters,
+      placeholder: "Enter Masters Course",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    {
+      name: "mastersYear",
+      label: "Masters Graduated Academic Year",
+      type: "text",
+      isVisible: !!masters,
+      placeholder: "Enter Year (e.g., 2021-2022)",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    // {
+    //   name: "mastersStartDate",
+    //   label: "Masters Start Date",
+    //   type: "date",
+    //   isVisible: !!masters,
+    //   config: {
+    //     variant: "bordered",
+    //     labelPlacement: "outside",
+    //   },
+    // },
+    // {
+    //   name: "mastersEndDate",
+    //   label: "Masters End Date",
+    //   type: "date",
+    //   isVisible: !!masters,
+    //   config: {
+    //     variant: "bordered",
+    //     labelPlacement: "outside",
+    //   },
+    // },
+    {
+      name: "doctorate",
+      label: "Doctorate",
+      type: "text",
+      placeholder: "Enter Doctorate Institution",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    {
+      name: "doctorateCourse",
+      label: "Doctorate Course",
+      type: "text",
+      isVisible: !!doctorate,
+      placeholder: "Enter Doctorate Course",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    // {
+    //   name: "doctorateStartDate",
+    //   label: "Doctorate Start Date",
+    //   type: "date",
+    //   isVisible: !!doctorate,
+    //   config: {
+    //     variant: "bordered",
+    //     labelPlacement: "outside",
+    //   },
+    // },
+    // {
+    //   name: "doctorateEndDate",
+    //   label: "Doctorate End Date",
+    //   type: "date",
+    //   isVisible: !!doctorate,
+    //   config: {
+    //     variant: "bordered",
+    //     labelPlacement: "outside",
+    //   },
+    // },
+    {
+      name: "doctorateYear",
+      label: "Doctorate Year",
+      type: "text",
+      isVisible: !!doctorate,
+      placeholder: "Enter Year (e.g., 2021-2022)",
+      config: {
+        variant: "bordered",
+        labelPlacement: "outside",
+      },
+    },
+    {
       name: "highestDegree",
       label: "Highest Degree Attainment",
       type: "text",
       config: {
-        variant: "bordered",
+        variant: "flat",
         isReadOnly: true,
+        disabled: true,
       },
     },
   ];
@@ -164,39 +309,47 @@ const EducationalBackgroundForm = () => {
         items={[
           {
             name: "certificates",
-            label: "Certificates",
+            label: "Basic Certificates",
             type: "text",
             Component: ({ onChange }) => (
               <FileDropzone
-                value={fileStates}
+                value={basicFileStates}
                 onChange={(files) => {
-                  setFileStates(files);
+                  setBasicFileStates(files);
                   onChange(files.map((f) => f.file));
                 }}
                 onFilesAdded={async (addedFiles) => {
-                  setFileStates([...fileStates, ...addedFiles]);
+                  setBasicFileStates([...basicFileStates, ...addedFiles]);
                   await Promise.all(
                     addedFiles.map(async (addedFileState) => {
                       try {
                         const res = await edgestore.publicFiles.upload({
                           file: addedFileState.file,
                           onProgressChange: async (progress) => {
-                            updateFileProgress(addedFileState.key, progress);
+                            updateFileProgress(
+                              addedFileState.key,
+                              progress,
+                              "basic"
+                            );
                             if (progress === 100) {
                               await new Promise((resolve) =>
                                 setTimeout(resolve, 1000)
                               );
                               updateFileProgress(
                                 addedFileState.key,
-                                "COMPLETE"
+                                "COMPLETE",
+                                "basic"
                               );
                             }
                           },
                         });
-                        // console.log(res);
                       } catch (err) {
                         console.error(err);
-                        updateFileProgress(addedFileState.key, "ERROR");
+                        updateFileProgress(
+                          addedFileState.key,
+                          "ERROR",
+                          "basic"
+                        );
                       }
                     })
                   );
@@ -206,6 +359,134 @@ const EducationalBackgroundForm = () => {
           },
         ]}
       />
+
+      {masters && (
+        <>
+          <Divider />
+          <Text className="text-medium font-semibold">
+            Masters Certificates
+          </Text>
+
+          <FormFields
+            items={[
+              {
+                name: "mastersCertificates",
+                label: "Masters Certificates",
+                type: "text",
+                Component: ({ onChange }) => (
+                  <FileDropzone
+                    value={mastersFileStates}
+                    onChange={(files) => {
+                      setMastersFileStates(files);
+                      onChange(files.map((f) => f.file));
+                    }}
+                    onFilesAdded={async (addedFiles) => {
+                      setMastersFileStates([...mastersFileStates, ...addedFiles]);
+                      await Promise.all(
+                        addedFiles.map(async (addedFileState) => {
+                          try {
+                            const res = await edgestore.publicFiles.upload({
+                              file: addedFileState.file,
+                              onProgressChange: async (progress) => {
+                                updateFileProgress(
+                                  addedFileState.key,
+                                  progress,
+                                  "masters"
+                                );
+                                if (progress === 100) {
+                                  await new Promise((resolve) =>
+                                    setTimeout(resolve, 1000)
+                                  );
+                                  updateFileProgress(
+                                    addedFileState.key,
+                                    "COMPLETE",
+                                    "masters"
+                                  );
+                                }
+                              },
+                            });
+                          } catch (err) {
+                            console.error(err);
+                            updateFileProgress(
+                              addedFileState.key,
+                              "ERROR",
+                              "masters"
+                            );
+                          }
+                        })
+                      );
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
+        </>
+      )}
+
+      {doctorate && (
+        <>
+          <Divider />
+          <Text className="text-medium font-semibold">
+            Doctorate Certificates
+          </Text>
+
+          <FormFields
+            items={[
+              {
+                name: "doctorateCertificates",
+                label: "Doctorate Certificates",
+                type: "text",
+                Component: ({ onChange }) => (
+                  <FileDropzone
+                    value={doctorateFileStates}
+                    onChange={(files) => {
+                      setDoctorateFileStates(files);
+                      onChange(files.map((f) => f.file));
+                    }}
+                    onFilesAdded={async (addedFiles) => {
+                      setDoctorateFileStates([...doctorateFileStates, ...addedFiles]);
+                      await Promise.all(
+                        addedFiles.map(async (addedFileState) => {
+                          try {
+                            const res = await edgestore.publicFiles.upload({
+                              file: addedFileState.file,
+                              onProgressChange: async (progress) => {
+                                updateFileProgress(
+                                  addedFileState.key,
+                                  progress,
+                                  "doctorate"
+                                );
+                                if (progress === 100) {
+                                  await new Promise((resolve) =>
+                                    setTimeout(resolve, 1000)
+                                  );
+                                  updateFileProgress(
+                                    addedFileState.key,
+                                    "COMPLETE",
+                                    "doctorate"
+                                  );
+                                }
+                              },
+                            });
+                          } catch (err) {
+                            console.error(err);
+                            updateFileProgress(
+                              addedFileState.key,
+                              "ERROR",
+                              "doctorate"
+                            );
+                          }
+                        })
+                      );
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
+        </>
+      )}
     </div>
   );
 };

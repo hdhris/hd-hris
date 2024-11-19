@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { Divider } from "@nextui-org/react";
 import EditPersonalInformationForm from "./EditPersonalInformationForm";
@@ -97,6 +97,72 @@ export const employeeSchema = z.object({
     .string()
     .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
     .optional(),
+  //
+  masters: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Masters institution should only contain letters and numbers"
+    )
+    .optional(),
+  mastersCourse: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Masters course should only contain letters and numbers"
+    )
+    .optional(),
+    mastersYear: z
+    .union([
+      z.string().regex(/^\d{4}-\d{4}$/, "Year should be in format YYYY-YYYY"),
+      z.string().length(0),  // allows empty string
+      z.null(),             // allows null
+      z.undefined()         // allows undefined
+    ])
+    .optional(),
+  mastersCertificates: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
+        fileName: z.string().optional(),
+      })
+    )
+    .optional()
+    .default([]),
+  doctorate: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Doctorate institution should only contain letters and numbers"
+    )
+    .optional(),
+  doctorateCourse: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Doctorate course should only contain letters and numbers"
+    )
+    .optional(),
+    doctorateYear: z
+    .union([
+      z.string().regex(/^\d{4}-\d{4}$/, "Year should be in format YYYY-YYYY"),
+      z.string().length(0),  // allows empty string
+      z.null(),             // allows null
+      z.undefined()         // allows undefined
+    ])
+    .optional(),
+  doctorateCertificates: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
+        fileName: z.string().optional(),
+      })
+    )
+    .optional()
+    .default([]),
+  //
   highestDegree: z.string().optional(),
   certificates: z
     .array(
@@ -112,10 +178,10 @@ export const employeeSchema = z.object({
   department_id: z.string().min(1, "Department is required"),
   job_id: z.string().min(1, "Job is required"),
   is_regular: z.preprocess((val) => {
-    if (typeof val === 'string') {
-      return val === 'true'
+    if (typeof val === "string") {
+      return val === "true";
     }
-    return val
+    return val;
   }, z.boolean()),
   branch_id: z.string().min(1, "Branch is required"),
   batch_id: z.string().min(1, "Batch is required"),
@@ -133,7 +199,7 @@ export const employeeSchema = z.object({
   //     return val;
   //   })
   //   .pipe(z.array(z.string()).min(1, "At least one working day is required")),
-  days_json: z.array(z.string())
+  days_json: z.array(z.string()),
 });
 
 interface EditEmployeeProps {
@@ -172,6 +238,14 @@ interface EmployeeFormData {
   tvlCourse: string;
   universityCollege: string;
   course: string;
+  masters?: string;
+  mastersCourse?: string;
+  mastersYear?: string;
+  mastersCertificates?: Certificate[];
+  doctorate?: string;
+  doctorateCourse?: string;
+  doctorateYear?: string;
+  doctorateCertificates?: Certificate[];
   highestDegree: string;
   certificates: Certificate[];
   hired_at: string;
@@ -214,6 +288,14 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       tvlCourse: "",
       universityCollege: "",
       course: "",
+      masters: "",
+      mastersCourse: "",
+      mastersYear: "",
+      mastersCertificates: [],
+      doctorate: "",
+      doctorateCourse: "",
+      doctorateYear: "",
+      doctorateCertificates: [],
       highestDegree: "",
       certificates: [],
       hired_at: "",
@@ -264,8 +346,23 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           fileName: cert.fileName,
         })
       );
+      const mastersCertificatesWithUrls = (educationalBg.mastersCertificates || []).map(
+        (cert: { fileName: string; fileUrl: string }) => ({
+          name: cert.fileName,
+          url: cert.fileUrl,
+          fileName: cert.fileName,
+        })
+      );
+  
+      const doctorateCertificatesWithUrls = (educationalBg.doctorateCertificates || []).map(
+        (cert: { fileName: string; fileUrl: string }) => ({
+          name: cert.fileName,
+          url: cert.fileUrl,
+          fileName: cert.fileName,
+        })
+      );
 
-        //reset and fetch the current employee data
+      //reset and fetch the current employee data
       methods.reset({
         picture: employeeData.picture || "",
         first_name: employeeData.first_name || "",
@@ -297,6 +394,14 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         tvlCourse: educationalBg.tvlCourse || "",
         universityCollege: educationalBg.universityCollege || "",
         course: educationalBg.course || "",
+        masters: educationalBg.masters || "",
+        mastersCourse: educationalBg.mastersCourse || "",
+        mastersYear: educationalBg.mastersYear || "",
+        mastersCertificates: mastersCertificatesWithUrls,
+        doctorate: educationalBg.doctorate || "",
+        doctorateCourse: educationalBg.doctorateCourse || "",
+        doctorateYear: educationalBg.doctorateYear || "",
+        doctorateCertificates: doctorateCertificatesWithUrls,
         highestDegree: educationalBg.highestDegree || "",
         certificates: certificatesWithUrls,
         batch_id:
@@ -380,6 +485,54 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         (cert) => cert !== null
       );
 
+      const mastersCertificates = await Promise.all(
+        (data.mastersCertificates || []).map(async (cert) => {
+          if (!cert) return null;
+          if (cert.url instanceof File) {
+            const result = await edgestore.publicFiles.upload({
+              file: cert.url,
+              options: { temporary: false },
+            });
+            return {
+              fileName:
+                cert.fileName ||
+                cert.name ||
+                result.url.split("/").pop() ||
+                "",
+              fileUrl: result.url,
+            };
+          }
+          return {
+            fileName: cert.fileName || cert.name || "",
+            fileUrl: cert.url as string,
+          };
+        })
+      ).then((certs) => certs.filter((cert) => cert !== null));
+    
+      const doctorateCertificates = await Promise.all(
+        (data.doctorateCertificates || []).map(async (cert) => {
+          if (!cert) return null;
+          if (cert.url instanceof File) {
+            const result = await edgestore.publicFiles.upload({
+              file: cert.url,
+              options: { temporary: false },
+            });
+            return {
+              fileName:
+                cert.fileName ||
+                cert.name ||
+                result.url.split("/").pop() ||
+                "",
+              fileUrl: result.url,
+            };
+          }
+          return {
+            fileName: cert.fileName || cert.name || "",
+            fileUrl: cert.url as string,
+          };
+        })
+      ).then((certs) => certs.filter((cert) => cert !== null));
+
       const educationalBackground = {
         elementary: data.elementary,
         highSchool: data.highSchool,
@@ -390,6 +543,14 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         course: data.course,
         highestDegree: data.highestDegree,
         certificates: filteredCertificates,
+        masters: data.masters,
+        mastersCourse: data.mastersCourse,
+        mastersYear: data.mastersYear,
+        mastersCertificates: mastersCertificates,
+        doctorate: data.doctorate,
+        doctorateCourse: data.doctorateCourse,
+        doctorateYear: data.doctorateYear,
+        doctorateCertificates: doctorateCertificates,
       };
 
       //use to prepare the input fulldata
@@ -419,7 +580,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           },
         ],
       };
-      // console.log("Sending data:", JSON.stringify(fullData, null, 2));
+      console.log("Sending data:", JSON.stringify(fullData, null, 2));
 
       //saving full data
       const response = await axios.put(

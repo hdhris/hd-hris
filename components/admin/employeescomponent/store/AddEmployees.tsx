@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import {
   Modal,
@@ -119,6 +119,66 @@ export const employeeSchema = z.object({
     .string()
     .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
     .optional(),
+    //
+    masters: z
+  .string()
+  .regex(
+    /^[a-zA-Z0-9\s]*$/,
+    "Masters institution should only contain letters and numbers"
+  )
+  .optional(),
+mastersCourse: z
+  .string()
+  .regex(/^[a-zA-Z0-9\s]*$/, "Masters course should only contain letters and numbers")
+  .optional(),
+  mastersYear: z
+  .union([
+    z.string().regex(/^\d{4}-\d{4}$/, "Year should be in format YYYY-YYYY"),
+    z.string().length(0),  // allows empty string
+    z.null(),             // allows null
+    z.undefined()         // allows undefined
+  ])
+  .optional(),
+mastersCertificates: z
+  .array(
+    z.object({
+      name: z.string().optional(),
+      url: z.union([z.string(), z.instanceof(File), z.undefined()]),
+      fileName: z.string().optional(),
+    })
+  )
+  .optional()
+  .default([]),
+doctorate: z
+  .string()
+  .regex(
+    /^[a-zA-Z0-9\s]*$/,
+    "Doctorate institution should only contain letters and numbers"
+  )
+  .optional(),
+doctorateCourse: z
+  .string()
+  .regex(/^[a-zA-Z0-9\s]*$/, "Doctorate course should only contain letters and numbers")
+  .optional(),
+  doctorateYear: z
+  .union([
+    z.string().regex(/^\d{4}-\d{4}$/, "Year should be in format YYYY-YYYY"),
+    z.string().length(0),  // allows empty string
+    z.null(),             // allows null
+    z.undefined()         // allows undefined
+  ])
+  .optional(),
+doctorateCertificates: z
+  .array(
+    z.object({
+      name: z.string().optional(),
+      url: z.union([z.string(), z.instanceof(File), z.undefined()]),
+      fileName: z.string().optional(),
+    })
+  )
+  .optional()
+  .default([]),
+  //
   highestDegree: z.string().optional(),
   certificates: z
     .array(
@@ -134,10 +194,10 @@ export const employeeSchema = z.object({
   department_id: z.string().min(1, "Department is required"),
   job_id: z.string().min(1, "Job is required"),
   is_regular: z.preprocess((val) => {
-    if (typeof val === 'string') {
-      return val === 'true'
+    if (typeof val === "string") {
+      return val === "true";
     }
-    return val
+    return val;
   }, z.boolean()),
   branch_id: z.string().min(1, "Branch is required"),
   batch_id: z.string().min(1, "Batch is required"),
@@ -155,7 +215,7 @@ export const employeeSchema = z.object({
   //     return val;
   //   })
   //   .pipe(z.array(z.string()).min(1, "At least one working day is required")),
-  days_json: z.array(z.string())
+  days_json: z.array(z.string()),
 });
 
 interface Certificate {
@@ -189,6 +249,14 @@ interface EmployeeFormData {
   course: string;
   highestDegree: string;
   certificates: Certificate[];
+  masters?: string;
+  mastersCourse?: string;
+  mastersYear?: string;
+  mastersCertificates?: Certificate[];
+  doctorate?: string;
+  doctorateCourse?: string;
+  doctorateYear?: string;
+  doctorateCertificates?: Certificate[];
   hired_at: string;
   department_id: string;
   job_id: string;
@@ -229,6 +297,14 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       course: "",
       highestDegree: "",
       certificates: [],
+      masters: "",
+      mastersCourse: "",
+      mastersYear: "",
+      doctorateYear: "",
+      mastersCertificates: [],
+      doctorate: "",
+      doctorateCourse: "",
+      doctorateCertificates: [],
       hired_at: new Date().toISOString(),
       is_regular: "false",
       department_id: "",
@@ -258,7 +334,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         });
         pictureUrl = result.url;
       } else {
-        pictureUrl = ""; 
+        pictureUrl = "";
       }
 
       // Handle certificates
@@ -289,6 +365,54 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       const filteredCertificates = updatedCertificates.filter(
         (cert) => cert !== null
       );
+      
+      const mastersCertificates = await Promise.all(
+        (data.mastersCertificates || []).map(async (cert) => {
+          if (!cert) return null;
+          if (cert.url instanceof File) {
+            const result = await edgestore.publicFiles.upload({
+              file: cert.url,
+              options: { temporary: false },
+            });
+            return {
+              fileName:
+                cert.fileName ||
+                cert.name ||
+                result.url.split("/").pop() ||
+                "",
+              fileUrl: result.url,
+            };
+          }
+          return {
+            fileName: cert.fileName || cert.name || "",
+            fileUrl: cert.url as string,
+          };
+        })
+      ).then((certs) => certs.filter((cert) => cert !== null));
+    
+      const doctorateCertificates = await Promise.all(
+        (data.doctorateCertificates || []).map(async (cert) => {
+          if (!cert) return null;
+          if (cert.url instanceof File) {
+            const result = await edgestore.publicFiles.upload({
+              file: cert.url,
+              options: { temporary: false },
+            });
+            return {
+              fileName:
+                cert.fileName ||
+                cert.name ||
+                result.url.split("/").pop() ||
+                "",
+              fileUrl: result.url,
+            };
+          }
+          return {
+            fileName: cert.fileName || cert.name || "",
+            fileUrl: cert.url as string,
+          };
+        })
+      ).then((certs) => certs.filter((cert) => cert !== null));
 
       // Build educational background
       const educationalBackground = {
@@ -301,7 +425,15 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         course: data.course,
         highestDegree: data.highestDegree,
         certificates: filteredCertificates,
-      };
+        masters: data.masters,
+        mastersCourse: data.mastersCourse,
+        mastersYear: data.mastersYear,
+        mastersCertificates: mastersCertificates,
+        doctorate: data.doctorate,
+        doctorateCourse: data.doctorateCourse,
+        doctorateYear: data.doctorateYear,
+        doctorateCertificates: doctorateCertificates,
+      }
 
       // This is to Prepare full data
       const fullData = {
@@ -401,7 +533,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
             <PersonalInformationForm />
             <Divider className="my-6" />
             <Text className="text-medium font-semibold">
-              Educational Background
+              Basic Educational Background
             </Text>
             <EducationalBackgroundForm />
             <Divider className="my-6" />
