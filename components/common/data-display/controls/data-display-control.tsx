@@ -52,6 +52,7 @@ function DataDisplayControl<T>({
     })
     const {sortedItems, onSortChange, sortDescriptor} = useSort<T>(paginatedData)
 
+    const items = sortProps ? sortedItems : paginatedData
 
     const displayMethods = [isTable, isGrid, isList].filter(item => item).length
 
@@ -163,7 +164,7 @@ function DataDisplayControl<T>({
             </div>}
         </div>
 
-        {children(sortedItems, sortDescriptor, onSortChange)}
+        {children(items, sortDescriptor, onSortChange)}
 
         {/* Bottom pagination */}
         <div

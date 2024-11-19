@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
             return prisma.dim_leave_balances.update({
                 where: {
                     id: data.id[index], // Match the correct ID for each record
+                    year: data.year
                 },
                 data: {
                     year: new Date().getFullYear(),

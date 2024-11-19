@@ -107,7 +107,6 @@ const RenderDisplay = <T extends { id: string | number }>({
 
     const newData = data.map(item => ({key: item.id, ...item}));
 
-
     const {display} = useDataDisplayControl();
     return (<>{isLoading ? (<Loading/>) : (<Switch expression={display}>
         <Case of="table">

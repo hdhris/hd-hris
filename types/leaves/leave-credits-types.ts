@@ -48,9 +48,6 @@ export interface LeaveCredits {
     picture: string | null;
     department: string;
     leave_balance: EmployeeLeaveBalance[] | null;
-    created_at: Date;
-    updated_at: Date;
-    deleted_at: Date | null;
     // earnings: {
     //     leave_type: LeaveEarning[];
     // };

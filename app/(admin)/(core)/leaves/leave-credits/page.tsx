@@ -39,7 +39,6 @@ function Page() {
     }, `&year=${year}`);
     const leaveCredit = useMemo(() => {
         if (data?.data) {
-
             return data.data
         } else {
             return []
@@ -146,10 +145,7 @@ function Page() {
                     id={data.id}
                     leave_balance={data.leave_balance}
                     name={data.name}
-                    picture={data.picture}
-                    created_at={data.created_at}
-                    updated_at={data.updated_at}
-                    deleted_at={data.deleted_at}/>);
+                    picture={data.picture}/>);
             }}
             // filterProps={{
             //     filterItems: filterLeaveTypes
