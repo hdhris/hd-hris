@@ -122,7 +122,7 @@ function Page() {
                 selectionMode="single"
                 selectedKeys={new Set([String(year)])}
                 onSelectionChange={(key) => setYear(Number(Array.from(key)[0]))}
-                items={data?.years.map((year) => ({
+                items={data?.meta_data.years.map((year) => ({
                     label: String(year), key: String(year),
                 })) || []}
                 trigger={{
@@ -166,7 +166,7 @@ function Page() {
                 onRowChange: setRows
             }}
             paginationProps={{
-                loop: true, data_length: data?.totalItems!, onChange: setPage
+                loop: true, data_length: data?.meta_data.totalItems, onChange: setPage
             }}
             // onTableDisplay={{
             //     config: LeaveTypeTableConfiguration,

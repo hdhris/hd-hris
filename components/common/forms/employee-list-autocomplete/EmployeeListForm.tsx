@@ -57,6 +57,9 @@ function EmployeeListForm({employees, isLoading, onSelected}: EmployeeListForm) 
                             selectedKey={field.value ? String(field.value) : null}
                             disableSelectorIconRotation
                             selectorIcon={<LuChevronsUpDown />}
+                            listboxProps={{
+                                emptyContent: "No Employees Found"
+                            }}
                             onSelectionChange={(e) => {
                                 const selectedItem = user.find(item => String(item.id) === String(e));
                                 if (selectedItem) {
