@@ -33,6 +33,7 @@ export async function GET(request: Request) {
             prisma.dim_leave_balances.groupBy({
                 by: ["year"],
                 where: { deleted_at: null },
+                orderBy: { year: "asc" },
             }),
         ]);
 
@@ -98,15 +99,9 @@ export async function GET(request: Request) {
                 return leaveOrder.indexOf(a.id) - leaveOrder.indexOf(b.id);
             });
 
-        // Now that values are sorted, map the `leave_credits` to match the same order
-        const sortedLeaveCredits = leave_credits
-            .map((credit) => credit.employee_id)
-            .sort((a, b) => leaveOrder.indexOf(a) - leaveOrder.indexOf(b));
 
         // Return the response with sorted data and meta information
         return NextResponse.json({
-            leave: sortedLeaveCredits,
-            data_id: values.map((v) => v.id),
             data: values,
             meta_data: {
                 totalItems: total_items.length,

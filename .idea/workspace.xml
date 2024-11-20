@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="polish leave credit v2">
+    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="fixing input number issue on scroll">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,7 +129,7 @@
       <workItem from="1731935089703" duration="644000" />
       <workItem from="1731941770915" duration="14768000" />
       <workItem from="1732068565218" duration="21963000" />
-      <workItem from="1732117480388" duration="6198000" />
+      <workItem from="1732117480388" duration="6603000" />
     </task>
     <task id="LOCAL-00001" summary="fixing issues in the leave">
       <option name="closed" value="true" />
@@ -219,7 +219,23 @@
       <option name="project" value="LOCAL" />
       <updated>1732123647840</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="fixing input number issue on scroll">
+      <option name="closed" value="true" />
+      <created>1732123856721</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1732123856721</updated>
+    </task>
+    <task id="LOCAL-00013" summary="fixing input number issue on scroll">
+      <option name="closed" value="true" />
+      <created>1732123917766</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1732123917766</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -249,6 +265,7 @@
     <MESSAGE value="polish leaves v1" />
     <MESSAGE value="polishing the leave credits" />
     <MESSAGE value="polish leave credit v2" />
-    <option name="LAST_COMMIT_MESSAGE" value="polish leave credit v2" />
+    <MESSAGE value="fixing input number issue on scroll" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing input number issue on scroll" />
   </component>
 </project>
