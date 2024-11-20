@@ -95,7 +95,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
 
     const onSubmit = async (data: z.infer<typeof LeaveCreditFormSchema>) => {
 
-        let values = {}
+        let values: {}
 
 
         const assign_to = data.apply_for

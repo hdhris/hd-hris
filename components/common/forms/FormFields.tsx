@@ -411,6 +411,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 classNames={InputStyle}
                                 endContent={item.endContent}
                                 startContent={item.startContent}
+                                onFocus={(e) => e.target.addEventListener("wheel", function (e) { e.preventDefault() }, { passive: false })}
                                 onValueChange={(value) => {
                                     if (item.type === "number") {
                                         // Parse value and ensure it's a number before passing it

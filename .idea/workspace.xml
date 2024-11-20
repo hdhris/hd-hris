@@ -4,16 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="polishing the leave credits">
+    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="polish leave credit v2">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/create/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/employee-leave-credits-status/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/employee-leave-credits-status/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/leaves/credits/leave-credit-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/credits/leave-credit-form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/forms/employee-list-autocomplete/EmployeeListForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/employee-list-autocomplete/EmployeeListForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/zodValidation/leaves/leave-credits-form/leave-credit-form-schema.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/leaves/leave-credits-form/leave-credit-form-schema.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/leaves/leave-credits-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/leave-credits-types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,7 +129,7 @@
       <workItem from="1731935089703" duration="644000" />
       <workItem from="1731941770915" duration="14768000" />
       <workItem from="1732068565218" duration="21963000" />
-      <workItem from="1732117480388" duration="5816000" />
+      <workItem from="1732117480388" duration="6198000" />
     </task>
     <task id="LOCAL-00001" summary="fixing issues in the leave">
       <option name="closed" value="true" />
@@ -218,7 +211,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732028263591</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="polish leave credit v2">
+      <option name="closed" value="true" />
+      <created>1732123647840</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1732123647840</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -247,6 +248,7 @@
     <MESSAGE value="small changes" />
     <MESSAGE value="polish leaves v1" />
     <MESSAGE value="polishing the leave credits" />
-    <option name="LAST_COMMIT_MESSAGE" value="polishing the leave credits" />
+    <MESSAGE value="polish leave credit v2" />
+    <option name="LAST_COMMIT_MESSAGE" value="polish leave credit v2" />
   </component>
 </project>
