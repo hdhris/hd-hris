@@ -1,20 +1,20 @@
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import { axiosInstance } from "@/services/fetcher";
 import { AttendaceStatuses, AttendanceData, AttendanceLog, InStatus, OutStatus } from "@/types/attendance-time/AttendanceTypes";
 import { min } from "lodash";
 
-export async function fetchAttendanceData(start: string, end: string): Promise<AttendanceData> {
-    const response = await fetch(`/api/attendance?start=${start}&end=${end}`);
-    if (!response.ok) throw new Error("Failed to fetch attendance data");
-    const data = await response.json();
-    return attendanceData({...data})
+export async function fetchAttendanceData(url: string): Promise<AttendanceData> {
+    // const response = await fetch(`/api/attendance?start=${start}&end=${end}`);
+    const response = await axiosInstance.get(url).then((res) => res.data);
+    return await attendanceData({...response})
 }
 
-function attendanceData({
+async function attendanceData({
     attendanceLogs,
     employees,
     batchSchedule,
     employeeSchedule,
-}: Omit<AttendanceData, "statusesByDate">): AttendanceData {
+}: Omit<AttendanceData, "statusesByDate">): Promise<AttendanceData> {
     // Reuse employee schedule map for references below
     const employeeScheduleMap = new Map(employeeSchedule.map((es) => [es.employee_id!, es]));
     // Reuse batch schedule map for references below

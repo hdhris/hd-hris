@@ -17,6 +17,8 @@ import { useQuery } from "@/services/queries";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import { capitalize, toUpper } from "lodash";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
+import useSWR from "swr";
+import { fetchAttendanceData } from "./stage";
 
 const modeType = ["Password", "Fingerprint", "Card", "Face ID", "Other"];
 const punchType = ["IN", "OUT"];
@@ -38,29 +40,34 @@ export default function Page() {
         emp_sched: EmployeeSchedule[];
     }>(schedApi);
 
-    const { data: attendanceData, isLoading } = useQuery<AttendanceData>(api);
+    const fetcher = async (url: string | null) => {
+        const data = await fetchAttendanceData(String(url));
+        return data;
+    };
+
+    const { data: attendanceData, isLoading } = useSWR<AttendanceData>(api, fetcher);
+    // const { data: attendanceData, isLoading } = useQuery<AttendanceData>(api);
 
     const [selectedLog, setSelectedLog] = useState<string>();
 
     const currentAttendanceInfo = useMemo(() => {
         const foundLog = attendanceData?.attendanceLogs.find((al) => al.id === Number(selectedLog));
-        const empSched = data?.emp_sched.find((es) => es.employee_id === foundLog?.employee_id);
-        const batchSched = data?.batch.find((b) => b.id === empSched?.batch_id);
-        const status = attendanceData?.statusesByDate[`${date}`][`${foundLog?.employee_id}`];
-        const results = {
-            log_info: foundLog,
-            employee_schedule: empSched,
-            batchmate_schedule: batchSched,
-            status: status,
-        };
-        // console.log(results);
-
-        return results;
+        if (foundLog) {
+            const empSched = data?.emp_sched.find((es) => es.employee_id === foundLog?.employee_id);
+            const batchSched = data?.batch.find((b) => b.id === empSched?.batch_id);
+            const status = attendanceData?.statusesByDate[`${date}`][`${foundLog?.employee_id}`];
+            return {
+                log_info: foundLog,
+                employee_schedule: empSched,
+                batchmate_schedule: batchSched,
+                status: status,
+            };
+        }
     }, [attendanceData, selectedLog, data]);
 
     const clockSchedule = useMemo(() => {
         const info = currentAttendanceInfo;
-        if (info.batchmate_schedule && info.employee_schedule) {
+        if (info?.batchmate_schedule && info?.employee_schedule) {
             return (
                 <>
                     <Chip variant="flat" color="success">
@@ -236,7 +243,7 @@ export default function Page() {
                         )}
                     </CardHeader>
                     <CardBody className="-mt-3">
-                        {clockSchedule && attendanceData && selectedLog && (
+                        {currentAttendanceInfo && clockSchedule && attendanceData && selectedLog && (
                             <ScrollShadow className="flex flex-col gap-2 p-1">
                                 <p className="text-sm text-gray-500 font-semibold">Morning</p>
                                 {currentAttendanceInfo.status?.amIn?.time ? (
