@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
                     year: new Date().getFullYear(),
                     allocated_days: leaveType.allocated_days,
                     remaining_days: leaveType.allocated_days,
-                    carry_forward_days: leaveType.carry_forward_days,
+                    carry_forward_days: leaveType.carry_forward_days ?? 0,
                     updated_at: new Date(),
                 },
             });
