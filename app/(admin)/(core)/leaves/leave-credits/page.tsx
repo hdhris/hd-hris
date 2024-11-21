@@ -17,7 +17,6 @@ import LeaveCreditForm from "@/components/admin/leaves/credits/leave-credit-form
 import {Employee} from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
 import {IoChevronDown} from "react-icons/io5";
 import DropdownList from "@/components/common/Dropdown";
-import CardView from "@/components/common/card-view/CardView";
 
 
 export interface EditCreditProp extends Employee {
@@ -189,10 +188,9 @@ function Page() {
                 }
             }}
         />
-        {editCredit && <CardView name={editCredit.name} email={editCredit.department} description="This is a comment"/>}
-        {/*<LeaveCreditForm title="Update Leave Credit"*/}
-        {/*                 description="Adjust and manage employee leave balances efficiently." onOpen={setIsEdit}*/}
-        {/*                 isOpen={isEdit} employee={editCredit}/>*/}
+        <LeaveCreditForm title="Update Leave Credit"
+                         description="Adjust and manage employee leave balances efficiently." onOpen={setIsEdit}
+                         isOpen={isEdit} employee={editCredit}/>
     </section>);
 }
 
