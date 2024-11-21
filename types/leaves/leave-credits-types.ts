@@ -40,6 +40,8 @@ export interface EmployeeLeaveBalance {
     carry_forward_days: number;
     leave_type: Pick<LeaveType, "id" | "name">
     used_days: number;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface LeaveCredits {
@@ -48,9 +50,6 @@ export interface LeaveCredits {
     picture: string | null;
     department: string;
     leave_balance: EmployeeLeaveBalance[] | null;
-    created_at: Date;
-    updated_at: Date;
-    deleted_at: Date | null;
     // earnings: {
     //     leave_type: LeaveEarning[];
     // };
@@ -58,6 +57,7 @@ export interface LeaveCredits {
 
 export interface EmployeeLeaveCredits {
     data: LeaveCredits[],
-    totalItems: number,
-    years: number[]
+    meta_data: {
+        totalItems: number, years: number[]
+    }
 }

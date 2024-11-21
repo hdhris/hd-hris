@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="polish leaves v1">
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
+    <list default="true" id="998454ab-3d8e-4fd3-8507-a298058ffbf6" name="Changes" comment="polish leave credit v2">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,12 +21,12 @@
     </option>
   </component>
   <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="main" />
+    <option name="BRANCH" value="origin/main" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="0f4d5fb1e217aeeb596247830d2fb9ce4eb7cd34" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -46,11 +47,11 @@
                 <list>
                   <RecentBranch>
                     <option name="branchName" value="john" />
-                    <option name="lastUsedInstant" value="1731941661" />
+                    <option name="lastUsedInstant" value="1731993994" />
                   </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="main" />
-                    <option name="lastUsedInstant" value="1731745499" />
+                    <option name="lastUsedInstant" value="1731993971" />
                   </RecentBranch>
                 </list>
               </option>
@@ -76,27 +77,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.codeium.enabled": "true",
-    "git-widget-placeholder": "john",
-    "last_opened_file_path": "C:/Users/Xero/WebstormProjects/HD-HRIS/HD-HRIS-MOBILE",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Users\\Xero\\WebstormProjects\\HD-HRIS\\HD-HRIS\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;database.data.extractors.current.export.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;john&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Xero/WebstormProjects/HD-HRIS/HD-HRIS/app/api/admin/(core)/leaves/leave-credit/test&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Xero\\WebstormProjects\\HD-HRIS\\HD-HRIS\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app\api\admin\(core)\leaves\leave-credit\test" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS-WEB" />
     </key>
@@ -123,6 +128,8 @@
       <workItem from="1731898896730" duration="20043000" />
       <workItem from="1731935089703" duration="644000" />
       <workItem from="1731941770915" duration="14768000" />
+      <workItem from="1732068565218" duration="21963000" />
+      <workItem from="1732117480388" duration="6198000" />
     </task>
     <task id="LOCAL-00001" summary="fixing issues in the leave">
       <option name="closed" value="true" />
@@ -196,7 +203,23 @@
       <option name="project" value="LOCAL" />
       <updated>1731956629430</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="polishing the leave credits">
+      <option name="closed" value="true" />
+      <created>1732028263591</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1732028263591</updated>
+    </task>
+    <task id="LOCAL-00011" summary="polish leave credit v2">
+      <option name="closed" value="true" />
+      <created>1732123647840</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1732123647840</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -224,6 +247,8 @@
     <MESSAGE value="adjusting route in leave credits" />
     <MESSAGE value="small changes" />
     <MESSAGE value="polish leaves v1" />
-    <option name="LAST_COMMIT_MESSAGE" value="polish leaves v1" />
+    <MESSAGE value="polishing the leave credits" />
+    <MESSAGE value="polish leave credit v2" />
+    <option name="LAST_COMMIT_MESSAGE" value="polish leave credit v2" />
   </component>
 </project>

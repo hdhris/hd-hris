@@ -39,7 +39,6 @@ function Page() {
     }, `&year=${year}`);
     const leaveCredit = useMemo(() => {
         if (data?.data) {
-
             return data.data
         } else {
             return []
@@ -123,7 +122,7 @@ function Page() {
                 selectionMode="single"
                 selectedKeys={new Set([String(year)])}
                 onSelectionChange={(key) => setYear(Number(Array.from(key)[0]))}
-                items={data?.years.map((year) => ({
+                items={data?.meta_data.years.map((year) => ({
                     label: String(year), key: String(year),
                 })) || []}
                 trigger={{
@@ -146,10 +145,7 @@ function Page() {
                     id={data.id}
                     leave_balance={data.leave_balance}
                     name={data.name}
-                    picture={data.picture}
-                    created_at={data.created_at}
-                    updated_at={data.updated_at}
-                    deleted_at={data.deleted_at}/>);
+                    picture={data.picture}/>);
             }}
             // filterProps={{
             //     filterItems: filterLeaveTypes
@@ -170,7 +166,7 @@ function Page() {
                 onRowChange: setRows
             }}
             paginationProps={{
-                loop: true, data_length: data?.totalItems!, onChange: setPage
+                loop: true, data_length: data?.meta_data.totalItems, onChange: setPage
             }}
             // onTableDisplay={{
             //     config: LeaveTypeTableConfiguration,
