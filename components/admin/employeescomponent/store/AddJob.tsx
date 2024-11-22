@@ -31,7 +31,12 @@ const jobPositionSchema = z.object({
     .string()
     .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
     .transform((val) => (val === "" ? "0.00" : val)),
+  basic_salary:z
+  .string()
+  .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
+  .transform((val) => (val === "" ? "0.00" : val)),
   is_active: z.boolean().default(true),
+  for_probi: z.boolean().default(true),
 });
 
 type JobPositionFormData = z.infer<typeof jobPositionSchema>;
@@ -46,6 +51,8 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     defaultValues: {
       name: "",
       pay_rate: "0.00",
+      basic_salary: "0.00",
+      for_probi: true,
       is_active: true,
     },
     mode: "onChange",
@@ -56,10 +63,12 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       methods.reset({
         name: "",
         pay_rate: "0.00",
+        basic_salary: "0.00",
         is_active: true,
       });
     }
   }, [isOpen, methods]);
+
 
   const handlePayRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -91,6 +100,26 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
         onChange: handlePayRateChange,
         value: methods.watch('pay_rate'),
         pattern: "^\\d*\\.?\\d{0,2}$",
+      },
+    },
+    {
+      name: "basic_salary",
+      label: "Basic Salary",
+      type: "text",
+      placeholder: "0.00",
+      description: "Basic Salary must be 0 or greater (format: 0.00)",
+      config: {
+        onChange: handlePayRateChange,
+        value: methods.watch('basic_salary'),
+        pattern: "^\\d*\\.?\\d{0,2}$",
+      },
+    },
+    {
+      name: "for_probi",
+      label: "For Probitionary",
+      type: "switch",
+      config: {
+        defaultSelected: true,
       },
     },
     {

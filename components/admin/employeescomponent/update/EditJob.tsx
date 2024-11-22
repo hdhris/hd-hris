@@ -13,7 +13,9 @@ import { useForm, FormProvider } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import { useJobpositionData } from "@/services/queries";
 import axios from "axios";
-import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JobPosition } from "@/types/employeee/JobType";
@@ -34,7 +36,12 @@ const jobPositionSchema = z.object({
     .string()
     .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
     .transform((val) => (val === "" ? "0.00" : val)),
+  basic_salary: z
+    .string()
+    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
+    .transform((val) => (val === "" ? "0.00" : val)),
   is_active: z.boolean().default(true),
+  for_probi: z.boolean().default(true),
 });
 
 type JobPositionFormData = z.infer<typeof jobPositionSchema>;
@@ -54,6 +61,8 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     defaultValues: {
       name: "",
       pay_rate: "0.00",
+      basic_salary: "0.00",
+      for_probi:true,
       is_active: true,
     },
     mode: "onChange",
@@ -64,13 +73,20 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       const job = jobPositions.find((job) => job.id === jobId);
       if (job) {
         // Handle pay_rate formatting whether it's a string or number
-        const payRate = typeof job.pay_rate === 'number' 
-          ? job.pay_rate.toFixed(2)
-          : parseFloat(job.pay_rate).toFixed(2) || "0.00";
+        const payRate =
+          typeof job.pay_rate === "number"
+            ? job.pay_rate.toFixed(2)
+            : parseFloat(job.pay_rate).toFixed(2) || "0.00";
 
+            const basicSalary = !job.basic_salary ? "0.00" :
+          typeof job.basic_salary === "number"
+            ? job.basic_salary.toFixed(2)
+            : parseFloat(job.basic_salary).toFixed(2);
         methods.reset({
           name: job.name,
           pay_rate: payRate,
+          basic_salary: basicSalary,
+          for_probi: job.for_probi,
           is_active: job.is_active,
         });
       } else {
@@ -86,10 +102,26 @@ const EditJob: React.FC<EditJobPositionProps> = ({
   const handlePayRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      const formattedValue = value === "" ? "0.00" : 
-        value.includes('.') ? value.padEnd(value.indexOf('.') + 3, '0') : 
-        value + '.00';
-      methods.setValue('pay_rate', formattedValue, { shouldValidate: true });
+      const formattedValue =
+        value === ""
+          ? "0.00"
+          : value.includes(".")
+          ? value.padEnd(value.indexOf(".") + 3, "0")
+          : value + ".00";
+      methods.setValue("pay_rate", formattedValue, { shouldValidate: true });
+    }
+  };
+
+  const handleBasicSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+      const formattedValue =
+        value === ""
+          ? "0.00"
+          : value.includes(".")
+          ? value.padEnd(value.indexOf(".") + 3, "0")
+          : value + ".00";
+      methods.setValue("basic_salary", formattedValue, { shouldValidate: true });
     }
   };
 
@@ -110,8 +142,28 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       description: "Pay rate must be 0 or greater (format: 0.00)",
       config: {
         onChange: handlePayRateChange,
-        value: methods.watch('pay_rate'),
+        value: methods.watch("pay_rate"),
         pattern: "^\\d*\\.?\\d{0,2}$",
+      },
+    },
+    {
+      name: "basic_salary",
+      label: "Basic Salary",
+      type: "text",
+      placeholder: "0.00",
+      description: "Basic Salary must be 0 or greater (format: 0.00)",
+      config: {
+        onChange: handleBasicSalaryChange,
+        value: methods.watch("basic_salary"),
+        pattern: "^\\d*\\.?\\d{0,2}$",
+      },
+    },
+    {
+      name: "for_probi",
+      label: "For Probitionary",
+      type: "switch",
+      config: {
+        defaultSelected: true,
       },
     },
     {
@@ -131,7 +183,8 @@ const EditJob: React.FC<EditJobPositionProps> = ({
   if (error) {
     return (
       <div>
-        Error loading job positions: {error.message || "Unknown error occurred."}
+        Error loading job positions:{" "}
+        {error.message || "Unknown error occurred."}
       </div>
     );
   }
@@ -189,12 +242,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
   };
 
   return (
-    <Modal 
-      size="md" 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      isDismissable={false}
-    >
+    <Modal size="md" isOpen={isOpen} onClose={onClose} isDismissable={false}>
       <form onSubmit={methods.handleSubmit(onSubmit)}>
         <FormProvider {...methods}>
           <ModalContent>
@@ -213,8 +261,8 @@ const EditJob: React.FC<EditJobPositionProps> = ({
               >
                 Cancel
               </Button>
-              <Button 
-                color="primary" 
+              <Button
+                color="primary"
                 type="submit"
                 disabled={isSubmitting || !methods.formState.isValid}
               >

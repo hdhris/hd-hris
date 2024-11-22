@@ -51,8 +51,13 @@ model dim_leave_balances {
   created_at         DateTime?       @db.Timestamp(6)
   updated_at         DateTime        @db.Timestamp(6)
   deleted_at         DateTime?       @db.Timestamp(6)
-  total_earned_days  Decimal         @default(0) @db.Decimal(10, 2)
+  leave_type_id      Int
+  ref_leave_types    ref_leave_types @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_employees    trans_employees @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_leave_balances_trans_employees_1")
+
+  @@index([employee_id], map: "idx_dim_leave_balances_allocations_employee_id")
+  @@index([leave_type_id], map: "idx_dim_leave_balances_allocations_leave_type_id")
+  @@index([year], map: "idx_dim_leave_balances_allocations_year")
 }
 
 model dim_payhead_affecteds {
@@ -61,6 +66,7 @@ model dim_payhead_affecteds {
   employee_id     Int?
   created_at      DateTime?        @db.Timestamp(6)
   updated_at      DateTime?        @db.Timestamp(6)
+  default_amount  Decimal?         @db.Decimal
   trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_affecteds_trans_employees1")
   ref_payheads    ref_payheads?    @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_payhead_affecteds_trans_payhead_list1")
 }
@@ -234,49 +240,49 @@ model ref_job_classes {
   deleted_at      DateTime?         @db.Timestamp(6)
   department_id   Int?
   pay_rate        Decimal?          @db.Decimal(10, 2)
+  basic_salary    Decimal?          @db.Decimal
+  for_probi       Boolean?
   ref_departments ref_departments?  @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
   trans_employees trans_employees[]
 }
 
 model ref_leave_types {
-  id                           Int                   @id @default(autoincrement())
-  accrual_frequency            String
-  accrual_rate                 Int
+  id                           Int                  @id @default(autoincrement())
   applicable_to_employee_types String
   attachment_required          Boolean
   code                         String
-  created_at                   DateTime              @db.Timestamp(6)
-  deleted_at                   DateTime?             @db.Timestamp(6)
+  created_at                   DateTime             @db.Timestamp(6)
+  deleted_at                   DateTime?            @db.Timestamp(6)
   description                  String
   is_active                    Boolean
-  max_accrual                  Int
-  max_duration                 Decimal               @db.Decimal(10, 2)
-  min_duration                 Decimal               @db.Decimal(10, 2)
+  max_duration                 Decimal              @db.Decimal(10, 2)
+  min_duration                 Decimal              @db.Decimal(10, 2)
   name                         String
   notice_required              Int
   paid_leave                   Boolean
-  updated_at                   DateTime?             @db.Timestamp(6)
+  updated_at                   DateTime?            @db.Timestamp(6)
   carry_over                   Boolean
-  fact_leave_earnings          fact_leave_earnings[]
+  dim_leave_balances           dim_leave_balances[]
   trans_leaves                 trans_leaves[]
 }
 
 model ref_payheads {
-  calculation              Json?                      @db.Json
-  created_at               DateTime?                  @db.Timestamp(6)
-  updated_at               DateTime?                  @db.Timestamp(6)
-  deleted_at               DateTime?                  @db.Timestamp(6)
-  id                       Int                        @id @default(autoincrement())
-  is_active                Boolean?
-  name                     String?                    @db.VarChar(45)
-  type                     String?                    @db.VarChar(10)
-  affected_json            Json?                      @db.Json
-  variable                 String?                    @db.VarChar(15)
-  is_overwritable          Boolean?
-  system_only              Boolean?
-  dim_payhead_affecteds    dim_payhead_affecteds[]
-  ref_benefit_plans        ref_benefit_plans[]
-  trans_payhead_breakdowns trans_payhead_breakdowns[]
+  calculation                  String?
+  created_at                   DateTime?                      @db.Timestamp(6)
+  updated_at                   DateTime?                      @db.Timestamp(6)
+  deleted_at                   DateTime?                      @db.Timestamp(6)
+  id                           Int                            @id @default(autoincrement())
+  is_active                    Boolean?
+  name                         String?                        @db.VarChar(45)
+  type                         String?                        @db.VarChar(10)
+  affected_json                Json?                          @db.Json
+  variable                     String?                        @db.VarChar(15)
+  is_overwritable              Boolean?
+  system_only                  Boolean?
+  dim_payhead_affecteds        dim_payhead_affecteds[]
+  dim_payhead_specific_amounts dim_payhead_specific_amounts[]
+  ref_benefit_plans            ref_benefit_plans[]
+  trans_payhead_breakdowns     trans_payhead_breakdowns[]
 }
 
 model ref_performance_criterias {
@@ -454,16 +460,15 @@ model trans_employees {
   resignation_json                                                       Json?                          @db.Json
   termination_json                                                       Json?                          @db.Json
   is_regular                                                             Boolean?
-  acl_user_access_control                                                acl_user_access_control[]
+  acl_user_access_control                                                acl_user_access_control?
   dim_employee_benefits                                                  dim_employee_benefits[]
   dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
   dim_incident_reports_dim_incident_reports_reported_byTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_reported_byTotrans_employees")
   dim_leave_balances                                                     dim_leave_balances[]
   dim_payhead_affecteds                                                  dim_payhead_affecteds[]
+  dim_payhead_specific_amounts                                           dim_payhead_specific_amounts[]
   dim_schedules                                                          dim_schedules[]
   dim_training_participants                                              dim_training_participants[]
-  fact_leave_earnings_fact_leave_earnings_employee_idTotrans_employees   fact_leave_earnings[]          @relation("fact_leave_earnings_employee_idTotrans_employees")
-  fact_leave_earnings_fact_leave_earnings_created_byTotrans_employees    fact_leave_earnings[]          @relation("fact_leave_earnings_created_byTotrans_employees")
   fact_performance_evaluations                                           fact_performance_evaluations[]
   log_attendances                                                        log_attendances[]
   sys_help_report_sys_help_report_reporter_idTotrans_employees           sys_help_report[]              @relation("sys_help_report_reporter_idTotrans_employees")
@@ -501,7 +506,8 @@ model trans_leaves {
   approved_by                       Int?
   approval_at                       DateTime?        @db.Timestamp(6)
   deleted_at                        DateTime?        @db.Timestamp(6)
-  attachment_json                   Json?            @db.Json
+  attachment_json                   Json?
+  evaluators                        Json?
   trans_employees_leaves            trans_employees? @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
   ref_leave_types                   ref_leave_types? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
   trans_employees_leaves_approvedBy trans_employees? @relation("trans_leaves_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
@@ -586,7 +592,7 @@ model auth_credentials {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model acl_user_access_control {
   id              Int              @id @default(autoincrement())
-  employee_id     Int?
+  employee_id     Int?             @unique
   privilege_id    Int
   banned_til      DateTime?        @db.Timestamptz(6)
   created_at      DateTime         @default(now()) @db.Timestamptz(6)
@@ -594,7 +600,7 @@ model acl_user_access_control {
   user_id         String?          @unique
   trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   sys_privileges  sys_privileges   @relation(fields: [privilege_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  trans_users     trans_users?     @relation(fields: [user_id], references: [id], onDelete: NoAction)
+  trans_users     trans_users?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   sec_devices     sec_devices[]
 }
 
@@ -632,19 +638,18 @@ model auth_accounts {
   token_type          String?     @db.VarChar
   id_token            String?
   type                String?     @db.VarChar
-  trans_users         trans_users @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Account_userId_fkey")
+  trans_users         trans_users @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Account_userId_fkey")
 
   @@id([provider, provider_account_id])
 }
 
 model sec_sessions {
-  sessionToken String      @unique(map: "Session_sessionToken_key")
+  sessionToken String   @unique(map: "Session_sessionToken_key")
   userId       String
   expires      DateTime
-  createdAt    DateTime    @default(now())
+  createdAt    DateTime @default(now())
   updatedAt    DateTime
-  id           Int         @id @default(autoincrement())
-  trans_users  trans_users @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Session_userId_fkey")
+  id           Int      @id @default(autoincrement())
 }
 
 model trans_users {
@@ -658,7 +663,6 @@ model trans_users {
   acl_user_access_control acl_user_access_control?
   auth_accounts           auth_accounts[]
   auth_credentials        auth_credentials?
-  sec_sessions            sec_sessions[]
 }
 
 model ref_holidays {
@@ -681,23 +685,6 @@ model trans_holidays {
   deleted_at          DateTime? @db.Timestamp(6)
   date                DateTime? @db.Date
   name                String?
-}
-
-model fact_leave_earnings {
-  id                                                               Int             @id @default(autoincrement())
-  employee_id                                                      Int
-  leave_type_id                                                    Int
-  earned_days                                                      Decimal         @db.Decimal(10, 2)
-  earning_date                                                     DateTime        @db.Date
-  accrual_period_start                                             DateTime        @db.Date
-  accrual_period_end                                               DateTime        @db.Date
-  created_at                                                       DateTime        @db.Timestamp(6)
-  created_by                                                       Int
-  ref_leave_types                                                  ref_leave_types @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_leave_earnings_ref_leave_types_1")
-  trans_employees_fact_leave_earnings_employee_idTotrans_employees trans_employees @relation("fact_leave_earnings_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_leave_earnings_trans_employees_1")
-  trans_employees_fact_leave_earnings_created_byTotrans_employees  trans_employees @relation("fact_leave_earnings_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_leave_earnings_trans_employees_2")
-
-  @@index([employee_id, leave_type_id], map: "idx_fact_leave_earnings_employee_leave_type")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -729,4 +716,18 @@ model ref_benefits_contribution_advance_settings {
   updated_at        DateTime?          @default(now()) @db.Timestamp(6)
   plan_id           Int?
   ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ref_benefits_contribution_table_plan_id_fkey")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dim_payhead_specific_amounts {
+  id              Int              @id @default(autoincrement())
+  created_at      DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?        @default(now()) @db.Timestamp(6)
+  payhead_id      Int?
+  employee_id     Int?
+  amount          Decimal?         @db.Decimal
+  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_payheads    ref_payheads?    @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([payhead_id, employee_id], map: "employee_payhead")
 }

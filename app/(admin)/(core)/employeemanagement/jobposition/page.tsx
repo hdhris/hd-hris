@@ -87,8 +87,10 @@ const Page: React.FC = () => {
     columns: [
       { uid: "name", name: "Name", sortable: true },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
-      { uid: "status", name: "Status", sortable: true },
+      { uid: "for_probi", name: "Work Status", sortable: true },
+      { uid: "basic_salary", name: "Basic Salary", sortable: true },
       { uid: "pay_rate", name: "Payrate", sortable: true },
+      { uid: "status", name: "Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (job: JobPosition, columnKey: React.Key): React.ReactElement => {
@@ -121,12 +123,31 @@ const Page: React.FC = () => {
               </Chip>
             </div>
           );
+          case "for_probi":
+            return (
+              <div className={cellClasses}>
+                <Chip
+                  className="capitalize"
+                  color={job.for_probi ? "warning" : "success"}
+                  size="sm"
+                  variant="flat"
+                >
+                  {job.for_probi ? "For Probitionary" : "For Regular"}
+                </Chip>
+              </div>
+            );
           case "pay_rate":
             return (
               <div className={cellClasses}>
                 <span>{job.pay_rate}</span>
               </div>
             );
+            case "basic_salary":
+              return (
+                <div className={cellClasses}>
+                  <span>{job.basic_salary || 0.00}</span>
+                </div>
+              );
         case "actions":
           return (
             <TableActionButton
