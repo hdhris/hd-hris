@@ -105,14 +105,14 @@ export async function GET(request: Request) {
 
         // Return the response with sorted data and meta information
         return NextResponse.json({
-            leave: sortedLeaveCredits,
-            data_id: values.map((v) => v.id),
             data: values,
             meta_data: {
                 totalItems: total_items.length,
                 years: years.map((item) => item.year),
             },
         } as EmployeeLeaveCredits);
+
+
     } catch (err) {
         console.error("Error fetching leave credits: ", err);
         return NextResponse.json(

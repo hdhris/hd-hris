@@ -114,7 +114,8 @@ const RenderDisplay = <T extends { id: string | number }>({
         </Case>
         <Case of="grid">
             <ScrollShadow className="flex-1 px-2 pb-2 max-w-full" size={10}>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,auto))] gap-5">
+                <div
+                    className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5">
                     <RenderList
                         // onClick={(key) => console.log("Key: ", key)}
                         items={newData}
@@ -166,9 +167,6 @@ const DataDisplayTable = <T extends { id: string | number }, >({data, config, ..
         data={data}
         config={config!}
         onSelectionChange={onSelectionChange}
-
-        // onSortChange={setSortDescriptor}
-        // sortDescriptor={sortDescriptor!}
         {...props}
     />)
 }
