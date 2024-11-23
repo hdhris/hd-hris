@@ -7,7 +7,19 @@ import {Button} from "@nextui-org/button";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {EmployeeLeaveCredits, LeaveCredits} from "@/types/leaves/leave-credits-types";
 import DataDisplay from "@/components/common/data-display/data-display";
-import {Accordion, AccordionItem, Avatar, Card, CardBody, CardHeader, cn, Progress, Tooltip, User} from '@nextui-org/react';
+import {
+    Accordion,
+    AccordionItem,
+    Avatar,
+    Card,
+    CardBody,
+    CardHeader,
+    Chip, ChipProps,
+    cn,
+    Progress,
+    Tooltip,
+    User
+} from '@nextui-org/react';
 import Typography from "@/components/common/typography/Typography";
 import AnimatedCircularProgressBar from "@/components/ui/animated-circular-progress-bar";
 import {LuCalendarClock, LuCalendarDays} from "react-icons/lu";
@@ -34,6 +46,8 @@ export interface EditCreditProp extends Employee {
         }
     }[] | undefined
 }
+
+
 
 function Page() {
     const {toast} = useToast()
@@ -155,7 +169,9 @@ function Page() {
                     id={data.id}
                     leave_balance={data.leave_balance}
                     name={data.name}
-                    picture={data.picture}/>);
+                    picture={data.picture}
+                    employment_status={data.employment_status}
+                    job={data.job}/>);
             }}
             // filterProps={{
             //     filterItems: filterLeaveTypes
@@ -206,7 +222,12 @@ function Page() {
                 setEditCredit(viewCredit)
             }}
             header={<div className="flex flex-row items-center space-x-4 pb-2">
-                <User name={viewCredit.name}
+                <User name={
+                    <div className="flex gap-2">
+                        <Typography>{viewCredit.name}</Typography>
+                        <Chip color={viewCredit.is_regular ? "success" : "warning"}>{viewCredit.is_regular ? "Regular" : "Probationary"}</Chip>
+                    </div>
+                }
                       description={viewCredit.department}
                       classNames={{
                           name: "text-medium font-semibold", description: "text-sm font-semibold text-default-400/80"
@@ -270,7 +291,8 @@ function Page() {
         <LeaveCreditForm title="Update Leave Credit"
                          description="Adjust and manage employee leave balances efficiently."
                          onOpen={setIsEdit}
-                         isOpen={isEdit} employee={editCredit}/>
+                         isOpen={isEdit}
+                         employee={editCredit}/>
     </section>);
 }
 

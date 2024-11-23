@@ -51,7 +51,13 @@ export async function GET(request: Request) {
                 first_name: true,
                 last_name: true,
                 picture: true,
+                is_regular: true,
                 ref_departments: { select: { name: true } },
+                ref_job_classes: {
+                    select: {
+                        name: true
+                    }
+                },
                 dim_leave_balances: {
                     select: {
                         id: true,
@@ -89,6 +95,8 @@ export async function GET(request: Request) {
                     id: emp.id,
                     name: getEmpFullName(emp),
                     picture: emp.picture,
+                    employment_status: emp.is_regular ? "regular" as const : "probationary" as const,
+                    job: emp.ref_job_classes?.name || "",
                     department: emp.ref_departments?.name || "",
                     leave_balance,
                 };
@@ -105,6 +113,8 @@ export async function GET(request: Request) {
 
         // Return the response with sorted data and meta information
         return NextResponse.json({
+            leave_credits_ids: leave_credits.map(item => item.id),
+            employee_id: emp_info.map(item => item.id),
             data: values,
             meta_data: {
                 totalItems: total_items.length,

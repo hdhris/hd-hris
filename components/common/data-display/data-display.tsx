@@ -19,6 +19,7 @@ import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import RenderList from "@/components/util/RenderList";
 import {AnimatedList} from '@/components/ui/animated-list';
 import Loading from "@/components/spinner/Loading";
+import NoData from "@/components/common/no-data/NoData";
 
 
 interface DataDisplayProps<T> extends RenderDisplayProps<T> {
@@ -115,14 +116,17 @@ const RenderDisplay = <T extends { id: string | number }>({
         <Case of="grid">
             <ScrollShadow className="flex-1 px-2 pb-2 max-w-full" size={10}>
                 <div
-                    className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5">
-                    <RenderList
-                        // onClick={(key) => console.log("Key: ", key)}
-                        items={newData}
-                        map={(item, key) => (<>
-                            {onGridDisplay ? onGridDisplay(item, key) : <p>No grid display available</p>}
-                        </>)}
-                    />
+                    className="h-full grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5">
+                    {
+                        newData.length > 0 ? <RenderList
+                            // onClick={(key) => console.log("Key: ", key)}
+                            items={newData}
+                            map={(item, key) => (<>
+                                {onGridDisplay ? onGridDisplay(item, key) : <p>No grid display available</p>}
+                            </>)}
+                        /> : <div className="h-full"><NoData/></div>
+                    }
+
                 </div>
             </ScrollShadow>
         </Case>
@@ -131,12 +135,15 @@ const RenderDisplay = <T extends { id: string | number }>({
             <ScrollShadow className="w-full h-full p-5 overflow-auto">
                 <AnimatedList>
                     <div className="grid grid-row-[repeat(auto-fit,minmax(100%,1fr))] gap-5 w-full">
-                        <RenderList
-                            items={newData}
-                            map={(item, key) => (<>
-                                {onListDisplay ? onListDisplay(item, key) : <p>No grid display available</p>}
-                            </>)}
-                        />
+                        {
+                            newData.length > 0 ?  <RenderList
+                                items={newData}
+                                map={(item, key) => (<>
+                                    {onListDisplay ? onListDisplay(item, key) : <p>No grid display available</p>}
+                                </>)}
+                            /> : <div className="h-full"><NoData/></div>
+                        }
+
                     </div>
                 </AnimatedList>
             </ScrollShadow>

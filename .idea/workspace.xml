@@ -4,14 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="deleting .idea">
-      <change afterPath="$PROJECT_DIR$/components/common/card-view/card-view.tsx" afterDir="false" />
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing the responsiveness of the onGridDisplay">
+      <change afterPath="$PROJECT_DIR$/assets/not-found/no-data.svg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/common/data-display/data-display.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/data-display/data-display.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/common/no-data/NoData.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/no-data/NoData.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/leave-credits-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/leave-credits-types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,9 +98,17 @@
       <updated>1732253412534</updated>
       <workItem from="1732253419244" duration="3426000" />
       <workItem from="1732272056857" duration="15320000" />
-      <workItem from="1732353501116" duration="757000" />
+      <workItem from="1732353501116" duration="4886000" />
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
+      <option name="closed" value="true" />
+      <created>1732354420647</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1732354420647</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -120,6 +128,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fixing" />
     <MESSAGE value="deleting .idea" />
-    <option name="LAST_COMMIT_MESSAGE" value="deleting .idea" />
+    <MESSAGE value="fixing the responsiveness of the onGridDisplay" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing the responsiveness of the onGridDisplay" />
   </component>
 </project>
