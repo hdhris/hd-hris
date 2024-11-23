@@ -1,493 +1,183 @@
-import { Form } from "@/components/ui/form";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
-  Avatar,
-  Spinner,
-  Selection,
-  CardFooter,
-  ScrollShadow,
-} from "@nextui-org/react";
-import {
-  AffectedJson,
-  PayheadAffected,
-} from "@/types/payroll/payheadType";
-import { TableConfigProps } from "@/types/table/TableDataTypes";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import TableData from "@/components/tabledata/TableData";
-import { ListDropDown } from "./ListBoxDropDown";
-import showDialog from "@/lib/utils/confirmDialog";
+"use client";
+import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
-import FormFields from "@/components/common/forms/FormFields";
-import PayheadCalculator from "./Calculator/Calculator";
-import { switchLabel } from "../attendance-time/holidays/script";
+import { usePayheads } from "@/services/queries";
+import { Payhead } from "@/types/payroll/payheadType";
+import { TableConfigProps } from "@/types/table/TableDataTypes";
+import { Button, Chip, Selection } from "@nextui-org/react";
+import { useRouter } from "next/dist/client/components/navigation";
+import axios from "axios";
+import TableData from "@/components/tabledata/TableData";
+import showDialog from "@/lib/utils/confirmDialog";
+import React, { useState } from "react";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import SearchFilter from "@/components/common/filter/SearchFilter";
+import { FilterItemsProps } from "@/components/common/filter/FilterItems";
 import { capitalize } from "lodash";
-import { useQuery } from "@/services/queries";
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
 
-interface PayheadFormProps {
-  label: string;
-  onSubmit: (values: any, employees: number[], affected: AffectedJson) => void;
-  type: "earning" | "deduction";
-  allData: { data: PayheadAffected; isLoading: boolean };
+function PayheadUI({ payhead_type }: { payhead_type: string }) {
+    const router = useRouter();
+    const { data, isLoading } = usePayheads(payhead_type);
+    const [payheads, setPayheads] = useState<Payhead[]>([]);
+    const config: TableConfigProps<Payhead> = {
+        columns: [
+            { uid: "name", name: "Name", sortable: true },
+            { uid: "affected", name: "Affected", sortable: true },
+            { uid: "status", name: "Status", sortable: true },
+            { uid: "action", name: "Action", sortable: false },
+        ],
+        rowCell: (item, columnKey) => {
+            const mandatory = item.affected_json.mandatory;
+            const employees = item.affected_json.employees;
+            const departments = item.affected_json.departments;
+            const roles = item.affected_json.job_classes;
+
+            switch (columnKey) {
+                case "name":
+                    return <p className="capitalize">{item.name}</p>;
+                case "affected":
+                    return (
+                        <div className="flex gap-4">
+                            {mandatory.probationary || mandatory.regular ? (
+                                <Chip color="primary" variant="bordered">
+                                    {mandatory.probationary && mandatory.regular && "Probationaries and Regulars"}
+                                    {mandatory.probationary && !mandatory.regular && "Probationaries only"}
+                                    {!mandatory.probationary && mandatory.regular && "Regulars only"}
+                                </Chip>
+                            ) : (
+                                <Chip color="primary" variant="bordered">
+                                    <strong>{employees === "all" ? "All associated" : employees.length}</strong>{" "}
+                                    employees selected
+                                </Chip>
+                            )}
+                            {
+                                <Chip color="default" variant="bordered">
+                                    <strong>{departments === "all" ? "All" : departments.length}</strong> departments
+                                </Chip>
+                            }
+                            {
+                                <Chip color="default" variant="bordered">
+                                    <strong>{employees === "all" ? "All" : employees.length}</strong> job classes
+                                </Chip>
+                            }
+                        </div>
+                    );
+                case "status":
+                    return item.is_active ? (
+                        <Chip color="success" variant="dot">
+                            Active
+                        </Chip>
+                    ) : (
+                        <Chip color="danger" variant="dot">
+                            In-active
+                        </Chip>
+                    );
+                case "action":
+                    return (
+                        <TableActionButton
+                            name={item.name}
+                            onEdit={() => router.push(`/payroll/${payhead_type}s/manage?id=${item.id}`)}
+                            onDelete={() => {
+                                if (item.system_only) {
+                                    toast({ title: "System variable cannot be deleted", variant: "warning" });
+                                } else {
+                                    handleDelete(item.id, item.name);
+                                }
+                            }}
+                        />
+                    );
+                default:
+                    return <></>;
+            }
+        },
+    };
+    const filterItems: FilterItemsProps<Payhead>[] = [
+        {
+            filter: [
+                { label: "Active", value: true },
+                { label: "Inactive", value: false },
+            ],
+            key: "is_active",
+            sectionName: "Status",
+        },
+        {
+            filter: [
+                {
+                    label: "Probationary",
+                    value: (item: Payhead) => {
+                        return item.affected_json.mandatory.probationary === true;
+                    },
+                },
+                {
+                    label: "Regular",
+                    value: (item: Payhead) => {
+                        return item.affected_json.mandatory.regular === true;
+                    },
+                },
+                {
+                    label: "Non-mandatory",
+                    value: (item: Payhead) => {
+                        return (
+                            item.affected_json.mandatory.regular === false &&
+                            item.affected_json.mandatory.probationary === false
+                        );
+                    },
+                },
+            ],
+            key: ["affected_json", "mandatory"],
+            sectionName: "Mandatory",
+        },
+    ];
+
+    const handleDelete = async (id: Number, name: string) => {
+        try {
+            const result = await showDialog({
+                title: `Delete ${payhead_type}`,
+                message: `Are you sure you want to delete '${name}' ?`,
+                preferredAnswer: "no",
+            });
+            if (result === "yes") {
+                await axios.post("/api/admin/payroll/payhead/delete", { id });
+                toast({
+                    description: `${capitalize(payhead_type)} deleted successfully!`,
+                    variant: "success",
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Something went wrong",
+                description: String(error),
+                variant: "danger",
+            });
+        }
+    };
+
+    return (
+        <div className="h-full flex flex-col">
+            <div className="flex justify-between items-center mb-2">
+                <SearchFilter
+                    searchConfig={[{ key: "name", label: "Name" }]}
+                    filterConfig={filterItems}
+                    items={data || []}
+                    setResults={setPayheads}
+                />
+                <Button
+                    {...uniformStyle()}
+                    className=" w-fit"
+                    onClick={() => router.push(`/payroll/${payhead_type}s/manage`)}
+                >
+                    Create {payhead_type}
+                </Button>
+            </div>
+            <TableData
+                config={config}
+                items={payheads || []}
+                isLoading={isLoading}
+                title="Earnings"
+                selectionMode="single"
+            />
+        </div>
+    );
 }
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(3, { message: "Name must be at least 3 characters." })
-    .max(20, { message: "Character limit reached." }),
-  calculation: z.string().optional(),
-  is_active: z.boolean().optional(),
-  is_overwritable: z.boolean().optional(),
-  variable: z.string().max(14).optional(),
-});
-
-export const PayheadForm: React.FC<PayheadFormProps> = ({
-  label,
-  onSubmit,
-  allData,
-  type,
-}) => {
-  const [selectedDepartment, setSelectedDepartment] = useState<Selection>(
-    new Set([])
-  );
-  const [selectedJobs, setSelectedJobs] = useState<Selection>(new Set([]));
-  const [selectedEmployees, setSelectedEmployees] = useState<Selection>(
-    new Set([])
-  );
-  const { data, isLoading } = allData || { data: null, isLoading: true }; // Ensure `data` has a fallback
-  const [disabledKeys, setDisabledKeys] = useState<any>([]);
-  const [mandatory, setMandatory] = useState({
-    probationary: false,
-    regular: false,
-  });
-  const [isFiltered, setIsFiltered] = useState(false);
-  const [isPending, setPending] = useState(false);
-  const { data: variables } = useQuery<string[]>(
-    `/api/admin/utils/get-payhead-variables?id=${
-      allData?.data?.payhead?.id || null
-    }`
-  );
-  useEffect(()=>{
-    console.log(variables);
-  },[variables])
-  const [isInvalid, setInvalid] = useState(false);
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      calculation: "",
-      is_active: true,
-    },
-  });
-
-  const config: TableConfigProps<UserEmployee> = {
-    columns: [
-      { uid: "name", name: "Name", sortable: true },
-      { uid: "role", name: "Role", sortable: true },
-    ],
-    rowCell: (item, columnKey) => {
-      switch (columnKey) {
-        case "name":
-          return (
-            <div className="flex items-center space-x-2">
-              <Avatar src={item.picture} />
-              <p className="capitalize">{`${item.first_name} ${item.middle_name} ${item.last_name}`}</p>
-            </div>
-          );
-        case "role":
-          return (
-            <div>
-              <p>{item.ref_job_classes ? item.ref_job_classes.name : "None"}</p>
-              <p className=" text-gray-500">
-                {item.ref_departments ? item.ref_departments.name : "None"}
-              </p>
-            </div>
-          );
-        default:
-          return <></>;
-      }
-    },
-  };
-
-  async function handleSubmit(value: z.infer<typeof formSchema>) {
-    if (!isFiltered && Array.from(selectedEmployees).length === 0) {
-      toast({
-        title: "Employee Selection",
-        description:
-          "Payhead is not mandatory to any status.\n\nSelecting an employee(s) is required.",
-        variant: "warning",
-      });
-      return;
-    }
-    if (Array.from(selectedDepartment).length === 0) {
-      const response = await showDialog({
-        title: "Department Selection",
-        message:
-          "No department is selected. The payhead will be applied to all departments automatically.\n\nWould you like to proceed?",
-      });
-      if (response === "no") {
-        return;
-      }
-    }
-    if (Array.from(selectedJobs).length === 0) {
-      const response = await showDialog({
-        title: "Role Selection",
-        message:
-          "No role is selected. The payhead will be applied to all roles automatically.\n\nWould you like to proceed?",
-      });
-      if (response === "no") {
-        return;
-      }
-    }
-    setPending(true);
-    await onSubmit(
-      value,
-      isFiltered
-        ? []
-        : selectedEmployees === "all"
-        ? data.employees.map((employee) => employee.id)
-        : Array.from(selectedEmployees).map(Number),
-      {
-        mandatory: mandatory,
-        departments:
-          Array.from(selectedDepartment).length != data.departments.length
-            ? Array.from(selectedDepartment).map(Number)
-            : [],
-        job_classes:
-          Array.from(selectedJobs).length != data.job_classes.length
-            ? Array.from(selectedJobs).map(Number)
-            : [],
-      }
-    );
-    setPending(false);
-  }
-
-  const setDataAtLoad = useCallback(() => {
-    if (data?.payhead) {
-      const employeeIds = data.affected.map((affected) =>
-        String(affected.employee_id)
-      );
-      setSelectedEmployees(new Set(employeeIds));
-      form.reset({
-        name: data.payhead.name,
-        calculation: data.payhead.calculation,
-        is_active: data.payhead.is_active,
-        is_overwritable: data.payhead.is_overwritable,
-        variable: data.payhead.variable,
-      });
-      if (data.payhead.affected_json) {
-        setMandatory(data.payhead.affected_json.mandatory);
-        if (data.payhead.affected_json.departments.length > 0) {
-          setSelectedDepartment(
-            new Set(data.payhead.affected_json.departments.map(String))
-          );
-        } else {
-          setSelectedDepartment(
-            new Set(
-              data?.departments.map((department) => String(department.id))
-            )
-          );
-        }
-        if (data.payhead.affected_json.job_classes.length > 0) {
-          setSelectedJobs(
-            new Set(data.payhead.affected_json.job_classes.map(String))
-          );
-        } else {
-          setSelectedJobs(
-            new Set(data.job_classes.map((job) => String(job.id)))
-          );
-        }
-      }
-    } else {
-      setSelectedDepartment(
-        new Set(data?.departments.map((department) => String(department.id)))
-      );
-      setSelectedJobs(new Set(data.job_classes.map((job) => String(job.id))));
-    }
-  }, [data, form]);
-
-  useEffect(() => {
-    if (data) setDataAtLoad();
-  }, [data, setDataAtLoad]);
-
-  const validateMandatory = useCallback(
-    (value: { probationary: boolean; regular: boolean }) => {
-      return (
-        (value.probationary === true && value.regular === false) ||
-        (value.probationary === false && value.regular === true) ||
-        (value.probationary === true && value.regular === true)
-      );
-    },
-    []
-  );
-
-  const filteredDeptAndJobsOrIsMandatory = useCallback(() => {
-    if (selectedDepartment && selectedJobs && data) {
-      if (
-        Array.from(selectedDepartment).length != data.departments.length ||
-        Array.from(selectedJobs).length != data.job_classes.length ||
-        validateMandatory(mandatory)
-      ) {
-        console.log("Filtered");
-        setIsFiltered(true);
-        const employeeIds = data?.employees.map((employee) =>
-          String(employee.id)
-        );
-        setDisabledKeys(employeeIds);
-      } else {
-        console.log("Unfiltered");
-        setDisabledKeys([]);
-        setIsFiltered(false);
-      }
-    }
-  }, [selectedDepartment, selectedJobs, mandatory, data, validateMandatory]);
-
-  useEffect(() => {
-    filteredDeptAndJobsOrIsMandatory();
-    
-  }, [filteredDeptAndJobsOrIsMandatory]);
-
-  if (isLoading || !data) {
-    return (
-      <Spinner
-        className="w-full h-[calc(100vh-9.5rem)]"
-        label="Please wait..."
-        color="primary"
-      />
-    );
-  }
-
-  return (
-    <div className="flex flex-row gap-2 pb-2 h-full">
-      <Card className="h-full mx-2 min-w-80 shadow-sm">
-        <CardHeader>{label}</CardHeader>
-        <CardBody className="pt-0">
-          <ScrollShadow className="-me-3 pe-3">
-            <Form {...form}>
-              <form
-                id="payhead-form"
-                onSubmit={form.handleSubmit(handleSubmit)}
-                className="space-y-2"
-              >
-                <FormFields
-                  items={[
-                    {
-                      name: "name",
-                      label: "Name",
-                      isRequired: true,
-                    },
-                    {
-                      name: "calculation",
-                      label: "Calculation",
-                      Component(field) {
-                        return (
-                          <PayheadCalculator
-                            payhead={data.payhead}
-                            setInvalid={setInvalid}
-                            input={field.value}
-                            setInput={field.onChange}
-                            // payheadVariables={variables}
-                          />
-                        );
-                      },
-                    },
-                    {
-                      name: "is_overwritable",
-                      type: "switch",
-                      label: switchLabel(
-                        "Writable",
-                        `Amount can be overwritten over given calculated input`
-                      ),
-                    },
-                    {
-                      name: "is_active",
-                      type: "switch",
-                      label: switchLabel(
-                        "Active",
-                        `${capitalize(type)} will be effective on next payroll`
-                      ),
-                    },
-                    {
-                      name: "mandatory_list",
-                      Component: () => (
-                        <ListDropDown
-                          items={[
-                            { name: "Probationary", id: 1 },
-                            { name: "Regular", id: 2 },
-                          ]}
-                          triggerName="Mandatory Status"
-                          selectedKeys={
-                            new Set(
-                              [
-                                mandatory?.probationary ? "1" : undefined,
-                                mandatory?.regular ? "2" : undefined,
-                              ].filter(
-                                (key): key is string => key !== undefined
-                              )
-                            )
-                          }
-                          onSelectionChange={(keys) => {
-                            const values = Array.from(keys);
-                            setMandatory({
-                              probationary: values.includes("1"),
-                              regular: values.includes("2"),
-                            });
-                          }}
-                          togglable={true}
-                          reversable={true}
-                        />
-                      ),
-                    },
-                    {
-                      name: "department_list",
-                      Component: () => (
-                        <ListDropDown
-                          items={data.departments || []}
-                          triggerName="Departments"
-                          selectedKeys={selectedDepartment}
-                          onSelectionChange={(keys) => {
-                            setSelectedDepartment(keys);
-                            setSelectedJobs(
-                              new Set(
-                                data.job_classes
-                                  .filter((job) =>
-                                    Array.from(keys).includes(
-                                      String(job.department_id)
-                                    )
-                                  )
-                                  .map((job) => String(job.id))
-                              )
-                            );
-                          }}
-                          togglable={true}
-                          reversable={true}
-                        />
-                      ),
-                    },
-                    {
-                      name: "role_list",
-                      Component: () => (
-                        <ListDropDown
-                          items={
-                            data.job_classes.filter((job) => {
-                              return Array.from(selectedDepartment).includes(
-                                String(job.department_id)
-                              );
-                            }) || []
-                          }
-                          triggerName="Roles"
-                          selectedKeys={selectedJobs}
-                          onSelectionChange={setSelectedJobs}
-                          togglable={true}
-                          reversable={true}
-                          sectionConfig={data.departments
-                            .map((dep) => {
-                              return {
-                                name: dep.name,
-                                key: "department_id",
-                                id: dep.id,
-                              };
-                            })
-                            .filter((dep) => {
-                              return Array.from(selectedDepartment).includes(
-                                String(dep.id)
-                              );
-                            })}
-                        />
-                      ),
-                    },
-                    {
-                      name: "variable",
-                      label: "Variable ( intended for reusability )",
-                      isRequired: false,
-                    },
-                  ]}
-                />
-              </form>
-            </Form>
-          </ScrollShadow>
-        </CardBody>
-        <CardFooter>
-          <Button
-            isLoading={isPending}
-            isDisabled={isInvalid}
-            color="primary"
-            className="w-full"
-            type="submit"
-            form="payhead-form"
-          >
-            Submit
-          </Button>
-        </CardFooter>
-      </Card>
-      <TableData
-        config={config}
-        items={data.employees || []}
-        isLoading={isLoading}
-        selectedKeys={isFiltered ? new Set([]) : selectedEmployees}
-        disabledKeys={disabledKeys}
-        searchingItemKey={["first_name", "middle_name", "last_name"]}
-        onSelectionChange={setSelectedEmployees}
-        counterName="Employees"
-        className="flex-1 w-full h-full"
-        removeWrapper
-        isHeaderSticky
-        color={"primary"}
-        selectionMode={isFiltered ? "single" : "multiple"}
-        aria-label="Employees"
-        filterItems={
-          !isFiltered
-            ? [
-                {
-                  filtered: data.departments.map((dep) => {
-                    return {
-                      name: dep.name,
-                      value: "dep_" + dep.id,
-                      key: "",
-                    };
-                  }),
-                  category: "Department",
-                },
-                {
-                  filtered: data.job_classes.map((job) => {
-                    return {
-                      name: job.name,
-                      value: "job_" + job.id,
-                      key: "",
-                    };
-                  }),
-                  category: "Roles",
-                },
-              ]
-            : undefined
-        }
-        filterConfig={(keys) => {
-          let filteredItems: UserEmployee[] = [...data.employees!];
-
-          if (keys !== "all" && keys.size > 0) {
-            console.log(Array.from(keys));
-            Array.from(keys).forEach((key) => {
-              const [uid, value] = (key as string).split("_");
-              filteredItems = filteredItems.filter((items) => {
-                if (uid.includes("dep")) {
-                  return items.ref_departments.id === Number(value);
-                } else if (uid.includes("job")) {
-                  return items.ref_job_classes.id === Number(value);
-                }
-              });
-            });
-          }
-
-          return filteredItems;
-        }}
-      />
-    </div>
-  );
-};
+export default PayheadUI;

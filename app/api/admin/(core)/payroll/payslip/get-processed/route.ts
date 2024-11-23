@@ -46,7 +46,6 @@ export async function GET(req: NextRequest) {
         where: { id: { in: employeeIDs } },
         select: {
           ...emp_rev_include.employee_detail.select,
-          dim_payhead_affecteds: { select: { payhead_id: true } },
         },
       }),
     ])

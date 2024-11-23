@@ -8,7 +8,7 @@ import {toDecimals} from "@/helper/numbers/toDecimals";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-    const [emp, leaveTypes] = await Promise.all([await prisma.trans_employees.findMany({
+    const [emp, leaveTypes] = await Promise.all([prisma.trans_employees.findMany({
         where: {
             deleted_at: null,
             // resignation_json: {
@@ -63,9 +63,10 @@ export async function GET() {
             },
             trans_leaves_trans_leaves_employee_idTotrans_employees: true
         }
-    }), await prisma.ref_leave_types.findMany({
+    }), prisma.ref_leave_types.findMany({
         where: {
-            is_active: true
+            is_active: true,
+            deleted_at: null
         }, select: {
             id: true, name: true, max_duration: true, min_duration: true, attachment_required: true
         },

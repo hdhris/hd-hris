@@ -1,3 +1,5 @@
+import {LeaveType} from "@/types/leaves/LeaveTypes";
+
 export interface LeaveBalance {
     id: number;
     employee_id: number;
@@ -22,6 +24,7 @@ export interface LeaveEarning {
 }
 
 export interface UsedLeave {
+    id: number;
     leave_type_name: string;
     leave_type_code: string;
     used_days: number;
@@ -31,11 +34,14 @@ export interface UsedLeave {
 }
 
 export interface EmployeeLeaveBalance {
+    id: number;
     allocated_days: number;
     remaining_days: number;
     carry_forward_days: number;
+    leave_type: Pick<LeaveType, "id" | "name">
     used_days: number;
-    total_earned_days: number;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface LeaveCredits {
@@ -44,15 +50,14 @@ export interface LeaveCredits {
     picture: string | null;
     department: string;
     leave_balance: EmployeeLeaveBalance[] | null;
-    used_leaves: {
-        leave_type: UsedLeave[];
-    };
-    earnings: {
-        leave_type: LeaveEarning[];
-    };
+    // earnings: {
+    //     leave_type: LeaveEarning[];
+    // };
 }
 
 export interface EmployeeLeaveCredits {
     data: LeaveCredits[],
-    totalItems: number,
+    meta_data: {
+        totalItems: number, years: number[]
+    }
 }

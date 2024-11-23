@@ -15,6 +15,9 @@ import {EditCreditProp} from "@/app/(admin)/(core)/leaves/leave-credits/page";
 import FormDrawer from "@/components/common/forms/FormDrawer";
 import {Button} from "@nextui-org/button";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
+import {LeaveTypeForEmployee} from "@/types/leaves/LeaveTypes";
+import Typography from "@/components/common/typography/Typography";
+import {Chip} from '@nextui-org/react';
 
 interface LeaveCreditFormProps {
     title?: string
@@ -29,6 +32,8 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
     const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
     const [employeeState, setEmployeeState] = useState<Employee[]>([]); // Initialize with employee prop if available
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [leaveTypes, setLeaveTypes] = useState<LeaveTypeForEmployee[]>([])
+    const [employeeLeaveType, setEmployeeLeaveType] = useState<LeaveTypeForEmployee[] | null>()
 
     // Handle modal open/close state changes
     const handleModalOpen = useCallback((value: boolean) => {
@@ -39,11 +44,10 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
     const {toast} = useToast()
     const data = useLeaveCreditEmployees()
     const form = useForm<z.infer<typeof LeaveCreditFormSchema>>({
-        resolver: zodResolver(LeaveCreditFormSchema), defaultValues: {
-            employee_id: 0, allocated_days: 0, carry_forward_days: 0,
-        },
+        defaultValues: {
+            employee_id: 0, leave_credits: [],
+        }, resolver: zodResolver(LeaveCreditFormSchema),
     });
-
 
     useEffect(() => {
         if (isOpen !== isModalOpen) {
@@ -65,28 +69,61 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
             });
 
         } else if (data && data.data) {
-            setEmployeeState(data.data);
+            setEmployeeState(data.data.employees);
+            setLeaveTypes(data.data.leave_types)
         }
     }, [data, employee, isOpen]);
 
     useEffect(() => {
         // Reset the form with employee details
         if (employee) {
-
+            const leave_types = leaveTypes.filter(item => employee.leave_credits?.some(leave => leave.leave_type_id === String(item.id)))
+            setEmployeeLeaveType(leave_types)
+            // console.log("Leave types: ", leave_types)
+            // console.log("Employee: ", employee)
             form.reset({
-                employee_id: employee.id,
-                allocated_days: employee.allocated_days,
-                carry_forward_days: employee.carry_forward_days,
+                apply_for: "specific_employee",
+                employee_id: employee.id, leave_credits: employee.leave_credits?.map(item => ({
+                    leave_type_id: item.leave_type_id,
+                    allocated_days: item.allocated_days,
+                    carry_forward_days: item.carry_forward_days
+                })),
             });
         }
-    }, [employee, form, isOpen]);
+    }, [employee, form, isOpen, leaveTypes]);
 
 
     const onSubmit = async (data: z.infer<typeof LeaveCreditFormSchema>) => {
-        const items = {
-            id: employee?.id, ...data,
-        }
 
+        let values: {}
+
+
+        const assign_to = data.apply_for
+        if(assign_to === "all"){
+            values = {
+                employee_id: employeeState.map(emp => emp.id),
+                leave_credits: data.leave_credits
+            }
+        } else if(assign_to === "regular"){
+            values = {
+                employee_id: employeeState.filter(item => item.is_regular === true).map(emp => emp.id),
+                leave_credits: data.leave_credits
+            }
+        } else if(assign_to === "probationary"){
+            values = {
+                employee_id: employeeState.filter(item => item.is_regular === false).map(emp => emp.id),
+                leave_credits: data.leave_credits
+            }
+        } else {
+            values = {
+                employee_id: [data.employee_id],
+                leave_credits: data.leave_credits
+            }
+        }
+        console.log("Create Data: ", values)
+        const items = {
+            id: employee?.leave_credits?.map(item => item.id), ...data,
+        }
         try {
             setIsLoading(true)
             if (employee?.id) {
@@ -96,7 +133,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                         title: "Success", description: "Leave credit updated successfully", variant: "success",
                     })
                     form.reset({
-                        employee_id: 0, allocated_days: 0, carry_forward_days: 0,
+                        employee_id: 0, leave_credits: [],
                     })
                     setIsModalOpen(false)
                 } else {
@@ -105,7 +142,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                     })
                 }
             } else {
-                const res = await axiosInstance.post("/api/admin/leaves/leave-credit/create", data)
+                const res = await axiosInstance.post("/api/admin/leaves/leave-credit/create", values)
                 if (res.status === 200) {
                     toast({
                         title: "Success", description: "Leave credit created successfully", variant: "success",
@@ -131,6 +168,23 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
         }
     }
 
+    const handleOnSelectEmployee = (id: number) => {
+        const is_regular = employeeState.find(emp => emp.id === id)?.is_regular
+
+        const all_leave_type = leaveTypes.filter(leave_type => leave_type.applicable_to_employee_types === 'all')
+        const available_leave_types = [...all_leave_type]
+        if (is_regular) {
+            const leave_type = leaveTypes.filter(leave_type => leave_type.applicable_to_employee_types === 'regular')
+            available_leave_types.push(...leave_type)
+
+        } else {
+            const leave_type = leaveTypes.filter(leave_type => leave_type.applicable_to_employee_types === 'probationary')
+            available_leave_types.push(...leave_type)
+        }
+
+        setEmployeeLeaveType(available_leave_types)
+    }
+
     const handleDelete = useCallback(async (id: Key) => {
         setIsLoadingDelete(true)
         try {
@@ -141,7 +195,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                 })
                 handleModalOpen(false)
                 form.reset({
-                    employee_id: 0, allocated_days: 0, carry_forward_days: 0,
+                    employee_id: 0, leave_credits: [],
                 })
             }
         } catch (err) {
@@ -155,15 +209,20 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
     }, [form, handleModalOpen, toast])
 
     const formFields: FormInputProps[] = [{
-        name: 'allocated_days', label: 'Allocated Days', type: 'number', placeholder: 'Allocated Days', description: "Set the number of days allocated to this employees.", isRequired: true
+        name: 'allocated_days',
+        label: 'Allocated Days',
+        type: 'number',
+        placeholder: 'Allocated Days',
+        description: "Set the number of days allocated to this employees.",
+        isRequired: true
     }, {
-        name: 'carry_forward_days', label: 'Carry Forward Days', type: 'number', placeholder: 'Carry Forward Days', description: "Set the number of days can be carried forward to this employee for the next year.", isRequired: true
+        name: 'carry_forward_days',
+        label: 'Carry Forward Days',
+        type: 'number',
+        placeholder: 'Carry Forward Days',
+        description: "Set the number of days can be carried forward to this employee for the next year."
     }]
 
-    //     <FormDrawer isLoading={false} title={title || "Add Leave Credit"}
-    // description={description || "Steps to Set Up and Allocate Employee Leave Credits."}
-    // onOpen={onOpen} isOpen={isOpen}>
-    //     </FormDrawer>
 
     return (<FormDrawer isLoading={isLoading} title={title || "Add Leave Credit"}
                         description={description || "Steps to Set Up and Allocate Employee Leave Credits."}
@@ -176,13 +235,161 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                         </div>}
                         onOpen={handleModalOpen} isOpen={isModalOpen}>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="drawer-form">
-                <EmployeeListForm employees={employeeState!} isLoading={data.isLoading}/>
-                <FormFields items={formFields}/>
+            <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+                id="drawer-form"
+            >
+                <FormFields items={[{
+                    name: "apply_for",
+                    label: "Assign to",
+                    description: "Select type of employee or specify an employee.",
+                    type: "select",
+                    isRequired: true,
+                    config: {
+                        options: [{
+                            value: "all", label: "All Employees"
+                        }, {
+                            value: "regular", label: "Regular"
+                        }, {
+                            value: "probationary", label: "Probationary"
+                        }, {
+                            value: "specific_employee", label: "Specify..."
+                        }]
+                    }
+                }]}/>
+                {form.watch("apply_for") === "specific_employee" && <EmployeeListForm
+                    employees={employeeState!}
+                    isLoading={data.isLoading}
+                    onSelected={handleOnSelectEmployee}
+                />}
+                {form.watch("apply_for") === "all" &&
+                    <div className="flex flex-col gap-4 border-2 border-divider/20 rounded-[5px]">
+                        {/*{employeeState.map(emp => {*/}
+                        {/*    return <input*/}
+                        {/*        key={emp.id}*/}
+                        {/*        type="hidden"*/}
+                        {/*        name="employee_id"*/}
+                        {/*        value={emp.id} // Ensure this stays hidden and set*/}
+                        {/*    />*/}
+                        {/*})}*/}
+                        {leaveTypes.map((leaveType, index) => {
+                            return (<div key={leaveType.id} className="space-y-2 border-b-2 last:border-none p-4">
+                                <div className="flex justify-between">
+                                <Typography className="font-semibold text-medium">
+                                        {leaveType.name}
+                                    </Typography>
+                                    <Chip>{leaveType.applicable_to_employee_types}</Chip>
+                                    {/* Register leave_type_id as a hidden field */}
+                                    <input
+                                        type="hidden"
+                                        {...form.register(`leave_credits.${index}.leave_type_id`)}
+                                        value={leaveType.id} // Ensure this stays hidden and set
+                                    />
+                                </div>
+                                <div className="flex gap-4">
+                                    <FormFields
+                                        items={formFields.map((field) => ({
+                                            ...field, name: `leave_credits.${index}.${field.name}`, // Use numeric index
+                                        }))}
+                                    />
+                                </div>
+                            </div>)
+                        })}
+                    </div>}
 
-                {/*<div className="w-full flex justify-end">*/}
-                {/*    <Button type="submit" isLoading={isLoading} {...uniformStyle()}>Save</Button>*/}
-                {/*</div>*/}
+                {
+                    form.watch("apply_for") === "regular" &&
+                    <div className="flex flex-col gap-4 border-2 border-divider/20 rounded-[5px]">
+                        {/*{employeeState.filter(emp => emp.is_regular === true).map(emp => {*/}
+                        {/*    return <input*/}
+                        {/*        key={emp.id}*/}
+                        {/*        type="hidden"*/}
+                        {/*        name="employee_id"*/}
+                        {/*        value={emp.id} // Ensure this stays hidden and set*/}
+                        {/*    />*/}
+                        {/*})}*/}
+                        {leaveTypes.filter(leave_type => leave_type.applicable_to_employee_types === "all" || leave_type.applicable_to_employee_types === "regular").map((leaveType, index) => {
+                            return (<div key={leaveType.id} className="space-y-2 border-b-2 last:border-none p-4">
+                                <div className="flex justify-between">
+                                    <Typography className="font-semibold text-medium">
+                                        {leaveType.name}
+                                    </Typography>
+                                    <Chip>{leaveType.applicable_to_employee_types}</Chip>
+                                    {/* Register leave_type_id as a hidden field */}
+                                    <input
+                                        type="hidden"
+                                        {...form.register(`leave_credits.${index}.leave_type_id`)}
+                                        value={leaveType.id} // Ensure this stays hidden and set
+                                    />
+                                </div>
+                                <div className="flex gap-4">
+                                    <FormFields
+                                        items={formFields.map((field) => ({
+                                            ...field, name: `leave_credits.${index}.${field.name}`, // Use numeric index
+                                        }))}
+                                    />
+                                </div>
+                            </div>)
+                        })}
+                    </div>
+                }
+                {
+                    form.watch("apply_for") === "probationary" &&
+                    <div className="flex flex-col gap-4 border-2 border-divider/20 rounded-[5px]">
+                        {leaveTypes.filter(leave_type => leave_type.applicable_to_employee_types === "all" || leave_type.applicable_to_employee_types === "probationary").map((leaveType, index) => {
+                            return (<div key={leaveType.id} className="space-y-2 border-b-2 last:border-none p-4">
+                                <div className="flex justify-between">
+                                    <Typography className="font-semibold text-medium">
+                                        {leaveType.name}
+                                    </Typography>
+                                    <Chip>{leaveType.applicable_to_employee_types}</Chip>
+                                    {/* Register leave_type_id as a hidden field */}
+                                    <input
+                                        type="hidden"
+                                        {...form.register(`leave_credits.${index}.leave_type_id`)}
+                                        value={leaveType.id} // Ensure this stays hidden and set
+                                    />
+                                </div>
+                                <div className="flex gap-4">
+                                    <FormFields
+                                        items={formFields.map((field) => ({
+                                            ...field, name: `leave_credits.${index}.${field.name}`, // Use numeric index
+                                        }))}
+                                    />
+                                </div>
+                            </div>)
+                        })}
+                    </div>
+                }
+
+                {employeeLeaveType && form.watch("employee_id") ? (
+                    <div className="flex flex-col gap-4 border-2 border-divider/20 rounded-[5px]">
+                        {employeeLeaveType.map((leaveType, index) => {
+                            return (<div key={leaveType.id} className="space-y-2 border-b-2 last:border-none p-4">
+                                <div className="flex justify-between">
+                                    <Typography className="font-semibold text-medium">
+                                        {leaveType.name}
+                                    </Typography>
+                                    <Chip>{leaveType.applicable_to_employee_types}</Chip>
+                                    {/* Register leave_type_id as a hidden field */}
+                                    <input
+                                        type="hidden"
+                                        {...form.register(`leave_credits.${index}.leave_type_id`)}
+                                        value={leaveType.id} // Ensure this stays hidden and set
+                                    />
+                                </div>
+                                <div className="flex gap-4">
+                                    <FormFields
+                                        items={formFields.map((field) => ({
+                                            ...field, name: `leave_credits.${index}.${field.name}`, // Use numeric index
+                                        }))}
+                                    />
+                                </div>
+                            </div>)
+                        })}
+                    </div>) : null}
+
             </form>
         </Form>
     </FormDrawer>)
@@ -190,3 +397,4 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
 }
 
 export default LeaveCreditForm;
+

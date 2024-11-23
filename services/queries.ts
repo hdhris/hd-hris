@@ -142,8 +142,8 @@ export function useLeaveCreditEmployees(){
     })
 }
 
-export function usePaginateQuery<T>(api: string, page: number, limit: number, options?: Omit<SWRConfiguration<T>, "keepPreviousData">) {
-    return useSWR<T>(`${api}?page=${page}&limit=${limit}`, fetcher, {
+export function usePaginateQuery<T>(api: string, page: number, limit: number, options?: Omit<SWRConfiguration<T>, "keepPreviousData">, params?: string) {
+    return useSWR<T>(`${api}?page=${page}&limit=${limit}${params}`, fetcher, {
         keepPreviousData: true,
         ...options,
     });

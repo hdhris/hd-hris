@@ -1,52 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hasContentType } from "@/helper/content-type/content-type-check";
-import { LeaveCreditFormSchema } from "@/helper/zodValidation/leaves/leave-credits-form/leave-credit-form-schema";
 import prisma from "@/prisma/prisma";
 
 export async function POST(req: NextRequest) {
     try {
-        hasContentType(req); // Check if the request has the correct content type
+        // Parse the incoming JSON payload
+        const data = await req.json();
 
-        const data = await req.json(); // Parse the incoming JSON data
+        const { employee_id, leave_credits } = data;
 
-        // Validate the incoming data using the Zod schema
-        const parsedData = LeaveCreditFormSchema.safeParse(data);
-        if (!parsedData.success) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Validation error",
-                    errors: parsedData.error.errors.map(error => error.message), // Map to user-friendly error messages
-                },
-                { status: 400 }
-            );
-        }
 
-        // Create a new leave balance entry in the database
-        await prisma.dim_leave_balances.create({
-            data: {
-                employee_id: parsedData.data.employee_id,
+
+        // Prepare an array of records for bulk creation
+        const recordsToCreate = employee_id.flatMap((id: number) =>
+            leave_credits.map((leaveType: { leave_type_id: string; allocated_days: number; carry_forward_days: number | null }) => ({
+                leave_type_id: Number(leaveType.leave_type_id),
+                employee_id: id,
                 year: new Date().getFullYear(),
-                allocated_days: parsedData.data.allocated_days,
-                remaining_days: parsedData.data.allocated_days,
-                carry_forward_days: parsedData.data.carry_forward_days,
+                allocated_days: leaveType.allocated_days,
+                remaining_days: leaveType.allocated_days,
+                carry_forward_days: leaveType.carry_forward_days ?? 0,
                 created_at: new Date(),
                 updated_at: new Date(),
-            },
+            }))
+        );
+
+        // console.log("Records: ", recordsToCreate)
+        // Bulk insert all records
+        await prisma.dim_leave_balances.createMany({
+            data: recordsToCreate,
         });
 
-        // Return a success response
+        // Return success response
         return NextResponse.json({
             success: true,
-            message: "Leave credit successfully added!",
+            message: "Leave credits successfully added!",
         });
     } catch (error) {
-        console.error("Error adding leave credit:", error);
+        console.error("Error adding leave credits:", error);
 
-        // Return a generic error message for unexpected errors
-        return NextResponse.json({
-            success: false,
-            message: "An unexpected error occurred. Please try again later.",
-        }, { status: 500 });
+        // Return a generic error message
+        return NextResponse.json(
+            {
+                success: false,
+                message: "An unexpected error occurred. Please try again later.",
+            },
+            { status: 500 }
+        );
     }
 }

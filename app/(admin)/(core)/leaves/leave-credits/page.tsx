@@ -1,5 +1,5 @@
 "use client"
-import React, {Key, useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {usePaginateQuery} from "@/services/queries";
 import {useToast} from "@/components/ui/use-toast";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
@@ -10,35 +10,39 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import {Avatar, Card, CardBody, CardHeader, cn, Tooltip} from '@nextui-org/react';
 import Typography from "@/components/common/typography/Typography";
 import AnimatedCircularProgressBar from "@/components/ui/animated-circular-progress-bar";
-import {LuCalendarClock, LuCalendarDays, LuCalendarPlus} from "react-icons/lu";
+import {LuCalendarClock, LuCalendarDays} from "react-icons/lu";
 import {icon_color, icon_size} from "@/lib/utils";
 import CountUp from "react-countup";
 import LeaveCreditForm from "@/components/admin/leaves/credits/leave-credit-form";
 import {Employee} from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
+import {IoChevronDown} from "react-icons/io5";
+import DropdownList from "@/components/common/Dropdown";
 
 
-export interface EditCreditProp extends Employee{
-    allocated_days: number,
-    carry_forward_days: number,
+export interface EditCreditProp extends Employee {
+    leave_credits: {
+        id: number
+        leave_type_id: string, allocated_days: number, carry_forward_days: number,
+    }[] | undefined
 }
+
 function Page() {
     const {toast} = useToast()
     const [page, setPage] = useState<number>(1)
     const [rows, setRows] = useState<number>(5)
+    const [year, setYear] = useState<number>(new Date().getFullYear())
     const [editCredit, setEditCredit] = useState<EditCreditProp>()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isEdit, setIsEdit] = useState<boolean>(false)
     const {data, isLoading} = usePaginateQuery<EmployeeLeaveCredits>("/api/admin/leaves/leave-credit", page, rows, {
         refreshInterval: 3000
-    });
+    }, `&year=${year}`);
     const leaveCredit = useMemo(() => {
         if (data?.data) {
-
             return data.data
         } else {
             return []
         }
-
 
     }, [data])
 
@@ -104,6 +108,8 @@ function Page() {
     // }
 
     const handleSelect = (edited: EditCreditProp) => {
+        console.log("Data: ", data)
+        console.log("Edited: ", edited)
         setIsEdit(true)
         setEditCredit(edited)
     }
@@ -112,21 +118,34 @@ function Page() {
     return (<section className='w-full h-full flex gap-4'>
         <DataDisplay
             // onSelect={(key) => alert(Number(key))}
+            addFunction={<DropdownList
+                selectionMode="single"
+                selectedKeys={new Set([String(year)])}
+                onSelectionChange={(key) => setYear(Number(Array.from(key)[0]))}
+                items={data?.meta_data.years.map((year) => ({
+                    label: String(year), key: String(year),
+                })) || []}
+                trigger={{
+                    label: (<p className="font-semibold text-blue-500">{year}</p>), props: {
+                        ...uniformStyle({color: "default", radius: "md"}),
+                        variant: "bordered",
+                        endContent: <IoChevronDown/>,
+                    },
+                }}
+                onAction={(key) => setYear(Number(key))}
+            />}
             isLoading={isLoading}
             title="Leave Types"
             defaultDisplay="grid"
             data={leaveCredit}
             onGridDisplay={(data) => {
                 return (<LeaveCreditCard
-                        onSelect={handleSelect}
-                        department={data.department}
-                        earnings={data.earnings}
-                        id={data.id}
-                        leave_balance={data.leave_balance}
-                        name={data.name}
-                        picture={data.picture}
-                        used_leaves={data.used_leaves}
-                    />);
+                    onSelect={handleSelect}
+                    department={data.department}
+                    id={data.id}
+                    leave_balance={data.leave_balance}
+                    name={data.name}
+                    picture={data.picture}/>);
             }}
             // filterProps={{
             //     filterItems: filterLeaveTypes
@@ -147,7 +166,7 @@ function Page() {
                 onRowChange: setRows
             }}
             paginationProps={{
-                loop: true, data_length: data?.totalItems!, onChange: setPage
+                loop: true, data_length: data?.meta_data.totalItems, onChange: setPage
             }}
             // onTableDisplay={{
             //     config: LeaveTypeTableConfiguration,
@@ -169,7 +188,9 @@ function Page() {
                 }
             }}
         />
-        <LeaveCreditForm title="Update Leave Credit" description="Adjust and manage employee leave balances efficiently." onOpen={setIsEdit} isOpen={isEdit} employee={editCredit}/>
+        <LeaveCreditForm title="Update Leave Credit"
+                         description="Adjust and manage employee leave balances efficiently." onOpen={setIsEdit}
+                         isOpen={isEdit} employee={editCredit}/>
     </section>);
 }
 
@@ -178,15 +199,22 @@ export default Page;
 const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (emp: EditCreditProp) => void }) => {
     const [percent, setPercent] = useState<number>(0)
 
-    const maxLeaveCredit = (employee.leave_balance?.reduce((a, b) => b.allocated_days + b.total_earned_days, 0))!
-
+    const maxLeaveCredit = (employee.leave_balance?.filter(balance => balance.allocated_days).reduce((a, b) => a + b.allocated_days, 0))!
+    const remaining = employee.leave_balance?.filter(item => item.remaining_days)?.reduce((a, b) => a + b.remaining_days, 0)
     const edited = {
         name: employee.name,
         id: employee.id,
         department: employee.department,
         picture: employee.picture!,
-        allocated_days: employee.leave_balance?.find(item => item.allocated_days)?.allocated_days!,
-        carry_forward_days: employee.leave_balance?.find(item => item.carry_forward_days)?.carry_forward_days!,
+        leave_credits: employee.leave_balance?.map(item => ({
+            id: item.id,
+            leave_type_id: String(item.leave_type.id),
+            allocated_days: item.allocated_days,
+            carry_forward_days: item.carry_forward_days,
+        }))
+
+        // allocated_days: employee.leave_balance?.find(item => item.allocated_days)?.allocated_days!,
+        // carry_forward_days: employee.leave_balance?.find(item => item.carry_forward_days)?.carry_forward_days!,
     }
     let colorCode: string
 
@@ -220,19 +248,19 @@ const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (e
                 <AnimatedCircularProgressBar
                     max={maxLeaveCredit}
                     min={0}
-                    value={employee.leave_balance?.find(item => item.remaining_days)?.remaining_days || 0}
+                    value={remaining || 0}
                     gaugePrimaryColor={colorCode}
                     gaugeSecondaryColor={"rgba(0, 0, 0, 0.1)"}
                     onValueChange={setPercent}
                     explain="Leave Balance %"
                 />
-                <div className="flex justify-around w-full mt-3">
+                <div className="flex justify-between w-full mt-3">
                     <Tooltip content="Allocated Days">
                         <div className="flex flex-col gap-1 items-center">
                             <LuCalendarDays className={cn("", icon_size, icon_color)}/>
                             <Typography className="text-xl font-bold flex flex-col items-center w-16">
                                 <CountUp start={0}
-                                         end={employee.leave_balance?.find(item => item.allocated_days)?.allocated_days!}
+                                         end={maxLeaveCredit}
                                          decimals={2}/>
                                 <Typography as="span"
                                             className="font-normal text-slate-700/50 text-sm">day/s</Typography>
@@ -244,19 +272,7 @@ const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (e
                             <LuCalendarClock className={cn("", icon_size, icon_color)}/>
                             <Typography className="text-xl font-bold flex flex-col items-center w-16">
                                 <CountUp start={0}
-                                         end={employee.leave_balance?.find(item => item.remaining_days)?.remaining_days!}
-                                         decimals={2}/>
-                                <Typography as="span"
-                                            className="font-normal text-slate-700/50 text-sm">day/s</Typography>
-                            </Typography>
-                        </div>
-                    </Tooltip>
-                    <Tooltip content="Earned Days">
-                        <div className="flex flex-col gap-1 items-center">
-                            <LuCalendarPlus className={cn("", icon_size, icon_color)}/>
-                            <Typography className="text-xl font-bold flex flex-col items-center w-16">
-                                <CountUp start={0}
-                                         end={employee.leave_balance?.find(item => item.total_earned_days)?.total_earned_days!}
+                                         end={remaining!}
                                          decimals={2}/>
                                 <Typography as="span"
                                             className="font-normal text-slate-700/50 text-sm">day/s</Typography>

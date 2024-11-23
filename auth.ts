@@ -96,8 +96,11 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                         return false;
                     }
 
+                    console.log("Control: ", access_control);
+
                     // console.time("UpsertUser");
-                    await prisma.auth_accounts.upsert({
+
+                    const updatedUser = await prisma.auth_accounts.upsert({
                         where: {
                             provider_provider_account_id: {
                                 provider: account.provider,
@@ -148,8 +151,16 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                         },
                     });
                     // console.timeEnd("UpsertUser");
-
-                    user.id = String(existingUser?.id);
+                    console.time("UpsertACL")
+                    await prisma.acl_user_access_control.update({
+                        where:{
+                            id: access_control.id
+                        }, data: {
+                            user_id:updatedUser.userId
+                        }
+                    })
+                    console.timeEnd("UpsertACL")
+                    user.id = String(updatedUser.userId);
                     console.log("user id: ", user.id)
                     if (existingUser) {
                         user.email = existingUser.email;
@@ -158,15 +169,13 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     }
 
                     // console.time("DeviceUpdate");
-                    await devices(user.id);
+                    await devices(updatedUser.userId);
                     // console.timeEnd("DeviceUpdate");
 
                     // console.timeEnd("signInProcess");
                     return true;
                 } else {
                     // console.time("DeviceUpdate");
-                    console.log("Account: ", account)
-                    console.log("User: ", user)
                     await devices(user.id!);
                     // console.timeEnd("DeviceUpdate");
 

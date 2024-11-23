@@ -63,6 +63,7 @@ function DataDisplay<T extends { id: string | number }>({
             onImport={rest.onImport}
             isSelectionDeleted={rest.isSelectionDeleted}
             onDeleteSelected={rest.onDeleteSelected!}
+            addFunction={rest.addFunction}
 
         >
             {(data: T[], sortDescriptor, onSortChange) => {
@@ -105,7 +106,6 @@ const RenderDisplay = <T extends { id: string | number }>({
                                                           }: RenderDisplayProps<T>) => {
 
     const newData = data.map(item => ({key: item.id, ...item}));
-
 
     const {display} = useDataDisplayControl();
     return (<>{isLoading ? (<Loading/>) : (<Switch expression={display}>
