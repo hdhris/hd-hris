@@ -3,6 +3,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 export type JobPosition = {
 id: number;
   name: string;
+  superior_id: number;
   pay_rate: number;
   basic_salary: number;
   is_active: boolean;

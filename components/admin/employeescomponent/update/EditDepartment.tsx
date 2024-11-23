@@ -1,21 +1,15 @@
 "use client"
 import React, { useEffect, useState } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Input,
-  Checkbox,
-} from "@nextui-org/react";
-import { useForm, Controller, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, ControllerRenderProps, FieldValues } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
-import { useDepartmentsData } from "@/services/queries"; // Import the useDepartmentsData hook
+import { useDepartmentsData } from "@/services/queries";
 import axios from "axios";
-import { FormItem, FormLabel, FormControl, FormMessage, Form } from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import Drawer from "@/components/common/Drawer";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
+import { Circle } from "lucide-react";
 
 interface EditDepartmentProps {
   isOpen: boolean;
@@ -23,7 +17,7 @@ interface EditDepartmentProps {
   departmentId: number;
   onDepartmentUpdated: () => void;
 }
-//
+
 interface DepartmentFormData {
   name: string;
   color: string;
@@ -39,7 +33,6 @@ const EditDepartment: React.FC<EditDepartmentProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  // Initialize form methods
   const methods = useForm<DepartmentFormData>({
     defaultValues: {
       name: "",
@@ -48,20 +41,16 @@ const EditDepartment: React.FC<EditDepartmentProps> = ({
     },
   });
 
-  const { control, handleSubmit, reset } = methods;
-
-  // Use useSWR to fetch department data
   const { data: departments, error, isLoading } = useDepartmentsData();
 
-  // Handle data loading and error states
   useEffect(() => {
     if (isOpen && departments && departmentId) {
       const department = departments.find((dept) => dept.id === departmentId);
 
       if (department) {
-        reset({
+        methods.reset({
           name: department.name,
-          color: department.color || "",
+          color: department.color || "#4f46e5",
           is_active: department.is_active,
         });
       } else {
@@ -72,7 +61,7 @@ const EditDepartment: React.FC<EditDepartmentProps> = ({
         });
       }
     }
-  }, [isOpen, departments, departmentId, reset, toast]);
+  }, [isOpen, departments, departmentId, methods, toast]);
 
   if (isLoading) {
     return <div>Loading department data...</div>;
@@ -86,7 +75,6 @@ const EditDepartment: React.FC<EditDepartmentProps> = ({
     );
   }
 
-  // Handle form submission
   const onSubmit = async (data: DepartmentFormData) => {
     setIsSubmitting(true);
     toast({
@@ -134,68 +122,68 @@ const EditDepartment: React.FC<EditDepartmentProps> = ({
     }
   };
 
+  const formFields: FormInputProps[] = [
+    {
+      name: "name",
+      label: "Department Name",
+      type: "text",
+      placeholder: "Enter department name",
+      isRequired: true,
+      config: {
+        isRequired: true,
+      }
+    },
+    {
+      name: "color",
+      label: "Department Color",
+      type: "color",
+      Component: (field: ControllerRenderProps<FieldValues, string>) => (
+        <div className="relative group">
+          <div 
+            className="w-10 h-10 rounded-full border-2 border-gray-200 overflow-hidden cursor-pointer transition-all duration-200 hover:scale-110"
+            style={{ backgroundColor: field.value }}
+            onClick={() => {
+              const colorInput = document.querySelector(
+                `input[name="${field.name}"]`
+              ) as HTMLInputElement | null;
+              colorInput?.click();
+            }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Circle className="w-6 h-6 text-white/80" />
+            </div>
+          </div>
+          <input
+            {...field}
+            type="color"
+            className="sr-only"
+            name={field.name}
+            onChange={(e) => field.onChange(e.target.value)}
+          />
+        </div>
+      ),
+    },
+    {
+      name: "is_active",
+      type: "switch",
+      label: "Is Active",
+      config: {
+        defaultSelected: true,
+      }
+    },
+  ];
+
   return (
-    <Drawer title = "Edit Department" isOpen={isOpen} onClose={onClose} >
-      <Form {...methods}>
-        <form id = "drawer-form" onSubmit={handleSubmit(onSubmit)}>
-         
-              <Controller
-                name="name"
-                control={control}
-                rules={{ required: "Department name is required" }}
-                render={({ field, fieldState: { error } }) => (
-                  <FormItem>
-                    <FormLabel>Department Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Enter department name"
-                        variant="bordered"
-                        isInvalid={!!error} // Apply invalid styling if there's an error
-                      />
-                    </FormControl>
-                    {error && <FormMessage>{error.message}</FormMessage>}
-                  </FormItem>
-                )}
-              />
-              <Controller
-                name="color"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex flex-col items-start">
-                    <label className="mb-2 text-sm font-medium text-gray-700">Color</label>
-                    <div className="relative w-10 h-10 rounded-full border border-gray-300 overflow-hidden">
-                      <input
-                        {...field}
-                        type="color"
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        onChange={(e) => field.onChange(e.target.value)}
-                      />
-                      <div
-                        className="absolute inset-0 rounded-full cursor-pointer"
-                        style={{ backgroundColor: field.value || '#ffffff' }}
-                        onClick={() => {
-                          const colorInput = document.querySelector('input[type="color"]') as HTMLInputElement | null;
-                          colorInput?.click(); // Safely trigger color picker
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-              />
-              <Controller
-                name="is_active"
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <Checkbox isSelected={value} onValueChange={onChange}>
-                    Is Active
-                  </Checkbox>
-                )}
-              />
-            
-             
+    <Drawer title="Edit Department" isOpen={isOpen} onClose={onClose}>
+      <FormProvider {...methods}>
+        <form id="drawer-form" onSubmit={methods.handleSubmit(onSubmit)}>
+          <Form {...methods}>
+            <div className="space-y-4">
+              <FormFields items={formFields} />
+            </div>
+          </Form>
         </form>
-      </Form>
+      </FormProvider>
     </Drawer>
   );
 };

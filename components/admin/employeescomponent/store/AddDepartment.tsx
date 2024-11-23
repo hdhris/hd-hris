@@ -1,29 +1,17 @@
 "use client"
 import React, { useState } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Input,
-  Checkbox,
-  useDisclosure,
-} from "@nextui-org/react";
-import Add from "@/components/common/button/Add";
-import { useForm, Controller, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, ControllerRenderProps, FieldValues } from "react-hook-form";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-  Form,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import Drawer from "@/components/common/Drawer";
-//
+import Add from "@/components/common/button/Add";
+import { useDisclosure } from "@nextui-org/react";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
+import { Circle } from "lucide-react";
+
 interface AddDepartmentProps {
   onDepartmentAdded: () => void;
 }
@@ -42,7 +30,7 @@ const AddDepartment: React.FC<AddDepartmentProps> = ({ onDepartmentAdded }) => {
   const methods = useForm<DepartmentFormData>({
     defaultValues: {
       name: "",
-      color: "",
+      color: "#4f46e5", // Default indigo color
       is_active: true,
     },
   });
@@ -95,84 +83,74 @@ const AddDepartment: React.FC<AddDepartmentProps> = ({ onDepartmentAdded }) => {
     }
   };
 
+  const formFields: FormInputProps[] = [
+    {
+      name: "name",
+      label: "Department Name",
+      type: "text",
+      placeholder: "Enter department name",
+      isRequired: true,
+      config: {
+        isRequired: true,
+      }
+    },
+    {
+      name: "color",
+      label: "Department Color",
+      type: "color",
+      Component: (field: ControllerRenderProps<FieldValues, string>) => (
+        <div className="relative group">
+          <div 
+            className="w-10 h-10 rounded-full border-2 border-gray-200 overflow-hidden cursor-pointer transition-all duration-200 hover:scale-110"
+            style={{ backgroundColor: field.value }}
+            onClick={() => {
+              const colorInput = document.querySelector(
+                `input[name="${field.name}"]`
+              ) as HTMLInputElement | null;
+              colorInput?.click();
+            }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Circle className="w-6 h-6 text-white/80" />
+            </div>
+          </div>
+          <input
+            {...field}
+            type="color"
+            className="sr-only"
+            name={field.name}
+            onChange={(e) => field.onChange(e.target.value)}
+          />
+        </div>
+      ),
+    },
+    {
+      name: "is_active",
+      type: "switch",
+      label: "Is Active",
+      config: {
+        defaultSelected: true,
+      }
+    },
+  ];
+
   return (
     <>
       <Add variant="solid" name="Add Department" onClick={onOpen} />
       <Drawer
-        title="Add Employee"
+        title="Add Department"
         isOpen={isOpen}
         onClose={onClose}
-        // isDismissable={false}
       >
-        <form id="drawer-form" onSubmit={methods.handleSubmit(onSubmit)}>
-          <Form {...methods}>
-            <FormItem>
-              <FormLabel>Department Name</FormLabel>
-              <FormControl>
-                <Controller
-                  name="name"
-                  control={methods.control}
-                  rules={{ required: "Department name is required" }}
-                  render={({ field, fieldState: { error } }) => (
-                    <Input
-                      {...field}
-                      placeholder="Enter department name"
-                      variant="bordered"
-                      isInvalid={!!error} // Apply invalid styling if there's an error
-                    />
-                  )}
-                />
-              </FormControl>
-              {methods.formState.errors.name && (
-                <FormMessage>
-                  {methods.formState.errors.name.message}
-                </FormMessage>
-              )}
-            </FormItem>
-            <FormItem>
-              <FormLabel>Color</FormLabel>
-              <FormControl>
-                <Controller
-                  name="color"
-                  control={methods.control}
-                  render={({ field }) => (
-                    <div className="relative w-10 h-10 rounded-full border border-gray-300 overflow-hidden">
-                      <input
-                        {...field}
-                        type="color"
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        onChange={(e) => field.onChange(e.target.value)} // Update form state
-                      />
-                      <div
-                        className="absolute inset-0 rounded-full cursor-pointer"
-                        style={{ backgroundColor: field.value || "#000000" }}
-                        onClick={() => {
-                          const colorInput = document.querySelector(
-                            'input[type="color"]'
-                          ) as HTMLInputElement | null;
-                          colorInput?.click(); // Safely trigger color picker
-                        }}
-                      ></div>
-                    </div>
-                  )}
-                />
-              </FormControl>
-            </FormItem>
-            <FormItem>
-              <FormControl>
-                <Controller
-                  name="is_active"
-                  control={methods.control}
-                  render={({ field: { onChange, value } }) => (
-                    <Checkbox isSelected={value} onValueChange={onChange}>
-                      Is Active
-                    </Checkbox>
-                  )}
-                />
-              </FormControl>
-            </FormItem>
-          </Form>
-        </form>
+        <FormProvider {...methods}>
+          <form id="drawer-form" onSubmit={methods.handleSubmit(onSubmit)}>
+            <Form {...methods}>
+              <div className="space-y-4">
+                <FormFields items={formFields} />
+              </div>
+            </Form>
+          </form>
+        </FormProvider>
       </Drawer>
     </>
   );

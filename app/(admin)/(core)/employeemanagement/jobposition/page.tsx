@@ -13,8 +13,6 @@ import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import showDialog from "@/lib/utils/confirmDialog";
 import { JobPosition } from "@/types/employeee/JobType";
 
-
-
 const Page: React.FC = () => {
   const { data: jobPositions, error, mutate } = useJobpositionData();
   const [sortedJobPositions, setSortedJobPositions] = useState<JobPosition[]>([]);
@@ -27,6 +25,12 @@ const Page: React.FC = () => {
       setSortedJobPositions(sorted);
     }
   }, [jobPositions]);
+
+  const getSuperiorName = (job: JobPosition): string => {
+    if (!job.superior_id || !jobPositions) return "None";
+    const superior = jobPositions.find(p => p.id === job.superior_id);
+    return superior ? superior.name : "None";
+  };
 
   const sortJobPositionsByRecentActivity = (positions: JobPosition[]) => {
     return [...positions].sort((a, b) => {
@@ -73,19 +77,16 @@ const Page: React.FC = () => {
 
   const handleJobUpdated = async () => {
     try {
-      const updatedData = await mutate();
-      if (updatedData) {
-        const sorted = sortJobPositionsByRecentActivity(updatedData);
-        setSortedJobPositions(sorted);
-      }
+      await mutate();
     } catch (error) {
       console.error("Error updating job position data:", error);
     }
   };
-//
+
   const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
+      { uid: "superior", name: "Superior", sortable: true },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
       { uid: "for_probi", name: "Work Status", sortable: true },
       { uid: "basic_salary", name: "Basic Salary", sortable: true },
@@ -102,6 +103,12 @@ const Page: React.FC = () => {
           return (
             <div className={cellClasses}>
               <span>{job.name}</span>
+            </div>
+          );
+        case "superior":
+          return (
+            <div className={cellClasses}>
+              <span>{getSuperiorName(job)}</span>
             </div>
           );
         case "employeeCount":
@@ -123,31 +130,31 @@ const Page: React.FC = () => {
               </Chip>
             </div>
           );
-          case "for_probi":
-            return (
-              <div className={cellClasses}>
-                <Chip
-                  className="capitalize"
-                  color={job.for_probi ? "warning" : "success"}
-                  size="sm"
-                  variant="flat"
-                >
-                  {job.for_probi ? "For Probitionary" : "For Regular"}
-                </Chip>
-              </div>
-            );
-          case "pay_rate":
-            return (
-              <div className={cellClasses}>
-                <span>{job.pay_rate}</span>
-              </div>
-            );
-            case "basic_salary":
-              return (
-                <div className={cellClasses}>
-                  <span>{job.basic_salary || 0.00}</span>
-                </div>
-              );
+        case "for_probi":
+          return (
+            <div className={cellClasses}>
+              <Chip
+                className="capitalize"
+                color={job.for_probi ? "warning" : "success"}
+                size="sm"
+                variant="flat"
+              >
+                {job.for_probi ? "For Probitionary" : "For Regular"}
+              </Chip>
+            </div>
+          );
+        case "pay_rate":
+          return (
+            <div className={cellClasses}>
+              <span>{job.pay_rate}</span>
+            </div>
+          );
+        case "basic_salary":
+          return (
+            <div className={cellClasses}>
+              <span>{job.basic_salary || 0.00}</span>
+            </div>
+          );
         case "actions":
           return (
             <TableActionButton
@@ -178,13 +185,19 @@ const Page: React.FC = () => {
         { key: "is_active", value: false, name: "Inactive", uid: "inactive" },
       ],
     },
+    {
+      category: "Work Status",
+      filtered: [
+        { key: "for_probi", value: true, name: "For probitionary", uid: "for probitionary" },
+        { key: "for_probi", value: false, name: "For Regular", uid: "for regular" },
+      ],
+    }
   ];
-  
 
   return (
     <div className="h-[calc(100vh-150px)] overflow-hidden">
       <DataDisplay
-      defaultDisplay="table"
+        defaultDisplay="table"
         title={`Job Positions (${sortedJobPositions?.length || 0})`}
         data={sortedJobPositions}
         filterProps={{
@@ -207,21 +220,33 @@ const Page: React.FC = () => {
                 <div className="flex flex-col">
                   <span className="font-medium">{job.name}</span>
                   <span className="text-sm text-gray-500">
+                    Superior: {getSuperiorName(job)}
+                  </span>
+                  <span className="text-sm text-gray-500">
                     {job.trans_employees?.length || 0} employees
                   </span>
                 </div>
-                <Chip
-                  className="capitalize"
-                  color={job.is_active ? "success" : "danger"}
-                  size="sm"
-                  variant="flat"
-                >
-                  {job.is_active ? "Active" : "Inactive"}
-                </Chip>
+                <div className="flex flex-col gap-2">
+                  <Chip
+                    className="capitalize"
+                    color={job.is_active ? "success" : "danger"}
+                    size="sm"
+                    variant="flat"
+                  >
+                    {job.is_active ? "Active" : "Inactive"}
+                  </Chip>
+                  <Chip
+                    className="capitalize"
+                    color={job.for_probi ? "warning" : "success"}
+                    size="sm"
+                    variant="flat"
+                  >
+                    {job.for_probi ? "Probitionary" : "Regular"}
+                  </Chip>
+                </div>
               </div>
             </BorderCard>
           </div>
-          
         )}
         paginationProps={{
           data_length: sortedJobPositions?.length
@@ -236,9 +261,6 @@ const Page: React.FC = () => {
             title: "Import",
           },
         }}
-        
-        
-
       />
 
       {selectedJobId !== null && (
