@@ -3,6 +3,8 @@ import { hasContentType } from "@/helper/content-type/content-type-check";
 import prisma from "@/prisma/prisma";
 import dayjs from "dayjs";
 import { auth } from "@/auth";
+import {LeaveEvaluatorsTypes} from "@/types/leaves/leave-evaluators-types";
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: NextRequest) {
     try {
@@ -41,6 +43,29 @@ export async function POST(req: NextRequest) {
             }, {status: 400});
         }
 
+        const evaluators: LeaveEvaluatorsTypes = {
+            approver: {
+                approval_id: uuidv4(),
+                employee_id: reviewer.id,
+                decision: {
+                    is_approved: true,
+                    rejectedReason: null,
+                    decisionDate: new Date()
+                },
+                comments: data.comment
+            },
+            // this is a brute force solution
+            reviewers: {
+                reviewerId: uuidv4(),
+                employee_id: 2,
+                decision: {
+                    is_reviewed: null,
+                    rejectedReason: null,
+                    decisionDate: null
+                },
+                comments: ""
+            }
+        }
         // Start the transaction
         await prisma.$transaction(async (tx) => {
             // Create a leave record
@@ -49,12 +74,12 @@ export async function POST(req: NextRequest) {
                 start_date: dayjs(data.leave_date).toISOString(),
                 end_date: dayjs(data.leave_date).add(Number(data.days_of_leave), "day").toISOString(),
                 reason: data.reason,
-                comment: data.comment,
+                comment: null,
                 type_id: data.leave_type_id,
                 status: "Pending",
                 created_at: new Date(),
-                approval_at: new Date(),
-                approved_by: reviewer.id
+                created_by: reviewer.id,
+                evaluators: evaluators
             };
 
             // Create leave request in the database within the transaction
@@ -122,3 +147,4 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, message });
     }
 }
+
