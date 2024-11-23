@@ -1,5 +1,5 @@
 "use client"
-import React, {Key, useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {usePaginateQuery} from "@/services/queries";
 import {useToast} from "@/components/ui/use-toast";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
@@ -8,17 +8,7 @@ import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {EmployeeLeaveCredits, LeaveCredits} from "@/types/leaves/leave-credits-types";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {
-    Accordion,
-    AccordionItem,
-    Avatar,
-    Card,
-    CardBody,
-    CardHeader,
-    Chip, ChipProps,
-    cn,
-    Progress,
-    Tooltip,
-    User
+    Accordion, AccordionItem, Avatar, Card, CardBody, CardHeader, Chip, cn, Progress, Tooltip, User
 } from '@nextui-org/react';
 import Typography from "@/components/common/typography/Typography";
 import AnimatedCircularProgressBar from "@/components/ui/animated-circular-progress-bar";
@@ -26,14 +16,14 @@ import {LuCalendarClock, LuCalendarDays} from "react-icons/lu";
 import {icon_color, icon_size} from "@/lib/utils";
 import CountUp from "react-countup";
 import LeaveCreditForm from "@/components/admin/leaves/credits/leave-credit-form";
-import {Employee} from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
 import {IoChevronDown} from "react-icons/io5";
 import DropdownList from "@/components/common/Dropdown";
 import CardView from "@/components/common/card-view/card-view";
 import NoData from "@/components/common/no-data/NoData";
+import {capitalize} from "@nextui-org/shared-utils";
 
 
-export interface EditCreditProp extends Employee {
+export interface EditCreditProp extends Omit<LeaveCredits, "leave_balance"> {
     leave_credits: {
         id: number
         leave_type_id: string,
@@ -46,7 +36,6 @@ export interface EditCreditProp extends Employee {
         }
     }[] | undefined
 }
-
 
 
 function Page() {
@@ -222,65 +211,58 @@ function Page() {
                 setEditCredit(viewCredit)
             }}
             header={<div className="flex flex-row items-center space-x-4 pb-2">
-                <User name={
-                    <div className="flex gap-2">
-                        <Typography>{viewCredit.name}</Typography>
-                        <Chip color={viewCredit.is_regular ? "success" : "warning"}>{viewCredit.is_regular ? "Regular" : "Probationary"}</Chip>
-                    </div>
-                }
+                <User name={<div className="flex gap-2">
+                    <Typography>{viewCredit.name}</Typography>
+                    <Chip
+                        color={viewCredit.employment_status === "regular" ? "success" : "warning"}>{capitalize(viewCredit.employment_status)}</Chip>
+                </div>}
                       description={viewCredit.department}
                       classNames={{
                           name: "text-medium font-semibold", description: "text-sm font-semibold text-default-400/80"
                       }}
                       avatarProps={{
-                          src: viewCredit.picture
+                          src: viewCredit.picture!
                       }}/>
 
             </div>}
 
             body={<div className="space-y-4">
                 <Accordion showDivider={false} defaultSelectedKeys={["0"]}>
-                    {viewCredit.leave_credits && viewCredit.leave_credits?.length > 0 ? (
-                        viewCredit.leave_credits.map((leave, index) => {
+                    {viewCredit.leave_credits && viewCredit.leave_credits?.length > 0 ? (viewCredit.leave_credits.map((leave, index) => {
                             const percent = (leave.remaining_days / leave.allocated_days) * 100;
                             const color = percent > 75 ? "success" : percent > 50 ? "warning" : "danger";
 
-                            return (
-                                <AccordionItem
+                            return (<AccordionItem
                                     className="overflow-hidden"
                                     key={index}
                                     aria-label={leave.leave_type.name}
-                                    title={
-                                        <>
-                                            <div className="flex justify-between text-sm">
-                                                <span>{leave.leave_type.name}</span>
-                                                <CountUp start={0} end={percent} suffix=" %" />
-                                            </div>
-                                            <Progress color={color} value={percent} className="h-2" />
-                                        </>
-                                    }
+                                    title={<>
+                                        <div className="flex justify-between text-sm">
+                                            <span>{leave.leave_type.name}</span>
+                                            <CountUp start={0} end={percent} suffix=" %"/>
+                                        </div>
+                                        <Progress color={color} value={percent} className="h-2"/>
+                                    </>}
                                 >
                                     <table className="w-full text-sm">
                                         <tbody>
-                                        {[
-                                            { label: "Allocated Days", value: leave.allocated_days },
-                                            { label: "Remaining Days", value: leave.remaining_days },
-                                            { label: "Used Days", value: leave.used_days },
-                                            { label: "Carry Forward", value: leave.carry_forward_days },
-                                        ].map((item, idx) => (
-                                            <tr key={idx} className="border-b last:border-b-0">
+                                        {[{
+                                            label: "Allocated Days",
+                                            value: leave.allocated_days
+                                        }, {label: "Remaining Days", value: leave.remaining_days}, {
+                                            label: "Used Days",
+                                            value: leave.used_days
+                                        }, {
+                                            label: "Carry Forward",
+                                            value: leave.carry_forward_days
+                                        },].map((item, idx) => (<tr key={idx} className="border-b last:border-b-0">
                                                 <td className="py-2 px-4 text-gray-500">{item.label}</td>
                                                 <td className="py-2 px-4">{item.value}</td>
-                                            </tr>
-                                        ))}
+                                            </tr>))}
                                         </tbody>
                                     </table>
-                                </AccordionItem>
-                            );
-                        })
-                    ) : (
-                        <NoData message="No Leave Credit"/>
-                    )}
+                                </AccordionItem>);
+                        })) : (<NoData message="No Leave Credit"/>)}
                 </Accordion>
 
             </div>}
@@ -308,6 +290,8 @@ const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (e
         id: employee.id,
         department: employee.department,
         picture: employee.picture!,
+        job: employee.job,
+        employment_status: employee.employment_status,
         leave_credits: employee.leave_balance?.map(item => ({
             id: item.id,
             leave_type_id: String(item.leave_type.id),

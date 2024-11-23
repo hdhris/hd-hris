@@ -179,7 +179,7 @@ function DataDisplayControl<T>({
                     </Button>)}
             </div>
             {/* Pagination centered */}
-            {paginationProps && <div className={cn("flex-1 flex justify-center", className?.lower.paginationClassname)}>
+            {paginationProps && values.length > 0 && <div className={cn("flex-1 flex justify-center", className?.lower.paginationClassname)}>
                 <Pagination
                     showControls
                     total={totalPages}
