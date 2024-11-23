@@ -227,42 +227,41 @@ function Page() {
             </div>}
 
             body={<div className="space-y-4">
-                <Accordion showDivider={false} defaultSelectedKeys={["0"]}>
+                <Accordion showDivider={false} defaultSelectedKeys={["0"]} aria-label="Leave Credits"
+                           aria-labelledby="Leave Credits">
                     {viewCredit.leave_credits && viewCredit.leave_credits?.length > 0 ? (viewCredit.leave_credits.map((leave, index) => {
-                            const percent = (leave.remaining_days / leave.allocated_days) * 100;
-                            const color = percent > 75 ? "success" : percent > 50 ? "warning" : "danger";
+                        const percent = (leave.remaining_days / leave.allocated_days) * 100;
+                        const color = percent > 75 ? "success" : percent > 50 ? "warning" : "danger";
 
-                            return (<AccordionItem
-                                    className="overflow-hidden"
-                                    key={index}
-                                    aria-label={leave.leave_type.name}
-                                    title={<>
-                                        <div className="flex justify-between text-sm">
-                                            <span>{leave.leave_type.name}</span>
-                                            <CountUp start={0} end={percent} suffix=" %"/>
-                                        </div>
-                                        <Progress color={color} value={percent} className="h-2"/>
-                                    </>}
-                                >
-                                    <table className="w-full text-sm">
-                                        <tbody>
-                                        {[{
-                                            label: "Allocated Days",
-                                            value: leave.allocated_days
-                                        }, {label: "Remaining Days", value: leave.remaining_days}, {
-                                            label: "Used Days",
-                                            value: leave.used_days
-                                        }, {
-                                            label: "Carry Forward",
-                                            value: leave.carry_forward_days
-                                        },].map((item, idx) => (<tr key={idx} className="border-b last:border-b-0">
-                                                <td className="py-2 px-4 text-gray-500">{item.label}</td>
-                                                <td className="py-2 px-4">{item.value}</td>
-                                            </tr>))}
-                                        </tbody>
-                                    </table>
-                                </AccordionItem>);
-                        })) : (<NoData message="No Leave Credit"/>)}
+                        return (<AccordionItem
+                            aria-labelledby="Leave Credits"
+                            className="overflow-hidden"
+                            key={index}
+                            aria-label={leave.leave_type.name}
+                            title={<>
+                                <div className="flex justify-between text-sm">
+                                    <span>{leave.leave_type.name}</span>
+                                    <CountUp start={0} end={percent} suffix=" %"/>
+                                </div>
+                                <Progress aria-label="Leave Credit Progress" color={color} value={percent} className="h-2"/>
+                            </>}
+                        >
+                            <table className="w-full text-sm">
+                                <tbody>
+                                {[{
+                                    label: "Allocated Days", value: leave.allocated_days
+                                }, {label: "Remaining Days", value: leave.remaining_days}, {
+                                    label: "Used Days", value: leave.used_days
+                                }, {
+                                    label: "Carry Forward", value: leave.carry_forward_days
+                                },].map((item, idx) => (<tr key={idx} className="border-b last:border-b-0">
+                                    <td className="py-2 px-4 text-gray-500">{item.label}</td>
+                                    <td className="py-2 px-4">{item.value}</td>
+                                </tr>))}
+                                </tbody>
+                            </table>
+                        </AccordionItem>);
+                    })) : (<NoData message="No Leave Credit"/>)}
                 </Accordion>
 
             </div>}

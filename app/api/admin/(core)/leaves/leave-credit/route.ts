@@ -113,8 +113,6 @@ export async function GET(request: Request) {
 
         // Return the response with sorted data and meta information
         return NextResponse.json({
-            leave_credits_ids: leave_credits.map(item => item.employee_id),
-            employee_id: emp_info.map(item => item.id),
             data: values,
             meta_data: {
                 totalItems: total_items.length,
