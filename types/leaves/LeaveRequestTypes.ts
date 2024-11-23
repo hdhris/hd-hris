@@ -34,6 +34,7 @@ export interface EmployeeLeavesStatus{
 }
 
 export interface LeaveBalance {
+    leave_type_id: number;
     year: number;
     remaining_days: number;
     carry_forward_days: number;
@@ -44,7 +45,7 @@ export interface EmployeeLeave {
     name: string;
     picture: string;
     department: string;
-    leave_balances: LeaveBalance;
+    leave_balances: LeaveBalance[];
 }
 
 export interface LeaveType {

@@ -54,6 +54,7 @@ function LeaveTypeSelection({isAttachmentRequired, min, max, leaveTypes, isLoadi
                         onInputChange={(e) => setSearchTerm(e)}  // Update searchTerm on input change
                         onSelectionChange={(e) => {
                             const selectedItem = availableLeavesTypes.find(item => String(item.id) === String(e));
+                            // console.log("Selected Leave Type: ", selectedItem)
                             if (selectedItem) {
                                 setValue('leave_type_id', selectedItem.id);
                                 field.onChange(selectedItem.id);  // Sync with react-hook-form

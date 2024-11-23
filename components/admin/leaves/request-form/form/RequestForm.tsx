@@ -70,8 +70,9 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
     }, [data]);
 
     const minMax = React.useMemo(() => {
+        const remainingLeaves = user?.employees.find(emp => emp.id === employeeIdSelected)?.leave_balances.find(leave => leave.leave_type_id === Number(form.watch("leave_type_id")))?.remaining_days || 0
 
-        const remainingLeaves = user?.employees.find(emp => emp.id === employeeIdSelected)?.leave_balances.remaining_days ?? 0
+        console.log("Leave Type Id: ", form.watch("leave_type_id"))
         if (remainingLeaves > maxLeave) {
             return Array.from({length: maxLeave - minLeave + 1}).map((_, i) => ({
                 label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`), value: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`)
@@ -170,6 +171,17 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         }
     }
 
+    const employee_leave_type = React.useMemo(() => {
+        const employee = user?.employees.find(item => item.id === employeeIdSelected);
+        if (!employee) {
+            return []; // Return an empty array if the employee is not found
+        }
+
+        return user?.availableLeaves.filter(leaveType =>
+            employee.leave_balances.some(balance => balance.leave_type_id === leaveType.id)
+        );
+
+    },[user, employeeIdSelected])
 
     return (<FormDrawer title={title || "File A leave Request"}
                         description={description || "Fill out the form to request a leave."}
@@ -183,7 +195,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
                                               onSelected={setEmployeeIdSelected}/>
                             <LeaveTypeSelection min={setMinLeave} max={setMaxLeave}
                                                 isAttachmentRequired={setIsAttachmentRequired}
-                                                leaveTypes={user?.availableLeaves!} isLoading={isLoading}/>
+                                                leaveTypes={employee_leave_type!} isLoading={isLoading}/>
                             {form.watch("leave_type_id") && minMax.length === 0 ?
                                 <Typography className="!text-danger text-sm">Cannot apply this leave to this
                                     employee.

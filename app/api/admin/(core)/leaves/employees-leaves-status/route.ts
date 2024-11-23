@@ -63,7 +63,9 @@ export async function GET() {
             },
             trans_leaves_trans_leaves_employee_idTotrans_employees: true
         }
-    }), prisma.ref_leave_types.findMany({
+    }),
+
+        prisma.ref_leave_types.findMany({
         where: {
             is_active: true,
             deleted_at: null
@@ -82,10 +84,11 @@ export async function GET() {
         picture: emp.picture,
         department: emp.ref_departments.name,
         leave_balances: emp.dim_leave_balances.map((leaveBalance: any) => ({
+            leave_type_id: leaveBalance.leave_type_id,
             year: leaveBalance.year,
             remaining_days: toDecimals(leaveBalance.remaining_days),
             carry_forward_days: toDecimals(leaveBalance.carry_forward_days),
-        }))[0],
+        })),
         trans_leaves: emp.trans_leaves_trans_leaves_employee_idTotrans_employees
     }));
 

@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
 
         // Parse request body
         const data = await req.json();
+        console.log("Data: ", data)
 
         // Validate required fields
         if (!data.employee_id || !data.leave_date || !data.days_of_leave || !data.reason || !data.leave_type_id) {
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
                 reason: data.reason,
                 comment: data.comment,
                 type_id: data.leave_type_id,
-                status: "Approved",
+                status: "Pending",
                 created_at: new Date(),
                 approval_at: new Date(),
                 approved_by: reviewer.id
@@ -65,12 +66,15 @@ export async function POST(req: NextRequest) {
             const leaveBalance = await tx.dim_leave_balances.findFirst({
                 where: {
                     deleted_at: null,
-                    employee_id: data.employee_id
+                    employee_id: data.employee_id,
+                    leave_type_id: data.leave_type_id
                 },
                 select: {
                     id: true
                 }
             });
+
+            console.log("Leave Credit Id: ", leaveBalance?.id)
 
             if (!leaveBalance) {
                 throw new Error("Leave balance not found for the specified employee.");
