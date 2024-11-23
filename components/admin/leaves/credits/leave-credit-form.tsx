@@ -18,6 +18,8 @@ import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {LeaveTypeForEmployee} from "@/types/leaves/LeaveTypes";
 import Typography from "@/components/common/typography/Typography";
 import {Chip, Selection} from '@nextui-org/react';
+import {LuInfo} from "react-icons/lu";
+import {icon_size, icon_size_sm} from "@/lib/utils";
 
 interface LeaveCreditFormProps {
     title?: string
@@ -262,7 +264,8 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                     }
                 }]}/>}
 
-                <p>{isAssignToVisible}</p>
+                {form.watch("apply_for") !== "specific_employee" && form.watch("apply_for") !== undefined && <Chip startContent={<LuInfo className={icon_size_sm}/>} color="danger" variant="bordered" className="word-break text-sm">Existing leave credits won&apos;t be overwritten.</Chip>}
+
                 {form.watch("apply_for") === "specific_employee" && <EmployeeListForm
                     employees={employeeState!}
                     isLoading={data.isLoading}

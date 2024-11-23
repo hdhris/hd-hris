@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing warning in regard to aria-label and polishing hidden assign to field when updating specific employee">
-      <change afterPath="$PROJECT_DIR$/app/api/email/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/email-templates/email.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/email-services.ts" afterDir="false" />
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="adding email-services.ts">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/credits/leave-credit-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/credits/leave-credit-form.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/email-services.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/email-services.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,7 +97,7 @@
       <updated>1732253412534</updated>
       <workItem from="1732253419244" duration="3426000" />
       <workItem from="1732272056857" duration="15320000" />
-      <workItem from="1732353501116" duration="15206000" />
+      <workItem from="1732353501116" duration="17771000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />
@@ -133,7 +131,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732369348545</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="adding email-services.ts">
+      <option name="closed" value="true" />
+      <created>1732372307873</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1732372307873</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -157,6 +163,7 @@
     <MESSAGE value="updating No data component - adding Icon" />
     <MESSAGE value="fixing the pagination in data display and fixing the interface in leave credit" />
     <MESSAGE value="fixing warning in regard to aria-label and polishing hidden assign to field when updating specific employee" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixing warning in regard to aria-label and polishing hidden assign to field when updating specific employee" />
+    <MESSAGE value="adding email-services.ts" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding email-services.ts" />
   </component>
 </project>
