@@ -4,11 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing the pagination in data display and fixing the interface in leave credit">
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing warning in regard to aria-label and polishing hidden assign to field when updating specific employee">
+      <change afterPath="$PROJECT_DIR$/app/api/email/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/email-templates/email.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/email-services.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/leaves/credits/leave-credit-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/credits/leave-credit-form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,6 +22,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
@@ -95,7 +99,7 @@
       <updated>1732253412534</updated>
       <workItem from="1732253419244" duration="3426000" />
       <workItem from="1732272056857" duration="15320000" />
-      <workItem from="1732353501116" duration="12275000" />
+      <workItem from="1732353501116" duration="15206000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />
@@ -121,7 +125,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732360534250</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="fixing warning in regard to aria-label and polishing hidden assign to field when updating specific employee">
+      <option name="closed" value="true" />
+      <created>1732369348545</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1732369348545</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -144,6 +156,7 @@
     <MESSAGE value="fixing the responsiveness of the onGridDisplay" />
     <MESSAGE value="updating No data component - adding Icon" />
     <MESSAGE value="fixing the pagination in data display and fixing the interface in leave credit" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixing the pagination in data display and fixing the interface in leave credit" />
+    <MESSAGE value="fixing warning in regard to aria-label and polishing hidden assign to field when updating specific employee" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing warning in regard to aria-label and polishing hidden assign to field when updating specific employee" />
   </component>
 </project>
