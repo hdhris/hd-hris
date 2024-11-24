@@ -21,6 +21,9 @@ import DropdownList from "@/components/common/Dropdown";
 import CardView from "@/components/common/card-view/card-view";
 import NoData from "@/components/common/no-data/NoData";
 import {capitalize} from "@nextui-org/shared-utils";
+import {mutate} from "swr";
+import showDialog from "@/lib/utils/confirmDialog";
+import {axiosInstance} from "@/services/fetcher";
 
 
 export interface EditCreditProp extends Omit<LeaveCredits, "leave_balance"> {
@@ -127,6 +130,43 @@ function Page() {
         setViewCredit(edited)
     }
 
+    const handleDelete = async (deleted: EditCreditProp) => {
+
+
+        const leave_credit_ids = deleted.leave_credits?.map((item) => item.id)
+
+        const onConfirm = await showDialog({
+            title: "Delete Leave Credit", message: (<Typography>Are you sure you want to delete this
+                <Typography as="span" className="font-semibold"> {deleted.name}</Typography>?
+            </Typography>)
+        })
+
+        if(onConfirm === "yes"){
+            const res = await axiosInstance.post('/api/admin/leaves/leave-credit/delete', leave_credit_ids)
+            if (res.status !== 200) {
+                toast({
+                    title: "Error", description: res.data.message, variant: "danger",
+                })
+            } else {
+                toast({
+                    title: "Success", description: res.data.message, variant: "success",
+                })
+                // await mutate()
+            }
+        }
+        // const res = await axiosInstance.delete(`/api/admin/leaves/leave-credit?id=${id}`)
+        // if (res.status !== 200) {
+        //     toast({
+        //         title: "Error", description: res.data.message, variant: "danger",
+        //     })
+        // } else {
+        //     toast({
+        //         title: "Success", description: res.data.message, variant: "success",
+        //     })
+        //     // await mutate()
+        // }
+    }
+
 
     return (<section className='w-full h-full flex gap-4 overflow-hidden'>
         <DataDisplay
@@ -210,8 +250,13 @@ function Page() {
             onEdit={() => {
                 setIsEdit(true)
                 setEditCredit(viewCredit)
-
             }}
+
+            onDelete={async () => {
+                console.log("Credit: ", viewCredit)
+                await handleDelete(viewCredit)
+            }}
+
             header={<div className="flex flex-row items-center space-x-4 pb-2">
                 <User name={<div className="flex gap-2">
                     <Typography>{viewCredit.name}</Typography>
