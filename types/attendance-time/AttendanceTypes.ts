@@ -60,9 +60,11 @@ export interface EmployeeSchedule {
 }
 
 export interface AttendanceData {
-  attendanceLog: AttendanceLog[];
-  employees: UserEmployee[];
-  statuses: AttendaceStatuses;
+  attendanceLogs: AttendanceLog[]; // Renamed to plural to better reflect multiple logs
+  employees: UserEmployee[]; // List of employees involved in the logs
+  statusesByDate: Record<string, AttendaceStatuses>; // Attendance statuses organized by date
+  batchSchedule: BatchSchedule[]; // Array of batch schedules for the employees
+  employeeSchedule: EmployeeSchedule[]; // Array of individual schedules for employees
 }
 
 export type InStatus = "absent" | "late" | "ontime" | "no break";

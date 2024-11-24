@@ -1,4 +1,4 @@
-import PayheadUI from '@/components/admin/payroll/PayheadUI'
+import PayheadUI from '@/components/admin/payroll/PayheadUi'
 import React from 'react'
 
 async function Page() {

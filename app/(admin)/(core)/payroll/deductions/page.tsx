@@ -1,5 +1,5 @@
 import React from 'react'
-import PayheadUI from "@/components/admin/payroll/PayheadUI";
+import PayheadUI from "@/components/admin/payroll/PayheadUi";
 
 async function Page() {
   return (
