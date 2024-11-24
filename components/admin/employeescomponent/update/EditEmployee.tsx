@@ -28,8 +28,8 @@ export const employeeSchema = z.object({
     .string()
     .min(1, "Last name is required")
     .regex(/^[a-zA-Z\s]*$/, "Last name should only contain letters"),
-  suffix: z.string().optional(),
-  extension: z.string().optional(),
+  suffix: z.string().optional().nullable(),
+  extension: z.string().optional().nullable(),
   gender: z.string().min(1, "Gender is required"),
   email: z.string().email("Invalid email address"),
   contact_no: z
@@ -580,7 +580,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
           },
         ],
       };
-      console.log("Sending data:", JSON.stringify(fullData, null, 2));
+      // console.log("Sending data:", JSON.stringify(fullData, null, 2));
 
       //saving full data
       const response = await axios.put(

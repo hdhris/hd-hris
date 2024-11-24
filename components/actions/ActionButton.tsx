@@ -5,6 +5,33 @@ import React from "react";
 import {ButtonProps, cn, TooltipProps} from "@nextui-org/react";
 import {LuPencil, LuTrash2} from "react-icons/lu";
 
+//Just to hide the edit and delete
+interface ExtendedActionProps extends ActionProps {
+    hideEdit?: boolean;
+    hideDelete?: boolean;
+}
+
+export const ExtendedTableActionButton = ({onDelete, onEdit, name, hideEdit, hideDelete}: ExtendedActionProps) => {
+    interface ActionBTNProps {
+        children: React.ReactNode
+        tooltipColor?: TooltipProps["color"]
+        variant?: ButtonProps["variant"]
+        onAction: () => void
+        tooltipName: string
+    }
+
+    const actionBTN = ({children, tooltipColor, variant, onAction, tooltipName}: ActionBTNProps) => (
+        <Tooltip content={`${tooltipName} ${name}`} color={tooltipColor || "default"}>
+            <Button isIconOnly variant={variant || "light"} onClick={onAction}>
+                {children}
+            </Button>
+        </Tooltip>)
+    return (<>
+        {!hideEdit && actionBTN({children:  <LuPencil size={18} className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
+        {!hideDelete && actionBTN({children: <LuTrash2 size={18} className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
+    </>);
+};
+//
 interface ActionProps {
     name: string
     onDelete: () => void; // for delete

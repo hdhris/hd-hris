@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { z } from "zod";
 
 declare global {
@@ -17,8 +17,8 @@ const employeeSchema = z.object({
   first_name: z.string().max(45),
   last_name: z.string().max(45),
   middle_name: z.string().max(45).optional(),
-  suffix: z.string().max(10).optional(),
-  extension: z.string().max(10).optional(),
+  suffix: z.string().max(10).optional().nullable(),
+  extension: z.string().max(10).optional().nullable(),
   email: z.string().email().max(45).optional(),
   contact_no: z.string().max(45).optional(),
   birthdate: z.string().optional(),
@@ -63,7 +63,7 @@ const employeeSchema = z.object({
         //   .refine((val) => val.length > 0, {
         //     message: "At least one working day is required",
         //   }),
-        days_json: z.array(z.string())
+        days_json: z.array(z.string()),
       })
     )
     .optional(),
@@ -73,8 +73,19 @@ const statusUpdateSchema = z.object({
   status: z.enum(["active", "suspended", "resigned", "terminated"]),
   reason: z.string().optional(),
   date: z.string().optional(),
+  endDate: z.string().optional(),
 });
 
+function parseJsonInput(data: any): Prisma.InputJsonValue {
+  if (typeof data === 'string') {
+    try {
+      return JSON.parse(data) as Prisma.InputJsonValue;
+    } catch {
+      return {} as Prisma.InputJsonValue;
+    }
+  }
+  return data as Prisma.InputJsonValue;
+}
 // Error Handling Helper
 function handleError(error: unknown, operation: string) {
   console.error(`Error during ${operation} operation:`, error);
@@ -121,8 +132,11 @@ export async function POST(req: NextRequest) {
 
 // Function to create an employee
 async function createEmployee(data: z.infer<typeof employeeSchema>) {
-  const { schedules, job_id, department_id, ...rest } = data;
-console.log(data)
+  const { schedules, job_id, department_id, educational_bg_json, ...rest } =
+    data;
+  // console.log(data)
+  const educationalBackground = parseJsonInput(educational_bg_json);
+
   try {
     // 1. Create the employee record
     const employee = await prisma.trans_employees.create({
@@ -130,6 +144,7 @@ console.log(data)
         ...rest,
         hired_at: data.hired_at ? new Date(data.hired_at) : null,
         birthdate: data.birthdate ? new Date(data.birthdate) : null,
+        educational_bg_json: educationalBackground,
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -306,7 +321,7 @@ async function updateEmployee(
   id: number,
   data: Partial<z.infer<typeof employeeSchema>>
 ) {
-  const { schedules, job_id, ...otherData } = data;
+  const { schedules, job_id,educational_bg_json, ...otherData } = data;
 
   const employee = await prisma.trans_employees.update({
     where: { id },
@@ -316,9 +331,17 @@ async function updateEmployee(
         ? new Date(otherData.birthdate)
         : undefined,
       updated_at: new Date(), // Ensure this line is present
+      educational_bg_json: educational_bg_json 
+  ? (typeof educational_bg_json === 'string' 
+      ? JSON.parse(educational_bg_json) 
+      : educational_bg_json) as Prisma.InputJsonValue
+  : undefined,
     },
+    
   });
-  console.log(data)
+
+  
+  console.log(data);
   if (job_id) {
     await prisma.trans_employees.update({
       where: { id },
@@ -343,42 +366,46 @@ async function updateEmployee(
   // logDatabaseOperation("UPDATE employee", employee);
   return employee;
 }
+
 async function updateEmployeeStatus(
   id: number,
   data: z.infer<typeof statusUpdateSchema>
 ) {
-  const { status, reason, date } = data;
-  const formattedDate = date
-    ? new Date(date).toISOString().split("T")[0]
-    : null;
-
-  let updateData: any = {
-    updated_at: new Date(),
-    suspension_json: null,
-    resignation_json: null,
-    termination_json: null,
-  };
-
-  if (status !== "active") {
-    const statusData =
-      reason && formattedDate ? { reason, date: formattedDate } : null;
-
-    switch (status) {
-      case "suspended":
-        updateData.suspension_json = statusData;
-        break;
-      case "resigned":
-        updateData.resignation_json = statusData;
-        break;
-      case "terminated":
-        updateData.termination_json = statusData;
-        break;
-      default:
-        throw new Error(`Unexpected employee status: ${status}`);
-    }
-  }
-
   try {
+    const { status, reason, date, endDate } = data;
+
+    let updateData: Prisma.trans_employeesUpdateInput = {
+      updated_at: new Date(),
+    };
+
+    if (status === "active") {
+      updateData.suspension_json = Prisma.JsonNull;
+      updateData.resignation_json = Prisma.JsonNull;
+      updateData.termination_json = Prisma.JsonNull;
+    } else {
+      switch (status) {
+        case "suspended":
+          updateData.suspension_json = {
+            suspensionReason: reason,
+            startDate: date,
+            endDate: endDate,
+          };
+          break;
+        case "resigned":
+          updateData.resignation_json = {
+            resignationReason: reason,
+            resignationDate: date,
+          };
+          break;
+        case "terminated":
+          updateData.termination_json = {
+            terminationReason: reason,
+            terminationDate: date,
+          };
+          break;
+      }
+    }
+
     const employee = await prisma.trans_employees.update({
       where: { id },
       data: updateData,

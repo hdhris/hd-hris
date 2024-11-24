@@ -62,22 +62,30 @@ export type Certificate = {
   issueDate: Date | string;
   expiryDate?: Date | string; // Optional, in case some certificates don't expire
 };
-
 export type EmployeeSuspension = {
-  suspensionReason: string | null;
-  suspensionDate: Date | string | null;
-  suspensionDuration: number | null;
+  suspensionReason: string;
+  startDate: string;
+  endDate: string;
 };
 
 export type EmployeeTermination = {
-  terminationReason: string | null;
-  terminationDate: Date | string | null;
+  terminationReason: string;
+  terminationDate: string;
 };
 
 export type EmployeeResignation = {
-  resignationDate: Date | string | null;
-  resignationReason: string | null;
+  resignationReason: string;
+  resignationDate: string;
 };
+
+// Create a type for status updates
+export type StatusUpdate = {
+  status: Status;
+  startDate?: string;
+  endDate?: string;
+  reason: string;
+};
+
 
 export type Employee = EmployeeAll & {
   suspension_json?: EmployeeSuspension | null;

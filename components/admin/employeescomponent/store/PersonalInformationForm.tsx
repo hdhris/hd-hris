@@ -173,7 +173,7 @@ const PersonalInformationForm = () => {
     {
       name: "suffix",
       label: "Suffix",
-      type: "select",
+      type: "auto-complete",
       config: {
         placeholder: "Enter Suffix",
         options: suffixOptions,

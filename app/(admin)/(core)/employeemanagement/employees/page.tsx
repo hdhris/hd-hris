@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useEmployeesData } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip } from "@nextui-org/react";
-import { TableActionButton } from "@/components/actions/ActionButton";
+import { ExtendedTableActionButton, TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/employeescomponent/store/AddEmployees";
 import EditEmployee from "@/components/admin/employeescomponent/update/EditEmployee";
@@ -27,7 +27,13 @@ const Page: React.FC = () => {
 
   useEffect(() => {
     if (employees) {
-      const sorted = sortEmployeesByRecentActivity(employees);
+      // Filter out non-active employees first, then sort them
+      const activeEmployees = employees.filter(employee => {
+        return !employee.suspension_json && 
+               !employee.resignation_json && 
+               !employee.termination_json;
+      });
+      const sorted = sortEmployeesByRecentActivity(activeEmployees);
       setSortedEmployees(sorted);
     }
   }, [employees]);
@@ -39,7 +45,7 @@ const Page: React.FC = () => {
       return dateB - dateA;
     });
   };
-//
+
   const handleEdit = (employee: Employee) => {
     setSelectedEmployeeId(employee);
     setIsEditModalOpen(true);
@@ -77,12 +83,16 @@ const Page: React.FC = () => {
 
   const handleEmployeeUpdated = async () => {
     try {
-      // First, manually call mutate to get fresh data
       const updatedData = await mutate();
 
-      // Then update the sorted employees with the fresh data
       if (updatedData) {
-        const sorted = sortEmployeesByRecentActivity(updatedData);
+        // Filter active employees after update
+        const activeEmployees = updatedData.filter(employee => {
+          return !employee.suspension_json && 
+                 !employee.resignation_json && 
+                 !employee.termination_json;
+        });
+        const sorted = sortEmployeesByRecentActivity(activeEmployees);
         setSortedEmployees(sorted);
       }
     } catch (error) {
@@ -176,7 +186,7 @@ const Page: React.FC = () => {
             </div>
           );
         case "status":
-          const status = getEmployeeStatus(employee);
+          const status = getEmployeeStatus(employee); 
           const statusColor = {
             Active: "success",
             Terminated: "danger",
@@ -196,15 +206,11 @@ const Page: React.FC = () => {
           );
         case "actions":
           return (
-            <TableActionButton
+            <ExtendedTableActionButton
               name={`${employee.first_name} ${employee.last_name}`}
               onEdit={() => handleEdit(employee)}
-              onDelete={() =>
-                handleDelete(
-                  employee.id,
-                  `${employee.first_name} ${employee.last_name}`
-                )
-              }
+              onDelete={() =>{}}
+              hideDelete={true}
             />
           );
         default:
@@ -228,24 +234,22 @@ const Page: React.FC = () => {
       category: "Department",
       filtered: sortedEmployees
         ? Array.from(new Set(sortedEmployees.map((e) => e.ref_departments?.name)))
-            .filter(Boolean) // Remove undefined values
+            .filter(Boolean)
             .map((dept) => ({
               key: "ref_departments.name",
-              value: dept || "", // Default to empty string if undefined
+              value: dept || "",
               name: dept || "",
               uid: dept || "",
             }))
         : [],
     },
   ];
-  
 
   return (
     <div className="h-[calc(100vh-150px)] overflow-hidden">
       <DataDisplay
         defaultDisplay="table"
         title="Employees"
-        
         data={sortedEmployees}
         filterProps={{
           filterItems: FilterItems,
@@ -254,12 +258,11 @@ const Page: React.FC = () => {
         onTableDisplay={{
           config: TableConfigurations,
           className: "h-full overflow-auto",
-                    layout: "auto",
+          layout: "auto",
         }}
         paginationProps={{
           data_length: sortedEmployees?.length
         }}
-        
         searchProps={{
           searchingItemKey: ["first_name", "last_name", "email", "contact_no"],
         }}
@@ -288,18 +291,16 @@ const Page: React.FC = () => {
             </BorderCard>
           </div>
         )}
-
         onExport={{
           drawerProps: {
-              title: "Export",
-          }
-      }}
-      onImport={{
-          drawerProps: {
-              title: "Import",
+            title: "Export",
           }
         }}
-        
+        onImport={{
+          drawerProps: {
+            title: "Import",
+          }
+        }}
       />
 
       {selectedEmployee && (
@@ -311,6 +312,7 @@ const Page: React.FC = () => {
           }}
           employee={selectedEmployee}
           onEmployeeUpdated={handleEmployeeUpdated}
+          sortedEmployees={sortedEmployees}
         />
       )}
 
