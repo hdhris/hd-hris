@@ -205,6 +205,7 @@ function Page() {
         />
 
         {viewCredit && <CardView
+            title="Leave Credit"
             onClose={() => setViewCredit(undefined)}
             onEdit={() => {
                 setIsEdit(true)

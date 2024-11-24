@@ -4,6 +4,7 @@ import { getPaginatedData } from "@/server/pagination/paginate"; // Import the r
 import { LeaveType } from "@/types/leaves/LeaveTypes";
 import { capitalize } from "@nextui-org/shared-utils";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
+import dayjs from "dayjs";
 
 export const dynamic = "force-dynamic";
 
@@ -83,13 +84,12 @@ export async function GET(request: Request) {
                 description: leaveType.description,
                 applicable_to_employee_types: capitalize(leaveType.applicable_to_employee_types),
                 attachment_required: leaveType.attachment_required,
-                created_at: leaveType.created_at,
+                created_at: dayjs(leaveType.created_at).format("YYYY-MM-DD"),
                 is_active: leaveType.is_active,
-                max_duration: leaveType.max_duration,
-                min_duration: leaveType.min_duration,
-                notice_required: leaveType.notice_required,
+                max_duration: Number(leaveType.max_duration),
+                min_duration: Number(leaveType.min_duration),
                 paid_leave: leaveType.paid_leave,
-                updated_at: leaveType.updated_at,
+                updated_at: dayjs(leaveType.updated_at).format("YYYY-MM-DD"),
                 carry_over: leaveType.carry_over,
                 current_employees: empAvails,
             };
