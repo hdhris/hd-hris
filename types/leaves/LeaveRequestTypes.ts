@@ -54,7 +54,6 @@ export interface LeaveType {
     name: string;
     min: number;
     max: number;
-    isAttachmentRequired: boolean;
 }
 
 
@@ -69,17 +68,7 @@ export interface LeaveTypesItems {
     max_duration: number;
 }
 
-interface EmployeeLeaveRequest {
-    id: number;
-    email: string;
-    prefix: string | null;
-    first_name: string;
-    last_name: string;
-    middle_name: string;
-    suffix: string | null;
-    extension: string | null;
-    picture: string;
-}
+
 // export interface LeaveRequest {
 //     id: number;
 //     name: string;
@@ -108,9 +97,6 @@ interface EmployeeLeaveType {
     code: string;
 }
 
-export interface LeaveRequestAttachment {
-    url: string
-}
 
 interface LeaveDetails {
     start_date: string; // ISO date string
@@ -118,7 +104,6 @@ interface LeaveDetails {
     total_days: number;
     comment: string | null;
     reason: string;
-    attachment: LeaveRequestAttachment[];
     status:"Pending" | "Approved" | "Rejected"
     created_at: string; // ISO date string
     updated_at: string; // ISO date string

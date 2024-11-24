@@ -11,11 +11,11 @@ export interface LeaveTypeSelectionProps {
     isLoading?: boolean;
     min: (days: number) => void;
     max: (days: number) => void;
-    isAttachmentRequired: (value: boolean) => void
+    // isAttachmentRequired: (value: boolean) => void
     isDisabled?: boolean
 }
 
-function LeaveTypeSelection({isAttachmentRequired, min, max, leaveTypes, isLoading, isDisabled }: LeaveTypeSelectionProps) {
+function LeaveTypeSelection({min, max, leaveTypes, isLoading, isDisabled }: LeaveTypeSelectionProps) {
     const { control, setValue, formState: { errors } } = useFormContext();
     const [searchTerm, setSearchTerm] = React.useState('');  // Add state for searchTerm
 
@@ -62,7 +62,7 @@ function LeaveTypeSelection({isAttachmentRequired, min, max, leaveTypes, isLoadi
                                 field.onChange(selectedItem.id);  // Sync with react-hook-form
                                 min(selectedItem.min);
                                 max(selectedItem.max);  // Set the leave type duration
-                                isAttachmentRequired(selectedItem.isAttachmentRequired)
+                                // isAttachmentRequired(selectedItem.isAttachmentRequired)
                             } else {
                                 setValue('leave_type_id', "");
                                 field.onChange("");  // Clear value

@@ -5,7 +5,6 @@ import EmployeeListForm from "@/components/common/forms/employee-list-autocomple
 import LeaveTypeSelection from "@/components/admin/leaves/request-form/LeaveTypeSelection";
 import Typography from "@/components/common/typography/Typography";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
-import FileUpload from "@/components/common/forms/FileUpload";
 import {Form} from "@/components/ui/form";
 import {useForm} from "react-hook-form";
 import {z} from "zod";
@@ -35,7 +34,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
     const [employeeIdSelected, setEmployeeIdSelected] = useState<number>(0)
     const [minLeave, setMinLeave] = useState<number>(0)
     const [maxLeave, setMaxLeave] = useState<number>(0)
-    const [isAttachmentRequired, setIsAttachmentRequired] = useState<boolean>(false)
+    // const [isAttachmentRequired, setIsAttachmentRequired] = useState<boolean>(false)
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -74,11 +73,13 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
 
         if (remainingLeaves > maxLeave) {
             return Array.from({length: maxLeave - minLeave + 1}).map((_, i) => ({
-                label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`), value: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`)
+                label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`),
+                value: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`)
             }))
         } else {
             return Array.from({length: remainingLeaves - minLeave + 1}).map((_, i) => ({
-                label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`), value:  String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`)
+                label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`),
+                value: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`)
             }))
         }
         // return Array.from({length: maxLeave - minLeave + 1}).map((_, i) => ({
@@ -87,7 +88,12 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
     }, [employeeIdSelected, form, maxLeave, minLeave, user?.employees])
 
     const LeaveRequestForm: FormInputProps[] = [{
-        isRequired: true, name: "days_of_leave", type: "select", label: "Days of Leave", inputDisabled: !form.watch("leave_type_id") || minMax.length === 0, config: {
+        isRequired: true,
+        name: "days_of_leave",
+        type: "select",
+        label: "Days of Leave",
+        inputDisabled: !form.watch("leave_type_id") || minMax.length === 0,
+        config: {
             options: minMax, isClearable: true, isDisabled: !form.watch("leave_type_id") || minMax.length === 0
         }
 
@@ -114,11 +120,10 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             id: employee?.id, ...values,
             leave_type_id: values.leave_type_id,
             days_of_leave: values.days_of_leave.split(" ")[0],
-            leave_date:  values.leave_date,
-            comment:  values.comment,
-            reason:  values.reason
+            leave_date: values.leave_date,
+            comment: values.comment,
+            reason: values.reason
         }
-
 
 
         try {
@@ -175,11 +180,9 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             return []; // Return an empty array if the employee is not found
         }
 
-        return user?.availableLeaves.filter(leaveType =>
-            employee.leave_balances.some(balance => balance.leave_type_id === leaveType.id)
-        );
+        return user?.availableLeaves.filter(leaveType => employee.leave_balances.some(balance => balance.leave_type_id === leaveType.id));
 
-    },[user, employeeIdSelected])
+    }, [user, employeeIdSelected])
 
     return (<FormDrawer title={title || "File A leave Request"}
                         description={description || "Fill out the form to request a leave."}
@@ -192,31 +195,32 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
                             <EmployeeListForm employees={user?.employees!} isLoading={isLoading}
                                               onSelected={setEmployeeIdSelected}/>
                             <LeaveTypeSelection min={setMinLeave} max={setMaxLeave}
-                                                isAttachmentRequired={setIsAttachmentRequired}
-                                                leaveTypes={employee_leave_type!} isLoading={isLoading} isDisabled={!form.watch("employee_id")}/>
+                                // isAttachmentRequired={setIsAttachmentRequired}
+                                                leaveTypes={employee_leave_type!} isLoading={isLoading}
+                                                isDisabled={!form.watch("employee_id")}/>
                             {form.watch("leave_type_id") && minMax.length === 0 ?
                                 <Typography className="!text-danger text-sm">Cannot apply this leave to this
                                     employee.
                                     Low leave credit balance</Typography> : ""}
                         </div>
                         <FormFields items={LeaveRequestForm}/>
-                        {isAttachmentRequired && <div className="flex flex-col gap-2">
-                            <div className="flex">
-                                <Typography className="text-sm font-medium mt-2">Upload Documents</Typography>
-                                <span className="ml-2 inline-flex text-destructive text-medium"> *</span>
-                            </div>
-                            <FileUpload
-                                className="rounded-sm"
-                                dropzoneOptions={{
-                                    accept: {
-                                        'application/pdf': ['.pdf'],
-                                        'application/msword': ['.doc'],
-                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-                                    },
-                                }}
-                            />
+                        {/*{isAttachmentRequired && <div className="flex flex-col gap-2">*/}
+                        {/*    <div className="flex">*/}
+                        {/*        <Typography className="text-sm font-medium mt-2">Upload Documents</Typography>*/}
+                        {/*        <span className="ml-2 inline-flex text-destructive text-medium"> *</span>*/}
+                        {/*    </div>*/}
+                        {/*    <FileUpload*/}
+                        {/*        className="rounded-sm"*/}
+                        {/*        dropzoneOptions={{*/}
+                        {/*            accept: {*/}
+                        {/*                'application/pdf': ['.pdf'],*/}
+                        {/*                'application/msword': ['.doc'],*/}
+                        {/*                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],*/}
+                        {/*            },*/}
+                        {/*        }}*/}
+                        {/*    />*/}
 
-                        </div>}
+                        {/*</div>}*/}
                         {/*<div className="w-full flex justify-end gap-2">*/}
                         {/*    <Button variant="light" radius="sm" size="sm" onClick={handleClear}>Clear</Button>*/}
                         {/*    <Switch expression={isAdd}>*/}

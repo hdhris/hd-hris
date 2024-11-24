@@ -1,23 +1,20 @@
 "use client"
 import React, {useCallback, useMemo, useState} from 'react';
-import {getEmpFullName} from "@/lib/utils/nameFormatter";
-import dayjs from "dayjs";
 import {Button} from "@nextui-org/button";
-import {useLeaveRequest, usePaginateQuery} from "@/services/queries";
+import {usePaginateQuery} from "@/services/queries";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {FilterItems, TableConfigurations} from "@/components/admin/leaves/table-config/approval-tables-configuration";
 import BorderCard from "@/components/common/BorderCard";
 import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
-import {EmployeeLeaveCredits} from "@/types/leaves/leave-credits-types";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import {useEmployeeId} from "@/hooks/employeeIdHook";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
     totalItems: number
 }
+
 function Page() {
     // const {data, isLoading} = useLeaveRequest()
     const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -35,9 +32,7 @@ function Page() {
         console.log("Leave Data: ", data?.data)
         if (data) return data.data.map((item) => {
             const created_by = {
-                id: item.created_by.id,
-                name: item.created_by.name,
-                picture: item.created_by.picture,
+                id: item.created_by.id, name: item.created_by.name, picture: item.created_by.picture,
             }
 
             return {
@@ -47,9 +42,7 @@ function Page() {
                 email: item.email || "N/A",
                 name: item.name,
                 leave_type: {
-                    id: item.leave_type.id,
-                    name: item.leave_type.name,
-                    code: item.leave_type.code
+                    id: item.leave_type.id, name: item.leave_type.name, code: item.leave_type.code
                 },
                 leave_details: {
                     start_date: item.leave_details.start_date, // Format date here
@@ -57,7 +50,6 @@ function Page() {
                     total_days: item.leave_details.total_days,
                     comment: item.leave_details.comment,
                     reason: item.leave_details.reason,
-                    attachment: item.leave_details.attachment,
                     status: item.leave_details.status,
                     created_at: item.leave_details.created_at,
                     updated_at: item.leave_details.updated_at

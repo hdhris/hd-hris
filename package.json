@@ -27,6 +27,7 @@
     "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.1",
+    "@react-email/components": "^0.0.28",
     "@supabase/supabase-js": "^2.46.1",
     "@types/nodemailer": "^6.4.17",
     "@uppy/core": "^4.2.3",

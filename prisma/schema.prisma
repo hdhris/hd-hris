@@ -249,7 +249,6 @@ model ref_job_classes {
 model ref_leave_types {
   id                           Int                  @id @default(autoincrement())
   applicable_to_employee_types String
-  attachment_required          Boolean
   code                         String
   created_at                   DateTime             @db.Timestamp(6)
   deleted_at                   DateTime?            @db.Timestamp(6)
@@ -258,7 +257,6 @@ model ref_leave_types {
   max_duration                 Decimal              @db.Decimal(10, 2)
   min_duration                 Decimal              @db.Decimal(10, 2)
   name                         String
-  notice_required              Int
   paid_leave                   Boolean
   updated_at                   DateTime?            @db.Timestamp(6)
   carry_over                   Boolean
@@ -505,7 +503,6 @@ model trans_leaves {
   reason                                                   String?
   created_by                                               Int?
   deleted_at                                               DateTime?        @db.Timestamp(6)
-  attachment_json                                          Json?
   evaluators                                               Json?
   trans_employees_leaves                                   trans_employees  @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
   ref_leave_types                                          ref_leave_types? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")

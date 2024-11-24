@@ -15,13 +15,8 @@ export const LeaveTypeSchema = z.object({
         required_error: "Max Duration is required",
         invalid_type_error: "Max Duration must be a number"
     }),
-    noticeRequired: z.number({
-        required_error: "Notice is required",
-        invalid_type_error: "Notice must be a number"
-    }), //Additional Settings
     paidLeave: z.boolean(),
     isActive: z.boolean(),
-    attachmentRequired: z.boolean(),
     applicableToEmployeeTypes: z.string(),
 }).refine(data => data.maxDuration >= data.minDuration, {
     message: "Max Duration must be greater than or equal to Min Duration", path: ["maxDuration"],

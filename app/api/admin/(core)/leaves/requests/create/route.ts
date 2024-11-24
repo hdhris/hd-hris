@@ -117,7 +117,6 @@ export async function POST(req: NextRequest) {
                 }
             });
 
-            console.log("Leave Credit Id: ", leaveBalance?.id)
 
             if (!leaveBalance) {
                 throw new Error("Leave balance not found for the specified employee.");

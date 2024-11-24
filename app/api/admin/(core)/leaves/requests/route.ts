@@ -2,11 +2,9 @@ import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import dayjs from "dayjs";
-import {LeaveRequest, LeaveRequestAttachment} from "@/types/leaves/LeaveRequestTypes";
+import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import {EvaluatorsTypes} from "@/types/leaves/leave-evaluators-types";
 import {processJsonObject} from "@/lib/utils/parser/JsonObject";
-import { JsonArray } from "@prisma/client/runtime/library";
-import {getEmployeeId} from "@/server/getEmployeeId";
 
 export const dynamic = "force-dynamic"
 
@@ -35,13 +33,16 @@ export async function GET(request: Request) {
                 select: {
                     id: true,
                     picture: true,
-                    email: true, prefix: true, first_name: true, last_name: true, middle_name: true, suffix: true,
+                    email: true,
+                    prefix: true,
+                    first_name: true,
+                    last_name: true,
+                    middle_name: true,
+                    suffix: true,
                 }
             }, ref_leave_types: {
                 select: {
-                    id: true,
-                    name: true,
-                    code: true
+                    id: true, name: true, code: true
                 }
             }
         }, orderBy: {
@@ -56,7 +57,6 @@ export async function GET(request: Request) {
     })
 
 
-
     const employees_request: LeaveRequest[] = data.map(items => {
         const evaluators = processJsonObject<EvaluatorsTypes>(items.evaluators)!
         const approverDecision = evaluators.approver.decision.is_approved;
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
 
         if (approverDecision === null || reviewerDecision === null) {
             status = "Pending"; // If either the approver or reviewer has not made a final decision
-        } else if(!approverDecision || !reviewerDecision){
+        } else if (!approverDecision || !reviewerDecision) {
             status = "Rejected"
         }
 
@@ -89,7 +89,6 @@ export async function GET(request: Request) {
                 total_days: dayjs(items.end_date).diff(items.start_date, 'day'),
                 comment: items.comment || "",
                 reason: items.reason || "",
-                attachment: processJsonObject<LeaveRequestAttachment[]>(items.attachment_json)!,
                 status: status as "Approved" | "Pending" | "Rejected",
                 created_at: dayjs(items.created_at).format("YYYY-MM-DD"),
                 updated_at: dayjs(items.updated_at).format("YYYY-MM-DD"),

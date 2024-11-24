@@ -6,9 +6,9 @@ import Typography from "@/components/common/typography/Typography";
 import {Avatar, AvatarGroup, BadgeProps, User} from "@nextui-org/react";
 import {Status} from "@/components/status/Status";
 import {FilterProps} from "@/types/table/default_config";
-import {axiosInstance} from "@/services/fetcher";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import {Tooltip} from "@nextui-org/tooltip";
+
 
 const ApprovalColumns: ColumnsProps[] = [{
     name: 'Name', uid: 'name', sortable: true
@@ -31,16 +31,16 @@ const approval_status_color_map: Record<string, BadgeProps["color"]> = {
 }
 export const TableConfigurations: TableConfigProps<LeaveRequest> = {
     columns: ApprovalColumns, rowCell: (item: LeaveRequest, columnKey: React.Key) => {
-        const handleReview = async (key: React.Key, method: "Approved" | "Rejected") => {
-            const res = await axiosInstance.post("/api/admin/leaves/requests/reviewed", {
-                id: key, method
-            })
-            if (res.status === 200) {
-                alert("Success")
-            } else {
-                alert("Failed")
-            }
-        }
+        // const handleReview = async (key: React.Key, method: "Approved" | "Rejected") => {
+        //     const res = await axiosInstance.post("/api/admin/leaves/requests/reviewed", {
+        //         id: key, method
+        //     })
+        //     if (res.status === 200) {
+        //         alert("Success")
+        //     } else {
+        //         alert("Failed")
+        //     }
+        // }
 
 
         const evaluators = []
@@ -64,7 +64,7 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
 
         console.log("Evaluator: ", evaluators)
         // const leave_status = item.
-        const cellValue = item[columnKey as keyof LeaveRequest];
+        // const cellValue = item[columnKey as keyof LeaveRequest];
         return (<Switch expression={columnKey as string}>
             <Case of="name">
                 <User
