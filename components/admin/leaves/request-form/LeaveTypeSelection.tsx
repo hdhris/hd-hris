@@ -12,9 +12,10 @@ export interface LeaveTypeSelectionProps {
     min: (days: number) => void;
     max: (days: number) => void;
     isAttachmentRequired: (value: boolean) => void
+    isDisabled?: boolean
 }
 
-function LeaveTypeSelection({isAttachmentRequired, min, max, leaveTypes, isLoading }: LeaveTypeSelectionProps) {
+function LeaveTypeSelection({isAttachmentRequired, min, max, leaveTypes, isLoading, isDisabled }: LeaveTypeSelectionProps) {
     const { control, setValue, formState: { errors } } = useFormContext();
     const [searchTerm, setSearchTerm] = React.useState('');  // Add state for searchTerm
 
@@ -34,6 +35,7 @@ function LeaveTypeSelection({isAttachmentRequired, min, max, leaveTypes, isLoadi
             render={({ field }) => (
                 <div>
                     <Autocomplete
+                        isDisabled={isDisabled}
                         label={<Typography
                             className={cn("text-sm font-medium inline-flex", errors.leave_type_id ? "text-red-500" : "")}>
                             Pick a Leave Type

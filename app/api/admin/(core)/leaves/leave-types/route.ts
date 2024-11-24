@@ -28,11 +28,6 @@ export async function GET(request: Request) {
         const [employeeCountData, employees] = await Promise.all([
             prisma.trans_leaves.groupBy({
                 by: ["type_id", "employee_id"],
-                where: {
-                    employee_id: {
-                        not: null,
-                    },
-                },
             }),
             prisma.trans_employees.findMany({
                 select: {

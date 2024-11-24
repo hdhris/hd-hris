@@ -3,8 +3,9 @@ import { hasContentType } from "@/helper/content-type/content-type-check";
 import prisma from "@/prisma/prisma";
 import dayjs from "dayjs";
 import { auth } from "@/auth";
-import {LeaveEvaluatorsTypes} from "@/types/leaves/leave-evaluators-types";
 import { v4 as uuidv4 } from 'uuid';
+import {EvaluatorsTypes} from "@/types/leaves/leave-evaluators-types";
+import {getEmpFullName} from "@/lib/utils/nameFormatter";
 
 export async function POST(req: NextRequest) {
     try {
@@ -32,7 +33,14 @@ export async function POST(req: NextRequest) {
                 email: session?.user.email!
             },
             select: {
-                id: true
+                id: true,
+                prefix: true,
+                first_name: true,
+                last_name: true,
+                suffix: true,
+                extension: true,
+                picture: true,
+                email: true
             }
         });
 
@@ -43,10 +51,15 @@ export async function POST(req: NextRequest) {
             }, {status: 400});
         }
 
-        const evaluators: LeaveEvaluatorsTypes = {
+        const evaluators: EvaluatorsTypes = {
             approver: {
-                approval_id: uuidv4(),
-                employee_id: reviewer.id,
+                approved_by: {
+                    id: uuidv4(),
+                    employee_id: reviewer.id,
+                    name: getEmpFullName(reviewer),
+                    picture: reviewer?.picture!,
+                    email: reviewer?.email
+                },
                 decision: {
                     is_approved: true,
                     rejectedReason: null,
@@ -56,8 +69,13 @@ export async function POST(req: NextRequest) {
             },
             // this is a brute force solution
             reviewers: {
-                reviewerId: uuidv4(),
-                employee_id: 2,
+                reviewed_by: {
+                    id: uuidv4(),
+                    employee_id: 2,
+                    name: "Datumanong, Muhammad Nizam",
+                    picture: "https://files.edgestore.dev/6bc0cgi3ynpz46db/publicFiles/_public/72b8b592-e919-4f88-af00-6966a6f1ca7c.jpg",
+                    email: "ndatumanong05@gmail.com"
+                },
                 decision: {
                     is_reviewed: null,
                     rejectedReason: null,

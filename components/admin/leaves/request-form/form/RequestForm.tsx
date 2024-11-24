@@ -72,7 +72,6 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
     const minMax = React.useMemo(() => {
         const remainingLeaves = user?.employees.find(emp => emp.id === employeeIdSelected)?.leave_balances.find(leave => leave.leave_type_id === Number(form.watch("leave_type_id")))?.remaining_days || 0
 
-        console.log("Leave Type Id: ", form.watch("leave_type_id"))
         if (remainingLeaves > maxLeave) {
             return Array.from({length: maxLeave - minLeave + 1}).map((_, i) => ({
                 label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`), value: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`)
@@ -85,21 +84,21 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         // return Array.from({length: maxLeave - minLeave + 1}).map((_, i) => ({
         //     label: String(`${minLeave + i} ${minLeave + i === 1 ? "Day" : "Days"}`), value: String(minLeave + i)
         // }));
-    }, [employeeIdSelected, maxLeave, minLeave, user?.employees])
+    }, [employeeIdSelected, form, maxLeave, minLeave, user?.employees])
 
     const LeaveRequestForm: FormInputProps[] = [{
-        isRequired: true, name: "days_of_leave", type: "auto-complete", label: "Days of Leave", config: {
+        isRequired: true, name: "days_of_leave", type: "select", label: "Days of Leave", inputDisabled: !form.watch("leave_type_id") || minMax.length === 0, config: {
             options: minMax, isClearable: true, isDisabled: !form.watch("leave_type_id") || minMax.length === 0
         }
 
     }, {
-        inputDisabled: !form.watch("leave_type_id") || minMax.length === 0,
+        inputDisabled: !form.watch("leave_type_id") || minMax.length === 0 || !form.watch("days_of_leave"),
         isRequired: true,
         name: "leave_date",
         type: "date-picker",
         label: "Start Date",
         config: {
-            granularity: "hour", hideTimeZone: true, minValue: today(getLocalTimeZone())
+            granularity: "hour", hideTimeZone: true, minValue: today(getLocalTimeZone()),
         }
 
     }, {
@@ -122,7 +121,6 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
 
 
 
-        console.log("Items: ", items)
         try {
             setIsSubmitting(true)
             if (employee?.id) {
@@ -195,7 +193,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
                                               onSelected={setEmployeeIdSelected}/>
                             <LeaveTypeSelection min={setMinLeave} max={setMaxLeave}
                                                 isAttachmentRequired={setIsAttachmentRequired}
-                                                leaveTypes={employee_leave_type!} isLoading={isLoading}/>
+                                                leaveTypes={employee_leave_type!} isLoading={isLoading} isDisabled={!form.watch("employee_id")}/>
                             {form.watch("leave_type_id") && minMax.length === 0 ?
                                 <Typography className="!text-danger text-sm">Cannot apply this leave to this
                                     employee.

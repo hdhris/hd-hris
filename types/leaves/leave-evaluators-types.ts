@@ -1,7 +1,12 @@
-export type LeaveEvaluatorsTypes = {
+export type EvaluatorsTypes = {
     approver: {
-        approval_id: string; // Unique ID for the approval
-        employee_id: number; // ID of the employee who is the approver
+        approved_by: {
+            id: string; // Unique ID for the approval
+            employee_id: number; // ID of the employee who is the approver
+            name: string;
+            picture: string;
+            email: string | null
+        }
         decision: {
             is_approved: boolean | null; // Indicates whether the request is approved (null if undecided)
             rejectedReason: string | null; // Reason for rejection (null if not rejected)
@@ -9,10 +14,14 @@ export type LeaveEvaluatorsTypes = {
         };
         comments: string; // Comments from the approver (e.g., "Awaiting final approval")
     };
-
     reviewers?: { // A single reviewer object, not an array
-        reviewerId: string; // Unique ID for the reviewer
-        employee_id: number ; // ID of the employee who is the reviewer
+        reviewed_by: {
+            id: string; // Unique ID for the reviewer
+            employee_id: number; // ID of the employee who is the approver
+            name: string;
+            picture: string;
+            email: string | null
+        }
         decision: {
             is_reviewed: boolean | null; // Indicates whether the request has been reviewed (null if not reviewed)
             rejectedReason: string | null; // Reason for rejection (null if not rejected)

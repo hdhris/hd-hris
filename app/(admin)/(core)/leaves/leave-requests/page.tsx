@@ -12,44 +12,7 @@ import BorderCard from "@/components/common/BorderCard";
 import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
 import {EmployeeLeaveCredits} from "@/types/leaves/leave-credits-types";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-
-// const getRequests = unstable_cache(async () => {
-//     return prisma.trans_leaves.findMany({
-//         where: {
-//             end_date: {
-//                 gte: new Date()
-//             }
-//         },
-//         include: {
-//             trans_employees_leaves: {
-//                 select: {
-//                     email: true,
-//                     prefix: true,
-//                     first_name: true,
-//                     last_name: true,
-//                     middle_name: true,
-//                     suffix: true,
-//                     extension: true,
-//                     picture: true
-//                 }
-//             },
-//             trans_employees_leaves_approvedBy: {
-//                 select: {
-//                     email: true,
-//                     prefix: true,
-//                     first_name: true,
-//                     last_name: true,
-//                     middle_name: true,
-//                     suffix: true,
-//                     extension: true,
-//                     picture: true
-//                 }
-//             },
-//             ref_leave_types: true
-//         }
-//     });
-// }, ['leave-requests'], { revalidate: 1, tags: ['leave-requests'] }); // Disable background revalidation
-//
+import {useEmployeeId} from "@/hooks/employeeIdHook";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -61,31 +24,52 @@ function Page() {
     const [page, setPage] = useState<number>(1)
     const [rows, setRows] = useState<number>(5)
 
+    // const empID = useEmployeeId()
+    // console.log("Emp ID: ", empID)
     const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
+
+
     const allRequests = useMemo(() => {
         console.log("Leave Data: ", data?.data)
         if (data) return data.data.map((item) => {
-            const approvedBy = {
-                name: getEmpFullName(item.trans_employees_leaves_approvedBy),
-                picture: item.trans_employees_leaves_approvedBy?.picture
+            const created_by = {
+                id: item.created_by.id,
+                name: item.created_by.name,
+                picture: item.created_by.picture,
             }
 
             return {
                 id: item.id,
-                picture: item.trans_employees_leaves?.picture,
-                email: item.trans_employees_leaves?.email || "N/A",
-                name: getEmpFullName(item.trans_employees_leaves),
-                leave_type: item?.ref_leave_types?.name!,
-                start_date: dayjs(item.start_date).format('YYYY-MM-DD'), // Format date here
-                end_date: dayjs(item.end_date).format('YYYY-MM-DD'),     // Format date here
-                total_days: dayjs(item.end_date).diff(item.start_date, 'day'),
-                status: item.status as "Pending" | "Approved" | "Rejected",
-                days_of_leave: String(dayjs(item.start_date).diff(item.end_date, 'day').toFixed(2)),
-                approvedBy
+                employee_id: item.employee_id,
+                picture: item.picture,
+                email: item.email || "N/A",
+                name: item.name,
+                leave_type: {
+                    id: item.leave_type.id,
+                    name: item.leave_type.name,
+                    code: item.leave_type.code
+                },
+                leave_details: {
+                    start_date: item.leave_details.start_date, // Format date here
+                    end_date: item.leave_details.end_date,     // Format date here
+                    total_days: item.leave_details.total_days,
+                    comment: item.leave_details.comment,
+                    reason: item.leave_details.reason,
+                    attachment: item.leave_details.attachment,
+                    status: item.leave_details.status,
+                    created_at: item.leave_details.created_at,
+                    updated_at: item.leave_details.updated_at
+                },
+                evaluators: item.evaluators,
+
+                // days_of_leave: String(dayjs(item.start_date).diff(item.end_date, 'day').toFixed(2)),
+                created_by
             }
         })
+
+        return []
     }, [data])
 
     const onOpenDrawer = useCallback(() => {

@@ -2,14 +2,19 @@ import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import dayjs from "dayjs";
+import {LeaveRequest, LeaveRequestAttachment} from "@/types/leaves/LeaveRequestTypes";
+import {EvaluatorsTypes} from "@/types/leaves/leave-evaluators-types";
+import {processJsonObject} from "@/lib/utils/parser/JsonObject";
+import { JsonArray } from "@prisma/client/runtime/library";
+import {getEmployeeId} from "@/server/getEmployeeId";
 
 export const dynamic = "force-dynamic"
+
 
 export async function GET(request: Request) {
     const {searchParams} = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');  // Default to page 1
     const perPage = parseInt(searchParams.get('limit') || '15');  // Default to 15 results per page
-
 
     const data = await prisma.trans_leaves.findMany({
         where: {
@@ -50,38 +55,54 @@ export async function GET(request: Request) {
         }
     })
 
-    const employees_request = data.map(items => {
+
+
+    const employees_request: LeaveRequest[] = data.map(items => {
+        const evaluators = processJsonObject<EvaluatorsTypes>(items.evaluators)!
+        const approverDecision = evaluators.approver.decision.is_approved;
+        const reviewerDecision = evaluators.reviewers?.decision.is_reviewed;
+
+// Determine the status based on the decisions
+        let status = "Approved"; // Default status is "Approved"
+
+        if (approverDecision === null || reviewerDecision === null) {
+            status = "Pending"; // If either the approver or reviewer has not made a final decision
+        } else if(!approverDecision || !reviewerDecision){
+            status = "Rejected"
+        }
+
         return {
             id: items.id,
             employee_id: items.employee_id,
             name: getEmpFullName(items.trans_employees_leaves),
-            email: items.trans_employees_leaves?.email,
-            picture: items.trans_employees_leaves?.picture,
+            email: items.trans_employees_leaves.email || "",
+            picture: items.trans_employees_leaves.picture || "",
             created_by: {
-                id: items.trans_employees_trans_leaves_created_byTotrans_employees?.id,
-                name: getEmpFullName(items.trans_employees_trans_leaves_created_byTotrans_employees),
-                picture: items.trans_employees_trans_leaves_created_byTotrans_employees?.picture,
-            },
-            leave_type: {
-                id: items.ref_leave_types?.id,
-                name: items.ref_leave_types?.name,
-                code: items.ref_leave_types?.code
+                id: items.trans_employees_trans_leaves_created_byTotrans_employees?.id!,
+                email: items.trans_employees_trans_leaves_created_byTotrans_employees?.email || "",
+                picture: items.trans_employees_trans_leaves_created_byTotrans_employees?.picture || "",
+                name: getEmpFullName(items.trans_employees_trans_leaves_created_byTotrans_employees)
             },
             leave_details: {
-                start_date: items.start_date,
-                end_date: items.end_date,
+                start_date: dayjs(items.start_date).format("YYYY-MM-DD"),
+                end_date: dayjs(items.end_date).format("YYYY-MM-DD"),
                 total_days: dayjs(items.end_date).diff(items.start_date, 'day'),
-                comment: items.comment,
-                reason: items.reason,
-                attachment: items.attachment_json,
-                created_at: items.created_at,
-                updated_at: items.updated_at
+                comment: items.comment || "",
+                reason: items.reason || "",
+                attachment: processJsonObject<LeaveRequestAttachment[]>(items.attachment_json)!,
+                status: status as "Approved" | "Pending" | "Rejected",
+                created_at: dayjs(items.created_at).format("YYYY-MM-DD"),
+                updated_at: dayjs(items.updated_at).format("YYYY-MM-DD"),
             },
-            evaluators: items.evaluators,
-
+            leave_type: {
+                id: items.ref_leave_types?.id!,
+                name: items.ref_leave_types?.name || "",
+                code: items.ref_leave_types?.code || ""
+            },
+            evaluators: processJsonObject<EvaluatorsTypes>(items.evaluators)!,
         }
-    })
 
+    })
     return NextResponse.json({
         data: employees_request, totalItems,
     })

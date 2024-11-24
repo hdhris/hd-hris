@@ -1,4 +1,5 @@
 import React from "react";
+import {EvaluatorsTypes} from "@/types/leaves/leave-evaluators-types";
 
 type ApprovedBy = {
     name: string;
@@ -79,17 +80,58 @@ interface EmployeeLeaveRequest {
     extension: string | null;
     picture: string;
 }
+// export interface LeaveRequest {
+//     id: number;
+//     name: string;
+//     email: string;
+//     picture: string;
+//     leave_type: string;
+//     start_date: string | Date;
+//     end_date: string | Date;
+//     total_days: number;
+//     trans_employees_leaves: EmployeeLeaveRequest;
+//     status: "Pending" | "Approved" | "Rejected";
+//     trans_employees_leaves_approvedBy: EmployeeLeaveRequest;
+//     ref_leave_types: LeaveType
+// }
+
+interface LeaveRequestCreatedBy {
+    id: number;
+    name: string;
+    picture: string;
+}
+
+
+interface EmployeeLeaveType {
+    id: number;
+    name: string;
+    code: string;
+}
+
+export interface LeaveRequestAttachment {
+    url: string
+}
+
+interface LeaveDetails {
+    start_date: string; // ISO date string
+    end_date: string;   // ISO date string
+    total_days: number;
+    comment: string | null;
+    reason: string;
+    attachment: LeaveRequestAttachment[];
+    status:"Pending" | "Approved" | "Rejected"
+    created_at: string; // ISO date string
+    updated_at: string; // ISO date string
+}
+
 export interface LeaveRequest {
     id: number;
+    employee_id: number;
     name: string;
     email: string;
     picture: string;
-    leave_type: string;
-    start_date: string | Date;
-    end_date: string | Date;
-    total_days: number;
-    trans_employees_leaves: EmployeeLeaveRequest;
-    status: "Pending" | "Approved" | "Rejected";
-    trans_employees_leaves_approvedBy: EmployeeLeaveRequest;
-    ref_leave_types: LeaveType
+    created_by: LeaveRequestCreatedBy;
+    leave_type: EmployeeLeaveType;
+    leave_details: LeaveDetails;
+    evaluators: EvaluatorsTypes;
 }

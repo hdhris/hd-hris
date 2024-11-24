@@ -5,14 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing leave RequestForm.tsx">
-      <change afterPath="$PROJECT_DIR$/types/leaves/leave-evaluators-types.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/data-display/data-display.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/data-display/data-display.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/request-form/LeaveTypeSelection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/request-form/LeaveTypeSelection.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/request-form/form/RequestForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/request-form/form/RequestForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/zodValidation/leaves/request-form/LeaveRequestFormValidation.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/leaves/request-form/LeaveRequestFormValidation.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/leave-evaluators-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/leave-evaluators-types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,6 +105,7 @@
       <workItem from="1732253419244" duration="3426000" />
       <workItem from="1732272056857" duration="15320000" />
       <workItem from="1732353501116" duration="27655000" />
+      <workItem from="1732411991554" duration="14895000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />

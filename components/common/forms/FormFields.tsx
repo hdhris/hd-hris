@@ -162,7 +162,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
         render={({field}) => {
             return (<FormItem className="w-full">
                 {item.label && item.type !== "checkbox" && item.type !== "group-checkbox" && item.type !== "switch" && (
-                    <FormLabel htmlFor={item.name} className={item.inputClassName}>
+                    <FormLabel htmlFor={item.name} className={cn(item.inputClassName, item.inputDisabled ? "text-default-400/75" : "")}>
                         {item.label}
                     </FormLabel>)}
                 {item.isRequired && <span className="ml-2 inline text-destructive text-medium"> *</span>}
