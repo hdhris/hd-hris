@@ -240,6 +240,8 @@ model ref_job_classes {
   deleted_at      DateTime?         @db.Timestamp(6)
   department_id   Int?
   pay_rate        Decimal?          @db.Decimal(10, 2)
+  basic_salary    Decimal?          @db.Decimal
+  for_probi       Boolean?
   ref_departments ref_departments?  @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
   trans_employees trans_employees[]
 }
@@ -247,7 +249,6 @@ model ref_job_classes {
 model ref_leave_types {
   id                           Int                  @id @default(autoincrement())
   applicable_to_employee_types String
-  attachment_required          Boolean
   code                         String
   created_at                   DateTime             @db.Timestamp(6)
   deleted_at                   DateTime?            @db.Timestamp(6)
@@ -256,7 +257,6 @@ model ref_leave_types {
   max_duration                 Decimal              @db.Decimal(10, 2)
   min_duration                 Decimal              @db.Decimal(10, 2)
   name                         String
-  notice_required              Int
   paid_leave                   Boolean
   updated_at                   DateTime?            @db.Timestamp(6)
   carry_over                   Boolean
@@ -484,31 +484,29 @@ model trans_employees {
   ref_addresses_trans_employees_addr_baranggayToref_addresses            ref_addresses?                 @relation("trans_employees_addr_baranggayToref_addresses", fields: [addr_baranggay], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses4")
   ref_branches                                                           ref_branches?                  @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_branch_7")
   trans_leaves_trans_leaves_employee_idTotrans_employees                 trans_leaves[]                 @relation("trans_leaves_employee_idTotrans_employees")
-  trans_leaves_trans_leaves_approved_byTotrans_employees                 trans_leaves[]                 @relation("trans_leaves_approved_byTotrans_employees")
+  trans_leaves_trans_leaves_created_byTotrans_employees                  trans_leaves[]                 @relation("trans_leaves_created_byTotrans_employees")
   trans_overtimes_trans_overtimes_employee_idTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_employee_idTotrans_employees")
   trans_overtimes_trans_overtimes_approved_byTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_approved_byTotrans_employees")
   trans_payrolls                                                         trans_payrolls[]
 }
 
 model trans_leaves {
-  employee_id                       Int?
-  start_date                        DateTime?        @db.Date
-  end_date                          DateTime?        @db.Date
-  comment                           String?
-  status                            String?          @db.VarChar(10)
-  created_at                        DateTime         @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
-  updated_at                        DateTime         @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
-  id                                Int              @id @default(autoincrement())
-  type_id                           Int?
-  reason                            String?
-  approved_by                       Int?
-  approval_at                       DateTime?        @db.Timestamp(6)
-  deleted_at                        DateTime?        @db.Timestamp(6)
-  attachment_json                   Json?
-  evaluators                        Json?
-  trans_employees_leaves            trans_employees? @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
-  ref_leave_types                   ref_leave_types? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
-  trans_employees_leaves_approvedBy trans_employees? @relation("trans_leaves_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
+  employee_id                                              Int
+  start_date                                               DateTime?        @db.Date
+  end_date                                                 DateTime?        @db.Date
+  comment                                                  String?
+  status                                                   String?          @db.VarChar(10)
+  created_at                                               DateTime         @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
+  updated_at                                               DateTime         @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  id                                                       Int              @id @default(autoincrement())
+  type_id                                                  Int?
+  reason                                                   String?
+  created_by                                               Int?
+  deleted_at                                               DateTime?        @db.Timestamp(6)
+  evaluators                                               Json?
+  trans_employees_leaves                                   trans_employees  @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
+  ref_leave_types                                          ref_leave_types? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
+  trans_employees_trans_leaves_created_byTotrans_employees trans_employees? @relation("trans_leaves_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
 }
 
 model trans_overtimes {
@@ -654,15 +652,6 @@ model auth_accounts {
   @@id([provider, provider_account_id])
 }
 
-model sec_sessions {
-  sessionToken String   @unique(map: "Session_sessionToken_key")
-  userId       String
-  expires      DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime
-  id           Int      @id @default(autoincrement())
-}
-
 model ref_holidays {
   id         Int       @id @default(autoincrement())
   name       String?   @db.VarChar(45)
@@ -728,4 +717,13 @@ model dim_payhead_specific_amounts {
   ref_payheads    ref_payheads?    @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([payhead_id, employee_id], map: "employee_payhead")
+}
+
+model sec_sessions {
+  sessionToken String   @unique(map: "Session_sessionToken_key")
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  id           Int      @id @default(autoincrement())
 }

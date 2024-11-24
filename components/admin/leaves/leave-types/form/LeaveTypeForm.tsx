@@ -30,8 +30,8 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
             //general information
             name: "", code: "", description: "",
             carryOver: false, //Leave Duration
-            minDuration: 0, maxDuration: 0, noticeRequired: 0, //Additional Settings
-            paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: "",
+            minDuration: 0, maxDuration: 0, //Additional Settings
+            paidLeave: false, isActive: false, applicableToEmployeeTypes: "",
         }
     })
 
@@ -44,10 +44,8 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 carryOver: data.carry_over,
                 minDuration: data.min_duration,
                 maxDuration: data.max_duration,
-                noticeRequired: data.notice_required,
                 paidLeave: data.paid_leave,
                 isActive: data.is_active,
-                attachmentRequired: data.attachment_required,
                 applicableToEmployeeTypes: data.applicable_to_employee_types.toLowerCase()
             })
 
@@ -76,8 +74,8 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 form.reset({
                     name: "", code: "", description: "",
                     carryOver: false, //Leave Duration
-                    minDuration: 0, maxDuration: 0, noticeRequired: 0, //Additional Settings
-                    paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: ""
+                    minDuration: 0, maxDuration: 0, //Additional Settings
+                    paidLeave: false, isActive: false, applicableToEmployeeTypes: ""
                 })
             }
         } catch (err) {
@@ -140,13 +138,6 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         placeholder: "e.g., 8",
         isRequired: true,
         description: "Maximum duration of leave that can be taken.",
-    }, {
-        name: "noticeRequired",
-        type: "number",
-        label: "Notice Required (days)",
-        placeholder: "e.g., 7",
-        isRequired: true,
-        description: "Notice required before taking leave.",
     }]
     const additionalSettings: FormInputProps[] = [switchToggle({
         name: 'paidLeave', label: 'Paid Leave', description: " Is this a paid leave type?"
@@ -170,11 +161,6 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         }
     }, switchToggle({
         name: 'carryOver', label: 'Carry Over', description: "Does this leave can be carried over to the next year?"
-    }),
-        switchToggle({
-        name: "attachmentRequired",
-        label: "Attachment Required",
-        description: "  Is an attachment (e.g., medical certificate) required?"
     })]
 
     return (<>

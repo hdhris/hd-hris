@@ -17,14 +17,14 @@ export async function POST(req: NextRequest) {
         //         id: true
         //     }
         // })
-        await prisma.dim_leave_balances.updateMany({
-            where:{
-                employee_id: data
-            },
-            data: {
-                deleted_at: new Date()
-            }
-        })
+        // await prisma.dim_leave_balances.updateMany({
+        //     where:{
+        //         id: data
+        //     },
+        //     data: {
+        //         deleted_at: new Date()
+        //     }
+        // })
         return NextResponse.json({ status: 200, message: "Leave credit deleted successfully." });
     } catch (error) {
         console.error("Error deleting leave credit:", error);

@@ -1,4 +1,5 @@
 import React from "react";
+import {EvaluatorsTypes} from "@/types/leaves/leave-evaluators-types";
 
 type ApprovedBy = {
     name: string;
@@ -34,6 +35,7 @@ export interface EmployeeLeavesStatus{
 }
 
 export interface LeaveBalance {
+    leave_type_id: number;
     year: number;
     remaining_days: number;
     carry_forward_days: number;
@@ -44,7 +46,7 @@ export interface EmployeeLeave {
     name: string;
     picture: string;
     department: string;
-    leave_balances: LeaveBalance;
+    leave_balances: LeaveBalance[];
 }
 
 export interface LeaveType {
@@ -52,7 +54,6 @@ export interface LeaveType {
     name: string;
     min: number;
     max: number;
-    isAttachmentRequired: boolean;
 }
 
 
@@ -67,28 +68,55 @@ export interface LeaveTypesItems {
     max_duration: number;
 }
 
-interface EmployeeLeaveRequest {
+
+// export interface LeaveRequest {
+//     id: number;
+//     name: string;
+//     email: string;
+//     picture: string;
+//     leave_type: string;
+//     start_date: string | Date;
+//     end_date: string | Date;
+//     total_days: number;
+//     trans_employees_leaves: EmployeeLeaveRequest;
+//     status: "Pending" | "Approved" | "Rejected";
+//     trans_employees_leaves_approvedBy: EmployeeLeaveRequest;
+//     ref_leave_types: LeaveType
+// }
+
+interface LeaveRequestCreatedBy {
     id: number;
-    email: string;
-    prefix: string | null;
-    first_name: string;
-    last_name: string;
-    middle_name: string;
-    suffix: string | null;
-    extension: string | null;
+    name: string;
     picture: string;
 }
+
+
+interface EmployeeLeaveType {
+    id: number;
+    name: string;
+    code: string;
+}
+
+
+interface LeaveDetails {
+    start_date: string; // ISO date string
+    end_date: string;   // ISO date string
+    total_days: number;
+    comment: string | null;
+    reason: string;
+    status:"Pending" | "Approved" | "Rejected"
+    created_at: string; // ISO date string
+    updated_at: string; // ISO date string
+}
+
 export interface LeaveRequest {
     id: number;
+    employee_id: number;
     name: string;
     email: string;
     picture: string;
-    leave_type: string;
-    start_date: string | Date;
-    end_date: string | Date;
-    total_days: number;
-    trans_employees_leaves: EmployeeLeaveRequest;
-    status: "Pending" | "Approved" | "Rejected";
-    trans_employees_leaves_approvedBy: EmployeeLeaveRequest;
-    ref_leave_types: LeaveType
+    created_by: LeaveRequestCreatedBy;
+    leave_type: EmployeeLeaveType;
+    leave_details: LeaveDetails;
+    evaluators: EvaluatorsTypes;
 }

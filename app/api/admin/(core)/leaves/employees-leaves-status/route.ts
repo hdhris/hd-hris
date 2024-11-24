@@ -1,6 +1,5 @@
 import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
-import {Prisma} from "@prisma/client";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {EmployeeLeave, EmployeeLeavesStatus, LeaveType} from "@/types/leaves/LeaveRequestTypes";
 import {toDecimals} from "@/helper/numbers/toDecimals";
@@ -10,8 +9,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
     const [emp, leaveTypes] = await Promise.all([prisma.trans_employees.findMany({
         where: {
-            deleted_at: null,
-            // resignation_json: {
+            deleted_at: null, // resignation_json: {
             //     equals: Prisma.DbNull
             // }, termination_json: {
             //     equals: Prisma.DbNull
@@ -33,8 +31,7 @@ export async function GET() {
                 some: {
                     remaining_days: {
                         gt: 0
-                    },
-                    deleted_at: null
+                    }, deleted_at: null
                 }
             }
         }, select: {
@@ -57,20 +54,20 @@ export async function GET() {
                 where: {
                     remaining_days: {
                         gt: 0
-                    },
-                    deleted_at: null
+                    }, deleted_at: null
                 }
             },
             trans_leaves_trans_leaves_employee_idTotrans_employees: true
         }
-    }), prisma.ref_leave_types.findMany({
-        where: {
-            is_active: true,
-            deleted_at: null
-        }, select: {
-            id: true, name: true, max_duration: true, min_duration: true, attachment_required: true
-        },
-    }),]);
+    }),
+
+        prisma.ref_leave_types.findMany({
+            where: {
+                is_active: true, deleted_at: null
+            }, select: {
+                id: true, name: true, max_duration: true, min_duration: true
+            },
+        }),]);
 
     // console.log("Leave Balance: ", emp.find((emp) => emp.id)?.dim_leave_balances)
 
@@ -82,20 +79,17 @@ export async function GET() {
         picture: emp.picture,
         department: emp.ref_departments.name,
         leave_balances: emp.dim_leave_balances.map((leaveBalance: any) => ({
+            leave_type_id: leaveBalance.leave_type_id,
             year: leaveBalance.year,
             remaining_days: toDecimals(leaveBalance.remaining_days),
             carry_forward_days: toDecimals(leaveBalance.carry_forward_days),
-        }))[0],
+        })),
         trans_leaves: emp.trans_leaves_trans_leaves_employee_idTotrans_employees
     }));
 
 
     const availableLeaves: LeaveType[] = leaveTypes.map((leave) => ({
-        id: leave.id,
-        name: leave.name,
-        min: toDecimals(leave.min_duration),
-        max: toDecimals(leave.max_duration),
-        isAttachmentRequired: leave.attachment_required
+        id: leave.id, name: leave.name, min: toDecimals(leave.min_duration), max: toDecimals(leave.max_duration),
     }))
 
     const data: EmployeeLeavesStatus = {

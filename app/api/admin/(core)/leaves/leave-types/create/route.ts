@@ -51,8 +51,6 @@ export async function POST(request: NextRequest) {
                 is_active: data.isActive,
                 min_duration: data.minDuration,
                 max_duration: data.maxDuration,
-                notice_required: data.noticeRequired,
-                attachment_required: data.attachmentRequired,
                 created_at: new Date(),
                 updated_at: new Date(),
                 applicable_to_employee_types: data.applicableToEmployeeTypes,

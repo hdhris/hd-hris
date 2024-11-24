@@ -17,7 +17,9 @@ import {Button} from "@nextui-org/button";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {LeaveTypeForEmployee} from "@/types/leaves/LeaveTypes";
 import Typography from "@/components/common/typography/Typography";
-import {Chip} from '@nextui-org/react';
+import {Chip, Selection} from '@nextui-org/react';
+import {LuInfo} from "react-icons/lu";
+import {icon_size, icon_size_sm} from "@/lib/utils";
 
 interface LeaveCreditFormProps {
     title?: string
@@ -34,6 +36,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [leaveTypes, setLeaveTypes] = useState<LeaveTypeForEmployee[]>([])
     const [employeeLeaveType, setEmployeeLeaveType] = useState<LeaveTypeForEmployee[] | null>()
+    const [isAssignToVisible, setIsAssignToVisible] = useState<boolean>(true)
 
     // Handle modal open/close state changes
     const handleModalOpen = useCallback((value: boolean) => {
@@ -57,38 +60,42 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
 
     useEffect(() => {
         if (employee) {
-            setEmployeeState((prevState) => {
+            setEmployeeState((prevState: Employee[]) => {
                 // Ensure prevState is initialized properly
                 const currentState = prevState || []; // Fallback to empty array
 
                 // Check if employee is already in the state to avoid unnecessary updates
                 if (currentState[0]?.id !== employee.id) {
-                    return [employee]; // Update only if it's different
+                    return [employee as Employee]; // Cast employee to Employee type if necessary
                 }
                 return currentState; // Return the previous state if it's the same
             });
 
+            console.log("Ensure prevState is initialized properly")
+            setIsAssignToVisible(false)
         } else if (data && data.data) {
             setEmployeeState(data.data.employees);
             setLeaveTypes(data.data.leave_types)
         }
-    }, [data, employee, isOpen]);
+    }, [data, employee]);
 
     useEffect(() => {
         // Reset the form with employee details
         if (employee) {
             const leave_types = leaveTypes.filter(item => employee.leave_credits?.some(leave => leave.leave_type_id === String(item.id)))
             setEmployeeLeaveType(leave_types)
-            // console.log("Leave types: ", leave_types)
-            // console.log("Employee: ", employee)
             form.reset({
                 apply_for: "specific_employee",
-                employee_id: employee.id, leave_credits: employee.leave_credits?.map(item => ({
+                employee_id: employee.id,
+                leave_credits: employee.leave_credits?.map(item => ({
                     leave_type_id: item.leave_type_id,
                     allocated_days: item.allocated_days,
                     carry_forward_days: item.carry_forward_days
                 })),
             });
+
+            console.log("Reset the form with employee details")
+            setIsAssignToVisible(false)
         }
     }, [employee, form, isOpen, leaveTypes]);
 
@@ -99,25 +106,23 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
 
 
         const assign_to = data.apply_for
-        if(assign_to === "all"){
+        if (assign_to === "all") {
             values = {
-                employee_id: employeeState.map(emp => emp.id),
-                leave_credits: data.leave_credits
+                employee_id: employeeState.map(emp => emp.id), leave_credits: data.leave_credits
             }
-        } else if(assign_to === "regular"){
+        } else if (assign_to === "regular") {
             values = {
                 employee_id: employeeState.filter(item => item.is_regular === true).map(emp => emp.id),
                 leave_credits: data.leave_credits
             }
-        } else if(assign_to === "probationary"){
+        } else if (assign_to === "probationary") {
             values = {
                 employee_id: employeeState.filter(item => item.is_regular === false).map(emp => emp.id),
                 leave_credits: data.leave_credits
             }
         } else {
             values = {
-                employee_id: [data.employee_id],
-                leave_credits: data.leave_credits
+                employee_id: [data.employee_id], leave_credits: data.leave_credits
             }
         }
         console.log("Create Data: ", values)
@@ -240,7 +245,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                 className="space-y-4"
                 id="drawer-form"
             >
-                <FormFields items={[{
+                {isAssignToVisible && <FormFields items={[{
                     name: "apply_for",
                     label: "Assign to",
                     description: "Select type of employee or specify an employee.",
@@ -257,7 +262,10 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                             value: "specific_employee", label: "Specify..."
                         }]
                     }
-                }]}/>
+                }]}/>}
+
+                {form.watch("apply_for") !== "specific_employee" && form.watch("apply_for") !== undefined && <Chip startContent={<LuInfo className={icon_size_sm}/>} color="danger" variant="bordered" className="word-break text-sm">Existing leave credits won&apos;t be overwritten.</Chip>}
+
                 {form.watch("apply_for") === "specific_employee" && <EmployeeListForm
                     employees={employeeState!}
                     isLoading={data.isLoading}
@@ -276,7 +284,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                         {leaveTypes.map((leaveType, index) => {
                             return (<div key={leaveType.id} className="space-y-2 border-b-2 last:border-none p-4">
                                 <div className="flex justify-between">
-                                <Typography className="font-semibold text-medium">
+                                    <Typography className="font-semibold text-medium">
                                         {leaveType.name}
                                     </Typography>
                                     <Chip>{leaveType.applicable_to_employee_types}</Chip>
@@ -298,8 +306,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                         })}
                     </div>}
 
-                {
-                    form.watch("apply_for") === "regular" &&
+                {form.watch("apply_for") === "regular" &&
                     <div className="flex flex-col gap-4 border-2 border-divider/20 rounded-[5px]">
                         {/*{employeeState.filter(emp => emp.is_regular === true).map(emp => {*/}
                         {/*    return <input*/}
@@ -332,10 +339,8 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                                 </div>
                             </div>)
                         })}
-                    </div>
-                }
-                {
-                    form.watch("apply_for") === "probationary" &&
+                    </div>}
+                {form.watch("apply_for") === "probationary" &&
                     <div className="flex flex-col gap-4 border-2 border-divider/20 rounded-[5px]">
                         {leaveTypes.filter(leave_type => leave_type.applicable_to_employee_types === "all" || leave_type.applicable_to_employee_types === "probationary").map((leaveType, index) => {
                             return (<div key={leaveType.id} className="space-y-2 border-b-2 last:border-none p-4">
@@ -360,8 +365,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                                 </div>
                             </div>)
                         })}
-                    </div>
-                }
+                    </div>}
 
                 {employeeLeaveType && form.watch("employee_id") ? (
                     <div className="flex flex-col gap-4 border-2 border-divider/20 rounded-[5px]">
