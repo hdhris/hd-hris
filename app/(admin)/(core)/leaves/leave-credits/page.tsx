@@ -250,13 +250,8 @@ function Page() {
             onEdit={() => {
                 setIsEdit(true)
                 setEditCredit(viewCredit)
-            }}
 
-            onDelete={async () => {
-                console.log("Credit: ", viewCredit)
-                await handleDelete(viewCredit)
             }}
-
             header={<div className="flex flex-row items-center space-x-4 pb-2">
                 <User name={<div className="flex gap-2">
                     <Typography>{viewCredit.name}</Typography>
