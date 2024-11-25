@@ -8,7 +8,7 @@ import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {EmployeeLeaveCredits, LeaveCredits} from "@/types/leaves/leave-credits-types";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {
-    Accordion, AccordionItem, Avatar, Card, CardBody, CardHeader, Chip, cn, Progress, Tooltip, User
+    Accordion, AccordionItem, Avatar, CardBody, CardHeader, Chip, cn, Progress, Tooltip, User
 } from '@nextui-org/react';
 import Typography from "@/components/common/typography/Typography";
 import AnimatedCircularProgressBar from "@/components/ui/animated-circular-progress-bar";
@@ -21,9 +21,10 @@ import DropdownList from "@/components/common/Dropdown";
 import CardView from "@/components/common/card-view/card-view";
 import NoData from "@/components/common/no-data/NoData";
 import {capitalize} from "@nextui-org/shared-utils";
-import {mutate} from "swr";
 import showDialog from "@/lib/utils/confirmDialog";
 import {axiosInstance} from "@/services/fetcher";
+import {Card} from "@nextui-org/card";
+import {usePDF} from "@react-pdf/renderer";
 
 
 export interface EditCreditProp extends Omit<LeaveCredits, "leave_balance"> {
@@ -123,11 +124,16 @@ function Page() {
     //
     // }
 
+    // const handleOnPrint = () => {
+    //
+    // }
+
     const handleSelect = (edited: EditCreditProp) => {
         console.log("Data: ", data)
         console.log("Edited: ", edited)
         // setEditCredit(edited)
         setViewCredit(edited)
+
     }
 
     const handleDelete = async (deleted: EditCreditProp) => {
@@ -141,7 +147,7 @@ function Page() {
             </Typography>)
         })
 
-        if(onConfirm === "yes"){
+        if (onConfirm === "yes") {
             const res = await axiosInstance.post('/api/admin/leaves/leave-credit/delete', leave_credit_ids)
             if (res.status !== 200) {
                 toast({
@@ -286,7 +292,8 @@ function Page() {
                                     <span>{leave.leave_type.name}</span>
                                     <CountUp start={0} end={percent} suffix=" %"/>
                                 </div>
-                                <Progress aria-label="Leave Credit Progress" color={color} value={percent} className="h-2"/>
+                                <Progress aria-label="Leave Credit Progress" color={color} value={percent}
+                                          className="h-2"/>
                             </>}
                         >
                             <table className="w-full text-sm">

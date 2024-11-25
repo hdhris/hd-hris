@@ -15,10 +15,11 @@ interface CardViewProps {
     onDelete?: () => void;
     onEdit?: () => void;
     onClose?: () => void
+    id?: string
 }
 
-function CardView({header, body, footer, onDelete, onEdit, onClose, title}: CardViewProps) {
-    return (<div className="w-[700px] space-y-4 rounded border border-default-400/20 overflow-hidden">
+function CardView({header, body, footer, onDelete, onEdit, onClose, title, id}: CardViewProps) {
+    return (<div className="w-[700px] space-y-4 rounded border border-default-400/20 overflow-hidden" id={id}>
         <ScrollShadow size={20} className="h-full overflow-y-auto p-4">
             <div
                 className="flex justify-between sticky top-0 bg-[#FAFAFA] z-10 px-4 py-2 border-b border-default-400/50">
