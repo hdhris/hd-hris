@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Calendar, Card, CardBody, CardHeader, Chip, cn, ScrollShadow, SortDescriptor } from "@nextui-org/react";
 import { parseDate } from "@internationalized/date";
 import {
@@ -15,7 +15,7 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { useQuery } from "@/services/queries";
 import UserMail from "@/components/common/avatar/user-info-mail";
-import { capitalize, toUpper } from "lodash";
+import { toUpper } from "lodash";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import useSWR from "swr";
 import { fetchAttendanceData } from "./stage";
@@ -84,6 +84,7 @@ export default function Page() {
 
     const config: TableConfigProps<AttendanceLog> = {
         columns: [
+            { uid: "id", name: "ID", sortable: true },
             { uid: "name", name: "Name", sortable: true },
             { uid: "mode", name: "Mode" },
             { uid: "daytime", name: "Daytime" },
@@ -120,6 +121,8 @@ export default function Page() {
             }
 
             switch (columnKey) {
+                case "id":
+                  return <>{employee.id}</>
                 case "name":
                     return (
                         <UserMail name={getEmpFullName(employee)} picture={employee.picture} email={employee.email} />
@@ -246,56 +249,66 @@ export default function Page() {
                         {currentAttendanceInfo && clockSchedule && attendanceData && selectedLog && (
                             <ScrollShadow className="flex flex-col gap-2 p-1">
                                 <p className="text-sm text-gray-500 font-semibold">Morning</p>
-                                {currentAttendanceInfo.status?.amIn?.time ? (
-                                    <div className="flex justify-between items-center text-sm ms-2">
+                                <div className="flex justify-between items-center text-sm ms-2">
+                                    {currentAttendanceInfo.status?.amIn?.time ? (
                                         <strong>
                                             {toGMT8(currentAttendanceInfo.status?.amIn?.time).format("hh:mm a")}
                                         </strong>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 font-semibold">Unrecorded</p>
+                                    )}
+                                    {currentAttendanceInfo.status?.amIn?.status && (
                                         <p>{toUpper(currentAttendanceInfo.status.amIn.status)}</p>
-                                    </div>
-                                ) : (
-                                    <p className="ms-2 text-sm text-gray-500 font-semibold">Unrecorded</p>
-                                )}
-                                {currentAttendanceInfo.status?.amOut?.time ? (
-                                    <div className="flex justify-between items-center text-sm ms-2">
+                                    )}
+                                </div>
+                                <div className="flex justify-between items-center text-sm ms-2">
+                                    {currentAttendanceInfo.status?.amOut?.time ? (
                                         <strong>
                                             {toGMT8(currentAttendanceInfo.status?.amOut?.time).format("hh:mm a")}
                                         </strong>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 font-semibold">Unrecorded</p>
+                                    )}
+                                    {currentAttendanceInfo.status?.amOut?.status && (
                                         <p>{toUpper(currentAttendanceInfo.status.amOut.status)}</p>
-                                    </div>
-                                ) : (
-                                    <p className="ms-2 text-sm text-gray-500 font-semibold">Unrecorded</p>
-                                )}
+                                    )}
+                                </div>
                                 <p className="text-sm text-gray-500 font-semibold mt-1">Afternoon</p>
-                                {currentAttendanceInfo.status?.pmIn?.time ? (
-                                    <div className="flex justify-between items-center text-sm ms-2">
+                                <div className="flex justify-between items-center text-sm ms-2">
+                                    {currentAttendanceInfo.status?.pmIn?.time ? (
                                         <strong>
                                             {toGMT8(currentAttendanceInfo.status?.pmIn?.time).format("hh:mm a")}
                                         </strong>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 font-semibold">Unrecorded</p>
+                                    )}
+                                    {currentAttendanceInfo.status?.pmIn?.status && (
                                         <p>{toUpper(currentAttendanceInfo.status.pmIn.status)}</p>
-                                    </div>
-                                ) : (
-                                    <p className="ms-2 text-sm text-gray-500 font-semibold">Unrecorded</p>
-                                )}
-                                {currentAttendanceInfo.status?.pmOut?.time ? (
-                                    <div className="flex justify-between items-center text-sm ms-2">
+                                    )}
+                                </div>
+                                <div className="flex justify-between items-center text-sm ms-2">
+                                    {currentAttendanceInfo.status?.pmOut?.time ? (
                                         <strong>
                                             {toGMT8(currentAttendanceInfo.status?.pmOut?.time).format("hh:mm a")}
                                         </strong>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 font-semibold">Unrecorded</p>
+                                    )}
+                                    {currentAttendanceInfo.status?.pmOut?.status && (
                                         <p>{toUpper(currentAttendanceInfo.status.pmOut.status)}</p>
-                                    </div>
-                                ) : (
-                                    <p className="ms-2 text-sm text-gray-500 font-semibold">Unrecorded</p>
-                                )}
+                                    )}
+                                </div>
                                 <p className="text-sm text-gray-500 font-semibold mt-1">Rendered</p>
                                 <p className="flex justify-between items-center text-sm ms-2">
                                     Shift:{" "}
                                     <span>
                                         {currentAttendanceInfo.status?.shift
-                                            ? calculateShiftLength(null, null, currentAttendanceInfo.status?.shift)
-                                                  .replace("ou", "")
-                                                  .replace("and", "&")
-                                                  .replace("ute", "")
+                                            ? calculateShiftLength(
+                                                  null,
+                                                  null,
+                                                  currentAttendanceInfo.status?.shift,
+                                                  true
+                                              )
                                             : "UNRECORDED"}
                                     </span>
                                 </p>
@@ -303,10 +316,12 @@ export default function Page() {
                                     Overtime:{" "}
                                     <span>
                                         {currentAttendanceInfo.status?.overtime
-                                            ? calculateShiftLength(null, null, currentAttendanceInfo.status?.overtime)
-                                                  .replace("ou", "")
-                                                  .replace("and", "&")
-                                                  .replace("ute", "")
+                                            ? calculateShiftLength(
+                                                  null,
+                                                  null,
+                                                  currentAttendanceInfo.status?.overtime,
+                                                  true
+                                              )
                                             : "0"}
                                     </span>
                                 </p>
@@ -314,10 +329,12 @@ export default function Page() {
                                     Undertime:{" "}
                                     <span>
                                         {currentAttendanceInfo.status?.undertime
-                                            ? calculateShiftLength(null, null, currentAttendanceInfo.status?.undertime)
-                                                  .replace("ou", "")
-                                                  .replace("and", "&")
-                                                  .replace("ute", "")
+                                            ? calculateShiftLength(
+                                                  null,
+                                                  null,
+                                                  currentAttendanceInfo.status?.undertime,
+                                                  true
+                                              )
                                             : "0"}
                                     </span>
                                 </p>

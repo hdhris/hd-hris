@@ -67,22 +67,23 @@ export interface AttendanceData {
   employeeSchedule: EmployeeSchedule[]; // Array of individual schedules for employees
 }
 
-export type InStatus = "absent" | "late" | "ontime" | "no break";
+export type InStatus = "absent" | "late" | "ontime" | "no break" | "no work";
 export type OutStatus =
   | "absent"
   | "early-out"
   | "overtime"
   | "ontime"
   | "lunch"
-  | "no break";
+  | "no break"
+  | "no work";
 
 export type punchIN = {
-  id: number;
+  id: number | null;
   time: string | null;
   status: InStatus;
 };
 export type punchOUT = {
-  id: number;
+  id: number | null;
   time: string | null;
   status: OutStatus;
 };
@@ -97,4 +98,4 @@ export type LogStatus = {
   undertime?: number;
 };
 
-export type AttendaceStatuses = { [key: string]: LogStatus };
+export type AttendaceStatuses = { [employeeID: string]: LogStatus };

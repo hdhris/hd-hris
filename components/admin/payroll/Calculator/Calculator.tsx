@@ -48,6 +48,7 @@ function PayheadCalculator({
             rate_p_hr: 1,
             total_shft_hr: 1,
             payroll_days: 1,
+            basic_salary: 1,
             ...payheadVariables?.reduce((acc, variable) => {
                 acc[variable] = 1;
                 return acc;
