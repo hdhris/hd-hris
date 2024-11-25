@@ -1,4 +1,3 @@
-// app/api/employeemanagement/employees/create-with-credentials/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { Prisma } from "@prisma/client";

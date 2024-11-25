@@ -1,4 +1,3 @@
-// app/api/auth/credentials/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import SimpleAES from "@/lib/cryptography/3des";

@@ -1,4 +1,3 @@
-// app/api/test-email/route.ts
 import { NextResponse } from "next/server";
 import { sendEmail } from "@/lib/utils/sendEmail";
 
