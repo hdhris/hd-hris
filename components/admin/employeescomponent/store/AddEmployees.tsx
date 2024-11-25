@@ -24,6 +24,7 @@ import Text from "@/components/Text";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { mutate } from "swr";
+import ScheduleSelection from "./ScheduleSelection";
 
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
@@ -537,8 +538,10 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
             </Text>
             <EducationalBackgroundForm />
             <Divider className="my-6" />
-            <Text>Job Information</Text>
+            <Text className="text-medium font-semibold" >Job Information</Text>
             <JobInformationForm />
+            <Text className="text-small font-semibold" >Working Schedule</Text>
+            <ScheduleSelection />
           </form>
         </Form>
       </Drawer>

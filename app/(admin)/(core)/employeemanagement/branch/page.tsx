@@ -149,10 +149,10 @@ const Page: React.FC = () => {
     sortItems: [
       { name: "Name", key: "name" as keyof Branch },
       {
-        name: "Created At",
+        name: "Created",
         key: "created_at" as keyof Branch,
       },
-      { name: "Updated At", key: "updated_at" as keyof Branch },
+      { name: "Updated", key: "updated_at" as keyof Branch },
     ],
   };
 

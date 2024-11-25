@@ -147,8 +147,8 @@ const Page: React.FC = () => {
   const sortProps = {
     sortItems: [
       { name: "Name", key: "name" as keyof Department },
-      { name: "Created At", key: "created_at" as keyof Department },
-      { name: "Updated At", key: "updated_at" as keyof Department },
+      { name: "Created", key: "created_at" as keyof Department },
+      { name: "Updated", key: "updated_at" as keyof Department },
     ],
   };
 

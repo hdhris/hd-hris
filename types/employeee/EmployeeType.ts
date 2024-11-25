@@ -34,6 +34,7 @@ export type EmployeeAll = {
   email: string;
   contact_no: string;
   picture: string;
+  is_regular:boolean;
   ref_job_classes: { name: string }; // Add this line
   ref_departments: { name: string }; // Add this line
   ref_addresses_trans_employees_addr_regionToref_addresses: { address_name: string, address_code: number},
