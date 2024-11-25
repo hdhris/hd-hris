@@ -7,24 +7,39 @@ import {Button} from "@nextui-org/button";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {EmployeeLeaveCredits, LeaveCredits} from "@/types/leaves/leave-credits-types";
 import DataDisplay from "@/components/common/data-display/data-display";
-import {Avatar, Card, CardBody, CardHeader, cn, Tooltip} from '@nextui-org/react';
+import {
+    Accordion, AccordionItem, Avatar, Card, CardBody, CardHeader, Chip, cn, Progress, Tooltip, User
+} from '@nextui-org/react';
 import Typography from "@/components/common/typography/Typography";
 import AnimatedCircularProgressBar from "@/components/ui/animated-circular-progress-bar";
 import {LuCalendarClock, LuCalendarDays} from "react-icons/lu";
 import {icon_color, icon_size} from "@/lib/utils";
 import CountUp from "react-countup";
 import LeaveCreditForm from "@/components/admin/leaves/credits/leave-credit-form";
-import {Employee} from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
 import {IoChevronDown} from "react-icons/io5";
 import DropdownList from "@/components/common/Dropdown";
+import CardView from "@/components/common/card-view/card-view";
+import NoData from "@/components/common/no-data/NoData";
+import {capitalize} from "@nextui-org/shared-utils";
+import {mutate} from "swr";
+import showDialog from "@/lib/utils/confirmDialog";
+import {axiosInstance} from "@/services/fetcher";
 
 
-export interface EditCreditProp extends Employee {
+export interface EditCreditProp extends Omit<LeaveCredits, "leave_balance"> {
     leave_credits: {
         id: number
-        leave_type_id: string, allocated_days: number, carry_forward_days: number,
+        leave_type_id: string,
+        allocated_days: number,
+        carry_forward_days: number,
+        remaining_days: number,
+        used_days: number
+        leave_type: {
+            id: number, name: string
+        }
     }[] | undefined
 }
+
 
 function Page() {
     const {toast} = useToast()
@@ -32,6 +47,7 @@ function Page() {
     const [rows, setRows] = useState<number>(5)
     const [year, setYear] = useState<number>(new Date().getFullYear())
     const [editCredit, setEditCredit] = useState<EditCreditProp>()
+    const [viewCredit, setViewCredit] = useState<EditCreditProp>()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isEdit, setIsEdit] = useState<boolean>(false)
     const {data, isLoading} = usePaginateQuery<EmployeeLeaveCredits>("/api/admin/leaves/leave-credit", page, rows, {
@@ -110,12 +126,49 @@ function Page() {
     const handleSelect = (edited: EditCreditProp) => {
         console.log("Data: ", data)
         console.log("Edited: ", edited)
-        setIsEdit(true)
-        setEditCredit(edited)
+        // setEditCredit(edited)
+        setViewCredit(edited)
+    }
+
+    const handleDelete = async (deleted: EditCreditProp) => {
+
+
+        const leave_credit_ids = deleted.leave_credits?.map((item) => item.id)
+
+        const onConfirm = await showDialog({
+            title: "Delete Leave Credit", message: (<Typography>Are you sure you want to delete this
+                <Typography as="span" className="font-semibold"> {deleted.name}</Typography>?
+            </Typography>)
+        })
+
+        if(onConfirm === "yes"){
+            const res = await axiosInstance.post('/api/admin/leaves/leave-credit/delete', leave_credit_ids)
+            if (res.status !== 200) {
+                toast({
+                    title: "Error", description: res.data.message, variant: "danger",
+                })
+            } else {
+                toast({
+                    title: "Success", description: res.data.message, variant: "success",
+                })
+                // await mutate()
+            }
+        }
+        // const res = await axiosInstance.delete(`/api/admin/leaves/leave-credit?id=${id}`)
+        // if (res.status !== 200) {
+        //     toast({
+        //         title: "Error", description: res.data.message, variant: "danger",
+        //     })
+        // } else {
+        //     toast({
+        //         title: "Success", description: res.data.message, variant: "success",
+        //     })
+        //     // await mutate()
+        // }
     }
 
 
-    return (<section className='w-full h-full flex gap-4'>
+    return (<section className='w-full h-full flex gap-4 overflow-hidden'>
         <DataDisplay
             // onSelect={(key) => alert(Number(key))}
             addFunction={<DropdownList
@@ -145,7 +198,9 @@ function Page() {
                     id={data.id}
                     leave_balance={data.leave_balance}
                     name={data.name}
-                    picture={data.picture}/>);
+                    picture={data.picture}
+                    employment_status={data.employment_status}
+                    job={data.job}/>);
             }}
             // filterProps={{
             //     filterItems: filterLeaveTypes
@@ -188,9 +243,80 @@ function Page() {
                 }
             }}
         />
+
+        {viewCredit && <CardView
+            title="Leave Credit"
+            onClose={() => setViewCredit(undefined)}
+            onEdit={() => {
+                setIsEdit(true)
+                setEditCredit(viewCredit)
+
+            }}
+            onDelete={() => handleDelete(viewCredit)}
+            header={<div className="flex flex-row items-center space-x-4 pb-2">
+                <User name={<div className="flex gap-2">
+                    <Typography>{viewCredit.name}</Typography>
+                    <Chip
+                        color={viewCredit.employment_status === "regular" ? "success" : "warning"}>{capitalize(viewCredit.employment_status)}</Chip>
+                </div>}
+                      description={viewCredit.department}
+                      classNames={{
+                          name: "text-medium font-semibold", description: "text-sm font-semibold text-default-400/80"
+                      }}
+                      avatarProps={{
+                          src: viewCredit.picture!
+                      }}/>
+
+            </div>}
+
+            body={<div className="space-y-4">
+                <Accordion showDivider={false} defaultSelectedKeys={["0"]} aria-label="Leave Credits"
+                           aria-labelledby="Leave Credits">
+                    {viewCredit.leave_credits && viewCredit.leave_credits?.length > 0 ? (viewCredit.leave_credits.map((leave, index) => {
+                        const percent = (leave.remaining_days / leave.allocated_days) * 100;
+                        const color = percent > 75 ? "success" : percent > 50 ? "warning" : "danger";
+
+                        return (<AccordionItem
+                            aria-labelledby="Leave Credits"
+                            className="overflow-hidden"
+                            key={index}
+                            aria-label={leave.leave_type.name}
+                            title={<>
+                                <div className="flex justify-between text-sm">
+                                    <span>{leave.leave_type.name}</span>
+                                    <CountUp start={0} end={percent} suffix=" %"/>
+                                </div>
+                                <Progress aria-label="Leave Credit Progress" color={color} value={percent} className="h-2"/>
+                            </>}
+                        >
+                            <table className="w-full text-sm">
+                                <tbody>
+                                {[{
+                                    label: "Allocated Days", value: leave.allocated_days
+                                }, {label: "Remaining Days", value: leave.remaining_days}, {
+                                    label: "Used Days", value: leave.used_days
+                                }, {
+                                    label: "Carry Forward", value: leave.carry_forward_days
+                                },].map((item, idx) => (<tr key={idx} className="border-b last:border-b-0">
+                                    <td className="py-2 px-4 text-gray-500">{item.label}</td>
+                                    <td className="py-2 px-4">{item.value}</td>
+                                </tr>))}
+                                </tbody>
+                            </table>
+                        </AccordionItem>);
+                    })) : (<NoData message="No Leave Credit"/>)}
+                </Accordion>
+
+            </div>}
+            footer={<></>}
+
+        />}
+
         <LeaveCreditForm title="Update Leave Credit"
-                         description="Adjust and manage employee leave balances efficiently." onOpen={setIsEdit}
-                         isOpen={isEdit} employee={editCredit}/>
+                         description="Adjust and manage employee leave balances efficiently."
+                         onOpen={setIsEdit}
+                         isOpen={isEdit}
+                         employee={editCredit}/>
     </section>);
 }
 
@@ -201,16 +327,21 @@ const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (e
 
     const maxLeaveCredit = (employee.leave_balance?.filter(balance => balance.allocated_days).reduce((a, b) => a + b.allocated_days, 0))!
     const remaining = employee.leave_balance?.filter(item => item.remaining_days)?.reduce((a, b) => a + b.remaining_days, 0)
-    const edited = {
+    const edited: EditCreditProp = {
         name: employee.name,
         id: employee.id,
         department: employee.department,
         picture: employee.picture!,
+        job: employee.job,
+        employment_status: employee.employment_status,
         leave_credits: employee.leave_balance?.map(item => ({
             id: item.id,
             leave_type_id: String(item.leave_type.id),
+            remaining_days: item.remaining_days,
             allocated_days: item.allocated_days,
+            used_days: item.used_days,
             carry_forward_days: item.carry_forward_days,
+            leave_type: item.leave_type
         }))
 
         // allocated_days: employee.leave_balance?.find(item => item.allocated_days)?.allocated_days!,
@@ -226,7 +357,7 @@ const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (e
         colorCode = "rgb(239 68 68)"
     }
 
-    return (<Card className="w-[270px] border-1" isHoverable isPressable shadow="none"
+    return (<Card className="border-1 w-full max-w-[270px]" isHoverable isPressable shadow="none"
                   onClick={() => onSelect && onSelect(edited)}>
         <CardHeader className="flex gap-4 border-b-2 border-b-divider/20">
             <Avatar src={employee.picture!} alt={employee.name} isBordered/>

@@ -11,7 +11,12 @@ const jobSchema = z.object({
     .string()
     .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
     .transform((val) => new Prisma.Decimal(val)),
+    basic_salary: z
+    .string()
+    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
+    .transform((val) => new Prisma.Decimal(val)),
   is_active: z.boolean().default(true),
+  for_probi: z.boolean().default(true),
   superior_id: z.number().optional().nullable(),
   department_id: z.number().optional().nullable(),
 });
@@ -84,7 +89,9 @@ export async function POST(req: Request) {
       data: {
         name: validatedData.name,
         pay_rate: validatedData.pay_rate,
+        basic_salary: validatedData.basic_salary,
         is_active: validatedData.is_active,
+        for_probi:validatedData.for_probi,
         superior_id: validatedData.superior_id,
         department_id: validatedData.department_id,
         created_at: new Date(),

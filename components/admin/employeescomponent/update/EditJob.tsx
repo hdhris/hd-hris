@@ -1,30 +1,25 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  useDisclosure,
-} from "@nextui-org/react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import { useJobpositionData } from "@/services/queries";
 import axios from "axios";
-import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JobPosition } from "@/types/employeee/JobType";
-//
+import Drawer from "@/components/common/Drawer";
+import { Form } from "@/components/ui/form";
+
 interface EditJobPositionProps {
   isOpen: boolean;
   onClose: () => void;
   jobId: number;
   onJobUpdated: () => void;
 }
-//
+
 const jobPositionSchema = z.object({
   name: z
     .string()
@@ -34,7 +29,16 @@ const jobPositionSchema = z.object({
     .string()
     .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
     .transform((val) => (val === "" ? "0.00" : val)),
+  basic_salary: z
+    .string()
+    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
+    .transform((val) => (val === "" ? "0.00" : val)),
+  superior_id: z
+    .string()
+    .nullish()
+    .transform((val) => val || null),
   is_active: z.boolean().default(true),
+  for_probi: z.boolean().default(true),
 });
 
 type JobPositionFormData = z.infer<typeof jobPositionSchema>;
@@ -54,6 +58,9 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     defaultValues: {
       name: "",
       pay_rate: "0.00",
+      basic_salary: "0.00",
+      superior_id: "",
+      for_probi: true,
       is_active: true,
     },
     mode: "onChange",
@@ -63,14 +70,23 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     if (isOpen && jobPositions && jobId) {
       const job = jobPositions.find((job) => job.id === jobId);
       if (job) {
-        // Handle pay_rate formatting whether it's a string or number
-        const payRate = typeof job.pay_rate === 'number' 
-          ? job.pay_rate.toFixed(2)
-          : parseFloat(job.pay_rate).toFixed(2) || "0.00";
+        const payRate =
+          typeof job.pay_rate === "number"
+            ? job.pay_rate.toFixed(2)
+            : parseFloat(job.pay_rate).toFixed(2) || "0.00";
+
+        const basicSalary = !job.basic_salary
+          ? "0.00"
+          : typeof job.basic_salary === "number"
+          ? job.basic_salary.toFixed(2)
+          : parseFloat(job.basic_salary).toFixed(2);
 
         methods.reset({
           name: job.name,
           pay_rate: payRate,
+          basic_salary: basicSalary,
+          superior_id: job.superior_id ? job.superior_id.toString() : "",
+          for_probi: job.for_probi,
           is_active: job.is_active,
         });
       } else {
@@ -86,10 +102,28 @@ const EditJob: React.FC<EditJobPositionProps> = ({
   const handlePayRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      const formattedValue = value === "" ? "0.00" : 
-        value.includes('.') ? value.padEnd(value.indexOf('.') + 3, '0') : 
-        value + '.00';
-      methods.setValue('pay_rate', formattedValue, { shouldValidate: true });
+      const formattedValue =
+        value === ""
+          ? "0.00"
+          : value.includes(".")
+          ? value.padEnd(value.indexOf(".") + 3, "0")
+          : value + ".00";
+      methods.setValue("pay_rate", formattedValue, { shouldValidate: true });
+    }
+  };
+
+  const handleBasicSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+      const formattedValue =
+        value === ""
+          ? "0.00"
+          : value.includes(".")
+          ? value.padEnd(value.indexOf(".") + 3, "0")
+          : value + ".00";
+      methods.setValue("basic_salary", formattedValue, {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -103,6 +137,22 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       description: "Position name should only contain letters",
     },
     {
+      name: "superior_id",
+      label: "Superior Position",
+      type: "select",
+      placeholder: "Select superior position",
+      description: "Select the superior position (optional)",
+      config: {
+        options:
+          jobPositions
+            ?.filter((job) => job.id !== jobId) // Filter out the current job
+            .map((job) => ({
+              value: job.id.toString(),
+              label: job.name,
+            })) || [],
+      },
+    },
+    {
       name: "pay_rate",
       label: "Pay Rate",
       type: "text",
@@ -110,8 +160,28 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       description: "Pay rate must be 0 or greater (format: 0.00)",
       config: {
         onChange: handlePayRateChange,
-        value: methods.watch('pay_rate'),
+        value: methods.watch("pay_rate"),
         pattern: "^\\d*\\.?\\d{0,2}$",
+      },
+    },
+    {
+      name: "basic_salary",
+      label: "Basic Salary",
+      type: "text",
+      placeholder: "0.00",
+      description: "Basic Salary must be 0 or greater (format: 0.00)",
+      config: {
+        onChange: handleBasicSalaryChange,
+        value: methods.watch("basic_salary"),
+        pattern: "^\\d*\\.?\\d{0,2}$",
+      },
+    },
+    {
+      name: "for_probi",
+      label: "For Probitionary",
+      type: "switch",
+      config: {
+        defaultSelected: true,
       },
     },
     {
@@ -124,18 +194,6 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     },
   ];
 
-  if (isLoading) {
-    return <div>Loading job position data...</div>;
-  }
-
-  if (error) {
-    return (
-      <div>
-        Error loading job positions: {error.message || "Unknown error occurred."}
-      </div>
-    );
-  }
-
   const onSubmit = async (data: JobPositionFormData) => {
     setIsSubmitting(true);
     toast({
@@ -147,6 +205,8 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       const formattedData = {
         ...data,
         pay_rate: parseFloat(data.pay_rate).toFixed(2),
+        basic_salary: parseFloat(data.basic_salary).toFixed(2),
+        superior_id: data.superior_id ? parseInt(data.superior_id) : null,
       };
 
       const response = await axios.put(
@@ -188,43 +248,41 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     }
   };
 
+  if (isLoading) {
+    return <div>Loading job position data...</div>;
+  }
+
+  if (error) {
+    return (
+      <div>
+        Error loading job positions:{" "}
+        {error.message || "Unknown error occurred."}
+      </div>
+    );
+  }
+
   return (
-    <Modal 
-      size="md" 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      isDismissable={false}
+    <Drawer
+      title="Edit Job Position"
+      size="sm"
+      isOpen={isOpen}
+      onClose={() => {
+        methods.reset();
+        onClose();
+      }}
     >
-      <form onSubmit={methods.handleSubmit(onSubmit)}>
-        <FormProvider {...methods}>
-          <ModalContent>
-            <ModalHeader>Edit Job Position</ModalHeader>
-            <ModalBody>
-              <FormFields items={formFields} size="sm" />
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                color="danger"
-                onClick={() => {
-                  methods.reset();
-                  onClose();
-                }}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button 
-                color="primary" 
-                type="submit"
-                disabled={isSubmitting || !methods.formState.isValid}
-              >
-                {isSubmitting ? "Saving..." : "Save"}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </FormProvider>
-      </form>
-    </Modal>
+      <Form {...methods}>
+        <form
+          className="mb-4 space-y-4"
+          id="drawer-form"
+          onSubmit={methods.handleSubmit(onSubmit)}
+        >
+          <div className="space-y-4">
+            <FormFields items={formFields} size="sm" />
+          </div>
+        </form>
+      </Form>
+    </Drawer>
   );
 };
 

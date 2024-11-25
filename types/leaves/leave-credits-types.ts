@@ -49,10 +49,10 @@ export interface LeaveCredits {
     name: string;
     picture: string | null;
     department: string;
+    employment_status: "regular" | "probationary";
+    job: string
     leave_balance: EmployeeLeaveBalance[] | null;
-    // earnings: {
-    //     leave_type: LeaveEarning[];
-    // };
+
 }
 
 export interface EmployeeLeaveCredits {

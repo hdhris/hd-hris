@@ -11,10 +11,11 @@ export interface LeaveTypeSelectionProps {
     isLoading?: boolean;
     min: (days: number) => void;
     max: (days: number) => void;
-    isAttachmentRequired: (value: boolean) => void
+    // isAttachmentRequired: (value: boolean) => void
+    isDisabled?: boolean
 }
 
-function LeaveTypeSelection({isAttachmentRequired, min, max, leaveTypes, isLoading }: LeaveTypeSelectionProps) {
+function LeaveTypeSelection({min, max, leaveTypes, isLoading, isDisabled }: LeaveTypeSelectionProps) {
     const { control, setValue, formState: { errors } } = useFormContext();
     const [searchTerm, setSearchTerm] = React.useState('');  // Add state for searchTerm
 
@@ -34,6 +35,7 @@ function LeaveTypeSelection({isAttachmentRequired, min, max, leaveTypes, isLoadi
             render={({ field }) => (
                 <div>
                     <Autocomplete
+                        isDisabled={isDisabled}
                         label={<Typography
                             className={cn("text-sm font-medium inline-flex", errors.leave_type_id ? "text-red-500" : "")}>
                             Pick a Leave Type
@@ -54,12 +56,13 @@ function LeaveTypeSelection({isAttachmentRequired, min, max, leaveTypes, isLoadi
                         onInputChange={(e) => setSearchTerm(e)}  // Update searchTerm on input change
                         onSelectionChange={(e) => {
                             const selectedItem = availableLeavesTypes.find(item => String(item.id) === String(e));
+                            // console.log("Selected Leave Type: ", selectedItem)
                             if (selectedItem) {
                                 setValue('leave_type_id', selectedItem.id);
                                 field.onChange(selectedItem.id);  // Sync with react-hook-form
                                 min(selectedItem.min);
                                 max(selectedItem.max);  // Set the leave type duration
-                                isAttachmentRequired(selectedItem.isAttachmentRequired)
+                                // isAttachmentRequired(selectedItem.isAttachmentRequired)
                             } else {
                                 setValue('leave_type_id', "");
                                 field.onChange("");  // Clear value

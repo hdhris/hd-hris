@@ -533,7 +533,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
             <PersonalInformationForm />
             <Divider className="my-6" />
             <Text className="text-medium font-semibold">
-              Basic Educational Background
+              Educational Background
             </Text>
             <EducationalBackgroundForm />
             <Divider className="my-6" />

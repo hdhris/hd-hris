@@ -51,7 +51,9 @@ const EditJobInformationForm: React.FC = () => {
     return acc;
   }, []);
 
-  const jobOptions = jobTitles.reduce((acc: any[], job) => {
+  const jobOptions = jobTitles
+  .filter((jt) => jt.for_probi === (watch("is_regular") === "false"))
+  .reduce((acc: any[], job) => {
     if (job && job.id && job.name) {
       acc.push({ value: job.id.toString(), label: job.name });
     }

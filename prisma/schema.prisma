@@ -652,15 +652,6 @@ model auth_accounts {
   @@id([provider, provider_account_id])
 }
 
-model sec_sessions {
-  sessionToken String   @unique(map: "Session_sessionToken_key")
-  userId       String
-  expires      DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime
-  id           Int      @id @default(autoincrement())
-}
-
 model ref_holidays {
   id         Int       @id @default(autoincrement())
   name       String?   @db.VarChar(45)
@@ -726,4 +717,13 @@ model dim_payhead_specific_amounts {
   ref_payheads    ref_payheads?    @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([payhead_id, employee_id], map: "employee_payhead")
+}
+
+model sec_sessions {
+  sessionToken String   @unique(map: "Session_sessionToken_key")
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  id           Int      @id @default(autoincrement())
 }

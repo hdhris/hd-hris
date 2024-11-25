@@ -28,8 +28,6 @@ export async function POST(request: NextRequest) {
             is_active: data.isActive,
             min_duration: data.minDuration,
             max_duration: data.maxDuration,
-            notice_required: data.noticeRequired,
-            attachment_required: data.attachmentRequired,
             applicable_to_employee_types: data.applicableToEmployeeTypes,
         };
 

@@ -1,5 +1,5 @@
 "use client"
-import React, {Key, ReactNode, useCallback, useEffect} from 'react';
+import React, {ReactNode, useCallback, useEffect} from 'react';
 import DataDisplayControl from "@/components/common/data-display/controls/data-display-control";
 import {
     DataDisplayControlProvider,
@@ -19,6 +19,7 @@ import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import RenderList from "@/components/util/RenderList";
 import {AnimatedList} from '@/components/ui/animated-list';
 import Loading from "@/components/spinner/Loading";
+import NoData from "@/components/common/no-data/NoData";
 
 
 interface DataDisplayProps<T> extends RenderDisplayProps<T> {
@@ -110,25 +111,28 @@ const RenderDisplay = <T extends { id: string | number }>({
     const {display} = useDataDisplayControl();
     return (<>{isLoading ? (<Loading/>) : (<Switch expression={display}>
         <Case of="table">
-            {onTableDisplay && <DataDisplayTable data={data} {...onTableDisplay} />}
+            {data.length > 0 ? onTableDisplay && <DataDisplayTable data={data} {...onTableDisplay} /> :
+                <div className="h-full"><NoData/></div>}
         </Case>
         <Case of="grid">
             <ScrollShadow className="flex-1 px-2 pb-2 max-w-full" size={10}>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,auto))] gap-5">
-                    <RenderList
+                <div
+                    className="h-full grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5">
+                    {newData.length > 0 ? <RenderList
                         // onClick={(key) => console.log("Key: ", key)}
                         items={newData}
                         map={(item, key) => (<>
                             {onGridDisplay ? onGridDisplay(item, key) : <p>No grid display available</p>}
                         </>)}
-                    />
+                    /> : <div className="h-full"><NoData/></div>}
+
                 </div>
             </ScrollShadow>
         </Case>
 
         <Case of="list">
             <ScrollShadow className="w-full h-full p-5 overflow-auto">
-                <AnimatedList>
+                {newData.length > 0 ? <AnimatedList>
                     <div className="grid grid-row-[repeat(auto-fit,minmax(100%,1fr))] gap-5 w-full">
                         <RenderList
                             items={newData}
@@ -137,7 +141,7 @@ const RenderDisplay = <T extends { id: string | number }>({
                             </>)}
                         />
                     </div>
-                </AnimatedList>
+                </AnimatedList> : <div className="h-full"><NoData/></div>}
             </ScrollShadow>
         </Case>
     </Switch>)} </>);
@@ -166,9 +170,6 @@ const DataDisplayTable = <T extends { id: string | number }, >({data, config, ..
         data={data}
         config={config!}
         onSelectionChange={onSelectionChange}
-
-        // onSortChange={setSortDescriptor}
-        // sortDescriptor={sortDescriptor!}
         {...props}
     />)
 }
