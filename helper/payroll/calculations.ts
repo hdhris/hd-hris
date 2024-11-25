@@ -4,6 +4,7 @@ const parser = new Parser();
 export const static_formula = {
   cash_advance_disbursement : 'get_disbursement',
   cash_advance_repayment : 'get_repayment',
+  tardiness : 'get_tardiness',
   benefit_contribution : 'get_contribution',
 } 
 
@@ -11,6 +12,7 @@ export type BaseValueProp = {
   rate_p_hr: number;
   total_shft_hr: number;
   payroll_days: number;
+  basic_salary: number;
   [key: string]: number;
 };
 
@@ -83,6 +85,8 @@ export function calculateAllPayheads(
 import { advanceCalculator } from "../benefits-calculator/advance-calculator";
 import { basicCalculator } from "../benefits-calculator/basic-calculator";
 import { Decimal } from "@prisma/client/runtime/library";
+import { AttendaceStatuses, BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 // Type definition for benefit data
 export interface ContributionSetting {
@@ -156,3 +160,34 @@ export class Benefit {
     }
   }
 }
+
+export function getUndertimeTotal(
+  logStatus: Record<string, AttendaceStatuses>,
+  empID: number,
+  timeSchedule: BatchSchedule | null,
+  startDate: string,
+  endDate: string
+): number {
+  if(!timeSchedule){
+    console.log("No shift found for emp: ",empID);
+    return 0;
+  };
+  // const factShiftLength = toGMT8(timeSchedule.clock_out!).diff(toGMT8(timeSchedule.clock_in!), "minute") - timeSchedule.break_min!;
+  // console.log("Emp: ", empID, "ShiftLength: ", factShiftLength);
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  let totalAmount = 0;
+
+  for (let current = new Date(start); current <= end; current.setDate(current.getDate() + 1)) {
+    const dateString = current.toISOString().split("T")[0]; // Convert to "YYYY-MM-DD" format
+
+    if (logStatus[dateString] && logStatus[dateString][empID]) {
+      totalAmount += logStatus[dateString][empID]?.undertime! //|| factShiftLength;
+    } 
+    // else {
+    //   totalAmount += factShiftLength;
+    // }
+  }
+
+  return totalAmount;
+};

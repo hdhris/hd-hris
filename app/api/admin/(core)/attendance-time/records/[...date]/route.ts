@@ -45,7 +45,14 @@ export async function GET(req: NextRequest) {
     const employeeSchedule = await prisma.dim_schedules.findMany({
       where: {
         trans_employees: {
-          id: { in: employeeIDsFromLogs },
+          OR: [
+            {
+              id: { in: employeeIDsFromLogs },
+            },
+            {
+              deleted_at: null,
+            }
+          ],
         },
       },
     });
@@ -54,8 +61,17 @@ export async function GET(req: NextRequest) {
       where: {
         dim_schedules: {
           some: {
-            employee_id: { in: employeeIDsFromLogs },
-          },
+            trans_employees: {
+              OR: [
+                {
+                  id: { in: employeeIDsFromLogs },
+                },
+                {
+                  deleted_at: null,
+                }
+              ],
+            }
+          }
         },
       },
     });
@@ -63,7 +79,14 @@ export async function GET(req: NextRequest) {
     // Fetch employee details for reference
     const employees = await prisma.trans_employees.findMany({
       where: {
-        id: { in: employeeIDsFromLogs },
+        OR: [
+          {
+            id: { in: employeeIDsFromLogs },
+          },
+          {
+            deleted_at: null,
+          }
+        ],
       },
       ...emp_rev_include.employee_detail,
     });

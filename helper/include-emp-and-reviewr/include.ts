@@ -29,6 +29,7 @@ export const emp_rev_include = {
           id: true,
           name: true,
           pay_rate: true,
+          basic_salary: true,
         },
       },
     },
@@ -65,6 +66,7 @@ export interface UserEmployee {
     id: number;
     name: string;
     pay_rate: string;
+    basic_salary: string;
   };
 }
 
