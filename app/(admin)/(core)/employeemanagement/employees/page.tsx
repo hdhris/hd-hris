@@ -30,7 +30,6 @@ const Page: React.FC = () => {
 
   useEffect(() => {
     if (employees) {
-      // Filter out non-active employees first, then sort them
       const activeEmployees = employees.filter((employee) => {
         return (
           !employee.suspension_json &&
