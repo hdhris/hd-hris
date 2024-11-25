@@ -46,11 +46,11 @@ export const employeeSchema = z.object({
   suffix: z
     .string()
 
-    .optional(),
+    .optional().nullable(),
   extension: z
     .string()
 
-    .optional(),
+    .optional().nullable(),
   gender: z.string().min(1, "Gender is required"),
   email: z.string().email("Invalid email address"),
   contact_no: z

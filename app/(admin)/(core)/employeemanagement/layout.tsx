@@ -9,6 +9,16 @@ function RootLayout({children}: { children: React.ReactNode }) {
               path: "employees",
             },
             {
+              key: "suspend",
+              title: "Suspend",
+              path: "suspend",
+            },
+            {
+              key: "resign",
+              title: "Resign",
+              path: "resign",
+            },
+            {
               key: "departments",
               title: "Departments",
               path: "departments",
