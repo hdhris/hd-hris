@@ -15,7 +15,7 @@ import AnimatedCircularProgressBar from "@/components/ui/animated-circular-progr
 import {LuCalendarClock, LuCalendarDays} from "react-icons/lu";
 import {icon_color, icon_size} from "@/lib/utils";
 import CountUp from "react-countup";
-import LeaveCreditForm from "@/components/admin/leaves/credits/leave-credit-form";
+import LeaveCreditForm from "@/components/admin/leaves/credits/forms/add/leave-credit-form";
 import {IoChevronDown} from "react-icons/io5";
 import DropdownList from "@/components/common/Dropdown";
 import CardView from "@/components/common/card-view/card-view";
@@ -24,7 +24,8 @@ import {capitalize} from "@nextui-org/shared-utils";
 import showDialog from "@/lib/utils/confirmDialog";
 import {axiosInstance} from "@/services/fetcher";
 import {Card} from "@nextui-org/card";
-import {usePDF} from "@react-pdf/renderer";
+import CardTable from "@/components/common/card-view/card-table";
+import LeaveCreditEditForm from '@/components/admin/leaves/credits/forms/edit/edit-credit-form';
 
 
 export interface EditCreditProp extends Omit<LeaveCredits, "leave_balance"> {
@@ -77,102 +78,10 @@ function Page() {
         </>)
     })
 
-    // const handleRowKey = (key: Key) => {
-    //     const data = leaveCredit.find((item) => item.id === Number(key))
-    //     setLeaveType(data!)
-    // }
-
-    // useEffect(() => {
-    //     const id = leaveType?.id
-    //     if (!isEqual(leaveCredit, leaveType)) {
-    //         setLeaveType(leaveCredit.find((item) => item.id === id))
-    //     }
-    // }, [leaveCredit, leaveType]);
-
-    // const handleLeaveTypeDeleteMultiple = async (keys: Selection) => {
-    //     const deleteKeys = keys === "all" ? leaveCredit.map((item) => item.id) // Collect all IDs
-    //         : Array.from(keys).map(key => Number(key)); // Collect selected IDs and convert to numbers
-    //
-    //
-    //     // Filter leaveData to find names of the deleted items
-    //     const deletedNames = leaveCredit
-    //         .filter(item => deleteKeys.includes(item.id)) // Use includes to check for matches
-    //         .map(item => item.name) // Map to get the names
-    //         .join(", "); // Join names into a string
-    //
-    //
-    //     const res = await showDialog({
-    //         title: "Delete Leave Type", message: (<Typography>Are you sure you want to delete this
-    //             <Typography as="span"
-    //                         className="font-semibold"> {deletedNames}</Typography>?
-    //         </Typography>)
-    //     })
-    //
-    //     if (res === "yes") {
-    //         const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', deleteKeys)
-    //         if (res.status !== 200) {
-    //             toast({
-    //                 title: "Error", description: res.data.message, variant: "danger",
-    //             })
-    //         }
-    //
-    //
-    //     }
-    //     if (res === "no") {
-    //         return;
-    //     }
-    //
-    // }
-
-    // const handleOnPrint = () => {
-    //
-    // }
-
     const handleSelect = (edited: EditCreditProp) => {
-        console.log("Data: ", data)
-        console.log("Edited: ", edited)
-        // setEditCredit(edited)
         setViewCredit(edited)
 
     }
-
-    const handleDelete = async (deleted: EditCreditProp) => {
-
-
-        const leave_credit_ids = deleted.leave_credits?.map((item) => item.id)
-
-        const onConfirm = await showDialog({
-            title: "Delete Leave Credit", message: (<Typography>Are you sure you want to delete this
-                <Typography as="span" className="font-semibold"> {deleted.name}</Typography>?
-            </Typography>)
-        })
-
-        if (onConfirm === "yes") {
-            const res = await axiosInstance.post('/api/admin/leaves/leave-credit/delete', leave_credit_ids)
-            if (res.status !== 200) {
-                toast({
-                    title: "Error", description: res.data.message, variant: "danger",
-                })
-            } else {
-                toast({
-                    title: "Success", description: res.data.message, variant: "success",
-                })
-                // await mutate()
-            }
-        }
-        // const res = await axiosInstance.delete(`/api/admin/leaves/leave-credit?id=${id}`)
-        // if (res.status !== 200) {
-        //     toast({
-        //         title: "Error", description: res.data.message, variant: "danger",
-        //     })
-        // } else {
-        //     toast({
-        //         title: "Success", description: res.data.message, variant: "success",
-        //     })
-        //     // await mutate()
-        // }
-    }
-
 
     return (<section className='w-full h-full flex gap-4 overflow-hidden'>
         <DataDisplay
@@ -258,7 +167,6 @@ function Page() {
                 setEditCredit(viewCredit)
 
             }}
-            onDelete={() => handleDelete(viewCredit)}
             header={<div className="flex flex-row items-center space-x-4 pb-2">
                 <User name={<div className="flex gap-2">
                     <Typography>{viewCredit.name}</Typography>
@@ -296,20 +204,27 @@ function Page() {
                                           className="h-2"/>
                             </>}
                         >
-                            <table className="w-full text-sm">
-                                <tbody>
-                                {[{
-                                    label: "Allocated Days", value: leave.allocated_days
-                                }, {label: "Remaining Days", value: leave.remaining_days}, {
-                                    label: "Used Days", value: leave.used_days
-                                }, {
-                                    label: "Carry Forward", value: leave.carry_forward_days
-                                },].map((item, idx) => (<tr key={idx} className="border-b last:border-b-0">
-                                    <td className="py-2 px-4 text-gray-500">{item.label}</td>
-                                    <td className="py-2 px-4">{item.value}</td>
-                                </tr>))}
-                                </tbody>
-                            </table>
+                            {/*<table className="w-full text-sm">*/}
+                            {/*    <tbody>*/}
+                            {/*    {[{*/}
+                            {/*        label: "Allocated Days", value: leave.allocated_days*/}
+                            {/*    }, {label: "Remaining Days", value: leave.remaining_days}, {*/}
+                            {/*        label: "Used Days", value: leave.used_days*/}
+                            {/*    }, {*/}
+                            {/*        label: "Carry Forward", value: leave.carry_forward_days*/}
+                            {/*    },].map((item, idx) => (<tr key={idx} className="border-b last:border-b-0">*/}
+                            {/*        <td className="py-2 px-4 text-gray-500">{item.label}</td>*/}
+                            {/*        <td className="py-2 px-4">{item.value}</td>*/}
+                            {/*    </tr>))}*/}
+                            {/*    </tbody>*/}
+                            {/*</table>*/}
+                            <CardTable data={[{
+                                label: "Allocated Days", value: leave.allocated_days
+                            }, {label: "Remaining Days", value: leave.remaining_days}, {
+                                label: "Used Days", value: leave.used_days
+                            }, {
+                                label: "Carry Forward", value: leave.carry_forward_days
+                            },]}/>
                         </AccordionItem>);
                     })) : (<NoData message="No Leave Credit"/>)}
                 </Accordion>
@@ -318,12 +233,11 @@ function Page() {
             footer={<></>}
 
         />}
-
-        <LeaveCreditForm title="Update Leave Credit"
-                         description="Adjust and manage employee leave balances efficiently."
-                         onOpen={setIsEdit}
-                         isOpen={isEdit}
-                         employee={editCredit}/>
+        <LeaveCreditEditForm title="Update Leave Credit"
+                              description="Adjust and manage employee leave balances efficiently."
+                              onOpen={setIsEdit}
+                              isOpen={isEdit}
+                              employee={editCredit}/>
     </section>);
 }
 

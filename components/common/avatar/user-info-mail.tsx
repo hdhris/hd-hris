@@ -1,9 +1,9 @@
 import { Link, User } from "@nextui-org/react";
-import React from "react";
+import React, {ReactNode} from "react";
 
 interface UserMailProps {
-    name: string;
-    description?: string;
+    name: string | ReactNode; // adding this to accept react node
+    description?: string | ReactNode;
     email?: string;
     picture: string;
     size?: "sm" | "md" | "lg";

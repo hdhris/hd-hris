@@ -6,7 +6,6 @@
  * @returns The singular or plural form of the word based on the count.
  */
 export const pluralize = (n: number, baseWord: string): string => {
-    console.log("N: ", n)
     if (n === 1) return `${n} ${baseWord}`;
 
     // Handle words ending in "f" or "fe" (e.g., "knife" -> "knives", "wolf" -> "wolves")

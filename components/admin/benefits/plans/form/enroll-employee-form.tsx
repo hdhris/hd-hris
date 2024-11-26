@@ -90,7 +90,7 @@ function EnrollEmployeeForm({plan_id, onOpen, isOpen}: EnrollEmployeeProps) {
                        if(values !== "all" && values.size > 0) {
                            setEmployee_id(Array.from(values).map(value => Number(value)))
                        } else {
-                           setEmployee_id(not_enrolled.map(id => id.id))
+                           setEmployee_id(not_enrolled.map(id => Number(id.id)))
                        }
                     }, config: {
                         columns: [{

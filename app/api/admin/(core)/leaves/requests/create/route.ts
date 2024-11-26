@@ -4,8 +4,10 @@ import prisma from "@/prisma/prisma";
 import dayjs from "dayjs";
 import { auth } from "@/auth";
 import { v4 as uuidv4 } from 'uuid';
-import {EvaluatorsTypes} from "@/types/leaves/leave-evaluators-types";
+import {EvaluatorsTypes, LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
+import {toGMT8} from "@/lib/utils/toGMT8";
+import { InputJsonValue } from "@prisma/client/runtime/library";
 
 export async function POST(req: NextRequest) {
     try {
@@ -44,6 +46,22 @@ export async function POST(req: NextRequest) {
             }
         });
 
+        const employee = await prisma.trans_employees.findUnique({
+            where: {
+                id: data.employee_id,
+            },
+            select:{
+                prefix: true,
+                first_name: true,
+                middle_name: true,
+                last_name: true,
+                suffix: true,
+                extension: true,
+                email: true,
+                picture: true
+            }
+        })
+
         if (!reviewer) {
             return NextResponse.json({
                 success: false,
@@ -51,38 +69,55 @@ export async function POST(req: NextRequest) {
             }, {status: 400});
         }
 
-        const evaluators: EvaluatorsTypes = {
+        const approver_uuid = uuidv4()
+        const reviewer_uuid = uuidv4()
+        const emp_uuid = uuidv4()
+
+        const evaluators: LeaveApplicationEvaluation = {
             approver: {
-                approved_by: {
-                    id: uuidv4(),
-                    employee_id: reviewer.id,
-                    name: getEmpFullName(reviewer),
-                    picture: reviewer?.picture!,
-                    email: reviewer?.email
-                },
                 decision: {
                     is_approved: true,
-                    rejectedReason: null,
-                    decisionDate: new Date()
+                    decisionDate: toGMT8().toISOString(),
+                    rejectedReason: null
                 },
-                comments: data.comment
+                approved_by: approver_uuid
             },
             // this is a brute force solution
             reviewers: {
-                reviewed_by: {
-                    id: uuidv4(),
-                    employee_id: 2,
-                    name: "Datumanong, Muhammad Nizam",
-                    picture: "https://files.edgestore.dev/6bc0cgi3ynpz46db/publicFiles/_public/72b8b592-e919-4f88-af00-6966a6f1ca7c.jpg",
-                    email: "ndatumanong05@gmail.com"
-                },
                 decision: {
-                    is_reviewed: null,
-                    rejectedReason: null,
-                    decisionDate: null
+                    is_reviewed: true,
+                    decisionDate: toGMT8().toISOString(),
+                    rejectedReason: null
                 },
-                comments: ""
-            }
+                reviewed_by: reviewer_uuid
+            },
+            users: [
+                {
+                    id: approver_uuid,
+                    name: "Cuello, John Rey",
+                    role: "approver",
+                    email: "johnreycuello2@gmail.com",
+                    picture: "https://img.freepik.com/free-photo/portrait-young-handsome-businessman-wearing-suit-standing-with-crossed-arms-with-isolated-studio-white-background_1150-63219.jpg?t=st=1730875405~exp=1730879005~hmac=74c3e9b73f3b8e12a79b50f93fffb6031b7d8eea8620f97444241c47bb854f9f&w=996",
+                    employee_id: 66
+                },
+                {
+                    id: reviewer_uuid,
+                    name: "Datumanong, Muhammad Nizam",
+                    role: "reviewer",
+                    email: "ndatumanong05@gmail.com",
+                    picture: "https://files.edgestore.dev/6bc0cgi3ynpz46db/publicFiles/_public/72b8b592-e919-4f88-af00-6966a6f1ca7c.jpg",
+                    employee_id: 2
+                },
+                {
+                    id: emp_uuid,
+                    name: getEmpFullName(employee),
+                    role: "applicant",
+                    picture: employee?.picture || "",
+                    email: employee?.email || "",
+                    employee_id: data.employee_id
+                }
+            ],
+            comments: []
         }
         // Start the transaction
         await prisma.$transaction(async (tx) => {
@@ -92,12 +127,11 @@ export async function POST(req: NextRequest) {
                 start_date: dayjs(data.leave_date).toISOString(),
                 end_date: dayjs(data.leave_date).add(Number(data.days_of_leave), "day").toISOString(),
                 reason: data.reason,
-                comment: null,
                 type_id: data.leave_type_id,
                 status: "Pending",
                 created_at: new Date(),
                 created_by: reviewer.id,
-                evaluators: evaluators
+                evaluators: evaluators as unknown as InputJsonValue
             };
 
             // Create leave request in the database within the transaction

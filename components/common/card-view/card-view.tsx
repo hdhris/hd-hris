@@ -30,7 +30,7 @@ function CardView({header, body, footer, onDelete, onEdit, onClose, title, id}: 
             </div>
             <div className="m-4">
 
-                <div className="h-fit">
+                <div className="h-fit flex flex-col gap-4 mb-4">
                     {body}
                 </div>
                 <hr className="border border-default-400/50"/>
@@ -52,8 +52,8 @@ function CardView({header, body, footer, onDelete, onEdit, onClose, title, id}: 
                                 </Button>
                             </Section>
                         </div>
-                        <hr className="border border-destructive/20"/>
                     </>}
+                    {onEdit && onDelete && <hr className="border border-destructive/20"/>}
                     {onDelete && <div className="ms-2">
                         <Section className="ms-0" title={`Delete ${title}`}
                                  subtitle="This action cannot be undone. Proceed with caution.">

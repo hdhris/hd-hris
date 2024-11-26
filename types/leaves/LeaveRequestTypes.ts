@@ -1,9 +1,8 @@
 import React from "react";
-import {EvaluatorsTypes} from "@/types/leaves/leave-evaluators-types";
+import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 
 type ApprovedBy = {
-    name: string;
-    picture: string;
+    name: string; picture: string;
 }
 
 export type LeaveRequestTypes = {
@@ -19,7 +18,7 @@ export type LeaveRequestTypes = {
     approvedBy: ApprovedBy;
 }
 
-export interface RequestFormTableType extends Omit<LeaveRequestTypes, "status" | "approvedBy" | "email">{
+export interface RequestFormTableType extends Omit<LeaveRequestTypes, "status" | "approvedBy" | "email"> {
     department: string;
     created_by: ApprovedBy;
     comment: string;
@@ -28,8 +27,7 @@ export interface RequestFormTableType extends Omit<LeaveRequestTypes, "status" |
 }
 
 
-
-export interface EmployeeLeavesStatus{
+export interface EmployeeLeavesStatus {
     employees: EmployeeLeave[]
     availableLeaves: LeaveType[]
 }
@@ -102,9 +100,8 @@ interface LeaveDetails {
     start_date: string; // ISO date string
     end_date: string;   // ISO date string
     total_days: number;
-    comment: string | null;
     reason: string;
-    status:"Pending" | "Approved" | "Rejected"
+    status: "Pending" | "Approved" | "Rejected"
     created_at: string; // ISO date string
     updated_at: string; // ISO date string
 }
@@ -118,5 +115,5 @@ export interface LeaveRequest {
     created_by: LeaveRequestCreatedBy;
     leave_type: EmployeeLeaveType;
     leave_details: LeaveDetails;
-    evaluators: EvaluatorsTypes;
+    evaluators: LeaveApplicationEvaluation;
 }

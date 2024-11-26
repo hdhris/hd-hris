@@ -22,6 +22,7 @@ import CardView from "@/components/common/card-view/card-view";
 import {isObjectEmpty} from "@/helper/objects/isObjectEmpty";
 import {pluralize} from "@/helper/pluralize/pluralize";
 import EmployeesAvatar from "@/components/common/avatar/employees-avatar";
+import CardTable from "@/components/common/card-view/card-table";
 
 
 function LeaveTypeTable() {
@@ -201,7 +202,6 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
     }
 
     return (<>
-        {/*</Card>*/}
         {!isObjectEmpty(props) && <CardView
             title="Leave Type"
             onDelete={() => handleLeaveTypeDelete(props.id)}
@@ -224,33 +224,23 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
                     <Typography className="text-sm text-justify indent-5 h-[4rem]">
                         {props.description}
                     </Typography>
-                    {/*<Avatar {...bgColor(props.code, 0.75)}*/}
-                    {/*        className="float-left mr-3 [clip-path:circle(50%)] [shape-outside:circle(50%)]"*/}
-                    {/*        alt={"system icon"}*/}
-                    {/*        src="../assets/system.png" size="md"/>*/}
                 </div>
             </div>}
             body={
-            <table className="w-full text-sm">
-                <tbody>
-                {[{
-                    label: "Minimum Days", value: pluralize(props.min_duration, "day")
-                }, {label: "Maximum Days", value: pluralize(props.max_duration, "day")}, {
-                    label: "Applicable to", value: props.applicable_to_employee_types
-                }, {
-                    label: "Current Usage", value: <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>
-                },{
-                    label: "Is Paid", value: props.paid_leave ? "Paid Leave" : "Unpaid Leave"
-                },{
-                    label: "Created At", value: props.created_at
-                },{
-                    label: "Updated At", value: props.updated_at
-                },].map((item, idx) => (<tr key={idx} className="border-b last:border-b-0">
-                    <td className="py-2 px-4 text-gray-500">{item.label}</td>
-                    <td className="py-2 px-4">{item.value}</td>
-                </tr>))}
-                </tbody>
-            </table>} footer={<></>}/>}
+            <CardTable data={[{
+                label: "Minimum Days", value: pluralize(props.min_duration, "day")
+            }, {label: "Maximum Days", value: pluralize(props.max_duration, "day")}, {
+                label: "Applicable to", value: props.applicable_to_employee_types
+            }, {
+                label: "Current Usage", value: <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>
+            },{
+                label: "Is Paid", value: props.paid_leave ? "Paid Leave" : "Unpaid Leave"
+            },{
+                label: "Created At", value: props.created_at
+            },{
+                label: "Updated At", value: props.updated_at
+            },]}/>
+        } footer={<></>}/>}
 
             <LeaveTypeForm
                 isOpen={editOpen}

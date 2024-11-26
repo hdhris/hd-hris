@@ -3,7 +3,7 @@ import prisma from "@/prisma/prisma";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import dayjs from "dayjs";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import {EvaluatorsTypes} from "@/types/leaves/leave-evaluators-types";
+import {EvaluatorsTypes, LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 
 export const dynamic = "force-dynamic"
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
 
 
     const employees_request: LeaveRequest[] = data.map(items => {
-        const evaluators = processJsonObject<EvaluatorsTypes>(items.evaluators)!
+        const evaluators = processJsonObject<LeaveApplicationEvaluation>(items.evaluators)!
         const approverDecision = evaluators.approver.decision.is_approved;
         const reviewerDecision = evaluators.reviewers?.decision.is_reviewed;
 
@@ -84,10 +84,9 @@ export async function GET(request: Request) {
                 name: getEmpFullName(items.trans_employees_trans_leaves_created_byTotrans_employees)
             },
             leave_details: {
-                start_date: dayjs(items.start_date).format("YYYY-MM-DD"),
-                end_date: dayjs(items.end_date).format("YYYY-MM-DD"),
+                start_date: dayjs(items.start_date).format("MMM DD, YYYY hh:mm A"),
+                end_date: dayjs(items.end_date).format("MMM DD, YYYY hh:mm A"),
                 total_days: dayjs(items.end_date).diff(items.start_date, 'day'),
-                comment: items.comment || "",
                 reason: items.reason || "",
                 status: status as "Approved" | "Pending" | "Rejected",
                 created_at: dayjs(items.created_at).format("YYYY-MM-DD"),
@@ -98,7 +97,7 @@ export async function GET(request: Request) {
                 name: items.ref_leave_types?.name || "",
                 code: items.ref_leave_types?.code || ""
             },
-            evaluators: processJsonObject<EvaluatorsTypes>(items.evaluators)!,
+            evaluators: processJsonObject<LeaveApplicationEvaluation>(items.evaluators)!,
         }
 
     })

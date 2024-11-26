@@ -5,13 +5,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing PayheadUI not PayheadUi">
-      <change afterPath="$PROJECT_DIR$/components/pdf-print/pay-slip.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/admin/leaves/credits/forms/edit/edit-credit-form.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/common/card-view/card-table.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/benefits/membership/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/benefits/membership/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-types/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-types/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/delete/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/delete/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/update/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/update/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/benefits/plans/form/enroll-employee-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/benefits/plans/form/enroll-employee-form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/benefits/plans/plan-details.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/benefits/plans/plan-details.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/credits/leave-credit-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/credits/forms/add/leave-credit-form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/avatar/user-info-mail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/avatar/user-info-mail.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/common/card-view/card-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/card-view/card-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/pluralize/pluralize.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/pluralize/pluralize.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/employeee/EmployeeType.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/employeee/EmployeeType.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/leave-evaluators-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/leave-evaluators-types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,9 +43,14 @@
     </option>
   </component>
   <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="origin/france" />
+    <option name="BRANCH" value="origin/main" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -38,6 +59,31 @@
     &quot;assignee&quot;: &quot;Xero-John&quot;
   }
 }</component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="john" />
+                    <option name="lastUsedInstant" value="1732506091" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="main" />
+                    <option name="lastUsedInstant" value="1732506047" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/Xero-John/HD-HRIS.git&quot;,
@@ -57,26 +103,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
-    &quot;database.data.extractors.current.export.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Xero/Desktop&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Xero\\WebstormProjects\\HD-HRIS\\HD-HRIS\\node_modules\\typescript\\lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "com.codeium.enabled": "true",
+    "database.data.extractors.current.export.id": "Comma-separated (CSV)_id",
+    "git-widget-placeholder": "john",
+    "last_opened_file_path": "C:/Users/Xero/Desktop",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Users\\Xero\\WebstormProjects\\HD-HRIS\\HD-HRIS\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
     ]
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\components\admin\leaves\credits\forms\add" />
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\components\admin\leaves\credits\add-form" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

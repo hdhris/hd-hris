@@ -26,8 +26,8 @@ const ApprovalColumns: ColumnsProps[] = [{
     name: 'Evaluated By', uid: 'evaluated_by',
 }]
 
-const approval_status_color_map: Record<string, BadgeProps["color"]> = {
-    approved: "success", rejected: "danger", pending: "warning"
+export const approval_status_color_map: Record<string, BadgeProps["color"]> = {
+    approved: "success", rejected: "danger", pending: "warning", canceled: "danger"
 }
 export const TableConfigurations: TableConfigProps<LeaveRequest> = {
     columns: ApprovalColumns, rowCell: (item: LeaveRequest, columnKey: React.Key) => {
@@ -47,7 +47,8 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
         const is_approved = item.evaluators.approver.decision.is_approved
         const is_reviewed = item.evaluators.reviewers?.decision.is_reviewed
         if (is_approved) {
-            const approved_by = item.evaluators.approver.approved_by
+            const approver = item.evaluators.approver.approved_by
+            const approved_by = item.evaluators.users.find(item => item.id === approver)
             const approver_data = {
                 type: "Approved", ...approved_by
             }
@@ -55,14 +56,13 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
         }
 
         if (is_reviewed) {
-            const reviewed_by = item.evaluators.reviewers?.reviewed_by
+            const reviewer = item.evaluators.reviewers.reviewed_by
+            const reviewed_by = item.evaluators.users.find(item => item.id === reviewer)
             const reviewer_data = {
                 type: "Reviewed", ...reviewed_by
             }
             evaluators.push(reviewer_data)
         }
-
-        console.log("Evaluator: ", evaluators)
         // const leave_status = item.
         // const cellValue = item[columnKey as keyof LeaveRequest];
         return (<Switch expression={columnKey as string}>

@@ -494,7 +494,6 @@ model trans_leaves {
   employee_id                                              Int
   start_date                                               DateTime?        @db.Date
   end_date                                                 DateTime?        @db.Date
-  comment                                                  String?
   status                                                   String?          @db.VarChar(10)
   created_at                                               DateTime         @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
   updated_at                                               DateTime         @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)

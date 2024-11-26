@@ -3,7 +3,7 @@ import React, {useCallback, useState} from 'react';
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {Button} from "@nextui-org/button";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
-import LeaveCreditForm from "@/components/admin/leaves/credits/leave-credit-form";
+import LeaveCreditForm from "@/components/admin/leaves/credits/forms/add/leave-credit-form";
 
 function Page() {
     const [isOpen, setIsOpen] = useState<boolean>(false)

@@ -30,3 +30,48 @@ export type EvaluatorsTypes = {
         comments: string; // Comments from the reviewer (e.g., "Leave request complies with company policy")
     };
 };
+
+
+interface Decision {
+    is_approved?: boolean;
+    is_reviewed?: boolean;
+    decisionDate: string;
+    rejectedReason: string | null;
+}
+
+interface User {
+    id: string;
+    name: string;
+    email?: string;
+    picture: string;
+    employee_id?: number;
+    role: "approver" | "reviewer" | "applicant";
+}
+
+interface Comment {
+    id: string;
+    author: string; // Reference to a User ID
+    timestamp: string;
+    message: string;
+    replies: Reply[];
+}
+
+interface Reply {
+    id: string;
+    author: string; // Reference to a User ID
+    timestamp: string;
+    message: string;
+}
+
+export interface LeaveApplicationEvaluation {
+    approver: {
+        decision: Decision;
+        approved_by: string; // Reference to a User ID
+    };
+    reviewers: {
+        decision: Decision;
+        reviewed_by: string; // Reference to a User ID
+    };
+    users: User[];
+    comments: Comment[];
+}

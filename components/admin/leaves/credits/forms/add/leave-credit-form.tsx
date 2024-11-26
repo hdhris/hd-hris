@@ -11,32 +11,27 @@ import {useLeaveCreditEmployees} from "@/services/queries";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import {AxiosError} from "axios";
-import {EditCreditProp} from "@/app/(admin)/(core)/leaves/leave-credits/page";
 import FormDrawer from "@/components/common/forms/FormDrawer";
 import {Button} from "@nextui-org/button";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {LeaveTypeForEmployee} from "@/types/leaves/LeaveTypes";
 import Typography from "@/components/common/typography/Typography";
-import {Chip, Selection} from '@nextui-org/react';
+import {Chip} from '@nextui-org/react';
 import {LuInfo} from "react-icons/lu";
-import {icon_size, icon_size_sm} from "@/lib/utils";
+import {icon_size_sm} from "@/lib/utils";
 
 interface LeaveCreditFormProps {
-    title?: string
-    description?: string
     onOpen: (value: boolean) => void
     isOpen: boolean,
-    employee?: EditCreditProp
 }
 
-function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCreditFormProps) {
+function LeaveCreditForm({onOpen, isOpen}: LeaveCreditFormProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
     const [employeeState, setEmployeeState] = useState<Employee[]>([]); // Initialize with employee prop if available
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [leaveTypes, setLeaveTypes] = useState<LeaveTypeForEmployee[]>([])
     const [employeeLeaveType, setEmployeeLeaveType] = useState<LeaveTypeForEmployee[] | null>()
-    const [isAssignToVisible, setIsAssignToVisible] = useState<boolean>(true)
 
     // Handle modal open/close state changes
     const handleModalOpen = useCallback((value: boolean) => {
@@ -59,45 +54,11 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
     }, [isLoadingDelete, isModalOpen, isOpen]);
 
     useEffect(() => {
-        if (employee) {
-            setEmployeeState((prevState: Employee[]) => {
-                // Ensure prevState is initialized properly
-                const currentState = prevState || []; // Fallback to empty array
-
-                // Check if employee is already in the state to avoid unnecessary updates
-                if (currentState[0]?.id !== employee.id) {
-                    return [employee as Employee]; // Cast employee to Employee type if necessary
-                }
-                return currentState; // Return the previous state if it's the same
-            });
-
-            console.log("Ensure prevState is initialized properly")
-            setIsAssignToVisible(false)
-        } else if (data && data.data) {
+        if (data && data.data) {
             setEmployeeState(data.data.employees);
             setLeaveTypes(data.data.leave_types)
         }
-    }, [data, employee]);
-
-    useEffect(() => {
-        // Reset the form with employee details
-        if (employee) {
-            const leave_types = leaveTypes.filter(item => employee.leave_credits?.some(leave => leave.leave_type_id === String(item.id)))
-            setEmployeeLeaveType(leave_types)
-            form.reset({
-                apply_for: "specific_employee",
-                employee_id: employee.id,
-                leave_credits: employee.leave_credits?.map(item => ({
-                    leave_type_id: item.leave_type_id,
-                    allocated_days: item.allocated_days,
-                    carry_forward_days: item.carry_forward_days
-                })),
-            });
-
-            console.log("Reset the form with employee details")
-            setIsAssignToVisible(false)
-        }
-    }, [employee, form, isOpen, leaveTypes]);
+    }, [data]);
 
 
     const onSubmit = async (data: z.infer<typeof LeaveCreditFormSchema>) => {
@@ -126,39 +87,23 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
             }
         }
         console.log("Create Data: ", values)
-        const items = {
-            id: employee?.leave_credits?.map(item => item.id), ...data,
-        }
+
         try {
             setIsLoading(true)
-            if (employee?.id) {
-                const res = await axiosInstance.post("/api/admin/leaves/leave-credit/update", items)
-                if (res.status === 200) {
-                    toast({
-                        title: "Success", description: "Leave credit updated successfully", variant: "success",
-                    })
-                    form.reset({
-                        employee_id: 0, leave_credits: [],
-                    })
-                    setIsModalOpen(false)
-                } else {
-                    toast({
-                        title: "Error", description: res.data.message, variant: "danger",
-                    })
-                }
+
+            const res = await axiosInstance.post("/api/admin/leaves/leave-credit/create", values)
+            if (res.status === 200) {
+                toast({
+                    title: "Success", description: "Leave credit created successfully", variant: "success",
+                })
+                form.reset()
             } else {
-                const res = await axiosInstance.post("/api/admin/leaves/leave-credit/create", values)
-                if (res.status === 200) {
-                    toast({
-                        title: "Success", description: "Leave credit created successfully", variant: "success",
-                    })
-                    form.reset()
-                } else {
-                    toast({
-                        title: "Error", description: res.data.message, variant: "danger",
-                    })
-                }
+                toast({
+                    title: "Error", description: res.data.message, variant: "danger",
+                })
             }
+
+
             // const res = await axiosInstance.post('/api/admin/leaves/leave-credit/create', data)
 
         } catch (e) {
@@ -229,12 +174,9 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
     }]
 
 
-    return (<FormDrawer isLoading={isLoading} title={title || "Add Leave Credit"}
-                        description={description || "Steps to Set Up and Allocate Employee Leave Credits."}
+    return (<FormDrawer isLoading={isLoading} title={"Add Leave Credit"}
+                        description={"Steps to Set Up and Allocate Employee Leave Credits."}
                         footer={<div className="w-full flex justify-end gap-4">
-                            {employee && <Button onClick={() => handleDelete(employee.id)}
-                                                 isLoading={isLoadingDelete}
-                                                 isDisabled={isLoading || isLoadingDelete} {...uniformStyle({color: "danger"})}>Delete</Button>}
                             <Button form="drawer-form" type="submit" isDisabled={isLoading || isLoadingDelete}
                                     isLoading={isLoading} {...uniformStyle()}>Save</Button>
                         </div>}
@@ -245,7 +187,7 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                 className="space-y-4"
                 id="drawer-form"
             >
-                {isAssignToVisible && <FormFields items={[{
+                <FormFields items={[{
                     name: "apply_for",
                     label: "Assign to",
                     description: "Select type of employee or specify an employee.",
@@ -262,9 +204,11 @@ function LeaveCreditForm({employee, title, description, onOpen, isOpen}: LeaveCr
                             value: "specific_employee", label: "Specify..."
                         }]
                     }
-                }]}/>}
+                }]}/>
 
-                {form.watch("apply_for") !== "specific_employee" && form.watch("apply_for") !== undefined && <Chip startContent={<LuInfo className={icon_size_sm}/>} color="danger" variant="bordered" className="word-break text-sm">Existing leave credits won&apos;t be overwritten.</Chip>}
+                {form.watch("apply_for") !== "specific_employee" && form.watch("apply_for") !== undefined &&
+                    <Chip startContent={<LuInfo className={icon_size_sm}/>} color="danger" variant="bordered"
+                          className="word-break text-sm">Existing leave credits won&apos;t be overwritten.</Chip>}
 
                 {form.watch("apply_for") === "specific_employee" && <EmployeeListForm
                     employees={employeeState!}

@@ -103,7 +103,7 @@ export type EmployeePaginate = {
 
 
 export interface EmployeeDetails {
-  id: number;                     // Unique identifier for the employee
+  id: string | number;                     // Unique identifier for the employee
   name: string     // Extension (e.g., nickname), optional and can be null
   picture?: string;              // URL to the employee's picture, optional
 }
