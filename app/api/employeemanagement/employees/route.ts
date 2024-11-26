@@ -256,7 +256,6 @@ async function getEmployeeById(id: number, daysJson?: Record<string, boolean>) {
 async function getAllEmployees(daysJson?: Record<string, boolean>) {
   const employees = await prisma.trans_employees.findMany({
     where: {
-      deleted_at: null,
       dim_schedules: daysJson
         ? {
             some: {
@@ -376,6 +375,7 @@ async function updateEmployeeStatus(
 
     let updateData: Prisma.trans_employeesUpdateInput = {
       updated_at: new Date(),
+      deleted_at: ["resined, terminated"].includes(status)? new Date() : null,
     };
 
     if (status === "active") {
