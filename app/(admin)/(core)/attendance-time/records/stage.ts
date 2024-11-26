@@ -55,7 +55,6 @@ async function attendanceData({
     for (let current = start; current <= end; current.setDate(current.getDate() + 1)) {
         dateRange.push(toGMT8(current).format("YYYY-MM-DD"));
     }
-    console.log("Date range: ", dateRange);
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Arrange and label the time log for each entry and return the overall information
