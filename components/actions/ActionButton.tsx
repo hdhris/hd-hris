@@ -11,31 +11,31 @@ interface ExtendedActionProps extends ActionProps {
     hideDelete?: boolean;
 }
 
-export const ExtendedTableActionButton = ({onDelete, onEdit, name, hideEdit, hideDelete}: ExtendedActionProps) => {
-    interface ActionBTNProps {
-        children: React.ReactNode
-        tooltipColor?: TooltipProps["color"]
-        variant?: ButtonProps["variant"]
-        onAction: () => void
-        tooltipName: string
-    }
+// export const ExtendedTableActionButton = ({onDelete, onEdit, name, hideEdit, hideDelete}: ExtendedActionProps) => {
+//     interface ActionBTNProps {
+//         children: React.ReactNode
+//         tooltipColor?: TooltipProps["color"]
+//         variant?: ButtonProps["variant"]
+//         onAction: () => void
+//         tooltipName: string
+//     }
 
-    const actionBTN = ({children, tooltipColor, variant, onAction, tooltipName}: ActionBTNProps) => (
-        <Tooltip content={`${tooltipName} ${name}`} color={tooltipColor || "default"}>
-            <Button isIconOnly variant={variant || "light"} onClick={onAction}>
-                {children}
-            </Button>
-        </Tooltip>)
-    return (<>
-        {!hideEdit && actionBTN({children:  <LuPencil size={18} className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
-        {!hideDelete && actionBTN({children: <LuTrash2 size={18} className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
-    </>);
-};
+//     const actionBTN = ({children, tooltipColor, variant, onAction, tooltipName}: ActionBTNProps) => (
+//         <Tooltip content={`${tooltipName} ${name}`} color={tooltipColor || "default"}>
+//             <Button isIconOnly variant={variant || "light"} onClick={onAction}>
+//                 {children}
+//             </Button>
+//         </Tooltip>)
+//     return (<>
+//         {!hideEdit && actionBTN({children:  <LuPencil size={18} className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
+//         {!hideDelete && actionBTN({children: <LuTrash2 size={18} className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
+//     </>);
+// };
 //
 interface ActionProps {
     name: string
-    onDelete: () => void; // for delete
-    onEdit: () => void; // for edit
+    onDelete?: () => void; // for delete
+    onEdit?: () => void; // for edit
 }
 export const TableActionButton = ({onDelete, onEdit, name}: ActionProps) => {
     interface ActionBTNProps {
@@ -53,8 +53,8 @@ export const TableActionButton = ({onDelete, onEdit, name}: ActionProps) => {
             </Button>
         </Tooltip>)
     return (<>
-        {actionBTN({children:  <LuPencil size={18} className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
-        {actionBTN({children: <LuTrash2 size={18} className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
+        {onEdit&& actionBTN({children:  <LuPencil size={18} className='text-default-400'/>, tooltipColor: "default", tooltipName: "Edit", variant: "light", onAction: onEdit})}
+        {onDelete&& actionBTN({children: <LuTrash2 size={18} className='text-danger'/>, tooltipColor: "danger", tooltipName: "Delete", variant: "light", onAction: onDelete})}
     </>);
 };
 

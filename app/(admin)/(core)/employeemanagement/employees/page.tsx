@@ -3,16 +3,11 @@ import React, { useEffect, useState } from "react";
 import { useEmployeesData } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip } from "@nextui-org/react";
-import {
-  ExtendedTableActionButton,
-  TableActionButton,
-} from "@/components/actions/ActionButton";
+import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/employeescomponent/store/AddEmployees";
 import EditEmployee from "@/components/admin/employeescomponent/update/EditEmployee";
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
-import axios from "axios";
-import showDialog from "@/lib/utils/confirmDialog";
 import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
 import dayjs from "dayjs";
@@ -28,15 +23,20 @@ const Page: React.FC = () => {
   const [selectedEmployeeId, setSelectedEmployeeId] =
     React.useState<Employee | null>(null);
 
+  const filterActiveEmployees = (employeesList: Employee[]) => {
+    return employeesList.filter((employee) => {
+      return (
+        !employee.suspension_json &&
+        !employee.resignation_json &&
+        !employee.termination_json &&
+        !employee.deleted_at
+      );
+    });
+  };
+
   useEffect(() => {
     if (employees) {
-      const activeEmployees = employees.filter((employee) => {
-        return (
-          !employee.suspension_json &&
-          !employee.resignation_json &&
-          !employee.termination_json
-        );
-      });
+      const activeEmployees = filterActiveEmployees(employees);
       const sorted = sortEmployeesByRecentActivity(activeEmployees);
       setSortedEmployees(sorted);
     }
@@ -61,56 +61,17 @@ const Page: React.FC = () => {
     </div>
   ));
 
-  const handleDelete = async (id: number, name: string) => {
-    try {
-      const result = await showDialog({
-        title: "Confirm Delete",
-        message: `Are you sure you want to delete '${name}' ?`,
-      });
-      if (result === "yes") {
-        await axios.delete(`/api/employeemanagement/employees?id=${id}`);
-        toast({
-          title: "Deleted",
-          description: "Employee deleted successfully!",
-          variant: "warning",
-        });
-        await mutate();
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error: " + error,
-        variant: "danger",
-      });
-    }
-  };
-
   const handleEmployeeUpdated = async () => {
     try {
       const updatedData = await mutate();
-
       if (updatedData) {
-        // Filter active employees after update
-        const activeEmployees = updatedData.filter((employee) => {
-          return (
-            !employee.suspension_json &&
-            !employee.resignation_json &&
-            !employee.termination_json
-          );
-        });
+        const activeEmployees = filterActiveEmployees(updatedData);
         const sorted = sortEmployeesByRecentActivity(activeEmployees);
         setSortedEmployees(sorted);
       }
     } catch (error) {
       console.error("Error updating employee data:", error);
     }
-  };
-
-  const getEmployeeStatus = (employee: Employee): string => {
-    if (employee.termination_json) return "Terminated";
-    if (employee.resignation_json) return "Resigned";
-    if (employee.suspension_json) return "Suspended";
-    return "Active";
   };
 
   const handleRowClick = (employee: Employee) => {
@@ -126,13 +87,10 @@ const Page: React.FC = () => {
       { uid: "contact", name: "Contact" },
       { uid: "hiredate", name: "Hired Date", sortable: true },
       { uid: "workstatus", name: "Work Status", sortable: true },
-      // { uid: "status", name: "Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
-
-      // Common styles for clickable cells
       const cellClasses = "cursor-pointer hover:bg-gray-50";
 
       switch (key) {
@@ -194,7 +152,10 @@ const Page: React.FC = () => {
           );
         case "workstatus":
           return (
-            <div className={cellClasses}>
+            <div
+              className={cellClasses}
+              onClick={() => handleRowClick(employee)}
+            >
               <Chip
                 className="capitalize"
                 color={employee.is_regular ? "success" : "warning"}
@@ -205,33 +166,11 @@ const Page: React.FC = () => {
               </Chip>
             </div>
           );
-        case "status":
-          const status = getEmployeeStatus(employee);
-          const statusColor = {
-            Active: "success",
-            Terminated: "danger",
-            Resigned: "default",
-            Suspended: "warning",
-          }[status] as "success" | "danger" | "warning" | "default";
-
-          return (
-            <div
-              className={cellClasses}
-              onClick={() => handleRowClick(employee)}
-            >
-              <Chip color={statusColor} size="sm" variant="flat">
-                {status}
-              </Chip>
-            </div>
-          );
-
         case "actions":
           return (
-            <ExtendedTableActionButton
+            <TableActionButton
               name={`${employee.first_name} ${employee.last_name}`}
               onEdit={() => handleEdit(employee)}
-              onDelete={() => {}}
-              hideDelete={true}
             />
           );
         default:
@@ -254,12 +193,21 @@ const Page: React.FC = () => {
     {
       category: "Work Status",
       filtered: [
-        { key: "is_regular", value: true, name: "Regular", uid: "probitionary" },
-        { key: "is_regular", value: false, name: "Probitionary", uid: "regular" },
+        {
+          key: "is_regular",
+          value: true,
+          name: "Regular",
+          uid: "probitionary",
+        },
+        {
+          key: "is_regular",
+          value: false,
+          name: "Probitionary",
+          uid: "regular",
+        },
       ],
     },
-    
-   {
+    {
       category: "Department",
       filtered: sortedEmployees
         ? Array.from(
@@ -274,7 +222,6 @@ const Page: React.FC = () => {
             }))
         : [],
     },
-    
     {
       category: "Job Position",
       filtered: sortedEmployees
