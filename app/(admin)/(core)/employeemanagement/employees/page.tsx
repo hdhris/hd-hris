@@ -3,7 +3,10 @@ import React, { useEffect, useState } from "react";
 import { useEmployeesData } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip } from "@nextui-org/react";
-import { ExtendedTableActionButton, TableActionButton } from "@/components/actions/ActionButton";
+import {
+  ExtendedTableActionButton,
+  TableActionButton,
+} from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/employeescomponent/store/AddEmployees";
 import EditEmployee from "@/components/admin/employeescomponent/update/EditEmployee";
@@ -27,11 +30,12 @@ const Page: React.FC = () => {
 
   useEffect(() => {
     if (employees) {
-      // Filter out non-active employees first, then sort them
-      const activeEmployees = employees.filter(employee => {
-        return !employee.suspension_json && 
-               !employee.resignation_json && 
-               !employee.termination_json;
+      const activeEmployees = employees.filter((employee) => {
+        return (
+          !employee.suspension_json &&
+          !employee.resignation_json &&
+          !employee.termination_json
+        );
       });
       const sorted = sortEmployeesByRecentActivity(activeEmployees);
       setSortedEmployees(sorted);
@@ -87,10 +91,12 @@ const Page: React.FC = () => {
 
       if (updatedData) {
         // Filter active employees after update
-        const activeEmployees = updatedData.filter(employee => {
-          return !employee.suspension_json && 
-                 !employee.resignation_json && 
-                 !employee.termination_json;
+        const activeEmployees = updatedData.filter((employee) => {
+          return (
+            !employee.suspension_json &&
+            !employee.resignation_json &&
+            !employee.termination_json
+          );
         });
         const sorted = sortEmployeesByRecentActivity(activeEmployees);
         setSortedEmployees(sorted);
@@ -119,7 +125,8 @@ const Page: React.FC = () => {
       { uid: "position", name: "Position", sortable: true },
       { uid: "contact", name: "Contact" },
       { uid: "hiredate", name: "Hired Date", sortable: true },
-      { uid: "status", name: "Status", sortable: true },
+      { uid: "workstatus", name: "Work Status", sortable: true },
+      // { uid: "status", name: "Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
@@ -185,8 +192,21 @@ const Page: React.FC = () => {
                 : "N/A"}
             </div>
           );
+        case "workstatus":
+          return (
+            <div className={cellClasses}>
+              <Chip
+                className="capitalize"
+                color={employee.is_regular ? "success" : "warning"}
+                size="sm"
+                variant="flat"
+              >
+                {employee.is_regular ? "Regular" : "Probitionary"}
+              </Chip>
+            </div>
+          );
         case "status":
-          const status = getEmployeeStatus(employee); 
+          const status = getEmployeeStatus(employee);
           const statusColor = {
             Active: "success",
             Terminated: "danger",
@@ -204,12 +224,13 @@ const Page: React.FC = () => {
               </Chip>
             </div>
           );
+
         case "actions":
           return (
             <ExtendedTableActionButton
               name={`${employee.first_name} ${employee.last_name}`}
               onEdit={() => handleEdit(employee)}
-              onDelete={() =>{}}
+              onDelete={() => {}}
               hideDelete={true}
             />
           );
@@ -223,17 +244,27 @@ const Page: React.FC = () => {
     sortItems: [
       { name: "First Name", key: "first_name" as keyof Employee },
       { name: "Last Name", key: "last_name" as keyof Employee },
-      { name: "Created At", key: "created_at" as keyof Employee },
-      { name: "Updated At", key: "updated_at" as keyof Employee },
+      { name: "Created", key: "created_at" as keyof Employee },
+      { name: "Updated", key: "updated_at" as keyof Employee },
       { name: "Hired Date", key: "hired_at" as keyof Employee },
     ],
   };
 
   const FilterItems = [
     {
+      category: "Work Status",
+      filtered: [
+        { key: "is_regular", value: true, name: "Regular", uid: "probitionary" },
+        { key: "is_regular", value: false, name: "Probitionary", uid: "regular" },
+      ],
+    },
+    
+   {
       category: "Department",
       filtered: sortedEmployees
-        ? Array.from(new Set(sortedEmployees.map((e) => e.ref_departments?.name)))
+        ? Array.from(
+            new Set(sortedEmployees.map((e) => e.ref_departments?.name))
+          )
             .filter(Boolean)
             .map((dept) => ({
               key: "ref_departments.name",
@@ -243,13 +274,29 @@ const Page: React.FC = () => {
             }))
         : [],
     },
+    
+    {
+      category: "Job Position",
+      filtered: sortedEmployees
+        ? Array.from(
+            new Set(sortedEmployees.map((e) => e.ref_job_classes?.name))
+          )
+            .filter(Boolean)
+            .map((job) => ({
+              key: "ref_job_classes.name",
+              value: job || "",
+              name: job || "",
+              uid: job || "",
+            }))
+        : [],
+    },
   ];
 
   return (
     <div className="h-[calc(100vh-150px)] overflow-hidden">
       <DataDisplay
         defaultDisplay="table"
-        title="Employees"
+        title="Active Employees"
         data={sortedEmployees}
         filterProps={{
           filterItems: FilterItems,
@@ -261,7 +308,7 @@ const Page: React.FC = () => {
           layout: "auto",
         }}
         paginationProps={{
-          data_length: sortedEmployees?.length
+          data_length: sortedEmployees?.length,
         }}
         searchProps={{
           searchingItemKey: ["first_name", "last_name", "email", "contact_no"],
@@ -273,19 +320,31 @@ const Page: React.FC = () => {
             onClick={() => handleRowClick(employee)}
           >
             <BorderCard className="p-4">
-              <div className="flex items-center gap-4">
-                <Avatar
-                  src={employee.picture || ""}
-                  alt={`${employee.first_name} ${employee.last_name}`}
-                />
-                <div className="flex flex-col">
-                  <span className="font-medium">
-                    {employee.first_name} {employee.last_name}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {employee.ref_departments?.name || "N/A"} -{" "}
-                    {employee.ref_job_classes?.name || "N/A"}
-                  </span>
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2">
+                  <Avatar
+                    src={employee.picture || ""}
+                    alt={`${employee.first_name} ${employee.last_name}`}
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {employee.first_name} {employee.last_name}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {employee.ref_departments?.name || "N/A"} -{" "}
+                      {employee.ref_job_classes?.name || "N/A"}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Chip
+                    className="capitalize"
+                    color={employee.is_regular ? "success" : "warning"}
+                    size="sm"
+                    variant="flat"
+                  >
+                    {employee.is_regular ? "Regular" : "Probitionary"}
+                  </Chip>
                 </div>
               </div>
             </BorderCard>
@@ -294,12 +353,12 @@ const Page: React.FC = () => {
         onExport={{
           drawerProps: {
             title: "Export",
-          }
+          },
         }}
         onImport={{
           drawerProps: {
             title: "Import",
-          }
+          },
         }}
       />
 

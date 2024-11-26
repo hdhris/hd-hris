@@ -172,8 +172,8 @@ const Page: React.FC = () => {
   const sortProps = {
     sortItems: [
       { name: "Name", key: "name" as keyof JobPosition },
-      { name: "Created At", key: "created_at" as keyof JobPosition },
-      { name: "Updated At", key: "updated_at" as keyof JobPosition },
+      { name: "Created", key: "created_at" as keyof JobPosition },
+      { name: "Updated", key: "updated_at" as keyof JobPosition },
     ],
   };
 

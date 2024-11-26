@@ -24,6 +24,8 @@ import Text from "@/components/Text";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { mutate } from "swr";
+import ScheduleSelection from "./ScheduleSelection";
+import AddAccount from "./AddAccount";
 
 interface AddEmployeeProps {
   onEmployeeAdded: () => void;
@@ -31,6 +33,8 @@ interface AddEmployeeProps {
 //
 export const employeeSchema = z.object({
   picture: z.union([z.instanceof(File), z.string()]).optional(),
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   first_name: z
     .string()
     .min(1, "First name is required")
@@ -46,11 +50,13 @@ export const employeeSchema = z.object({
   suffix: z
     .string()
 
-    .optional().nullable(),
+    .optional()
+    .nullable(),
   extension: z
     .string()
 
-    .optional().nullable(),
+    .optional()
+    .nullable(),
   gender: z.string().min(1, "Gender is required"),
   email: z.string().email("Invalid email address"),
   contact_no: z
@@ -119,65 +125,71 @@ export const employeeSchema = z.object({
     .string()
     .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
     .optional(),
-    //
-    masters: z
-  .string()
-  .regex(
-    /^[a-zA-Z0-9\s]*$/,
-    "Masters institution should only contain letters and numbers"
-  )
-  .optional(),
-mastersCourse: z
-  .string()
-  .regex(/^[a-zA-Z0-9\s]*$/, "Masters course should only contain letters and numbers")
-  .optional(),
+  //
+  masters: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Masters institution should only contain letters and numbers"
+    )
+    .optional(),
+  mastersCourse: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Masters course should only contain letters and numbers"
+    )
+    .optional(),
   mastersYear: z
-  .union([
-    z.string().regex(/^\d{4}-\d{4}$/, "Year should be in format YYYY-YYYY"),
-    z.string().length(0),  // allows empty string
-    z.null(),             // allows null
-    z.undefined()         // allows undefined
-  ])
-  .optional(),
-mastersCertificates: z
-  .array(
-    z.object({
-      name: z.string().optional(),
-      url: z.union([z.string(), z.instanceof(File), z.undefined()]),
-      fileName: z.string().optional(),
-    })
-  )
-  .optional()
-  .default([]),
-doctorate: z
-  .string()
-  .regex(
-    /^[a-zA-Z0-9\s]*$/,
-    "Doctorate institution should only contain letters and numbers"
-  )
-  .optional(),
-doctorateCourse: z
-  .string()
-  .regex(/^[a-zA-Z0-9\s]*$/, "Doctorate course should only contain letters and numbers")
-  .optional(),
+    .union([
+      z.string().regex(/^\d{4}-\d{4}$/, "Year should be in format YYYY-YYYY"),
+      z.string().length(0), // allows empty string
+      z.null(), // allows null
+      z.undefined(), // allows undefined
+    ])
+    .optional(),
+  mastersCertificates: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
+        fileName: z.string().optional(),
+      })
+    )
+    .optional()
+    .default([]),
+  doctorate: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Doctorate institution should only contain letters and numbers"
+    )
+    .optional(),
+  doctorateCourse: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Doctorate course should only contain letters and numbers"
+    )
+    .optional(),
   doctorateYear: z
-  .union([
-    z.string().regex(/^\d{4}-\d{4}$/, "Year should be in format YYYY-YYYY"),
-    z.string().length(0),  // allows empty string
-    z.null(),             // allows null
-    z.undefined()         // allows undefined
-  ])
-  .optional(),
-doctorateCertificates: z
-  .array(
-    z.object({
-      name: z.string().optional(),
-      url: z.union([z.string(), z.instanceof(File), z.undefined()]),
-      fileName: z.string().optional(),
-    })
-  )
-  .optional()
-  .default([]),
+    .union([
+      z.string().regex(/^\d{4}-\d{4}$/, "Year should be in format YYYY-YYYY"),
+      z.string().length(0), // allows empty string
+      z.null(), // allows null
+      z.undefined(), // allows undefined
+    ])
+    .optional(),
+  doctorateCertificates: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
+        fileName: z.string().optional(),
+      })
+    )
+    .optional()
+    .default([]),
   //
   highestDegree: z.string().optional(),
   certificates: z
@@ -225,6 +237,8 @@ interface Certificate {
 }
 
 interface EmployeeFormData {
+  password: string;
+  username: string;
   picture: File | string;
   first_name: string;
   middle_name: string;
@@ -365,7 +379,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
       const filteredCertificates = updatedCertificates.filter(
         (cert) => cert !== null
       );
-      
+
       const mastersCertificates = await Promise.all(
         (data.mastersCertificates || []).map(async (cert) => {
           if (!cert) return null;
@@ -376,10 +390,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
             });
             return {
               fileName:
-                cert.fileName ||
-                cert.name ||
-                result.url.split("/").pop() ||
-                "",
+                cert.fileName || cert.name || result.url.split("/").pop() || "",
               fileUrl: result.url,
             };
           }
@@ -389,7 +400,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
           };
         })
       ).then((certs) => certs.filter((cert) => cert !== null));
-    
+
       const doctorateCertificates = await Promise.all(
         (data.doctorateCertificates || []).map(async (cert) => {
           if (!cert) return null;
@@ -400,10 +411,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
             });
             return {
               fileName:
-                cert.fileName ||
-                cert.name ||
-                result.url.split("/").pop() ||
-                "",
+                cert.fileName || cert.name || result.url.split("/").pop() || "",
               fileUrl: result.url,
             };
           }
@@ -433,10 +441,35 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         doctorateCourse: data.doctorateCourse,
         doctorateYear: data.doctorateYear,
         doctorateCertificates: doctorateCertificates,
-      }
+      };
 
+      let accountResponse;
+      try {
+        accountResponse = await axios.post("/api/employeemanagement/employees/create-with-credentials", {
+          employee: {
+            first_name: data.first_name,
+            email: data.email
+          },
+          credentials: {
+            username: data.username,
+            password: data.password
+          }
+        });
+      } catch (error) {
+        // If account creation fails, throw error and stop the process
+        const errorMessage = axios.isAxiosError(error)
+          ? error.response?.data?.message || "Failed to create user account"
+          : "Failed to create user account";
+        throw new Error(errorMessage);
+      }
+  
+      if (accountResponse.status !== 201 || !accountResponse.data.userId) {
+        throw new Error("Failed to create user account - no user ID returned");
+      };
+  
       // This is to Prepare full data
       const fullData = {
+        user_id: accountResponse.data.userId,
         picture: pictureUrl,
         first_name: data.first_name,
         middle_name: data.middle_name,
@@ -468,49 +501,40 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
         ],
       };
 
-      // console.log("Sending data:", JSON.stringify(fullData, null, 2));
-      //this is to save the fulldata
-      const response = await axios.post(
-        "/api/employeemanagement/employees",
-        fullData
-      );
+      
+   
+      const response = await axios.post("/api/employeemanagement/employees", fullData);
 
-      if (response.status === 201) {
-        onEmployeeAdded();
-        methods.reset();
-        toast({
-          title: "Success",
-          description: "Employee successfully added!",
-          duration: 3000,
-        });
-
-        mutate("/api/employeemanagement/employees");
-        setTimeout(() => {
-          onClose();
-        }, 500);
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        console.error("Server error response:", error.response.data);
-        toast({
-          title: "Error",
-          description:
-            error.response.data.message ||
-            "Failed to add employee. Please try again.",
-          duration: 3000,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred. Please try again.",
-          duration: 3000,
-        });
-      }
-    } finally {
-      setIsSubmitting(false);
+    if (response.status === 201) {
+      onEmployeeAdded();
+      methods.reset();
+      toast({
+        title: "Success",
+        description: "Employee added and credentials sent to their email!",
+        duration: 3000,
+      });
+      mutate("/api/employeemanagement/employees");
+      onClose();
     }
-  };
+  } catch (error) {
+    console.error("Error:", error);
+    if (axios.isAxiosError(error)) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to create employee",
+        duration: 3000,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: (error as Error).message || "An unexpected error occurred",
+        duration: 3000,
+      });
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <>
@@ -537,8 +561,14 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
             </Text>
             <EducationalBackgroundForm />
             <Divider className="my-6" />
-            <Text>Job Information</Text>
+            <Text className="text-medium font-semibold">Job Information</Text>
             <JobInformationForm />
+            <Text className="text-small font-semibold">Working Schedule</Text>
+            <ScheduleSelection />
+            <Text className="text-medium font-semibold">
+              Account Credentials
+            </Text>
+            <AddAccount userId="" email={methods.watch("email")} />
           </form>
         </Form>
       </Drawer>
