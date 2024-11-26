@@ -127,8 +127,9 @@ export async function stageTable(
         const daySchedule = employeeScheduleMap.get(emp.id);
         const timeSchedule = batchScheduleMap.get(daySchedule?.batch_id || 0);
     
+        const ratePerHour = parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0;
         const baseVariables: BaseValueProp = {
-          rate_p_hr: parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0,
+          rate_p_hr: ratePerHour,
           total_shft_hr: 80,
           basic_salary: parseFloat(String(emp.ref_job_classes?.basic_salary)) || 0.0,
           payroll_days: payrollDays,
@@ -140,7 +141,7 @@ export async function stageTable(
             timeSchedule || null,
             dateInfo.start_date,
             dateInfo.end_date
-          ),
+          ) * (ratePerHour / 60),
         };
     
         // Filter applicable payheads for calculation based on employee and payhead data.

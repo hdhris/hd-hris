@@ -1,3 +1,10 @@
+import { formatDistanceToNow } from 'date-fns'
+
+function formatTimeAgo(date: Date): string {
+  return formatDistanceToNow(date, { addSuffix: true })
+}
+
+
 const numberWithCommas = (n: number) => {
     return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 20 });
 }
@@ -10,6 +17,10 @@ const ordinalSuffix = (i: number) => {
     remainder >= 11 && remainder <= 13 ? "th" : suffixes[(value % 10) as keyof typeof suffixes] || "th";
     return `${value}${suffix}`;
 }
+
+const formatCurrency = (amount: string) => {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: "PHP" }).format(Number(amount));
+};
 
 const getRandomInt = (min: number, max: number) => {
     min = Math.ceil(min);
@@ -26,4 +37,5 @@ const compactNumber = (x: number) => {
 };
 
 
-export {numberWithCommas, ordinalSuffix, getRandomInt, compactNumber}
+
+export {numberWithCommas, ordinalSuffix, getRandomInt, compactNumber, formatCurrency, formatTimeAgo}

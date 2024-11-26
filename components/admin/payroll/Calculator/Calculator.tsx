@@ -75,7 +75,7 @@ function PayheadCalculator({
                 setInput(input + newVal);
             }
         },
-        [input]
+        [input, setInput]
     );
 
     const handleBackspace = useCallback(() => {
@@ -99,7 +99,7 @@ function PayheadCalculator({
             }
         }
         setInput(val);
-    },[input]);
+    },[input, setInput]);
 
     return (
         <div className="flex gap-2">
@@ -123,7 +123,7 @@ function PayheadCalculator({
                 </PopoverTrigger>
                 <PopoverContent>
                     <div className="w-fit p-4">
-                        <div className="grid grid-cols-4 gap-2 justify-end">
+                        <div className="grid grid-cols-6 gap-2 justify-end">
                             {calcbuttons.map((button, index) => (
                                 <Button
                                     color={isNumeric(button) ? "primary" : undefined}

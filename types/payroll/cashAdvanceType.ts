@@ -11,8 +11,8 @@ export interface LoanRequest {
   reason: string;
   status: ApprovalStatusType; // "pending" | "approved" | "rejected"
   approval_by: number;
-  approval_at: string | null;
-  comment: string | null;
+  approval_at: string;
+  comment: string;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

@@ -6,14 +6,14 @@ import { Payhead } from "@/types/payroll/payheadType";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Button, Chip, Selection } from "@nextui-org/react";
 import { useRouter } from "next/dist/client/components/navigation";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import { FilterItemsProps } from "@/components/common/filter/FilterItems";
+import { capitalize } from "lodash";
 import axios from "axios";
 import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
-import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import SearchFilter from "@/components/common/filter/SearchFilter";
-import { FilterItemsProps } from "@/components/common/filter/FilterItems";
-import { capitalize } from "lodash";
 
 function PayheadUI({ payhead_type }: { payhead_type: string }) {
     const router = useRouter();
@@ -79,7 +79,7 @@ function PayheadUI({ payhead_type }: { payhead_type: string }) {
                             onEdit={() => router.push(`/payroll/${payhead_type}s/manage?id=${item.id}`)}
                             onDelete={() => {
                                 if (item.system_only) {
-                                    toast({ title: "System variable cannot be deleted", variant: "warning" });
+                                    toast({ title: `System ${payhead_type} cannot be deleted`, variant: "warning" });
                                 } else {
                                     handleDelete(item.id, item.name);
                                 }

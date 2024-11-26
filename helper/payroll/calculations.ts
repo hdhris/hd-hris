@@ -37,6 +37,8 @@ export function calculateAllPayheads(
   unCalculateAmount: VariableFormulaProp[],
   surpressErrorMsg: boolean = false,
 ): VariableAmountProp[] {
+  const sqrt = Math.sqrt;
+  const abs = Math.abs;
   let calculatedAmount: VariableAmountProp[] = [];
   let isError = false;
 
@@ -46,6 +48,12 @@ export function calculateAllPayheads(
       variable,
       amount,
     }));
+
+    const sanitizeFormula = (formula: string) =>{
+      return formula
+        .replaceAll("√","sqrt") // square root
+        .replaceAll("x","*") // multiplication
+    }
   
     unCalculateAmount.forEach(ua=>{
       const variables = [...baseVariables, ...calculatedAmount]
@@ -59,7 +67,7 @@ export function calculateAllPayheads(
         amount: (()=>{
           try {
             return parser.evaluate(
-              ua.formula,
+              sanitizeFormula(ua.formula),
               variables.reduce((acc, { variable, amount }) => {
                 acc[variable] = amount ; // Set the variable name as the key and amount as the value
                 return acc; // Return the accumulator for the next iteration

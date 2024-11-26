@@ -28,10 +28,7 @@ function IncidentDrawer({
 }: // isSubmitting,
 IncidentDrawerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data, isLoading } = useQuery<UserEmployee[]>(
-    "/api/admin/utils/get-employee-search",
-    { refreshInterval: 5000 }
-  );
+  const { data, isLoading } = useQuery<UserEmployee[]>("/api/admin/utils/get-employee-search");
   const employees = useMemo(() => {
     if (data) {
       return data.map((emp) => ({

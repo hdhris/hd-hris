@@ -1,4 +1,4 @@
-import { Link, User } from "@nextui-org/react";
+import { cn, Link, User } from "@nextui-org/react";
 import React from "react";
 
 interface UserMailProps {
@@ -21,7 +21,7 @@ function UserMail({ name, email, description, picture, message, onClick, size, c
     return (
         <User
             name={name}
-            className={className}
+            className={cn('flex justify-start',className)}
             onClick={onClick}
             description={
                 email && emailRegex.test(email) ? (
