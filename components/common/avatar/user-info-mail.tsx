@@ -26,7 +26,6 @@ function UserMail({ name, email, description, picture, message, onClick, size, c
             description={
                 email && emailRegex.test(email) ? (
                     <Link
-                        href="#"
                         size="sm"
                         className="text-blue-500"
                         onPress={(e) => {
