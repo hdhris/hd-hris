@@ -60,27 +60,30 @@ export interface EmployeeSchedule {
 }
 
 export interface AttendanceData {
-  attendanceLog: AttendanceLog[];
-  employees: UserEmployee[];
-  statuses: AttendaceStatuses;
+  attendanceLogs: AttendanceLog[]; // Renamed to plural to better reflect multiple logs
+  employees: UserEmployee[]; // List of employees involved in the logs
+  statusesByDate: Record<string, AttendaceStatuses>; // Attendance statuses organized by date
+  batchSchedule: BatchSchedule[]; // Array of batch schedules for the employees
+  employeeSchedule: EmployeeSchedule[]; // Array of individual schedules for employees
 }
 
-export type InStatus = "absent" | "late" | "ontime" | "no break";
+export type InStatus = "absent" | "late" | "ontime" | "no break" | "no work";
 export type OutStatus =
   | "absent"
   | "early-out"
   | "overtime"
   | "ontime"
   | "lunch"
-  | "no break";
+  | "no break"
+  | "no work";
 
 export type punchIN = {
-  id: number;
+  id: number | null;
   time: string | null;
   status: InStatus;
 };
 export type punchOUT = {
-  id: number;
+  id: number | null;
   time: string | null;
   status: OutStatus;
 };
@@ -95,4 +98,4 @@ export type LogStatus = {
   undertime?: number;
 };
 
-export type AttendaceStatuses = { [key: string]: LogStatus };
+export type AttendaceStatuses = { [employeeID: string]: LogStatus };

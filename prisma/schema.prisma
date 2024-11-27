@@ -494,7 +494,6 @@ model trans_leaves {
   employee_id                                              Int
   start_date                                               DateTime?        @db.Date
   end_date                                                 DateTime?        @db.Date
-  comment                                                  String?
   status                                                   String?          @db.VarChar(10)
   created_at                                               DateTime         @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
   updated_at                                               DateTime         @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
@@ -652,15 +651,6 @@ model auth_accounts {
   @@id([provider, provider_account_id])
 }
 
-model sec_sessions {
-  sessionToken String   @unique(map: "Session_sessionToken_key")
-  userId       String
-  expires      DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime
-  id           Int      @id @default(autoincrement())
-}
-
 model ref_holidays {
   id         Int       @id @default(autoincrement())
   name       String?   @db.VarChar(45)
@@ -726,4 +716,13 @@ model dim_payhead_specific_amounts {
   ref_payheads    ref_payheads?    @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([payhead_id, employee_id], map: "employee_payhead")
+}
+
+model sec_sessions {
+  sessionToken String   @unique(map: "Session_sessionToken_key")
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  id           Int      @id @default(autoincrement())
 }

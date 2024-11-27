@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing PayheadUI not PayheadUi">
+      <change afterPath="$PROJECT_DIR$/app/error.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/fonts/inter/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/Inter-Italic-VariableFont_opsz,wght.woff" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/error/server-error.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/not-found.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/not-found.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/not-found/not-found.svg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/not-found/not-found.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/request-form/form/RequestForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/request-form/form/RequestForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/card-view/card-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/card-view/card-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/login/Login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/login/Login.tsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+        <option value="TypeScript JSX File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="origin/france" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Xero-John&quot;
+  }
+}</component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="john" />
+                    <option name="lastUsedInstant" value="1732506091" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="main" />
+                    <option name="lastUsedInstant" value="1732506047" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Xero-John/HD-HRIS.git&quot;,
+    &quot;accountId&quot;: &quot;b5f152ec-cbe8-4d2b-9411-9380cee4dc5f&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2pBxbHtpctVMimeJbmT1HbjeJRG" />
+  <component name="ProjectViewState">
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "com.codeium.enabled": "true",
+    "database.data.extractors.current.export.id": "Comma-separated (CSV)_id",
+    "database.data.extractors.current.id": "Comma-separated (CSV)_id",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Xero/WebstormProjects/HD-HRIS/HD-HRIS/app",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Users\\Xero\\WebstormProjects\\HD-HRIS\\HD-HRIS\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app" />
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app\fonts\inter" />
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\assets\fonts\inter" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\assets" />
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app" />
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\components\admin\leaves\credits\forms\add" />
+      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\components\admin\leaves\credits\add-form" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task id="LOCAL-00001" summary="deleting .idea">
+      <option name="closed" value="true" />
+      <created>1732176759639</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1732176759639</updated>
+    </task>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="deleting .idea" />
+      <created>1732253412534</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1732253412534</updated>
+      <workItem from="1732253419244" duration="3426000" />
+      <workItem from="1732272056857" duration="15320000" />
+      <workItem from="1732353501116" duration="27655000" />
+      <workItem from="1732411991554" duration="22114000" />
+      <workItem from="1732501489335" duration="3833000" />
+      <workItem from="1732623105052" duration="21408000" />
+    </task>
+    <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
+      <option name="closed" value="true" />
+      <created>1732354420647</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1732354420647</updated>
+    </task>
+    <task id="LOCAL-00003" summary="updating No data component - adding Icon">
+      <option name="closed" value="true" />
+      <created>1732358507528</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1732358507528</updated>
+    </task>
+    <task id="LOCAL-00004" summary="fixing the pagination in data display and fixing the interface in leave credit">
+      <option name="closed" value="true" />
+      <created>1732360534250</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1732360534250</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fixing warning in regard to aria-label and polishing hidden assign to field when updating specific employee">
+      <option name="closed" value="true" />
+      <created>1732369348545</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1732369348545</updated>
+    </task>
+    <task id="LOCAL-00006" summary="adding email-services.ts">
+      <option name="closed" value="true" />
+      <created>1732372307873</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1732372307873</updated>
+    </task>
+    <task id="LOCAL-00007" summary="adding an alert message to the leave credit form">
+      <option name="closed" value="true" />
+      <created>1732374837862</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1732374837862</updated>
+    </task>
+    <task id="LOCAL-00008" summary="fixing leave RequestForm.tsx">
+      <option name="closed" value="true" />
+      <created>1732380091489</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1732380091489</updated>
+    </task>
+    <task id="LOCAL-00009" summary="fixing leave RequestForm.tsx v2">
+      <option name="closed" value="true" />
+      <created>1732459383790</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1732459383790</updated>
+    </task>
+    <task id="LOCAL-00010" summary="cleaning">
+      <option name="closed" value="true" />
+      <created>1732463104400</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1732463104400</updated>
+    </task>
+    <task id="LOCAL-00011" summary="cleaning">
+      <option name="closed" value="true" />
+      <created>1732463302497</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1732463302497</updated>
+    </task>
+    <task id="LOCAL-00012" summary="cleaning">
+      <option name="closed" value="true" />
+      <created>1732463317198</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1732463317198</updated>
+    </task>
+    <task id="LOCAL-00013" summary="cleaning">
+      <option name="closed" value="true" />
+      <created>1732463402963</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1732463402963</updated>
+    </task>
+    <task id="LOCAL-00014" summary="fixing leave types">
+      <option name="closed" value="true" />
+      <created>1732466301489</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1732466301489</updated>
+    </task>
+    <task id="LOCAL-00015" summary="fixing leave types">
+      <option name="closed" value="true" />
+      <created>1732466575551</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1732466575551</updated>
+    </task>
+    <task id="LOCAL-00016" summary="fixing PayheadUI not PayheadUi">
+      <option name="closed" value="true" />
+      <created>1732469625892</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1732469625892</updated>
+    </task>
+    <task id="LOCAL-00017" summary="fixing LeaveRequest v1">
+      <option name="closed" value="true" />
+      <created>1732610157359</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1732610157359</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fixing" />
+    <MESSAGE value="deleting .idea" />
+    <MESSAGE value="fixing the responsiveness of the onGridDisplay" />
+    <MESSAGE value="updating No data component - adding Icon" />
+    <MESSAGE value="fixing the pagination in data display and fixing the interface in leave credit" />
+    <MESSAGE value="fixing warning in regard to aria-label and polishing hidden assign to field when updating specific employee" />
+    <MESSAGE value="adding email-services.ts" />
+    <MESSAGE value="adding an alert message to the leave credit form" />
+    <MESSAGE value="fixing leave RequestForm.tsx" />
+    <MESSAGE value="fixing leave RequestForm.tsx v2" />
+    <MESSAGE value="cleaning" />
+    <MESSAGE value="fixing leave types" />
+    <MESSAGE value="polish leave credit v2" />
+    <MESSAGE value="fixing PayheadUI not PayheadUi" />
+    <MESSAGE value="fixing LeaveRequest v1" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing LeaveRequest v1" />
+  </component>
+</project>

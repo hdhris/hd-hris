@@ -28,7 +28,7 @@ function DatePickerPayroll({setProcessDate, onDeploy}:DatePickerUiProps) {
   let formatter = useDateFormatter({ dateStyle: "long" });
   const {data:payrollDates, isLoading, mutate} = useQuery<ProcessDate[]>('/api/admin/payroll/get-process-dates',
     {
-      refreshInterval: 1000,
+      refreshInterval: 5000,
       // refreshInterval: 0,
       // refreshWhenHidden: false,
       // refreshWhenOffline: false,

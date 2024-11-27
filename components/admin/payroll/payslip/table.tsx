@@ -58,10 +58,7 @@ export function PRPayslipTable({
         setStageMsg("Initializing employees' payroll...");
         const stage_one = await axios.post('/api/admin/payroll/payslip/get-unprocessed', { dateID: processDate.id, stageNumber: 1 });
         const { payrolls, employees, dataPH } = stage_one.data.result;
-        const stage_two = await axios.post('/api/admin/payroll/payslip/get-unprocessed', { dateID: processDate.id, stageNumber: 2 });
-        const { cashToDisburse, cashToRepay, benefitsPlansData } = stage_two.data.result;
-        setStageMsg("Performing calculations...");
-        const final_stage =  await stageTable(processDate, {payrolls, employees, dataPH}, { cashToDisburse, cashToRepay, benefitsPlansData }, setStageMsg);
+        const final_stage =  await stageTable(processDate, {payrolls, employees, dataPH}, setStageMsg);
         return final_stage;
       } else {
         // Fetch from the provided API URL
@@ -376,6 +373,12 @@ export function PRPayslipTable({
         <thead className="text-xs text-gray-500 sticky top-0 z-50 h-11">
           <tr className="divide-x divide-gray-200">
             <th
+              key={"id"}
+              className="sticky top-0 left-0 bg-gray-100 font-bold px-4 py-2 text-left w-[50px] max-w-[50px] z-50"
+            >
+              ID
+            </th>
+            <th
               key={"name"}
               className="sticky top-0 left-0 bg-gray-100 font-bold px-4 py-2 text-left w-[200px] max-w-[200px] z-50"
             >
@@ -424,6 +427,12 @@ export function PRPayslipTable({
               key={employee.id}
               onFocus={() => handleFocuses(employee.id)}
             >
+              <td
+                key={`${employee.id}-id`}
+                className="sticky left-0 bg-white truncate text-sm font-semibold w-[50px] max-w-[50px] z-40"
+              >
+                {employee.id}
+              </td>
               <td
                 key={`${employee.id}-name`}
                 className="sticky left-0 bg-white truncate text-sm font-semibold w-[200px] max-w-[200px] z-40"

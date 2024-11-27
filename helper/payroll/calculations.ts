@@ -4,6 +4,7 @@ const parser = new Parser();
 export const static_formula = {
   cash_advance_disbursement : 'get_disbursement',
   cash_advance_repayment : 'get_repayment',
+  tardiness : 'get_tardiness',
   benefit_contribution : 'get_contribution',
 } 
 
@@ -11,6 +12,7 @@ export type BaseValueProp = {
   rate_p_hr: number;
   total_shft_hr: number;
   payroll_days: number;
+  basic_salary: number;
   [key: string]: number;
 };
 
@@ -35,6 +37,8 @@ export function calculateAllPayheads(
   unCalculateAmount: VariableFormulaProp[],
   surpressErrorMsg: boolean = false,
 ): VariableAmountProp[] {
+  const sqrt = Math.sqrt;
+  const abs = Math.abs;
   let calculatedAmount: VariableAmountProp[] = [];
   let isError = false;
 
@@ -44,6 +48,12 @@ export function calculateAllPayheads(
       variable,
       amount,
     }));
+
+    const sanitizeFormula = (formula: string) =>{
+      return formula
+        .replaceAll("√","sqrt") // square root
+        .replaceAll("x","*") // multiplication
+    }
   
     unCalculateAmount.forEach(ua=>{
       const variables = [...baseVariables, ...calculatedAmount]
@@ -57,7 +67,7 @@ export function calculateAllPayheads(
         amount: (()=>{
           try {
             return parser.evaluate(
-              ua.formula,
+              sanitizeFormula(ua.formula),
               variables.reduce((acc, { variable, amount }) => {
                 acc[variable] = amount ; // Set the variable name as the key and amount as the value
                 return acc; // Return the accumulator for the next iteration
@@ -83,6 +93,8 @@ export function calculateAllPayheads(
 import { advanceCalculator } from "../benefits-calculator/advance-calculator";
 import { basicCalculator } from "../benefits-calculator/basic-calculator";
 import { Decimal } from "@prisma/client/runtime/library";
+import { AttendaceStatuses, BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 // Type definition for benefit data
 export interface ContributionSetting {
@@ -156,3 +168,34 @@ export class Benefit {
     }
   }
 }
+
+export function getUndertimeTotal(
+  logStatus: Record<string, AttendaceStatuses>,
+  empID: number,
+  timeSchedule: BatchSchedule | null,
+  startDate: string,
+  endDate: string
+): number {
+  if(!timeSchedule){
+    console.log("No shift found for emp: ",empID);
+    return 0;
+  };
+  // const factShiftLength = toGMT8(timeSchedule.clock_out!).diff(toGMT8(timeSchedule.clock_in!), "minute") - timeSchedule.break_min!;
+  // console.log("Emp: ", empID, "ShiftLength: ", factShiftLength);
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  let totalAmount = 0;
+
+  for (let current = new Date(start); current <= end; current.setDate(current.getDate() + 1)) {
+    const dateString = current.toISOString().split("T")[0]; // Convert to "YYYY-MM-DD" format
+
+    if (logStatus[dateString] && logStatus[dateString][empID]) {
+      totalAmount += logStatus[dateString][empID]?.undertime! //|| factShiftLength;
+    } 
+    // else {
+    //   totalAmount += factShiftLength;
+    // }
+  }
+
+  return totalAmount;
+};

@@ -6,6 +6,7 @@ import {
   Benefit,
   calculateAllPayheads,
   ContributionSetting,
+  getUndertimeTotal,
   static_formula,
   VariableAmountProp,
   VariableFormulaProp,
@@ -19,6 +20,7 @@ import {
   ProcessDate,
 } from "@/types/payroll/payrollType";
 import axios from "axios";
+import { fetchAttendanceData } from "../../attendance-time/records/stage";
 
 export async function stageTable(
   dateInfo: ProcessDate,
@@ -27,18 +29,34 @@ export async function stageTable(
     employees: UserEmployee[];
     dataPH: PayslipPayhead[];
   },
-  stage_two: {
-    cashToDisburse: CashToDisburse[];
-    cashToRepay: CashToRepay[];
-    benefitsPlansData: BenefitsPlanData[];
-  },
+  // stage_two: {
+  //   cashToDisburse: CashToDisburse[];
+  //   cashToRepay: CashToRepay[];
+  //   benefitsPlansData: BenefitsPlanData[];
+  // },
   setStageMsg: (msg:string)=>void,
 ): Promise<PayslipData> {
   try {
     // console.log(stage_one, stage_two);
+    // const { cashToDisburse, cashToRepay, benefitsPlansData } = stage_two.data.result;
     const { payrolls, employees, dataPH } = stage_one;
-    const { cashToDisburse, cashToRepay, benefitsPlansData } =
-      convertToNumber(stage_two);
+    const [stage_two, {attendanceLogs, batchSchedule, employeeSchedule, statusesByDate}] = await Promise.all([
+      axios.post('/api/admin/payroll/payslip/get-unprocessed', { dateID: dateInfo.id, stageNumber: 2 }),
+
+      fetchAttendanceData(
+        String(
+            `/api/admin/attendance-time/records/api?start=${toGMT8(dateInfo.start_date).format(
+                "YYYY-MM-DD"
+            )}&end=${toGMT8(dateInfo.end_date).format("YYYY-MM-DD")}`
+        )
+    )
+    ])
+    setStageMsg("Performing calculations...");
+    // Reuse employee schedule map for references below
+    const { cashToDisburse, cashToRepay, benefitsPlansData } = convertToNumber({...stage_two.data.result});
+    const employeeScheduleMap = new Map(employeeSchedule.map((es) => [es.employee_id!, es]));
+    // Reuse batch schedule map for references below
+    const batchScheduleMap = new Map(batchSchedule.map((bs) => [bs.id, bs]));
 
     // console.log("Preparing cash advances...");
     const cashDisburseMap = new Map(
@@ -103,82 +121,98 @@ export async function stageTable(
 
     const amountRecordsMap = new Map(dataPH.map(dph=> [dph.id, new Map(dph.dim_payhead_specific_amounts.map(psa => [psa.employee_id, psa.amount]))]));
     // console.log("Calculating some gross and deduction...");
-    employees.forEach((emp) => {
-      // Define base variables for payroll calculations.
-      // const contribution = new Benefit(benefitMap.get(emp.id) as any).getContribution;
-      const baseVariables: BaseValueProp = {
-        rate_p_hr: parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0,
-        total_shft_hr: 80,
-        payroll_days: payrollDays,
-        [static_formula.cash_advance_disbursement]: cashDisburseMap.get(emp.id) ?? 0,
-        [static_formula.cash_advance_repayment]: cashRepayMap.get(emp.id!) ?? 0,
-      };
-
-      // Filter applicable payheads for calculation based on employee and payhead data.
-      const calculateContributions: VariableAmountProp[] = employeeBenefitsMap[
-        emp.id
-      ]
-        ? employeeBenefitsMap[emp.id].map((benefit) => {
-            const getBasicSalary = {
-              payhead_id: null,
-              variable: "",
-              formula: String(basicSalaryFormula),
-            };
-            return {
-              link_id: benefit.id,
-              payhead_id: benefitDeductionMap.get(benefit.id)!,
-              variable: benefit.name,
-              amount: new Benefit(benefit).getContribution(
-                calculateAllPayheads(baseVariables, [getBasicSalary])[0].amount
-              ),
-            };
+    await Promise.all(
+      employees.map(async (emp) => {
+        // Define base variables for payroll calculations.
+        const daySchedule = employeeScheduleMap.get(emp.id);
+        const timeSchedule = batchScheduleMap.get(daySchedule?.batch_id || 0);
+    
+        const ratePerHour = parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0;
+        const baseVariables: BaseValueProp = {
+          rate_p_hr: ratePerHour,
+          total_shft_hr: 80,
+          basic_salary: parseFloat(String(emp.ref_job_classes?.basic_salary)) || 0.0,
+          payroll_days: payrollDays,
+          [static_formula.cash_advance_disbursement]: cashDisburseMap.get(emp.id) ?? 0,
+          [static_formula.cash_advance_repayment]: cashRepayMap.get(emp.id!) ?? 0,
+          [static_formula.tardiness]: getUndertimeTotal(
+            statusesByDate,
+            emp.id,
+            timeSchedule || null,
+            dateInfo.start_date,
+            dateInfo.end_date
+          ) * (ratePerHour / 60),
+        };
+    
+        // Filter applicable payheads for calculation based on employee and payhead data.
+        const calculateContributions: VariableAmountProp[] = employeeBenefitsMap[emp.id]
+          ? employeeBenefitsMap[emp.id].map((benefit) => {
+              const getBasicSalary = {
+                payhead_id: null,
+                variable: "",
+                formula: String(basicSalaryFormula),
+              };
+              return {
+                link_id: benefit.id,
+                payhead_id: benefitDeductionMap.get(benefit.id)!,
+                variable: benefit.name,
+                amount: new Benefit(benefit).getContribution(
+                  calculateAllPayheads(baseVariables, [getBasicSalary])[0].amount
+                ),
+              };
+            })
+          : [];
+    
+        // Filter applicable payheads based on conditions and calculations
+        const applicableFormulatedPayheads: VariableFormulaProp[] = dataPH
+          .filter((ph) => {
+            return (
+              String(ph.calculation) !== "" &&
+              isAffected(tryParse(emp), tryParse(ph)) &&
+              (ph.calculation === static_formula.cash_advance_disbursement
+                ? cashDisburseMap.has(emp.id)
+                : true) &&
+              (ph.calculation === static_formula.cash_advance_repayment
+                ? cashRepayMap.has(emp.id)
+                : true) &&
+              ph.calculation != static_formula.benefit_contribution // Benefits already calculated, ignore.
+            );
           })
-        : [];
-      //1 Basic Salary
-      //2 Cash Disbursement
-      //3 Cash Repayment
-      const applicableFormulatedPayheads: VariableFormulaProp[] = dataPH
-        .filter((ph) => {
-          return (
-            String(ph.calculation) !== "" &&
-            isAffected(tryParse(emp), tryParse(ph)) &&
-            (ph.calculation === static_formula.cash_advance_disbursement ? cashDisburseMap.has(emp.id) : true) &&
-            (ph.calculation === static_formula.cash_advance_repayment ? cashRepayMap.has(emp.id) : true) &&
-            ph.calculation != static_formula.benefit_contribution // Benefits already calculated, ignore.
-          );
-        })
-        .map((ph) => ({
-          link_id: (() => {
-            if (ph.calculation === static_formula.cash_advance_disbursement) {
-              if (cashAdvancementIDMap.has(emp.id)) {
-                return cashAdvancementIDMap.get(emp.id);
+          .map((ph) => ({
+            link_id: (() => {
+              if (ph.calculation === static_formula.cash_advance_disbursement) {
+                if (cashAdvancementIDMap.has(emp.id)) {
+                  return cashAdvancementIDMap.get(emp.id);
+                }
               }
-            }
-            if (ph.calculation === static_formula.cash_advance_repayment) {
-              if (cashRepaymentIDMap.has(emp.id)) {
-                return cashRepaymentIDMap.get(emp.id);
+              if (ph.calculation === static_formula.cash_advance_repayment) {
+                if (cashRepaymentIDMap.has(emp.id)) {
+                  return cashRepaymentIDMap.get(emp.id);
+                }
               }
-            }
-            return undefined;
-          })(),
-          payhead_id: ph.id,
-          variable: String(ph.variable),
-          formula: (()=>{
-            const amountRecord = amountRecordsMap.get(ph.id)?.get(emp.id);
-            return String(amountRecord ?? ph.calculation)
-          })(),
-        }));
-
-      // Calculate amounts and update `calculatedAmountList` with results for each employee.
-      const calculatedAmount = calculateAllPayheads(
-        baseVariables,
-        applicableFormulatedPayheads
-      ).filter((ca) => ca.payhead_id);
-      calculatedAmountList[emp.id] = [
-        ...calculatedAmount,
-        ...calculateContributions,
-      ];
-    });
+              return undefined;
+            })(),
+            payhead_id: ph.id,
+            variable: String(ph.variable),
+            formula: (() => {
+              const amountRecord = amountRecordsMap.get(ph.id)?.get(emp.id);
+              return String(amountRecord ?? ph.calculation);
+            })(),
+          }));
+    
+        // Calculate amounts and update `calculatedAmountList` with results for each employee.
+        const calculatedAmount = calculateAllPayheads(
+          baseVariables,
+          applicableFormulatedPayheads
+        ).filter((ca) => ca.payhead_id);
+    
+        calculatedAmountList[emp.id] = [
+          ...calculatedAmount,
+          ...calculateContributions,
+        ];
+      })
+    );
+    
 
     // return NextResponse.json(calculatedAmountList);
     // Insert calculated breakdowns into `trans_payhead_breakdowns` table.

@@ -1,8 +1,10 @@
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(utc);
+dayjs.extend(relativeTime);
 dayjs.extend(customParseFormat);
 
 export function toGMT8(value?: string | Date): dayjs.Dayjs {

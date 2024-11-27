@@ -1,9 +1,9 @@
-import { Link, User } from "@nextui-org/react";
-import React from "react";
+import { cn, Link, User } from "@nextui-org/react";
+import React, {ReactNode}  from "react";
 
 interface UserMailProps {
-    name: string;
-    description?: string;
+    name: string | ReactNode; // adding this to accept react node
+    description?: string | ReactNode;
     email?: string;
     picture: string;
     size?: "sm" | "md" | "lg";
@@ -21,12 +21,11 @@ function UserMail({ name, email, description, picture, message, onClick, size, c
     return (
         <User
             name={name}
-            className={className}
+            className={cn('flex justify-start',className)}
             onClick={onClick}
             description={
                 email && emailRegex.test(email) ? (
                     <Link
-                        href="#"
                         size="sm"
                         className="text-blue-500"
                         onPress={(e) => {

@@ -23,7 +23,8 @@ export interface DrawerProps {
     isDismissible?: boolean;
     size?: "sm" | "md" | "lg";
     isSubmitting?: boolean
-}
+    unSubmittable?: boolean
+  }
 
 const sizeMap = {
   lg: "md:min-w-[900px]",
@@ -39,7 +40,8 @@ const Drawer = ({
   isDismissible,
   footer,
   size,
-  isSubmitting
+  isSubmitting,
+  unSubmittable,
 }: DrawerProps) => {
   const hasDrawerForm = React.useMemo((): boolean => {
     return checkForDrawerForm(children);
@@ -93,6 +95,7 @@ const Drawer = ({
                   ) : hasDrawerForm && (
                     <Button
                       isLoading={isSubmitting}
+                      isDisabled={unSubmittable}
                       {...uniformStyle()}
                       type="submit"
                       form="drawer-form"
