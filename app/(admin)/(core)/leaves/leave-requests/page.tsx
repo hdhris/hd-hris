@@ -1,7 +1,7 @@
 "use client"
 import React, {Key, useCallback, useMemo, useState} from 'react';
 import {Button} from "@nextui-org/button";
-import {usePaginateQuery} from "@/services/queries";
+import {usePaginateQuery, useQuery} from "@/services/queries";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import DataDisplay from "@/components/common/data-display/data-display";
@@ -25,6 +25,7 @@ import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import {useSession} from "next-auth/react";
 import {FaReply} from "react-icons/fa";
 import dayjs from "dayjs";
+import {HolidayData} from "@/types/attendance-time/HolidayTypes";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -40,7 +41,7 @@ function Page() {
     const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
-
+    const { data: holiday, isLoading: holidayLoading} = useQuery<HolidayData>(`/api/admin/attendance-time/holidays/${new Date().getFullYear()}`);
 
     const allRequests = useMemo(() => {
         if (data) return data.data.map((item) => {
