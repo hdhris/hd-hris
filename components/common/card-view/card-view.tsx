@@ -11,7 +11,7 @@ interface CardViewProps {
     title?: string;
     header: ReactNode;
     body: ReactNode;
-    footer: ReactNode;
+    footer?: ReactNode;
     onDelete?: () => void;
     onEdit?: () => void;
     onClose?: () => void
