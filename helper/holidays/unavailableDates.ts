@@ -6,7 +6,7 @@ import { useEffect, useMemo } from "react";
 
 // Custom hook to handle holiday logic
 export const useHolidays = () => {
-  const { data: holidays } = useQuery<HolidayData>(`/api/admin/attendance-time/holidays/${toGMT8().year()}`);
+  const { data: holidays } = useQuery<HolidayData>(`/api/admin/attendance-time/holidays/adjacents/${toGMT8().year()}`);
 
   // Compute disabled date ranges
   const disabledRanges = useMemo(() => {
