@@ -55,8 +55,6 @@ export async function GET(
       (event: HolidayEvent) => toGMT8(event.start_date).get("year") >= year-1 && toGMT8(event.end_date).get("year") <= year+1
     );
 
-    console.log(googleHolidays);
-
     // .filter((event: HolidayEvent) => event.isPublicHoliday); // Return only public holidays
 
     const privateHolidays = (
