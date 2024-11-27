@@ -13,6 +13,7 @@ import { Form } from "@/components/ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Text from "@/components/Text";
+import EditScheduleSelection from "./EditScheduleSelection";
 //
 export const employeeSchema = z.object({
   picture: z.union([z.instanceof(File), z.string()]).optional(),
@@ -635,6 +636,8 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
             <Divider className="my-4" />
             <Text>Job Information</Text>
             <EditJobInformationForm />
+            <Text className="text-small font-semibold" >Working Schedule</Text>
+            <EditScheduleSelection />
           </>
         </form>
       </Form>

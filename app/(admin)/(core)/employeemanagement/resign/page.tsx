@@ -11,7 +11,7 @@ import dayjs from "dayjs";
 import axios from "axios";
 import showDialog from "@/lib/utils/confirmDialog";
 import {
-  ExtendedTableActionButton,
+  // ExtendedTableActionButton,
   TableActionButton,
 } from "@/components/actions/ActionButton";
 
@@ -28,13 +28,14 @@ const Page: React.FC = () => {
     if (employees) {
       const filtered = employees
         .filter((employee) => {
-          return employee.resignation_json || employee.termination_json;
+          return (employee.resignation_json && employee.deleted_at) || (employee.termination_json && employee.deleted_at);
         })
         .sort((a, b) => {
           const dateA = new Date(a.updated_at || a.created_at).getTime();
           const dateB = new Date(b.updated_at || b.created_at).getTime();
           return dateB - dateA;
         });
+        console.log(filtered)
       setFilteredEmployees(filtered);
     }
   }, [employees]);
@@ -262,10 +263,8 @@ const Page: React.FC = () => {
               >
                 Activate
               </Button>
-              <ExtendedTableActionButton
+              <TableActionButton
                 name={`${employee.first_name} ${employee.last_name}`}
-                onEdit={() => {}}
-                hideEdit={true}
                 onDelete={() =>
                   handleDelete(
                     employee.id,

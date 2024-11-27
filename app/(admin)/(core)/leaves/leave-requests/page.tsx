@@ -18,7 +18,7 @@ import UserMail from "@/components/common/avatar/user-info-mail";
 import CardTable from "@/components/common/card-view/card-table";
 import BorderCard from "@/components/common/BorderCard";
 import InputStyle from "@/lib/custom/styles/InputStyle";
-import {LuCheck, LuSendHorizonal, LuX} from "react-icons/lu";
+import {LuCheck, LuSendHorizonal, LuX, LuBan } from "react-icons/lu";
 import {icon_color, icon_size, icon_size_sm} from "@/lib/utils";
 import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
@@ -106,11 +106,19 @@ function Page() {
     const reviewer = users?.find(user => user.id === evaluators?.reviewers.reviewed_by)
     const approver_details = evaluators?.approver
     const reviewer_details = evaluators?.reviewers
-
-    // if (reviewer?.id === reviewer_details?.reviewed_by) {
-    //     console.log("Reviewer Details: ", reviewer_details)
-    // }
-    // reviewer?.id === reviewer_details?.reviewed_by && reviewer_details?.decision.is_reviewed
+    // const leave_progress = dayjs(selectedRequest?.leave_details.start_date).diff(dayjs(), "day")
+    const startDate = dayjs(selectedRequest?.leave_details.start_date);
+    const endDate = dayjs(selectedRequest?.leave_details.end_date);
+    const today = dayjs();
+    const leave_progress = useMemo(() => {
+        if (today.isBefore(startDate, 'day')) {
+            return "Not Started";
+        } else if (today.isAfter(endDate, 'day')) {
+            return"Finished";
+        } else {
+            return "On Going";
+        }
+    }, [endDate, startDate, today])
     return (<section className='w-full h-full flex gap-4 overflow-hidden'>
         <DataDisplay
             isLoading={isLoading}
@@ -179,6 +187,8 @@ function Page() {
                 label: "End Date", value: selectedRequest.leave_details.end_date
             }, {
                 label: "Total Days", value: selectedRequest.leave_details.total_days
+            }, {
+                label: "Leave Progress Status", value: <Chip variant="flat" color={leave_progress === "Not Started" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
             }, {
                 label: "Created By", value: <>
                     <UserAvatarTooltip user={{
@@ -327,7 +337,12 @@ function Page() {
                 },]}/>
             </BorderCard>
 
-        </>} footer={<></>}/>}
+        </>} onDanger={<>
+            <Section className="ms-0" title="Cancel"
+                     subtitle="Cancel the leave request">
+                <Button startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
+            </Section>
+        </>}/>}
 
     </section>);
 }

@@ -6,9 +6,7 @@ import {
   static_formula,
   VariableAmountProp,
 } from "@/helper/payroll/calculations";
-import { Parser } from "expr-eval";
 import { PrismaClient } from "@prisma/client";
-const parser = new Parser();
 
 export const dynamic = "force-dynamic";
 

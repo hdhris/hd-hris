@@ -27,7 +27,8 @@ const Page: React.FC = () => {
           return (
             employee.suspension_json &&
             !employee.resignation_json &&
-            !employee.termination_json
+            !employee.termination_json &&
+            !employee.deleted_at
           );
         })
         .sort((a, b) => {

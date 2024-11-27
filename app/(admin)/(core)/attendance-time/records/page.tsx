@@ -63,7 +63,7 @@ export default function Page() {
                 status: status,
             };
         }
-    }, [attendanceData, selectedLog, data]);
+    }, [attendanceData, selectedLog, data, date]);
 
     const clockSchedule = useMemo(() => {
         const info = currentAttendanceInfo;

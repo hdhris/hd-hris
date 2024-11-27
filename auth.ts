@@ -15,14 +15,13 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
         credentials: {
             username: {}, password: {},
         }, authorize: async (credentials) => {
-            if (!credentials.username || !credentials.password) {
-                throw new Error('Fields cannot be empty');
-            }
+            // if (!credentials.username || !credentials.password) {
+            //     throw new Error('Fields cannot be empty');
+            // }
+            //
+            // // Validate credentials
+            const {username, password} = credentials as unknown as {username: string, password: string}
 
-            // Validate credentials
-            const {username, password} = await LoginValidation.parseAsync(credentials as {
-                username: string; password: string;
-            });
 
             // Handle user authorization
             return await handleAuthorization({username, password});
@@ -210,7 +209,6 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
             }
             return token;
         }, async session({session, token}: { session: Session; token: JWT; user: User }) {
-
             session.user = token;
             return session;
         },
