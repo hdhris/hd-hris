@@ -60,66 +60,66 @@ const Page: React.FC = () => {
     }
   };
 
-  const handleActivate = async (employee: Employee) => {
-    try {
-      const result = await showDialog({
-        title: "Confirm Activation",
-        message: `Are you sure you want to activate ${employee.first_name} ${employee.last_name}?`,
-      });
+  // const handleActivate = async (employee: Employee) => {
+  //   try {
+  //     const result = await showDialog({
+  //       title: "Confirm Activation",
+  //       message: `Are you sure you want to activate ${employee.first_name} ${employee.last_name}?`,
+  //     });
 
-      if (result === "yes") {
-        setIsActivating(employee.id);
-        const response = await axios.put(
-          `/api/employeemanagement/employees?id=${employee.id}&type=status`,
-          {
-            status: "active",
-          }
-        );
+  //     if (result === "yes") {
+  //       setIsActivating(employee.id);
+  //       const response = await axios.put(
+  //         `/api/employeemanagement/employees?id=${employee.id}&type=status`,
+  //         {
+  //           status: "active",
+  //         }
+  //       );
 
-        if (response.status === 200) {
-          toast({
-            title: "Success",
-            description: "Employee activated successfully",
-            variant: "success",
-          });
-          await mutate(); // Refresh the data
-        }
-      }
-    } catch (error) {
-      console.error("Error activating employee:", error);
-      toast({
-        title: "Error",
-        description: "Failed to activate employee. Please try again.",
-        variant: "danger",
-      });
-    } finally {
-      setIsActivating(null);
-    }
-  };
+  //       if (response.status === 200) {
+  //         toast({
+  //           title: "Success",
+  //           description: "Employee activated successfully",
+  //           variant: "success",
+  //         });
+  //         await mutate(); // Refresh the data
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error activating employee:", error);
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to activate employee. Please try again.",
+  //       variant: "danger",
+  //     });
+  //   } finally {
+  //     setIsActivating(null);
+  //   }
+  // };
 
-  const handleDelete = async (id: number, name: string) => {
-    try {
-      const result = await showDialog({
-        title: "Confirm Delete",
-        message: `Are you sure you want to delete '${name}' ?`,
-      });
-      if (result === "yes") {
-        await axios.delete(`/api/employeemanagement/employees?id=${id}`);
-        toast({
-          title: "Deleted",
-          description: "Employee deleted successfully!",
-          variant: "warning",
-        });
-        await mutate();
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error: " + error,
-        variant: "danger",
-      });
-    }
-  };
+  // const handleDelete = async (id: number, name: string) => {
+  //   try {
+  //     const result = await showDialog({
+  //       title: "Confirm Delete",
+  //       message: `Are you sure you want to delete '${name}' ?`,
+  //     });
+  //     if (result === "yes") {
+  //       await axios.delete(`/api/employeemanagement/employees?id=${id}`);
+  //       toast({
+  //         title: "Deleted",
+  //         description: "Employee deleted successfully!",
+  //         variant: "warning",
+  //       });
+  //       await mutate();
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       title: "Error",
+  //       description: "Error: " + error,
+  //       variant: "danger",
+  //     });
+  //   }
+  // };
 
   const handleRowClick = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -176,7 +176,7 @@ const Page: React.FC = () => {
       { uid: "type", name: "Type", sortable: true },
       { uid: "date", name: "Date", sortable: true },
       { uid: "reason", name: "Reason" },
-      { uid: "actions", name: "Actions" },
+      // { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
@@ -248,32 +248,32 @@ const Page: React.FC = () => {
               {status.reason || "N/A"}
             </div>
           );
-        case "actions":
-          return (
-            <div
-              className="flex items-center gap-2 justify-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Button
-                size="sm"
-                variant="flat"
-                color="success"
-                isLoading={isActivating === employee.id}
-                onPress={() => handleActivate(employee)}
-              >
-                Activate
-              </Button>
-              <TableActionButton
-                name={`${employee.first_name} ${employee.last_name}`}
-                onDelete={() =>
-                  handleDelete(
-                    employee.id,
-                    `${employee.first_name} ${employee.last_name}`
-                  )
-                }
-              />
-            </div>
-          );
+        // case "actions":
+        //   return (
+        //     <div
+        //       className="flex items-center gap-2 justify-center"
+        //       onClick={(e) => e.stopPropagation()}
+        //     >
+        //       <Button
+        //         size="sm"
+        //         variant="flat"
+        //         color="success"
+        //         isLoading={isActivating === employee.id}
+        //         onPress={() => handleActivate(employee)}
+        //       >
+        //         Activate
+        //       </Button>
+        //       <TableActionButton
+        //         name={`${employee.first_name} ${employee.last_name}`}
+        //         onDelete={() =>
+        //           handleDelete(
+        //             employee.id,
+        //             `${employee.first_name} ${employee.last_name}`
+        //           )
+        //         }
+        //       />
+        //     </div>
+        //   );
         default:
           return <div>-</div>;
       }
@@ -376,7 +376,7 @@ const Page: React.FC = () => {
                     <Chip color={status.color} size="sm">
                       {status.type}
                     </Chip>
-                    <div onClick={(e) => e.stopPropagation()}>
+                    {/* <div onClick={(e) => e.stopPropagation()}>
                       <Button
                         size="sm"
                         variant="flat"
@@ -386,7 +386,7 @@ const Page: React.FC = () => {
                       >
                         Activate
                       </Button>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </BorderCard>

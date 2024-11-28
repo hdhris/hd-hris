@@ -1,7 +1,7 @@
 "use client"
 import React, {Key, useCallback, useMemo, useState} from 'react';
 import {Button} from "@nextui-org/button";
-import {usePaginateQuery} from "@/services/queries";
+import {usePaginateQuery, useQuery} from "@/services/queries";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import DataDisplay from "@/components/common/data-display/data-display";
@@ -18,13 +18,23 @@ import UserMail from "@/components/common/avatar/user-info-mail";
 import CardTable from "@/components/common/card-view/card-table";
 import BorderCard from "@/components/common/BorderCard";
 import InputStyle from "@/lib/custom/styles/InputStyle";
-import {LuCheck, LuSendHorizonal, LuX, LuBan } from "react-icons/lu";
+import {
+    LuCheck,
+    LuSendHorizonal,
+    LuX,
+    LuBan,
+    LuCalendarRange,
+    LuThumbsUp,
+    LuThumbsDown,
+    LuPencil
+} from "react-icons/lu";
 import {icon_color, icon_size, icon_size_sm} from "@/lib/utils";
 import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import {useSession} from "next-auth/react";
 import {FaReply} from "react-icons/fa";
 import dayjs from "dayjs";
+import {HolidayData} from "@/types/attendance-time/HolidayTypes";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -40,7 +50,7 @@ function Page() {
     const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
-
+    const { data: holiday, isLoading: holidayLoading} = useQuery<HolidayData>(`/api/admin/attendance-time/holidays/${new Date().getFullYear()}`);
 
     const allRequests = useMemo(() => {
         if (data) return data.data.map((item) => {
@@ -108,6 +118,12 @@ function Page() {
     // const leave_progress = dayjs(selectedRequest?.leave_details.start_date).diff(dayjs(), "day")
     const startDate = dayjs(selectedRequest?.leave_details.start_date);
     const endDate = dayjs(selectedRequest?.leave_details.end_date);
+
+    const is_approver = users?.filter(user => user.id === approver_details?.approved_by).find(user => user.employee_id === session.data?.user?.employee_id)
+    const is_reviewer = users?.filter(user => user.id === reviewer_details?.reviewed_by).find(user => user.employee_id === session.data?.user?.employee_id)
+
+    console.log("Is Approver: ", is_approver)
+    console.log("Is Reviewer: ", is_reviewer)
     const today = dayjs();
     const leave_progress = useMemo(() => {
         if (today.isBefore(startDate, 'day')) {
@@ -288,18 +304,33 @@ function Page() {
             <Section className="ms-0" title="Evaluator's Decision"
                      subtitle="Summary of evaluator's feedback and decisions"/>
             <BorderCard heading={<Typography className="text-medium">Review Details</Typography>}>
-                <User
-                    className="justify-start p-2"
-                    name={<Typography className="text-sm font-semibold">{reviewer?.name}</Typography>}
-                    description={<Typography className="text-sm font-semibold !text-default-400/75">
-                        {reviewer?.email}
-                    </Typography>}
-                    avatarProps={{
-                        src: reviewer?.picture, classNames: {base: '!size-6'}, isBordered: true,
-                    }}
-                />
+                <div className="flex justify-between items-center">
+                    <User
+                        className="justify-start p-2"
+                        name={<Typography className="text-sm font-semibold">{reviewer?.name}</Typography>}
+                        description={<Typography className="text-sm font-semibold !text-default-400/75">
+                            {reviewer?.email}
+                        </Typography>}
+                        avatarProps={{
+                            src: reviewer?.picture, classNames: {base: '!size-6'}, isBordered: true,
+                        }}
+                    />
+                    {!reviewer_details?.decision.is_reviewed && is_reviewer && <div className="flex gap-2">
+                        <Button size="sm" radius="full" isIconOnly variant="light"
+                            // onClick={handleReview.bind(null, item.id, "Approved")}
+                        >
+                            <LuThumbsUp className={cn("text-success", icon_size_sm)}/>
+                        </Button>
+                        <Button size="sm" radius="full" isIconOnly variant="light"
+                            // onClick={handleReview.bind(null, item.id, "Rejected")}
+                        >
+                            <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>
+                        </Button>
+                    </div>}
+                </div>
+
                 {/*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*/}
-                <CardTable data={[{
+                {reviewer_details?.decision.is_reviewed  && <CardTable data={[{
                     label: "Status",
                     value: reviewer_details?.decision.is_reviewed ?
                         <LuCheck className={cn("text-success", icon_size_sm)}/> :
@@ -309,34 +340,59 @@ function Page() {
                 }, {
                     label: "Rejected Reason",
                     value: reviewer_details?.decision.rejectedReason ? reviewer_details?.decision.rejectedReason : ""
-                },]}/>
+                },]}/>}
             </BorderCard>
             <BorderCard heading={<Typography className="text-medium">Approved Details</Typography>}>
-                <User
-                    className="justify-start p-2"
-                    name={<Typography className="text-sm font-semibold">{approver?.name}</Typography>}
-                    description={<Typography className="text-sm font-semibold !text-default-400/75">
-                        {approver?.email}
-                    </Typography>}
-                    avatarProps={{
-                        src: approver?.picture, classNames: {base: '!size-6'}, isBordered: true,
-                    }}
-                />
-                {/*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*/}
-                <CardTable data={[{
-                    label: "Status",
-                    value: approver_details?.decision.is_approved ?
-                        <LuCheck className={cn("text-success", icon_size_sm)}/> :
-                        <LuX className={cn("text-danger", icon_size_sm)}/>
-                }, {
-                    label: "Decision Date", value: dayjs(approver_details?.decision.decisionDate).format("YYYY-MM-DD")
-                }, {
-                    label: "Rejected Reason",
-                    value: approver_details?.decision.rejectedReason ? approver_details?.decision.rejectedReason : ""
-                },]}/>
+                <div className="flex justify-between items-center">
+                    <User
+                        className="justify-start p-2"
+                        name={<Typography className="text-sm font-semibold">{approver?.name}</Typography>}
+                        description={<Typography className="text-sm font-semibold !text-default-400/75">
+                            {approver?.email}
+                        </Typography>}
+                        avatarProps={{
+                            src: approver?.picture, classNames: {base: '!size-6'}, isBordered: true,
+                        }}
+                    />
+                    {!approver_details?.decision.is_approved && is_approver && <div className="flex gap-2">
+                        <Button size="sm" radius="full" isIconOnly variant="light"
+                            // onClick={handleReview.bind(null, item.id, "Approved")}
+                        >
+                            <LuThumbsUp className={cn("text-success", icon_size_sm)}/>
+                        </Button>
+                        <Button size="sm" radius="full" isIconOnly variant="light"
+                            // onClick={handleReview.bind(null, item.id, "Rejected")}
+                        >
+                            <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>
+                        </Button>
+                    </div>}
+                </div>
+                    {/*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*/}
+                    {approver_details?.decision.is_approved && <CardTable data={[{
+                        label: "Status",
+                        value: approver_details?.decision.is_approved ?
+                            <LuCheck className={cn("text-success", icon_size_sm)}/> :
+                            <LuX className={cn("text-danger", icon_size_sm)}/>
+                    }, {
+                        label: "Decision Date",
+                        value: dayjs(approver_details?.decision.decisionDate).format("YYYY-MM-DD")
+                    }, {
+                        label: "Rejected Reason",
+                        value: approver_details?.decision.rejectedReason ? approver_details?.decision.rejectedReason : ""
+                    },]}/>}
             </BorderCard>
 
         </>} onDanger={<>
+            <Section className="ms-0" title="Edit Leave"
+                     subtitle="Edit the leave request">
+                <Button startContent={<LuPencil />}{...uniformStyle()}>Edit</Button>
+            </Section>
+            <hr className="border border-destructive/20"/>
+            <Section className="ms-0" title="Extend Leave"
+                     subtitle="Extend the leave request">
+                <Button startContent={<LuCalendarRange />} {...uniformStyle()}>Extend</Button>
+            </Section>
+            <hr className="border border-destructive/20"/>
             <Section className="ms-0" title="Cancel"
                      subtitle="Cancel the leave request">
                 <Button startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>

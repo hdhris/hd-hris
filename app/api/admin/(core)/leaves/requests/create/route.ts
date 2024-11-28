@@ -153,7 +153,10 @@ export async function POST(req: NextRequest) {
 
 
             if (!leaveBalance) {
-                throw new Error("Leave balance not found for the specified employee.");
+                return NextResponse.json({
+                    success: false,
+                    message: "Leave balance not found for the specified employee."
+                }, {status: 400});
             }
 
             // Update the leave balance within the transaction
