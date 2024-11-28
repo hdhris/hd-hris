@@ -213,7 +213,7 @@ const Page: React.FC = () => {
           </div>
         )}
         paginationProps={{
-          data_length: sortedBranches?.length,
+          data_length: branches?.length,
         }}
         onExport={{
           drawerProps: {

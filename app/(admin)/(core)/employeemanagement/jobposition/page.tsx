@@ -249,7 +249,7 @@ const Page: React.FC = () => {
           </div>
         )}
         paginationProps={{
-          data_length: sortedJobPositions?.length
+          data_length: jobPositions?.length
         }}
         onExport={{
           drawerProps: {

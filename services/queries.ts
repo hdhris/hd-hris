@@ -77,6 +77,17 @@ export function useEmployeesData() {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
+export function useSuspendedEmployees() {
+    return useSWR<Employee[]>('/api/employeemanagement/suspended', fetcher, {
+        // revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+export function useResignedTerminatedEmployees() {
+    return useSWR<Employee[]>('/api/employeemanagement/resigned-terminated', fetcher, {
+        // revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
 
 export function useDepartmentsData() {
     return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {//

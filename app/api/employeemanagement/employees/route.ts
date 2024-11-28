@@ -77,7 +77,7 @@ const statusUpdateSchema = z.object({
 });
 
 function parseJsonInput(data: any): Prisma.InputJsonValue {
-  if (typeof data === 'string') {
+  if (typeof data === "string") {
     try {
       return JSON.parse(data) as Prisma.InputJsonValue;
     } catch {
@@ -253,18 +253,47 @@ async function getEmployeeById(id: number, daysJson?: Record<string, boolean>) {
 }
 
 // Fetch all employees
+// Fetch all employees with status filtering
 async function getAllEmployees(daysJson?: Record<string, boolean>) {
   const employees = await prisma.trans_employees.findMany({
     where: {
-      dim_schedules: daysJson
-        ? {
+      AND: [
+        // Exclude deleted employees
+        {
+          deleted_at: null
+        },
+        // Include employees with no resignation or empty resignation data
+        {
+          OR: [
+            { resignation_json: { equals: Prisma.JsonNull } },
+            { resignation_json: { equals: Prisma.DbNull } }
+          ]
+        },
+        // Include employees with no termination or empty termination data
+        {
+          OR: [
+            { termination_json: { equals: Prisma.JsonNull } },
+            { termination_json: { equals: Prisma.DbNull } }
+          ]
+        },
+        // Include employees with no suspension or empty suspension data
+        {
+          OR: [
+            { suspension_json: { equals: Prisma.JsonNull } },
+            { suspension_json: { equals: Prisma.DbNull } }
+          ]
+        },
+        // Add days_json filter if provided
+        daysJson ? {
+          dim_schedules: {
             some: {
               days_json: {
                 equals: daysJson,
               },
             },
           }
-        : undefined,
+        } : {}
+      ]
     },
     include: {
       ref_departments: true,
@@ -277,7 +306,6 @@ async function getAllEmployees(daysJson?: Record<string, boolean>) {
     },
   });
 
-  // logDatabaseOperation("GET all employees", employees);
   return employees;
 }
 
@@ -320,7 +348,7 @@ async function updateEmployee(
   id: number,
   data: Partial<z.infer<typeof employeeSchema>>
 ) {
-  const { schedules, job_id,educational_bg_json, ...otherData } = data;
+  const { schedules, job_id, educational_bg_json, ...otherData } = data;
 
   const employee = await prisma.trans_employees.update({
     where: { id },
@@ -330,16 +358,14 @@ async function updateEmployee(
         ? new Date(otherData.birthdate)
         : undefined,
       updated_at: new Date(), // Ensure this line is present
-      educational_bg_json: educational_bg_json 
-  ? (typeof educational_bg_json === 'string' 
-      ? JSON.parse(educational_bg_json) 
-      : educational_bg_json) as Prisma.InputJsonValue
-  : undefined,
+      educational_bg_json: educational_bg_json
+        ? ((typeof educational_bg_json === "string"
+            ? JSON.parse(educational_bg_json)
+            : educational_bg_json) as Prisma.InputJsonValue)
+        : undefined,
     },
-    
   });
 
-  
   console.log(data);
   if (job_id) {
     await prisma.trans_employees.update({
@@ -375,7 +401,7 @@ async function updateEmployeeStatus(
 
     let updateData: Prisma.trans_employeesUpdateInput = {
       updated_at: new Date(),
-      deleted_at: ["resined, terminated"].includes(status)? new Date() : null,
+      deleted_at: ["resined, terminated"].includes(status) ? new Date() : null,
     };
 
     if (status === "active") {
