@@ -5,11 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing PayheadUI not PayheadUi">
+      <change afterPath="$PROJECT_DIR$/app/api/auth/forgot/authenticating-email/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/auth/forgot/update-password/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/utils/uuid-validator/validator.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/card-view/card-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/card-view/card-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/actions/authActions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/actions/authActions.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/forgot/change/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/forgot/change/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/forgot/otp/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/forgot/otp/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/forgot/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/forgot/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/login/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/forgot/Forgot.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/forgot/Forgot.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/forgot/ForgotButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/forgot/ForgotButton.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/forgot/change/ChangePassword.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/forgot/change/ChangePassword.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/forgot/otp/Otp.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/forgot/otp/Otp.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/defaults_configurations/devices.ts" beforeDir="false" afterPath="$PROJECT_DIR$/defaults_configurations/devices.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/email-services.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/email-services.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +30,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript File" />
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
@@ -91,13 +102,13 @@
     "com.codeium.enabled": "true",
     "database.data.extractors.current.export.id": "Comma-separated (CSV)_id",
     "database.data.extractors.current.id": "Comma-separated (CSV)_id",
-    "git-widget-placeholder": "john",
-    "last_opened_file_path": "C:/Users/Xero/WebstormProjects/HD-HRIS/HD-HRIS/app",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Xero/WebstormProjects/Capstone/HD-HRIS",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Users\\Xero\\WebstormProjects\\HD-HRIS\\HD-HRIS\\node_modules\\typescript\\lib",
+    "ts.external.directory.path": "C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -108,21 +119,23 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS" />
       <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app" />
       <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app\fonts\inter" />
       <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\assets\fonts\inter" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\auth\forgot" />
+      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\auth" />
+      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\auth\login" />
       <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\assets" />
       <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app" />
-      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\components\admin\leaves\credits\forms\add" />
-      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\components\admin\leaves\credits\add-form" />
     </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.24807.6" />
       </set>
     </attachedChunks>
   </component>
@@ -148,6 +161,8 @@
       <workItem from="1732411991554" duration="22114000" />
       <workItem from="1732501489335" duration="3833000" />
       <workItem from="1732623105052" duration="21408000" />
+      <workItem from="1732947144398" duration="13000" />
+      <workItem from="1732947228033" duration="27331000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />

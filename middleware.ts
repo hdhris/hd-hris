@@ -6,40 +6,39 @@ export default auth((req: any) => {
 
     // Allow access to public assets and specific routes
     if (
-        pathname === '/favicon.ico' || // Favicon
-        pathname === '/globals.css' || // Global CSS file
-        pathname.startsWith('/_next/') || // Skip Next.js static files and images
-        pathname.startsWith('/public') || // Skip anything in the public folder
-        pathname.startsWith('/api/auth') || // Allow API auth routes
-        pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico|css|js)$/) // Skip common static files
+        pathname === '/favicon.ico' ||
+        pathname === '/globals.css' ||
+        pathname.startsWith('/_next/') ||
+        pathname.startsWith('/public') ||
+        pathname.startsWith('/api/auth') ||
+        pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico|css|js)$/)
     ) {
         return NextResponse.next();
     }
 
+
+
     // Redirect unauthenticated users to the login page (root)
     if (!req.auth) {
-        if (pathname === '/') {
-            return NextResponse.next();
+        if (pathname.startsWith('/auth') || pathname.startsWith('/api/auth') || pathname.startsWith('/auth/forgot')) {
+            return NextResponse.next(); // Allow access to login and forgot password routes
         }
-        return NextResponse.redirect(new URL("/", req.nextUrl.origin));
+        return NextResponse.redirect(new URL("/auth/login", req.nextUrl.origin));
     }
 
     // Check if the isDefaultAccount value is null or undefined
-    if (req.auth.user.isDefaultAccount == null) {
-        if (pathname === '/auth/login-checkpoint') {
-            // Prevent access to login-checkpoint if isDefaultAccount is null or undefined
-            return NextResponse.redirect(new URL("/", req.nextUrl.origin));
-        }
-        return NextResponse.next();
-    }
+    // if (req.auth.user.isDefaultAccount == null) {
+    //     if (pathname === '/auth/login-checkpoint') {
+    //         return NextResponse.redirect(new URL("/auth/login", req.nextUrl.origin));
+    //     }
+    //     return NextResponse.next();
+    // }
 
-    // If the user has a default account, force them to /auth/login-checkpoint and prevent access to other routes
+    // If the user has a default account, force them to /auth/login-checkpoint
     if (req.auth.user.isDefaultAccount) {
         if (pathname !== '/auth/login-checkpoint') {
-            // Block access to any other page and redirect to /auth/login-checkpoint
             return NextResponse.redirect(new URL("/auth/login-checkpoint", req.nextUrl.origin));
         }
-        // Allow access to /auth/login-checkpoint if the user is already there
         return NextResponse.next();
     }
 
@@ -49,8 +48,8 @@ export default auth((req: any) => {
 
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|globals.css|public/|api/auth).*)', // Exclude public and API auth routes
-        '/auth/login-checkpoint', // Ensure login checkpoint is included in the matching
+        '/((?!_next/static|_next/image|favicon.ico|globals.css|public/|api/auth).*)',
+        '/auth/login-checkpoint',
         '/:path*'
     ],
 };
