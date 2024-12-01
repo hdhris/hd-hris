@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="adding a payslip pdf">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing route in payelip">
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/payroll/payslip/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/payroll/payslip/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/payroll/payslip/deploy-system-payheads/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/payroll/payslip/deploy-system-payheads/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/types/payslip/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/payslip/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -153,7 +151,7 @@
       <workItem from="1732623105052" duration="21408000" />
       <workItem from="1732947144398" duration="13000" />
       <workItem from="1732947228033" duration="32607000" />
-      <workItem from="1733057123772" duration="23518000" />
+      <workItem from="1733057123772" duration="23853000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />
@@ -315,7 +313,23 @@
       <option name="project" value="LOCAL" />
       <updated>1733087287899</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="fixing route in payelip">
+      <option name="closed" value="true" />
+      <created>1733087721721</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1733087721721</updated>
+    </task>
+    <task id="LOCAL-00023" summary="fixing route in payelip">
+      <option name="closed" value="true" />
+      <created>1733087729286</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1733087729286</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -352,6 +366,8 @@
     <MESSAGE value="fixes v3 for forgot password" />
     <MESSAGE value="testing pdf" />
     <MESSAGE value="adding a payslip pdf" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding a payslip pdf" />
+    <MESSAGE value="fixing route in payslip" />
+    <MESSAGE value="fixing route in payelip" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing route in payelip" />
   </component>
 </project>
