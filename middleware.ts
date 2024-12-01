@@ -17,6 +17,9 @@ export default auth((req: any) => {
     }
 
 
+    if(pathname === "/"){
+        return NextResponse.redirect(new URL("/auth/login", req.nextUrl.origin));
+    }
 
     // Redirect unauthenticated users to the login page (root)
     if (!req.auth) {

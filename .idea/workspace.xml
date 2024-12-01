@@ -4,23 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing PayheadUI not PayheadUi">
-      <change afterPath="$PROJECT_DIR$/app/api/auth/forgot/authenticating-email/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/auth/forgot/update-password/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/utils/uuid-validator/validator.ts" afterDir="false" />
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixes v2 for forgot password">
+      <change afterPath="$PROJECT_DIR$/assets/hero/super-user.svg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/actions/authActions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/actions/authActions.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/forgot/change/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/forgot/change/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/forgot/otp/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/forgot/otp/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/forgot/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/forgot/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/forgot/Forgot.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/forgot/Forgot.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/forgot/ForgotButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/forgot/ForgotButton.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/forgot/change/ChangePassword.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/forgot/change/ChangePassword.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/forgot/otp/Otp.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/forgot/otp/Otp.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/defaults_configurations/devices.ts" beforeDir="false" afterPath="$PROJECT_DIR$/defaults_configurations/devices.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/payroll/payslip/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/payroll/payslip/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/hero/forgot_hero.svg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/hero/forgot_hero.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/hero/new_password.svg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/hero/new_password.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/hero/otp_hero.svg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/hero/otp_hero.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/login/Login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/login/Login.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/email-services.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/email-services.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/next.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.mjs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,27 +89,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.codeium.enabled": "true",
-    "database.data.extractors.current.export.id": "Comma-separated (CSV)_id",
-    "database.data.extractors.current.id": "Comma-separated (CSV)_id",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/Xero/WebstormProjects/Capstone/HD-HRIS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;database.data.extractors.current.export.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
+    &quot;database.data.extractors.current.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Xero/WebstormProjects/Capstone/HD-HRIS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS" />
@@ -162,7 +155,8 @@
       <workItem from="1732501489335" duration="3833000" />
       <workItem from="1732623105052" duration="21408000" />
       <workItem from="1732947144398" duration="13000" />
-      <workItem from="1732947228033" duration="27331000" />
+      <workItem from="1732947228033" duration="32607000" />
+      <workItem from="1733057123772" duration="2706000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />
@@ -292,7 +286,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732610157359</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="fixes v2 for forgot password">
+      <option name="closed" value="true" />
+      <created>1732977688179</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1732977688179</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -325,6 +327,7 @@
     <MESSAGE value="polish leave credit v2" />
     <MESSAGE value="fixing PayheadUI not PayheadUi" />
     <MESSAGE value="fixing LeaveRequest v1" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixing LeaveRequest v1" />
+    <MESSAGE value="fixes v2 for forgot password" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixes v2 for forgot password" />
   </component>
 </project>
