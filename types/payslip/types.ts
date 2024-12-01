@@ -22,3 +22,9 @@ export interface ViewPayslipType {
     };
     net: number;
 }
+
+export type systemPayhead = {
+    link_id: number;
+    amount: number;
+    payroll_id: number;
+}
