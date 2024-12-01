@@ -1,9 +1,10 @@
 // /pages/api/batch-schedule.ts
-import { systemPayhead } from "@/app/(admin)/(core)/payroll/payslip/page";
+
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import prisma from "@/prisma/prisma";
 import { Decimal } from "@prisma/client/runtime/library";
 import { NextRequest, NextResponse } from "next/server";
+import {systemPayhead} from "@/types/payslip/types";
 
 export async function POST(req: NextRequest) {
   try {

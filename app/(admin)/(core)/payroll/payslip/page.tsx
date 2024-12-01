@@ -53,11 +53,11 @@ import {generatePDF} from "@/helper/generate-pdf/generatePDF";
 //   net: number;
 // }
 //
-export type systemPayhead = {
-  link_id: number;
-  amount: number;
-  payroll_id: number;
-}
+// export type systemPayhead = {
+//   link_id: number;
+//   amount: number;
+//   payroll_id: number;
+// }
 
 function Page() {
   const [focusedEmployee, setFocusedEmployee] = useState<number | null>(null);
