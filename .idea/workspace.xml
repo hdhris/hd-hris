@@ -4,16 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixes v2 for forgot password">
-      <change afterPath="$PROJECT_DIR$/assets/hero/super-user.svg" afterDir="false" />
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixes v3 for forgot password">
+      <change afterPath="$PROJECT_DIR$/app/api/generate-pdf/route.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/pdf/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/common/pdf/PDFTemplate.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/common/pdf/PDFViewer.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/payroll/payslip/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/payroll/payslip/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/hero/forgot_hero.svg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/hero/forgot_hero.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/hero/new_password.svg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/hero/new_password.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/hero/otp_hero.svg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/hero/otp_hero.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/login/Login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/login/Login.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/Inter-Italic-VariableFont_opsz,wght.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,8 +22,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript JSX File" />
         <option value="TypeScript File" />
+        <option value="TypeScript JSX File" />
       </list>
     </option>
   </component>
@@ -156,7 +155,7 @@
       <workItem from="1732623105052" duration="21408000" />
       <workItem from="1732947144398" duration="13000" />
       <workItem from="1732947228033" duration="32607000" />
-      <workItem from="1733057123772" duration="2706000" />
+      <workItem from="1733057123772" duration="7334000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />
@@ -294,7 +293,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732977688179</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="fixes v3 for forgot password">
+      <option name="closed" value="true" />
+      <created>1733060015743</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1733060015743</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -328,6 +335,7 @@
     <MESSAGE value="fixing PayheadUI not PayheadUi" />
     <MESSAGE value="fixing LeaveRequest v1" />
     <MESSAGE value="fixes v2 for forgot password" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixes v2 for forgot password" />
+    <MESSAGE value="fixes v3 for forgot password" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixes v3 for forgot password" />
   </component>
 </project>
