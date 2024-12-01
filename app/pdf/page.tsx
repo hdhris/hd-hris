@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import PDFViewer from "@/components/common/pdf/PDFViewer";
+import {ViewPayslipType} from "@/types/payslip/types";
 
 export default function Home() {
     const [pdfUrl, setPdfUrl] = useState<string | null>(null)
@@ -12,17 +13,42 @@ export default function Home() {
     const [content, setContent] = useState('')
 
     const generatePDF = async () => {
-        const response = await fetch('/api/generate-pdf', {
+        const payslipData: ViewPayslipType & {date: string} = {
+            date: "2023-06-01",
+            data: {
+                name: "John Doe",
+                role: "Software Engineer",
+            },
+            earnings: {
+                total: 5000,
+                list: [
+                    { label: "Basic Salary", number: "001", amount: "4000" },
+                    { label: "Overtime", number: "002", amount: "500" },
+                    { label: "Bonus", number: "003", amount: "500" },
+                ],
+            },
+            deductions: {
+                total: 1000,
+                list: [
+                    { label: "Income Tax", number: "101", amount: "800" },
+                    { label: "Health Insurance", number: "102", amount: "200" },
+                ],
+            },
+            net: 4000,
+        };
+
+        const response = await fetch('/api/admin/payroll/payslip/print-payslip', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ title, content }),
+            body: JSON.stringify(payslipData),
         })
         const blob = await response.blob()
         const url = URL.createObjectURL(blob)
         console.log("Url: ", url)
-        setPdfUrl(url)
+        window.open(url, '_blank');
+
     }
 
     return (
@@ -49,7 +75,6 @@ export default function Home() {
                 />
             </div>
             <Button onClick={generatePDF}>Generate PDF</Button>
-            {pdfUrl && <PDFViewer url={pdfUrl} />}
         </div>
     )
 }

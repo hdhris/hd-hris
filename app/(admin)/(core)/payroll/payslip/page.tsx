@@ -1,67 +1,68 @@
 "use client";
-import { PRPayslipTable } from "@/components/admin/payroll/payslip/table";
+import {PRPayslipTable} from "@/components/admin/payroll/payslip/table";
 import DatePickerPayroll from "@/components/admin/payroll/proccess/PayrollDatePicker";
-import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
-import { useUserInfo } from "@/lib/utils/getEmployeInfo";
-import { getEmpFullName } from "@/lib/utils/nameFormatter";
-import { toGMT8 } from "@/lib/utils/toGMT8";
-import {
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  cn,
-  Spinner,
-} from "@nextui-org/react";
-import React, { useCallback, useEffect, useState } from "react";
+import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
+import {useUserInfo} from "@/lib/utils/getEmployeInfo";
+import {getEmpFullName} from "@/lib/utils/nameFormatter";
+import {toGMT8} from "@/lib/utils/toGMT8";
+import {Card, CardBody, CardFooter, CardHeader, cn, Spinner,} from "@nextui-org/react";
+import React, {useCallback, useState} from "react";
 import {numberWithCommas} from "@/lib/utils/numberFormat";
 import axios from "axios";
-import { toast } from "@/components/ui/use-toast";
+import {toast} from "@/components/ui/use-toast";
 import {ProcessDate} from "@/types/payroll/payrollType";
+import {ViewPayslipType} from "@/types/payslip/types";
+import {Button} from "@nextui-org/button";
+import {LuPrinter} from "react-icons/lu";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import {generatePDF} from "@/helper/generate-pdf/generatePDF";
 
-const data = {
-  name: 'Michael Angelo Supetran',
-  role: 'Sales Representative',
-}
-const lists = [
-  {
-    label: "No. of Days",
-    number: "30",
-    // amount: "P 3,000",
-  },{
-    label: "Basic + COLA",
-    number: "3000",
-    // amount: "P 5,000",
-  },{
-    label: "Overtime",
-    number: "45hr",
-    // amount: "P 1,520",
-  },
-]
 
-export type viewPayslipType = {
-  data: typeof data,
-  earnings: {
-    total: number,
-    list: typeof lists,
-  },
-  deductions: {
-    total: number,
-    list: typeof lists,
-  }
-  net: number;
-}
+//I already created a reusable interface
 
-export type systemPayhead = {
-  link_id: number;
-  amount: number;
-  payroll_id: number;
-}
+// const data = {
+//   name: 'Michael Angelo Supetran',
+//   role: 'Sales Representative',
+// }
+// const lists = [
+//   {
+//     label: "No. of Days",
+//     number: "30",
+//     // amount: "P 3,000",
+//   },{
+//     label: "Basic + COLA",
+//     number: "3000",
+//     // amount: "P 5,000",
+//   },{
+//     label: "Overtime",
+//     number: "45hr",
+//     // amount: "P 1,520",
+//   },
+// ]
+//
+// export type viewPayslipType = {
+//   data: typeof data,
+//   earnings: {
+//     total: number,
+//     list: typeof lists,
+//   },
+//   deductions: {
+//     total: number,
+//     list: typeof lists,
+//   }
+//   net: number;
+// }
+//
+// export type systemPayhead = {
+//   link_id: number;
+//   amount: number;
+//   payroll_id: number;
+// }
 
 function Page() {
   const [focusedEmployee, setFocusedEmployee] = useState<number | null>(null);
   const [focusedPayhead, setFocusedPayhead] = useState<number | null>(null);
-  const [payslip, setPayslip] = useState<viewPayslipType | null>(null)
+  const [payslip, setPayslip] = useState<ViewPayslipType | null>(null)
   const [processDate, setProcessDate] = useState<ProcessDate>();
   const [toBeDeployed, setTobeDeployed] = useState<unknown>();
   const userInfo = useUserInfo();
@@ -76,7 +77,14 @@ function Page() {
       }
     }
   },[toBeDeployed])
-  SetNavEndContent(() => <DatePickerPayroll setProcessDate={setProcessDate} onDeploy={deployNow}/>);
+  const handlePrint = async () => {
+    const data = {
+      date: `${toGMT8(processDate?.start_date).format("MMMM D")}-${toGMT8(processDate?.end_date).format("D, YYYY")}`,
+      ...payslip
+    }
+    await generatePDF("/api/admin/payroll/payslip/print-payslip", data)
+  }
+  SetNavEndContent(() => <><DatePickerPayroll setProcessDate={setProcessDate} onDeploy={deployNow}/> <Button isIconOnly isDisabled={payslip === null} {...uniformStyle()} onClick={handlePrint}><LuPrinter  className="size-5" /></Button></>);
 
   if (processDate === undefined) {
     return <Spinner label="Loading..." className="w-full h-full" />;

@@ -3,7 +3,7 @@ import ReactPDF, {Document, Page, StyleSheet, Text, View} from '@react-pdf/rende
 
 const styles = StyleSheet.create({
     page: {
-        flexDirection: 'column', backgroundColor: '#E4E4E4', padding: 30,
+        flexDirection: 'column', backgroundColor: '#ffffff', padding: 30,
     }, title: {
         fontSize: 24, marginBottom: 20,
     }, content: {
@@ -18,7 +18,10 @@ interface PDFTemplateProps {
 
 function PDFTemplate({title, content}: PDFTemplateProps) {
     return (<Document>
-            <Page size="A4" style={styles.page}>
+            <Page size={{
+                width: "5in",
+                height: "5in"
+            }} style={styles.page}>
                 <View>
                     <Text style={styles.title}>{title}</Text>
                     <Text style={styles.content}>{content}</Text>
