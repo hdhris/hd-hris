@@ -22,7 +22,7 @@ const inter_local = localFont({
 
 })
 const isMaintenanceMode = process.env.MAINTAINANCE_MODE;
-let title = ""
+let title: string
 if (isMaintenanceMode === "true") {
     title = `${process.env.APP_NAME} | Maintenance Mode`
 } else {

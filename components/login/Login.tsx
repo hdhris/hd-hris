@@ -124,9 +124,9 @@ function Userlogin() {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2'>
                         <FormFields items={loginFields}/>
-                        <div className='flex justify-between'>
-                            <Checkbox size='sm'>Remember Me</Checkbox>
-                        </div>
+                        {/*<div className='flex justify-between'>*/}
+                        {/*    <Checkbox size='sm'>Remember Me</Checkbox>*/}
+                        {/*</div>*/}
 
                         {/*<Typography as={Link} href={'/forgot'} className='text-red-400 cursor-pointer text-right text-small'></Typography>*/}
 

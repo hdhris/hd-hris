@@ -12,8 +12,8 @@ export async function devices(user_id: string) {
         ]);
         // console.timeEnd("Fetch IP and User-Agent");
 
-        console.log("Ip Response: ", ipResponse);
-        console.log("Region: ", userAgent)
+        // console.log("Ip Response: ", ipResponse);
+        // console.log("Region: ", userAgent)
         const ua = parse(userAgent);
         const ip_address = ipResponse.ip;
         const { country_code, country_name, region, city } = ipResponse;

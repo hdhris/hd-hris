@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['@react-pdf/renderer'],
-  },
   env: {
     APP_NAME: process.env.APP_NAME,
     AES_SECRET: process.env.AES_SECRET,
