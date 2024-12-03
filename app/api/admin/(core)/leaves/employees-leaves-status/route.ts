@@ -61,9 +61,14 @@ export async function GET() {
         }
     }),
 
-        prisma.ref_leave_types.findMany({
+        prisma.ref_leave_type_details.findMany({
             where: {
-                is_active: true, deleted_at: null
+                is_active: true,
+                trans_leave_types:{
+                    some: {
+                        deleted_at: null
+                    }
+                }
             }, select: {
                 id: true, name: true, max_duration: true, min_duration: true
             },

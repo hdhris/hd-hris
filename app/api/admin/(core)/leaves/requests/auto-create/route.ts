@@ -74,22 +74,22 @@ export async function POST(req: NextRequest) {
         const emp_uuid = uuidv4()
 
         const evaluators: LeaveApplicationEvaluation = {
+            approver: {
+                decision: {
+                    is_approved: true,
+                    decisionDate: toGMT8().toISOString(),
+                    rejectedReason: null
+                },
+                approved_by: approver_uuid
+            },
+            // this is a brute force solution
             reviewers: {
                 decision: {
-                    is_reviewed: false,
+                    is_reviewed: true,
                     decisionDate: toGMT8().toISOString(),
                     rejectedReason: null
                 },
                 reviewed_by: reviewer_uuid
-            },
-            // this is a brute force solution
-            approver: {
-                decision: {
-                    is_approved: undefined,
-                    decisionDate: null,
-                    rejectedReason: null
-                },
-                approved_by: approver_uuid
             },
             users: [
                 {

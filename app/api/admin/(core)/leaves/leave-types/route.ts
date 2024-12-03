@@ -15,18 +15,47 @@ export async function GET(request: Request) {
         const perPage = parseInt(searchParams.get('limit') || '15');  // Default to 15 results per page
 
         // Use the reusable pagination function with Prisma model
-        const { data, totalItems, currentPage } = await getPaginatedData<LeaveType>(
-            prisma.ref_leave_types,  // The Prisma model
-            page,
-            perPage,
-            { deleted_at: null },  // Filtering condition
-            null,
-            { name: 'asc' }  // Order by name
-        );
+        // const { data, totalItems, currentPage } = await getPaginatedData<LeaveType>(
+        //     prisma.trans_leave_types,  // The Prisma model
+        //     page,
+        //     perPage,
+        //     { deleted_at: null },  // Filtering condition
+        //     null,
+        //     { created_at: 'asc' }  // Order by name
+        // );
+
+
 
         // Fetch employee counts and employee details concurrently
         // Fetch employee counts and employee details concurrently
-        const [employeeCountData, employees] = await Promise.all([
+        const [data, total_items, employeeCountData, employees] = await Promise.all([
+            prisma.trans_leave_types.findMany({
+                where: {
+                    deleted_at: null,
+                },
+                select: {
+                    id: true,
+                    created_at: true,
+                    updated_at: true,
+                    ref_leave_type_details: true,
+                    ref_employment_status: {
+                        select: {
+                            name: true
+                        }
+                    }
+                },
+                orderBy: {
+                    updated_at: "desc"
+                },
+                take: perPage,
+                skip: (page - 1) * perPage
+            }),
+
+            prisma.trans_leave_types.count({
+                where: {
+                    deleted_at: null
+                },
+            }),
             prisma.trans_leaves.groupBy({
                 by: ["type_id", "employee_id"],
             }),
@@ -66,7 +95,7 @@ export async function GET(request: Request) {
             }
         });
 
-// Map the leave types with current employee details
+        // Map the leave types with current employee details
         const result = data.map(leaveType => {
             const currentEmployeesIds = employeeMap.get(leaveType.id) || [];
             const empAvails = employees.filter(employee => currentEmployeesIds.includes(employee.id)).map((emp)=> {
@@ -79,27 +108,26 @@ export async function GET(request: Request) {
             });
             return {
                 id: leaveType.id,
-                name: leaveType.name,
-                code: leaveType.code,
-                description: leaveType.description,
-                applicable_to_employee_types: capitalize(leaveType.applicable_to_employee_types),
-                attachment_required: leaveType.attachment_required,
+                name: leaveType.ref_leave_type_details.name,
+                code: leaveType.ref_leave_type_details.code,
+                description: leaveType.ref_leave_type_details.description,
+                applicable_to_employee_types: capitalize(leaveType.ref_employment_status.name),
+                attachment_required: leaveType.ref_leave_type_details.attachment_required,
                 created_at: dayjs(leaveType.created_at).format("YYYY-MM-DD"),
-                is_active: leaveType.is_active,
-                max_duration: Number(leaveType.max_duration),
-                min_duration: Number(leaveType.min_duration),
-                paid_leave: leaveType.paid_leave,
+                is_active: leaveType.ref_leave_type_details.is_active,
+                max_duration: Number(leaveType.ref_leave_type_details.max_duration),
+                min_duration: Number(leaveType.ref_leave_type_details.min_duration),
+                paid_leave: leaveType.ref_leave_type_details.paid_leave,
                 updated_at: dayjs(leaveType.updated_at).format("YYYY-MM-DD"),
-                carry_over: leaveType.carry_over,
+                carry_over: leaveType.ref_leave_type_details.carry_over,
                 current_employees: empAvails,
             };
         }) as unknown as LeaveType[];
 
         return NextResponse.json({
             data: result,
-            currentPage,
             perPage,
-            totalItems,
+            totalItems: total_items,
         });
     } catch (err) {
         console.error("Error: ", err);

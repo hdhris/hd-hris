@@ -150,14 +150,14 @@ function LeaveTypeTable() {
             }}
             defaultDisplay="table"/>
 
-        <LeaveTypesDetails {...leaveType!}/>
+        <LeaveTypesDetails {...leaveType!} onClose={() => setLeaveType(undefined)}/>
     </section>);
 }
 
 export default LeaveTypeTable;
 
 
-const LeaveTypesDetails = ({...props}: LeaveType) => {
+const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void}) => {
     const {toast} = useToast()
     const curr_emp = props.current_employees
     const [editOpen, setEditOpen] = useState<boolean>(false)
@@ -206,9 +206,10 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
             title="Leave Type"
             onDelete={() => handleLeaveTypeDelete(props.id)}
             onEdit={() => handleLeaveTypeEdit(!editOpen)}
+            onClose={onClose}
             header={<div
                 className="relative flex flex-col gap-2 h-32 bg-opacity-50 backdrop-blur-sm w-full">
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-5 w-fit">
                     <Typography className="text-2xl font-bold">{props.name}</Typography>
                     <Chip style={{
                         background: getColor(props.code, 0.2),
@@ -234,7 +235,9 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
             }, {
                 label: "Current Usage", value: <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>
             },{
-                label: "Is Paid", value: props.paid_leave ? "Paid Leave" : "Unpaid Leave"
+                label: "Leave Compensation Status", value: props.paid_leave ? "Paid Leave" : "Unpaid Leave"
+            },{
+                label: "Attachment Status", value: props.attachment_required ? "Required" : "Not Required"
             },{
                 label: "Created At", value: props.created_at
             },{

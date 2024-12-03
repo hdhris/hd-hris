@@ -17,6 +17,7 @@ export const LeaveTypeSchema = z.object({
     }),
     paidLeave: z.boolean(),
     isActive: z.boolean(),
+    attachmentRequired: z.boolean(),
     applicableToEmployeeTypes: z.string(),
 }).refine(data => data.maxDuration >= data.minDuration, {
     message: "Max Duration must be greater than or equal to Min Duration", path: ["maxDuration"],

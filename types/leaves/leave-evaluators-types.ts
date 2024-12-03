@@ -33,9 +33,9 @@ export type EvaluatorsTypes = {
 
 
 interface Decision {
-    is_approved?: boolean;
-    is_reviewed?: boolean;
-    decisionDate: string;
+    is_approved?: boolean | null;
+    is_reviewed?: boolean | null;
+    decisionDate: string | null;
     rejectedReason: string | null;
 }
 

@@ -13,6 +13,7 @@ import {Chip} from "@nextui-org/chip";
 import uniqolor from "uniqolor";
 import {rgba} from "color2k";
 import {FilterProps} from "@/types/table/default_config";
+import {getColor} from "@/helper/background-color-generator/generator";
 
 const LeaveTypesTableColumns: ColumnsProps[] = [{
     name: "Name", uid: "name", sortable: true
@@ -55,8 +56,11 @@ export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
                 <Typography>{`${item.min_duration} - ${item.max_duration} Day/s`}</Typography>
             </Case>
             <Case of="applicable_to_employee_types">
-                <Chip variant="flat" radius="sm"
-                      color={employee_types_color_map[item.applicable_to_employee_types.toLowerCase()]}>
+                <Chip style={{
+                    background: getColor(item.applicable_to_employee_types, 0.2),
+                    borderColor: getColor(item.applicable_to_employee_types, 0.5),
+                    color: getColor(item.applicable_to_employee_types)
+                }} variant="bordered">
                     {item.applicable_to_employee_types}
                 </Chip>
 

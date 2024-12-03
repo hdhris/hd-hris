@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
 
         const { employee_id, leave_credits } = data;
 
+        console.log("Credit Data: ", data)
 
 
         // Prepare an array of records for bulk creation
@@ -26,9 +27,9 @@ export async function POST(req: NextRequest) {
 
         // console.log("Records: ", recordsToCreate)
         // Bulk insert all records
-        await prisma.dim_leave_balances.createMany({
-            data: recordsToCreate,
-        });
+        // await prisma.dim_leave_balances.createMany({
+        //     data: recordsToCreate,
+        // });
 
         // Return success response
         return NextResponse.json({

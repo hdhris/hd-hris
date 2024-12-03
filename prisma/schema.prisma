@@ -41,19 +41,19 @@ model dim_incident_reports {
 }
 
 model dim_leave_balances {
-  id                 Int             @id @default(autoincrement())
+  id                 Int               @id @default(autoincrement())
   employee_id        Int
   year               Int
-  allocated_days     Decimal         @default(0) @db.Decimal(10, 2)
-  used_days          Decimal         @default(0) @db.Decimal(10, 2)
-  remaining_days     Decimal         @default(0) @db.Decimal(10, 2)
-  carry_forward_days Decimal         @default(0) @db.Decimal(10, 2)
-  created_at         DateTime?       @db.Timestamp(6)
-  updated_at         DateTime        @db.Timestamp(6)
-  deleted_at         DateTime?       @db.Timestamp(6)
+  allocated_days     Decimal           @default(0) @db.Decimal(10, 2)
+  used_days          Decimal           @default(0) @db.Decimal(10, 2)
+  remaining_days     Decimal           @default(0) @db.Decimal(10, 2)
+  carry_forward_days Decimal           @default(0) @db.Decimal(10, 2)
+  created_at         DateTime?         @db.Timestamp(6)
+  updated_at         DateTime          @db.Timestamp(6)
+  deleted_at         DateTime?         @db.Timestamp(6)
   leave_type_id      Int
-  ref_leave_types    ref_leave_types @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  trans_employees    trans_employees @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_leave_balances_trans_employees_1")
+  ref_leave_types    trans_leave_types @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  trans_employees    trans_employees   @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_leave_balances_trans_employees_1")
 
   @@index([employee_id], map: "idx_dim_leave_balances_allocations_employee_id")
   @@index([leave_type_id], map: "idx_dim_leave_balances_allocations_leave_type_id")
@@ -185,23 +185,21 @@ model ref_batch_schedules {
 }
 
 model ref_benefit_plans {
-  id                                         Int                                          @id @default(autoincrement())
-  name                                       String?                                      @db.VarChar(45)
-  type                                       String?                                      @db.VarChar(10)
-  coverage_details                           String?
-  employer_contribution                      Decimal?                                     @db.Decimal(10, 2)
-  employee_contribution                      Decimal?                                     @db.Decimal(10, 2)
-  effective_date                             DateTime?                                    @db.Date
-  expiration_date                            DateTime?                                    @db.Date
-  description                                String?
-  created_at                                 DateTime                                     @db.Timestamp(6)
-  updated_at                                 DateTime                                     @db.Timestamp(6)
-  deleted_at                                 DateTime?                                    @db.Timestamp(6)
-  is_active                                  Boolean?
-  deduction_id                               Int?
-  dim_employee_benefits                      dim_employee_benefits[]
-  ref_payheads                               ref_payheads?                                @relation(fields: [deduction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ref_benefits_contribution_advance_settings ref_benefits_contribution_advance_settings[]
+  id                              Int                               @id @default(autoincrement())
+  name                            String?                           @db.VarChar(45)
+  type                            String?                           @db.VarChar(10)
+  coverage_details                String?
+  effective_date                  DateTime?                         @db.Date
+  expiration_date                 DateTime?                         @db.Date
+  description                     String?
+  created_at                      DateTime                          @db.Timestamp(6)
+  updated_at                      DateTime                          @db.Timestamp(6)
+  deleted_at                      DateTime?                         @db.Timestamp(6)
+  is_active                       Boolean?
+  deduction_id                    Int?
+  dim_employee_benefits           dim_employee_benefits[]
+  ref_payheads                    ref_payheads?                     @relation(fields: [deduction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_benefits_contribution_table ref_benefits_contribution_table[]
 }
 
 model ref_branches {
@@ -231,37 +229,22 @@ model ref_departments {
 }
 
 model ref_job_classes {
-  id              Int               @id @default(autoincrement())
-  name            String?           @db.VarChar(45)
-  superior_id     Int?
-  is_active       Boolean?
-  created_at      DateTime          @db.Timestamp(6)
-  updated_at      DateTime          @db.Timestamp(6)
-  deleted_at      DateTime?         @db.Timestamp(6)
-  department_id   Int?
-  pay_rate        Decimal?          @db.Decimal(10, 2)
-  basic_salary    Decimal?          @db.Decimal
-  for_probi       Boolean?
-  ref_departments ref_departments?  @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
-  trans_employees trans_employees[]
-}
-
-model ref_leave_types {
-  id                           Int                  @id @default(autoincrement())
-  applicable_to_employee_types String
-  code                         String
-  created_at                   DateTime             @db.Timestamp(6)
-  deleted_at                   DateTime?            @db.Timestamp(6)
-  description                  String
-  is_active                    Boolean
-  max_duration                 Decimal              @db.Decimal(10, 2)
-  min_duration                 Decimal              @db.Decimal(10, 2)
-  name                         String
-  paid_leave                   Boolean
-  updated_at                   DateTime?            @db.Timestamp(6)
-  carry_over                   Boolean
-  dim_leave_balances           dim_leave_balances[]
-  trans_leaves                 trans_leaves[]
+  id                Int                 @id @default(autoincrement())
+  name              String?             @db.VarChar(45)
+  superior_id       Int?
+  is_active         Boolean?
+  created_at        DateTime            @db.Timestamp(6)
+  updated_at        DateTime            @db.Timestamp(6)
+  deleted_at        DateTime?           @db.Timestamp(6)
+  department_id     Int?
+  pay_rate          Decimal?            @db.Decimal(10, 2)
+  basic_salary      Decimal?            @db.Decimal
+  for_probi         Boolean?
+  is_superior       Boolean             @default(false)
+  max_employees     Int?
+  ref_departments   ref_departments?    @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
+  trans_employees   trans_employees[]
+  trans_signatories trans_signatories[]
 }
 
 model ref_payheads {
@@ -458,6 +441,8 @@ model trans_employees {
   resignation_json                                                       Json?                          @db.Json
   termination_json                                                       Json?                          @db.Json
   is_regular                                                             Boolean?
+  employement_status_id                                                  Int?
+  salary_grade_id                                                        Int?
   acl_user_access_control                                                acl_user_access_control?
   dim_employee_benefits                                                  dim_employee_benefits[]
   dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
@@ -483,6 +468,8 @@ model trans_employees {
   ref_addresses_trans_employees_addr_municipalToref_addresses            ref_addresses?                 @relation("trans_employees_addr_municipalToref_addresses", fields: [addr_municipal], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses3")
   ref_addresses_trans_employees_addr_baranggayToref_addresses            ref_addresses?                 @relation("trans_employees_addr_baranggayToref_addresses", fields: [addr_baranggay], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses4")
   ref_branches                                                           ref_branches?                  @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_branch_7")
+  ref_employment_status                                                  ref_employment_status?         @relation(fields: [employement_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_salary_grades                                                      ref_salary_grades?             @relation(fields: [salary_grade_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_leaves_trans_leaves_employee_idTotrans_employees                 trans_leaves[]                 @relation("trans_leaves_employee_idTotrans_employees")
   trans_leaves_trans_leaves_created_byTotrans_employees                  trans_leaves[]                 @relation("trans_leaves_created_byTotrans_employees")
   trans_overtimes_trans_overtimes_employee_idTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_employee_idTotrans_employees")
@@ -492,20 +479,20 @@ model trans_employees {
 
 model trans_leaves {
   employee_id                                              Int
-  start_date                                               DateTime?        @db.Date
-  end_date                                                 DateTime?        @db.Date
-  status                                                   String?          @db.VarChar(10)
-  created_at                                               DateTime         @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
-  updated_at                                               DateTime         @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
-  id                                                       Int              @id @default(autoincrement())
+  start_date                                               DateTime?               @db.Timestamp(6)
+  end_date                                                 DateTime?               @db.Timestamp(6)
+  status                                                   String?                 @db.VarChar(10)
+  created_at                                               DateTime                @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
+  updated_at                                               DateTime                @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  id                                                       Int                     @id @default(autoincrement())
   type_id                                                  Int?
   reason                                                   String?
   created_by                                               Int?
-  deleted_at                                               DateTime?        @db.Timestamp(6)
+  deleted_at                                               DateTime?               @db.Timestamp(6)
   evaluators                                               Json?
-  trans_employees_leaves                                   trans_employees  @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
-  ref_leave_types                                          ref_leave_types? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
-  trans_employees_trans_leaves_created_byTotrans_employees trans_employees? @relation("trans_leaves_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
+  trans_employees_leaves                                   trans_employees         @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
+  ref_leave_types                                          ref_leave_type_details? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
+  trans_employees_trans_leaves_created_byTotrans_employees trans_employees?        @relation("trans_leaves_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
 }
 
 model trans_overtimes {
@@ -687,24 +674,6 @@ model sys_help_report {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model ref_benefits_contribution_advance_settings {
-  id                Int                @id(map: "ref_benefits_contribution_pkey") @default(autoincrement())
-  min_salary        Decimal?           @db.Decimal
-  max_salary        Decimal?           @db.Decimal
-  min_MSC           Decimal?           @db.Decimal
-  max_MSC           Decimal?           @db.Decimal
-  msc_step          Decimal?           @db.Decimal
-  ec_threshold      Decimal?           @db.Decimal
-  ec_low_rate       Decimal?           @db.Decimal
-  ec_high_rate      Decimal?           @db.Decimal
-  wisp_threshold    Decimal?           @db.Decimal
-  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime?          @default(now()) @db.Timestamp(6)
-  plan_id           Int?
-  ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ref_benefits_contribution_table_plan_id_fkey")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model dim_payhead_specific_amounts {
   id              Int              @id @default(autoincrement())
   created_at      DateTime         @default(now()) @db.Timestamptz(6)
@@ -718,11 +687,106 @@ model dim_payhead_specific_amounts {
   @@unique([payhead_id, employee_id], map: "employee_payhead")
 }
 
-model sec_sessions {
-  sessionToken String   @unique(map: "Session_sessionToken_key")
-  userId       String
-  expires      DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime
-  id           Int      @id @default(autoincrement())
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_benefits_contribution_table {
+  id                Int                @id(map: "ref_benefits_contribution_pkey") @default(autoincrement())
+  min_salary        Decimal?           @db.Decimal
+  max_salary        Decimal?           @db.Decimal
+  min_MSC           Decimal?           @db.Decimal
+  max_MSC           Decimal?           @db.Decimal
+  msc_step          Decimal?           @db.Decimal
+  ec_threshold      Decimal?           @db.Decimal
+  ec_low_rate       Decimal?           @db.Decimal
+  ec_high_rate      Decimal?           @db.Decimal
+  wisp_threshold    Decimal?           @db.Decimal
+  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?          @default(now()) @db.Timestamp(6)
+  plan_id           Int?
+  employee_rate     Decimal            @default(0) @db.Decimal
+  employer_rate     Decimal            @default(0) @db.Decimal
+  ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_employment_status {
+  id                Int                 @id @default(autoincrement())
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
+  deleted_at        DateTime?           @db.Timestamptz(6)
+  name              String
+  trans_employees   trans_employees[]
+  trans_leave_types trans_leave_types[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_salary_grades {
+  id              Int               @id @default(autoincrement())
+  name            String
+  amount          Decimal           @db.Decimal
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamp(6)
+  deleted_at      DateTime?         @db.Timestamp(6)
+  trans_employees trans_employees[]
+}
+
+model ref_leave_type_details {
+  id                  Int                 @id(map: "ref_leave_types_pkey") @default(autoincrement())
+  code                String
+  description         String
+  is_active           Boolean
+  max_duration        Decimal             @db.Decimal(10, 2)
+  min_duration        Decimal             @db.Decimal(10, 2)
+  name                String
+  paid_leave          Boolean
+  carry_over          Boolean
+  attachment_required Boolean             @default(false)
+  trans_leave_types   trans_leave_types[]
+  trans_leaves        trans_leaves[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_signatory_paths {
+  id                Int                 @id(map: "ref_signatories_path_pkey") @default(autoincrement())
+  signatories_path  String
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
+  trans_signatories trans_signatories[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_signatory_roles {
+  id                  Int                 @id @default(autoincrement())
+  signatory_role_name String
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime            @default(now()) @db.Timestamptz(6)
+  trans_signatories   trans_signatories[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model trans_signatories {
+  id                  Int                 @id(map: "ref_evaluators_pkey") @default(autoincrement())
+  job_id              Int
+  signatory_role_id   Int
+  signatory_path_id   Int
+  order_number        Int
+  updated_at          DateTime            @default(now()) @db.Timestamp(6)
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  deleted_at          DateTime?           @db.Timestamp(6)
+  ref_job_classes     ref_job_classes     @relation(fields: [job_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ref_evaluators_job_id_fkey")
+  ref_signatory_paths ref_signatory_paths @relation(fields: [signatory_path_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_signatory_roles ref_signatory_roles @relation(fields: [signatory_role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model trans_leave_types {
+  id                     Int                    @id(map: "trans_leave_type_pkey") @default(autoincrement())
+  leave_type_details_id  Int
+  employment_status_id   Int
+  created_at             DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime               @default(now()) @db.Timestamptz(6)
+  deleted_at             DateTime?              @db.Timestamptz(6)
+  dim_leave_balances     dim_leave_balances[]
+  ref_employment_status  ref_employment_status  @relation(fields: [employment_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_leave_type_employment_status_id_fkey")
+  ref_leave_type_details ref_leave_type_details @relation(fields: [leave_type_details_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_leave_type_leave_type_details_id_fkey")
 }

@@ -127,6 +127,7 @@ export async function POST(req: Request) {
         // Render the PDF to a stream
         const pdfStream = await ReactPDF.renderToStream(<PayStub data={payslipData} />);
 
+        console.log(`filename="${payslipData.data.name+"-"+payslipData.date}-Payslip.pdf"`)
         // Return the PDF as a downloadable response
         return new NextResponse(pdfStream as unknown as ReadableStream, {
             headers: {
