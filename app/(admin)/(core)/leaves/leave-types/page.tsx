@@ -231,7 +231,7 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
             <CardTable data={[{
                 label: "Minimum Days", value: pluralize(props.min_duration, "day")
             }, {label: "Maximum Days", value: pluralize(props.max_duration, "day")}, {
-                label: "Applicable to", value: props.applicable_to_employee_types
+                label: "Applicable for", value: props.applicable_to_employee_types
             }, {
                 label: "Current Usage", value: <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>
             },{

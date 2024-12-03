@@ -82,6 +82,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 toast({
                     title: "Success", description: "Leave type created successfully", variant: "success",
                 })
+
                 form.reset({
                     name: "", code: "", description: "", carryOver: false, //Leave Duration
                     minDuration: 0, maxDuration: 0, //Additional Settings
