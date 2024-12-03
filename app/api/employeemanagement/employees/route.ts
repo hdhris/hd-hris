@@ -132,10 +132,10 @@ export async function POST(req: NextRequest) {
 
 // Function to create an employee
 async function createEmployee(data: z.infer<typeof employeeSchema>) {
-  const { schedules, job_id, department_id, educational_bg_json, ...rest } =
-    data;
+  const { schedules, job_id, department_id, educational_bg_json, family_bg_json, ...rest } = data;
   // console.log(data)
   const educationalBackground = parseJsonInput(educational_bg_json);
+  const familyBackground = parseJsonInput(family_bg_json);
 
   try {
     // 1. Create the employee record
@@ -145,6 +145,7 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
         hired_at: data.hired_at ? new Date(data.hired_at) : null,
         birthdate: data.birthdate ? new Date(data.birthdate) : null,
         educational_bg_json: educationalBackground,
+        family_bg_json: familyBackground,
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -197,10 +198,16 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
 }
 //
 // GET: Fetch employees-leaves-status
+
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
   const daysJson = url.searchParams.get("days_json");
+
+  //just remove this if you want to display all data remove this pagination cause it was optional
+  const page = Number(url.searchParams.get("page")) || 1;
+  const rowsPerPage = Number(url.searchParams.get("rowsPerPage")) || 50000;//displaying total nnumber of data in a page you can define it here
+  const pageSize = Math.min(rowsPerPage, 100);
 
   let parsedDaysJson;
   if (daysJson) {
@@ -217,14 +224,100 @@ export async function GET(req: NextRequest) {
   try {
     const result = id
       ? await getEmployeeById(parseInt(id), parsedDaysJson)
-      : await getAllEmployees(parsedDaysJson);
+      : await getAllEmployees(parsedDaysJson, { page, pageSize });//remove the page and pagesize
     return NextResponse.json(result);
   } catch (error) {
-    return handleError(error, "fetch");
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid data", details: error.errors },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { error: "Failed to fetch employees" },
+      { status: 500 }
+    );
   }
 }
 
-// Fetch employee by ID
+//remove this
+interface PaginationParams {
+  page: number;
+  pageSize: number;
+}
+//remove the pagination?:paginationparams
+async function getAllEmployees(daysJson?: Record<string, boolean>, pagination?: PaginationParams) {
+  const whereCondition = {
+    AND: [
+      { deleted_at: null },
+      {
+        OR: [
+          { resignation_json: { equals: Prisma.JsonNull } },
+          { resignation_json: { equals: Prisma.DbNull } },
+        ],
+      },
+      {
+        OR: [
+          { termination_json: { equals: Prisma.JsonNull } },
+          { termination_json: { equals: Prisma.DbNull } },
+        ],
+      },
+      {
+        OR: [
+          { suspension_json: { equals: Prisma.JsonNull } },
+          { suspension_json: { equals: Prisma.DbNull } },
+        ],
+      },
+      daysJson
+        ? {
+            dim_schedules: {
+              some: {
+                days_json: {
+                  equals: daysJson,
+                },
+              },
+            },
+          }
+        : {},
+    ],
+  };
+
+  //remove this pagination to display all data
+  const page = pagination?.page || 1;
+  const pageSize = pagination?.pageSize || 10;
+  const skip = (page - 1) * pageSize;
+
+  // Get employees with pagination
+  const employees = await prisma.trans_employees.findMany({
+    where: whereCondition,
+    orderBy: [
+      {
+        updated_at: 'desc'
+      },
+      {
+        created_at: 'desc'
+      }
+    ],
+
+    //remove this
+    skip,
+    take: pageSize,
+    //
+    include: {
+      ref_departments: true,
+      ref_job_classes: true,
+      ref_addresses_trans_employees_addr_regionToref_addresses: true,
+      ref_addresses_trans_employees_addr_provinceToref_addresses: true,
+      ref_addresses_trans_employees_addr_municipalToref_addresses: true,
+      ref_addresses_trans_employees_addr_baranggayToref_addresses: true,
+      dim_schedules: { include: { ref_batch_schedules: true } },
+    },
+  });
+
+  // Return just the employees array to match existing frontend expectations
+  return employees;
+}
+
 async function getEmployeeById(id: number, daysJson?: Record<string, boolean>) {
   const employee = await prisma.trans_employees.findFirst({
     where: {
@@ -247,68 +340,9 @@ async function getEmployeeById(id: number, daysJson?: Record<string, boolean>) {
     },
   });
 
-  // logDatabaseOperation("GET employee by ID", employee);
   if (!employee) throw new Error("Employee not found");
   return employee;
 }
-
-// Fetch all employees
-// Fetch all employees with status filtering
-async function getAllEmployees(daysJson?: Record<string, boolean>) {
-  const employees = await prisma.trans_employees.findMany({
-    where: {
-      AND: [
-        // Exclude deleted employees
-        {
-          deleted_at: null
-        },
-        // Include employees with no resignation or empty resignation data
-        {
-          OR: [
-            { resignation_json: { equals: Prisma.JsonNull } },
-            { resignation_json: { equals: Prisma.DbNull } }
-          ]
-        },
-        // Include employees with no termination or empty termination data
-        {
-          OR: [
-            { termination_json: { equals: Prisma.JsonNull } },
-            { termination_json: { equals: Prisma.DbNull } }
-          ]
-        },
-        // Include employees with no suspension or empty suspension data
-        {
-          OR: [
-            { suspension_json: { equals: Prisma.JsonNull } },
-            { suspension_json: { equals: Prisma.DbNull } }
-          ]
-        },
-        // Add days_json filter if provided
-        daysJson ? {
-          dim_schedules: {
-            some: {
-              days_json: {
-                equals: daysJson,
-              },
-            },
-          }
-        } : {}
-      ]
-    },
-    include: {
-      ref_departments: true,
-      ref_job_classes: true,
-      ref_addresses_trans_employees_addr_regionToref_addresses: true,
-      ref_addresses_trans_employees_addr_provinceToref_addresses: true,
-      ref_addresses_trans_employees_addr_municipalToref_addresses: true,
-      ref_addresses_trans_employees_addr_baranggayToref_addresses: true,
-      dim_schedules: { include: { ref_batch_schedules: true } },
-    },
-  });
-
-  return employees;
-}
-
 // PUT: Update employee
 export async function PUT(req: NextRequest) {
   const url = new URL(req.url);
@@ -348,7 +382,13 @@ async function updateEmployee(
   id: number,
   data: Partial<z.infer<typeof employeeSchema>>
 ) {
-  const { schedules, job_id, educational_bg_json, ...otherData } = data;
+  const {
+    schedules,
+    job_id,
+    educational_bg_json,
+    family_bg_json,
+    ...otherData
+  } = data;
 
   const employee = await prisma.trans_employees.update({
     where: { id },
@@ -362,6 +402,11 @@ async function updateEmployee(
         ? ((typeof educational_bg_json === "string"
             ? JSON.parse(educational_bg_json)
             : educational_bg_json) as Prisma.InputJsonValue)
+        : undefined,
+      family_bg_json: family_bg_json
+        ? ((typeof family_bg_json === "string"
+            ? JSON.parse(family_bg_json)
+            : family_bg_json) as Prisma.InputJsonValue)
         : undefined,
     },
   });

@@ -75,7 +75,7 @@ const JobInformationForm: React.FC = () => {
         placeholder: "Select Work Status",
         options: [
           { label: "Regular", value: "true" },
-          { label: "Probitionary", value: "false" },
+          { label: "Probationary", value: "false" },
         ],
       },
     },

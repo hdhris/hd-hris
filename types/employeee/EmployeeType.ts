@@ -11,6 +11,17 @@ export type EmployeeAll = {
   suffix: string;
   extension: string;
   birthdate: string;
+
+  fathers_first_name?: string;
+  fathers_middle_name?: string;
+  fathers_last_name?: string;
+  mothers_first_name?: string;
+  mothers_middle_name?: string;
+  mothers_last_name?: string;
+  guardian_first_name?: string;
+  guardian_middle_name?: string;
+  guardian_last_name?: string;
+
   addr_region: string;
   addr_province: string;
   addr_municipal: string;
@@ -24,9 +35,18 @@ export type EmployeeAll = {
   suspension_json?: string;
   resignation_json?: string;
   termination_json?: string;
-  highestDegree: string;
   certificates: Array<{ name: string; url: string }>;
+  masters: string;
+  mastersCourse: string;
+  mastersYear: string;
+  mastersCertificates: Array<{ name: string; url: string }>;
+  doctorate: string;
+  doctorateCourse: string;
+  doctorateYear: string;
+  doctorateCertificates: Array<{ name: string; url: string }>;
+  highestDegree: string;
   hired_at: string;
+  branch_id: string;
   department_id: string;
   job_id: string;
   status:string;
@@ -34,7 +54,7 @@ export type EmployeeAll = {
   email: string;
   contact_no: string;
   picture: string;
-  is_regular:boolean;
+  is_regular: string;
   deleted_at: string;
   ref_job_classes: { name: string }; // Add this line
   ref_departments: { name: string }; // Add this line
@@ -42,10 +62,26 @@ export type EmployeeAll = {
   ref_addresses_trans_employees_addr_provinceToref_addresses: { address_name: string, address_code: number},
   ref_addresses_trans_employees_addr_municipalToref_addresses: { address_name: string, address_code: number},
   ref_addresses_trans_employees_addr_baranggayToref_addresses: { address_name: string, address_code: number},
+  dim_schedules?: {
+    days_json: string | string[];
+    ref_batch_schedules?: {
+      id: string | number;
+    };
+  }[];
   
 };
 
+
+
+
+interface Certificate {
+  name: string;
+  url: string | File;
+  fileName: string;
+}
 // Educational Background Type
+
+
 export type EmployeeEducationalBG = {
   elementary?: string;
   highSchool?: string;
@@ -54,20 +90,34 @@ export type EmployeeEducationalBG = {
   universityCollege?: string;
   course?: string;
   highestDegree?: string;
-  certificates?: Certificate[];
+  masters?: string;
+  mastersCourse?: string;
+  mastersYear?: string;
+  mastersCertificates?: Certificate[];
+  doctorate?: string;
+  doctorateCourse?: string;
+  doctorateYear?: string;
+  doctorateCertificates?: Certificate[];
+  certificates: Certificate[];
 };
 
 // Certificates Type
-export type Certificate = {
-  name: string;
-  issuingOrganization: string;
-  issueDate: Date | string;
-  expiryDate?: Date | string; // Optional, in case some certificates don't expire
-};
+
 export type EmployeeSuspension = {
   suspensionReason: string;
   startDate: string;
   endDate: string;
+};
+export type FamilyBackground = {
+  fathers_first_name?: string;
+  fathers_middle_name?: string;
+  fathers_last_name?: string;
+  mothers_first_name?: string;
+  mothers_middle_name?: string;
+  mothers_last_name?: string;
+  guardian_first_name?: string;
+  guardian_middle_name?: string;
+  guardian_last_name?: string;
 };
 
 export type EmployeeTermination = {
@@ -94,6 +144,7 @@ export type Employee = EmployeeAll & {
   resignation_json?: EmployeeResignation | null;
   termination_json?: EmployeeTermination | null;
   educational_bg_json?: EmployeeEducationalBG | null;
+  family_bg_json?: string | FamilyBackground | null; // Add this lin
 };
 
 export type EmployeePaginate = {

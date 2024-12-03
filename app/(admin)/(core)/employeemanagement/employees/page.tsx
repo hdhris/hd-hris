@@ -5,13 +5,13 @@ import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import AddEmployee from "@/components/admin/employeescomponent/store/AddEmployees";
-import EditEmployee from "@/components/admin/employeescomponent/update/EditEmployee";
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
 import Text from "@/components/Text";
 import dayjs from "dayjs";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
+import { useRouter } from 'next/navigation';
 
 const EmptyState: React.FC = () => {
   return (
@@ -30,10 +30,10 @@ const Page: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<Employee | null>(null);
+  const router = useRouter();
 
-  const handleEdit = (employee: Employee) => {
-    setSelectedEmployeeId(employee);
-    setIsEditModalOpen(true);
+  const handleEditEmployee = (employeeId: number) => {
+    router.push(`/employeemanagement/employees/edit-employee/${employeeId.toString()}`);
   };
 
   const handleEmployeeUpdated = async () => {
@@ -138,7 +138,7 @@ const Page: React.FC = () => {
                 size="sm"
                 variant="flat"
               >
-                {employee.is_regular ? "Regular" : "Probitionary"}
+                {employee.is_regular ? "Regular" : "Probationary"}
               </Chip>
             </div>
           );
@@ -146,7 +146,9 @@ const Page: React.FC = () => {
           return (
             <TableActionButton
               name={`${employee.first_name} ${employee.last_name}`}
-              onEdit={() => handleEdit(employee)}
+            
+               
+                onEdit={() => handleEditEmployee(employee.id)}              
             />
           );
         default:
@@ -173,12 +175,12 @@ const Page: React.FC = () => {
           key: "is_regular",
           value: true,
           name: "Regular",
-          uid: "probitionary",
+          uid: "probationary",
         },
         {
           key: "is_regular",
           value: false,
-          name: "Probitionary",
+          name: "Probationary",
           uid: "regular",
         },
       ],
@@ -288,7 +290,7 @@ const Page: React.FC = () => {
                     size="sm"
                     variant="flat"
                   >
-                    {employee.is_regular ? "Regular" : "Probitionary"}
+                    {employee.is_regular ? "Regular" : "Probationary"}
                   </Chip>
                 </div>
               </div>
@@ -320,17 +322,6 @@ const Page: React.FC = () => {
         />
       )}
 
-      {selectedEmployeeId && (
-        <EditEmployee
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedEmployeeId(null);
-          }}
-          employeeData={selectedEmployeeId}
-          onEmployeeUpdated={handleEmployeeUpdated}
-        />
-      )}
     </div>
   );
 };

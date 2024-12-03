@@ -139,7 +139,7 @@ const Page: React.FC = () => {
                 size="sm"
                 variant="flat"
               >
-                {job.for_probi ? "For Probitionary" : "For Regular"}
+                {job.for_probi ? "For probationary" : "For Regular"}
               </Chip>
             </div>
           );
@@ -188,7 +188,7 @@ const Page: React.FC = () => {
     {
       category: "Work Status",
       filtered: [
-        { key: "for_probi", value: true, name: "For probitionary", uid: "for probitionary" },
+        { key: "for_probi", value: true, name: "For probationary", uid: "for probationary" },
         { key: "for_probi", value: false, name: "For Regular", uid: "for regular" },
       ],
     }
@@ -241,7 +241,7 @@ const Page: React.FC = () => {
                     size="sm"
                     variant="flat"
                   >
-                    {job.for_probi ? "Probitionary" : "Regular"}
+                    {job.for_probi ? "probationary" : "Regular"}
                   </Chip>
                 </div>
               </div>

@@ -77,6 +77,13 @@ export function useEmployeesData() {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
+
+export function useEmployeeData(id: string | null) {
+    return useSWR<Employee>(
+        id ? `/api/employeemanagement/employees?id=${id}` : null,
+        fetcher
+    );
+}
 export function useSuspendedEmployees() {
     return useSWR<Employee[]>('/api/employeemanagement/suspended', fetcher, {
         // revalidateOnFocus: false, refreshInterval: 3000
