@@ -1,0 +1,846 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table dim_employee_benefits {
+  id Int [pk, increment]
+  employee_id Int
+  plan_id Int
+  enrollment_date DateTime
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  terminated_at DateTime
+  coverage_amount Decimal
+  contribution_amount Decimal
+  ref_benefit_plans ref_benefit_plans
+  trans_employees trans_employees
+  trans_benefit_contributions trans_benefit_contributions [not null]
+}
+
+Table dim_incident_reports {
+  id Int [pk, increment]
+  employee_id Int
+  occurance_date DateTime
+  type String
+  location String
+  severity String
+  description String
+  reported_by Int
+  comments String
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  trans_employees_dim_incident_reports_employee_idTotrans_employees trans_employees
+  trans_employees_dim_incident_reports_reported_byTotrans_employees trans_employees
+}
+
+Table dim_leave_balances {
+  id Int [pk, increment]
+  employee_id Int [not null]
+  year Int [not null]
+  allocated_days Decimal [not null, default: 0]
+  used_days Decimal [not null, default: 0]
+  remaining_days Decimal [not null, default: 0]
+  carry_forward_days Decimal [not null, default: 0]
+  created_at DateTime
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  leave_type_id Int [not null]
+  ref_leave_types ref_leave_types [not null]
+  trans_employees trans_employees [not null]
+}
+
+Table dim_payhead_affecteds {
+  id Int [pk, increment]
+  payhead_id Int
+  employee_id Int
+  created_at DateTime
+  updated_at DateTime
+  default_amount Decimal
+  trans_employees trans_employees
+  ref_payheads ref_payheads
+}
+
+Table dim_schedules {
+  id Int [pk, increment]
+  employee_id Int
+  days_json Json
+  batch_id Int
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  ref_batch_schedules ref_batch_schedules
+  trans_employees trans_employees
+}
+
+Table dim_training_participants {
+  id Int [pk, increment]
+  program_id Int
+  employee_id Int
+  enrollement_date DateTime
+  status String
+  feedback String
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  terminated_at DateTime
+  ref_training_programs ref_training_programs
+  trans_employees trans_employees
+  fact_training_records fact_training_records [not null]
+}
+
+Table dim_training_schedules {
+  id Int [pk, increment]
+  program_id Int
+  location String
+  session_timestamp DateTime
+  hour_duration Int
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  ref_training_programs ref_training_programs
+  fact_training_records fact_training_records [not null]
+}
+
+Table fact_evaluation_breakdowns {
+  id Int [pk, increment]
+  criteria_id Int
+  evaluation_id Int
+  rating Decimal
+  max_rate Decimal
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  fact_performance_evaluations fact_performance_evaluations
+  ref_performance_criterias ref_performance_criterias
+}
+
+Table fact_performance_evaluations {
+  id Int [pk, increment]
+  employee_id Int
+  eval_date_from DateTime
+  eval_date_to DateTime
+  total_rating Decimal
+  max_rate Decimal
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  fact_evaluation_breakdowns fact_evaluation_breakdowns [not null]
+  trans_employees trans_employees
+}
+
+Table fact_training_records {
+  id Int [pk, increment]
+  schedule_id Int
+  participant_id Int
+  rating Int
+  feedback String
+  suggestion String
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  dim_training_participants dim_training_participants
+  dim_training_schedules dim_training_schedules
+}
+
+Table log_attendances {
+  id Int [pk, increment]
+  employee_id Int [not null]
+  timestamp DateTime [not null]
+  status Int
+  created_at DateTime
+  punch Int
+  trans_employees trans_employees [not null]
+}
+
+Table ref_addresses {
+  address_code Int [pk, increment]
+  address_name String [not null]
+  parent_code Int
+  trans_employees_trans_employees_addr_regionToref_addresses trans_employees [not null]
+  trans_employees_trans_employees_addr_provinceToref_addresses trans_employees [not null]
+  trans_employees_trans_employees_addr_municipalToref_addresses trans_employees [not null]
+  trans_employees_trans_employees_addr_baranggayToref_addresses trans_employees [not null]
+}
+
+Table ref_batch_schedules {
+  id Int [pk, increment]
+  name String
+  clock_in DateTime
+  clock_out DateTime
+  is_active Boolean
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  break_min Int
+  dim_schedules dim_schedules [not null]
+}
+
+Table ref_benefit_plans {
+  id Int [pk, increment]
+  name String
+  type String
+  coverage_details String
+  employer_contribution Decimal
+  employee_contribution Decimal
+  effective_date DateTime
+  expiration_date DateTime
+  description String
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  is_active Boolean
+  deduction_id Int
+  dim_employee_benefits dim_employee_benefits [not null]
+  ref_payheads ref_payheads
+  ref_benefits_contribution_advance_settings ref_benefits_contribution_advance_settings [not null]
+}
+
+Table ref_branches {
+  id Int [pk, increment]
+  name String
+  addr_region Int
+  addr_province Int
+  addr_municipal Int
+  addr_baranggay Int
+  is_active Boolean
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  trans_employees trans_employees [not null]
+}
+
+Table ref_departments {
+  id Int [pk, increment]
+  name String
+  color String
+  is_active Boolean
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime
+  ref_job_classes ref_job_classes [not null]
+  trans_employees trans_employees [not null]
+}
+
+Table ref_job_classes {
+  id Int [pk, increment]
+  name String
+  superior_id Int
+  is_active Boolean
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  department_id Int
+  pay_rate Decimal
+  basic_salary Decimal
+  for_probi Boolean
+  ref_departments ref_departments
+  trans_employees trans_employees [not null]
+}
+
+Table ref_leave_types {
+  id Int [pk, increment]
+  applicable_to_employee_types String [not null]
+  code String [not null]
+  created_at DateTime [not null]
+  deleted_at DateTime
+  description String [not null]
+  is_active Boolean [not null]
+  max_duration Decimal [not null]
+  min_duration Decimal [not null]
+  name String [not null]
+  paid_leave Boolean [not null]
+  updated_at DateTime
+  carry_over Boolean [not null]
+  dim_leave_balances dim_leave_balances [not null]
+  trans_leaves trans_leaves [not null]
+}
+
+Table ref_payheads {
+  calculation String
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime
+  id Int [pk, increment]
+  is_active Boolean
+  name String
+  type String
+  affected_json Json
+  variable String
+  is_overwritable Boolean
+  system_only Boolean
+  dim_payhead_affecteds dim_payhead_affecteds [not null]
+  dim_payhead_specific_amounts dim_payhead_specific_amounts [not null]
+  ref_benefit_plans ref_benefit_plans [not null]
+  trans_payhead_breakdowns trans_payhead_breakdowns [not null]
+}
+
+Table ref_performance_criterias {
+  id Int [pk, increment]
+  name String
+  description String
+  max_rate Decimal
+  is_active Boolean
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  fact_evaluation_breakdowns fact_evaluation_breakdowns [not null]
+}
+
+Table ref_training_programs {
+  id Int [pk, increment]
+  name String
+  description String
+  hour_duration Int
+  location String
+  start_date DateTime
+  end_date DateTime
+  employee_instructor_id Int
+  max_participants Int
+  is_active Boolean
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  dim_training_participants dim_training_participants [not null]
+  dim_training_schedules dim_training_schedules [not null]
+}
+
+Table sys_notifications {
+  id Int [pk, increment]
+  employee_id Int
+  content String
+  seen_at DateTime
+  read_at DateTime
+  created_at DateTime
+  deleted_at DateTime
+  updated_at DateTime
+  trans_employees trans_employees
+}
+
+Table sys_privileges {
+  id Int [pk, increment]
+  accessibility Json
+  name String
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  acl_user_access_control acl_user_access_control [not null]
+}
+
+Table sys_variables {
+  id Int [pk, increment]
+  employee_id Int [unique]
+  key String
+  data Json
+  created_at DateTime [not null]
+  updated_at DateTime
+  trans_employees trans_employees
+}
+
+Table trans_attendance_details {
+  id Int [pk, increment]
+  employee_id Int
+  payroll_date_id Int
+  attendance_records_json Json
+  paid_hours Int
+  paid_double_hours Int
+  paid_leaves Int
+  paid_overtimes Int
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime
+  trans_employees trans_employees
+}
+
+Table trans_benefit_contributions {
+  id Int [pk, increment]
+  employee_benefit_id Int
+  contribution_date DateTime
+  employer_contribution Decimal
+  employee_contribution Decimal
+  total_contribution Decimal
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  payroll_id Int
+  dim_employee_benefits dim_employee_benefits
+  trans_payrolls trans_payrolls
+}
+
+Table trans_cash_advance_disbursements {
+  id Int [pk, increment]
+  cash_advance_id Int
+  disbursed_at DateTime
+  amount Decimal
+  payment_method String
+  repayment_status String
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  payroll_id Int
+  trans_cash_advances trans_cash_advances
+  trans_payrolls trans_payrolls
+  trans_cash_advance_repayments trans_cash_advance_repayments [not null]
+}
+
+Table trans_cash_advance_repayments {
+  id Int [pk, increment]
+  disbursement_id Int
+  repaid_at DateTime
+  amount_repaid Decimal
+  payment_method String
+  status String
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  payroll_id Int
+  trans_cash_advance_disbursements trans_cash_advance_disbursements
+  trans_payrolls trans_payrolls
+}
+
+Table trans_cash_advances {
+  id Int [pk, increment]
+  employee_id Int
+  amount_requested Decimal
+  reason String
+  status String
+  approval_by Int
+  approval_at DateTime
+  comment String
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  trans_cash_advance_disbursements trans_cash_advance_disbursements [not null]
+  trans_employees_trans_cash_advances_employee_idTotrans_employees trans_employees
+  trans_employees_trans_cash_advances_approval_byTotrans_employees trans_employees
+}
+
+Table trans_employees {
+  id Int [pk, increment]
+  branch_id Int
+  picture String
+  first_name String [not null]
+  last_name String [not null]
+  middle_name String
+  suffix String
+  extension String
+  email String [unique]
+  contact_no String
+  birthdate DateTime
+  gender String
+  job_id Int
+  department_id Int
+  addr_region Int
+  addr_province Int
+  addr_municipal Int
+  addr_baranggay Int
+  hired_at DateTime
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime
+  statutory_no_json Json
+  family_bg_json Json
+  educational_bg_json Json
+  civil_service_eligibility_json Json
+  work_experience_json Json
+  voluntary_organizations_json Json
+  training_programs_attended_json Json
+  government_issued_id_json Json
+  prefix String
+  suspension_json Json
+  resignation_json Json
+  termination_json Json
+  is_regular Boolean
+  acl_user_access_control acl_user_access_control
+  dim_employee_benefits dim_employee_benefits [not null]
+  dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports [not null]
+  dim_incident_reports_dim_incident_reports_reported_byTotrans_employees dim_incident_reports [not null]
+  dim_leave_balances dim_leave_balances [not null]
+  dim_payhead_affecteds dim_payhead_affecteds [not null]
+  dim_payhead_specific_amounts dim_payhead_specific_amounts [not null]
+  dim_schedules dim_schedules [not null]
+  dim_training_participants dim_training_participants [not null]
+  fact_performance_evaluations fact_performance_evaluations [not null]
+  log_attendances log_attendances [not null]
+  sys_help_report_sys_help_report_reporter_idTotrans_employees sys_help_report [not null]
+  sys_help_report_sys_help_report_reviewer_idTotrans_employees sys_help_report [not null]
+  sys_notifications sys_notifications [not null]
+  sys_variables sys_variables
+  trans_attendance_details trans_attendance_details [not null]
+  trans_cash_advances_trans_cash_advances_employee_idTotrans_employees trans_cash_advances [not null]
+  trans_cash_advances_trans_cash_advances_approval_byTotrans_employees trans_cash_advances [not null]
+  ref_departments ref_departments
+  ref_job_classes ref_job_classes
+  ref_addresses_trans_employees_addr_regionToref_addresses ref_addresses
+  ref_addresses_trans_employees_addr_provinceToref_addresses ref_addresses
+  ref_addresses_trans_employees_addr_municipalToref_addresses ref_addresses
+  ref_addresses_trans_employees_addr_baranggayToref_addresses ref_addresses
+  ref_branches ref_branches
+  trans_leaves_trans_leaves_employee_idTotrans_employees trans_leaves [not null]
+  trans_leaves_trans_leaves_created_byTotrans_employees trans_leaves [not null]
+  trans_overtimes_trans_overtimes_employee_idTotrans_employees trans_overtimes [not null]
+  trans_overtimes_trans_overtimes_approved_byTotrans_employees trans_overtimes [not null]
+  trans_payrolls trans_payrolls [not null]
+}
+
+Table trans_leaves {
+  employee_id Int [not null]
+  start_date DateTime
+  end_date DateTime
+  status String
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  id Int [pk, increment]
+  type_id Int
+  reason String
+  created_by Int
+  deleted_at DateTime
+  evaluators Json
+  trans_employees_leaves trans_employees [not null]
+  ref_leave_types ref_leave_types
+  trans_employees_trans_leaves_created_byTotrans_employees trans_employees
+}
+
+Table trans_overtimes {
+  employee_id Int
+  status String
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  id Int [pk, increment]
+  date DateTime
+  clock_in DateTime
+  clock_out DateTime
+  requested_mins Int
+  reason String
+  approved_by Int
+  approved_at DateTime
+  rate_per_hour Decimal
+  comment String
+  rendered_mins Int
+  deleted_at DateTime
+  trans_employees_overtimes trans_employees
+  trans_employees_overtimes_approvedBy trans_employees
+}
+
+Table trans_payhead_breakdowns {
+  payroll_id Int
+  payhead_id Int
+  amount Decimal
+  id Int [pk, increment]
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  ref_payheads ref_payheads
+  trans_payrolls trans_payrolls
+
+  indexes {
+    (payhead_id, payroll_id) [unique]
+  }
+}
+
+Table trans_payroll_date {
+  id Int [pk, increment]
+  start_date DateTime
+  end_date DateTime
+  is_processed Boolean
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  deleted_at DateTime
+  trans_payrolls trans_payrolls [not null]
+}
+
+Table trans_users {
+  id String [pk]
+  name String [not null]
+  email String [unique, not null]
+  emailVerified DateTime
+  image String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  acl_user_access_control acl_user_access_control
+  auth_accounts auth_accounts [not null]
+  auth_credentials auth_credentials
+}
+
+Table trans_payrolls {
+  employee_id Int [not null]
+  gross_total_amount Decimal
+  deduction_total_amount Decimal
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+  id Int [pk, increment]
+  date_id Int
+  deleted_at DateTime
+  trans_benefit_contributions trans_benefit_contributions [not null]
+  trans_cash_advance_disbursements trans_cash_advance_disbursements [not null]
+  trans_cash_advance_repayments trans_cash_advance_repayments [not null]
+  trans_payhead_breakdowns trans_payhead_breakdowns [not null]
+  trans_employees trans_employees [not null]
+  trans_payroll_date trans_payroll_date
+
+  indexes {
+    (employee_id, date_id) [unique]
+  }
+}
+
+Table auth_credentials {
+  id Int [pk, increment]
+  username String [unique, not null]
+  password String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime
+  user_id String [unique, not null]
+  trans_users trans_users [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table acl_user_access_control {
+  id Int [pk, increment]
+  employee_id Int [unique]
+  privilege_id Int [not null]
+  banned_til DateTime
+  created_at DateTime [default: `now()`, not null]
+  update_at DateTime
+  user_id String [unique]
+  trans_employees trans_employees
+  sys_privileges sys_privileges [not null]
+  trans_users trans_users
+  sec_devices sec_devices [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table sec_devices {
+  id Int [pk, increment]
+  ip_address String
+  is_logged_out Boolean [not null, default: false]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`]
+  country_code String
+  country_name String
+  region String
+  city String
+  platform String
+  os String
+  os_version String
+  login_count Int [not null]
+  platform_type String
+  acl_user_access_control_id Int [not null]
+  acl_user_access_control acl_user_access_control [not null]
+}
+
+Table auth_accounts {
+  userId String [not null]
+  provider String [not null]
+  provider_account_id String [not null]
+  refresh_token String
+  access_token String
+  expires_at Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  scope String
+  token_type String
+  id_token String
+  type String
+  trans_users trans_users [not null]
+
+  indexes {
+    (provider, provider_account_id) [pk]
+  }
+}
+
+Table ref_holidays {
+  id Int [pk, increment]
+  name String
+  type String
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime
+  start_date DateTime
+  end_date DateTime
+}
+
+Table trans_holidays {
+  id Int [pk, increment]
+  no_work Boolean
+  pay_rate_percentage Decimal
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime
+  date DateTime
+  name String
+}
+
+Table sys_help_report {
+  id Int [pk, increment]
+  created_at DateTime [default: `now()`, not null]
+  pathname String
+  reporter_id Int
+  reviewer_id Int
+  description String
+  updated_at DateTime [default: `now()`]
+  trans_employees_sys_help_report_reporter_idTotrans_employees trans_employees
+  trans_employees_sys_help_report_reviewer_idTotrans_employees trans_employees
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table ref_benefits_contribution_advance_settings {
+  id Int [pk, increment]
+  min_salary Decimal
+  max_salary Decimal
+  min_MSC Decimal
+  max_MSC Decimal
+  msc_step Decimal
+  ec_threshold Decimal
+  ec_low_rate Decimal
+  ec_high_rate Decimal
+  wisp_threshold Decimal
+  created_at DateTime [default: `now()`]
+  updated_at DateTime [default: `now()`]
+  plan_id Int
+  ref_benefit_plans ref_benefit_plans
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table dim_payhead_specific_amounts {
+  id Int [pk, increment]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`]
+  payhead_id Int
+  employee_id Int
+  amount Decimal
+  trans_employees trans_employees
+  ref_payheads ref_payheads
+
+  indexes {
+    (payhead_id, employee_id) [unique]
+  }
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table sec_sessions {
+  sessionToken String [unique, not null]
+  userId String [not null]
+  expires DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  id Int [pk, increment]
+}
+
+Ref: dim_employee_benefits.plan_id > ref_benefit_plans.id [delete: No Action]
+
+Ref: dim_employee_benefits.employee_id > trans_employees.id [delete: No Action]
+
+Ref: dim_incident_reports.employee_id > trans_employees.id [delete: No Action]
+
+Ref: dim_incident_reports.reported_by > trans_employees.id [delete: No Action]
+
+Ref: dim_leave_balances.leave_type_id > ref_leave_types.id [delete: No Action]
+
+Ref: dim_leave_balances.employee_id > trans_employees.id [delete: No Action]
+
+Ref: dim_payhead_affecteds.employee_id > trans_employees.id [delete: No Action]
+
+Ref: dim_payhead_affecteds.payhead_id > ref_payheads.id [delete: No Action]
+
+Ref: dim_schedules.batch_id > ref_batch_schedules.id [delete: No Action]
+
+Ref: dim_schedules.employee_id > trans_employees.id [delete: No Action]
+
+Ref: dim_training_participants.program_id > ref_training_programs.id [delete: No Action]
+
+Ref: dim_training_participants.employee_id > trans_employees.id [delete: No Action]
+
+Ref: dim_training_schedules.program_id > ref_training_programs.id [delete: No Action]
+
+Ref: fact_evaluation_breakdowns.evaluation_id > fact_performance_evaluations.id [delete: No Action]
+
+Ref: fact_evaluation_breakdowns.criteria_id > ref_performance_criterias.id [delete: No Action]
+
+Ref: fact_performance_evaluations.employee_id > trans_employees.id [delete: No Action]
+
+Ref: fact_training_records.participant_id > dim_training_participants.id [delete: No Action]
+
+Ref: fact_training_records.schedule_id > dim_training_schedules.id [delete: No Action]
+
+Ref: log_attendances.employee_id > trans_employees.id [delete: No Action]
+
+Ref: ref_benefit_plans.deduction_id > ref_payheads.id [delete: No Action]
+
+Ref: ref_job_classes.department_id > ref_departments.id [delete: No Action]
+
+Ref: sys_notifications.employee_id > trans_employees.id [delete: No Action]
+
+Ref: sys_variables.employee_id - trans_employees.id [delete: No Action]
+
+Ref: trans_attendance_details.employee_id > trans_employees.id [delete: No Action]
+
+Ref: trans_benefit_contributions.employee_benefit_id > dim_employee_benefits.id [delete: No Action]
+
+Ref: trans_benefit_contributions.payroll_id > trans_payrolls.id [delete: No Action]
+
+Ref: trans_cash_advance_disbursements.cash_advance_id > trans_cash_advances.id [delete: No Action]
+
+Ref: trans_cash_advance_disbursements.payroll_id > trans_payrolls.id [delete: No Action]
+
+Ref: trans_cash_advance_repayments.disbursement_id > trans_cash_advance_disbursements.id [delete: No Action]
+
+Ref: trans_cash_advance_repayments.payroll_id > trans_payrolls.id [delete: No Action]
+
+Ref: trans_cash_advances.employee_id > trans_employees.id [delete: No Action]
+
+Ref: trans_cash_advances.approval_by > trans_employees.id [delete: No Action]
+
+Ref: trans_employees.department_id > ref_departments.id [delete: No Action]
+
+Ref: trans_employees.job_id > ref_job_classes.id [delete: No Action]
+
+Ref: trans_employees.addr_region > ref_addresses.address_code [delete: No Action]
+
+Ref: trans_employees.addr_province > ref_addresses.address_code [delete: No Action]
+
+Ref: trans_employees.addr_municipal > ref_addresses.address_code [delete: No Action]
+
+Ref: trans_employees.addr_baranggay > ref_addresses.address_code [delete: No Action]
+
+Ref: trans_employees.branch_id > ref_branches.id [delete: No Action]
+
+Ref: trans_leaves.employee_id > trans_employees.id [delete: No Action]
+
+Ref: trans_leaves.type_id > ref_leave_types.id [delete: No Action]
+
+Ref: trans_leaves.created_by > trans_employees.id [delete: No Action]
+
+Ref: trans_overtimes.employee_id > trans_employees.id [delete: No Action]
+
+Ref: trans_overtimes.approved_by > trans_employees.id [delete: No Action]
+
+Ref: trans_payhead_breakdowns.payhead_id > ref_payheads.id [delete: No Action]
+
+Ref: trans_payhead_breakdowns.payroll_id > trans_payrolls.id [delete: No Action]
+
+Ref: trans_payrolls.employee_id > trans_employees.id [delete: No Action]
+
+Ref: trans_payrolls.date_id > trans_payroll_date.id [delete: No Action]
+
+Ref: auth_credentials.user_id - trans_users.id [delete: No Action]
+
+Ref: acl_user_access_control.employee_id - trans_employees.id [delete: No Action]
+
+Ref: acl_user_access_control.privilege_id > sys_privileges.id [delete: No Action]
+
+Ref: acl_user_access_control.user_id - trans_users.id [delete: No Action]
+
+Ref: sec_devices.acl_user_access_control_id > acl_user_access_control.id [delete: No Action]
+
+Ref: auth_accounts.userId > trans_users.id [delete: No Action]
+
+Ref: sys_help_report.reporter_id > trans_employees.id [delete: No Action]
+
+Ref: sys_help_report.reviewer_id > trans_employees.id [delete: No Action]
+
+Ref: ref_benefits_contribution_advance_settings.plan_id > ref_benefit_plans.id [delete: No Action]
+
+Ref: dim_payhead_specific_amounts.employee_id > trans_employees.id [delete: No Action]
+
+Ref: dim_payhead_specific_amounts.payhead_id > ref_payheads.id [delete: No Action]
