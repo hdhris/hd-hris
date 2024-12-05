@@ -189,23 +189,21 @@ model ref_batch_schedules {
 }
 
 model ref_benefit_plans {
-  id                                         Int                                          @id @default(autoincrement())
-  name                                       String?                                      @db.VarChar(45)
-  type                                       String?                                      @db.VarChar(10)
-  coverage_details                           String?
-  employer_contribution                      Decimal?                                     @db.Decimal(10, 2)
-  employee_contribution                      Decimal?                                     @db.Decimal(10, 2)
-  effective_date                             DateTime?                                    @db.Date
-  expiration_date                            DateTime?                                    @db.Date
-  description                                String?
-  created_at                                 DateTime                                     @db.Timestamp(6)
-  updated_at                                 DateTime                                     @db.Timestamp(6)
-  deleted_at                                 DateTime?                                    @db.Timestamp(6)
-  is_active                                  Boolean?
-  deduction_id                               Int?
-  dim_employee_benefits                      dim_employee_benefits[]
-  ref_payheads                               ref_payheads?                                @relation(fields: [deduction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ref_benefits_contribution_advance_settings ref_benefits_contribution_advance_settings[]
+  id                              Int                               @id @default(autoincrement())
+  name                            String?                           @db.VarChar(45)
+  type                            String?                           @db.VarChar(10)
+  coverage_details                String?
+  effective_date                  DateTime?                         @db.Date
+  expiration_date                 DateTime?                         @db.Date
+  description                     String?
+  created_at                      DateTime                          @db.Timestamp(6)
+  updated_at                      DateTime                          @db.Timestamp(6)
+  deleted_at                      DateTime?                         @db.Timestamp(6)
+  is_active                       Boolean?
+  deduction_id                    Int?
+  dim_employee_benefits           dim_employee_benefits[]
+  ref_payheads                    ref_payheads?                     @relation(fields: [deduction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_benefits_contribution_table ref_benefits_contribution_table[]
 }
 
 model ref_branches {
@@ -246,6 +244,9 @@ model ref_job_classes {
   pay_rate        Decimal?          @db.Decimal(10, 2)
   basic_salary    Decimal?          @db.Decimal
   for_probi       Boolean?
+  is_superior     Boolean           @default(false)
+  max_employees   Int?
+  ref_evaluators  ref_evaluators[]
   ref_departments ref_departments?  @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
   trans_employees trans_employees[]
 }
@@ -289,13 +290,13 @@ model ref_payheads {
 
 model ref_performance_criterias {
   id                         Int                          @id @default(autoincrement())
-  name                       String?                      @db.VarChar(45)
-  description                String?
-  max_rate                   Decimal?                     @db.Decimal(10, 2)
-  is_active                  Boolean?
-  created_at                 DateTime                     @db.Timestamp(6)
-  updated_at                 DateTime                     @db.Timestamp(6)
+  name                       String                       @db.VarChar(45)
+  description                String
+  is_active                  Boolean
+  created_at                 DateTime                     @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime                     @default(now()) @db.Timestamp(6)
   deleted_at                 DateTime?                    @db.Timestamp(6)
+  ratings_json               Json                         @db.Json
   fact_evaluation_breakdowns fact_evaluation_breakdowns[]
 }
 
@@ -462,6 +463,8 @@ model trans_employees {
   resignation_json                                                       Json?                          @db.Json
   termination_json                                                       Json?                          @db.Json
   is_regular                                                             Boolean?
+  employement_status_id                                                  Int?
+  salary_grade_id                                                        Int?
   acl_user_access_control                                                acl_user_access_control?
   dim_employee_benefits                                                  dim_employee_benefits[]
   dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
@@ -487,6 +490,8 @@ model trans_employees {
   ref_addresses_trans_employees_addr_municipalToref_addresses            ref_addresses?                 @relation("trans_employees_addr_municipalToref_addresses", fields: [addr_municipal], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses3")
   ref_addresses_trans_employees_addr_baranggayToref_addresses            ref_addresses?                 @relation("trans_employees_addr_baranggayToref_addresses", fields: [addr_baranggay], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses4")
   ref_branches                                                           ref_branches?                  @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_branch_7")
+  ref_employment_status                                                  ref_employment_status?         @relation(fields: [employement_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_salary_grades                                                      ref_salary_grades?             @relation(fields: [salary_grade_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_leaves_trans_leaves_employee_idTotrans_employees                 trans_leaves[]                 @relation("trans_leaves_employee_idTotrans_employees")
   trans_leaves_trans_leaves_created_byTotrans_employees                  trans_leaves[]                 @relation("trans_leaves_created_byTotrans_employees")
   trans_overtimes_trans_overtimes_employee_idTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_employee_idTotrans_employees")
@@ -496,8 +501,8 @@ model trans_employees {
 
 model trans_leaves {
   employee_id                                              Int
-  start_date                                               DateTime?        @db.Date
-  end_date                                                 DateTime?        @db.Date
+  start_date                                               DateTime?        @db.Timestamp(6)
+  end_date                                                 DateTime?        @db.Timestamp(6)
   status                                                   String?          @db.VarChar(10)
   created_at                                               DateTime         @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
   updated_at                                               DateTime         @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
@@ -691,24 +696,6 @@ model sys_help_report {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model ref_benefits_contribution_advance_settings {
-  id                Int                @id(map: "ref_benefits_contribution_pkey") @default(autoincrement())
-  min_salary        Decimal?           @db.Decimal
-  max_salary        Decimal?           @db.Decimal
-  min_MSC           Decimal?           @db.Decimal
-  max_MSC           Decimal?           @db.Decimal
-  msc_step          Decimal?           @db.Decimal
-  ec_threshold      Decimal?           @db.Decimal
-  ec_low_rate       Decimal?           @db.Decimal
-  ec_high_rate      Decimal?           @db.Decimal
-  wisp_threshold    Decimal?           @db.Decimal
-  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime?          @default(now()) @db.Timestamp(6)
-  plan_id           Int?
-  ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ref_benefits_contribution_table_plan_id_fkey")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model dim_payhead_specific_amounts {
   id              Int              @id @default(autoincrement())
   created_at      DateTime         @default(now()) @db.Timestamptz(6)
@@ -729,4 +716,59 @@ model sec_sessions {
   createdAt    DateTime @default(now())
   updatedAt    DateTime
   id           Int      @id @default(autoincrement())
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_benefits_contribution_table {
+  id                Int                @id(map: "ref_benefits_contribution_pkey") @default(autoincrement())
+  min_salary        Decimal?           @db.Decimal
+  max_salary        Decimal?           @db.Decimal
+  min_MSC           Decimal?           @db.Decimal
+  max_MSC           Decimal?           @db.Decimal
+  msc_step          Decimal?           @db.Decimal
+  ec_threshold      Decimal?           @db.Decimal
+  ec_low_rate       Decimal?           @db.Decimal
+  ec_high_rate      Decimal?           @db.Decimal
+  wisp_threshold    Decimal?           @db.Decimal
+  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?          @default(now()) @db.Timestamp(6)
+  plan_id           Int?
+  employee_rate     Decimal            @default(0) @db.Decimal
+  employer_rate     Decimal            @default(0) @db.Decimal
+  ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_employment_status {
+  id              Int               @id @default(autoincrement())
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  deleted_at      DateTime?         @db.Timestamptz(6)
+  name            String
+  trans_employees trans_employees[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_evaluators {
+  id               Int             @id @default(autoincrement())
+  job_id           Int
+  signatories_path String
+  role_name        String
+  order_number     Int
+  updated_at       DateTime        @default(now()) @db.Timestamp(6)
+  created_at       DateTime        @default(now()) @db.Timestamptz(6)
+  deleted_at       DateTime?       @db.Timestamp(6)
+  ref_job_classes  ref_job_classes @relation(fields: [job_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_salary_grades {
+  id              Int               @id @default(autoincrement())
+  name            String
+  amount          Decimal           @db.Decimal
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamp(6)
+  deleted_at      DateTime?         @db.Timestamp(6)
+  trans_employees trans_employees[]
 }
