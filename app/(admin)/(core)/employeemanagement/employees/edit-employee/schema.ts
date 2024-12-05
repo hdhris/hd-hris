@@ -9,7 +9,6 @@ export type Certificate = {
 };
 
 export interface EmployeeFormData {
-  is_regular: string;
   picture: File | string;
   first_name: string;
   middle_name: string;
@@ -54,8 +53,9 @@ export interface EmployeeFormData {
   department_id: string;
   job_id: string;
   branch_id: string;
+  salary_grade_id: string;
   batch_id: string;
-
+  employement_status_id: string;
   days_json: string[];
 }
 
@@ -91,7 +91,10 @@ export const employeeSchema = z.object({
       if (val.startsWith("+639")) return val.substring(3);
       return val;
     })
-    .refine((val) => val.length === 10, "Contact number must be exactly 10 digits"),
+    .refine(
+      (val) => val.length === 10,
+      "Contact number must be exactly 10 digits"
+    ),
   birthdate: z.string().min(1, "Birthdate is required"),
   addr_region: z.string().min(1, "Region is required"),
   addr_province: z.string().min(1, "Province is required"),
@@ -108,15 +111,24 @@ export const employeeSchema = z.object({
   guardian_last_name: z.string().optional(),
   elementary: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "School name should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
     .optional(),
   highSchool: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "School name should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
     .optional(),
   seniorHighSchool: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "School name should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
     .optional(),
   seniorHighStrand: z
     .string()
@@ -128,7 +140,10 @@ export const employeeSchema = z.object({
     .optional(),
   universityCollege: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "School name should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
     .optional(),
   course: z
     .string()
@@ -147,11 +162,17 @@ export const employeeSchema = z.object({
     .default([]),
   masters: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Masters institution should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Masters institution should only contain letters and numbers"
+    )
     .optional(),
   mastersCourse: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Masters course should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Masters course should only contain letters and numbers"
+    )
     .optional(),
   mastersYear: z
     .union([
@@ -173,11 +194,17 @@ export const employeeSchema = z.object({
     .default([]),
   doctorate: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Doctorate institution should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Doctorate institution should only contain letters and numbers"
+    )
     .optional(),
   doctorateCourse: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Doctorate course should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Doctorate course should only contain letters and numbers"
+    )
     .optional(),
   doctorateYear: z
     .union([
@@ -200,11 +227,8 @@ export const employeeSchema = z.object({
   hired_at: z.string().min(1, "Hire date is required"),
   department_id: z.string().min(1, "Department is required"),
   job_id: z.string().min(1, "Job is required"),
-  is_regular: z.preprocess((val) => {
-    if (typeof val === "string") return val === "true";
-    return val;
-  }, z.boolean().optional()),
   branch_id: z.string().min(1, "Branch is required"),
+  employement_status_id: z.string().min(1, "Employement status is required"),
   batch_id: z.string().min(1, "Batch is required"),
   days_json: z.array(z.string()),
 });

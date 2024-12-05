@@ -62,7 +62,7 @@ const Page: React.FC = () => {
       { uid: "position", name: "Position", sortable: true },
       { uid: "contact", name: "Contact" },
       { uid: "hiredate", name: "Hired Date", sortable: true },
-      { uid: "workstatus", name: "Work Status", sortable: true },
+      { uid: "employmentstatus", name: "Employment Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
@@ -126,21 +126,14 @@ const Page: React.FC = () => {
                 : "N/A"}
             </div>
           );
-        case "workstatus":
+        case "employmentstatus":
           return (
             <div
-              className={cellClasses}
-              onClick={() => handleRowClick(employee)}
-            >
-              <Chip
-                className="capitalize"
-                color={employee.is_regular ? "success" : "warning"}
-                size="sm"
-                variant="flat"
-              >
-                {employee.is_regular ? "Regular" : "Probationary"}
-              </Chip>
-            </div>
+            className={cellClasses}
+            onClick={() => handleRowClick(employee)}
+          >
+            {employee.ref_employment_status?.name || "N/A"}
+          </div>
           );
         case "actions":
           return (
@@ -284,14 +277,7 @@ const Page: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Chip
-                    className="capitalize"
-                    color={employee.is_regular ? "success" : "warning"}
-                    size="sm"
-                    variant="flat"
-                  >
-                    {employee.is_regular ? "Regular" : "Probationary"}
-                  </Chip>
+                  
                 </div>
               </div>
             </BorderCard>

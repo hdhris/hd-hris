@@ -47,6 +47,8 @@ export type EmployeeAll = {
   highestDegree: string;
   hired_at: string;
   branch_id: string;
+  employement_status_id: string;
+  salary_grade_id: string;
   department_id: string;
   job_id: string;
   status:string;
@@ -54,10 +56,10 @@ export type EmployeeAll = {
   email: string;
   contact_no: string;
   picture: string;
-  is_regular: string;
   deleted_at: string;
   ref_job_classes: { name: string }; // Add this line
   ref_departments: { name: string }; // Add this line
+  ref_employment_status: {name: string};
   ref_addresses_trans_employees_addr_regionToref_addresses: { address_name: string, address_code: number},
   ref_addresses_trans_employees_addr_provinceToref_addresses: { address_name: string, address_code: number},
   ref_addresses_trans_employees_addr_municipalToref_addresses: { address_name: string, address_code: number},

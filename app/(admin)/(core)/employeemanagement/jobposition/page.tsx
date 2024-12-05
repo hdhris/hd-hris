@@ -88,7 +88,6 @@ const Page: React.FC = () => {
       { uid: "name", name: "Name", sortable: true },
       { uid: "superior", name: "Superior", sortable: true },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
-      { uid: "for_probi", name: "Work Status", sortable: true },
       { uid: "basic_salary", name: "Basic Salary", sortable: true },
       { uid: "pay_rate", name: "Payrate", sortable: true },
       { uid: "status", name: "Status", sortable: true },
@@ -127,19 +126,6 @@ const Page: React.FC = () => {
                 variant="flat"
               >
                 {job.is_active ? "Active" : "Inactive"}
-              </Chip>
-            </div>
-          );
-        case "for_probi":
-          return (
-            <div className={cellClasses}>
-              <Chip
-                className="capitalize"
-                color={job.for_probi ? "warning" : "success"}
-                size="sm"
-                variant="flat"
-              >
-                {job.for_probi ? "For probationary" : "For Regular"}
               </Chip>
             </div>
           );
@@ -233,7 +219,7 @@ const Page: React.FC = () => {
                     size="sm"
                     variant="flat"
                   >
-                    {job.is_active ? "Active" : "Inactive"}
+                    {job.is_active ? "Active" : "Inactive"} 
                   </Chip>
                   <Chip
                     className="capitalize"

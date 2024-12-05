@@ -33,6 +33,16 @@ function RootLayout({children}: { children: React.ReactNode }) {
               title: "Branch",
               path: "branch",
             },
+            {
+              key: "employmentstatus",
+              title: "Employment Status",
+              path: "employmentstatus",
+            },
+            {
+              key: "salarygrade",
+              title: "Salary Grade",
+              path: "salarygrade",
+            },
     ]
     return (
         <NavigationTabs tabs={tabs} basePath="employeemanagement">

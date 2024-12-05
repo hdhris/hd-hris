@@ -11,6 +11,8 @@ import {Payhead, PayheadAffected} from "@/types/payroll/payheadType";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import prisma from "@/prisma/prisma";
 import { JobPosition } from "@/types/employeee/JobType";
+import { SalaryGrade } from "@/types/employeee/SalaryType";
+import { EmploymentStatus } from "@/types/employeee/EmploymentStatusType";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -84,6 +86,8 @@ export function useEmployeeData(id: string | null) {
         fetcher
     );
 }
+
+
 export function useSuspendedEmployees() {
     return useSWR<Employee[]>('/api/employeemanagement/suspended', fetcher, {
         // revalidateOnFocus: false, refreshInterval: 3000
@@ -107,6 +111,20 @@ export function useJobpositionData() {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
+
+export function useSalaryGradeData() {
+    return useSWR<SalaryGrade[]>('/api/employeemanagement/salarygrade', fetcher, {//
+        // revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
+export function useEmploymentStatusData() {
+    return useSWR<EmploymentStatus[]>('/api/employeemanagement/employmentstatus', fetcher, {//
+        // revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
+
 export function useBranchesData() {
     return useSWR<Branch[]>('/api/employeemanagement/branch', fetcher, {//
         // revalidateOnFocus: false, refreshInterval: 3000

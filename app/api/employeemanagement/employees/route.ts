@@ -25,6 +25,8 @@ const employeeSchema = z.object({
   hired_at: z.string().optional(),
   gender: z.string().max(10).optional(),
   job_id: z.number().optional(),
+  salary_grade_id: z.number().optional(),
+  employement_status_id: z.number().optional(),
   department_id: z.number().optional(),
   addr_region: z.number().optional(),
   addr_province: z.number().optional(),
@@ -207,7 +209,7 @@ export async function GET(req: NextRequest) {
   //just remove this if you want to display all data remove this pagination cause it was optional
   const page = Number(url.searchParams.get("page")) || 1;
   const rowsPerPage = Number(url.searchParams.get("rowsPerPage")) || 50000;//displaying total nnumber of data in a page you can define it here
-  const pageSize = Math.min(rowsPerPage, 100);
+  const pageSize = Math.min(rowsPerPage, 50000);
 
   let parsedDaysJson;
   if (daysJson) {
@@ -306,6 +308,7 @@ async function getAllEmployees(daysJson?: Record<string, boolean>, pagination?: 
     include: {
       ref_departments: true,
       ref_job_classes: true,
+      ref_employment_status: true,
       ref_addresses_trans_employees_addr_regionToref_addresses: true,
       ref_addresses_trans_employees_addr_provinceToref_addresses: true,
       ref_addresses_trans_employees_addr_municipalToref_addresses: true,

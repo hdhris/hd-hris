@@ -164,6 +164,7 @@ export const employeeSchema = z.object({
     return val;
   }, z.boolean()),
   branch_id: z.string().min(1, "Branch is required"),
+  salary_grade_id: z.string().min(1, "Salary Grade is required"),
   batch_id: z.string().min(1, "Batch is required"),
   days_json: z.array(z.string()),
 });

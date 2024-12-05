@@ -71,6 +71,7 @@ const jobFields: EmployeeFields[] = [
   "job_id",
   "is_regular",
   "branch_id",
+  "salary_grade_id",
   "batch_id",
   "days_json",
 ];
@@ -132,6 +133,7 @@ export default function AddEmployeePage() {
       department_id: "",
       job_id: "",
       branch_id: "",
+      salary_grade_id: "",
       batch_id: "",
       days_json: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       username: "",
@@ -342,6 +344,7 @@ export default function AddEmployeePage() {
         job_id: parseInt(data.job_id, 10),
         is_regular: Boolean(data.is_regular),
         branch_id: parseInt(data.branch_id, 10),
+        salary_grade_id: parseInt(data.salary_grade_id, 10),
         batch_id: parseInt(data.batch_id, 10),
         schedules: [
           {
