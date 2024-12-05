@@ -104,7 +104,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         type: "date-picker",
         label: "Start Date",
         config: {
-            granularity: "hour", hideTimeZone: true, minValue: today(getLocalTimeZone()),
+            granularity: "minute", hideTimeZone: true, minValue: today(getLocalTimeZone()),
         }
 
     }, {

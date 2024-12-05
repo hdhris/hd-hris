@@ -124,12 +124,12 @@ export async function POST(req: NextRequest) {
             // Create a leave record
             const leaveRecord = {
                 employee_id: data.employee_id,
-                start_date: dayjs(data.leave_date).toISOString(),
-                end_date: dayjs(data.leave_date).add(Number(data.days_of_leave), "day").toISOString(),
+                start_date: toGMT8(data.leave_date).toISOString(),
+                end_date: toGMT8(data.leave_date).add(Number(data.days_of_leave), "day").toISOString(),
                 reason: data.reason,
                 type_id: data.leave_type_id,
-                status: "Pending",
-                created_at: new Date(),
+                created_at: toGMT8().toISOString(),
+                updated_at: toGMT8().toISOString(),
                 created_by: reviewer.id,
                 evaluators: evaluators as unknown as InputJsonValue
             };
@@ -153,7 +153,10 @@ export async function POST(req: NextRequest) {
 
 
             if (!leaveBalance) {
-                throw new Error("Leave balance not found for the specified employee.");
+                return NextResponse.json({
+                    success: false,
+                    message: "Leave balance not found for the specified employee."
+                }, {status: 400});
             }
 
             // Update the leave balance within the transaction

@@ -236,7 +236,7 @@ const PersonalInformationForm = () => {
   ];
 
   return (
-    <form className="space-y-6">
+    <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Text className="font-semibold mb-2">Profile Image</Text>
@@ -314,7 +314,7 @@ const PersonalInformationForm = () => {
       <div className="grid grid-cols-2 gap-4">
         <AddressInput />
       </div>
-    </form>
+    </div>
   );
 };
 

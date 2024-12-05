@@ -10,13 +10,19 @@ import MaintenanceBreak from "@/components/maintainance/Maintenance";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import {Toaster} from "@/components/ui/toaster";
+import localFont from 'next/font/local'
 // import DbConnection from "@/components/DBConnection";
 // import PrelineScript from "@/components/preline/PrelineScript";
 // import Script from "next/script";
 
-const inter = Inter({subsets: ["latin"]});
+// const inter = Inter({subsets: ["latin"]});
+const inter_local = localFont({
+    src: "./fonts/inter/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
+    display: "swap",
+
+})
 const isMaintenanceMode = process.env.MAINTAINANCE_MODE;
-let title = ""
+let title: string
 if (isMaintenanceMode === "true") {
     title = `${process.env.APP_NAME} | Maintenance Mode`
 } else {
@@ -39,7 +45,7 @@ export default function RootLayout({
 }>) {
 
     return (<html lang="en">
-    <body className={inter.className}>
+    <body className={inter_local.className}>
     <Providers>
         <Debug/>
         <Switch expression={isMaintenanceMode!}>

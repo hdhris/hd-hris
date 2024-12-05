@@ -10,7 +10,7 @@ interface ForgotButtonProps extends ButtonProps {
 function ForgotButton({className, ...props}:ForgotButtonProps) {
     return (
         <Button {...props} size='sm' variant='light' className={cn('w-fit text-blue-400', className)} as={Link}
-                href={'/forgot'}>Forgot Password</Button>
+                href={'/auth/forgot'}>Forgot Password</Button>
     );
 }
 

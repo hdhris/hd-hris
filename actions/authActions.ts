@@ -82,5 +82,5 @@ export async function doSocialLogin() {
 }
 
 export async function logout() {
-    await signOut({redirectTo: "/"});
+    await signOut({redirectTo: "/auth/login"});
 }

@@ -327,14 +327,14 @@ const Page: React.FC = () => {
                       Suspended
                     </Chip>
                     <div onClick={(e) => e.stopPropagation()}>
-                      <Button
+                      <Button radius="full"
                         size="sm"
                         variant="flat"
                         color="success"
                         isLoading={isActivating === employee.id}
                         onPress={() => handleActivate(employee)}
                       >
-                        Activate
+                        Unsuspend
                       </Button>
                     </div>
                   </div>

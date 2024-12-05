@@ -9,35 +9,30 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {FaLock} from "react-icons/fa";
 import {RiEyeCloseLine, RiEyeLine} from "react-icons/ri";
 import {Form} from "@/components/ui/form";
-import {
-    Button,
-    Card,
-    CardBody,
-    CardHeader,
-    Chip,
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    Spinner,
-    useDisclosure
-} from "@nextui-org/react";
+import {Button, Card, CardBody, CardHeader, Chip} from "@nextui-org/react";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import new_password_hero from '@/assets/hero/new_password.svg'
-import Link from "next/link";
 import {LuXCircle} from "react-icons/lu";
+import {axiosInstance} from "@/services/fetcher";
+import SimpleAES from "@/lib/cryptography/3des";
+import {deleteCookie, getCookie} from "cookies-next";
+import {AxiosError} from "axios";
+import {useRouter} from "next/navigation"
 
 
 function ChangePassword() {
+    const router = useRouter()
     const forgot_icon = 'text-default-400'
-    const {isOpen, onOpen, onOpenChange} = useDisclosure();
     const formSchema = z.object({
-        new_password: z.string().min(2, {
-            message: "Username must be at least 2 characters.",
-        }), confirm_password: z.string().min(4, {
-            message: "Password must be at least 4 characters.",
-        })
+        new_password: z.string()
+            .min(1, {message: "Password cannot be empty"}) // Ensures the field is not empty
+            .min(8, {
+                message: "Password is too short",
+            }), confirm_password: z.string()
+            .min(1, {message: "Password cannot be empty"}) // Ensures the field is not empty
+            .min(8, {
+                message: "Password is too short",
+            })
     }).refine(data => data.new_password === data.confirm_password, {
         message: "Passwords do not match", path: ["confirm_password"],
     });
@@ -49,7 +44,7 @@ function ChangePassword() {
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const [isVisible, setIsVisible] = useState(false)
-    const {isDirty, isValid} = useFormState(form)
+    const {isDirty,} = useFormState(form)
 
 
     const handlePasswordVisibility = (e: { preventDefault: () => void }) => {
@@ -69,14 +64,33 @@ function ChangePassword() {
         </Button>)
     }]
 
-    const passwordChangeSuccessfullyModal = () => {
-        return (<div>
-            <Typography className='text-center'>Password Changed Successfully</Typography>
-        </div>)
-    }
-
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        onOpen();
+        setError("")
+        setLoading(true)
+        try {
+            const user = getCookie("user")
+            const aes = new SimpleAES()
+            const decrypt_user = await aes.decryptData(user as string)
+
+            const user_data = JSON.parse(decrypt_user) as { email: string, id: string }
+            const user_info = {
+                id: user_data.id, ...values
+            }
+            const res = await axiosInstance.put('/api/auth/forgot/update-password', user_info)
+            if (res.status === 200) {
+                deleteCookie("user")
+                router.replace("/auth/login")
+            }
+        } catch (error) {
+            console.log(error)
+            if (error instanceof AxiosError) {
+                setError(error.response?.data.message)
+            } else {
+                setError("Something went wrong.")
+            }
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (<section className='h-full flex items-center justify-center gap-10 background'>
@@ -97,38 +111,15 @@ function ChangePassword() {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2'>
                         <FormFields items={loginFields}/>
-                        <Button type='submit' isDisabled={!isDirty || !isValid} className='w-full' color='primary'
+                        <Button type='submit' isLoading={loading} isDisabled={!isDirty} className='w-full'
+                                color='primary'
                                 radius='sm'>
-                            {loading ? <Spinner size="sm"/> : "Confirm"}
+                            Confirm
                         </Button>
                     </form>
                 </Form>
             </CardBody>
         </Card>
-        <Modal
-            backdrop="opaque"
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-        >
-            <ModalContent>
-                {(onClose) => (<>
-                    <ModalHeader className="flex flex-col gap-1">Password Change Successfully</ModalHeader>
-                    <ModalBody>
-                        <Typography>Your password has been successfully updated. You can now log in using your new password.
-                            If you did not initiate this change or suspect any unauthorized activity, please contact our
-                            support team immediately.</Typography>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button color="danger" variant="light" onPress={onClose}>
-                            Close
-                        </Button>
-                        <Button color="primary" onPress={onClose} as={Link} href="/">
-                            Proceed
-                        </Button>
-                    </ModalFooter>
-                </>)}
-            </ModalContent>
-        </Modal>
     </section>);
 }
 

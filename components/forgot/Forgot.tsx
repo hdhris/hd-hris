@@ -10,13 +10,14 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {Button} from "@nextui-org/button";
 import {Form} from "@/components/ui/form";
 import {Chip} from "@nextui-org/chip";
-import {Spinner} from "@nextui-org/react";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import forgot_hero from '@/assets/hero/forgot_hero.svg'
-import Link from "next/link";
 import {LuMail, LuXCircle} from "react-icons/lu";
 import {setCookie} from "cookies-next";
-import {redirect, useRouter} from "next/navigation";
+import {useRouter} from "next/navigation";
+import {axiosInstance} from "@/services/fetcher";
+import {AxiosError} from "axios";
+import {v4 as uuidv4} from 'uuid';
 
 function Forgot() {
 
@@ -32,21 +33,34 @@ function Forgot() {
     })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
-    const [isVisible, setIsVisible] = useState(false)
     const {isDirty, isValid} = useFormState(form)
 
-
-    const handlePasswordVisibility = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
-        setIsVisible(!isVisible);
-    } //handlePasswordVisibility
     const loginFields: FormInputProps[] = [{
         name: "email", label: "Email", isFocus: true, startContent: <LuMail className={'text-default-400'}/>
     }]
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        setCookie('email', values.email, { maxAge: 15 * 60 }); // Cookie expires in 2 minutes
-        router.push('/forgot/otp')
+        setError("")
+        setLoading(true)
+        try {
+            const res = await axiosInstance.post("/api/auth/forgot/authenticating-email", values)
+            if (res.status === 200) {
+                const token = uuidv4()
+                setCookie('otp-token', token) // Cookie expires in 2 minutes
+                router.replace('/auth/forgot/otp')
+            }
+        } catch (error) {
+            console.log(error)
+
+            if (error instanceof AxiosError) {
+                setError(error.response?.data.message)
+            } else {
+                setError("Something went wrong.")
+            }
+        } finally {
+            setLoading(false)
+        }
+
     }
 
     return (<section className='h-full flex items-center justify-center gap-10 background'>
@@ -65,10 +79,9 @@ function Forgot() {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2'>
                         <FormFields items={loginFields}/>
-                        <Button type='submit' isDisabled={!isDirty || !isValid} className='w-full' color='primary'
-                                radius='sm'>
-                            {loading ? <Spinner size="sm"/> : "Send"}
-
+                        <Button type='submit' isLoading={loading} isDisabled={!isDirty || !isValid} className='w-full'
+                                color='primary'
+                                radius='sm'>Send
                         </Button>
                     </form>
                 </Form>

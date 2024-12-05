@@ -13,18 +13,18 @@ import React, {
 import { PayrollInputColumn } from "./input";
 import axios from "axios";
 import { cn, Spinner } from "@nextui-org/react";
-import { systemPayhead, viewPayslipType } from "@/app/(admin)/(core)/payroll/payslip/page";
 import {numberWithCommas} from "@/lib/utils/numberFormat";
 import { axiosInstance } from "@/services/fetcher";
 import useSWR from "swr";
 import { stageTable } from "@/app/(admin)/(core)/payroll/payslip/stage";
 import { static_formula, VariableAmountProp } from "@/helper/payroll/calculations";
+import {ViewPayslipType, systemPayhead} from "@/types/payslip/types";
 
 interface PRPayslipTableType {
   processDate: ProcessDate;
   // setFocusedEmployee: (id: number | null) => void;
   // setFocusedPayhead: (id: number | null) => void;
-  setPayslip: (item: viewPayslipType | null) => void;
+  setPayslip: (item: ViewPayslipType | null) => void;
   setTobeDeployed: (item: unknown) => void;
 }
 export function PRPayslipTable({

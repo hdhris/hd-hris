@@ -254,38 +254,38 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     }
   };
 
-  const handleActivate = async () => {
-    setIsActivateSubmitting(true);
-    try {
-      const response = await axios.put(
-        `/api/employeemanagement/employees?id=${currentEmployee.id}&type=status`,
-        {
-          status: "active" as Status,
-        }
-      );
+  // const handleActivate = async () => {
+  //   setIsActivateSubmitting(true);
+  //   try {
+  //     const response = await axios.put(
+  //       `/api/employeemanagement/employees?id=${currentEmployee.id}&type=status`,
+  //       {
+  //         status: "active" as Status,
+  //       }
+  //     );
 
-      if (response.status === 200) {
-        toast({
-          title: "Status Updated: Active",
-          description: "Employee has been activated successfully",
-          variant: "success",
-          duration: 3000,
-        });
-        await onEmployeeUpdated();
-        onClose(); // Close the drawer
-      }
-    } catch (error) {
-      console.error("Error activating employee:", error);
-      toast({
-        title: "Error",
-        description: "Failed to activate employee. Please try again.",
-        variant: "danger",
-        duration: 5000,
-      });
-    } finally {
-      setIsActivateSubmitting(false);
-    }
-  };
+  //     if (response.status === 200) {
+  //       toast({
+  //         title: "Status Updated: Active",
+  //         description: "Employee has been activated successfully",
+  //         variant: "success",
+  //         duration: 3000,
+  //       });
+  //       await onEmployeeUpdated();
+  //       onClose(); // Close the drawer
+  //     }
+  //   } catch (error) {
+  //     console.error("Error activating employee:", error);
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to activate employee. Please try again.",
+  //       variant: "danger",
+  //       duration: 5000,
+  //     });
+  //   } finally {
+  //     setIsActivateSubmitting(false);
+  //   }
+  // };
   const StatusDisplay = () => {
     const getStatusInfo = (): StatusInfo => {
       if (currentEmployee.suspension_json) {
@@ -375,8 +375,13 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                 </Text>
               </div>
             )}
+          
+            </div>
+            </div>
+            <div className ="flex justify-end">
             {status.type !== "Active" && (
               <div className="flex gap-3 mt-4">
+                
                 <Button
                   size="md"
                   variant="shadow"
@@ -386,7 +391,9 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                 >
                   Edit Details
                 </Button>
-                <Button
+                
+                
+                {/* <Button
                   size="md"
                   color="success"
                   variant="flat"
@@ -395,12 +402,12 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                   isDisabled={isStatusUpdateSubmitting}
                 >
                   Activate Employee
-                </Button>
+                </Button> */}
               </div>
             )}
-          </div>
-        </div>
-      </div>
+            </div>
+            </div>
+
     );
   };
 
