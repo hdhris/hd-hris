@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 import FormFields, {
@@ -94,10 +94,12 @@ const extensionOptions = [
 
 const PersonalInformationForm = () => {
   const { setValue, watch } = useFormContext(); // Use form context instead of creating new form
-  const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
+  const [imagePreview, setImagePreview] = useState<string | undefined>(
+    undefined
+  );
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Watch the picture value to sync with form state
   const pictureValue = watch("picture");
 
@@ -136,7 +138,6 @@ const PersonalInformationForm = () => {
       fileInputRef.current.value = "";
     }
   }, [setValue]);
-
 
   const formNameFields: FormInputProps[] = [
     {
@@ -235,6 +236,90 @@ const PersonalInformationForm = () => {
     },
   ];
 
+  const fathersBackground: FormInputProps[] = [
+    {
+      name: "fathers_first_name",
+      label: "Father's First Name",
+      type: "text",
+      config: {
+        placeholder: "Enter the employee's father's first name",
+      },
+    },
+
+    {
+      name: "fathers_middle_name",
+      label: "Father's middle name",
+      type: "text",
+      config: {
+        placeholder: "Enter the employee's father's middle name",
+      },
+    },
+    {
+      name: "fathers_last_name",
+      label: "Father's last name",
+      type: "text",
+      config: {
+        placeholder: "Enter the employee's father's last name",
+      },
+    },
+  ];
+
+  const mothersBackground: FormInputProps[] = [
+    {
+      name: "mothers_first_name",
+      label: "Mother's First Name",
+      type: "text",
+      config: {
+        placeholder: "Enter the employee's mother's first name",
+      },
+    },
+
+    {
+      name: "mothers_middle_name",
+      label: "Mother's maiden middle name",
+      type: "text",
+      config: {
+        placeholder: "Enter the employee's mother's maiden middle name",
+      },
+    },
+    {
+      name: "mothers_last_name",
+      label: "Mother's maiden last name",
+      type: "text",
+      config: {
+        placeholder: "Enter the employee's mother's maiden last name",
+      },
+    },
+  ];
+
+  const guardiansBackground: FormInputProps[] = [
+    {
+      name: "guardian_first_name",
+      label: "Guardian's First Name",
+      type: "text",
+      config: {
+        placeholder: "Enter the employee's guardian's first name",
+      },
+    },
+
+    {
+      name: "guardian_middle_name",
+      label: "Guardian's middle name",
+      type: "text",
+      config: {
+        placeholder: "Enter the employee's guardian's middle name",
+      },
+    },
+    {
+      name: "mothers_last_name",
+      label: "Guardian's last name",
+      type: "text",
+      config: {
+        placeholder: "Enter the employee's guardian's last name",
+      },
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
@@ -296,6 +381,7 @@ const PersonalInformationForm = () => {
       <div className="grid grid-cols-3 gap-4">
         <FormFields items={formNameFields} />
       </div>
+
       <div className="grid grid-cols-2 gap-4">
         <FormFields items={formSEFields} />
       </div>
@@ -313,6 +399,21 @@ const PersonalInformationForm = () => {
 
       <div className="grid grid-cols-2 gap-4">
         <AddressInput />
+      </div>
+
+      <Divider />
+      <Text className="text-medium font-semibold pb-2">Family background</Text>
+      <Text className="text-medium font-semibold">{"Father's name"}</Text>
+      <div className="grid grid-cols-3 gap-4">
+        <FormFields items={fathersBackground} />
+      </div>
+    <Text className="text-medium font-semibold">{"Mother's maiden name"}</Text>
+      <div className="grid grid-cols-3 gap-4">
+        <FormFields items={mothersBackground} />
+      </div>
+  <Text className="text-medium font-semibold">{"Guardian's name"}</Text>
+      <div className="grid grid-cols-3 gap-4">
+        <FormFields items={guardiansBackground} />
       </div>
     </div>
   );

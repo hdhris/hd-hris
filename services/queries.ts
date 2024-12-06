@@ -5,13 +5,14 @@ import {Employee} from "@/types/employeee/EmployeeType";
 import {Signatory} from "@/types/audit/types";
 import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
 import {Department} from "@/types/employeee/DepartmentType";
-import {BatchSchedule} from "@/types/attendance-time/AttendanceTypes";
+import {BatchSchedule, Schedules} from "@/types/attendance-time/AttendanceTypes";
 import {Branch} from "@/types/employeee/BranchType";
 import {Payhead, PayheadAffected} from "@/types/payroll/payheadType";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import prisma from "@/prisma/prisma";
-import {JobPosition} from "@/types/employeee/JobType";
-import {EmploymentStatusDetails} from "@/types/employment-status/employment-status";
+import { JobPosition } from "@/types/employeee/JobType";
+import { SalaryGrade } from "@/types/employeee/SalaryType";
+import { EmploymentStatus } from "@/types/employeee/EmploymentStatusType";
 import {EmployeeLeaveCreditFormSetup} from "@/types/leaves/leave-credits-types";
 
 export function useDashboard() {
@@ -62,7 +63,6 @@ export function useUser() {
         revalidateOnFocus: true
     })
 }
-
 export function useLoginActivity() {
     return useSWR<LoginActivity[]>('/api/admin/security', fetcher, {
         revalidateOnFocus: true
@@ -81,6 +81,26 @@ export function useEmployeesData() {
     })
 }
 
+export function useEmployeeData(id: string | null) {
+    return useSWR<Employee>(
+        id ? `/api/employeemanagement/employees?id=${id}` : null,
+        fetcher
+    );
+}
+
+
+export function useSuspendedEmployees() {
+    return useSWR<Employee[]>('/api/employeemanagement/suspended', fetcher, {
+        // revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+export function useResignedTerminatedEmployees() {
+    return useSWR<Employee[]>('/api/employeemanagement/resigned-terminated', fetcher, {
+        // revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
+
 export function useDepartmentsData() {
     return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {//
         // revalidateOnFocus: false, refreshInterval: 3000
@@ -92,6 +112,19 @@ export function useJobpositionData() {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
+
+export function useSalaryGradeData() {
+    return useSWR<SalaryGrade[]>('/api/employeemanagement/salarygrade', fetcher, {//
+        // revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
+export function useEmploymentStatusData() {
+    return useSWR<EmploymentStatus[]>('/api/employeemanagement/employmentstatus', fetcher, {//
+        // revalidateOnFocus: false, refreshInterval: 3000
+    })
+}
+
 
 export function useBranchesData() {
     return useSWR<Branch[]>('/api/employeemanagement/branch', fetcher, {//
@@ -121,7 +154,6 @@ export function useNewPayhead() {
 type ArgumentsTuple = readonly [any, ...unknown[]];
 type Arguments = string | ArgumentsTuple | Record<any, any> | null | undefined | false;
 type Key = Arguments | (() => Arguments);
-
 ////////////////////////////////////////////////////////////////////////////////////////
 
 export function useQuery<T>(key: Key, options?: SWRConfiguration<T>) {
@@ -153,7 +185,6 @@ export function useLeaveCreditEmployees() {
         revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
     })
 }
-
 
 export function usePaginateQuery<T>(api: string, page: number, limit: number, options?: Omit<SWRConfiguration<T>, "keepPreviousData">, params?: string) {
     return useSWR<T>(`${api}?page=${page}&limit=${limit}${params ? params : ""}`, fetcher, {

@@ -486,8 +486,7 @@ model trans_employees {
   suspension_json                                                        Json?                          @db.Json
   resignation_json                                                       Json?                          @db.Json
   termination_json                                                       Json?                          @db.Json
-  employement_status_id                                                  Int?
-  salary_grade_id                                                        Int?
+  is_regular                                                             Boolean?
   acl_user_access_control                                                acl_user_access_control?
   dim_employee_benefits                                                  dim_employee_benefits[]
   dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
@@ -526,12 +525,12 @@ model trans_employees {
 
 model trans_leaves {
   employee_id                                              Int
-  start_date                                               DateTime?               @db.Timestamp(6)
-  end_date                                                 DateTime?               @db.Timestamp(6)
-  status                                                   String?                 @db.VarChar(10)
-  created_at                                               DateTime                @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
-  updated_at                                               DateTime                @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
-  id                                                       Int                     @id @default(autoincrement())
+  start_date                                               DateTime?        @db.Date
+  end_date                                                 DateTime?        @db.Date
+  status                                                   String?          @db.VarChar(10)
+  created_at                                               DateTime         @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
+  updated_at                                               DateTime         @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  id                                                       Int              @id @default(autoincrement())
   type_id                                                  Int?
   reason                                                   String?
   created_by                                               Int?
