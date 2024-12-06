@@ -1,4 +1,5 @@
-import {LeaveType} from "@/types/leaves/LeaveTypes";
+import {LeaveType, LeaveTypeForEmployee} from "@/types/leaves/LeaveTypes";
+import {Employee} from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
 
 export interface LeaveBalance {
     id: number;
@@ -49,7 +50,7 @@ export interface LeaveCredits {
     name: string;
     picture: string | null;
     department: string;
-    employment_status: "regular" | "probationary";
+    employment_status: string;
     job: string
     leave_balance: EmployeeLeaveBalance[] | null;
 
@@ -60,4 +61,10 @@ export interface EmployeeLeaveCredits {
     meta_data: {
         totalItems: number, years: number[]
     }
+}
+
+
+export interface EmployeeLeaveCreditFormSetup {
+    employees: Employee[]
+    leave_types: LeaveTypeForEmployee[]
 }

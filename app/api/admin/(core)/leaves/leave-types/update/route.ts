@@ -32,12 +32,13 @@ export async function POST(request: NextRequest) {
         };
 
         // Perform the update operation
-        await prisma.ref_leave_types.update({
+        await prisma.ref_leave_type_details.update({
             where: {id: data.id},
             data: {
                 ...leaveTypeData, updated_at: new Date(),
             }
         });
+
 
         // Return a success response
         return NextResponse.json({

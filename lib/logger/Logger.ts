@@ -14,12 +14,12 @@ class Logger {
         this.logLevel = logLevel;
     }
 
-    private log(message: string, level: LogLevel): void {
+    private log(message: any, level: LogLevel): void {
         const timestamp = new Date().toISOString();
         console.log(`[${timestamp}] [${level}] - `, message);
     }
 
-    public debug(message: string): void {
+    public debug(message: any): void {
         // Disable DEBUG logs only in production
         if (process.env.NODE_ENV !== 'production' && this.shouldLog(LogLevel.DEBUG)) {
             this.log(message, LogLevel.DEBUG);

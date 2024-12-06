@@ -4,24 +4,17 @@ import {LeaveType} from "@/types/leaves/LeaveTypes";
 import {capitalize} from "@nextui-org/shared-utils";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import dayjs from "dayjs";
+import {Logger, LogLevel} from "@/lib/logger/Logger";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
     try {
+
+        const logger = new Logger(LogLevel.DEBUG)
         const {searchParams} = new URL(request.url);
         const page = parseInt(searchParams.get('page') || '1');  // Default to page 1
         const perPage = parseInt(searchParams.get('limit') || '15');  // Default to 15 results per page
-
-        // Use the reusable pagination function with Prisma model
-        // const { data, totalItems, currentPage } = await getPaginatedData<LeaveType>(
-        //     prisma.trans_leave_types,  // The Prisma model
-        //     page,
-        //     perPage,
-        //     { deleted_at: null },  // Filtering condition
-        //     null,
-        //     { created_at: 'asc' }  // Order by name
-        // );
 
 
         // Fetch employee counts and employee details concurrently
@@ -38,7 +31,7 @@ export async function GET(request: Request) {
                     include: {
                         ref_employment_status: {
                             select: {
-                                name: true
+                                id: true, name: true
                             }
                         }
                     }
@@ -102,12 +95,22 @@ export async function GET(request: Request) {
                 }
 
             });
+
+            const employmentStatus = leaveType.trans_leave_types.filter(item => item.ref_employment_status);
+            if (employmentStatus) {
+                logger.debug(employmentStatus);
+            } else {
+                logger.debug("No matching employment status found");
+            }
             return {
                 id: leaveType.id,
                 name: leaveType.name,
                 code: leaveType.code,
                 description: leaveType.description,
-                applicable_to_employee_types: leaveType.is_applicable_to_all ? "All" : capitalize(leaveType.trans_leave_types.find(item => item.ref_employment_status.name)?.ref_employment_status.name || ""),
+                applicable_to_employee_types: {
+                    id: leaveType.is_applicable_to_all ? "all" : leaveType.trans_leave_types.find(item => item.ref_employment_status.id)?.ref_employment_status.id,
+                    name: leaveType.is_applicable_to_all ? "all" : leaveType.trans_leave_types.find(item => item.ref_employment_status.name)?.ref_employment_status.name || ""
+                },
                 attachment_required: leaveType.attachment_required,
                 created_at: dayjs(leaveType.created_at).format("YYYY-MM-DD"),
                 is_active: leaveType.is_active,
@@ -119,7 +122,6 @@ export async function GET(request: Request) {
                 current_employees: empAvails,
             };
         }) as unknown as LeaveType[];
-
 
         return NextResponse.json({
             data: result, perPage, totalItems: total_items,

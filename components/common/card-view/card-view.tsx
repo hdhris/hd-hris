@@ -1,4 +1,4 @@
-import {cn} from "@nextui-org/react";
+import {ButtonProps, cn} from "@nextui-org/react";
 import React, {ReactNode} from "react";
 import {Button} from "@nextui-org/button";
 import {LuPencil, LuTrash2, LuX} from "react-icons/lu";
@@ -14,12 +14,14 @@ interface CardViewProps {
     footer?: ReactNode;
     onDelete?: () => void;
     onEdit?: () => void;
+    editProps?: ButtonProps
+    deleteProps?: ButtonProps
     onClose?: () => void
     onDanger?: ReactNode
     id?: string
 }
 
-function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, onDanger}: CardViewProps) {
+function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, onDanger, editProps, deleteProps}: CardViewProps) {
     return (<div className="w-[700px] space-y-4 rounded border border-default-400/20 overflow-hidden grid grid-rows-[auto_1fr] pb-6" id={id}>
         <div
             className="flex justify-between sticky top-0 bg-[#FAFAFA] z-10 px-4 py-2 border-b border-default-400/50">
@@ -49,7 +51,7 @@ function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, o
                                              subtitle={`Update or modify ${title?.toLowerCase()} details`}>
                                         <Button {...uniformStyle({
                                             size: "sm", color: "default"
-                                        })}
+                                        })} {...editProps}
                                                 onClick={onEdit}
                                                 startContent={<LuPencil/>}>
                                             Edit
@@ -62,6 +64,7 @@ function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, o
                                 <Section className="ms-0" title={`Delete ${title}`}
                                          subtitle="This action cannot be undone. Proceed with caution.">
                                     <Button {...uniformStyle({color: "danger"})}
+                                            {...deleteProps}
                                             onClick={onDelete}
                                             startContent={<LuTrash2/>}>Delete</Button></Section>
 

@@ -14,6 +14,8 @@ import uniqolor from "uniqolor";
 import {rgba} from "color2k";
 import {FilterProps} from "@/types/table/default_config";
 import {getColor} from "@/helper/background-color-generator/generator";
+import {uniformChipStyle} from "@/lib/custom/styles/SizeRadius";
+import {capitalize} from "@nextui-org/shared-utils";
 
 const LeaveTypesTableColumns: ColumnsProps[] = [{
     name: "Name", uid: "name", sortable: true
@@ -56,12 +58,15 @@ export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
                 <Typography>{`${item.min_duration} - ${item.max_duration} Day/s`}</Typography>
             </Case>
             <Case of="applicable_to_employee_types">
-                <Chip style={{
-                    background: getColor(item.applicable_to_employee_types, 0.2),
-                    borderColor: getColor(item.applicable_to_employee_types, 0.5),
-                    color: getColor(item.applicable_to_employee_types)
-                }} variant="bordered">
-                    {item.applicable_to_employee_types}
+                <Chip
+                    {...uniformChipStyle(item.applicable_to_employee_types.name)}
+                //     style={{
+                //     background: getColor(item.applicable_to_employee_types.name, 0.2),
+                //     borderColor: getColor(item.applicable_to_employee_types.name, 0.5),
+                //     color: getColor(item.applicable_to_employee_types.name)
+                // }}
+                    variant="bordered" className="rounded">
+                    {capitalize(item.applicable_to_employee_types.name)}
                 </Chip>
 
             </Case>

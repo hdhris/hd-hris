@@ -4,7 +4,7 @@ import {usePaginateQuery} from "@/services/queries";
 import {useToast} from "@/components/ui/use-toast";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {Button} from "@nextui-org/button";
-import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
+import {uniformChipStyle, uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {EmployeeLeaveCredits, LeaveCredits} from "@/types/leaves/leave-credits-types";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {
@@ -171,7 +171,9 @@ function Page() {
                 <User name={<div className="flex gap-2">
                     <Typography>{viewCredit.name}</Typography>
                     <Chip
-                        color={viewCredit.employment_status === "regular" ? "success" : "warning"}>{capitalize(viewCredit.employment_status)}</Chip>
+                        {...uniformChipStyle(viewCredit.employment_status)}
+                        variant="bordered"
+                        >{capitalize(viewCredit.employment_status)}</Chip>
                 </div>}
                       description={viewCredit.department}
                       classNames={{

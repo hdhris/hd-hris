@@ -13,6 +13,7 @@ import {useToast} from "@/components/ui/use-toast";
 import {LeaveType} from "@/types/leaves/LeaveTypes";
 import {AxiosError} from "axios";
 import {useEmploymentStatus} from "@/services/queries";
+import {Logger, LogLevel} from "@/lib/logger/Logger";
 
 interface LeaveTypeFormProps {
     title?: string
@@ -28,6 +29,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
     const {toast} = useToast()
     const {data: employment_status} = useEmploymentStatus()
 
+    const logger = new Logger(LogLevel.DEBUG)
     const form = useForm<z.infer<typeof LeaveTypeSchema>>({
         resolver: zodResolver(LeaveTypeSchema), defaultValues: {
             //general information
@@ -39,7 +41,6 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
     const {isDirty, isValid} = useFormState(form)
     const employeeStatus = useMemo(() => {
         if(employment_status) {
-            console.log("Employment Status: ", employment_status)
             return employment_status.data
         }
         return []
@@ -47,6 +48,8 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
 
     useEffect(() => {
         if (data) {
+
+            logger.debug(data)
             form.reset({
                 name: data.name,
                 code: data.code,
@@ -57,7 +60,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 paidLeave: data.paid_leave,
                 isActive: data.is_active,
                 attachmentRequired: data.attachment_required,
-                applicableToEmployeeTypes: data.applicable_to_employee_types.toLowerCase()
+                applicableToEmployeeTypes: String(data.applicable_to_employee_types.id)
             })
 
         }
@@ -184,7 +187,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
     })]
 
     return (<>
-        <Drawer isSubmitting={isLoading} unSubmittable={!isDirty} isOpen={isOpen} onClose={onOpen} size="sm" title={<Title
+        <Drawer isSubmitting={isLoading} isOpen={isOpen} onClose={onOpen} size="sm" title={<Title
             className="ms-1"
             heading={title || "Add Leave Types"}
             subHeading={description || "Define the details for the new leave type below."}

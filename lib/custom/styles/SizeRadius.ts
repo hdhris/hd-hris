@@ -1,3 +1,6 @@
+import {CSSProperties} from "react";
+import {getColor} from "@/helper/background-color-generator/generator";
+
 type colorType =
   | "danger"
   | "success"
@@ -25,3 +28,14 @@ export const uniformStyle = ({
     color: color,
   };
 };
+
+
+export const uniformChipStyle = (name: string) => {
+  return {
+    style: {
+      background: getColor(name, 0.2),
+      borderColor: getColor(name, 0.5),
+      color: getColor(name)
+    }
+  }
+}

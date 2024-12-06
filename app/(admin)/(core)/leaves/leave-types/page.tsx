@@ -23,6 +23,7 @@ import {isObjectEmpty} from "@/helper/objects/isObjectEmpty";
 import {pluralize} from "@/helper/pluralize/pluralize";
 import EmployeesAvatar from "@/components/common/avatar/employees-avatar";
 import CardTable from "@/components/common/card-view/card-table";
+import {capitalize} from "@nextui-org/shared-utils";
 
 
 function LeaveTypeTable() {
@@ -174,6 +175,7 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
     const handleLeaveTypeDelete = async (key: Key) => {
         const hasEmployees = props.current_employees.length
 
+        console.log("Props: ", props)
         const leaveTypeName = props.name
         if (hasEmployees > 0) {
             alert("Cannot delete leave type with employees")
@@ -185,8 +187,13 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
             </Typography>)
         })
 
+        const deletedIds = {
+            leave_type_id: props.id,
+            employee_status_id: props.applicable_to_employee_types.id
+        }
+
         if (res === "yes") {
-            const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', [key])
+            const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', deletedIds)
             if (res.status !== 200) {
                 toast({
                     title: "Error", description: res.data.message, variant: "danger",
@@ -206,6 +213,9 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
             title="Leave Type"
             onDelete={() => handleLeaveTypeDelete(props.id)}
             onEdit={() => handleLeaveTypeEdit(!editOpen)}
+            editProps={{
+                isDisabled: props.current_employees.length > 0
+            }}
             onClose={onClose}
             header={<div
                 className="relative flex flex-col gap-2 h-32 bg-opacity-50 backdrop-blur-sm w-full">
@@ -231,7 +241,7 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
             <CardTable data={[{
                 label: "Minimum Days", value: pluralize(props.min_duration, "day")
             }, {label: "Maximum Days", value: pluralize(props.max_duration, "day")}, {
-                label: "Applicable for", value: props.applicable_to_employee_types
+                label: "Applicable for", value: capitalize(props.applicable_to_employee_types.name)
             }, {
                 label: "Current Usage", value: <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>
             },{

@@ -1,22 +1,10 @@
-import {
-    Body,
-    Container,
-    Head,
-    Heading,
-    Hr,
-    Html,
-    Img,
-    Preview,
-    Section,
-    Text,
-} from '@react-email/components';
+import {Body, Column, Container, Head, Hr, Html, Img, Section, Tailwind, Text,} from '@react-email/components';
 import * as React from 'react';
 
 interface FlexibleEmailTemplateProps {
-    companyName: string;
-    companyLogo: string;
-    companyWebsite: string;
-    previewText: string;
+    companyName?: string;
+    companyLogo?: string;
+    companyWebsite?: string;
     children: React.ReactNode;
 }
 
@@ -24,73 +12,67 @@ export const FlexibleEmailTemplate: React.FC<FlexibleEmailTemplateProps> = ({
                                                                                 companyName = process.env.APP_NAME,
                                                                                 companyLogo = process.env.BASE_URL + "/logo.svg",
                                                                                 companyWebsite = process.env.BASE_URL,
-                                                                                previewText = 'Important information inside',
                                                                                 children,
                                                                             }) => {
-    return (
-        <Html>
-            <Head />
-            <Preview>{previewText}</Preview>
+    return (<Html>
+            <Head/>
             <Body style={main}>
-                <Container style={container}>
-                    <Section style={headerSection}>
-                        <Img
-                            src={companyLogo}
-                            width="150"
-                            height="50"
-                            alt={`${companyName} logo`}
-                            style={logo}
-                        />
-                        <Heading as="h1" style={heading}>
-                            {companyName}
-                        </Heading>
-                        <Text style={subheading}>
-                            <a href={companyWebsite} style={link}>
-                                {companyWebsite}
-                            </a>
-                        </Text>
-                    </Section>
-                    <Hr style={hr} />
-                    <Section style={contentSection}>
-                        <div style={contentWrapper}>
-                            {children}
-                        </div>
-                    </Section>
-                    <Hr style={hr} />
-                    <Section style={footerSection}>
-                        <Text style={footer}>
-                            © {new Date().getFullYear()} {companyName}. All rights reserved.
-                        </Text>
-                    </Section>
-                </Container>
+                <Tailwind>
+                    <Container className="h-full w-full ">
+                        <Section>
+                            <Column className="px-4">
+                                <Img
+                                    src={companyLogo}
+                                    className="size-24"
+                                    alt={`${companyName} logo`}
+                                    style={logo}
+                                />
+                            </Column>
+
+                        </Section>
+                        <Hr style={hr}/>
+                        <Section style={contentSection}>
+                            <div className="px-4">
+                                {children}
+                            </div>
+                            <div className="px-4">
+                                <Text style={footerText}>
+                                    Best regards,
+                                    <br/>
+                                    <strong>HD-HRiS</strong>
+                                    <br/>
+                                    <em>This is an automated message—please do not reply.</em>
+                                </Text>
+                            </div>
+
+                        </Section>
+                        <Hr style={hr}/>
+                        <Section style={footerSection}>
+                            <div className="mt-4">
+                                <Text style={footer}>
+                                    © {new Date().getFullYear()} {companyName}. All rights reserved.
+
+                                </Text>
+                                <Text style={footer}>
+                                    {companyName}
+                                </Text>
+                                <Text style={footer}>
+                                    <a href={companyWebsite}>{companyWebsite}</a>
+                                </Text>
+                            </div>
+                        </Section>
+                    </Container>
+                </Tailwind>
+
             </Body>
-        </Html>
-    );
+        </Html>);
 };
 
 const main = {
     backgroundColor: '#f6f9fc',
-    fontFamily:
-        '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif',
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif',
 };
 
-const container = {
-    margin: '0 auto',
-    padding: '20px 0 48px',
-    width: '580px',
-    maxWidth: '100%',
-};
-
-const headerSection = {
-    display: 'flex',
-    flexDirection: 'row' as const, // Or 'row' for horizontal alignment
-    alignItems: 'center', // Center items horizontally
-    justifyContent: 'center', // Center items vertically
-    padding: '32px',
-    backgroundColor: '#ffffff',
-    borderRadius: '5px 5px 0 0',
-    textAlign: 'center' as const,
-};
 
 const contentSection = {
     padding: '48px 32px', // Increased vertical padding
@@ -98,10 +80,7 @@ const contentSection = {
 };
 
 const footerSection = {
-    padding: '32px',
-    backgroundColor: '#ffffff',
-    borderRadius: '0 0 5px 5px',
-    textAlign: 'center' as const,
+    padding: '32px', backgroundColor: '#ffffff', borderRadius: '0 0 5px 5px', textAlign: 'center' as const,
 };
 
 const logo = {
@@ -118,29 +97,23 @@ const heading = {
 };
 
 const subheading = {
-    fontSize: '15px',
-    fontWeight: '400',
-    color: '#687484',
+    fontSize: '15px', fontWeight: '400', color: '#687484',
 };
 
 const link = {
-    color: '#687484',
-    textDecoration: 'underline',
+    color: '#687484', textDecoration: 'underline',
 };
 
 const hr = {
-    borderColor: '#cccccc',
-    margin: '0',
+    borderColor: '#cccccc', margin: '0',
 };
 
 const footer = {
-    color: '#8898aa',
-    fontSize: '12px',
+    color: '#8898aa', fontSize: '12px', margin: 0, lineHeight: "20px"
 };
 
-const contentWrapper = {
-    padding: '0 16px', // Add horizontal padding to the content
-};
-
+const footerText = {
+    color: "#777", fontSize: "14px", lineHeight: "1.5", marginTop: "20px",
+}
 export default FlexibleEmailTemplate;
 

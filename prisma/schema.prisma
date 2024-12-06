@@ -56,7 +56,7 @@ model dim_leave_balances {
   updated_at         DateTime          @db.Timestamp(6)
   deleted_at         DateTime?         @db.Timestamp(6)
   leave_type_id      Int
-  ref_leave_types    trans_leave_types @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  trans_leave_types  trans_leave_types @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_employees    trans_employees   @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_leave_balances_trans_employees_1")
 
   @@index([employee_id], map: "idx_dim_leave_balances_allocations_employee_id")
@@ -298,13 +298,13 @@ model ref_payheads {
 
 model ref_performance_criterias {
   id                         Int                          @id @default(autoincrement())
-  name                       String?                      @db.VarChar(45)
-  description                String?
-  max_rate                   Decimal?                     @db.Decimal(10, 2)
-  is_active                  Boolean?
-  created_at                 DateTime                     @db.Timestamp(6)
-  updated_at                 DateTime                     @db.Timestamp(6)
+  name                       String                       @db.VarChar(45)
+  description                String
+  is_active                  Boolean
+  created_at                 DateTime                     @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime                     @default(now()) @db.Timestamp(6)
   deleted_at                 DateTime?                    @db.Timestamp(6)
+  ratings_json               Json                         @db.Json
   fact_evaluation_breakdowns fact_evaluation_breakdowns[]
 
   @@index([deleted_at])
@@ -486,7 +486,6 @@ model trans_employees {
   suspension_json                                                        Json?                          @db.Json
   resignation_json                                                       Json?                          @db.Json
   termination_json                                                       Json?                          @db.Json
-  is_regular                                                             Boolean?
   employement_status_id                                                  Int?
   salary_grade_id                                                        Int?
   acl_user_access_control                                                acl_user_access_control?
@@ -794,7 +793,7 @@ model ref_salary_grades {
 
 model ref_leave_type_details {
   id                   Int                 @id(map: "ref_leave_types_pkey") @default(autoincrement())
-  code                 String
+  code                 String              @unique
   description          String
   is_active            Boolean
   max_duration         Decimal             @db.Decimal(10, 2)
@@ -808,8 +807,6 @@ model ref_leave_type_details {
   updated_at           DateTime            @default(now()) @db.Timestamptz(6)
   trans_leave_types    trans_leave_types[]
   trans_leaves         trans_leaves[]
-
-  @@unique(code)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -830,6 +827,22 @@ model ref_signatory_roles {
   trans_signatories   trans_signatories[]
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model trans_leave_types {
+  id                     Int                    @id(map: "trans_leave_type_pkey") @default(autoincrement())
+  leave_type_details_id  Int
+  employment_status_id   Int
+  created_at             DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime               @default(now()) @db.Timestamptz(6)
+  deleted_at             DateTime?              @db.Timestamptz(6)
+  dim_leave_balances     dim_leave_balances[]
+  ref_employment_status  ref_employment_status  @relation(fields: [employment_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_leave_type_employment_status_id_fkey")
+  ref_leave_type_details ref_leave_type_details @relation(fields: [leave_type_details_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_leave_type_leave_type_details_id_fkey")
+
+  @@unique([leave_type_details_id, employment_status_id], map: "unique_leave_type_details_employment_status")
+  @@index([deleted_at])
+}
+
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model trans_signatories {
@@ -845,21 +858,5 @@ model trans_signatories {
   ref_signatory_paths ref_signatory_paths @relation(fields: [signatory_path_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ref_signatory_roles ref_signatory_roles @relation(fields: [signatory_role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@index([deleted_at])
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model trans_leave_types {
-  id                     Int                    @id(map: "trans_leave_type_pkey") @default(autoincrement())
-  leave_type_details_id  Int
-  employment_status_id   Int
-  created_at             DateTime               @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime               @default(now()) @db.Timestamptz(6)
-  deleted_at             DateTime?              @db.Timestamptz(6)
-  dim_leave_balances     dim_leave_balances[]
-  ref_employment_status  ref_employment_status  @relation(fields: [employment_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_leave_type_employment_status_id_fkey")
-  ref_leave_type_details ref_leave_type_details @relation(fields: [leave_type_details_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_leave_type_leave_type_details_id_fkey")
-
-  @@unique([leave_type_details_id, employment_status_id], map: "unique_leave_type_details_employment_status")
   @@index([deleted_at])
 }

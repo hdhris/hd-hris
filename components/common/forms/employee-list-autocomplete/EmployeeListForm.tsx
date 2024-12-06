@@ -5,13 +5,15 @@ import { Autocomplete, AutocompleteItem, cn, User } from "@nextui-org/react";
 import { LuChevronsUpDown } from "react-icons/lu";
 import Typography from "@/components/common/typography/Typography";
 import {FormDescription} from "@/components/ui/form";
+import {EmploymentStatusDetails} from "@/types/employment-status/employment-status";
+
 
 export type Employee = {
     id: number;
     name: string;
     picture: string;
     department: string;
-    is_regular?: boolean
+    employment_status: EmploymentStatusDetails
 };
 
 interface EmployeeListForm {
