@@ -49,7 +49,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
     useEffect(() => {
         if (data) {
 
-            logger.debug(data)
+            // logger.debug(data)
             form.reset({
                 name: data.name,
                 code: data.code,
@@ -68,7 +68,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
 
 
     const onSubmit = async (values: z.infer<typeof LeaveTypeSchema>) => {
-        // setIsLoading(true)
+        setIsLoading(true)
         const items = {
             id: data?.id, ...values,
         }
@@ -76,7 +76,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         try {
             let rest
             if (data?.id) {
-                rest = await axiosInstance.post("/api/admin/leaves/leave-types/update", items)
+                rest = await axiosInstance.patch("/api/admin/leaves/leave-types/update", items)
             } else {
                 rest = await axiosInstance.post("/api/admin/leaves/leave-types/create", values)
             }

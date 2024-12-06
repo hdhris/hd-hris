@@ -11,9 +11,6 @@ export async function POST(request: NextRequest) {
 
         const data = await request.json();
 
-        const logger = new Logger(LogLevel.DEBUG)
-        logger.debug(data)
-
 
         const data_validation = await LeaveTypeSchema.safeParseAsync(data)
 

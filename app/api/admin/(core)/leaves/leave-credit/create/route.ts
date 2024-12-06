@@ -8,13 +8,29 @@ export async function POST(req: NextRequest) {
 
         const { employee_id, leave_credits } = data;
 
-        console.log("Credit Data: ", data)
+        console.log("Leave Credit: ", leave_credits)
 
+        const employee = await prisma.trans_employees.findMany({
+            where: {
+                id: {
+                    in: employee_id
+                }
+            },
+            select: {
+                ref_employment_status: {
+                    select: {
+                        id: true,
+                    },
+                }
+            },
+        })
+
+        console.log("Employees: ", employee)
 
         // Prepare an array of records for bulk creation
         const recordsToCreate = employee_id.flatMap((id: number) =>
             leave_credits.map((leaveType: { leave_type_id: string; allocated_days: number; carry_forward_days: number | null }) => ({
-                leave_type_id: Number(leaveType.leave_type_id),
+                leave_type_id: 1,
                 employee_id: id,
                 year: new Date().getFullYear(),
                 allocated_days: leaveType.allocated_days,
@@ -22,8 +38,10 @@ export async function POST(req: NextRequest) {
                 carry_forward_days: leaveType.carry_forward_days ?? 0,
                 created_at: new Date(),
                 updated_at: new Date(),
+
             }))
         );
+
 
         // console.log("Records: ", recordsToCreate)
         // Bulk insert all records

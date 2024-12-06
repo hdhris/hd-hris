@@ -11,7 +11,7 @@ export const emp_rev_include = {
       email: true,
       contact_no: true,
       picture: true,
-      is_regular: true,
+      // is_regular: true,
       ref_departments: {
         select: {
           id: true,

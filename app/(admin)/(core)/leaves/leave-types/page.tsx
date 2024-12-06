@@ -24,6 +24,7 @@ import {pluralize} from "@/helper/pluralize/pluralize";
 import EmployeesAvatar from "@/components/common/avatar/employees-avatar";
 import CardTable from "@/components/common/card-view/card-table";
 import {capitalize} from "@nextui-org/shared-utils";
+import {AxiosError} from "axios";
 
 
 function LeaveTypeTable() {
@@ -69,40 +70,56 @@ function LeaveTypeTable() {
         }
     }, [leaveData, leaveType]);
 
-    const handleLeaveTypeDeleteMultiple = async (keys: Selection) => {
-        const deleteKeys = keys === "all" ? leaveData.map((item) => item.id) // Collect all IDs
-            : Array.from(keys).map(key => Number(key)); // Collect selected IDs and convert to numbers
-
-
-        // Filter leaveData to find names of the deleted items
-        const deletedNames = leaveData
-            .filter(item => deleteKeys.includes(item.id)) // Use includes to check for matches
-            .map(item => item.name) // Map to get the names
-            .join(", "); // Join names into a string
-
-
-        const res = await showDialog({
-            title: "Delete Leave Type", message: (<Typography>Are you sure you want to delete this
-                <Typography as="span"
-                            className="font-semibold"> {deletedNames}</Typography>?
-            </Typography>)
-        })
-
-        if (res === "yes") {
-            const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', deleteKeys)
-            if (res.status !== 200) {
-                toast({
-                    title: "Error", description: res.data.message, variant: "danger",
-                })
-            }
-
-
-        }
-        if (res === "no") {
-            return;
-        }
-
-    }
+    // const handleLeaveTypeDeleteMultiple = async (keys: Selection) => {
+    //     const deleteKeys = keys === "all" ? leaveData.map((item) => item.id) // Collect all IDs
+    //         : Array.from(keys).map(key => Number(key)); // Collect selected IDs and convert to numbers
+    //
+    //
+    //     // Filter leaveData to find names of the deleted items
+    //     const deletedNames = leaveData
+    //         .filter(item => deleteKeys.includes(item.id)) // Use includes to check for matches
+    //         .map(item => item.name) // Map to get the names
+    //         .join(", "); // Join names into a string
+    //
+    //
+    //     const res = await showDialog({
+    //         title: "Delete Leave Type", message: (<Typography>Are you sure you want to delete this
+    //             <Typography as="span"
+    //                         className="font-semibold"> {deletedNames}</Typography>?
+    //         </Typography>)
+    //     })
+    //
+    //
+    //     alert("Deleted Keys: " + deleteKeys)
+    //     if (res === "yes") {
+    //         try {
+    //             const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', deleteKeys)
+    //             if (res.status !== 200) {
+    //                 toast({
+    //                     title: "Error", description: res.data.message, variant: "danger",
+    //                 })
+    //             }
+    //         } catch (error){
+    //             console.log(error)
+    //             if(error instanceof Error) {
+    //                 toast({
+    //                     title: "Error", description: error.message, variant: "danger",
+    //                 })
+    //             } else if(error instanceof AxiosError){
+    //                 toast({
+    //                     title: "Error", description: error.response?.data.message, variant: "danger",
+    //                 })
+    //             }
+    //         }
+    //
+    //
+    //
+    //     }
+    //     if (res === "no") {
+    //         return;
+    //     }
+    //
+    // }
 
 
     return (<section className='w-full h-full flex gap-4'>
@@ -119,9 +136,9 @@ function LeaveTypeTable() {
                 }, {key: "name", name: "Name"}, {key: "created_at", name: "Created At"}]
 
             }}
-            onDeleteSelected={async (keys) => {
-                await handleLeaveTypeDeleteMultiple(keys)
-            }}
+            // onDeleteSelected={async (keys) => {
+            //     await handleLeaveTypeDeleteMultiple(keys)
+            // }}
             searchProps={{
                 searchingItemKey: ["name"]
             }}
@@ -134,21 +151,20 @@ function LeaveTypeTable() {
             onTableDisplay={{
                 config: LeaveTypeTableConfiguration,
                 onRowAction: handleRowKey,
-                selectionMode: "multiple",
                 layout: "auto"
             }}
 
 
-            onExport={{
-                drawerProps: {
-                    title: "Export",
-                }
-            }}
-            onImport={{
-                drawerProps: {
-                    title: "Import",
-                }
-            }}
+            // onExport={{
+            //     drawerProps: {
+            //         title: "Export",
+            //     }
+            // }}
+            // onImport={{
+            //     drawerProps: {
+            //         title: "Import",
+            //     }
+            // }}
             defaultDisplay="table"/>
 
         <LeaveTypesDetails {...leaveType!} onClose={() => setLeaveType(undefined)}/>
@@ -162,6 +178,8 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
     const {toast} = useToast()
     const curr_emp = props.current_employees
     const [editOpen, setEditOpen] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false)
+
     const [data, setData] = useState<LeaveType>()
     const handleEmployeePicture = (key: Key) => {
         alert(key)
@@ -193,12 +211,28 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
         }
 
         if (res === "yes") {
-            const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', deletedIds)
-            if (res.status !== 200) {
-                toast({
-                    title: "Error", description: res.data.message, variant: "danger",
-                })
+            setLoading(true)
+            try{
+                const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', deletedIds)
+                if (res.status !== 200) {
+                    toast({
+                        title: "Error", description: res.data.message, variant: "danger",
+                    })
+                }
+            }catch (error){
+                console.log(error)
+                if(error instanceof Error) {
+                    toast({
+                        title: "Error", description: error.message, variant: "danger",
+                    })
+                } else if(error instanceof AxiosError){
+                    toast({
+                        title: "Error", description: error.response?.data.message, variant: "danger",
+                    })
+                }
             }
+
+
 
 
         }

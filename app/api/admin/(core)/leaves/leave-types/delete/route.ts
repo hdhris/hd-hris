@@ -24,8 +24,10 @@ export async function POST(request: NextRequest) {
         //     }
         // })
 
+        console.log("Deleted: ", data)
 
         if(data.employee_status_id === "all"){
+            console.log("All")
             await prisma.trans_leave_types.updateMany({
                 where: {
                     leave_type_details_id: data.leave_type_id

@@ -18,7 +18,6 @@ export async function GET(request: Request) {
 
 
         // Fetch employee counts and employee details concurrently
-        // Fetch employee counts and employee details concurrently
         const [data, total_items, employeeCountData, employees] = await Promise.all([prisma.ref_leave_type_details.findMany({
             where: {
                 trans_leave_types: {
@@ -66,6 +65,8 @@ export async function GET(request: Request) {
                 },
             }),]);
 
+        console.log("Data: ", data)
+
 // Create a map for current employees by type_id for faster lookup
         const employeeMap = new Map<number, number[]>();
 
@@ -96,12 +97,12 @@ export async function GET(request: Request) {
 
             });
 
-            const employmentStatus = leaveType.trans_leave_types.filter(item => item.ref_employment_status);
-            if (employmentStatus) {
-                logger.debug(employmentStatus);
-            } else {
-                logger.debug("No matching employment status found");
-            }
+            // const employmentStatus = leaveType.trans_leave_types.filter(item => item.ref_employment_status);
+            // if (employmentStatus) {
+            //     logger.debug(employmentStatus);
+            // } else {
+            //     logger.debug("No matching employment status found");
+            // }
             return {
                 id: leaveType.id,
                 name: leaveType.name,

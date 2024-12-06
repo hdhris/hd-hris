@@ -62,29 +62,17 @@ export async function GET(request: Request) {
                         updated_at: true,
                         deleted_at: true,
                         trans_leave_types: {
-                            select: {
+                            select:{
                                 ref_leave_type_details: {
-                                    select: {
-                                        id: true, name: true
+                                    select:{
+                                        id: true,
+                                        name: true
                                     }
                                 }
                             }
                         }
                     },
                 }
-                // dim_leave_balances: {
-                //     select: {
-                //         id: true,
-                //         allocated_days: true,
-                //         remaining_days: true,
-                //         carry_forward_days: true,
-                //         used_days: true,
-                //         created_at: true,
-                //         updated_at: true,
-                //         deleted_at: true,
-                //         ref_leave_types: { select: { id: true, name: true } },
-                //     },
-                // },
             },
         });
 

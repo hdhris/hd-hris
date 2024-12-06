@@ -14,6 +14,7 @@ import { JobPosition } from "@/types/employeee/JobType";
 import { SalaryGrade } from "@/types/employeee/SalaryType";
 import { EmploymentStatus } from "@/types/employeee/EmploymentStatusType";
 import {EmployeeLeaveCreditFormSetup} from "@/types/leaves/leave-credits-types";
+import {EmploymentStatusDetails} from "@/types/employment-status/employment-status";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
