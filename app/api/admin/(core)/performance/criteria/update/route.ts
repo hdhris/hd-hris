@@ -5,12 +5,14 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 export async function POST(req: NextRequest) {
   const body = await req.json();
   try {
-    // console.log(body);
-    await prisma.dim_incident_reports.create({
+
+    await prisma.sys_help_report.update({
+        where: {
+            id: body.id,
+        },
         data: {
-          created_at: toGMT8().toISOString(),
-          updated_at: toGMT8().toISOString(),
-          ...body,
+            reviewer_id: body.reviewer_id,
+            updated_at: toGMT8().toISOString(),
         },
     })
     return NextResponse.json({ status: 200 });

@@ -227,10 +227,10 @@ async function stage_two(prisma: PrismaClient, dateID: number){
               id: true,
               name: true,
               deduction_id: true,
-              employee_contribution: true,
-              employer_contribution: true,
-              ref_benefits_contribution_advance_settings: {
+              ref_benefits_contribution_table:{
                 select: {
+                  employee_rate: true,
+                  employer_rate: true,
                   min_salary: true,
                   max_salary: true,
                   min_MSC: true,

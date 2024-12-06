@@ -11,7 +11,19 @@ export const emp_rev_include = {
       email: true,
       contact_no: true,
       picture: true,
-      // is_regular: true,
+      ref_salary_grades: {
+        select: {
+          id: true,
+          name: true,
+          amount: true,
+        },
+      },
+      ref_employment_status: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       ref_departments: {
         select: {
           id: true,
@@ -53,7 +65,15 @@ export interface UserEmployee {
   email: string;
   contact_no: string;
   picture: string;
-  is_regular: boolean;
+  ref_salary_grades: {
+    id: number;
+    name: string;
+    amount: number;
+  },
+  ref_employment_status: {
+    id: number;
+    name: string;
+  };
   ref_departments: {
     id: number;
     name: string;

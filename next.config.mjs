@@ -37,6 +37,10 @@ const nextConfig = {
         // destination: "/benefits/membership",
         destination: "/benefits/plans",
         permanent: true,
+      },{
+        source: "/performance",
+        destination: "/performance/criteria",
+        permanent: true,
       },
     ];
   },

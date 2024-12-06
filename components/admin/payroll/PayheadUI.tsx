@@ -38,11 +38,10 @@ function PayheadUI({ payhead_type }: { payhead_type: string }) {
                 case "affected":
                     return (
                         <div className="flex gap-4">
-                            {mandatory.probationary || mandatory.regular ? (
-                                <Chip color="primary" variant="bordered">
-                                    {mandatory.probationary && mandatory.regular && "Probationaries and Regulars"}
-                                    {mandatory.probationary && !mandatory.regular && "Probationaries only"}
-                                    {!mandatory.probationary && mandatory.regular && "Regulars only"}
+                            {mandatory==="all" || mandatory.length > 0 ? (
+                                <Chip color="default" variant="bordered">
+                                    <strong>{mandatory==="all"? 'All ' : mandatory.length}</strong>{" "}
+                                    employment status selected
                                 </Chip>
                             ) : (
                                 <Chip color="primary" variant="bordered">
@@ -100,33 +99,30 @@ function PayheadUI({ payhead_type }: { payhead_type: string }) {
             key: "is_active",
             sectionName: "Status",
         },
-        {
-            filter: [
-                {
-                    label: "Probationary",
-                    value: (item: Payhead) => {
-                        return item.affected_json.mandatory.probationary === true;
-                    },
-                },
-                {
-                    label: "Regular",
-                    value: (item: Payhead) => {
-                        return item.affected_json.mandatory.regular === true;
-                    },
-                },
-                {
-                    label: "Non-mandatory",
-                    value: (item: Payhead) => {
-                        return (
-                            item.affected_json.mandatory.regular === false &&
-                            item.affected_json.mandatory.probationary === false
-                        );
-                    },
-                },
-            ],
-            key: ["affected_json", "mandatory"],
-            sectionName: "Mandatory",
-        },
+        // {
+        //     filter: [
+        //         {
+        //             label: "Probationary",
+        //             value: (item: Payhead) => {
+        //                 return item.affected_json.mandatory.probationary === true;
+        //             },
+        //         },
+        //         {
+        //             label: "Regular",
+        //             value: (item: Payhead) => {
+        //                 return item.affected_json.mandatory.regular === true;
+        //             },
+        //         },
+        //         {
+        //             label: "All employment status",
+        //             value: (item: Payhead) => {
+        //                 return item.affected_json.mandatory === "all";
+        //             },
+        //         },
+        //     ],
+        //     key: ["affected_json", "mandatory"],
+        //     sectionName: "Mandatory",
+        // },
     ];
 
     const handleDelete = async (id: Number, name: string) => {

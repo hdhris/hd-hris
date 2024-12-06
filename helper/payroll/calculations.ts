@@ -101,9 +101,9 @@ export interface ContributionSetting {
   id: number;
   deduction_id: number;
   name: string;
-  employee_contribution: number;
-  employer_contribution: number;
-  ref_benefits_contribution_advance_settings?: {
+  ref_benefits_contribution_table?: {
+    employee_rate: number;
+    employer_rate: number;
     min_salary: number;
     max_salary: number;
     min_MSC: number;
@@ -127,38 +127,37 @@ export class Benefit {
   // Method to calculate the contribution based on salary
   public getContribution(salary: number): number {
     try {
-      let contribution: number;
+      let contribution = 0;
 
       if (
-        this.data.ref_benefits_contribution_advance_settings &&
-        this.data.ref_benefits_contribution_advance_settings.length > 0
+        this.data.ref_benefits_contribution_table &&
+        this.data.ref_benefits_contribution_table.length > 0
       ) {
-        const advanceRates = this.data.ref_benefits_contribution_advance_settings[0];
+        const contributionTable = this.data.ref_benefits_contribution_table[0];
 
         const rates = {
-          minSalary: advanceRates.min_salary,
-          maxSalary: advanceRates.max_salary,
-          minMSC: advanceRates.min_MSC,
-          maxMSC: advanceRates.max_MSC,
-          mscStep: advanceRates.msc_step,
-          regularEmployeeRate: this.data.employee_contribution,
-          regularEmployerRate: this.data.employer_contribution,
-          ecThreshold: advanceRates.ec_threshold,
-          ecLowRate: advanceRates.ec_low_rate,
-          ecHighRate: advanceRates.ec_high_rate,
-          wispThreshold: advanceRates.wisp_threshold,
+          minSalary: contributionTable.min_salary,
+          maxSalary: contributionTable.max_salary,
+          minMSC: contributionTable.min_MSC,
+          maxMSC: contributionTable.max_MSC,
+          mscStep: contributionTable.msc_step,
+          regularEmployeeRate: contributionTable.employee_rate,
+          regularEmployerRate: contributionTable.employer_rate,
+          ecThreshold: contributionTable.ec_threshold,
+          ecLowRate: contributionTable.ec_low_rate,
+          ecHighRate: contributionTable.ec_high_rate,
+          wispThreshold: contributionTable.wisp_threshold,
         };
 
-        // console.log("Name: ", this.data.name, " Calc: ", advanceCalculator(salary, rates))
         contribution = advanceCalculator(salary, rates).employeeShare + (advanceCalculator(salary, rates).wispEmployee ?? 0);
       } else {
-        const basic = basicCalculator(
-          salary,
-          this.data.employer_contribution,
-          this.data.employee_contribution
-        );
+        // const basic = basicCalculator(
+        //   salary,
+        //   this.data.employer_contribution,
+        //   this.data.employee_contribution
+        // );
         // console.log("Name: ", this.data.name, " Basic Calc: ", basic)
-        contribution = basic.employee_contribution //+ basic.employer_contribution;
+        // contribution = basic.employee_contribution //+ basic.employer_contribution;
       }
 
       return contribution;

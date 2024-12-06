@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -487,8 +491,7 @@ model trans_employees {
   suspension_json                                                        Json?                          @db.Json
   resignation_json                                                       Json?                          @db.Json
   termination_json                                                       Json?                          @db.Json
-  employement_status_id                                                  Int
-  salary_grade_id                                                        Int?
+  is_regular                                                             Boolean?
   acl_user_access_control                                                acl_user_access_control?
   dim_employee_benefits                                                  dim_employee_benefits[]
   dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
@@ -515,8 +518,6 @@ model trans_employees {
   ref_addresses_trans_employees_addr_municipalToref_addresses            ref_addresses?                 @relation("trans_employees_addr_municipalToref_addresses", fields: [addr_municipal], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses3")
   ref_addresses_trans_employees_addr_baranggayToref_addresses            ref_addresses?                 @relation("trans_employees_addr_baranggayToref_addresses", fields: [addr_baranggay], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses4")
   ref_branches                                                           ref_branches?                  @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_branch_7")
-  ref_employment_status                                                  ref_employment_status          @relation(fields: [employement_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ref_salary_grades                                                      ref_salary_grades?             @relation(fields: [salary_grade_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_leaves_trans_leaves_employee_idTotrans_employees                 trans_leaves[]                 @relation("trans_leaves_employee_idTotrans_employees")
   trans_leaves_trans_leaves_created_byTotrans_employees                  trans_leaves[]                 @relation("trans_leaves_created_byTotrans_employees")
   trans_overtimes_trans_overtimes_employee_idTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_employee_idTotrans_employees")
@@ -733,21 +734,7 @@ model sys_help_report {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model dim_payhead_specific_amounts {
-  id              Int              @id @default(autoincrement())
-  created_at      DateTime         @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime?        @default(now()) @db.Timestamp(6)
-  payhead_id      Int?
-  employee_id     Int?
-  amount          Decimal?         @db.Decimal
-  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ref_payheads    ref_payheads?    @relation(fields: [payhead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@unique([payhead_id, employee_id], map: "employee_payhead")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model ref_benefits_contribution_table {
+model ref_benefits_contribution_advance_settings {
   id                Int                @id(map: "ref_benefits_contribution_pkey") @default(autoincrement())
   min_salary        Decimal?           @db.Decimal
   max_salary        Decimal?           @db.Decimal
@@ -761,9 +748,7 @@ model ref_benefits_contribution_table {
   created_at        DateTime?          @default(now()) @db.Timestamptz(6)
   updated_at        DateTime?          @default(now()) @db.Timestamp(6)
   plan_id           Int?
-  employee_rate     Decimal            @default(0) @db.Decimal
-  employer_rate     Decimal            @default(0) @db.Decimal
-  ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_benefit_plans ref_benefit_plans? @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ref_benefits_contribution_table_plan_id_fkey")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

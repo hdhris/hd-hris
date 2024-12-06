@@ -6,8 +6,11 @@ import {
 } from "@/components/admin/incident/reports/configs";
 import IncidentDrawer from "@/components/admin/incident/reports/incident-drawer";
 import DataDisplay from "@/components/common/data-display/data-display";
+import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { useQuery } from "@/services/queries";
 import { IncidentReport } from "@/types/incident-reports/type";
+import { Button } from "@nextui-org/react";
 import React, { useState } from "react";
 
 function Page() {
@@ -17,15 +20,15 @@ function Page() {
     "/api/admin/incident/reports",
     { refreshInterval: 5000 }
   );
-  // SetNavEndContent(() => {
-  //   return (
-  //     <>
-  //       <Button {...uniformStyle()} onClick={() => setOpen(true)}>
-  //         File incident
-  //       </Button>
-  //     </>
-  //   );
-  // });
+  SetNavEndContent(() => {
+    return (
+      <>
+        <Button {...uniformStyle()} onClick={() => setOpen(true)}>
+          File incident
+        </Button>
+      </>
+    );
+  });
 
   return (
     <>
@@ -48,7 +51,7 @@ function Page() {
         }}
         defaultDisplay="table"
         paginationProps={{
-          data_length: data?.length,
+          data_length: data?.length || 0,
         }}
       />
 

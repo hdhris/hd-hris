@@ -67,7 +67,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
             variable: "",
             name: "New",
             affected_json: {
-                mandatory: { probationary: false, regular: false },
+                mandatory: "all",
                 departments: "all",
                 job_classes: "all",
                 employees: "all",
@@ -84,85 +84,60 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
     const unSubmittable = useMemo((): string | undefined => {
         if (isInvalid) return "Syntax error in calculation";
 
-        if (mandatory.probationary && mandatory.regular) {
+        if (mandatory === "all" || (Array.isArray(mandatory) && mandatory.length > 0)) {
             if (departments != "all" && departments.length === 0) return "Select a department(s) to be affected";
             else if (roles != "all" && roles.length === 0) return "Select a role(s) to be affected";
         }
 
-        if (!mandatory.probationary && !mandatory.regular && employees != "all" && selectedEmployees.length === 0)
+        if (mandatory!="all" && (Array.isArray(mandatory) && mandatory.length === 0) && employees != "all" && selectedEmployees.length === 0)
             return "Payhead is not mandatory to any work status.\n\nSelect an employee(s) to be affected.";
 
         return undefined;
     }, [isInvalid, mandatory, departments, roles, employees, selectedEmployees]);
 
     const isMandatory = useMemo(() => {
-        return mandatory.regular || mandatory.probationary;
+        return mandatory==="all" || (Array.isArray(mandatory) && mandatory.length > 0);
     }, [mandatory]);
 
-    const filteredEmployeesByMandatory = useMemo(() => {
-        return (
-            payheadAffected?.employees.filter((emp) => {
-                if (isMandatory) return true;
-
-                if (mandatory.regular) return emp.is_regular;
-                if (mandatory.probationary) return !emp.is_regular;
-
-                return true;
-            }) || []
-        );
-    }, [payheadAffected, isMandatory, mandatory]);
-
-    const filteredRoles = useMemo(() => {
-        return (
-            payheadAffected?.job_classes.filter((job) => {
-                if (Array.isArray(departments)) {
-                    return departments.includes(job.department_id);
+    const updateAmountRecords = useCallback(
+        (employee_id: number, amount: number) => {
+            setAmountRecords((prev) => {
+                const newRecords = new Map(prev);
+    
+                if (amount > 0) {
+                    newRecords.set(employee_id, amount); // Add or update
                 } else {
-                    return true; // "all"
+                    newRecords.delete(employee_id); // Remove if zero
                 }
-            }) || []
-        );
-    }, [departments, payheadAffected]);
-
-    function updateAmountRecords(employee_id: number, amount: number) {
-        setAmountRecords((prev) => {
-            const newRecords = new Map(prev);
-
-            if (amount > 0) {
-                // Add or update the amount for the given employee_id
-                newRecords.set(employee_id, amount);
-            } else {
-                // Remove the entry for the given employee_id
-                newRecords.delete(employee_id);
-            }
-
-            return newRecords;
-        });
-    }
+    
+                return newRecords;
+            });
+        },
+        [] // Dependencies are stable
+    );
 
     // First load
     useEffect(() => {
         if (payheadAffected?.payhead) {
-            const amount_records = payheadAffected.payhead?.dim_payhead_specific_amounts;
-            if (amount_records && amount_records.length > 0) {
-                amount_records.forEach((record) => {
-                    updateAmountRecords(record?.employee_id, record?.amount);
-                });
-            }
-            if (
-                payheadAffected.payhead?.affected_json?.employees &&
-                Array.isArray(payheadAffected.payhead.affected_json.employees) &&
-                payheadAffected.payhead.affected_json.employees.length > 0
-            ) {
-                setSelectedEmployees(payheadAffected.payhead.affected_json.employees);
-            }
+            const amount_records = payheadAffected.payhead?.dim_payhead_specific_amounts || [];
+            const employees = payheadAffected.payhead?.affected_json?.employees || [];
+    
+            // Use temporary variables to prevent redundant state updates
+            const newAmountRecords = new Map<number, number>();
+            amount_records.forEach((record) => {
+                newAmountRecords.set(record.employee_id, record.amount);
+            });
+    
+            setAmountRecords(newAmountRecords);
+            setSelectedEmployees(Array.isArray(employees) ? employees : []);
         }
     }, [payheadAffected]);
 
     const getAmountRecords = useCallback(
         (employee_id: number): string => {
-            const value = String(amountRecords.get(employee_id)) || "";
-            return value;
+            return amountRecords.has(employee_id) 
+                ? String(amountRecords.get(employee_id)) 
+                : "0"; // Default value to ensure controlled behavior
         },
         [amountRecords]
     );
@@ -190,6 +165,12 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
             }
 
             if (
+                Array.isArray(value.affected_json.mandatory) &&
+                value.affected_json.mandatory.length === payheadAffected?.employement_status.length
+            )
+                value.affected_json.mandatory = "all"; // Automatically involve every departments
+
+            if (
                 isMandatory ||
                 (Array.isArray(value.affected_json.employees) &&
                     value.affected_json.employees.length === payheadAffected?.employees.length)
@@ -205,22 +186,18 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
             )
                 value.affected_json.departments = "all"; // Automatically involve every departments
 
-            if (Array.isArray(value.affected_json.job_classes)) {
-                const selectedRoles = new Set(
-                    value.affected_json.job_classes.filter((val) => filteredRoles.map((fr) => fr.id).includes(val))
-                );
-
-                if (selectedRoles.size === filteredRoles?.length) {
-                    value.affected_json.job_classes = "all"; // Automatically involve every job/roles
-                } else {
-                    value.affected_json.job_classes = [...selectedRoles];
-                }
+            if (
+                Array.isArray(value.affected_json.job_classes) &&
+                value.affected_json.job_classes.length === payheadAffected?.job_classes?.length
+            ) {
+                value.affected_json.job_classes = "all"; // Automatically involve every job/roles
             }
 
             console.log(
                 value,
                 Array.from(amountRecords, ([employee_id, amount]) => ({ employee_id, amount }))
             );
+            // return
             try {
                 const response = await axios.post("/api/admin/payroll/payhead/upsert-payhead", {
                     data: value,
@@ -242,28 +219,23 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                 toast({ title: `${error}`, variant: "danger" });
             }
         },
-        [amountRecords, selectedEmployees, payheadAffected, filteredRoles, isMandatory, unSubmittable, payhead_type, router]
+        [amountRecords, selectedEmployees, payheadAffected, isMandatory, unSubmittable, payhead_type, router]
     );
 
-    const totalAffectedEmployees = useMemo(() => {
-        let allAffected = [
-            ...filteredEmployeesByMandatory.filter((emp) =>
-                isMandatory
-                    ? mandatory.probationary && mandatory.regular
-                        ? true
-                        : mandatory.probationary && !mandatory.regular
-                        ? !emp.is_regular
-                        : !mandatory.probationary && mandatory.regular && emp.is_regular
-                    : selectedEmployees.includes(emp.id)
-            ),
-        ];
-        allAffected = allAffected.filter((emp) =>
-            departments === "all" ? true : departments.includes(emp.ref_departments.id)
-        );
-        allAffected = allAffected.filter((emp) => (roles === "all" ? true : roles.includes(emp.ref_job_classes.id)));
+    const allAffectedEmployees = useMemo(() => {
+        let allAffected = payheadAffected?.employees.filter((emp) => {
+            if(mandatory === "all" || (Array.isArray(mandatory) && (mandatory.length===0 || mandatory.includes(emp.ref_employment_status?.id)))){
+                if(departments === "all" ? true : departments.includes(emp.ref_departments.id)){
+                    if(roles === "all" ? true : roles.includes(emp.ref_job_classes.id)){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }) || [];
 
-        return new Set(allAffected.map((emp) => emp.id));
-    }, [isMandatory, filteredEmployeesByMandatory, selectedEmployees, mandatory, departments, roles]);
+        return new Map(allAffected.map((emp) => [emp.id, emp]));
+    }, [payheadAffected, mandatory, departments, roles]);
 
     const invalidParams = useMemo(() => {
         if (!payhead_type) return true;
@@ -342,25 +314,15 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                                     triggerProps={{
                                         isDisabled: strictLevel >= 2
                                     }}
-                                    items={[
-                                        { name: "Probationary", id: "mandatory" },
-                                        { name: "Regular", id: "regular" },
-                                    ]}
-                                    triggerName="Mandatory Status"
+                                    items={payheadAffected?.employement_status || []}
+                                    triggerName="Employment Status"
                                     selectedKeys={
-                                        new Set(
-                                            [
-                                                field?.value?.probationary ? "mandatory" : undefined,
-                                                field?.value?.regular ? "regular" : undefined,
-                                            ].filter((key) => key !== undefined)
-                                        )
+                                        Array.isArray(field.value)
+                                            ? new Set(field.value)
+                                            : new Set(payheadAffected?.employement_status.map((stat) => stat.id)) // "all"
                                     }
                                     onSelectionChange={(keys) => {
-                                        const values = Array.from(keys);
-                                        field.onChange({
-                                            probationary: values.includes("mandatory"),
-                                            regular: values.includes("regular"),
-                                        });
+                                        field.onChange([...keys]);
                                     }}
                                     togglable={true}
                                     reversable={true}
@@ -396,28 +358,17 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                                     triggerProps={{
                                         isDisabled: strictLevel >= 2
                                     }}
-                                    items={filteredRoles}
+                                    items={payheadAffected?.job_classes || []}
                                     triggerName="Roles"
                                     selectedKeys={
                                         Array.isArray(field.value)
-                                            ? new Set(
-                                                  field.value.filter((val) =>
-                                                      filteredRoles.map((jc) => jc.id).includes(val)
-                                                  )
-                                              )
-                                            : new Set(filteredRoles.map((jc) => jc.id)) // "all"
+                                            ? new Set(field.value)
+                                            : new Set(payheadAffected?.job_classes.map((jc) => jc.id)) // "all"
                                     }
                                     onSelectionChange={(keys) => field.onChange([...keys])}
                                     togglable={true}
                                     reversable={true}
                                     sectionConfig={payheadAffected?.departments
-                                        .filter((dep) => {
-                                            if (Array.isArray(departments)) {
-                                                return departments.includes(dep.id);
-                                            } else {
-                                                return true; // "all"
-                                            }
-                                        })
                                         .map((dep) => {
                                             return {
                                                 name: dep.name,
@@ -439,8 +390,8 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
             </CardForm>
             <div className="w-full h-full overflow-auto ">
                 <div className="sticky top-0 left-0 bg-gray-50 z-10 pb-4 shadow-md flex justify-between">
-                    <SearchFilter
-                        items={filteredEmployeesByMandatory}
+                    {/* <SearchFilter
+                        items={[...allAffectedEmployees.values()]}
                         setResults={setFilteredEmployees}
                         className="w-80"
                         searchConfig={[
@@ -461,13 +412,13 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                                 label: "Email",
                             },
                         ]}
-                    />
+                    /> */}
                     <p className="text-gray-500 font-semibold text-small">
-                        {totalAffectedEmployees.size} employees affected
+                        {allAffectedEmployees.size} employees affected
                     </p>
                 </div>
                 <div className="min-w-[750px] space-y-1 h-fit">
-                    {filteredEmployees.map((item: UserEmployee) => (
+                    {[...allAffectedEmployees.values()].map((item: UserEmployee) => (
                         <div
                             key={item.id}
                             className={cn(
@@ -476,7 +427,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                                 isMandatory
                                     ? "border-gray-50"
                                     : selectedEmployees.includes(item.id)
-                                    ? totalAffectedEmployees.has(item.id)
+                                    ? allAffectedEmployees.has(item.id)
                                         ? "border-blue-500"
                                         : "border-gray-500"
                                     : "border-gray-50"
@@ -504,8 +455,17 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                                     variant="bordered"
                                     type="number"
                                     className="w-20"
-                                    value={getAmountRecords(item.id)}
-                                    onValueChange={(value) => updateAmountRecords(item.id, Number(value))}
+                                    value={getAmountRecords(item.id) || ""}
+                                    onChange={(e) => {
+                                        const value = parseFloat(e.target.value);
+                                        updateAmountRecords(item.id, isNaN(value) ? 0 : value);
+                                    }}
+                                    onBlur={() => {
+                                        if (!amountRecords.has(item.id)) {
+                                            // Optional: Reset to a default value if necessary
+                                            updateAmountRecords(item.id, 0);
+                                        }
+                                    }}
                                 />
                             </div>
                         </div>
@@ -530,10 +490,7 @@ const formSchema = z.object({
     variable: z.string().max(14).optional(),
     type: z.string(),
     affected_json: z.object({
-        mandatory: z.object({
-            probationary: z.boolean(),
-            regular: z.boolean(),
-        }),
+        mandatory: z.union([z.array(z.number()), z.literal("all")]),
         departments: z.union([z.array(z.number()), z.literal("all")]),
         job_classes: z.union([z.array(z.number()), z.literal("all")]),
         employees: z.union([z.array(z.number()), z.literal("all")]),

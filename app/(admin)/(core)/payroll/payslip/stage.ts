@@ -167,15 +167,13 @@ export async function stageTable(
         const applicableFormulatedPayheads: VariableFormulaProp[] = dataPH
           .filter((ph) => {
             return (
-              String(ph.calculation) !== "" &&
-              isAffected(tryParse(emp), tryParse(ph)) &&
-              (ph.calculation === static_formula.cash_advance_disbursement
-                ? cashDisburseMap.has(emp.id)
-                : true) &&
-              (ph.calculation === static_formula.cash_advance_repayment
-                ? cashRepayMap.has(emp.id)
-                : true) &&
-              ph.calculation != static_formula.benefit_contribution // Benefits already calculated, ignore.
+                (String(ph.calculation) === ""
+                    ? String(ph.calculation) === "" && !!amountRecordsMap.get(ph.id)?.get(emp.id)
+                    : true) &&
+                isAffected(tryParse(emp), tryParse(ph)) &&
+                (ph.calculation === static_formula.cash_advance_disbursement ? cashDisburseMap.has(emp.id) : true) &&
+                (ph.calculation === static_formula.cash_advance_repayment ? cashRepayMap.has(emp.id) : true) &&
+                ph.calculation != static_formula.benefit_contribution // Benefits already calculated, ignore.
             );
           })
           .map((ph) => ({
