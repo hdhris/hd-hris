@@ -28,8 +28,8 @@ const formSchema = z.object({
     clock_out: z.string(),
     date: z.string(),
     rate_per_hour: z.string(),
-    comment: z.string(),
-    reason: z.string(),
+    comment: z.string().optional(),
+    reason: z.string().optional(),
 });
 
 function Page() {
