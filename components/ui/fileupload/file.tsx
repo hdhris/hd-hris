@@ -77,6 +77,8 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
     if (dropzoneOptions?.maxFiles && value?.length) {
         disabled = disabled ?? value.length >= dropzoneOptions.maxFiles;
     }
+
+
     // dropzone configuration
     const {
         getRootProps, getInputProps, fileRejections, isFocused, isDragAccept, isDragReject, isDragActive

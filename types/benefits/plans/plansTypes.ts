@@ -3,6 +3,8 @@ import {EmployeeDetails} from "@/types/employeee/EmployeeType";
 export interface BenefitAdditionalDetails {
     id: number
     planId: number
+    employerContribution: number;
+    employeeContribution: number;
     minSalary?: number;
     maxSalary?: number;
     minMSC?: number;
@@ -20,8 +22,6 @@ export interface BenefitPlan {
     type: string;
     eligibilityCriteria: string;
     coverageDetails: string;
-    employerContribution: number;
-    employeeContribution: number;
     effectiveDate: string;
     expirationDate: string;
     description: string;

@@ -13,7 +13,7 @@ export type Employee = {
     name: string;
     picture: string;
     department: string;
-    employment_status: EmploymentStatusDetails
+    employment_status?: EmploymentStatusDetails
 };
 
 interface EmployeeListForm {
@@ -64,6 +64,7 @@ function EmployeeListForm({employees, isLoading, onSelected}: EmployeeListForm) 
                             }}
                             onSelectionChange={(e) => {
                                 const selectedItem = user.find(item => String(item.id) === String(e));
+
                                 if (selectedItem) {
                                     setValue('employee_id', selectedItem.id);
                                     field.onChange(selectedItem.id);

@@ -102,14 +102,14 @@ export default function PlanDetails({...props}: BenefitPlan) {
                                 <Typography className="font-semibold text-medium">Employee Rate %</Typography>
                                 <div className="p-2 rounded-full bg-default-400/50 w-fit">
                                     <Typography as="span"
-                                                className="text-xl font-semibold">{props.employeeContribution}%</Typography>
+                                                className="text-xl font-semibold">{props.benefitAdditionalDetails?.employeeContribution}%</Typography>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2 p-2 w-fit items-center">
                                 <Typography className="font-semibold text-medium">Employer Rate %</Typography>
                                 <div className="p-2 rounded-full bg-default-400/50 w-fit">
                                     <Typography as="span"
-                                                className="text-xl font-semibold">{props.employerContribution}%</Typography>
+                                                className="text-xl font-semibold">{props.benefitAdditionalDetails?.employerContribution}%</Typography>
                                 </div>
                             </div>
                         </div>

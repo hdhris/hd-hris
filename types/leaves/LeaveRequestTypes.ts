@@ -52,6 +52,7 @@ export interface LeaveType {
     name: string;
     min: number;
     max: number;
+    is_attachment_required: boolean
 }
 
 

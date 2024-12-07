@@ -4,23 +4,31 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="adding leave credit">
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing leave credit v1">
+      <change afterPath="$PROJECT_DIR$/types/upload/upload-types.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-types/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-types/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/overtime/preview/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/overtime/preview/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/benefits/plans/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/benefits/plans/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/benefits/plans/enroll/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/benefits/plans/enroll/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/benefits/plans/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/benefits/plans/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/benefits/plans/update/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/benefits/plans/update/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/employees-leaves-status/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/employees-leaves-status/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/create/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/employee-leave-credits-status/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/employee-leave-credits-status/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/create/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/delete/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/delete/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/update/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/update/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/benefits/plans/form/benefit-plan-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/benefits/plans/form/benefit-plan-form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/benefits/plans/plan-details.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/benefits/plans/plan-details.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/admin/leaves/credits/forms/add/leave-credit-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/credits/forms/add/leave-credit-form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/leaves/leave-types/form/LeaveTypeForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/leave-types/form/LeaveTypeForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/include-emp-and-reviewr/include.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/include-emp-and-reviewr/include.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utils/confirmDialog.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/confirmDialog.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prisma/ERD.svg" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/test.prisma" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/request-form/LeaveTypeSelection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/request-form/LeaveTypeSelection.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/request-form/form/RequestForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/request-form/form/RequestForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/employee-list-autocomplete/EmployeeListForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/employee-list-autocomplete/EmployeeListForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/fileupload/file.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/fileupload/file.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/queries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/queries.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/benefits/plans/plansTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/benefits/plans/plansTypes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,13 +38,13 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript File" />
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
   <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="origin/france" />
+    <option name="BRANCH" value="origin/nizam" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -176,7 +184,7 @@
       <workItem from="1733412228630" duration="352000" />
       <workItem from="1733412943866" duration="6883000" />
       <workItem from="1733443659721" duration="13107000" />
-      <workItem from="1733470073925" duration="16172000" />
+      <workItem from="1733470073925" duration="42675000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />
@@ -402,11 +410,30 @@
       <option name="project" value="LOCAL" />
       <updated>1733455289190</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="fixing leave credit v1">
+      <option name="closed" value="true" />
+      <created>1733500984463</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1733500984463</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+        <option value="GitHub.CommitStatus" />
+      </list>
+    </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -420,7 +447,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="deleting .idea" />
     <MESSAGE value="fixing the responsiveness of the onGridDisplay" />
     <MESSAGE value="updating No data component - adding Icon" />
     <MESSAGE value="fixing the pagination in data display and fixing the interface in leave credit" />
@@ -445,6 +471,7 @@
     <MESSAGE value="fixing leave types, and adding logger" />
     <MESSAGE value="adding indexes in schema.prisma" />
     <MESSAGE value="adding leave credit" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding leave credit" />
+    <MESSAGE value="fixing leave credit v1" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing leave credit v1" />
   </component>
 </project>

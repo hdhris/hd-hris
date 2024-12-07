@@ -10,6 +10,7 @@ import {DrawerFormTypes} from "@/types/drawer-form/drawer-form-types";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {useToast} from "@/components/ui/use-toast";
 import {BenefitPlan} from "@/types/benefits/plans/plansTypes";
+import {axiosInstance} from "@/services/fetcher";
 
 interface BenefitPlanFormProps extends DrawerFormTypes {
     plan?: BenefitPlan
@@ -35,8 +36,8 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
                 effective_date: plan.effectiveDate || "",
                 expiration_date: plan.expirationDate || "",
                 is_active: plan.isActive ?? false, // Assuming a boolean
-                employer_contribution: plan.employerContribution ?? 0,
-                employee_contribution: plan.employeeContribution ?? 0,
+                employer_contribution: plan.benefitAdditionalDetails?.employerContribution ?? 0,
+                employee_contribution: plan.benefitAdditionalDetails?.employerContribution ?? 0,
                 advance_setting: !!plan.benefitAdditionalDetails,
                 minSalary: plan.benefitAdditionalDetails?.minSalary ?? 0,
                 maxSalary: plan.benefitAdditionalDetails?.maxSalary ?? 0,
@@ -105,8 +106,8 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
                 effective_date: plan.effectiveDate || "",
                 expiration_date: plan.expirationDate || "",
                 is_active: plan.isActive ?? false, // Assuming a boolean
-                employer_contribution: plan.employerContribution ?? 0,
-                employee_contribution: plan.employeeContribution ?? 0,
+                employer_contribution: plan.benefitAdditionalDetails?.employerContribution ?? 0,
+                employee_contribution: plan.benefitAdditionalDetails?.employeeContribution ?? 0,
                 advance_setting: !!plan.benefitAdditionalDetails,
                 minSalary: plan.benefitAdditionalDetails?.minSalary ?? 0,
                 maxSalary: plan.benefitAdditionalDetails?.maxSalary ?? 0,
@@ -125,41 +126,41 @@ function BenefitPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanForm
     const onSubmit = async (values: z.infer<typeof PlanFormValidation>) => {
         // console.log("Plan: ", plan)
         const data = plan && {
-            // // benefitAdditionalDetails: {
-            // //     id: plan.benefitAdditionalDetails?.id || undefined,
-            // //     values.advance_setting ? ...values.
-            // // },
-            // deduction_id: plan.deduction_id,
-            // id: plan.id,
-            //
+            // benefitAdditionalDetails: {
+            //     id: plan.benefitAdditionalDetails?.id || undefined,
+            //     values.advance_setting ? ...values.
+            // },
+            deduction_id: plan.deduction_id,
+            id: plan.id,
+            plan_id: plan.benefitAdditionalDetails?.planId,
             ...values
         }
 
-        console.log("Values: ", values)
-        console.log("Data: ", data)
-        // setIsLoading(true)
-        // try {
-        //
-        //     let res
-        //     if (plan) {
-        //         res = await axiosInstance.post("/api/admin/benefits/plans/update", data)
-        //     } else {
-        //         res = await axiosInstance.post("/api/admin/benefits/plans/create", values)
-        //     }
-        //     if (res.status === 200) {
-        //         toast({
-        //             title: "Success",
-        //             description: `Plan ${plan ? "updating" : "creating"} successfully`,
-        //             variant: "success"
-        //         })
-        //     }
-        // } catch (error) {
-        //     toast({
-        //         title: "Error", description: `Error ${plan ? "updating" : "creating"} plan`, variant: "danger"
-        //     })
-        // } finally {
-        //     setIsLoading(false)
-        // }
+        console.log("Benefit Plan: ", data)
+
+        setIsLoading(true)
+        try {
+
+            let res
+            if (plan) {
+                res = await axiosInstance.post("/api/admin/benefits/plans/update", data)
+            } else {
+                res = await axiosInstance.post("/api/admin/benefits/plans/create", values)
+            }
+            if (res.status === 200) {
+                toast({
+                    title: "Success",
+                    description: `Plan ${plan ? "updating" : "creating"} successfully`,
+                    variant: "success"
+                })
+            }
+        } catch (error) {
+            toast({
+                title: "Error", description: `Error ${plan ? "updating" : "creating"} plan`, variant: "danger"
+            })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     const basicInfoFields: FormInputProps[] = [{

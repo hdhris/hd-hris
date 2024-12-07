@@ -58,7 +58,6 @@ function Page() {
                 id: item.created_by.id, name: item.created_by.name, picture: item.created_by.picture,
             }
 
-
             return {
                 id: item.id,
                 employee_id: item.employee_id,
@@ -123,8 +122,8 @@ function Page() {
     const is_approver = users?.filter(user => user.id === approver_details?.approved_by).find(user => user.employee_id === session.data?.user?.employee_id)
     const is_reviewer = users?.filter(user => user.id === reviewer_details?.reviewed_by).find(user => user.employee_id === session.data?.user?.employee_id)
 
-    console.log("Is Approver: ", is_approver)
-    console.log("Is Reviewer: ", is_reviewer)
+    // console.log("Is Approver: ", is_approver)
+    // console.log("Is Reviewer: ", is_reviewer)
     const today = dayjs();
     const leave_progress = useMemo(() => {
         if (today.isBefore(startDate, 'day')) {
@@ -283,14 +282,14 @@ function Page() {
                     })}
                 </div>
             </BorderCard>
-            <div className="flex gap-2 items-center">
-                <Input startContent={<Avatar classNames={{
-                    base: "h-7 w-7"
-                }}
-                                             src={session.data?.user?.image}
-                />} color="primary" variant="bordered" placeholder="Add a comment..." classNames={InputStyle}/>
-                <Button isIconOnly color="primary" variant="light"><LuSendHorizonal className={cn(icon_size)}/></Button>
-            </div>
+            {/*<div className="flex gap-2 items-center">*/}
+            {/*    <Input startContent={<Avatar classNames={{*/}
+            {/*        base: "h-7 w-7"*/}
+            {/*    }}*/}
+            {/*                                 src={session.data?.user?.image}*/}
+            {/*    />} color="primary" variant="bordered" placeholder="Add a comment..." classNames={InputStyle}/>*/}
+            {/*    <Button isIconOnly color="primary" variant="light"><LuSendHorizonal className={cn(icon_size)}/></Button>*/}
+            {/*</div>*/}
             <hr className="border border-default-400 space-y-2"/>
             <Section className="ms-0" title="Reason" subtitle="Reason of employee in regard to leave request
             ."/>
@@ -386,17 +385,17 @@ function Page() {
         </>} onDanger={<>
             <Section className="ms-0" title="Edit Leave"
                      subtitle="Edit the leave request">
-                <Button startContent={<LuPencil />}{...uniformStyle()}>Edit</Button>
+                <Button isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"} startContent={<LuPencil />}{...uniformStyle()}>Edit</Button>
             </Section>
             <hr className="border border-destructive/20"/>
             <Section className="ms-0" title="Extend Leave"
                      subtitle="Extend the leave request">
-                <Button startContent={<LuCalendarRange />} {...uniformStyle()}>Extend</Button>
+                <Button isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"} startContent={<LuCalendarRange />} {...uniformStyle()}>Extend</Button>
             </Section>
             <hr className="border border-destructive/20"/>
             <Section className="ms-0" title="Cancel"
                      subtitle="Cancel the leave request">
-                <Button startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
+                <Button isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"} startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
             </Section>
         </>}/>}
 

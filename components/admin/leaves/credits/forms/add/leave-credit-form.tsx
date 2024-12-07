@@ -76,24 +76,28 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
         const applicableLeaveTypes = leaveTypes.filter(
             leaveType => leaveType.applicable_to_employee_types === employeeStatus || leaveType.applicable_to_employee_types === 'all'
         );
-        alert("Employee status: " + JSON.stringify(applicableLeaveTypes))
+
         setEmployeeLeaveType(applicableLeaveTypes);
     };
 
     const handleSubmit = async (data: z.infer<typeof LeaveCreditFormSchema>) => {
         const { apply_for, employee_id, leave_credits } = data;
 
+        // console.log("Emp: ", employeeState.find(item => item.id === employee_id)?.employment_status.id)
         const payload =
-            apply_for === 'all'
-                ? { employee_id: employeeState.map(emp => emp.id), leave_credits }
-                : apply_for === 'specific_employee'
-                    ? { employee_id, leave_credits }
+                apply_for === 'specific_employee'
+                    ? { employee_id: [employee_id],
+                    apply_for: employeeState.find(item => item.id === employee_id)?.employment_status.id,
+                        leave_credits }
                     : {
                         employee_id: employeeState
                             .filter(emp => emp.employment_status.name === apply_for)
                             .map(emp => emp.id),
+                        apply_for: employeeState
+                            .find(emp => emp.employment_status.name === apply_for)?.employment_status.id,
                         leave_credits,
                     };
+
 
         try {
             setIsLoading(true);
@@ -105,7 +109,7 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
                     description: 'Leave credit created successfully',
                     variant: 'success',
                 });
-                // form.reset();
+                form.reset();
             } else {
                 toast({
                     title: 'Error',
@@ -173,7 +177,6 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
     ];
 
     const renderLeaveTypes = (filteredLeaveTypes: LeaveTypeForEmployee[]) => {
-        console.log("Filter Leave: ", filteredLeaveTypes)
         return filteredLeaveTypes.map((leaveType, index) => (
             <div key={leaveType.id} className="space-y-2 border-b-2 last:border-none p-4">
                 <div className="flex justify-between">

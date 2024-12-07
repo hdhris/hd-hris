@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
         // Parse request body
         const data = await req.json();
-        console.log("Data: ", data)
+        console.log("Creating Data: ", data)
 
         // Validate required fields
         if (!data.employee_id || !data.leave_date || !data.days_of_leave || !data.reason || !data.leave_type_id) {
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
         const evaluators: LeaveApplicationEvaluation = {
             reviewers: {
                 decision: {
-                    is_reviewed: false,
+                    is_reviewed: true,
                     decisionDate: toGMT8().toISOString(),
                     rejectedReason: null
                 },
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
             // this is a brute force solution
             approver: {
                 decision: {
-                    is_approved: undefined,
+                    is_approved: true,
                     decisionDate: null,
                     rejectedReason: null
                 },
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
                 start_date: toGMT8(data.leave_date).toISOString(),
                 end_date: toGMT8(data.leave_date).add(Number(data.days_of_leave), "day").toISOString(),
                 reason: data.reason,
-                type_id: data.leave_type_id,
+                leave_type_id: data.leave_type_id,
                 created_at: toGMT8().toISOString(),
                 updated_at: toGMT8().toISOString(),
                 created_by: reviewer.id,
@@ -198,7 +198,7 @@ export async function POST(req: NextRequest) {
             message = "Database error. Please contact support if the issue persists.";
         }
 
-        return NextResponse.json({ success: false, message });
+        return NextResponse.json({ success: false, message }, {status: 500});
     }
 }
 

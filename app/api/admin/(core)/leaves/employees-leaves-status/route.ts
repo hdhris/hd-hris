@@ -61,16 +61,25 @@ export async function GET() {
         }
     }),
 
-        prisma.ref_leave_type_details.findMany({
+        prisma.trans_leave_types.findMany({
             where: {
-                is_active: true,
-                trans_leave_types:{
-                    some: {
-                        deleted_at: null
+                deleted_at: null,
+                ref_leave_type_details: {
+                    is_active: true,
+                }
+                // is_active: true,
+                // trans_leave_types:{
+                //     some: {
+                //         deleted_at: null
+                //     }
+                // }
+            }, select: {
+                id: true,
+                ref_leave_type_details: {
+                    select:{
+                        name: true, max_duration: true, min_duration: true, attachment_required: true
                     }
                 }
-            }, select: {
-                id: true, name: true, max_duration: true, min_duration: true
             },
         }),]);
 
@@ -94,7 +103,7 @@ export async function GET() {
 
 
     const availableLeaves: LeaveType[] = leaveTypes.map((leave) => ({
-        id: leave.id, name: leave.name, min: toDecimals(leave.min_duration), max: toDecimals(leave.max_duration),
+        id: leave.id, name: leave.ref_leave_type_details.name, min: toDecimals(leave.ref_leave_type_details.min_duration), max: toDecimals(leave.ref_leave_type_details.max_duration), is_attachment_required: leave.ref_leave_type_details.attachment_required
     }))
 
     const data: EmployeeLeavesStatus = {

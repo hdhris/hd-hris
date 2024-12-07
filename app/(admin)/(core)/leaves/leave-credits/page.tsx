@@ -81,6 +81,8 @@ function Page() {
     const handleSelect = (edited: EditCreditProp) => {
         setViewCredit(edited)
 
+        console.log("Edited: ", edited)
+
     }
 
     return (<section className='w-full h-full flex gap-4 overflow-hidden'>

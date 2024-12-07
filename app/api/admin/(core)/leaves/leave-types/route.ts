@@ -49,7 +49,7 @@ export async function GET(request: Request) {
                     }
                 },
             }), prisma.trans_leaves.groupBy({
-                by: ["type_id", "employee_id"],
+                by: ["leave_type_id", "employee_id"],
             }), prisma.trans_employees.findMany({
                 select: {
                     id: true,
@@ -72,8 +72,8 @@ export async function GET(request: Request) {
 
 // Populate the map with employee IDs grouped by type_id
         employeeCountData.forEach(empCount => {
-            if (empCount.type_id !== null && empCount.employee_id !== null) {
-                const typeId = empCount.type_id as number;
+            if (empCount.leave_type_id !== null && empCount.employee_id !== null) {
+                const typeId = empCount.leave_type_id as number;
                 const employeeId = empCount.employee_id as number;
 
                 // If the map already has this type_id, push the employee_id to the existing array

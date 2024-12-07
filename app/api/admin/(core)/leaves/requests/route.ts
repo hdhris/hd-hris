@@ -18,7 +18,7 @@ export async function GET(request: Request) {
         where: {
             deleted_at: null
         }, include: {
-            trans_employees_leaves: {
+            trans_employees_trans_leaves_employee_idTotrans_employees: {
                 select: {
                     email: true,
                     prefix: true,
@@ -40,9 +40,13 @@ export async function GET(request: Request) {
                     middle_name: true,
                     suffix: true,
                 }
-            }, ref_leave_types: {
+            }, trans_leave_types: {
                 select: {
-                    id: true, name: true, code: true
+                    ref_leave_type_details: {
+                        select: {
+                            id: true, name: true, code: true
+                        }
+                    }
                 }
             }
         }, orderBy: {
@@ -74,9 +78,9 @@ export async function GET(request: Request) {
         return {
             id: items.id,
             employee_id: items.employee_id,
-            name: getEmpFullName(items.trans_employees_leaves),
-            email: items.trans_employees_leaves.email || "",
-            picture: items.trans_employees_leaves.picture || "",
+            name: getEmpFullName(items.trans_employees_trans_leaves_employee_idTotrans_employees),
+            email: items.trans_employees_trans_leaves_employee_idTotrans_employees.email || "",
+            picture: items.trans_employees_trans_leaves_employee_idTotrans_employees.picture || "",
             created_by: {
                 id: items.trans_employees_trans_leaves_created_byTotrans_employees?.id!,
                 email: items.trans_employees_trans_leaves_created_byTotrans_employees?.email || "",
@@ -93,9 +97,9 @@ export async function GET(request: Request) {
                 updated_at: dayjs(items.updated_at).format("YYYY-MM-DD"),
             },
             leave_type: {
-                id: items.ref_leave_types?.id!,
-                name: items.ref_leave_types?.name || "",
-                code: items.ref_leave_types?.code || ""
+                id: items.trans_leave_types?.ref_leave_type_details?.id!,
+                name: items.trans_leave_types?.ref_leave_type_details?.name || "",
+                code: items.trans_leave_types?.ref_leave_type_details?.code || ""
             },
             evaluators: processJsonObject<LeaveApplicationEvaluation>(items.evaluators)!,
         }
