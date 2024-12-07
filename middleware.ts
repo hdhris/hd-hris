@@ -16,6 +16,13 @@ export default auth((req: any) => {
         return NextResponse.next();
     }
 
+    // Allow api access to mobile
+    if (
+        pathname.startsWith('/api/mobile')
+    ) {
+        return NextResponse.next();
+    }
+
 
     if(pathname === "/"){
         return NextResponse.redirect(new URL("/auth/login", req.nextUrl.origin));
