@@ -245,7 +245,7 @@ function CashAdvanceForm({ isOpen, onClose, cashAdvance, mutate, onApproval}: Ca
                                             name: getEmpFullName(emp),
                                             id: emp.id,
                                             picture: emp.picture,
-                                            is_regular: emp.is_regular,
+                                            employment_status: emp.ref_employment_status,
                                         };
                                     }) || []
                                 }
