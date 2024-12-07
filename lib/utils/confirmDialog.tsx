@@ -8,10 +8,11 @@ interface showDialogProps extends Omit<ModalProps, "title"> {
     message: ReactNode;
     withCancel?: boolean;
     preferredAnswer?: "yes" | "no" | "cancel";
+    isLoading?: boolean
 }
 
 const showDialog = async ({
-                              title, message, withCancel, preferredAnswer, ...rest
+                              title, message, withCancel, preferredAnswer, isLoading, ...rest
                           }: Omit<showDialogProps, "children">): Promise<"yes" | "no" | "cancel"> => {
     const prefAnswer = preferredAnswer || "yes";
     return new Promise((resolve) => {
@@ -80,6 +81,7 @@ const showDialog = async ({
                             variant={prefAnswer == "yes" ? "solid" : "light"}
                             ref={prefAnswer == "yes" ? buttonRef : null}
                             onPress={handleYes}
+                            isLoading={isLoading}
                         >
                             Yes
                         </Button>

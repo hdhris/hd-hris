@@ -1,11 +1,15 @@
 import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
+import {LeaveTypeForEmployee} from "@/types/leaves/LeaveTypes";
+import {Logger, LogLevel} from "@/lib/logger/Logger";
+import {Employee} from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
     try {
+        const logger = new Logger(LogLevel.DEBUG)
         // Fetch current year leave balances where deleted_at is null
         const leave_balances = await prisma?.dim_leave_balances.findMany({
             where: {
@@ -22,31 +26,61 @@ export async function GET() {
                 },
             }, include: {
                 ref_departments: true, // Include department data
+                ref_employment_status: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
             },
-        }), prisma.ref_leave_types.findMany({
+        }), prisma.ref_leave_type_details.findMany({
             where: {
-                is_active: true, deleted_at: null
+                is_active: true,
+                trans_leave_types: {
+                    some: {
+                        deleted_at: null
+                    }
+                }
             }, select: {
-                id: true, name: true, applicable_to_employee_types: true
-            }, orderBy: {
-                applicable_to_employee_types: "asc"
-            }
+                id: true,
+                name: true,
+                is_applicable_to_all: true,
+                trans_leave_types: {
+                    select: {
+                        ref_employment_status: {
+                            select:{
+                                name: true,
+                            }
+                        }
+                    }
+                }
+            },
         })
 
         ])
 
         // Format the employee data for a user-friendly response
-        const data = employees.map((emp) => {
+        const data: Employee[] = employees.map((emp: any) => {
             return {
-                id: emp.id, name: getEmpFullName(emp), // Full name formatted from employee data
+                id: emp.id,
+                name: getEmpFullName(emp), // Full name formatted from employee data
                 picture: emp.picture, department: emp.ref_departments?.name ?? "No department", // Default to "No department" if department name is missing
-                is_regular: emp.is_regular
+                employment_status: emp.ref_employment_status
             };
         });
 
+        const leave_type_available: LeaveTypeForEmployee[] =  leave_types.map(item => {
+            return{
+                id: item.id,
+                name: item.name,
+                applicable_to_employee_types: item.is_applicable_to_all ? "all" : item.trans_leave_types.map(item => item.ref_employment_status.name)[0]
+            }
+        })
 
+
+        // logger.debug(leave_type_available)
         return NextResponse.json({
-            employees: data, leave_types
+            employees: data, leave_types: leave_type_available
         });
     } catch (error) {
         console.error("Failed to fetch employees or leave balances:", error);

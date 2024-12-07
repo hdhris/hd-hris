@@ -1,9 +1,9 @@
 import {z} from "zod";
-import {useForm} from "react-hook-form";
+import {useForm, useFormState} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {cn} from "@nextui-org/react";
-import React, {FC, ReactNode, useEffect, useState} from "react";
+import React, {FC, ReactNode, useEffect, useMemo, useState} from "react";
 import Drawer from "@/components/common/Drawer";
 import {Form} from "@/components/ui/form";
 import {Section, Title} from "@/components/common/typography/Typography";
@@ -12,6 +12,8 @@ import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import {LeaveType} from "@/types/leaves/LeaveTypes";
 import {AxiosError} from "axios";
+import {useEmploymentStatus} from "@/services/queries";
+import {Logger, LogLevel} from "@/lib/logger/Logger";
 
 interface LeaveTypeFormProps {
     title?: string
@@ -21,22 +23,33 @@ interface LeaveTypeFormProps {
     data?: LeaveType
 }
 
+
 const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeFormProps) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const {toast} = useToast()
+    const {data: employment_status} = useEmploymentStatus()
 
+    const logger = new Logger(LogLevel.DEBUG)
     const form = useForm<z.infer<typeof LeaveTypeSchema>>({
         resolver: zodResolver(LeaveTypeSchema), defaultValues: {
             //general information
-            name: "", code: "", description: "",
-            carryOver: false, //Leave Duration
+            name: "", code: "", description: "", carryOver: false, //Leave Duration
             minDuration: 0, maxDuration: 0, //Additional Settings
-            paidLeave: false, isActive: false, applicableToEmployeeTypes: "",
+            paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: "",
         }
     })
+    const {isDirty, isValid} = useFormState(form)
+    const employeeStatus = useMemo(() => {
+        if(employment_status) {
+            return employment_status.data
+        }
+        return []
+    }, [employment_status])
 
     useEffect(() => {
         if (data) {
+
+            // logger.debug(data)
             form.reset({
                 name: data.name,
                 code: data.code,
@@ -46,24 +59,25 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 maxDuration: data.max_duration,
                 paidLeave: data.paid_leave,
                 isActive: data.is_active,
-                applicableToEmployeeTypes: data.applicable_to_employee_types.toLowerCase()
+                attachmentRequired: data.attachment_required,
+                applicableToEmployeeTypes: String(data.applicable_to_employee_types.id)
             })
 
         }
     }, [data, form]);
 
 
-    const onSubmit = async (values: any) => {
+    const onSubmit = async (values: z.infer<typeof LeaveTypeSchema>) => {
         setIsLoading(true)
         const items = {
-            id: data?.id,
-            ...values,
+            id: data?.id, ...values,
         }
+
         try {
             let rest
-            if(data?.id){
-                rest = await axiosInstance.post("/api/admin/leaves/leave-types/update", items)
-            } else{
+            if (data?.id) {
+                rest = await axiosInstance.patch("/api/admin/leaves/leave-types/update", items)
+            } else {
                 rest = await axiosInstance.post("/api/admin/leaves/leave-types/create", values)
             }
 
@@ -71,20 +85,20 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 toast({
                     title: "Success", description: "Leave type created successfully", variant: "success",
                 })
+
                 form.reset({
-                    name: "", code: "", description: "",
-                    carryOver: false, //Leave Duration
+                    name: "", code: "", description: "", carryOver: false, //Leave Duration
                     minDuration: 0, maxDuration: 0, //Additional Settings
-                    paidLeave: false, isActive: false, applicableToEmployeeTypes: ""
+                    paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: ""
                 })
             }
         } catch (err) {
             console.log(err)
-            if(err instanceof AxiosError){
+            if (err instanceof AxiosError) {
                 toast({
                     title: "Error", description: err.response?.data.message, variant: "danger",
                 })
-            } else{
+            } else {
                 toast({
                     title: "Error", description: "Something went wrong", variant: "danger",
                 })
@@ -103,6 +117,9 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         placeholder: "e.g., Vacation, Sick Leave",
         description: "The name of the leave type.",
         isRequired: true,
+        config: {
+            autoFocus: true
+        }
     }, {
         name: 'code',
         type: "text",
@@ -118,8 +135,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         isRequired: true,
         placeholder: "Brief description of the leave type",
         config: {
-           maxLength: 255,
-            maxRows: 4,
+            maxLength: 255, maxRows: 4,
         }
 
     },]
@@ -151,16 +167,23 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         isRequired: true,
         description: "Select the employee types this leave applies to.",
         config: {
-            options: [{
-                value: "all", label: "All Employee Types",
-            }, {
-                value: "regular", label: "Regular"
-            }, {
-                value: "probationary", label: "Probationary"
-            }]
+            options: [
+                { value: "all", label: "All Employee Types" },
+                ...(Array.isArray(employeeStatus)
+                        ? employeeStatus.map((item) => ({
+                            value: String(item.id),
+                            label: item.name,
+                        }))
+                        : []
+                )
+            ]
         }
     }, switchToggle({
         name: 'carryOver', label: 'Carry Over', description: "Does this leave can be carried over to the next year?"
+    }), switchToggle({
+        name: "attachmentRequired",
+        label: "Attachment Required",
+        description: "  Is an attachment (e.g., medical certificate) required?"
     })]
 
     return (<>

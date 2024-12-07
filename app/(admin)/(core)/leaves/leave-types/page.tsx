@@ -23,6 +23,8 @@ import {isObjectEmpty} from "@/helper/objects/isObjectEmpty";
 import {pluralize} from "@/helper/pluralize/pluralize";
 import EmployeesAvatar from "@/components/common/avatar/employees-avatar";
 import CardTable from "@/components/common/card-view/card-table";
+import {capitalize} from "@nextui-org/shared-utils";
+import {AxiosError} from "axios";
 
 
 function LeaveTypeTable() {
@@ -68,40 +70,56 @@ function LeaveTypeTable() {
         }
     }, [leaveData, leaveType]);
 
-    const handleLeaveTypeDeleteMultiple = async (keys: Selection) => {
-        const deleteKeys = keys === "all" ? leaveData.map((item) => item.id) // Collect all IDs
-            : Array.from(keys).map(key => Number(key)); // Collect selected IDs and convert to numbers
-
-
-        // Filter leaveData to find names of the deleted items
-        const deletedNames = leaveData
-            .filter(item => deleteKeys.includes(item.id)) // Use includes to check for matches
-            .map(item => item.name) // Map to get the names
-            .join(", "); // Join names into a string
-
-
-        const res = await showDialog({
-            title: "Delete Leave Type", message: (<Typography>Are you sure you want to delete this
-                <Typography as="span"
-                            className="font-semibold"> {deletedNames}</Typography>?
-            </Typography>)
-        })
-
-        if (res === "yes") {
-            const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', deleteKeys)
-            if (res.status !== 200) {
-                toast({
-                    title: "Error", description: res.data.message, variant: "danger",
-                })
-            }
-
-
-        }
-        if (res === "no") {
-            return;
-        }
-
-    }
+    // const handleLeaveTypeDeleteMultiple = async (keys: Selection) => {
+    //     const deleteKeys = keys === "all" ? leaveData.map((item) => item.id) // Collect all IDs
+    //         : Array.from(keys).map(key => Number(key)); // Collect selected IDs and convert to numbers
+    //
+    //
+    //     // Filter leaveData to find names of the deleted items
+    //     const deletedNames = leaveData
+    //         .filter(item => deleteKeys.includes(item.id)) // Use includes to check for matches
+    //         .map(item => item.name) // Map to get the names
+    //         .join(", "); // Join names into a string
+    //
+    //
+    //     const res = await showDialog({
+    //         title: "Delete Leave Type", message: (<Typography>Are you sure you want to delete this
+    //             <Typography as="span"
+    //                         className="font-semibold"> {deletedNames}</Typography>?
+    //         </Typography>)
+    //     })
+    //
+    //
+    //     alert("Deleted Keys: " + deleteKeys)
+    //     if (res === "yes") {
+    //         try {
+    //             const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', deleteKeys)
+    //             if (res.status !== 200) {
+    //                 toast({
+    //                     title: "Error", description: res.data.message, variant: "danger",
+    //                 })
+    //             }
+    //         } catch (error){
+    //             console.log(error)
+    //             if(error instanceof Error) {
+    //                 toast({
+    //                     title: "Error", description: error.message, variant: "danger",
+    //                 })
+    //             } else if(error instanceof AxiosError){
+    //                 toast({
+    //                     title: "Error", description: error.response?.data.message, variant: "danger",
+    //                 })
+    //             }
+    //         }
+    //
+    //
+    //
+    //     }
+    //     if (res === "no") {
+    //         return;
+    //     }
+    //
+    // }
 
 
     return (<section className='w-full h-full flex gap-4'>
@@ -118,9 +136,9 @@ function LeaveTypeTable() {
                 }, {key: "name", name: "Name"}, {key: "created_at", name: "Created At"}]
 
             }}
-            onDeleteSelected={async (keys) => {
-                await handleLeaveTypeDeleteMultiple(keys)
-            }}
+            // onDeleteSelected={async (keys) => {
+            //     await handleLeaveTypeDeleteMultiple(keys)
+            // }}
             searchProps={{
                 searchingItemKey: ["name"]
             }}
@@ -133,34 +151,35 @@ function LeaveTypeTable() {
             onTableDisplay={{
                 config: LeaveTypeTableConfiguration,
                 onRowAction: handleRowKey,
-                selectionMode: "multiple",
                 layout: "auto"
             }}
 
 
-            onExport={{
-                drawerProps: {
-                    title: "Export",
-                }
-            }}
-            onImport={{
-                drawerProps: {
-                    title: "Import",
-                }
-            }}
+            // onExport={{
+            //     drawerProps: {
+            //         title: "Export",
+            //     }
+            // }}
+            // onImport={{
+            //     drawerProps: {
+            //         title: "Import",
+            //     }
+            // }}
             defaultDisplay="table"/>
 
-        <LeaveTypesDetails {...leaveType!}/>
+        <LeaveTypesDetails {...leaveType!} onClose={() => setLeaveType(undefined)}/>
     </section>);
 }
 
 export default LeaveTypeTable;
 
 
-const LeaveTypesDetails = ({...props}: LeaveType) => {
+const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void}) => {
     const {toast} = useToast()
     const curr_emp = props.current_employees
     const [editOpen, setEditOpen] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false)
+
     const [data, setData] = useState<LeaveType>()
     const handleEmployeePicture = (key: Key) => {
         alert(key)
@@ -174,6 +193,7 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
     const handleLeaveTypeDelete = async (key: Key) => {
         const hasEmployees = props.current_employees.length
 
+        console.log("Props: ", props)
         const leaveTypeName = props.name
         if (hasEmployees > 0) {
             alert("Cannot delete leave type with employees")
@@ -185,13 +205,34 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
             </Typography>)
         })
 
+        const deletedIds = {
+            leave_type_id: props.id,
+            employee_status_id: props.applicable_to_employee_types.id
+        }
+
         if (res === "yes") {
-            const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', [key])
-            if (res.status !== 200) {
-                toast({
-                    title: "Error", description: res.data.message, variant: "danger",
-                })
+            setLoading(true)
+            try{
+                const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', deletedIds)
+                if (res.status !== 200) {
+                    toast({
+                        title: "Error", description: res.data.message, variant: "danger",
+                    })
+                }
+            }catch (error){
+                console.log(error)
+                if(error instanceof Error) {
+                    toast({
+                        title: "Error", description: error.message, variant: "danger",
+                    })
+                } else if(error instanceof AxiosError){
+                    toast({
+                        title: "Error", description: error.response?.data.message, variant: "danger",
+                    })
+                }
             }
+
+
 
 
         }
@@ -206,9 +247,13 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
             title="Leave Type"
             onDelete={() => handleLeaveTypeDelete(props.id)}
             onEdit={() => handleLeaveTypeEdit(!editOpen)}
+            editProps={{
+                isDisabled: props.current_employees.length > 0
+            }}
+            onClose={onClose}
             header={<div
                 className="relative flex flex-col gap-2 h-32 bg-opacity-50 backdrop-blur-sm w-full">
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-5 w-fit">
                     <Typography className="text-2xl font-bold">{props.name}</Typography>
                     <Chip style={{
                         background: getColor(props.code, 0.2),
@@ -230,11 +275,13 @@ const LeaveTypesDetails = ({...props}: LeaveType) => {
             <CardTable data={[{
                 label: "Minimum Days", value: pluralize(props.min_duration, "day")
             }, {label: "Maximum Days", value: pluralize(props.max_duration, "day")}, {
-                label: "Applicable to", value: props.applicable_to_employee_types
+                label: "Applicable for", value: capitalize(props.applicable_to_employee_types.name)
             }, {
                 label: "Current Usage", value: <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>
             },{
-                label: "Is Paid", value: props.paid_leave ? "Paid Leave" : "Unpaid Leave"
+                label: "Leave Compensation Status", value: props.paid_leave ? "Paid Leave" : "Unpaid Leave"
+            },{
+                label: "Attachment Status", value: props.attachment_required ? "Required" : "Not Required"
             },{
                 label: "Created At", value: props.created_at
             },{

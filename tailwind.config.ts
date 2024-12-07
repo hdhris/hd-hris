@@ -101,8 +101,8 @@ const config = {
         themes: {
           light: {
             colors: {
-              background: "#FFFFFF", // or DEFAULT
-              foreground: "#11181C", // or 50 to 900 DEFAULT
+              // background: "#FFFFFF", // or DEFAULT
+              // foreground: "#11181C", // or 50 to 900 DEFAULT
               primary: {
                700: "#0f172a",
               },

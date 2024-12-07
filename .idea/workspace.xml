@@ -4,10 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="final fix">
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/payroll/payslip/deploy-system-payheads/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/payroll/payslip/deploy-system-payheads/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/payroll/payslip/table.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/payroll/payslip/table.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/payslip/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/payslip/types.ts" afterDir="false" />
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="adding leave credit">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-types/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-types/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/employee-leave-credits-status/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/employee-leave-credits-status/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/delete/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/delete/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/update/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/update/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/credits/forms/add/leave-credit-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/credits/forms/add/leave-credit-form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/leave-types/form/LeaveTypeForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/leave-types/form/LeaveTypeForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/include-emp-and-reviewr/include.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/include-emp-and-reviewr/include.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/utils/confirmDialog.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/confirmDialog.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prisma/ERD.svg" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/test.prisma" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/queries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/queries.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,27 +96,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.codeium.enabled": "true",
-    "database.data.extractors.current.export.id": "Comma-separated (CSV)_id",
-    "database.data.extractors.current.id": "Comma-separated (CSV)_id",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/Xero/WebstormProjects/Capstone/HD-HRIS/components/common",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;database.data.extractors.current.export.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
+    &quot;database.data.extractors.current.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Xero/Desktop&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\common" />
@@ -151,7 +165,18 @@
       <workItem from="1732623105052" duration="21408000" />
       <workItem from="1732947144398" duration="13000" />
       <workItem from="1732947228033" duration="32607000" />
-      <workItem from="1733057123772" duration="24268000" />
+      <workItem from="1733057123772" duration="24566000" />
+      <workItem from="1733100216634" duration="7721000" />
+      <workItem from="1733142599883" duration="3378000" />
+      <workItem from="1733148274458" duration="6000" />
+      <workItem from="1733151211122" duration="6185000" />
+      <workItem from="1733200377920" duration="35125000" />
+      <workItem from="1733372066658" duration="27354000" />
+      <workItem from="1733411707721" duration="406000" />
+      <workItem from="1733412228630" duration="352000" />
+      <workItem from="1733412943866" duration="6883000" />
+      <workItem from="1733443659721" duration="13107000" />
+      <workItem from="1733470073925" duration="16172000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />
@@ -337,7 +362,47 @@
       <option name="project" value="LOCAL" />
       <updated>1733088158835</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="final fix v2">
+      <option name="closed" value="true" />
+      <created>1733088474953</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1733088474953</updated>
+    </task>
+    <task id="LOCAL-00026" summary="fixing leave types, and adding logger">
+      <option name="closed" value="true" />
+      <created>1733211889846</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1733211889847</updated>
+    </task>
+    <task id="LOCAL-00027" summary="adding indexes in schema.prisma">
+      <option name="closed" value="true" />
+      <created>1733219405357</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1733219405357</updated>
+    </task>
+    <task id="LOCAL-00028" summary="adding indexes in schema.prisma">
+      <option name="closed" value="true" />
+      <created>1733230116532</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1733230116532</updated>
+    </task>
+    <task id="LOCAL-00029" summary="adding leave credit">
+      <option name="closed" value="true" />
+      <created>1733455289190</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1733455289190</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -355,7 +420,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixing" />
     <MESSAGE value="deleting .idea" />
     <MESSAGE value="fixing the responsiveness of the onGridDisplay" />
     <MESSAGE value="updating No data component - adding Icon" />
@@ -377,6 +441,10 @@
     <MESSAGE value="fixing route in payslip" />
     <MESSAGE value="fixing route in payelip" />
     <MESSAGE value="final fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="final fix" />
+    <MESSAGE value="final fix v2" />
+    <MESSAGE value="fixing leave types, and adding logger" />
+    <MESSAGE value="adding indexes in schema.prisma" />
+    <MESSAGE value="adding leave credit" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding leave credit" />
   </component>
 </project>

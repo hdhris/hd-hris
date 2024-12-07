@@ -2,7 +2,7 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
-import { useDepartmentsData, useJobpositionData, useBranchesData } from "@/services/queries";
+import { useDepartmentsData, useJobpositionData, useBranchesData, useSalaryGradeData, useEmploymentStatusData } from "@/services/queries";
 
 
 const JobInformationForm: React.FC = () => {
@@ -11,6 +11,8 @@ const JobInformationForm: React.FC = () => {
   const { data: departments = [] } = useDepartmentsData();
   const { data: jobTitles = [] } = useJobpositionData();
   const { data: branches = [] } = useBranchesData();
+  const { data: salaries = [] } = useSalaryGradeData();
+  const { data: empstatuses = [] } = useEmploymentStatusData();
 
   const departmentOptions = departments.reduce((acc: any[], dept) => {
     if (dept && dept.id && dept.name) {
@@ -26,6 +28,20 @@ const JobInformationForm: React.FC = () => {
     return acc;
   }, []);
 
+  const employmentstatusOptions = empstatuses.reduce((acc: any[], empstatuses) => {
+    if (empstatuses && empstatuses.id && empstatuses.name) {
+      acc.push({ value: empstatuses.id.toString(), label: empstatuses.name });
+    }
+    return acc;
+  }, []);
+
+  const salaryGradeOptions = salaries.reduce((acc: any[], salary) => {
+    if (salary && salary.id && salary.name && salary.amount) {
+      acc.push({ value: salary.id.toString(), label: `${salary.name}: P${Number(salary.amount).toFixed(2)}` });
+    }
+    return acc;
+  }, []);
+  
   const jobOptions = jobTitles
     .filter((jt) => jt.for_probi === (watch("is_regular") === "false"))
     .reduce((acc: any[], job) => {
@@ -67,16 +83,24 @@ const JobInformationForm: React.FC = () => {
       },
     },
     {
-      name: "is_regular",
-      label: "Work Status",
+      name: "employement_status_id",
+      label: "Employment status",
       type: "select",
       isRequired: true,
       config: {
-        placeholder: "Select Work Status",
-        options: [
-          { label: "Regular", value: "true" },
-          { label: "Probitionary", value: "false" },
-        ],
+        placeholder: "Select employment status",
+        options: employmentstatusOptions,
+      },
+    },
+ 
+    {
+      name: "salary_grade_id",
+      label: "Salary Grade",
+      type: "select",
+      isRequired: true,
+      config: {
+        placeholder: "Select Salary Grade",
+        options: salaryGradeOptions,
       },
     },
     {

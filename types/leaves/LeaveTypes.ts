@@ -6,10 +6,13 @@ export interface LeaveTypesKey {
     key: React.Key,
     data?: LeaveTypesItems
 }
-
+interface ApplicableTo{
+    id: number
+    name: string
+}
 export interface LeaveType {
     id: number;
-    applicable_to_employee_types: 'regular' | 'probationary'; // Adjust if needed
+    applicable_to_employee_types: ApplicableTo; // Adjust if needed
     attachment_required: boolean;
     code: string;
     created_at: string; // You might consider using Date if you want to handle dates directly
@@ -35,7 +38,7 @@ export interface LeaveRequestPaginate {
 export interface LeaveTypeForEmployee{
     id: number;
     name: string;
-    applicable_to_employee_types?: "all" | "regular" | "probationary";
+    applicable_to_employee_types: string;
 }
 
 

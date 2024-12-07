@@ -209,7 +209,7 @@ const Page: React.FC = () => {
           </div>
         )}
         paginationProps={{
-          data_length: sortedDepartments?.length
+          data_length: departments?.length
         }}
         onExport={{
           drawerProps: {

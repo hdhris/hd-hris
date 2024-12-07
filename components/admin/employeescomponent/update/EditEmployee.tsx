@@ -58,6 +58,19 @@ export const employeeSchema = z.object({
   addr_province: z.string().min(1, "Province is required"),
   addr_municipal: z.string().min(1, "Municipal is required"),
   addr_baranggay: z.string().min(1, "Baranggay is required"),
+  
+  fathers_first_name: z.string().optional(),
+  fathers_middle_name: z.string().optional(),
+  fathers_last_name: z.string().optional(),
+  
+  mothers_first_name: z.string().optional(),
+  mothers_middle_name: z.string().optional(),
+  mothers_last_name: z.string().optional(),
+  
+  guardian_first_name: z.string().optional(),
+  guardian_middle_name: z.string().optional(),
+  guardian_last_name: z.string().optional(),
+
   elementary: z
     .string()
     .regex(
@@ -232,6 +245,20 @@ interface EmployeeFormData {
   addr_province: string;
   addr_municipal: string;
   addr_baranggay: string;
+
+  //
+  fathers_first_name: string;
+  fathers_middle_name: string;
+  fathers_last_name: string;
+
+  mothers_first_name: string;
+  mothers_middle_name: string;
+  mothers_last_name: string;
+
+  guardian_first_name: string;
+  guardian_middle_name: string;
+  guardian_last_name: string;
+  //
   elementary: string;
   highSchool: string;
   seniorHighSchool: string;
@@ -282,6 +309,17 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
       addr_province: "",
       addr_municipal: "",
       addr_baranggay: "",
+      fathers_first_name: "",
+      fathers_middle_name: "",
+      fathers_last_name: "",
+
+      mothers_first_name: "",
+      mothers_middle_name: "",
+      mothers_last_name: "",
+
+      guardian_first_name: "",
+      guardian_middle_name: "",
+      guardian_last_name: "",
       elementary: "",
       highSchool: "",
       seniorHighSchool: "",
@@ -363,6 +401,11 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         })
       );
 
+      const familyBg =
+      typeof employeeData.family_bg_json === "string"
+        ? JSON.parse(employeeData.family_bg_json || "{}")
+        : employeeData.family_bg_json || {};
+
       //reset and fetch the current employee data
       methods.reset({
         picture: employeeData.picture || "",
@@ -388,6 +431,19 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         branch_id: employeeData.branch_id?.toString() || "",
         job_id: employeeData.job_id?.toString() || "",
         is_regular: employeeData.is_regular?.toString() || "",
+
+        fathers_first_name: familyBg.fathers_first_name || "",
+        fathers_middle_name: familyBg.fathers_middle_name || "",
+        fathers_last_name: familyBg.fathers_last_name || "",
+
+        mothers_first_name: familyBg.mothers_first_name || "",
+        mothers_middle_name: familyBg.mothers_middle_name || "",
+        mothers_last_name: familyBg.mothers_last_name || "",
+
+        guardian_first_name: familyBg.guardian_first_name || "",
+        guardian_middle_name: familyBg.guardian_middle_name || "",
+        guardian_last_name: familyBg.guardian_last_name || "",
+
         elementary: educationalBg.elementary || "",
         highSchool: educationalBg.highSchool || "",
         seniorHighSchool: educationalBg.seniorHighSchool || "",
@@ -554,6 +610,20 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         doctorateCertificates: doctorateCertificates,
       };
 
+      const familyBackground = {
+        fathers_first_name: data.fathers_first_name,
+        fathers_middle_name: data.fathers_middle_name,
+        fathers_last_name: data.fathers_last_name,
+
+        mothers_first_name: data.mothers_first_name,
+        mothers_middle_name: data.mothers_middle_name,
+        mothers_last_name: data.mothers_last_name,
+
+        guardian_first_name: data.guardian_first_name,
+        guardian_middle_name: data.guardian_middle_name,
+        guardian_last_name: data.guardian_middle_name,
+      };
+
       //use to prepare the input fulldata
       const fullData = {
         ...data,
@@ -573,6 +643,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({
         is_regular: Boolean(data.is_regular),
         branch_id: parseInt(data.branch_id, 10),
         educational_bg_json: JSON.stringify(educationalBackground),
+        family_bg_json: JSON.stringify(familyBackground),
         batch_id: parseInt(data.batch_id, 10),
         schedules: [
           {

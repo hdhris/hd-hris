@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     });
 
     const result = await sendEmail({
-      to: "francejay724@gmail.com", // Replace with your test email
+      to: "francejay724@gmail.com", 
       subject: "Test Email from HR System",
       text: `
         This is a test email from your HR system.

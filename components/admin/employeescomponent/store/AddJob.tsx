@@ -138,7 +138,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     },
     {
       name: "for_probi",
-      label: "For Probitionary",
+      label: "For probationary",
       type: "switch",
       config: {
         defaultSelected: true,

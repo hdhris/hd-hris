@@ -1,36 +1,56 @@
-import { NextResponse } from "next/server";
+import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
-import { getPaginatedData } from "@/server/pagination/paginate"; // Import the reusable function
-import { LeaveType } from "@/types/leaves/LeaveTypes";
-import { capitalize } from "@nextui-org/shared-utils";
+import {LeaveType} from "@/types/leaves/LeaveTypes";
+import {capitalize} from "@nextui-org/shared-utils";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import dayjs from "dayjs";
+import {Logger, LogLevel} from "@/lib/logger/Logger";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
+
+        const logger = new Logger(LogLevel.DEBUG)
+        const {searchParams} = new URL(request.url);
         const page = parseInt(searchParams.get('page') || '1');  // Default to page 1
         const perPage = parseInt(searchParams.get('limit') || '15');  // Default to 15 results per page
 
-        // Use the reusable pagination function with Prisma model
-        const { data, totalItems, currentPage } = await getPaginatedData<LeaveType>(
-            prisma.ref_leave_types,  // The Prisma model
-            page,
-            perPage,
-            { deleted_at: null },  // Filtering condition
-            null,
-            { name: 'asc' }  // Order by name
-        );
 
         // Fetch employee counts and employee details concurrently
-        // Fetch employee counts and employee details concurrently
-        const [employeeCountData, employees] = await Promise.all([
-            prisma.trans_leaves.groupBy({
+        const [data, total_items, employeeCountData, employees] = await Promise.all([prisma.ref_leave_type_details.findMany({
+            where: {
+                trans_leave_types: {
+                    some: {
+                        deleted_at: null
+                    }
+                },
+            }, include: {
+                trans_leave_types: {
+                    include: {
+                        ref_employment_status: {
+                            select: {
+                                id: true, name: true
+                            }
+                        }
+                    }
+                },
+            }, orderBy: {
+                updated_at: "desc"
+            }, take: perPage, skip: (page - 1) * perPage
+        }),
+
+            prisma.ref_leave_type_details.count({
+                where: {
+                    trans_leave_types: {
+                        some: {
+                            deleted_at: null
+                        }
+                    }
+                },
+            }), prisma.trans_leaves.groupBy({
                 by: ["type_id", "employee_id"],
-            }),
-            prisma.trans_employees.findMany({
+            }), prisma.trans_employees.findMany({
                 select: {
                     id: true,
                     first_name: true,
@@ -40,12 +60,12 @@ export async function GET(request: Request) {
                     suffix: true,
                     extension: true,
                     picture: true,
-                },
-                where: {
+                }, where: {
                     deleted_at: null,
                 },
-            }),
-        ]);
+            }),]);
+
+        console.log("Data: ", data)
 
 // Create a map for current employees by type_id for faster lookup
         const employeeMap = new Map<number, number[]>();
@@ -66,23 +86,32 @@ export async function GET(request: Request) {
             }
         });
 
-// Map the leave types with current employee details
+
+        // Map the leave types with current employee details
         const result = data.map(leaveType => {
             const currentEmployeesIds = employeeMap.get(leaveType.id) || [];
-            const empAvails = employees.filter(employee => currentEmployeesIds.includes(employee.id)).map((emp)=> {
+            const empAvails = employees.filter(employee => currentEmployeesIds.includes(employee.id)).map((emp) => {
                 return {
-                    id: emp.id,
-                    name: getEmpFullName(emp),
-                    picture: emp.picture
+                    id: emp.id, name: getEmpFullName(emp), picture: emp.picture
                 }
 
             });
+
+            // const employmentStatus = leaveType.trans_leave_types.filter(item => item.ref_employment_status);
+            // if (employmentStatus) {
+            //     logger.debug(employmentStatus);
+            // } else {
+            //     logger.debug("No matching employment status found");
+            // }
             return {
                 id: leaveType.id,
                 name: leaveType.name,
                 code: leaveType.code,
                 description: leaveType.description,
-                applicable_to_employee_types: capitalize(leaveType.applicable_to_employee_types),
+                applicable_to_employee_types: {
+                    id: leaveType.is_applicable_to_all ? "all" : leaveType.trans_leave_types.find(item => item.ref_employment_status.id)?.ref_employment_status.id,
+                    name: leaveType.is_applicable_to_all ? "all" : leaveType.trans_leave_types.find(item => item.ref_employment_status.name)?.ref_employment_status.name || ""
+                },
                 attachment_required: leaveType.attachment_required,
                 created_at: dayjs(leaveType.created_at).format("YYYY-MM-DD"),
                 is_active: leaveType.is_active,
@@ -96,11 +125,10 @@ export async function GET(request: Request) {
         }) as unknown as LeaveType[];
 
         return NextResponse.json({
-            data: result,
-            currentPage,
-            perPage,
-            totalItems,
+            data: result, perPage, totalItems: total_items,
         });
+
+
     } catch (err) {
         console.error("Error: ", err);
         return NextResponse.error();

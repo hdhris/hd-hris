@@ -1,6 +1,9 @@
 import {hasContentType} from "@/helper/content-type/content-type-check";
 import {NextRequest, NextResponse} from "next/server";
-import prisma from "@/prisma/prisma";
+import {Logger, LogLevel} from "@/lib/logger/Logger";
+import prisma from "@/prisma/prisma"
+import {LeaveTypeSchema} from "@/helper/zodValidation/leaves/leave-types-form/LeaveTypesForm";
+import {toGMT8} from "@/lib/utils/toGMT8";
 
 export async function POST(request: NextRequest) {
     try {
@@ -8,56 +11,63 @@ export async function POST(request: NextRequest) {
 
         const data = await request.json();
 
-        // Validate the data
-        // const validatedData = LeaveTypeSchema.parse(data);
 
-        const isDuplicate = await prisma.ref_leave_types.findFirst({
-            where: {
-                name: data.name, // Check for the same name
-                OR: [
-                    {
-                        applicable_to_employee_types: {
-                            contains: "regular", // Check if it's already assigned to "regular"
-                        },
+        const data_validation = await LeaveTypeSchema.safeParseAsync(data)
+
+
+
+        if(data_validation.success){
+            const verify = await prisma.ref_leave_type_details.findUnique({
+                where: {
+                    code: data_validation.data.code
+                }
+            })
+            if(verify) return NextResponse.json({success: false, message: "Cannot have duplicate code. Try Again"}, {status: 409})
+            const is_applicable_for_all = data_validation.data.applicableToEmployeeTypes === "all"
+            let employee_status_ids = []
+            if(is_applicable_for_all){
+                const ids =  await prisma.ref_employment_status.findMany({
+                    where: {
+                        deleted_at: null
                     },
-                    {
-                        applicable_to_employee_types: {
-                            contains: "probationary", // Check if it's already assigned to "probationary"
-                        },
-                    },
-                ],
-            },
+                    select: {
+                        id: true
+                    }
+                })
+
+                employee_status_ids = [...ids.map(id => id.id)]
+            } else {
+                employee_status_ids.push(Number(data_validation.data.applicableToEmployeeTypes))
+            }
+
+            await prisma.ref_leave_type_details.create({
+                data: {
+                    name: data_validation.data.name,
+                    code: data_validation.data.code,
+                    description: data_validation.data.description,
+                    carry_over: data_validation.data.carryOver,
+                    paid_leave: data_validation.data.paidLeave,
+                    is_active: data_validation.data.isActive,
+                    min_duration: data_validation.data.minDuration,
+                    max_duration: data_validation.data.maxDuration,
+                    attachment_required: data_validation.data.attachmentRequired,
+                    is_applicable_to_all: is_applicable_for_all,
+                    trans_leave_types: {
+                        createMany: {
+                            data: employee_status_ids.map(status_id => ({
+                                employment_status_id: status_id,
+                                created_at: toGMT8().toISOString(),
+                                updated_at: toGMT8().toISOString(),
+                            })),
+                        }
+                    }
+                }
+            })
+         }
+
+        return NextResponse.json({message: "Leave type created successfully.",
+            // data: createdLeaveType
         });
-
-        if (isDuplicate && data.applicableToEmployeeTypes.includes("all")) {
-            return NextResponse.json({
-                message: "Leave type with the same name already exists and cannot be set to 'all' if it's already assigned to 'regular' or 'probationary'."
-            }, { status: 400 });
-        }
-
-        if (isDuplicate) {
-            return NextResponse.json({message: "Leave type with the same name or employee type restriction already exists."}, {status: 400});
-        }
-
-
-        // Create a new leave type
-        const createdLeaveType = await prisma.ref_leave_types.create({
-            data: {
-                name: data.name,
-                code: data.code,
-                description: data.description,
-                carry_over: data.carryOver,
-                paid_leave: data.paidLeave,
-                is_active: data.isActive,
-                min_duration: data.minDuration,
-                max_duration: data.maxDuration,
-                created_at: new Date(),
-                updated_at: new Date(),
-                applicable_to_employee_types: data.applicableToEmployeeTypes,
-            },
-        });
-
-        return NextResponse.json({message: "Leave type created successfully.", data: createdLeaveType});
     } catch (err) {
         console.error("Error: ", err); // Log the error for debugging
 

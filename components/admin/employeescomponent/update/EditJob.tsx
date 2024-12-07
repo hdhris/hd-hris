@@ -178,7 +178,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     },
     {
       name: "for_probi",
-      label: "For Probitionary",
+      label: "For probationary",
       type: "switch",
       config: {
         defaultSelected: true,

@@ -2,6 +2,7 @@ import {hasContentType} from "@/helper/content-type/content-type-check";
 import {NextRequest, NextResponse} from "next/server";
 import {z} from "zod";
 import prisma from "@/prisma/prisma";
+import {toGMT8} from "@/lib/utils/toGMT8";
 
 
 export async function POST(request: NextRequest) {
@@ -23,19 +24,33 @@ export async function POST(request: NextRequest) {
         //     }
         // })
 
-        console.log("Ids: ", data);
+        console.log("Deleted: ", data)
 
-        // Update the leave type to mark as deleted
-        await prisma.ref_leave_types.updateMany({
-            where: {
-                id: {
-                    in: data
+        if(data.employee_status_id === "all"){
+            console.log("All")
+            await prisma.trans_leave_types.updateMany({
+                where: {
+                    leave_type_details_id: data.leave_type_id
+                },
+                data: {
+                    deleted_at: toGMT8().toISOString()
                 }
-            },
-            data: {
-                deleted_at: new Date()
-            }
-        });
+            });
+        } else{
+            await prisma.trans_leave_types.update({
+                where: {
+                    leave_type_details_id_employment_status_id: {
+                        leave_type_details_id: data.leave_type_id,
+                        employment_status_id: data.employee_status_id
+                    }
+                },
+                data: {
+                    deleted_at: toGMT8().toISOString()
+                }
+            });
+
+        }
+        // Update the leave type to mark as deleted
 
         // Return successful response
         return NextResponse.json({

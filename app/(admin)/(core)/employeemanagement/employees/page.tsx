@@ -1,58 +1,47 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useEmployeesData } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
-import { toast } from "@/components/ui/use-toast";
 import AddEmployee from "@/components/admin/employeescomponent/store/AddEmployees";
-import EditEmployee from "@/components/admin/employeescomponent/update/EditEmployee";
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
+import Text from "@/components/Text";
 import dayjs from "dayjs";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
+import { useRouter } from 'next/navigation';
 
+const EmptyState: React.FC = () => {
+  return (
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
+      <div className="text-center space-y-3">
+        <Text className="text-xl font-bold text-gray-700">No Employees Found</Text>
+        <Text className="text-gray-500">There are no active employees at the moment.</Text>
+        <Text className="text-sm text-gray-400">Click the &apos;Add Employee&apos; button above to get started.</Text>
+      </div>
+    </div>
+  );
+};
 const Page: React.FC = () => {
-  const { data: employees, mutate, error, isLoading } = useEmployeesData();
-  const [sortedEmployees, setSortedEmployees] = useState<Employee[]>([]);
-  const [selectedEmployee, setSelectedEmployee] =
-    React.useState<Employee | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = React.useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] =
-    React.useState<Employee | null>(null);
+  const { data: employees, mutate, isLoading } = useEmployeesData();
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<Employee | null>(null);
+  const router = useRouter();
 
-  const filterActiveEmployees = (employeesList: Employee[]) => {
-    return employeesList.filter((employee) => {
-      return (
-        !employee.suspension_json &&
-        !employee.resignation_json &&
-        !employee.termination_json &&
-        !employee.deleted_at
-      );
-    });
+  const handleEditEmployee = (employeeId: number) => {
+    router.push(`/employeemanagement/employees/edit-employee/${employeeId.toString()}`);
   };
 
-  useEffect(() => {
-    if (employees) {
-      const activeEmployees = filterActiveEmployees(employees);
-      const sorted = sortEmployeesByRecentActivity(activeEmployees);
-      setSortedEmployees(sorted);
+  const handleEmployeeUpdated = async () => {
+    try {
+      await mutate();
+    } catch (error) {
+      console.error("Error updating employee data:", error);
     }
-  }, [employees]);
-
-  const sortEmployeesByRecentActivity = (employees: Employee[]) => {
-    return [...employees].sort((a, b) => {
-      const dateA = new Date(a.updated_at || a.created_at).getTime();
-      const dateB = new Date(b.updated_at || b.created_at).getTime();
-      return dateB - dateA;
-    });
-  };
-
-  const handleEdit = (employee: Employee) => {
-    setSelectedEmployeeId(employee);
-    setIsEditModalOpen(true);
   };
 
   SetNavEndContent(() => (
@@ -60,19 +49,6 @@ const Page: React.FC = () => {
       <AddEmployee onEmployeeAdded={handleEmployeeUpdated} />
     </div>
   ));
-
-  const handleEmployeeUpdated = async () => {
-    try {
-      const updatedData = await mutate();
-      if (updatedData) {
-        const activeEmployees = filterActiveEmployees(updatedData);
-        const sorted = sortEmployeesByRecentActivity(activeEmployees);
-        setSortedEmployees(sorted);
-      }
-    } catch (error) {
-      console.error("Error updating employee data:", error);
-    }
-  };
 
   const handleRowClick = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -86,7 +62,7 @@ const Page: React.FC = () => {
       { uid: "position", name: "Position", sortable: true },
       { uid: "contact", name: "Contact" },
       { uid: "hiredate", name: "Hired Date", sortable: true },
-      { uid: "workstatus", name: "Work Status", sortable: true },
+      { uid: "employmentstatus", name: "Employment Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
@@ -150,27 +126,22 @@ const Page: React.FC = () => {
                 : "N/A"}
             </div>
           );
-        case "workstatus":
+        case "employmentstatus":
           return (
             <div
-              className={cellClasses}
-              onClick={() => handleRowClick(employee)}
-            >
-              <Chip
-                className="capitalize"
-                color={employee.is_regular ? "success" : "warning"}
-                size="sm"
-                variant="flat"
-              >
-                {employee.is_regular ? "Regular" : "Probitionary"}
-              </Chip>
-            </div>
+            className={cellClasses}
+            onClick={() => handleRowClick(employee)}
+          >
+            {employee.ref_employment_status?.name || "N/A"}
+          </div>
           );
         case "actions":
           return (
             <TableActionButton
               name={`${employee.first_name} ${employee.last_name}`}
-              onEdit={() => handleEdit(employee)}
+            
+               
+                onEdit={() => handleEditEmployee(employee.id)}              
             />
           );
         default:
@@ -197,21 +168,21 @@ const Page: React.FC = () => {
           key: "is_regular",
           value: true,
           name: "Regular",
-          uid: "probitionary",
+          uid: "probationary",
         },
         {
           key: "is_regular",
           value: false,
-          name: "Probitionary",
+          name: "Probationary",
           uid: "regular",
         },
       ],
     },
     {
       category: "Department",
-      filtered: sortedEmployees
+      filtered: employees?.length 
         ? Array.from(
-            new Set(sortedEmployees.map((e) => e.ref_departments?.name))
+            new Set(employees.map((e) => e.ref_departments?.name))
           )
             .filter(Boolean)
             .map((dept) => ({
@@ -224,9 +195,9 @@ const Page: React.FC = () => {
     },
     {
       category: "Job Position",
-      filtered: sortedEmployees
+      filtered: employees?.length
         ? Array.from(
-            new Set(sortedEmployees.map((e) => e.ref_job_classes?.name))
+            new Set(employees.map((e) => e.ref_job_classes?.name))
           )
             .filter(Boolean)
             .map((job) => ({
@@ -239,23 +210,45 @@ const Page: React.FC = () => {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="h-[calc(100vh-150px)] overflow-hidden">
+        <DataDisplay
+          defaultDisplay="table"
+          title="Active Employees"
+          data={[]}
+          isLoading={true}
+          onTableDisplay={{
+            config: TableConfigurations,
+            className: "h-full overflow-auto",
+            layout: "auto",
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (!employees || employees.length === 0) {
+    return <EmptyState />;
+  }
+
   return (
     <div className="h-[calc(100vh-150px)] overflow-hidden">
       <DataDisplay
         defaultDisplay="table"
         title="Active Employees"
-        data={sortedEmployees}
+        data={employees}
         filterProps={{
           filterItems: FilterItems,
         }}
-        isLoading={isLoading}
+        isLoading={false}
         onTableDisplay={{
           config: TableConfigurations,
           className: "h-full overflow-auto",
           layout: "auto",
         }}
         paginationProps={{
-          data_length: sortedEmployees?.length,
+          data_length: employees.length,
         }}
         searchProps={{
           searchingItemKey: ["first_name", "last_name", "email", "contact_no"],
@@ -284,14 +277,7 @@ const Page: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Chip
-                    className="capitalize"
-                    color={employee.is_regular ? "success" : "warning"}
-                    size="sm"
-                    variant="flat"
-                  >
-                    {employee.is_regular ? "Regular" : "Probitionary"}
-                  </Chip>
+                  
                 </div>
               </div>
             </BorderCard>
@@ -318,21 +304,10 @@ const Page: React.FC = () => {
           }}
           employee={selectedEmployee}
           onEmployeeUpdated={handleEmployeeUpdated}
-          sortedEmployees={sortedEmployees}
+          sortedEmployees={employees}
         />
       )}
 
-      {selectedEmployeeId && (
-        <EditEmployee
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedEmployeeId(null);
-          }}
-          employeeData={selectedEmployeeId}
-          onEmployeeUpdated={handleEmployeeUpdated}
-        />
-      )}
     </div>
   );
 };

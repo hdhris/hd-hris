@@ -22,17 +22,30 @@ export default function Component() {
 
     const sssData = useMemo(() => {
         return {
-            minSalary: 4250,
-            maxSalary: 29750,
-            minMSC: 4000,
-            maxMSC: 30000,
-            mscStep: 500,
-            regularEmployeeRate: 0.045,
-            regularEmployerRate: 0.095,
-            ecThreshold: 14500,
-            ecLowRate: 10,
-            ecHighRate: 30,
-            wispThreshold: 20000
+            // minSalary: 4250,
+            // maxSalary: 29750,
+            // minMSC: 4000,
+            // maxMSC: 30000,
+            // mscStep: 500,
+            // regularEmployeeRate: 0.045,
+            // regularEmployerRate: 0.095,
+            // ecThreshold: 14500,
+            // ecLowRate: 10,
+            // ecHighRate: 30,
+            // wispThreshold: 20000
+            minSalary: 0,
+            maxSalary: 0,
+            minMSC: 0,
+            maxMSC: 0,
+            mscStep: 0,
+            regularEmployeeRate: 2.5,
+            regularEmployerRate: 2.5,
+            ecThreshold: 0,
+            ecLowRate: 0,
+            ecHighRate: 0,
+            wispThreshold: 0
+
+
         }
     }, [])
 

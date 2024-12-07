@@ -1,13 +1,14 @@
-import { NextResponse } from "next/server";
+import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
-import { getEmpFullName } from "@/lib/utils/nameFormatter";
-import { EmployeeLeaveCredits, LeaveCredits } from "@/types/leaves/leave-credits-types";
+import {getEmpFullName} from "@/lib/utils/nameFormatter";
+import {EmployeeLeaveCredits, LeaveCredits} from "@/types/leaves/leave-credits-types";
+import {capitalize} from "@nextui-org/shared-utils";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
+        const {searchParams} = new URL(request.url);
         const page = Math.max(Number(searchParams.get("page")) || 1, 1); // Ensure positive page number
         const perPage = Math.max(Number(searchParams.get("limit")) || 5, 1); // Ensure positive limit
         const year = Number(searchParams.get("year")) || new Date().getFullYear();
@@ -15,35 +16,23 @@ export async function GET(request: Request) {
         // Fetch leave credits
         const leave_credits = await prisma.dim_leave_balances.findMany({
             where: {
-                year,
-                deleted_at: null,
-            },
-            distinct: ["employee_id"],
-            orderBy: { updated_at: "desc" },
-            take: perPage,
-            skip: (page - 1) * perPage,
+                year, deleted_at: null,
+            }, distinct: ["employee_id"], orderBy: {updated_at: "desc"}, take: perPage, skip: (page - 1) * perPage,
         });
 
         // Total employees and years for metadata
-        const [total_items, years] = await Promise.all([
-            prisma.dim_leave_balances.groupBy({
-                by: ["employee_id"],
-                where: { deleted_at: null },
-            }),
-            prisma.dim_leave_balances.groupBy({
-                by: ["year"],
-                where: { deleted_at: null },
-            }),
-        ]);
+        const [total_items, years] = await Promise.all([prisma.dim_leave_balances.groupBy({
+            by: ["employee_id"], where: {deleted_at: null},
+        }), prisma.dim_leave_balances.groupBy({
+            by: ["year"], where: {deleted_at: null},
+        }),]);
 
         // Fetch employee information
         const employeeIds = leave_credits.map((credit) => credit.employee_id);
         const emp_info = await prisma.trans_employees.findMany({
             where: {
-                id: { in: employeeIds },
-                deleted_at: null,
-            },
-            select: {
+                id: {in: employeeIds}, deleted_at: null,
+            }, select: {
                 id: true,
                 prefix: true,
                 suffix: true,
@@ -51,8 +40,12 @@ export async function GET(request: Request) {
                 first_name: true,
                 last_name: true,
                 picture: true,
-                is_regular: true,
-                ref_departments: { select: { name: true } },
+                ref_employment_status: {
+                    select: {
+                        id: true, name: true,
+                    }
+                },
+                ref_departments: {select: {name: true}},
                 ref_job_classes: {
                     select: {
                         name: true
@@ -68,9 +61,18 @@ export async function GET(request: Request) {
                         created_at: true,
                         updated_at: true,
                         deleted_at: true,
-                        ref_leave_types: { select: { id: true, name: true } },
+                        trans_leave_types: {
+                            select:{
+                                ref_leave_type_details: {
+                                    select:{
+                                        id: true,
+                                        name: true
+                                    }
+                                }
+                            }
+                        }
                     },
-                },
+                }
             },
         });
 
@@ -88,14 +90,14 @@ export async function GET(request: Request) {
                     used_days: items.used_days.toNumber(),
                     created_at: items.created_at?.toLocaleTimeString()!,
                     updated_at: items.updated_at?.toLocaleTimeString()!,
-                    leave_type: items.ref_leave_types,
+                    leave_type: items.trans_leave_types.ref_leave_type_details,
                 }));
 
                 return {
                     id: emp.id,
                     name: getEmpFullName(emp),
                     picture: emp.picture,
-                    employment_status: emp.is_regular ? "regular" as const : "probationary" as const,
+                    employment_status: emp.ref_employment_status?.name || "",
                     job: emp.ref_job_classes?.name || "",
                     department: emp.ref_departments?.name || "",
                     leave_balance,
@@ -113,22 +115,18 @@ export async function GET(request: Request) {
 
         // Return the response with sorted data and meta information
         return NextResponse.json({
-            data: values,
-            meta_data: {
-                totalItems: total_items.length,
-                years: years.map((item) => item.year),
+            data: values, meta_data: {
+                totalItems: total_items.length, years: years.map((item) => item.year),
             },
         } as EmployeeLeaveCredits);
+
+        // return NextResponse.json(emp_info)
 
 
     } catch (err) {
         console.error("Error fetching leave credits: ", err);
-        return NextResponse.json(
-            {
-                error: "Failed to fetch leave credits.",
-                details: err instanceof Error ? err.message : String(err),
-            },
-            { status: 500 }
-        );
+        return NextResponse.json({
+            error: "Failed to fetch leave credits.", details: err instanceof Error ? err.message : String(err),
+        }, {status: 500});
     }
 }
