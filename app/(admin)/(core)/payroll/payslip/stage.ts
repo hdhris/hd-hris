@@ -311,7 +311,7 @@ function convertToNumber(data: PayrollData): PayrollData {
           plan.ref_benefit_plans.employer_contribution
         ),
         ref_benefits_contribution_advance_settings:
-          plan.ref_benefit_plans.ref_benefits_contribution_advance_settings.map(
+          plan.ref_benefit_plans.ref_benefits_contribution_table.map(
             (setting: any) => ({
               ...setting,
               min_salary: Number(setting.min_salary),

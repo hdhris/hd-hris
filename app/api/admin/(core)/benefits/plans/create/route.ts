@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
                     system_only: true,
                     is_overwritable: false,
                     affected_json: {
-                        mandatory: { probationary: true, regular: true },
+                        mandatory: "all",
                         departments: "all",
                         job_classes: "all",
                         employees: "all",
