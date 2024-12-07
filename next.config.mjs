@@ -38,6 +38,11 @@ const nextConfig = {
         destination: "/benefits/plans",
         permanent: true,
       },
+      {
+        source: "/trainings-and-seminars",
+        destination: "/trainings-and-seminars/empprograms",
+        permanent: true,
+      },
     ];
   },
   async headers() {
