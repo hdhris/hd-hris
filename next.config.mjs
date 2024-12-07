@@ -42,6 +42,11 @@ const nextConfig = {
         destination: "/performance/criteria",
         permanent: true,
       },
+      {
+        source: "/trainings-and-seminars",
+        destination: "/trainings-and-seminars/empprograms",
+        permanent: true,
+      },
     ];
   },
   async headers() {
