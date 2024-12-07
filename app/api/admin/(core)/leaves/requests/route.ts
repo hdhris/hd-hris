@@ -18,7 +18,7 @@ export async function GET(request: Request) {
         where: {
             deleted_at: null
         }, include: {
-            trans_employees_trans_leaves_employee_idTotrans_employees: {
+            trans_employees_leaves: {
                 select: {
                     email: true,
                     prefix: true,
@@ -78,9 +78,9 @@ export async function GET(request: Request) {
         return {
             id: items.id,
             employee_id: items.employee_id,
-            name: getEmpFullName(items.trans_employees_trans_leaves_employee_idTotrans_employees),
-            email: items.trans_employees_trans_leaves_employee_idTotrans_employees.email || "",
-            picture: items.trans_employees_trans_leaves_employee_idTotrans_employees.picture || "",
+            name: getEmpFullName(items.trans_employees_leaves),
+            email: items.trans_employees_leaves.email || "",
+            picture: items.trans_employees_leaves.picture || "",
             created_by: {
                 id: items.trans_employees_trans_leaves_created_byTotrans_employees?.id!,
                 email: items.trans_employees_trans_leaves_created_byTotrans_employees?.email || "",

@@ -61,7 +61,7 @@ export async function GET(request: Request) {
                         created_at: true,
                         updated_at: true,
                         deleted_at: true,
-                        trans_leave_types: {
+                        ref_leave_types: {
                             select:{
                                 ref_leave_type_details: {
                                     select:{
@@ -90,7 +90,7 @@ export async function GET(request: Request) {
                     used_days: items.used_days.toNumber(),
                     created_at: items.created_at?.toLocaleTimeString()!,
                     updated_at: items.updated_at?.toLocaleTimeString()!,
-                    leave_type: items.trans_leave_types.ref_leave_type_details,
+                    leave_type: items.ref_leave_types.ref_leave_type_details,
                 }));
 
                 return {
