@@ -47,6 +47,7 @@ export const employeeSchema = z.object({
   addr_municipal: z.string().min(1, "Municipal is required"),
   addr_baranggay: z.string().min(1, "Baranggay is required"),
   
+  
   // Family background fields
   fathers_first_name: z.string().optional(),
   fathers_middle_name: z.string().optional(),
@@ -159,14 +160,15 @@ export const employeeSchema = z.object({
   hired_at: z.string().min(1, "Hire date is required"),
   department_id: z.string().min(1, "Department is required"),
   job_id: z.string().min(1, "Job is required"),
-  is_regular: z.preprocess((val) => {
-    if (typeof val === "string") return val === "true";
-    return val;
-  }, z.boolean()),
+  // is_regular: z.preprocess((val) => {
+  //   if (typeof val === "string") return val === "true";
+  //   return val;
+  // }, z.boolean()),
   branch_id: z.string().min(1, "Branch is required"),
   salary_grade_id: z.string().min(1, "Salary Grade is required"),
   batch_id: z.string().min(1, "Batch is required"),
   days_json: z.array(z.string()),
+  employement_status_id: z.string().min(1, "Employement status is required"),
 });
 
 export type EmployeeFormData = z.infer<typeof employeeSchema>;

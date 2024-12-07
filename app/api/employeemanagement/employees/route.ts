@@ -35,7 +35,6 @@ const employeeSchema = z.object({
   prefix: z.string().max(10).optional(),
   statutory_no_json: z.any().optional(),
   family_bg_json: z.any().optional(),
-  is_regular: z.boolean(),
   educational_bg_json: z.any().optional(),
   civil_service_eligibility_json: z.any().optional(),
   work_experience_json: z.any().optional(),
@@ -145,7 +144,7 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
       data: {
         ...rest,
         branch_id: data?.branch_id!,
-        employement_status_id: data?.employement_status_id!,
+        employement_status_id: data.employement_status_id!,
         hired_at: data.hired_at ? new Date(data.hired_at) : null,
         birthdate: data.birthdate ? new Date(data.birthdate) : null,
         educational_bg_json: educationalBackground,
