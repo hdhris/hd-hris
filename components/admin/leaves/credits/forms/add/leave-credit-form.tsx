@@ -72,7 +72,7 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
     );
 
     const handleOnSelectEmployee = (id: number) => {
-        const employeeStatus = employeeState.find(emp => emp.id === id)?.employment_status.name;
+        const employeeStatus = employeeState?.find(emp => emp.id === id)?.employment_status!.name;
         const applicableLeaveTypes = leaveTypes.filter(
             leaveType => leaveType.applicable_to_employee_types === employeeStatus || leaveType.applicable_to_employee_types === 'all'
         );
@@ -87,14 +87,14 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
         const payload =
                 apply_for === 'specific_employee'
                     ? { employee_id: [employee_id],
-                    apply_for: employeeState.find(item => item.id === employee_id)?.employment_status.id,
+                    apply_for: employeeState?.find(item => item.id === employee_id)?.employment_status!.id,
                         leave_credits }
                     : {
                         employee_id: employeeState
-                            .filter(emp => emp.employment_status.name === apply_for)
+                            .filter(emp => emp.employment_status!.name === apply_for)
                             .map(emp => emp.id),
                         apply_for: employeeState
-                            .find(emp => emp.employment_status.name === apply_for)?.employment_status.id,
+                            .find(emp => emp.employment_status!.name === apply_for)?.employment_status!.id,
                         leave_credits,
                     };
 

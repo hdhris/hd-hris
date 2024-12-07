@@ -25,7 +25,7 @@ import showDialog from "@/lib/utils/confirmDialog";
 import {axiosInstance} from "@/services/fetcher";
 import {Card} from "@nextui-org/card";
 import CardTable from "@/components/common/card-view/card-table";
-import LeaveCreditEditForm from '@/components/admin/leaves/credits/forms/edit/edit-credit-form';
+// import LeaveCreditEditForm from '@/components/admin/leaves/credits/forms/edit/edit-credit-form';
 
 
 export interface EditCreditProp extends Omit<LeaveCredits, "leave_balance"> {
@@ -164,11 +164,11 @@ function Page() {
         {viewCredit && <CardView
             title="Leave Credit"
             onClose={() => setViewCredit(undefined)}
-            onEdit={() => {
-                setIsEdit(true)
-                setEditCredit(viewCredit)
-
-            }}
+            // onEdit={() => {
+            //     setIsEdit(true)
+            //     setEditCredit(viewCredit)
+            //
+            // }}
             header={<div className="flex flex-row items-center space-x-4 pb-2">
                 <User name={<div className="flex gap-2">
                     <Typography>{viewCredit.name}</Typography>
@@ -237,11 +237,11 @@ function Page() {
             footer={<></>}
 
         />}
-        <LeaveCreditEditForm title="Update Leave Credit"
-                              description="Adjust and manage employee leave balances efficiently."
-                              onOpen={setIsEdit}
-                              isOpen={isEdit}
-                              employee={editCredit}/>
+        {/*<LeaveCreditEditForm title="Update Leave Credit"*/}
+        {/*                      description="Adjust and manage employee leave balances efficiently."*/}
+        {/*                      onOpen={setIsEdit}*/}
+        {/*                      isOpen={isEdit}*/}
+        {/*                      employee={editCredit}/>*/}
     </section>);
 }
 

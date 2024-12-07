@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
 
 // Function to create an employee
 async function createEmployee(data: z.infer<typeof employeeSchema>) {
-  const { schedules, job_id, department_id, educational_bg_json, family_bg_json, ...rest } = data;
+  const { schedules, job_id, department_id, educational_bg_json, family_bg_json, branch_id, employement_status_id, ...rest } = data;
   // console.log(data)
   const educationalBackground = parseJsonInput(educational_bg_json);
   const familyBackground = parseJsonInput(family_bg_json);
@@ -144,6 +144,8 @@ async function createEmployee(data: z.infer<typeof employeeSchema>) {
     const employee = await prisma.trans_employees.create({
       data: {
         ...rest,
+        branch_id: data?.branch_id!,
+        employement_status_id: data?.employement_status_id!,
         hired_at: data.hired_at ? new Date(data.hired_at) : null,
         birthdate: data.birthdate ? new Date(data.birthdate) : null,
         educational_bg_json: educationalBackground,
