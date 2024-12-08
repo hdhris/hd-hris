@@ -286,6 +286,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 variant="bordered"
                                 radius="sm"
                                 size={size}
+                                {...(item.config as DateRangePickerProps)}
                                 value={field.value?.start && field.value?.end && dayjs(field.value?.start).isValid() && dayjs(field.value?.end).isValid() ? {
                                     // start: parseAbsoluteToLocal(dayjs(field.value?.start).toISOString()),
                                     // end: parseAbsoluteToLocal(dayjs(field.value?.end).toISOString()),

@@ -273,9 +273,11 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
                 </div>
             </div>}
             body={
-            <CardTable data={[{
-                label: "Minimum Days", value: pluralize(props.min_duration, "day")
-            }, {label: "Maximum Days", value: pluralize(props.max_duration, "day")}, {
+            <CardTable data={[
+            //     {
+            //     label: "Minimum Days", value: pluralize(props.min_duration, "day")
+            // },
+                {label: "Maximum Days", value: pluralize(props.max_duration, "day")}, {
                 label: "Applicable for", value: capitalize(props.applicable_to_employee_types.name)
             }, {
                 label: "Current Usage", value: <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>

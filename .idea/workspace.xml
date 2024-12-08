@@ -4,17 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixes v2">
-      <change afterPath="$PROJECT_DIR$/components/admin/leaves/credits/forms/edit/edit-leave-credits.tsx" afterDir="false" />
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing leave credit">
+      <change afterPath="$PROJECT_DIR$/lib/utils/normalizeCalendarDateToDate.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-types/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-types/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/create/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/update/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/update/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/employee-leave-credits-status/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/employee-leave-credits-status/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/update/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-types/update/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/leaves/credits/forms/add/leave-credit-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/credits/forms/add/leave-credit-form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/form-tests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/form-tests/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/leave-types/display/table/config/leave-type-table-config.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/leave-types/display/table/config/leave-type-table-config.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/admin/leaves/leave-types/form/LeaveTypeForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/leave-types/form/LeaveTypeForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/zodValidation/leaves/leave-credits-form/leave-credit-form-schema.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/leaves/leave-credits-form/leave-credit-form-schema.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/request-form/form/RequestForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/request-form/form/RequestForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/zodValidation/leaves/leave-types-form/LeaveTypesForm.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/leaves/leave-types-form/LeaveTypesForm.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/zodValidation/leaves/request-form/LeaveRequestFormValidation.ts" beforeDir="false" afterPath="$PROJECT_DIR$/helper/zodValidation/leaves/request-form/LeaveRequestFormValidation.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,12 +63,8 @@
               <option name="branches">
                 <list>
                   <RecentBranch>
-                    <option name="branchName" value="john" />
-                    <option name="lastUsedInstant" value="1732506091" />
-                  </RecentBranch>
-                  <RecentBranch>
                     <option name="branchName" value="main" />
-                    <option name="lastUsedInstant" value="1732506047" />
+                    <option name="lastUsedInstant" value="1733635807" />
                   </RecentBranch>
                 </list>
               </option>
@@ -92,8 +96,9 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "JavaScript Debug.localhost:3000.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.codeium.enabled": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "database.data.extractors.current.export.id": "Comma-separated (CSV)_id",
     "database.data.extractors.current.id": "Comma-separated (CSV)_id",
     "git-widget-placeholder": "main",
@@ -102,7 +107,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "com.codeium.AppSettingsConfigurable",
     "ts.external.directory.path": "C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   },
@@ -128,10 +133,20 @@
       <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app" />
     </key>
   </component>
+  <component name="RunManager">
+    <configuration name="localhost:3000" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:3000">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.localhost:3000" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.24807.6" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-WS-243.22562.112" />
       </set>
     </attachedChunks>
   </component>
@@ -172,7 +187,11 @@
       <workItem from="1733443659721" duration="13107000" />
       <workItem from="1733470073925" duration="48390000" />
       <workItem from="1733547917731" duration="2213000" />
-      <workItem from="1733571253270" duration="20171000" />
+      <workItem from="1733571253270" duration="27064000" />
+      <workItem from="1733634755938" duration="65000" />
+      <workItem from="1733634877721" duration="309000" />
+      <workItem from="1733635561277" duration="397000" />
+      <workItem from="1733636185244" duration="9214000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />
@@ -454,7 +473,23 @@
       <option name="project" value="LOCAL" />
       <updated>1733546865065</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="fixing leave credit">
+      <option name="closed" value="true" />
+      <created>1733619970872</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1733619970872</updated>
+    </task>
+    <task id="LOCAL-00038" summary="fixing leave credit">
+      <option name="closed" value="true" />
+      <created>1733620226415</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1733620226415</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -483,7 +518,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="adding an alert message to the leave credit form" />
     <MESSAGE value="fixing leave RequestForm.tsx" />
     <MESSAGE value="fixing leave RequestForm.tsx v2" />
     <MESSAGE value="cleaning" />
@@ -508,6 +542,7 @@
     <MESSAGE value="merging" />
     <MESSAGE value="fixes" />
     <MESSAGE value="fixes v2" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixes v2" />
+    <MESSAGE value="fixing leave credit" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing leave credit" />
   </component>
 </project>

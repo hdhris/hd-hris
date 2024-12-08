@@ -455,7 +455,7 @@ model trans_cash_advances {
 
 model trans_employees {
   id                                                                     Int                            @id @default(autoincrement())
-  branch_id                                                              Int
+  branch_id                                                              Int?
   picture                                                                String?
   first_name                                                             String                         @db.VarChar(45)
   last_name                                                              String                         @db.VarChar(45)
@@ -801,7 +801,6 @@ model ref_leave_type_details {
   description          String
   is_active            Boolean
   max_duration         Decimal             @db.Decimal(10, 2)
-  min_duration         Decimal             @db.Decimal(10, 2)
   name                 String
   paid_leave           Boolean
   carry_over           Boolean

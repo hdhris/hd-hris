@@ -135,9 +135,9 @@ export async function POST(req: NextRequest) {
             };
 
             // Create leave request in the database within the transaction
-            await tx.trans_leaves.create({
-                data: leaveRecord
-            });
+            // await tx.trans_leaves.create({
+            //     data: leaveRecord
+            // });
 
             // Find the employee's leave balance ID
             const leaveBalance = await tx.dim_leave_balances.findFirst({
@@ -160,20 +160,20 @@ export async function POST(req: NextRequest) {
             }
 
             // Update the leave balance within the transaction
-            await tx.dim_leave_balances.update({
-                where: {
-                    id: leaveBalance.id
-                },
-                data: {
-                    remaining_days: {
-                        decrement: Number(data.days_of_leave)
-                    },
-                    used_days: {
-                        increment: Number(data.days_of_leave)
-                    },
-                    updated_at: new Date()
-                }
-            });
+            // await tx.dim_leave_balances.update({
+            //     where: {
+            //         id: leaveBalance.id
+            //     },
+            //     data: {
+            //         remaining_days: {
+            //             decrement: Number(data.days_of_leave)
+            //         },
+            //         used_days: {
+            //             increment: Number(data.days_of_leave)
+            //         },
+            //         updated_at: new Date()
+            //     }
+            // });
         });
 
         // If the transaction succeeds, return a success message

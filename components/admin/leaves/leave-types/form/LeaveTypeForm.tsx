@@ -34,11 +34,11 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         resolver: zodResolver(LeaveTypeSchema), defaultValues: {
             //general information
             name: "", code: "", description: "", carryOver: false, //Leave Duration
-            minDuration: 0, maxDuration: 0, //Additional Settings
+            // minDuration: 0,
+            maxDuration: 0, //Additional Settings
             paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: "",
         }
     })
-    const {isDirty, isValid} = useFormState(form)
     const employeeStatus = useMemo(() => {
         if(employment_status) {
             return employment_status.data
@@ -55,7 +55,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 code: data.code,
                 description: data.description,
                 carryOver: data.carry_over,
-                minDuration: data.min_duration,
+                // minDuration: data.min_duration,
                 maxDuration: data.max_duration,
                 paidLeave: data.paid_leave,
                 isActive: data.is_active,
@@ -89,7 +89,8 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 onOpen(false)
                 form.reset({
                     name: "", code: "", description: "", carryOver: false, //Leave Duration
-                    minDuration: 0, maxDuration: 0, //Additional Settings
+                    // minDuration: 0,
+                    maxDuration: 0, //Additional Settings
                     paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: ""
                 })
             }
@@ -141,14 +142,17 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
 
     },]
 
-    const leaveDuration: FormInputProps[] = [{
-        name: "minDuration",
-        type: "number",
-        label: "Minimum Duration (days)",
-        placeholder: "e.g., 4",
-        isRequired: true,
-        description: "Minimum duration of leave that can be taken.",
-    }, {
+    const leaveDuration: FormInputProps[] = [
+    //     {
+    //     name: "minDuration",
+    //     type: "number",
+    //     label: "Minimum Duration (days)",
+    //     placeholder: "e.g., 4",
+    //     isRequired: true,
+    //     description: "Minimum duration of leave that can be taken.",
+    // },
+    //
+        {
         name: "maxDuration",
         type: "number",
         label: "Maximum Duration (days)",
