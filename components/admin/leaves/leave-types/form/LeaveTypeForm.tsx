@@ -86,6 +86,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                     title: "Success", description: "Leave type created successfully", variant: "success",
                 })
 
+                onOpen(false)
                 form.reset({
                     name: "", code: "", description: "", carryOver: false, //Leave Duration
                     minDuration: 0, maxDuration: 0, //Additional Settings
