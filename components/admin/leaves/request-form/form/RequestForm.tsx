@@ -398,29 +398,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
 
     async function onSubmit(values: z.infer<typeof LeaveRequestFormValidation>) {
         try {
-            // const startDate = new Date(values.leave_date_range.start);
-            // const start = {
-            //     year: startDate.getFullYear(),
-            //     month: startDate.getMonth() + 1,
-            //     day: startDate.getDate(),
-            // }
-            //
-            // // Mock data
-            // const existingLeaveDates = [
-            //     { start_date: "2024-12-10", end_date: "2024-12-11" }, // Leave ranges
-            // ];
-            // const allowedDaysJson = ["mon", "tue", "wed", "thu", "fri"]; // Allowed working days
-            //
-            //
-            // const endDate = calculateEndDate(start, maxLeave, existingLeaveDates, allowedDaysJson);
-            // console.log("End: ", endDate);
-            //
-            // // const endOfLeave = dayjs(values.leave_date_range.start).add(maxLeave, "days").toString()
-            // console.log("Start: ", values.leave_date_range.start)
-            // console.log("End: ", endOfLeave)
-            // const start = new Date(values.leave_date_range.start);
-            // console.log("Max: ", minMax(new CalendarDate(start.getFullYear(), start.getMonth() + 1, start.getDate())))
-            console.log("Url: ", url)
+
             // Ensure validation for document attachments if required
             if (employee_leave_type?.some((lt) => lt.is_attachment_required) && !documentAttachments) {
                 toast({

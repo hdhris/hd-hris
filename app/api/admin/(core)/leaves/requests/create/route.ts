@@ -17,10 +17,13 @@ export async function POST(req: NextRequest) {
 
         // Parse request body
         const data = await req.json();
-        console.log("Creating Data: ", data)
-
         // Validate required fields
+
         const validate = LeaveRequestFormValidation.safeParse(data)
+        const remainingLeaveCredit = Number(data.total_days / 1440).toFixed(2)
+
+        const usedLeaveCredit = Number(data.used_leave / 1440).toFixed(2)
+            console.log("Creating Data: ", data)
 
         if(!validate.success){
             return NextResponse.json({
@@ -144,14 +147,15 @@ export async function POST(req: NextRequest) {
                 created_at: toGMT8().toISOString(),
                 updated_at: toGMT8().toISOString(),
                 created_by: reviewer.id,
+                status: "Approved",
                 evaluators: evaluators as unknown as InputJsonValue,
                 files: attachmentLinks.url
             };
 
             // Create leave request in the database within the transaction
-            // await tx.trans_leaves.create({
-            //     data: leaveRecord
-            // });
+            await tx.trans_leaves.create({
+                data: leaveRecord
+            });
 
             // Find the employee's leave balance ID
             const leaveBalance = await tx.dim_leave_balances.findFirst({
@@ -174,20 +178,16 @@ export async function POST(req: NextRequest) {
             }
 
             // Update the leave balance within the transaction
-            // await tx.dim_leave_balances.update({
-            //     where: {
-            //         id: leaveBalance.id
-            //     },
-            //     data: {
-            //         remaining_days: {
-            //             decrement: Number(data.total_days)
-            //         },
-            //         used_days: {
-            //             increment: Number(data.total_days)
-            //         },
-            //         updated_at: new Date()
-            //     }
-            // });
+            await tx.dim_leave_balances.update({
+                where: {
+                    id: leaveBalance.id
+                },
+                data: {
+                    remaining_days: remainingLeaveCredit,
+                    used_days: usedLeaveCredit,
+                    updated_at: new Date()
+                }
+            });
         });
 
         // If the transaction succeeds, return a success message

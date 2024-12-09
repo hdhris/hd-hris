@@ -9,6 +9,7 @@ interface DimSchedule {
 interface RefBatchSchedule {
     clock_in: string; // ISO date string
     clock_out: string; // ISO date string
+    break_min: number;
 }
 
 

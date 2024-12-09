@@ -48,7 +48,7 @@ export async function GET() {
                 select: {
                     days_json: true, ref_batch_schedules: {
                         select: {
-                            clock_in: true, clock_out: true
+                            clock_in: true, clock_out: true, break_min: true
                         }
                     }
                 }
