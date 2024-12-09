@@ -283,16 +283,6 @@ const Page: React.FC = () => {
             </BorderCard>
           </div>
         )}
-        onExport={{
-          drawerProps: {
-            title: "Export",
-          },
-        }}
-        onImport={{
-          drawerProps: {
-            title: "Import",
-          },
-        }}
       />
 
       {selectedEmployee && (

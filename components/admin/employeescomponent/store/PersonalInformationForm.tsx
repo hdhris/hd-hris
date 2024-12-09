@@ -93,10 +93,8 @@ const extensionOptions = [
 ];
 
 const PersonalInformationForm = () => {
-  const { setValue, watch } = useFormContext(); // Use form context instead of creating new form
-  const [imagePreview, setImagePreview] = useState<string | undefined>(
-    undefined
-  );
+  const { setValue, watch } = useFormContext();
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,6 +105,10 @@ const PersonalInformationForm = () => {
   useEffect(() => {
     if (typeof pictureValue === "string" && pictureValue !== "") {
       setImagePreview(pictureValue);
+    } else if (pictureValue instanceof File) {
+      setImagePreview(URL.createObjectURL(pictureValue));
+    } else {
+      setImagePreview(null);
     }
   }, [pictureValue]);
 
@@ -117,13 +119,7 @@ const PersonalInformationForm = () => {
         setFileError("File size must be less than 5MB");
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-        setValue("picture", file); // This will now properly update the form context
-      };
-      reader.readAsDataURL(file);
-      setFileError("");
+      setValue("picture", file);
     }
   };
 
@@ -132,7 +128,7 @@ const PersonalInformationForm = () => {
   };
 
   const handleRemovePhoto = useCallback(() => {
-    setImagePreview(undefined);
+    setImagePreview(null);
     setValue("picture", "");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -320,7 +316,7 @@ const PersonalInformationForm = () => {
     },
   ];
 
-  return (
+ return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
         <div>

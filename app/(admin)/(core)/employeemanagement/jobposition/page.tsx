@@ -88,7 +88,6 @@ const Page: React.FC = () => {
       { uid: "name", name: "Name", sortable: true },
       { uid: "superior", name: "Superior", sortable: true },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
-      { uid: "basic_salary", name: "Basic Salary", sortable: true },
       { uid: "pay_rate", name: "Payrate", sortable: true },
       { uid: "status", name: "Status", sortable: true },
       { uid: "actions", name: "Actions" },
@@ -135,12 +134,6 @@ const Page: React.FC = () => {
               <span>{job.pay_rate}</span>
             </div>
           );
-        case "basic_salary":
-          return (
-            <div className={cellClasses}>
-              <span>{job.basic_salary || 0.00}</span>
-            </div>
-          );
         case "actions":
           return (
             <TableActionButton
@@ -171,13 +164,6 @@ const Page: React.FC = () => {
         { key: "is_active", value: false, name: "Inactive", uid: "inactive" },
       ],
     },
-    {
-      category: "Work Status",
-      filtered: [
-        { key: "for_probi", value: true, name: "For probationary", uid: "for probationary" },
-        { key: "for_probi", value: false, name: "For Regular", uid: "for regular" },
-      ],
-    }
   ];
 
   return (
@@ -221,14 +207,6 @@ const Page: React.FC = () => {
                   >
                     {job.is_active ? "Active" : "Inactive"} 
                   </Chip>
-                  <Chip
-                    className="capitalize"
-                    color={job.for_probi ? "warning" : "success"}
-                    size="sm"
-                    variant="flat"
-                  >
-                    {job.for_probi ? "probationary" : "Regular"}
-                  </Chip>
                 </div>
               </div>
             </BorderCard>
@@ -236,16 +214,6 @@ const Page: React.FC = () => {
         )}
         paginationProps={{
           data_length: jobPositions?.length
-        }}
-        onExport={{
-          drawerProps: {
-            title: "Export",
-          },
-        }}
-        onImport={{
-          drawerProps: {
-            title: "Import",
-          },
         }}
       />
 

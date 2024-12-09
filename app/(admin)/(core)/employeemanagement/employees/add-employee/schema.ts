@@ -1,4 +1,5 @@
 // app/employeemanagement/employee/addemployees/schema.ts
+import axios from "axios";
 import { z } from "zod";
 
 // Single Certificate type definition
@@ -6,6 +7,17 @@ export type Certificate = {
   name?: string;
   url: string | File;
   fileName?: string;
+};
+
+const checkEmailExists = async (email: string) => {
+  try {
+    const response = await axios.get(
+      `/api/employeemanagement/check-email?email=${email}`
+    );
+    return !response.data.exists;
+  } catch (error) {
+    return false;
+  }
 };
 
 export const employeeSchema = z.object({
@@ -27,7 +39,12 @@ export const employeeSchema = z.object({
   suffix: z.string().optional().nullable(),
   extension: z.string().optional().nullable(),
   gender: z.string().min(1, "Gender is required"),
-  email: z.string().email("Invalid email address"),
+  email: z
+    .string()
+    .email("Please enter a valid email address")
+    .refine(async (email) => await checkEmailExists(email), {
+      message: "This email is already registered",
+    }),
   contact_no: z
     .string()
     .min(1, "Contact number is required")
@@ -40,14 +57,16 @@ export const employeeSchema = z.object({
       if (val.startsWith("+639")) return val.substring(3);
       return val;
     })
-    .refine((val) => val.length === 10, "Contact number must be exactly 10 digits"),
+    .refine(
+      (val) => val.length === 10,
+      "Contact number must be exactly 10 digits"
+    ),
   birthdate: z.string().min(1, "Birthdate is required"),
   addr_region: z.string().min(1, "Region is required"),
   addr_province: z.string().min(1, "Province is required"),
   addr_municipal: z.string().min(1, "Municipal is required"),
   addr_baranggay: z.string().min(1, "Baranggay is required"),
-  
-  
+
   // Family background fields
   fathers_first_name: z.string().optional(),
   fathers_middle_name: z.string().optional(),
@@ -58,19 +77,28 @@ export const employeeSchema = z.object({
   guardian_first_name: z.string().optional(),
   guardian_middle_name: z.string().optional(),
   guardian_last_name: z.string().optional(),
-  
+
   // Educational background fields
   elementary: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "School name should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
     .optional(),
   highSchool: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "School name should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
     .optional(),
   seniorHighSchool: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "School name should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
     .optional(),
   seniorHighStrand: z
     .string()
@@ -79,35 +107,35 @@ export const employeeSchema = z.object({
   tvlCourse: z
     .string()
     .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
-    .optional(),
+    .optional()
+    .nullable(),
   universityCollege: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "School name should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "School name should only contain letters and numbers"
+    )
     .optional(),
   course: z
     .string()
     .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
     .optional(),
   highestDegree: z.string().optional(),
-  certificates: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
-        fileName: z.string().optional(),
-      })
-    )
-    .optional()
-    .default([]),
-  
+
   // Masters details
   masters: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Masters institution should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Masters institution should only contain letters and numbers"
+    )
     .optional(),
   mastersCourse: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Masters course should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Masters course should only contain letters and numbers"
+    )
     .optional(),
   mastersYear: z
     .union([
@@ -117,25 +145,21 @@ export const employeeSchema = z.object({
       z.undefined(),
     ])
     .optional(),
-  mastersCertificates: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
-        fileName: z.string().optional(),
-      })
-    )
-    .optional()
-    .default([]),
-  
+
   // Doctorate details
   doctorate: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Doctorate institution should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Doctorate institution should only contain letters and numbers"
+    )
     .optional(),
   doctorateCourse: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Doctorate course should only contain letters and numbers")
+    .regex(
+      /^[a-zA-Z0-9\s]*$/,
+      "Doctorate course should only contain letters and numbers"
+    )
     .optional(),
   doctorateYear: z
     .union([
@@ -145,17 +169,20 @@ export const employeeSchema = z.object({
       z.undefined(),
     ])
     .optional(),
-  doctorateCertificates: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
-        fileName: z.string().optional(),
-      })
-    )
+
+    certificates: z
+    .array(z.union([z.instanceof(File), z.string()]))
     .optional()
     .default([]),
-    
+  mastersCertificates: z
+    .array(z.union([z.instanceof(File), z.string()]))
+    .optional()
+    .default([]),
+  doctorateCertificates: z
+    .array(z.union([z.instanceof(File), z.string()]))
+    .optional()
+    .default([]),
+
   // Employment details
   hired_at: z.string().min(1, "Hire date is required"),
   department_id: z.string().min(1, "Department is required"),

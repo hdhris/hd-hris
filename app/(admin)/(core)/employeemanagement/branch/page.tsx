@@ -215,16 +215,6 @@ const Page: React.FC = () => {
         paginationProps={{
           data_length: branches?.length,
         }}
-        onExport={{
-          drawerProps: {
-            title: "Export",
-          },
-        }}
-        onImport={{
-          drawerProps: {
-            title: "Import",
-          },
-        }}
       />
 
       {selectedBranchId !== null && (

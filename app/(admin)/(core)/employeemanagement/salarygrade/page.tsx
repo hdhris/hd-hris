@@ -81,7 +81,9 @@ const Page: React.FC = () => {
   const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "amount", name: "Amount", sortable: true },
+
+      { uid: "amount", name: "Salary grade amount (monthly)", sortable: true },
+      { uid: "rph", name: "Rate per hour", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (salary: SalaryGrade, columnKey: React.Key): React.ReactElement => {
@@ -99,6 +101,12 @@ const Page: React.FC = () => {
           return (
             <div className={cellClasses}>
               <span>{salary.amount || 0.00}</span>
+            </div>
+          );
+          case "rph":
+          return (
+            <div className={cellClasses}>
+              <span>{salary.rate_per_hour || 0.00}</span>
             </div>
           );
         case "actions":
@@ -151,6 +159,9 @@ const Page: React.FC = () => {
                 <div className="flex flex-col">
                   <span className="font-medium">{salary.amount}</span>
                 </div>
+                <div className="flex flex-col">
+                  <span className="font-medium">{salary.rate_per_hour}</span>
+                </div>
                 </div>
               </div>
             </BorderCard>
@@ -158,16 +169,6 @@ const Page: React.FC = () => {
         )}
         paginationProps={{
           data_length: salaryGrade?.length
-        }}
-        onExport={{
-          drawerProps: {
-            title: "Export",
-          },
-        }}
-        onImport={{
-          drawerProps: {
-            title: "Import",
-          },
         }}
       />
 
