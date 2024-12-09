@@ -87,6 +87,8 @@ model dim_schedules {
   deleted_at          DateTime?            @db.Timestamp(6)
   start_date          DateTime?            @db.Timestamptz(6)
   end_date            DateTime?            @db.Timestamptz(6)
+  clock_in            DateTime?            @db.Time(6)
+  clock_out           DateTime?            @db.Time(6)
   ref_batch_schedules ref_batch_schedules? @relation(fields: [batch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_schedules_ref_batch_schedule_2")
   trans_employees     trans_employees?     @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_schedule_employees1")
 
