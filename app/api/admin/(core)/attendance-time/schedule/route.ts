@@ -20,8 +20,9 @@ export async function GET() {
         }
       },
       where: {
+        end_date: null,
         trans_employees:{
-          deleted_at:null
+          deleted_at:null,
         }
       }
     })

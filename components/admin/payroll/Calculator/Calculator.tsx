@@ -54,8 +54,9 @@ function PayheadCalculator({
                 return acc;
             }, {} as Record<string, number>),
         };
+        console.log(baseVariables);
 
-        const vals = calculateAllPayheads(baseVariables, [{ payhead_id: -1, formula: input, variable: "x" }], true);
+        const vals = calculateAllPayheads(baseVariables, [{ payhead_id: -1, formula: input, variable: "x" }]);
         return vals.length > 0;
     }, [input, payheadVariables, isDisabled]);
 

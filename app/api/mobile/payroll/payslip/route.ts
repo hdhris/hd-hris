@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const employee_id = Number(searchParams.get("employee_id"));
   try {
     // const body = await req.json();
-    const date = await prisma.trans_payhead_breakdowns.findMany({
+    const breakdowns = await prisma.trans_payhead_breakdowns.findMany({
         where : {
           trans_payrolls: {
             date_id,
@@ -21,11 +21,12 @@ export async function GET(req: NextRequest) {
             select: {
               name: true,
               type: true,
+              id: true,
             }
           }
         }
     })
-    return NextResponse.json(date);
+    return NextResponse.json(breakdowns);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
   }
