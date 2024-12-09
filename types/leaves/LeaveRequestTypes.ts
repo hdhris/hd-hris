@@ -1,6 +1,17 @@
 import React from "react";
 import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 
+interface DimSchedule {
+    days_json: string[];
+    ref_batch_schedules: RefBatchSchedule;
+}
+
+interface RefBatchSchedule {
+    clock_in: string; // ISO date string
+    clock_out: string; // ISO date string
+}
+
+
 type ApprovedBy = {
     name: string; picture: string;
 }
@@ -42,7 +53,6 @@ export interface LeaveBalance {
 export interface LeaveType {
     id: number;
     name: string;
-    min: number;
     max: number;
     is_attachment_required: boolean
 }
@@ -77,7 +87,7 @@ interface EmployeeLeaveType {
 interface LeaveDetails {
     start_date: string; // ISO date string
     end_date: string;   // ISO date string
-    total_days: number;
+    total_days?: number;
     reason: string;
     status: "Pending" | "Approved" | "Rejected"
     created_at: string; // ISO date string
@@ -103,8 +113,9 @@ export interface EmployeeLeave {
     name: string;
     picture: string;
     department: string;
-    leave_balances: LeaveBalance[];
+    leave_balances: LeaveBalance[]
     trans_leaves: LeaveApplication[]
+    dim_schedules: DimSchedule[];
 }
 
 interface LeaveApplication {

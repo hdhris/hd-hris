@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
                     carry_over: data_validation.data.carryOver,
                     paid_leave: data_validation.data.paidLeave,
                     is_active: data_validation.data.isActive,
-                    min_duration: 0,
                     max_duration: data_validation.data.maxDuration,
                     attachment_required: data_validation.data.attachmentRequired,
                     is_applicable_to_all: is_applicable_for_all,

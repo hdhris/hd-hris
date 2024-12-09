@@ -5,6 +5,8 @@ import dayjs from "dayjs";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import {EvaluatorsTypes, LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 import {processJsonObject} from "@/lib/utils/parser/JsonObject";
+import {toGMT8} from "@/lib/utils/toGMT8";
+import {capitalize} from "@nextui-org/shared-utils";
 
 export const dynamic = "force-dynamic"
 
@@ -48,7 +50,8 @@ export async function GET(request: Request) {
                         }
                     }
                 }
-            }
+            },
+
         }, orderBy: {
             updated_at: 'desc'
         }, take: perPage, skip: (page - 1) * perPage
@@ -88,11 +91,11 @@ export async function GET(request: Request) {
                 name: getEmpFullName(items.trans_employees_trans_leaves_created_byTotrans_employees)
             },
             leave_details: {
-                start_date: dayjs(items.start_date).format("MMM DD, YYYY hh:mm A"),
-                end_date: dayjs(items.end_date).format("MMM DD, YYYY hh:mm A"),
-                total_days: dayjs(items.end_date).diff(items.start_date, 'day'),
+                start_date: toGMT8(items.start_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
+                end_date: toGMT8(items.end_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
                 reason: items.reason || "",
-                status: status as "Approved" | "Pending" | "Rejected",
+                // status: status as "Approved" | "Pending" | "Rejected"
+                status: items.status as "Approved" | "Pending" | "Rejected",
                 created_at: dayjs(items.created_at).format("YYYY-MM-DD"),
                 updated_at: dayjs(items.updated_at).format("YYYY-MM-DD"),
             },

@@ -8,6 +8,7 @@ import {EvaluatorsTypes, LeaveApplicationEvaluation} from "@/types/leaves/leave-
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import { InputJsonValue } from "@prisma/client/runtime/library";
+import {LeaveRequestFormValidation} from "@/helper/zodValidation/leaves/request-form/LeaveRequestFormValidation";
 
 export async function POST(req: NextRequest) {
     try {
@@ -19,11 +20,20 @@ export async function POST(req: NextRequest) {
         console.log("Creating Data: ", data)
 
         // Validate required fields
-        if (!data.employee_id || !data.leave_date || !data.days_of_leave || !data.reason || !data.leave_type_id) {
+        const validate = LeaveRequestFormValidation.safeParse(data)
+
+        if(!validate.success){
             return NextResponse.json({
                 success: false,
-                message: "Missing required fields. Please provide employee ID, leave date, days of leave, reason, and leave type ID."
-            }, {status: 400});
+                message: validate.error.message
+            }, {status: 404})
+        }
+
+        if(data.total_days <= 0){
+            return NextResponse.json({
+                success: false,
+                message: "Invalid days of leave."
+            }, {status: 404})
         }
 
         // Get the current user session
@@ -48,7 +58,7 @@ export async function POST(req: NextRequest) {
 
         const employee = await prisma.trans_employees.findUnique({
             where: {
-                id: data.employee_id,
+                id: validate.data.employee_id,
             },
             select:{
                 prefix: true,
@@ -73,6 +83,9 @@ export async function POST(req: NextRequest) {
         const reviewer_uuid = uuidv4()
         const emp_uuid = uuidv4()
 
+        const attachmentLinks = {
+            url: data.url
+        }
         const evaluators: LeaveApplicationEvaluation = {
             reviewers: {
                 decision: {
@@ -123,15 +136,16 @@ export async function POST(req: NextRequest) {
         await prisma.$transaction(async (tx) => {
             // Create a leave record
             const leaveRecord = {
-                employee_id: data.employee_id,
-                start_date: toGMT8(data.leave_date).toISOString(),
-                end_date: toGMT8(data.leave_date).add(Number(data.days_of_leave), "day").toISOString(),
-                reason: data.reason,
-                leave_type_id: data.leave_type_id,
+                employee_id: validate.data.employee_id,
+                start_date: toGMT8(validate.data.leave_date_range.start).toISOString(),
+                end_date: toGMT8(validate.data.leave_date_range.end).toISOString(),
+                reason: validate.data.reason,
+                leave_type_id: validate.data.leave_type_id,
                 created_at: toGMT8().toISOString(),
                 updated_at: toGMT8().toISOString(),
                 created_by: reviewer.id,
-                evaluators: evaluators as unknown as InputJsonValue
+                evaluators: evaluators as unknown as InputJsonValue,
+                files: attachmentLinks.url
             };
 
             // Create leave request in the database within the transaction
@@ -143,8 +157,8 @@ export async function POST(req: NextRequest) {
             const leaveBalance = await tx.dim_leave_balances.findFirst({
                 where: {
                     deleted_at: null,
-                    employee_id: data.employee_id,
-                    leave_type_id: data.leave_type_id
+                    employee_id: validate.data.employee_id,
+                    leave_type_id: validate.data.leave_type_id
                 },
                 select: {
                     id: true
@@ -166,10 +180,10 @@ export async function POST(req: NextRequest) {
             //     },
             //     data: {
             //         remaining_days: {
-            //             decrement: Number(data.days_of_leave)
+            //             decrement: Number(data.total_days)
             //         },
             //         used_days: {
-            //             increment: Number(data.days_of_leave)
+            //             increment: Number(data.total_days)
             //         },
             //         updated_at: new Date()
             //     }

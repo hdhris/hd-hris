@@ -8,7 +8,7 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import {
     approval_status_color_map, FilterItems, TableConfigurations
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
-import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
+import RequestForm from "@/app/tests/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import CardView from "@/components/common/card-view/card-view";
 import {Avatar, Chip, cn, Input, ScrollShadow, User} from '@nextui-org/react';
@@ -35,6 +35,9 @@ import {useSession} from "next-auth/react";
 import {FaReply} from "react-icons/fa";
 import dayjs from "dayjs";
 import {HolidayData} from "@/types/attendance-time/HolidayTypes";
+import {CalendarDate, isWeekend} from "@internationalized/date";
+import {useHolidays} from "@/helper/holidays/unavailableDates";
+import {useLocale} from "@react-aria/i18n";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -51,11 +54,34 @@ function Page() {
         refreshInterval: 3000
     });
     const { data: holiday, isLoading: holidayLoading} = useQuery<HolidayData>(`/api/admin/attendance-time/holidays/${new Date().getFullYear()}`);
+    const {isDateUnavailable} = useHolidays()
+    let {locale} = useLocale();
 
     const allRequests = useMemo(() => {
         if (data) return data.data.map((item) => {
             const created_by = {
                 id: item.created_by.id, name: item.created_by.name, picture: item.created_by.picture,
+            }
+
+            const total_leave = dayjs(item.leave_details.end_date).diff(item.leave_details.start_date, 'days');
+
+            // Ensure the range is valid (start date should be before end date)
+
+            // Convert the start date string into a Date object, then into a CalendarDate
+            let startDate = new Date(item.leave_details.start_date);  // Parse the start date string into a Date object
+            let currentDate = new CalendarDate(startDate.getFullYear(), startDate.getMonth() + 1, startDate.getDate()); // Convert Date to CalendarDate (Month is 0-based, so add 1)
+
+            let validLeaveDays = 0; // Counter for valid leave days
+
+            // Iterate over the date range and check each date
+            for (let i = 0; i < total_leave; i++) {
+                // Check if the current date is a valid leave day (not a weekend, not an unavailable date)
+                if (!isWeekend(currentDate, locale) && !isDateUnavailable(currentDate)) {
+                    validLeaveDays++; // Increment if it's a valid leave day
+                }
+
+                // Move to the next day
+                currentDate = currentDate.add({days: 1}); // Add 1 day using CalendarDate's add method
             }
 
             return {
@@ -70,7 +96,7 @@ function Page() {
                 leave_details: {
                     start_date: item.leave_details.start_date, // Format date here
                     end_date: item.leave_details.end_date,     // Format date here
-                    total_days: item.leave_details.total_days,
+                    total_days: validLeaveDays,
                     reason: item.leave_details.reason,
                     status: item.leave_details.status,
                     created_at: item.leave_details.created_at,
@@ -83,7 +109,7 @@ function Page() {
         })
 
         return []
-    }, [data])
+    }, [data, isDateUnavailable, locale])
 
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))
@@ -96,7 +122,6 @@ function Page() {
     }, [setIsOpen])
 
     SetNavEndContent(() => {
-
         return (<>
             <Button {...uniformStyle()} onClick={onOpenDrawer}>
                 File A Leave

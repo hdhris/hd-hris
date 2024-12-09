@@ -46,7 +46,6 @@ function DataDisplay<T extends { id: string | number }>({
                                                             ...rest
                                                         }: DataDisplayType<T>) {
 
-
     return (<DataDisplayControlProvider values={data} defaultDisplay={defaultDisplay}>
         <DataDisplayControl
             title={rest.title}

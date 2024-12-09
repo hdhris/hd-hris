@@ -116,7 +116,6 @@ export async function GET(request: Request) {
                 created_at: dayjs(leaveType.created_at).format("YYYY-MM-DD"),
                 is_active: leaveType.is_active,
                 max_duration: Number(leaveType.max_duration),
-                // min_duration: Number(leaveType.min_duration),
                 paid_leave: leaveType.paid_leave,
                 updated_at: dayjs(leaveType.updated_at).format("YYYY-MM-DD"),
                 carry_over: leaveType.carry_over,
