@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
         const programs = await prisma.ref_training_programs.findMany({
             where: {
                 deleted_at: null,
-                type: 'seminars', // Explicitly filter by seminars
+                type: 'seminars', 
             },
             include: {
                 dim_training_participants: true,

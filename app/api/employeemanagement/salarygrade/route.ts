@@ -11,6 +11,9 @@ amount: z
     .string()
     .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
     .transform((val) => new Prisma.Decimal(val)),
+    rate_per_hour: z .string()
+    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
+    .transform((val) => new Prisma.Decimal(val)),
   
 });
 
@@ -74,6 +77,7 @@ export async function POST(req: Request) {
       data: {
         name: validatedData.name,
         amount: validatedData.amount,
+        rate_per_hour: validatedData.rate_per_hour,
         created_at: new Date(),
         updated_at: new Date(),
       },

@@ -1,11 +1,12 @@
 // app/employeemanagement/employee/addemployees/schema.ts
+import axios from "axios";
 import { z } from "zod";
 
 // Single Certificate type definition
 export type Certificate = {
-  name?: string;
-  url: string | File;
-  fileName?: string;
+  certificates: (string | File)[];
+  mastersCertificates?: (string | File)[];
+  doctorateCertificates?: (string | File)[];
 };
 
 export interface EmployeeFormData {
@@ -42,13 +43,13 @@ export interface EmployeeFormData {
   masters?: string;
   mastersCourse?: string;
   mastersYear?: string;
-  mastersCertificates?: Certificate[];
   doctorate?: string;
   doctorateCourse?: string;
   doctorateYear?: string;
-  doctorateCertificates?: Certificate[];
   highestDegree: string;
-  certificates: Certificate[];
+  certificates: (string | File)[];
+  mastersCertificates: (string | File)[];
+  doctorateCertificates: (string | File)[];
   hired_at: string;
   department_id: string;
   job_id: string;
@@ -57,12 +58,15 @@ export interface EmployeeFormData {
   batch_id: string;
   employement_status_id: string;
   days_json: string[];
+  username?: string;
+  password?: string;
 }
+
+
+
 
 export const employeeSchema = z.object({
   picture: z.union([z.instanceof(File), z.string()]).optional(),
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
   first_name: z
     .string()
     .min(1, "First name is required")
@@ -78,7 +82,9 @@ export const employeeSchema = z.object({
   suffix: z.string().optional().nullable(),
   extension: z.string().optional().nullable(),
   gender: z.string().min(1, "Gender is required"),
-  email: z.string().email("Invalid email address"),
+  email: z
+    .string()
+    .email("Please enter a valid email address"),
   contact_no: z
     .string()
     .min(1, "Contact number is required")
@@ -100,6 +106,8 @@ export const employeeSchema = z.object({
   addr_province: z.string().min(1, "Province is required"),
   addr_municipal: z.string().min(1, "Municipal is required"),
   addr_baranggay: z.string().min(1, "Baranggay is required"),
+
+  // Family background fields
   fathers_first_name: z.string().optional(),
   fathers_middle_name: z.string().optional(),
   fathers_last_name: z.string().optional(),
@@ -109,6 +117,8 @@ export const employeeSchema = z.object({
   guardian_first_name: z.string().optional(),
   guardian_middle_name: z.string().optional(),
   guardian_last_name: z.string().optional(),
+
+  // Educational background fields
   elementary: z
     .string()
     .regex(
@@ -137,7 +147,8 @@ export const employeeSchema = z.object({
   tvlCourse: z
     .string()
     .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
-    .optional(),
+    .optional()
+    .nullable(),
   universityCollege: z
     .string()
     .regex(
@@ -150,16 +161,8 @@ export const employeeSchema = z.object({
     .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
     .optional(),
   highestDegree: z.string().optional(),
-  certificates: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
-        fileName: z.string().optional(),
-      })
-    )
-    .optional()
-    .default([]),
+
+  // Masters details
   masters: z
     .string()
     .regex(
@@ -182,16 +185,8 @@ export const employeeSchema = z.object({
       z.undefined(),
     ])
     .optional(),
-  mastersCertificates: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
-        fileName: z.string().optional(),
-      })
-    )
-    .optional()
-    .default([]),
+
+  // Doctorate details
   doctorate: z
     .string()
     .regex(
@@ -214,21 +209,32 @@ export const employeeSchema = z.object({
       z.undefined(),
     ])
     .optional(),
-  doctorateCertificates: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        url: z.union([z.string(), z.instanceof(File), z.undefined()]),
-        fileName: z.string().optional(),
-      })
-    )
+
+    certificates: z
+    .array(z.union([z.instanceof(File), z.string()]))
     .optional()
     .default([]),
+  mastersCertificates: z
+    .array(z.union([z.instanceof(File), z.string()]))
+    .optional()
+    .default([]),
+  doctorateCertificates: z
+    .array(z.union([z.instanceof(File), z.string()]))
+    .optional()
+    .default([]),
+
+  // Employment details
   hired_at: z.string().min(1, "Hire date is required"),
   department_id: z.string().min(1, "Department is required"),
   job_id: z.string().min(1, "Job is required"),
+  // is_regular: z.preprocess((val) => {
+  //   if (typeof val === "string") return val === "true";
+  //   return val;
+  // }, z.boolean()),
   branch_id: z.string().min(1, "Branch is required"),
-  employement_status_id: z.string().min(1, "Employement status is required"),
+  salary_grade_id: z.string().min(1, "Salary Grade is required"),
   batch_id: z.string().min(1, "Batch is required"),
   days_json: z.array(z.string()),
+  employement_status_id: z.string().min(1, "Employement status is required"),
 });
+

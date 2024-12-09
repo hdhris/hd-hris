@@ -154,16 +154,6 @@ const Page: React.FC = () => {
         paginationProps={{
           data_length: empStatus?.length,
         }}
-        onExport={{
-          drawerProps: {
-            title: "Export",
-          },
-        }}
-        onImport={{
-          drawerProps: {
-            title: "Import",
-          },
-        }}
       />
 
       {selectedEmploymentStatusId !== null && (

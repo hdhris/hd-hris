@@ -89,9 +89,8 @@ export default function EditEmployeePage({
   const { edgestore } = useEdgeStore();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("personal");
-  const { data: employeeData, isLoading: isFetching } = useEmployeeData(
-    params.id
-  );
+  const { data: employeeData, isLoading: isFetching } = useEmployeeData(params.id);
+
 
   const methods = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
@@ -129,14 +128,17 @@ export default function EditEmployeePage({
       course: "",
       highestDegree: "",
       certificates: [],
+      mastersCertificates: [],
+      doctorateCertificates: [],
+     
       masters: "",
       mastersCourse: "",
       mastersYear: "",
-      mastersCertificates: [],
+   
       doctorate: "",
       doctorateCourse: "",
       doctorateYear: "",
-      doctorateCertificates: [],
+    
       hired_at: "",
       department_id: "",
       job_id: "",
@@ -147,6 +149,29 @@ export default function EditEmployeePage({
     },
   });
 
+  const processCertificates = async (
+    certificates: (string | File)[] = []
+  ): Promise<string[]> => {
+    const processed = await Promise.all(
+      certificates.map(async (cert) => {
+        if (!cert) return null;
+
+        if (cert instanceof File) {
+          const result = await edgestore.publicFiles.upload({
+            file: cert,
+            options: {
+              temporary: false,
+            },
+          });
+          return result.url;
+        }
+        return cert; // If it's already a string URL, return it directly
+      })
+    );
+
+    return processed.filter((url): url is string => url !== null);
+  };
+
   const fetchEmployeeData = useCallback(async () => {
     if (!employeeData) return;
 
@@ -156,35 +181,26 @@ export default function EditEmployeePage({
       if (employeeData.dim_schedules?.[0]?.days_json) {
         try {
           const daysJson = employeeData.dim_schedules[0].days_json;
-          daysArray =
-            typeof daysJson === "string" ? JSON.parse(daysJson) : daysJson;
+          daysArray = typeof daysJson === "string" ? JSON.parse(daysJson) : daysJson;
         } catch (error) {
           console.error("Error parsing days_json:", error);
         }
       }
 
       // Process educational background
-      const educationalBg =
-        typeof employeeData.educational_bg_json === "string"
-          ? JSON.parse(employeeData.educational_bg_json || "{}")
-          : employeeData.educational_bg_json || {};
-
-      // Process certificates
-      const processCertificates = (certs: any[] = []): Certificate[] => {
-        if (!Array.isArray(certs)) return [];
-
-        return certs.map((cert) => ({
-          name: cert.fileName || "",
-          url: cert.fileUrl || "",
-          fileName: cert.fileName || "",
-        }));
-      };
+      const educationalBg = typeof employeeData.educational_bg_json === "string"
+        ? JSON.parse(employeeData.educational_bg_json || "{}")
+        : employeeData.educational_bg_json || {};
 
       // Process family background
-      const familyBg =
-        typeof employeeData.family_bg_json === "string"
-          ? JSON.parse(employeeData.family_bg_json || "{}")
-          : employeeData.family_bg_json || {};
+      const familyBg = typeof employeeData.family_bg_json === "string"
+        ? JSON.parse(employeeData.family_bg_json || "{}")
+        : employeeData.family_bg_json || {};
+
+      // Extract certificates as simple arrays of URLs
+      const certificates = Array.isArray(educationalBg.certificates) ? educationalBg.certificates : [];
+      const mastersCertificates = Array.isArray(educationalBg.mastersCertificates) ? educationalBg.mastersCertificates : [];
+      const doctorateCertificates = Array.isArray(educationalBg.doctorateCertificates) ? educationalBg.doctorateCertificates : [];
 
       methods.reset({
         picture: employeeData.picture || "",
@@ -214,13 +230,9 @@ export default function EditEmployeePage({
         employement_status_id: employeeData.employement_status_id?.toString() || "",
         ...familyBg,
         ...educationalBg,
-        certificates: processCertificates(educationalBg.certificates),
-        mastersCertificates: processCertificates(
-          educationalBg.mastersCertificates
-        ),
-        doctorateCertificates: processCertificates(
-          educationalBg.doctorateCertificates
-        ),
+        certificates,
+        mastersCertificates,
+        doctorateCertificates,
         batch_id:
           employeeData.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() ||
           "",
@@ -253,52 +265,15 @@ export default function EditEmployeePage({
         });
         pictureUrl = result.url;
       }
+  
+      // Process all certificate types
+      const [certificates, mastersCertificates, doctorateCertificates] = await Promise.all([
+        processCertificates(data.certificates),
+        processCertificates(data.mastersCertificates),
+        processCertificates(data.doctorateCertificates),
+      ]);
 
-      // Process certificates
-      const processUploadedCertificates = async (
-        certificates: Certificate[] | undefined
-      ) => {
-        if (!certificates || !Array.isArray(certificates)) {
-          return [];
-        }
-
-        return await Promise.all(
-          certificates.map(async (cert) => {
-            if (!cert) return null;
-            if (cert.url instanceof File) {
-              const result = await edgestore.publicFiles.upload({
-                file: cert.url,
-                options: { temporary: false },
-              });
-              return {
-                fileName:
-                  cert.fileName ||
-                  cert.name ||
-                  result.url.split("/").pop() ||
-                  "",
-                fileUrl: result.url,
-              };
-            }
-            return {
-              fileName: cert.fileName || cert.name || "",
-              fileUrl: cert.url as string,
-            };
-          })
-        ).then((certs) =>
-          certs.filter(
-            (cert): cert is NonNullable<typeof cert> => cert !== null
-          )
-        );
-      };
-
-      // Update the certificates processing in handleFormSubmit
-      const [certificates, mastersCertificates, doctorateCertificates] =
-        await Promise.all([
-          processUploadedCertificates(data.certificates || []),
-          processUploadedCertificates(data.mastersCertificates || []),
-          processUploadedCertificates(data.doctorateCertificates || []),
-        ]);
-
+  
       const educationalBackground = {
         elementary: data.elementary,
         highSchool: data.highSchool,
@@ -308,17 +283,17 @@ export default function EditEmployeePage({
         universityCollege: data.universityCollege,
         course: data.course,
         highestDegree: data.highestDegree,
-        certificates,
+        certificates, // Now just an array of URLs
         masters: data.masters,
         mastersCourse: data.mastersCourse,
         mastersYear: data.mastersYear,
-        mastersCertificates,
+        mastersCertificates, // Now just an array of URLs
         doctorate: data.doctorate,
         doctorateCourse: data.doctorateCourse,
         doctorateYear: data.doctorateYear,
-        doctorateCertificates,
+        doctorateCertificates, // Now just an array of URLs
       };
-
+  
       const familyBackground = {
         fathers_first_name: data.fathers_first_name,
         fathers_middle_name: data.fathers_middle_name,
@@ -330,13 +305,11 @@ export default function EditEmployeePage({
         guardian_middle_name: data.guardian_middle_name,
         guardian_last_name: data.guardian_last_name,
       };
-
+  
       const fullData = {
         ...data,
         picture: pictureUrl,
-        birthdate: data.birthdate
-          ? new Date(data.birthdate).toISOString()
-          : null,
+        birthdate: data.birthdate ? new Date(data.birthdate).toISOString() : null,
         hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
@@ -357,12 +330,12 @@ export default function EditEmployeePage({
           },
         ],
       };
-
+  
       const response = await axios.put(
         `/api/employeemanagement/employees?id=${params.id}`,
         fullData
       );
-
+  
       if (response.status === 200) {
         router.push("/employeemanagement/employees");
         toast({
