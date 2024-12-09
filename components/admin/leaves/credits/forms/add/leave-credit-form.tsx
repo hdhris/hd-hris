@@ -39,7 +39,6 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
     const [leaveTypes, setLeaveTypes] = useState<LeaveTypeForEmployee[]>([]);
     const [employeeLeaveType, setEmployeeLeaveType] = useState<LeaveTypeForEmployee[] | null>(null);
 
-
     const employmentStatus = useMemo(() => employeeStatus || [], [employeeStatus]);
 
     const form = useForm<z.infer<typeof LeaveCreditFormSchema>>({
@@ -81,6 +80,7 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
     };
 
     const handleSubmit = async (data: z.infer<typeof LeaveCreditFormSchema>) => {
+
         const { apply_for, employee_id, leave_credits } = data;
 
         // console.log("Emp: ", employeeState.find(item => item.id === employee_id)?.employment_status.id)
@@ -97,6 +97,16 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
                             .find(emp => emp.employment_status!.name === apply_for)?.employment_status!.id,
                         leave_credits,
                     };
+
+
+        if(payload.employee_id.length <= 0) {
+            toast({
+                title: 'Error',
+                description: `No ${capitalize(apply_for)} Employee Found`,
+                variant: 'danger',
+            });
+            return
+        }
 
 
         try {

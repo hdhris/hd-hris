@@ -1,48 +1,54 @@
-'use client'
-import React, {useEffect} from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import ChangePassword from "@/components/forgot/change/ChangePassword";
-import {deleteCookie, getCookie, setCookie} from "cookies-next";
-import {useRouter} from "next/navigation";
-import {uuidValidateV4} from "@/lib/utils/uuid-validator/validator";
-import {useIsClient} from "@/hooks/ClientRendering";
+import { deleteCookie, getCookie, setCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
+import { uuidValidateV4 } from "@/lib/utils/uuid-validator/validator";
+// import { useIsClient } from "@/hooks/ClientRendering";
 
 function Page() {
     const router = useRouter();
     const token = getCookie("change-password-token");
-    const validate_token = uuidValidateV4(token as string)
-    const isClient = useIsClient()
-
+    const validateToken = uuidValidateV4(token as string);
+    // const isClient = useIsClient();
 
     useEffect(() => {
-        // Get the token creation time
-        const tokenCreationTime = getCookie("token-creation-time");
+        // if (!isClient) return;
 
-        // If no creation time exists, set it to the current time
+        if (!validateToken) {
+            console.log("Token invalid or expired, redirecting...");
+            router.push("/auth/forgot");
+            return;
+        }
+
+        // Handle token expiration logic
+        const tokenCreationTime = getCookie("token-creation-time");
+        const fiveMinutes = 5 * 60 * 1000;
+
         if (!tokenCreationTime) {
+            // Set token creation time if not set
             setCookie("token-creation-time", Date.now());
         } else {
             const elapsedTime = Date.now() - Number(tokenCreationTime);
-            const fiveMinutes = 5 * 60 * 1000;
-
-            // If 5 minutes have passed, delete the token
             if (elapsedTime >= fiveMinutes) {
+                // If token has expired, delete cookies and redirect
                 deleteCookie("change-password-token");
                 deleteCookie("token-creation-time");
+                console.log("Token expired, redirecting...");
+                router.push("/auth/forgot");
             }
         }
-    }, []);
+    }, [validateToken, router]);
 
-    if (!validate_token) {
-        router.push("/auth/forgot");
-        console.log("Ive been there...")
-        return;
-    }
+    // Wait for client-side rendering to avoid server-side mismatches
+    // if (!isClient) return null;
 
-    if(!isClient) return null
-
-    return (<main className="flex h-screen flex-col items-center">
-            <ChangePassword/>
-        </main>);
+    return (
+        <main className="flex h-screen flex-col items-center">
+            <ChangePassword />
+        </main>
+    );
 }
 
 export default Page;

@@ -11,6 +11,8 @@ export async function PATCH(request: NextRequest) {
 
         const data = await request.json();
 
+        console.log("Patch leave types:", data)
+
         const logger = new Logger(LogLevel.DEBUG);
         // logger.debug(data);
 
@@ -66,6 +68,7 @@ export async function PATCH(request: NextRequest) {
             employee_status_ids.push(Number(data_validation.data.applicableToEmployeeTypes));
         }
 
+        console.log("Ids: ", employee_status_ids);
         // Update the leave type details
         await prisma.ref_leave_type_details.update({
             where: { id: data.id },
@@ -81,17 +84,6 @@ export async function PATCH(request: NextRequest) {
                 attachment_required: data_validation.data.attachmentRequired,
                 is_applicable_to_all: is_applicable_for_all,
                 updated_at: new Date(),
-                // Update related trans_leave_types
-                trans_leave_types: {
-                    deleteMany: {}, // Clear existing relationships
-                    createMany: {
-                        data: employee_status_ids.map((status_id) => ({
-                            employment_status_id: status_id,
-                            created_at: toGMT8().toISOString(),
-                            updated_at: toGMT8().toISOString(),
-                        })),
-                    },
-                },
             },
         });
 

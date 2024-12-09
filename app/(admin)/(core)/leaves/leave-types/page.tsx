@@ -188,6 +188,7 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
     const handleLeaveTypeEdit = (value: boolean) => {
         setEditOpen(value)
         setData(props!)
+
     }
 
     const handleLeaveTypeDelete = async (key: Key) => {

@@ -17,6 +17,7 @@ import {signOut} from "next-auth/react";
 import {ToastAction} from "@/components/ui/toast";
 import {useCredentials} from "@/hooks/Credentials";
 import { LuUserCircle2 } from "react-icons/lu";
+import {useIsClient} from "@/hooks/ClientRendering";
 
 export default function ProfileForm() {
     const {edgestore} = useEdgeStore();
@@ -27,6 +28,7 @@ export default function ProfileForm() {
     const [avatar, setAvatar] = useState<File | null>(null)
     const [fileError, setFileError] = useState<string>("");
     const {data: profile, isLoading} = useUser();
+    const isClient = useIsClient()
     const [uploadingProgress, setUploadingProgress] = useState<{
         progress: number, status: "Complete" | "Uploading" | "Error" | null
     }>({
@@ -40,6 +42,7 @@ export default function ProfileForm() {
             display_name: ""
         }
     });
+
 
     useEffect(() => {
         if (profile) {
@@ -223,6 +226,7 @@ export default function ProfileForm() {
         setLoading(false);
     }
 
+    if(!isClient) return null
     return (<Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 flex flex-col p-2 h-full overflow-hidden'>
             <FormFields items={upperInput}/>
