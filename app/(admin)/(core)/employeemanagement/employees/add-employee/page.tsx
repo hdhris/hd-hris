@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { employeeSchema, type EmployeeFormData } from "./schema";
@@ -15,68 +15,68 @@ import EducationalBackgroundForm from "@/components/admin/employeescomponent/sto
 import JobInformationForm from "@/components/admin/employeescomponent/store/JobInformation";
 import PersonalInformationForm from "@/components/admin/employeescomponent/store/PersonalInformationForm";
 import ScheduleSelection from "@/components/admin/employeescomponent/store/ScheduleSelection";
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab, Spinner } from "@nextui-org/react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 
 type EmployeeFields = keyof EmployeeFormData;
 
-const personalFields: EmployeeFields[] = [
-  "first_name",
-  "middle_name",
-  "last_name",
-  "suffix",
-  "extension",
-  "gender",
-  "email",
-  "contact_no",
-  "birthdate",
-  "addr_region",
-  "addr_province",
-  "addr_municipal",
-  "addr_baranggay",
-  "fathers_first_name",
-  "fathers_middle_name",
-  "fathers_last_name",
-  "mothers_first_name",
-  "mothers_middle_name",
-  "mothers_last_name",
-  "guardian_first_name",
-  "guardian_middle_name",
-  "guardian_last_name",
-];
-
-const educationalFields: EmployeeFields[] = [
-  "elementary",
-  "highSchool",
-  "seniorHighSchool",
-  "seniorHighStrand",
-  "tvlCourse",
-  "universityCollege",
-  "course",
-  "highestDegree",
-  "certificates",
-  "masters",
-  "mastersCourse",
-  "mastersYear",
-  "mastersCertificates",
-  "doctorate",
-  "doctorateCourse",
-  "doctorateYear",
-  "doctorateCertificates",
-];
-
-const jobFields: EmployeeFields[] = [
-  "hired_at",
-  "department_id",
-  "job_id",
-  "employement_status_id",
-  "branch_id",
-  "salary_grade_id",
-  "batch_id",
-  "days_json",
-];
-
-const accountFields: EmployeeFields[] = ["username", "password"];
+const tabFieldsMap = {
+  personal: [
+    "first_name",
+    "middle_name",
+    "last_name",
+    "suffix",
+    "extension",
+    "gender",
+    "email",
+    "contact_no",
+    "birthdate",
+    "addr_region",
+    "addr_province",
+    "addr_municipal",
+    "addr_baranggay",
+    "fathers_first_name",
+    "fathers_middle_name",
+    "fathers_last_name",
+    "mothers_first_name",
+    "mothers_middle_name",
+    "mothers_last_name",
+    "guardian_first_name",
+    "guardian_middle_name",
+    "guardian_last_name",
+    "picture",
+  ] as EmployeeFields[],
+  educational: [
+    "elementary",
+    "highSchool",
+    "seniorHighSchool",
+    "seniorHighStrand",
+    "tvlCourse",
+    "universityCollege",
+    "course",
+    "highestDegree",
+    "certificates",
+    "masters",
+    "mastersCourse",
+    "mastersYear",
+    "mastersCertificates",
+    "doctorate",
+    "doctorateCourse",
+    "doctorateYear",
+    "doctorateCertificates",
+  ] as EmployeeFields[],
+  job: [
+    "hired_at",
+    "department_id",
+    "job_id",
+    "employement_status_id",
+    "branch_id",
+    "salary_grade_id",
+    "batch_id",
+    "days_json",
+  ] as EmployeeFields[],
+  account: ["username", "password"] as EmployeeFields[],
+};
 
 export default function AddEmployeePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -142,185 +142,127 @@ export default function AddEmployeePage() {
     mode: "onChange",
   });
 
-  const handleNext = async () => {
-    let fieldsToValidate: EmployeeFields[] = [];
+  const validateCurrentTab = async (tabKey: string): Promise<boolean> => {
+    const fieldsToValidate =
+      tabFieldsMap[tabKey as keyof typeof tabFieldsMap] || [];
+    return await methods.trigger(fieldsToValidate);
+  };
 
-    switch (activeTab) {
-      case "personal":
-        fieldsToValidate = personalFields;
-        break;
-      case "educational":
-        fieldsToValidate = educationalFields;
-        break;
-      case "job":
-        fieldsToValidate = jobFields;
-        break;
-      case "account":
-        fieldsToValidate = accountFields;
-        break;
+  const handleTabChange = async (newTab: string) => {
+    const tabs = ["personal", "educational", "job", "account"];
+    const currentIndex = tabs.indexOf(activeTab);
+    const newIndex = tabs.indexOf(newTab);
+
+    if (newIndex > currentIndex) {
+      const isValid = await validateCurrentTab(activeTab);
+      if (!isValid) {
+        toast({
+          title: "Validation Error",
+          variant: "danger",
+          description: "Please fill in all required fields before proceeding.",
+          duration: 3000,
+        });
+        return;
+      }
     }
 
-    const result = await methods.trigger(fieldsToValidate);
+    setActiveTab(newTab);
+  };
 
-    if (result) {
-      const tabs = ["personal", "educational", "job", "account"];
-      const currentIndex = tabs.indexOf(activeTab);
-      if (currentIndex < tabs.length - 1) {
-        setActiveTab(tabs[currentIndex + 1]);
-      }
-    } else {
+  const handleNext = async () => {
+    const tabs = ["personal", "educational", "job", "account"];
+    const currentIndex = tabs.indexOf(activeTab);
+
+    const isValid = await validateCurrentTab(activeTab);
+    if (isValid && currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
+    } else if (!isValid) {
       toast({
         title: "Validation Error",
         variant: "danger",
-        description: "Please check the fields before proceeding.",
+        description: "Please fill in all required fields before proceeding.",
         duration: 3000,
       });
     }
   };
 
-  const handleFormSubmit = async (data: EmployeeFormData) => {
-    setIsSubmitting(true);
-    toast({
-      title: "Submitting",
-      description: "Adding new employee...",
-    });
+  const handlePrevious = () => {
+    const tabs = ["personal", "educational", "job", "account"];
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1]);
+    }
+  };
 
+  const uploadFile = async (
+    file: File
+  ): Promise<{ fileName: string; fileUrl: string }> => {
+    const result = await edgestore.publicFiles.upload({
+      file,
+      options: { temporary: false },
+    });
+    const fileName = result.url.split("/").pop() || "";
+    return {
+      fileName,
+      fileUrl: result.url,
+    };
+  };
+  const processCertificates = async (
+    certificates: (string | File)[] = []
+  ): Promise<string[]> => {
+    const processed = await Promise.all(
+      certificates.map(async (cert) => {
+        if (!cert) return null;
+
+        if (cert instanceof File) {
+          const result = await edgestore.publicFiles.upload({
+            file: cert,
+            options: {
+              temporary: false,
+            },
+          });
+          // Return just the URL string for database storage
+          return result.url;
+        }
+        // If it's already a string URL, return it directly
+        return cert;
+      })
+    );
+
+    // Filter out any null values and ensure we have an array of URLs
+    return processed.filter((url): url is string => url !== null);
+  };
+
+  const handleFormSubmit = async (data: EmployeeFormData) => {
     try {
+      setIsSubmitting(true);
+      toast({
+        title: "Submitting",
+        description: "Adding new employee...",
+      });
+  
       let pictureUrl = typeof data.picture === "string" ? data.picture : "";
       if (data.picture instanceof File) {
-        const result = await edgestore.publicFiles.upload({
-          file: data.picture,
-        });
-        pictureUrl = result.url;
+        const result = await uploadFile(data.picture);
+        pictureUrl = result.fileUrl;
       }
-
-      const updatedCertificates = await Promise.all(
-        (data.certificates || []).map(async (cert) => {
-          if (!cert) return null;
-          if (cert.url instanceof File) {
-            const result = await edgestore.publicFiles.upload({
-              file: cert.url,
-              options: { temporary: false },
-            });
-            return {
-              fileName:
-                cert.fileName || cert.name || result.url.split("/").pop() || "",
-              fileUrl: result.url,
-            };
-          }
-          return {
-            fileName: cert.fileName || cert.name || "",
-            fileUrl: cert.url as string,
-          };
-        })
-      );
-
-      const filteredCertificates = updatedCertificates.filter(
-        (cert) => cert !== null
-      );
-
-      const mastersCertificates = await Promise.all(
-        (data.mastersCertificates || []).map(async (cert) => {
-          if (!cert) return null;
-          if (cert.url instanceof File) {
-            const result = await edgestore.publicFiles.upload({
-              file: cert.url,
-              options: { temporary: false },
-            });
-            return {
-              fileName:
-                cert.fileName || cert.name || result.url.split("/").pop() || "",
-              fileUrl: result.url,
-            };
-          }
-          return {
-            fileName: cert.fileName || cert.name || "",
-            fileUrl: cert.url as string,
-          };
-        })
-      ).then((certs) => certs.filter((cert) => cert !== null));
-
-      const doctorateCertificates = await Promise.all(
-        (data.doctorateCertificates || []).map(async (cert) => {
-          if (!cert) return null;
-          if (cert.url instanceof File) {
-            const result = await edgestore.publicFiles.upload({
-              file: cert.url,
-              options: { temporary: false },
-            });
-            return {
-              fileName:
-                cert.fileName || cert.name || result.url.split("/").pop() || "",
-              fileUrl: result.url,
-            };
-          }
-          return {
-            fileName: cert.fileName || cert.name || "",
-            fileUrl: cert.url as string,
-          };
-        })
-      ).then((certs) => certs.filter((cert) => cert !== null));
-
-      const educationalBackground = {
-        elementary: data.elementary,
-        highSchool: data.highSchool,
-        seniorHighSchool: data.seniorHighSchool,
-        seniorHighStrand: data.seniorHighStrand,
-        tvlCourse: data.tvlCourse,
-        universityCollege: data.universityCollege,
-        course: data.course,
-        highestDegree: data.highestDegree,
-        certificates: filteredCertificates,
-        masters: data.masters,
-        mastersCourse: data.mastersCourse,
-        mastersYear: data.mastersYear,
-        mastersCertificates: mastersCertificates,
-        doctorate: data.doctorate,
-        doctorateCourse: data.doctorateCourse,
-        doctorateYear: data.doctorateYear,
-        doctorateCertificates: doctorateCertificates,
-      };
-
-      const familyBackground = {
-        fathers_first_name: data.fathers_first_name,
-        fathers_middle_name: data.fathers_middle_name,
-        fathers_last_name: data.fathers_last_name,
-        mothers_first_name: data.mothers_first_name,
-        mothers_middle_name: data.mothers_middle_name,
-        mothers_last_name: data.mothers_last_name,
-        guardian_first_name: data.guardian_first_name,
-        guardian_middle_name: data.guardian_middle_name,
-        guardian_last_name: data.guardian_last_name,
-      };
-
-      let accountResponse;
-      try {
-        accountResponse = await axios.post(
-          "/api/employeemanagement/employees/create-with-credentials",
-          {
-            employee: {
-              first_name: data.first_name,
-              email: data.email,
-            },
-            credentials: {
-              username: data.username,
-              password: data.password,
-            },
-          }
-        );
-      } catch (error) {
-        const errorMessage = axios.isAxiosError(error)
-          ? error.response?.data?.message || "Failed to create user account"
-          : "Failed to create user account";
-        throw new Error(errorMessage);
-      }
-
-      if (accountResponse.status !== 201 || !accountResponse.data.userId) {
-        throw new Error("Failed to create user account - no user ID returned");
-      }
-
-      const fullData = {
-        user_id: accountResponse.data.userId,
+  
+      const [filteredCertificates, mastersCertificates, doctorateCertificates] =
+        await Promise.all([
+          processCertificates(data.certificates),
+          processCertificates(data.mastersCertificates),
+          processCertificates(data.doctorateCertificates),
+        ]);
+  
+      const employeeData = {
+        employee: {
+          first_name: data.first_name,
+          email: data.email,
+        },
+        credentials: {
+          username: data.username,
+          password: data.password,
+        },
         picture: pictureUrl,
         first_name: data.first_name,
         middle_name: data.middle_name,
@@ -338,8 +280,37 @@ export default function AddEmployeePage() {
         addr_province: parseInt(data.addr_province, 10),
         addr_municipal: parseInt(data.addr_municipal, 10),
         addr_baranggay: parseInt(data.addr_baranggay, 10),
-        educational_bg_json: JSON.stringify(educationalBackground),
-        family_bg_json: JSON.stringify(familyBackground),
+        educational_bg_json: JSON.stringify({
+          elementary: data.elementary,
+          highSchool: data.highSchool,
+          seniorHighSchool: data.seniorHighSchool,
+          seniorHighStrand: data.seniorHighStrand,
+          tvlCourse: data.tvlCourse,
+          universityCollege: data.universityCollege,
+          course: data.course,
+          highestDegree: data.highestDegree,
+          certificates: filteredCertificates, // This should be an array of URLs
+          mastersCertificates: mastersCertificates,
+          doctorateCertificates: doctorateCertificates,
+          masters: data.masters,
+          mastersCourse: data.mastersCourse,
+          mastersYear: data.mastersYear,
+
+          doctorate: data.doctorate,
+          doctorateCourse: data.doctorateCourse,
+          doctorateYear: data.doctorateYear,
+        }),
+        family_bg_json: JSON.stringify({
+          fathers_first_name: data.fathers_first_name,
+          fathers_middle_name: data.fathers_middle_name,
+          fathers_last_name: data.fathers_last_name,
+          mothers_first_name: data.mothers_first_name,
+          mothers_middle_name: data.mothers_middle_name,
+          mothers_last_name: data.mothers_last_name,
+          guardian_first_name: data.guardian_first_name,
+          guardian_middle_name: data.guardian_middle_name,
+          guardian_last_name: data.guardian_last_name,
+        }),
         department_id: parseInt(data.department_id, 10),
         job_id: parseInt(data.job_id, 10),
         employement_status_id: parseInt(data.employement_status_id, 10),
@@ -356,38 +327,86 @@ export default function AddEmployeePage() {
 
       const response = await axios.post(
         "/api/employeemanagement/employees",
-        fullData
+        employeeData
       );
 
       if (response.status === 201) {
         router.push("/employeemanagement/employees");
         toast({
           title: "Success",
-          description: "Employee added and credentials sent to their email!",
+          description: "Employee added successfully!",
           duration: 3000,
         });
         mutate("/api/employeemanagement/employees");
       }
     } catch (error) {
-      console.error("Error:", error);
-      if (axios.isAxiosError(error)) {
-        toast({
-          title: "Error",
-          description:
-            error.response?.data?.message || "Failed to create employee",
-          duration: 3000,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description:
-            (error as Error).message || "An unexpected error occurred",
-          duration: 3000,
-        });
+      let errorMessage = "An unexpected error occurred";
+
+      if (!navigator.onLine) {
+        errorMessage = "Please check your internet connection and try again";
+      } else if (axios.isAxiosError(error)) {
+        errorMessage =
+          error.response?.data?.message || "Failed to create employee";
+
+        if (error.code === "ECONNABORTED") {
+          errorMessage = "Request timed out. Please try again";
+        } else if (error.response?.status === 409) {
+          errorMessage = "Username or email already exists";
+        } else if (error.response?.status === 500) {
+          errorMessage = "Server error. Please try again later";
+        }
       }
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "danger",
+        duration: 5000,
+      });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const renderTabContent = (tabKey: string) => {
+    return (
+      <div className="w-full bg-white">
+        <Form {...methods}>
+          <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
+            <FormProvider {...methods}>
+              <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
+                {tabKey === "personal" && (
+                  <>
+                    <PersonalInformationForm />
+                  </>
+                )}
+                {tabKey === "educational" && (
+                  <>
+                    <EducationalBackgroundForm />
+                  </>
+                )}
+                {tabKey === "job" && (
+                  <div className="space-y-4">
+                    <JobInformationForm />
+                    <div className="pt-2 border-t">
+                      <h3 className="text-lg font-medium my-2">
+                        Work Schedule
+                      </h3>
+                      <div className="space-y-2">
+                        <ScheduleSelection />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {tabKey === "account" && (
+                  <AddAccount userId="" email={methods.watch("email")} />
+                )}
+              </div>
+            </FormProvider>
+          </form>
+        </Form>
+      </div>
+    );
   };
 
   return (
@@ -395,120 +414,28 @@ export default function AddEmployeePage() {
       <Tabs
         aria-label="Employee Information Tabs"
         selectedKey={activeTab}
-        onSelectionChange={async (key) => {
-          const selectedTab = key as string;
-          let fieldsToValidate: EmployeeFields[] = [];
-
-          switch (activeTab) {
-            case "personal":
-              fieldsToValidate = personalFields;
-              break;
-            case "educational":
-              fieldsToValidate = educationalFields;
-              break;
-            case "job":
-              fieldsToValidate = jobFields;
-              break;
-            case "account":
-              fieldsToValidate = accountFields;
-              break;
-          }
-
-          const result = await methods.trigger(fieldsToValidate);
-          if (result) {
-            setActiveTab(selectedTab);
-          } else {
-            // Display an error message or prevent the tab change
-            toast({
-              title: "Validation Error",
-              variant: "danger",
-              description:
-                "Please check the fields on the current tab before proceeding.",
-              duration: 3000,
-            });
-          }
-        }}
+        onSelectionChange={(key) => handleTabChange(key as string)}
         className="w-full"
       >
         <Tab key="personal" title="Personal Information">
-          <div className="w-full bg-white">
-            <Form {...methods}>
-              <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
-                <FormProvider {...methods}>
-                  <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
-                    <PersonalInformationForm />
-                  </div>
-                </FormProvider>
-              </form>
-            </Form>
-          </div>
+          {renderTabContent("personal")}
         </Tab>
-
         <Tab key="educational" title="Educational Background">
-          <div className="w-full bg-white">
-            <Form {...methods}>
-              <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
-                <FormProvider {...methods}>
-                  <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
-                    <EducationalBackgroundForm />
-                  </div>
-                </FormProvider>
-              </form>
-            </Form>
-          </div>
+          {renderTabContent("educational")}
         </Tab>
-
         <Tab key="job" title="Job Information">
-          <div className="w-full bg-white">
-            <Form {...methods}>
-              <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
-                <FormProvider {...methods}>
-                  <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
-                    <div className="space-y-4">
-                      <JobInformationForm />
-                      <div className="pt-2 border-t">
-                        <h3 className="text-lg font-medium my-2">
-                          Work Schedule
-                        </h3>
-                        <div className="space-y-2">
-                          <ScheduleSelection />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </FormProvider>
-              </form>
-            </Form>
-          </div>
+          {renderTabContent("job")}
         </Tab>
-
         <Tab key="account" title="Account">
-          <div className="w-full bg-white">
-            <Form {...methods}>
-              <form onSubmit={methods.handleSubmit(handleFormSubmit)}>
-                <FormProvider {...methods}>
-                  <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
-                    <AddAccount userId="" email={methods.watch("email")} />
-                  </div>
-                </FormProvider>
-              </form>
-            </Form>
-          </div>
+          {renderTabContent("account")}
         </Tab>
       </Tabs>
-
-      <div className="fixed bottom-0 left-0 right-0">
-        <div className="px-6 py-4 flex justify-end gap-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t">
+        <div className="container px-6 py-4 flex justify-end items-center gap-4">
           <Button
             type="button"
             variant="outline"
-            onClick={() => {
-              const tabs = ["personal", "educational", "job", "account"];
-              const currentIndex = tabs.indexOf(activeTab);
-              if (currentIndex > 0) {
-                setActiveTab(tabs[currentIndex - 1]);
-              }
-            }}
+            onClick={handlePrevious}
             disabled={activeTab === "personal"}
             className="flex items-center gap-2"
           >
@@ -522,13 +449,28 @@ export default function AddEmployeePage() {
               disabled={isSubmitting}
               onClick={async (e) => {
                 e.preventDefault();
-                const result = await methods.trigger();
-                if (result) {
+                const isValid = await methods.trigger();
+                if (isValid) {
                   methods.handleSubmit(handleFormSubmit)();
+                } else {
+                  toast({
+                    title: "Validation Error",
+                    description: "Please fill in all required fields.",
+                    variant: "danger",
+                    duration: 3000,
+                  });
                 }
               }}
+              className="flex items-center gap-2"
             >
-              {isSubmitting ? "Submitting..." : "Submit"}
+              {isSubmitting ? (
+                <>
+                  <Spinner/>
+                  Submitting...
+                </>
+              ) : (
+                "Submit"
+              )}
             </Button>
           ) : (
             <Button

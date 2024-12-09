@@ -28,16 +28,11 @@ const jobPositionSchema = z.object({
     .string()
     .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
     .transform((val) => (val === "" ? "0.00" : val)),
-  basic_salary: z
-    .string()
-    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
-    .transform((val) => (val === "" ? "0.00" : val)),
   superior_id: z
     .string()
     .nullish()
     .transform((val) => val || null),
   is_active: z.boolean().default(true),
-  for_probi: z.boolean().default(true),
 });
 
 type JobPositionFormData = z.infer<typeof jobPositionSchema>;
@@ -53,9 +48,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     defaultValues: {
       name: "",
       pay_rate: "0.00",
-      basic_salary: "0.00",
       superior_id: "",
-      for_probi: true,
       is_active: true,
     },
     mode: "onChange",
@@ -74,20 +67,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     }
   };
 
-  const handleBasicSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      const formattedValue =
-        value === ""
-          ? "0.00"
-          : value.includes(".")
-          ? value.padEnd(value.indexOf(".") + 3, "0")
-          : value + ".00";
-      methods.setValue("basic_salary", formattedValue, {
-        shouldValidate: true,
-      });
-    }
-  };
+ 
 
   const formFields: FormInputProps[] = [
     {
@@ -125,18 +105,6 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       },
     },
     {
-      name: "basic_salary",
-      label: "Basic Salary",
-      type: "text",
-      placeholder: "0.00",
-      description: "Basic Salary must be 0 or greater (format: 0.00)",
-      config: {
-        onChange: handleBasicSalaryChange,
-        value: methods.watch("basic_salary"),
-        pattern: "^\\d*\\.?\\d{0,2}$",
-      },
-    },
-    {
       name: "for_probi",
       label: "For probationary",
       type: "switch",
@@ -165,7 +133,6 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       const formattedData = {
         ...data,
         pay_rate: parseFloat(data.pay_rate).toFixed(2),
-        basic_salary: parseFloat(data.basic_salary).toFixed(2),
         superior_id: data.superior_id ? parseInt(data.superior_id) : null,
       };
 
@@ -179,10 +146,8 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
         methods.reset({
           name: "",
           pay_rate: "0.00",
-          basic_salary: "0.00",
           superior_id: "",
           is_active: true,
-          for_probi: true,
         });
         toast({
           title: "Success",

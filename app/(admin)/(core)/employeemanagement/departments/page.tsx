@@ -211,16 +211,6 @@ const Page: React.FC = () => {
         paginationProps={{
           data_length: departments?.length
         }}
-        onExport={{
-          drawerProps: {
-            title: "Export",
-          },
-        }}
-        onImport={{
-          drawerProps: {
-            title: "Import",
-          },
-        }}
         
       />
 
