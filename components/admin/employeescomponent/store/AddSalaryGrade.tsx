@@ -20,10 +20,12 @@ interface AddSalaryGradeProps {
 }
 
 const SalaryGradeSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Salary grade name is required"),
+  name: z.string().min(1, "Salary grade name is required"),
   amount: z
+    .string()
+    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
+    .transform((val) => (val === "" ? "0.00" : val)),
+  rate_per_hour: z
     .string()
     .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
     .transform((val) => (val === "" ? "0.00" : val)),
@@ -58,6 +60,19 @@ const AddSalaryGrade: React.FC<AddSalaryGradeProps> = ({ onSalaryAdded }) => {
     }
   };
 
+  const handleRatePerHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+      const formattedValue =
+        value === ""
+          ? "0.00"
+          : value.includes(".")
+          ? value.padEnd(value.indexOf(".") + 3, "0")
+          : value + ".00";
+      methods.setValue("rate_per_hour", formattedValue, { shouldValidate: true });
+    }
+  };
+
   const formFields: FormInputProps[] = [
     {
       name: "name",
@@ -65,20 +80,34 @@ const AddSalaryGrade: React.FC<AddSalaryGradeProps> = ({ onSalaryAdded }) => {
       type: "text",
       placeholder: "Enter salary grade name",
       isRequired: true,
-      description: "Kindly put grade and number in salary grade name (e.g. Grade 3 -)",
+      description:
+        "Kindly put grade and number in salary grade name (e.g. Grade 3 -)",
     },
     {
       name: "amount",
-      label: "Amount",
+      label: "Salary grade amount",
       type: "text",
       placeholder: "0.00",
-      description: "Amount must be 0 or greater (format: 0.00)",
+      description: "Monthly salary grade amount must be 0 or greater (format: 0.00)",
       config: {
         onChange: handleAmountChange,
         value: methods.watch("amount"),
         pattern: "^\\d*\\.?\\d{0,2}$",
       },
     },
+    {
+      name: "rate_per_hour",
+      label: "Rate per hour",
+      type: "text",
+      placeholder: "0.00",
+      description: "Amount must be 0 or greater (format: 0.00)",
+      config: {
+        onChange: handleRatePerHourChange,
+        value: methods.watch("rate_per_hour"),
+        pattern: "^\\d*\\.?\\d{0,2}$",
+      },
+    },
+  
   ];
 
   const onSubmit = async (data: SalaryGradeFormData) => {
@@ -92,6 +121,7 @@ const AddSalaryGrade: React.FC<AddSalaryGradeProps> = ({ onSalaryAdded }) => {
       const formattedData = {
         ...data,
         amount: parseFloat(data.amount).toFixed(2),
+        rate_per_hour: parseFloat(data. rate_per_hour).toFixed(2),
       };
 
       const response = await axios.post<SalaryGrade>(
@@ -104,6 +134,7 @@ const AddSalaryGrade: React.FC<AddSalaryGradeProps> = ({ onSalaryAdded }) => {
         methods.reset({
           name: "",
           amount: "0.00",
+          rate_per_hour: "0.00"
         });
         toast({
           title: "Success",

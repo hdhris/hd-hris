@@ -85,6 +85,10 @@ model dim_schedules {
   created_at          DateTime             @db.Timestamp(6)
   updated_at          DateTime             @db.Timestamp(6)
   deleted_at          DateTime?            @db.Timestamp(6)
+  start_date          DateTime?            @db.Timestamptz(6)
+  end_date            DateTime?            @db.Timestamptz(6)
+  clock_in            DateTime?            @db.Time(6)
+  clock_out           DateTime?            @db.Time(6)
   ref_batch_schedules ref_batch_schedules? @relation(fields: [batch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_schedules_ref_batch_schedule_2")
   trans_employees     trans_employees?     @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_schedule_employees1")
 
@@ -455,7 +459,7 @@ model trans_cash_advances {
 
 model trans_employees {
   id                                                                     Int                            @id @default(autoincrement())
-  branch_id                                                              Int
+  branch_id                                                              Int?
   picture                                                                String?
   first_name                                                             String                         @db.VarChar(45)
   last_name                                                              String                         @db.VarChar(45)
@@ -770,6 +774,7 @@ model ref_salary_grades {
   created_at      DateTime          @default(now()) @db.Timestamptz(6)
   updated_at      DateTime          @default(now()) @db.Timestamp(6)
   deleted_at      DateTime?         @db.Timestamp(6)
+  rate_per_hour   Decimal?          @db.Decimal
   trans_employees trans_employees[]
 
   @@index([deleted_at])
@@ -801,7 +806,6 @@ model ref_leave_type_details {
   description          String
   is_active            Boolean
   max_duration         Decimal             @db.Decimal(10, 2)
-  min_duration         Decimal             @db.Decimal(10, 2)
   name                 String
   paid_leave           Boolean
   carry_over           Boolean
