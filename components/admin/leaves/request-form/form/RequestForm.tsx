@@ -25,8 +25,8 @@ import {EditCreditProp} from "@/app/(admin)/(core)/leaves/leave-credits/page";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import LeaveTypeSelection from "@/components/admin/leaves/request-form/LeaveTypeSelection";
 import EmployeeListForm from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
-import {LeaveRequestFormValidation} from "@/helper/zodValidation/leaves/request-form/LeaveRequestFormValidation";
 import {CalendarDate, DateValue, getLocalTimeZone, today, ZonedDateTime} from "@internationalized/date";
+import {LeaveRequestFormValidation} from "@/helper/zodValidation/leaves/request-form/LeaveRequestFormValidation";
 
 
 // Extend dayjs with the plugins
@@ -64,7 +64,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         }
     });
 
-    const {isValid, isDirty} = useFormState(form)
+    const {isValid} = useFormState(form)
 
     useEffect(() => {
         if (isOpen !== isModalOpen) {

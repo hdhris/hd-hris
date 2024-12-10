@@ -90,7 +90,7 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
                 <Typography>{item.leave_details.end_date}</Typography>
             </Case>
             <Case of="total_days">
-                <Typography>{formatDaysToReadableTime(item.leave_details.total_days)}</Typography>
+                <Typography>{item.leave_details.total_days}</Typography>
             </Case>
             <Case of="status">
                 <Status color={approval_status_color_map[item.leave_details.status.toLowerCase()]}>

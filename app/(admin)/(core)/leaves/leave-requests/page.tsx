@@ -85,30 +85,12 @@ function Page() {
         })
 
         return []
-    }, [data, isDateUnavailable, locale])
-
-
-    // const haveExistingLeave = useCallback((date: DateValue) => {
-    //     //get the existing leave dates if not rejected
-    //     const existingLeaveDates = user?.employees
-    //         .filter(item => item.id === employeeIdSelected)
-    //         .map((employee) => employee.trans_leaves.filter((leave) => leave.leave_type_id && leave.status !== "Rejected"))
-    //         .flat() || [];
-    //
-    //     const currentDate = normalizeDate(new Date(date.year, date.month - 1, date.day));
-    //     return existingLeaveDates.some((leave) => {
-    //         const startDate = normalizeDate(new Date(leave.start_date));
-    //         const endDate = normalizeDate(new Date(leave.end_date));
-    //
-    //         return currentDate >= startDate && currentDate <= endDate; // Disable if within range
-    //     });
-    //
-    // }, [employeeIdSelected, user?.employees])
+    }, [data])
 
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))
         setSelectedRequest(selected)
-        console.log("Selected: ", selected)
+        // console.log("Selected: ", selected)
     }
 
     const onOpenDrawer = useCallback(() => {

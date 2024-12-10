@@ -527,6 +527,7 @@ model trans_employees {
   trans_overtimes_trans_overtimes_employee_idTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_employee_idTotrans_employees")
   trans_overtimes_trans_overtimes_approved_byTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_approved_byTotrans_employees")
   trans_payrolls                                                         trans_payrolls[]
+  trans_signatories                                                      trans_signatories[]
 
   @@index([deleted_at])
 }
@@ -818,17 +819,19 @@ model ref_leave_type_details {
 }
 
 model ref_signatory_paths {
-  id               Int      @id(map: "ref_signatories_path_pkey") @default(autoincrement())
-  signatories_path String
-  created_at       DateTime @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime @default(now()) @db.Timestamptz(6)
+  id                Int                 @id(map: "ref_signatories_path_pkey") @default(autoincrement())
+  signatories_path  String
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
+  trans_signatories trans_signatories[]
 }
 
 model ref_signatory_roles {
-  id                  Int      @id @default(autoincrement())
+  id                  Int                 @id @default(autoincrement())
   signatory_role_name String
-  created_at          DateTime @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime @default(now()) @db.Timestamptz(6)
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime            @default(now()) @db.Timestamptz(6)
+  trans_signatories   trans_signatories[]
 }
 
 model trans_leave_types {
@@ -848,14 +851,17 @@ model trans_leave_types {
 }
 
 model trans_signatories {
-  id                Int       @id(map: "ref_evaluators_pkey") @default(autoincrement())
-  job_id            Int
-  signatory_role_id Int
-  signatory_path_id Int
-  order_number      Int
-  updated_at        DateTime  @default(now()) @db.Timestamp(6)
-  created_at        DateTime  @default(now()) @db.Timestamptz(6)
-  deleted_at        DateTime? @db.Timestamp(6)
+  id                  Int                 @id(map: "ref_evaluators_pkey") @default(autoincrement())
+  employee_id         Int
+  signatory_role_id   Int
+  signatory_path_id   Int
+  order_number        Int
+  updated_at          DateTime            @default(now()) @db.Timestamp(6)
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  deleted_at          DateTime?           @db.Timestamp(6)
+  trans_employees     trans_employees     @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_signatory_paths ref_signatory_paths @relation(fields: [signatory_path_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_signatory_roles ref_signatory_roles @relation(fields: [signatory_role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([deleted_at])
 }

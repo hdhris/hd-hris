@@ -6,6 +6,7 @@ import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 import {toGMT8} from "@/lib/utils/toGMT8";
+import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
 
 export const dynamic = "force-dynamic"
 
@@ -94,7 +95,7 @@ export async function GET(request: Request) {
                 end_date: toGMT8(items.end_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
                 reason: items.reason || "",
                 status: items.status as "Approved" | "Pending" | "Rejected",
-                total_days: items.total_days.toNumber(),
+                total_days: formatDaysToReadableTime(items.total_days.toNumber()),
                 created_at: dayjs(items.created_at).format("YYYY-MM-DD"),
                 updated_at: dayjs(items.updated_at).format("YYYY-MM-DD"),
             },
@@ -107,6 +108,9 @@ export async function GET(request: Request) {
         }
 
     })
+
+
+
     return NextResponse.json({
         data: employees_request, totalItems,
     })
