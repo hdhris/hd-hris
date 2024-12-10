@@ -4,13 +4,10 @@ import Add from "@/components/common/button/Add";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
-import FormFields, {
-  FormInputProps,
-} from "@/components/common/forms/FormFields";
+import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SalaryGrade } from "@/types/employeee/SalaryType";
-
 import { useDisclosure } from "@nextui-org/react";
 import Drawer from "@/components/common/Drawer";
 import { Form } from "@/components/ui/form";
@@ -21,14 +18,8 @@ interface AddSalaryGradeProps {
 
 const SalaryGradeSchema = z.object({
   name: z.string().min(1, "Salary grade name is required"),
-  amount: z
-    .string()
-    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
-    .transform((val) => (val === "" ? "0.00" : val)),
-  rate_per_hour: z
-    .string()
-    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
-    .transform((val) => (val === "" ? "0.00" : val)),
+  amount: z.string().min(1, "Amount is required"),
+  rate_per_hour: z.string().min(1, "Rate per hour is required")
 });
 
 type SalaryGradeFormData = z.infer<typeof SalaryGradeSchema>;
@@ -42,35 +33,14 @@ const AddSalaryGrade: React.FC<AddSalaryGradeProps> = ({ onSalaryAdded }) => {
     resolver: zodResolver(SalaryGradeSchema),
     defaultValues: {
       name: "",
-      amount: "0.00",
+      amount: "",
+      rate_per_hour: ""
     },
-    mode: "onChange",
+    mode: "onChange"
   });
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      const formattedValue =
-        value === ""
-          ? "0.00"
-          : value.includes(".")
-          ? value.padEnd(value.indexOf(".") + 3, "0")
-          : value + ".00";
-      methods.setValue("amount", formattedValue, { shouldValidate: true });
-    }
-  };
-
-  const handleRatePerHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      const formattedValue =
-        value === ""
-          ? "0.00"
-          : value.includes(".")
-          ? value.padEnd(value.indexOf(".") + 3, "0")
-          : value + ".00";
-      methods.setValue("rate_per_hour", formattedValue, { shouldValidate: true });
-    }
+  const handleNumberInput = (value: string) => {
+    return value.replace(/[^\d.]/g, '').replace(/(\..*?)\./g, '$1');
   };
 
   const formFields: FormInputProps[] = [
@@ -80,34 +50,32 @@ const AddSalaryGrade: React.FC<AddSalaryGradeProps> = ({ onSalaryAdded }) => {
       type: "text",
       placeholder: "Enter salary grade name",
       isRequired: true,
-      description:
-        "Kindly put grade and number in salary grade name (e.g. Grade 3 -)",
+      description: "Kindly put grade and number in salary grade name (e.g. Grade 3)",
     },
     {
       name: "amount",
       label: "Salary grade amount",
       type: "text",
-      placeholder: "0.00",
-      description: "Monthly salary grade amount must be 0 or greater (format: 0.00)",
+      placeholder: "Enter amount",
+      description: "Enter amount",
       config: {
-        onChange: handleAmountChange,
-        value: methods.watch("amount"),
-        pattern: "^\\d*\\.?\\d{0,2}$",
-      },
+        onValueChange: (value: string) => {
+          methods.setValue("amount", handleNumberInput(value), { shouldValidate: true });
+        }
+      }
     },
     {
       name: "rate_per_hour",
       label: "Rate per hour",
       type: "text",
-      placeholder: "0.00",
-      description: "Amount must be 0 or greater (format: 0.00)",
+      placeholder: "Enter rate per hour",
+      description: "Enter rate per hour",
       config: {
-        onChange: handleRatePerHourChange,
-        value: methods.watch("rate_per_hour"),
-        pattern: "^\\d*\\.?\\d{0,2}$",
-      },
+        onValueChange: (value: string) => {
+          methods.setValue("rate_per_hour", handleNumberInput(value), { shouldValidate: true });
+        }
+      }
     },
-  
   ];
 
   const onSubmit = async (data: SalaryGradeFormData) => {
@@ -118,23 +86,17 @@ const AddSalaryGrade: React.FC<AddSalaryGradeProps> = ({ onSalaryAdded }) => {
     });
 
     try {
-      const formattedData = {
-        ...data,
-        amount: parseFloat(data.amount).toFixed(2),
-        rate_per_hour: parseFloat(data. rate_per_hour).toFixed(2),
-      };
-
       const response = await axios.post<SalaryGrade>(
         "/api/employeemanagement/salarygrade",
-        formattedData
+        data
       );
 
       if (response.status === 201) {
         onSalaryAdded();
         methods.reset({
           name: "",
-          amount: "0.00",
-          rate_per_hour: "0.00"
+          amount: "",
+          rate_per_hour: ""
         });
         toast({
           title: "Success",

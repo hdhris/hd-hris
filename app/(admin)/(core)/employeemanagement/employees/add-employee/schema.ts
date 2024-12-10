@@ -1,5 +1,6 @@
 // app/employeemanagement/employee/addemployees/schema.ts
 import axios from "axios";
+import dayjs from "dayjs";
 import { z } from "zod";
 
 // Single Certificate type definition
@@ -61,7 +62,19 @@ export const employeeSchema = z.object({
       (val) => val.length === 10,
       "Contact number must be exactly 10 digits"
     ),
-  birthdate: z.string().min(1, "Birthdate is required"),
+    birthdate: z.string()
+  .min(1, "Birthdate is required")
+  .refine((date) => {
+    const birthDate = dayjs(date);
+    const maxAge = dayjs().subtract(100, 'years');
+    return birthDate.isAfter(maxAge);
+  }, "Age cannot be over 100 years")
+  .refine((date) => {
+    const birthDate = dayjs(date);
+    const minAge = dayjs('2008-12-31');
+    return birthDate.isBefore(minAge) || birthDate.isSame(minAge);
+  }, "Employee must be at least 15 years old"),
+  
   addr_region: z.string().min(1, "Region is required"),
   addr_province: z.string().min(1, "Province is required"),
   addr_municipal: z.string().min(1, "Municipal is required"),
@@ -184,7 +197,19 @@ export const employeeSchema = z.object({
     .default([]),
 
   // Employment details
-  hired_at: z.string().min(1, "Hire date is required"),
+  hired_at: z.string()
+  .min(1, "Hire date is required")
+  .refine((date) => {
+    const hireDate = dayjs(date);
+    const currentDate = dayjs().endOf('day');
+    return hireDate.isSame(currentDate, 'day') || hireDate.isBefore(currentDate);
+  }, "Hire date cannot be in the future")
+  .refine((date) => {
+    const hireDate = dayjs(date);
+    const minimumHireDate = dayjs('1970-01-01');
+    return hireDate.isAfter(minimumHireDate);
+  }, "Hire date seems invalid. Please select a more recent date"),
+  
   department_id: z.string().min(1, "Department is required"),
   job_id: z.string().min(1, "Job is required"),
   // is_regular: z.preprocess((val) => {

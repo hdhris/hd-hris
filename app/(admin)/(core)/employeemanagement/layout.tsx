@@ -15,7 +15,7 @@ function RootLayout({children}: { children: React.ReactNode }) {
             },
             {
               key: "resign",
-              title: "Resign",
+              title: "Unemployment",
               path: "resign",
             },
             {

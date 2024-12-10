@@ -83,12 +83,11 @@ export function useEmployeesData() {
 }
 
 export function useEmployeeData(id: string | null) {
-    return useSWR<Employee>(
-        id ? `/api/employeemanagement/employees?id=${id}` : null,
-        fetcher
+    return useSWR<Employee & { userAccount: { id: number; email: string; auth_credentials: { id: number; username: string; password: string } } | null }>(
+      id ? `/api/employeemanagement/employees?id=${id}` : null,
+      fetcher
     );
-}
-
+  }
 
 export function useSuspendedEmployees() {
     return useSWR<Employee[]>('/api/employeemanagement/suspended', fetcher, {

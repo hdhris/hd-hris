@@ -14,6 +14,9 @@ import SearchFilter from "@/components/common/filter/SearchFilter";
 import { useRouter } from "next/navigation";
 import { Spinner, cn } from "@nextui-org/react";
 import EmployeeListForm from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
+import { DateStyle } from "@/lib/custom/styles/InputStyle";
+import { parseAbsoluteToLocal } from "@internationalized/date";
+import dayjs from "dayjs";
 
 type EmployeeInclude = {
   id: number;
@@ -69,8 +72,26 @@ const formSchema = z.object({
   location: z
     .string()
     .min(3, { message: "Location must be at least 3 characters." }),
-  start_date: z.string(),
-  end_date: z.string(),
+    start_date: z.string()
+    .min(1, "Start date is required")
+    .refine((date) => {
+      const startDate = dayjs(date);
+      const currentDate = dayjs().endOf('day');
+      return startDate.isSame(currentDate) || startDate.isBefore(currentDate);
+    }, "Start date cannot be in the future"),
+
+  end_date: z.string()
+    .min(1, "End date is required")
+    .refine((date) => {
+      const endDate = dayjs(date);
+      const currentDate = dayjs().startOf('day');
+      return endDate.isSame(currentDate) || endDate.isAfter(currentDate);
+    }, "End date must be today or in the future")
+    .refine((date: string) => {
+      const endDate = dayjs(date);
+      const startDate = dayjs();
+      return endDate.isSame(startDate) || endDate.isAfter(startDate);
+    }, "End date must be on or after the start date"),
   // employee_instructor_id: z.number().min(1, { message: "Please select an instructor" }),
   instructor_name: z
     .string()
@@ -111,7 +132,7 @@ export default function ManagePrograms({
       hour_duration: 1,
       location: "",
       start_date: new Date().toISOString().split("T")[0],
-      end_date: new Date().toISOString().split("T")[0],
+      end_date: "",
       instructor_name: "",
       max_participants: 10,
       is_active: true,
@@ -288,12 +309,26 @@ export default function ManagePrograms({
               label: "Start Date",
               type: "date-picker",
               isRequired: true,
+              config: {
+                placeholder: "Select start date",
+                maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
+                defaultValue: null,
+                classNames: DateStyle,
+                validationState: "valid"
+              }
             },
             {
               name: "end_date",
               label: "End Date",
               type: "date-picker",
               isRequired: true,
+              config: {
+                placeholder: "Select end date",
+                minValue: parseAbsoluteToLocal(dayjs().startOf('day').toISOString()),
+                defaultValue: null,
+                classNames: DateStyle,
+                validationState: "valid"
+              }
             },
             {
               name: "max_participants",

@@ -3,6 +3,9 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
 import { useDepartmentsData, useJobpositionData, useBranchesData, useSalaryGradeData, useEmploymentStatusData } from "@/services/queries";
+import { DateStyle } from "@/lib/custom/styles/InputStyle";
+import { parseAbsoluteToLocal } from "@internationalized/date";
+import dayjs from "dayjs";
 
 
 const JobInformationForm: React.FC = () => {
@@ -69,7 +72,10 @@ const JobInformationForm: React.FC = () => {
       isRequired: true,
       config: {
         placeholder: "Select hire date",
+        maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
         defaultValue: new Date().toISOString(),
+        classNames: DateStyle,  
+        validationState: "valid"
       },
     },
     {

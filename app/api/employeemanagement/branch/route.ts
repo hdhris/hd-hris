@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { z } from "zod";
 
 declare global {
@@ -28,7 +28,10 @@ function handleError(error: unknown, operation: string) {
     );
   }
   return NextResponse.json(
-    { error: `Failed to ${operation} branch`, message: (error as Error).message },
+    {
+      error: `Failed to ${operation} branch`,
+      message: (error as Error).message,
+    },
     { status: 500 }
   );
 }
@@ -107,9 +110,12 @@ export async function PUT(req: NextRequest) {
   const id = url.searchParams.get("id");
 
   if (!id) {
-    return NextResponse.json({ error: "Branch ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Branch ID is required" },
+      { status: 400 }
+    );
   }
-//
+  //
   try {
     const data = await req.json();
     const validatedData = branchSchema.parse(data);
@@ -133,17 +139,48 @@ export async function DELETE(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
 
-  if (!id) return NextResponse.json({ error: "Branch ID is required" }, { status: 400 });
+  if (!id)
+    return NextResponse.json(
+      { error: "Branch ID is required" },
+      { status: 400 }
+    );
 
   try {
     const branch = await prisma.ref_branches.update({
-      where: { id: parseInt(id) },
-      data: { deleted_at: new Date() },
+      where: { id: parseInt(id), trans_employees: { none: {} } },
+      data: {
+        deleted_at: new Date(),
+        updated_at: new Date(),
+      },
     });
+
+    if (!branch) {
+      return NextResponse.json(
+        { message: "Cannot delete branch with registered employees" },
+        { status: 404 }
+      );
+    }
 
     // logDatabaseOperation("DELETE branch", branch);
     return NextResponse.json({ message: "Branch deleted successfully" });
   } catch (error) {
-    return handleError(error, "delete");
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2003') {
+        return NextResponse.json(
+          { 
+            status: "error",
+            message: "Cannot delete branch that has registered employees" 
+          }, 
+          { status: 400 }
+        );
+      }
+    }
+    return NextResponse.json(
+      { 
+        status: "error",
+        message: "Cannot delete branch that has registered employees" 
+      }, 
+      { status: 500 }
+    );
   }
 }
