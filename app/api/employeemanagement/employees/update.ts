@@ -180,7 +180,7 @@ export async function updateEmployeeStatus(id: number, data: StatusUpdateInput) 
 
   const updateData: Prisma.trans_employeesUpdateInput = {
     updated_at: new Date(),
-    deleted_at: ["resigned", "terminated"].includes(status) ? new Date() : null,
+    // deleted_at: ["resigned", "terminated"].includes(status) ? new Date() : null,
   };
 
   // Status-specific data updates

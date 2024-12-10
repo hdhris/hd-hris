@@ -48,6 +48,10 @@ async function getAllSuspendedEmployees() {
       suspension_json: { not: Prisma.JsonNull },
     },
     include: {
+      ref_addresses_trans_employees_addr_baranggayToref_addresses: true,
+      ref_addresses_trans_employees_addr_municipalToref_addresses: true,
+      ref_addresses_trans_employees_addr_provinceToref_addresses: true,
+      ref_addresses_trans_employees_addr_regionToref_addresses: true,
       ref_departments: true,
       ref_job_classes: true,
       dim_schedules: { include: { ref_batch_schedules: true } },
