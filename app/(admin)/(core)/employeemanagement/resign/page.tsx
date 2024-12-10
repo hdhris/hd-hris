@@ -2,22 +2,24 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { useResignedTerminatedEmployees } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
-import { Avatar, Chip, Spinner } from "@nextui-org/react";
+import { Avatar, Chip, Button, Spinner } from "@nextui-org/react";
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
 import dayjs from "dayjs";
 import Text from "@/components/Text";
+import axios from "axios";
+import { toast } from "@/components/ui/use-toast";
+import showDialog from "@/lib/utils/confirmDialog";
 
 const LoadingAndEmptyState: React.FC<{
   isLoading: boolean;
   isEmpty: boolean;
-
 }> = ({ isLoading, isEmpty }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[400px]">
-        <Spinner> Loading... </Spinner>
+        <Spinner>Loading...</Spinner>
       </div>
     );
   }
@@ -26,7 +28,9 @@ const LoadingAndEmptyState: React.FC<{
     return (
       <div className="flex flex-col items-center justify-center h-[400px] text-gray-500">
         <Text className="text-lg font-medium">No former employees found</Text>
-        <Text className="text-sm mt-2">When employees resign or are terminated, they will appear here</Text>
+        <Text className="text-sm mt-2">
+          When employees resign or are terminated, they will appear here
+        </Text>
       </div>
     );
   }
@@ -42,12 +46,53 @@ const Page: React.FC = () => {
   } = useResignedTerminatedEmployees();
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isActivating, setIsActivating] = useState<number | null>(null);
 
   const handleEmployeeUpdated = useCallback(async () => {
     try {
       await mutate();
     } catch (error) {
       console.error("Error updating employee data:", error);
+    }
+  }, [mutate]);
+
+  const handleActivate = useCallback(async (employee: Employee) => {
+    try {
+      const status = employee.termination_json ? "terminated" : "resigned";
+      const result = await showDialog({
+        title: "Confirm Reactivation",
+        message: `Are you sure you want to reactivate ${employee.first_name} ${employee.last_name}?`,
+      });
+
+      if (result === "yes") {
+        setIsActivating(employee.id);
+        const response = await axios.put(
+          `/api/employeemanagement/employees?id=${employee.id}&type=status`,
+          {
+            status: "active",
+          }
+        );
+
+        if (response.status === 200) {
+          toast({
+            title: "Success",
+            description: "Employee reactivated successfully",
+            variant: "success",
+            duration: 3000,
+          });
+          await mutate();
+        }
+      }
+    } catch (error) {
+      console.error("Error activating employee:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reactivate employee. Please try again.",
+        variant: "danger",
+        duration: 5000,
+      });
+    } finally {
+      setIsActivating(null);
     }
   }, [mutate]);
 
@@ -99,6 +144,7 @@ const Page: React.FC = () => {
       { uid: "type", name: "Type", sortable: true },
       { uid: "date", name: "Date", sortable: true },
       { uid: "reason", name: "Reason" },
+      { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
@@ -158,11 +204,25 @@ const Page: React.FC = () => {
               {status.reason || "N/A"}
             </div>
           );
+        case "actions":
+          return (
+            <div onClick={(e) => e.stopPropagation()}>
+              <Button
+                size="sm"
+                variant="flat"
+                color="success"
+                isLoading={isActivating === employee.id}
+                onPress={() => handleActivate(employee)}
+              >
+                Reactivate
+              </Button>
+            </div>
+          );
         default:
           return <div>-</div>;
       }
     },
-  }), [handleRowClick, getEmployeeStatus]);
+  }), [handleRowClick, handleActivate, isActivating, getEmployeeStatus]);
 
   const sortProps = useMemo(() => ({
     sortItems: [
@@ -193,7 +253,12 @@ const Page: React.FC = () => {
       category: "Type",
       filtered: [
         { key: "type", value: "Resigned", name: "Resigned", uid: "resigned" },
-        { key: "type", value: "Terminated", name: "Terminated", uid: "terminated" },
+        {
+          key: "type",
+          value: "Terminated",
+          name: "Terminated",
+          uid: "terminated",
+        },
       ],
     },
   ], [resignedTerminatedEmployees]);
@@ -227,18 +292,29 @@ const Page: React.FC = () => {
               <Chip color={status.color} size="sm">
                 {status.type}
               </Chip>
+              <div onClick={(e) => e.stopPropagation()}>
+                <Button
+                  size="sm"
+                  variant="flat"
+                  color="success"
+                  isLoading={isActivating === employee.id}
+                  onPress={() => handleActivate(employee)}
+                >
+                  Reactivate
+                </Button>
+              </div>
             </div>
           </div>
         </BorderCard>
       </div>
     );
-  }, [handleRowClick, getEmployeeStatus]);
+  }, [handleRowClick, handleActivate, isActivating, getEmployeeStatus]);
 
   if (isLoading || !resignedTerminatedEmployees?.length) {
     return (
       <LoadingAndEmptyState 
         isLoading={isLoading} 
-        isEmpty={!resignedTerminatedEmployees?.length}
+        isEmpty={!resignedTerminatedEmployees?.length} 
       />
     );
   }

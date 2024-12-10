@@ -28,15 +28,19 @@ async function getResignedTerminatedEmployeeById(id: number) {
   const employee = await prisma.trans_employees.findFirst({
     where: {
       id,
-      deleted_at: { not: null },
       OR: [
         { resignation_json: { not: Prisma.JsonNull } },
         { termination_json: { not: Prisma.JsonNull } },
       ],
     },
     include: {
+      
       ref_departments: true,
       ref_job_classes: true,
+      ref_addresses_trans_employees_addr_baranggayToref_addresses: true,
+      ref_addresses_trans_employees_addr_municipalToref_addresses: true,
+      ref_addresses_trans_employees_addr_provinceToref_addresses: true,
+      ref_addresses_trans_employees_addr_regionToref_addresses: true,
       dim_schedules: { include: { ref_batch_schedules: true } },
     },
   });
@@ -49,7 +53,6 @@ async function getResignedTerminatedEmployeeById(id: number) {
 async function getAllResignedTerminatedEmployees() {
   const employees = await prisma.trans_employees.findMany({
     where: {
-      deleted_at: { not: null },
       OR: [
         { resignation_json: { not: Prisma.JsonNull } },
         { termination_json: { not: Prisma.JsonNull } },
@@ -58,6 +61,10 @@ async function getAllResignedTerminatedEmployees() {
     include: {
       ref_departments: true,
       ref_job_classes: true,
+      ref_addresses_trans_employees_addr_baranggayToref_addresses: true,
+      ref_addresses_trans_employees_addr_municipalToref_addresses: true,
+      ref_addresses_trans_employees_addr_provinceToref_addresses: true,
+      ref_addresses_trans_employees_addr_regionToref_addresses: true,
       dim_schedules: { include: { ref_batch_schedules: true } },
     },
   });

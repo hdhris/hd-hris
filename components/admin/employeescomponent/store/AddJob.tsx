@@ -81,7 +81,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     {
       name: "superior_id",
       label: "Superior Position",
-      type: "select",
+      type: "auto-complete",
       placeholder: "Select superior position",
       description: "Select the superior position (optional)",
       config: {
@@ -102,14 +102,6 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
         onChange: handlePayRateChange,
         value: methods.watch("pay_rate"),
         pattern: "^\\d*\\.?\\d{0,2}$",
-      },
-    },
-    {
-      name: "for_probi",
-      label: "For probationary",
-      type: "switch",
-      config: {
-        defaultSelected: true,
       },
     },
     {

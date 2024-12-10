@@ -75,9 +75,10 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     return dayjs(dateString).format("MMM DD, YYYY");
   };
 
+  const today = dayjs().startOf('day');
   const getFormFields = (type: ModalType): FormInputProps[] => {
     const commonDateConfig = {
-      defaultValue: null,
+     
       classNames: DateStyle,
       validationState: "valid"
     };
@@ -90,9 +91,11 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             label: "Suspension Start Date",
             type: "date-picker",
             isRequired: true,
+            
             config: {
               placeholder: "Select suspension start date",
               maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
+              defaultValue: today.toISOString(),
               ...commonDateConfig
             }
           },
@@ -129,6 +132,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             config: {
               placeholder: "Select resignation date",
               maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
+              defaultValue: today.toISOString(),
               ...commonDateConfig
             }
           },
@@ -154,6 +158,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             config: {
               placeholder: "Select termination date",
               maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
+              defaultValue: today.toISOString(),
               ...commonDateConfig
             }
           },
@@ -190,6 +195,8 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     setActiveModal(type);
     let formData = {};
     
+    const today = dayjs().startOf('day').toISOString();
+
     switch (type) {
       case "suspend":
         if (currentEmployee.suspension_json) {
@@ -200,6 +207,11 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             startDate: dayjs(data.startDate).format("YYYY-MM-DD"),
             endDate: dayjs(data.endDate).format("YYYY-MM-DD"),
             reason: data.reason || data.suspensionReason,
+          };
+        } else {
+          formData = {
+            startDate: today,
+            reason: ""
           };
         }
         break;
@@ -212,6 +224,11 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             startDate: dayjs(data.resignationDate).format("YYYY-MM-DD"),
             reason: data.reason || data.resignationReason,
           };
+        } else {
+          formData = {
+            startDate: today,
+            reason: ""
+          };
         }
         break;
       case "terminate":
@@ -222,6 +239,11 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
           formData = {
             startDate: dayjs(data.terminationDate).format("YYYY-MM-DD"),
             reason: data.reason || data.terminationReason,
+          };
+        } else {
+          formData = {
+            startDate: today,
+            reason: ""
           };
         }
         break;
