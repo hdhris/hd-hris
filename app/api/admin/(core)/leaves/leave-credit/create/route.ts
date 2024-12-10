@@ -50,11 +50,12 @@ export async function POST(req: NextRequest) {
             }
         }
 
+        console.log("Employee Leave Type: ", recordsToCreate)
+
         // Bulk insert all records
         if (recordsToCreate.length > 0) {
             await prisma.dim_leave_balances.createMany({
                 data: recordsToCreate,
-                skipDuplicates: true, // Skip duplicates if necessary
             });
         } else {
             return NextResponse.json({

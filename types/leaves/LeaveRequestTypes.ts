@@ -1,6 +1,18 @@
 import React from "react";
 import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 
+interface DimSchedule {
+    days_json: string[];
+    ref_batch_schedules: RefBatchSchedule;
+}
+
+interface RefBatchSchedule {
+    clock_in: string; // ISO date string
+    clock_out: string; // ISO date string
+    break_min: number;
+}
+
+
 type ApprovedBy = {
     name: string; picture: string;
 }
@@ -39,18 +51,9 @@ export interface LeaveBalance {
     carry_forward_days: number;
 }
 
-export interface EmployeeLeave {
-    id: number;
-    name: string;
-    picture: string;
-    department: string;
-    leave_balances: LeaveBalance[];
-}
-
 export interface LeaveType {
     id: number;
     name: string;
-    min: number;
     max: number;
     is_attachment_required: boolean
 }
@@ -67,21 +70,6 @@ export interface LeaveTypesItems {
     max_duration: number;
 }
 
-
-// export interface LeaveRequest {
-//     id: number;
-//     name: string;
-//     email: string;
-//     picture: string;
-//     leave_type: string;
-//     start_date: string | Date;
-//     end_date: string | Date;
-//     total_days: number;
-//     trans_employees_leaves: EmployeeLeaveRequest;
-//     status: "Pending" | "Approved" | "Rejected";
-//     trans_employees_leaves_approvedBy: EmployeeLeaveRequest;
-//     ref_leave_types: LeaveType
-// }
 
 interface LeaveRequestCreatedBy {
     id: number;
@@ -100,7 +88,7 @@ interface EmployeeLeaveType {
 interface LeaveDetails {
     start_date: string; // ISO date string
     end_date: string;   // ISO date string
-    total_days: number;
+    total_days: string;
     reason: string;
     status: "Pending" | "Approved" | "Rejected"
     created_at: string; // ISO date string
@@ -117,4 +105,65 @@ export interface LeaveRequest {
     leave_type: EmployeeLeaveType;
     leave_details: LeaveDetails;
     evaluators: LeaveApplicationEvaluation;
+}
+
+//for leave applications
+
+export interface EmployeeLeave {
+    id: number;
+    name: string;
+    picture: string;
+    department: string;
+    leave_balances: LeaveBalance[]
+    trans_leaves: LeaveApplication[]
+    dim_schedules: DimSchedule[];
+}
+
+interface LeaveApplication {
+    employee_id: number;
+    start_date: string; // ISO 8601 date string
+    end_date: string; // ISO 8601 date string
+    status: string | null;
+    created_at: string; // ISO 8601 date string
+    updated_at: string; // ISO 8601 date string
+    id: number;
+    leave_type_id: number;
+    reason: string;
+    created_by: number;
+    deleted_at: string | null;
+    evaluators: Evaluators;
+    files: string[] | null; // Adjust based on the structure of "files" if available
+}
+
+interface Evaluators {
+    users: EvaluatorUser[];
+    approver: ApproverDecision;
+    comments: any[]; // Replace `any` if comments structure is known
+    reviewers: ReviewerDecision;
+}
+
+interface EvaluatorUser {
+    id: string; // UUID
+    name: string;
+    role: string;
+    email: string;
+    picture: string; // URL string
+    employee_id: number;
+}
+
+interface ApproverDecision {
+    decision: Decision;
+    approved_by: string; // UUID
+}
+
+interface ReviewerDecision {
+    decision: Decision;
+    reviewed_by: string; // UUID
+}
+
+interface Decision {
+    is_approved?: boolean; // Present in approver decision
+    is_reviewed?: boolean; // Present in reviewer decision
+    decisionDate: string | null; // ISO 8601 date string
+    rejectedReason: string | null;
 }

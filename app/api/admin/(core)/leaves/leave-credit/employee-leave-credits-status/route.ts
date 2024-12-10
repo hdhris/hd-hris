@@ -4,14 +4,13 @@ import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {LeaveTypeForEmployee} from "@/types/leaves/LeaveTypes";
 import {Logger, LogLevel} from "@/lib/logger/Logger";
 import {Employee} from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
-
 export const dynamic = "force-dynamic";
 
 export async function GET() {
     try {
         const logger = new Logger(LogLevel.DEBUG)
         // Fetch current year leave balances where deleted_at is null
-        const leave_balances = await prisma?.dim_leave_balances.findMany({
+        const leave_balances = await prisma.dim_leave_balances.findMany({
             where: {
                 deleted_at: null, year: new Date().getFullYear(), // Only balances for the current year
             },
@@ -60,7 +59,9 @@ export async function GET() {
         ])
 
         // Format the employee data for a user-friendly response
-        const data: Employee[] = employees.map((emp: any) => {
+        const data: Employee[] = employees.filter(item => {
+            return item.resignation_json === null && item.termination_json === null
+        }).map((emp: any) => {
             return {
                 id: emp.id,
                 name: getEmpFullName(emp), // Full name formatted from employee data

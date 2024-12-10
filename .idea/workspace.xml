@@ -4,14 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="merging">
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="fixing leave credit v2">
+      <change afterPath="$PROJECT_DIR$/app/api/admin/test-routes/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/leave-credit/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/employeemanagement/employees/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/employeemanagement/employees/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/leaves/credits/forms/add/leave-credit-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/credits/forms/add/leave-credit-form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/leaves/credits/forms/edit/edit-credit-form.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/request-form/form/RequestForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/request-form/form/RequestForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/utils/timeFormatter.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/timeFormatter.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,12 +55,8 @@
               <option name="branches">
                 <list>
                   <RecentBranch>
-                    <option name="branchName" value="john" />
-                    <option name="lastUsedInstant" value="1732506091" />
-                  </RecentBranch>
-                  <RecentBranch>
                     <option name="branchName" value="main" />
-                    <option name="lastUsedInstant" value="1732506047" />
+                    <option name="lastUsedInstant" value="1733635807" />
                   </RecentBranch>
                 </list>
               </option>
@@ -89,17 +88,19 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;JavaScript Debug.localhost:3000.executor&quot;: &quot;Debug&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;com.codeium.enabled&quot;: &quot;true&quot;,
     &quot;database.data.extractors.current.export.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
     &quot;database.data.extractors.current.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Xero/Desktop&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Xero/WebstormProjects/Capstone/HD-HRIS/app/tests&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.codeium.AppSettingsConfigurable&quot;,
     &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS\\node_modules\\typescript\\lib&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
@@ -111,24 +112,34 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\tests" />
+      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\admin\leaves\credits\forms\edit" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\common" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\public" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS" />
-      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app" />
-      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app\fonts\inter" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\admin\leaves\request-form\form" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\auth\forgot" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\auth" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\auth\login" />
       <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\assets" />
-      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\app" />
     </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="localhost:3000" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:3000">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.localhost:3000" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.24807.6" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-WS-243.22562.112" />
       </set>
     </attachedChunks>
   </component>
@@ -167,7 +178,16 @@
       <workItem from="1733412228630" duration="352000" />
       <workItem from="1733412943866" duration="6883000" />
       <workItem from="1733443659721" duration="13107000" />
-      <workItem from="1733470073925" duration="45639000" />
+      <workItem from="1733470073925" duration="48390000" />
+      <workItem from="1733547917731" duration="2213000" />
+      <workItem from="1733571253270" duration="27064000" />
+      <workItem from="1733634755938" duration="65000" />
+      <workItem from="1733634877721" duration="309000" />
+      <workItem from="1733635561277" duration="397000" />
+      <workItem from="1733636185244" duration="45308000" />
+      <workItem from="1733707449607" duration="45301000" />
+      <workItem from="1733757033787" duration="23068000" />
+      <workItem from="1733794058916" duration="19633000" />
     </task>
     <task id="LOCAL-00002" summary="fixing the responsiveness of the onGridDisplay">
       <option name="closed" value="true" />
@@ -433,7 +453,71 @@
       <option name="project" value="LOCAL" />
       <updated>1733543266259</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="fixes">
+      <option name="closed" value="true" />
+      <created>1733544485278</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1733544485278</updated>
+    </task>
+    <task id="LOCAL-00036" summary="fixes v2">
+      <option name="closed" value="true" />
+      <created>1733546865065</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1733546865065</updated>
+    </task>
+    <task id="LOCAL-00037" summary="fixing leave credit">
+      <option name="closed" value="true" />
+      <created>1733619970872</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1733619970872</updated>
+    </task>
+    <task id="LOCAL-00038" summary="fixing leave credit">
+      <option name="closed" value="true" />
+      <created>1733620226415</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1733620226415</updated>
+    </task>
+    <task id="LOCAL-00039" summary="fixing leave request">
+      <option name="closed" value="true" />
+      <created>1733646398439</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1733646398439</updated>
+    </task>
+    <task id="LOCAL-00040" summary="testing">
+      <option name="closed" value="true" />
+      <created>1733757175666</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1733757175666</updated>
+    </task>
+    <task id="LOCAL-00041" summary="fixing leave credit">
+      <option name="closed" value="true" />
+      <created>1733780205790</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1733780205790</updated>
+    </task>
+    <task id="LOCAL-00042" summary="fixing leave credit v2">
+      <option name="closed" value="true" />
+      <created>1733806249477</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1733806249477</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -462,12 +546,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixing warning in regard to aria-label and polishing hidden assign to field when updating specific employee" />
-    <MESSAGE value="adding email-services.ts" />
-    <MESSAGE value="adding an alert message to the leave credit form" />
-    <MESSAGE value="fixing leave RequestForm.tsx" />
-    <MESSAGE value="fixing leave RequestForm.tsx v2" />
-    <MESSAGE value="cleaning" />
     <MESSAGE value="fixing leave types" />
     <MESSAGE value="polish leave credit v2" />
     <MESSAGE value="fixing PayheadUI not PayheadUi" />
@@ -487,6 +565,12 @@
     <MESSAGE value="fixing benefits v1" />
     <MESSAGE value="merging with nizam" />
     <MESSAGE value="merging" />
-    <option name="LAST_COMMIT_MESSAGE" value="merging" />
+    <MESSAGE value="fixes" />
+    <MESSAGE value="fixes v2" />
+    <MESSAGE value="fixing leave request" />
+    <MESSAGE value="testing" />
+    <MESSAGE value="fixing leave credit" />
+    <MESSAGE value="fixing leave credit v2" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing leave credit v2" />
   </component>
 </project>

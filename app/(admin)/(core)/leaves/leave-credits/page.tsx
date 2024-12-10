@@ -21,11 +21,9 @@ import DropdownList from "@/components/common/Dropdown";
 import CardView from "@/components/common/card-view/card-view";
 import NoData from "@/components/common/no-data/NoData";
 import {capitalize} from "@nextui-org/shared-utils";
-import showDialog from "@/lib/utils/confirmDialog";
-import {axiosInstance} from "@/services/fetcher";
 import {Card} from "@nextui-org/card";
 import CardTable from "@/components/common/card-view/card-table";
-// import LeaveCreditEditForm from '@/components/admin/leaves/credits/forms/edit/edit-credit-form';
+import EditLeaveCredits from '@/components/admin/leaves/credits/forms/edit/edit-leave-credits';
 
 
 export interface EditCreditProp extends Omit<LeaveCredits, "leave_balance"> {
@@ -48,25 +46,29 @@ function Page() {
     const [page, setPage] = useState<number>(1)
     const [rows, setRows] = useState<number>(5)
     const [year, setYear] = useState<number>(new Date().getFullYear())
-    const [editCredit, setEditCredit] = useState<EditCreditProp>()
+    const [editCredit, setEditCredit] = useState<EditCreditProp & { apply_for: string }>()
     const [viewCredit, setViewCredit] = useState<EditCreditProp>()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isEdit, setIsEdit] = useState<boolean>(false)
     const {data, isLoading} = usePaginateQuery<EmployeeLeaveCredits>("/api/admin/leaves/leave-credit", page, rows, {
         refreshInterval: 3000
     }, `&year=${year}`);
-    const leaveCredit = useMemo(() => {
-        if (data?.data) {
-            return data.data
-        } else {
-            return []
-        }
 
-    }, [data])
+    const leaveCredit = useMemo(() => {
+        return data?.data || [];
+    }, [data?.data]);
 
     const onOpenDrawer = useCallback(() => {
         setIsOpen(true)
     }, [setIsOpen])
+
+    const onEditOpenDrawer = useCallback((viewCredit: EditCreditProp) => {
+        setIsEdit(true)
+        const edit = {
+            ...viewCredit, apply_for: "specific_employee"
+        }
+        setEditCredit(edit)
+    }, [])
 
     SetNavEndContent(() => {
 
@@ -80,10 +82,10 @@ function Page() {
 
     const handleSelect = (edited: EditCreditProp) => {
         setViewCredit(edited)
-
         console.log("Edited: ", edited)
 
     }
+
 
     return (<section className='w-full h-full flex gap-4 overflow-hidden'>
         <DataDisplay
@@ -127,10 +129,6 @@ function Page() {
             //         key: "id", name: "ID"
             //     }, {key: "name", name: "Name"}, {key: "created_at", name: "Created At"}]
             //
-            // }}
-            // onDeleteSelected={async (keys) => {
-            //     await handleLeaveTypeDeleteMultiple(keys)
-            // }}
             searchProps={{
                 searchingItemKey: ["name"]
             }}
@@ -140,14 +138,6 @@ function Page() {
             paginationProps={{
                 loop: true, data_length: data?.meta_data.totalItems, onChange: setPage
             }}
-            // onTableDisplay={{
-            //     config: LeaveTypeTableConfiguration,
-            //     isLoading,
-            //     onRowAction: handleRowKey,
-            //     selectionMode: "multiple",
-            //     layout: "auto"
-            // }}
-
 
             onExport={{
                 drawerProps: {
@@ -164,18 +154,14 @@ function Page() {
         {viewCredit && <CardView
             title="Leave Credit"
             onClose={() => setViewCredit(undefined)}
-            // onEdit={() => {
-            //     setIsEdit(true)
-            //     setEditCredit(viewCredit)
-            //
-            // }}
+            onEdit={() => onEditOpenDrawer(viewCredit)}
             header={<div className="flex flex-row items-center space-x-4 pb-2">
                 <User name={<div className="flex gap-2">
                     <Typography>{viewCredit.name}</Typography>
                     <Chip
                         {...uniformChipStyle(viewCredit.employment_status)}
                         variant="bordered"
-                        >{capitalize(viewCredit.employment_status)}</Chip>
+                    >{capitalize(viewCredit.employment_status)}</Chip>
                 </div>}
                       description={viewCredit.department}
                       classNames={{
@@ -208,20 +194,6 @@ function Page() {
                                           className="h-2"/>
                             </>}
                         >
-                            {/*<table className="w-full text-sm">*/}
-                            {/*    <tbody>*/}
-                            {/*    {[{*/}
-                            {/*        label: "Allocated Days", value: leave.allocated_days*/}
-                            {/*    }, {label: "Remaining Days", value: leave.remaining_days}, {*/}
-                            {/*        label: "Used Days", value: leave.used_days*/}
-                            {/*    }, {*/}
-                            {/*        label: "Carry Forward", value: leave.carry_forward_days*/}
-                            {/*    },].map((item, idx) => (<tr key={idx} className="border-b last:border-b-0">*/}
-                            {/*        <td className="py-2 px-4 text-gray-500">{item.label}</td>*/}
-                            {/*        <td className="py-2 px-4">{item.value}</td>*/}
-                            {/*    </tr>))}*/}
-                            {/*    </tbody>*/}
-                            {/*</table>*/}
                             <CardTable data={[{
                                 label: "Allocated Days", value: leave.allocated_days
                             }, {label: "Remaining Days", value: leave.remaining_days}, {
@@ -237,11 +209,7 @@ function Page() {
             footer={<></>}
 
         />}
-        {/*<LeaveCreditEditForm title="Update Leave Credit"*/}
-        {/*                      description="Adjust and manage employee leave balances efficiently."*/}
-        {/*                      onOpen={setIsEdit}*/}
-        {/*                      isOpen={isEdit}*/}
-        {/*                      employee={editCredit}/>*/}
+        {editCredit && <EditLeaveCredits onOpen={setIsEdit} isOpen={isEdit} employee={editCredit}/>}
     </section>);
 }
 

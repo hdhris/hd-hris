@@ -9,19 +9,17 @@ import { LeaveType } from "@/types/leaves/LeaveRequestTypes";
 export interface LeaveTypeSelectionProps {
     leaveTypes: LeaveType[];
     isLoading?: boolean;
-    min: (days: number) => void;
-    max: (days: number) => void;
+    max?: (days: number) => void;
     isAttachmentRequired: (value: boolean) => void
     isDisabled?: boolean
 }
 
-function LeaveTypeSelection({min, max, leaveTypes, isLoading, isDisabled, isAttachmentRequired }: LeaveTypeSelectionProps) {
+function LeaveTypeSelection({max, leaveTypes, isLoading, isDisabled, isAttachmentRequired }: LeaveTypeSelectionProps) {
     const { control, setValue, formState: { errors } } = useFormContext();
     const [searchTerm, setSearchTerm] = React.useState('');  // Add state for searchTerm
 
     // Memoize the leave types and normalize for searching
     const availableLeavesTypes = React.useMemo(() => {
-        console.log("Leave Types item: ", leaveTypes)
         if (!leaveTypes || leaveTypes.length === 0) return [];
         return leaveTypes.map(type => ({
             ...type,
@@ -61,14 +59,12 @@ function LeaveTypeSelection({min, max, leaveTypes, isLoading, isDisabled, isAtta
                             if (selectedItem) {
                                 setValue('leave_type_id', selectedItem.id);
                                 field.onChange(selectedItem.id);  // Sync with react-hook-form
-                                min(selectedItem.min);
-                                max(selectedItem.max);  // Set the leave type duration
+                                max && max(selectedItem.max);  // Set the leave type duration
                                 isAttachmentRequired(selectedItem.is_attachment_required)
                             } else {
                                 setValue('leave_type_id', "");
                                 field.onChange("");  // Clear value
-                                min(0);
-                                max(0);  // Set the leave type duration
+                                max && max(0);  // Set the leave type duration
                             }
                         }}
                         {...field}

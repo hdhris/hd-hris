@@ -7,6 +7,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {Form} from '@/components/ui/form';
 import FormFields from '@/components/common/forms/FormFields';
 import {Button} from '@nextui-org/button';
+import {getLocalTimeZone, today} from "@internationalized/date";
 
 // Define the Zod schema
 const schema = z.object({
@@ -123,8 +124,10 @@ function Page() {
                         }
 
                     }, {
-                        isRequired: true, name: "holiday", type: "date-range-picker", label: "Holiday", config: {
-                            granularity: "hour"
+                        isRequired: true, name: "holiday", type: "date-range-picker", label: "Holiday",
+                        config: {
+                            granularity: "hour",
+                            minValue: today(getLocalTimeZone())
                         }
                     }, {
                         name: "price", type: "radio-group", label: "Price", config: {

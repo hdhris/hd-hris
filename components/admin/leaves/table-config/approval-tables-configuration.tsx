@@ -8,6 +8,7 @@ import {Status} from "@/components/status/Status";
 import {FilterProps} from "@/types/table/default_config";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import {Tooltip} from "@nextui-org/tooltip";
+import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
 
 
 const ApprovalColumns: ColumnsProps[] = [{

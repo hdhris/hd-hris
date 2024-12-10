@@ -131,7 +131,7 @@ export async function stageTable(
         const baseVariables: BaseValueProp = {
           rate_p_hr: ratePerHour,
           total_shft_hr: 80,
-          basic_salary: parseFloat(String(emp.ref_job_classes?.basic_salary)) || 0.0,
+          basic_salary: Number(String(emp?.ref_salary_grades?.amount || 0.00)),
           payroll_days: payrollDays,
           [static_formula.cash_advance_disbursement]: cashDisburseMap.get(emp.id) ?? 0,
           [static_formula.cash_advance_repayment]: cashRepayMap.get(emp.id!) ?? 0,
@@ -271,13 +271,13 @@ interface BenefitsPlanData {
     id: number;
     name: string;
     deduction_id: number;
-    employee_contribution: number;
-    employer_contribution: number;
-    ref_benefits_contribution_advance_settings: ContributionAdvanceSetting[];
+    ref_benefits_contribution_table: ContributionAdvanceSetting[];
   };
 }
 
 interface ContributionAdvanceSetting {
+  employee_rate: number;
+  employer_rate: number;
   min_salary: number;
   max_salary: number;
   min_MSC: number;
@@ -311,7 +311,7 @@ function convertToNumber(data: PayrollData): PayrollData {
           plan.ref_benefit_plans.employer_contribution
         ),
         ref_benefits_contribution_advance_settings:
-          plan.ref_benefit_plans.ref_benefits_contribution_advance_settings.map(
+          plan.ref_benefit_plans.ref_benefits_contribution_table.map(
             (setting: any) => ({
               ...setting,
               min_salary: Number(setting.min_salary),

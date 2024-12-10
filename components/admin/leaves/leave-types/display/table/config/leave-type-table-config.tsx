@@ -16,6 +16,7 @@ import {FilterProps} from "@/types/table/default_config";
 import {getColor} from "@/helper/background-color-generator/generator";
 import {uniformChipStyle} from "@/lib/custom/styles/SizeRadius";
 import {capitalize} from "@nextui-org/shared-utils";
+import {pluralize} from "@/helper/pluralize/pluralize";
 
 const LeaveTypesTableColumns: ColumnsProps[] = [{
     name: "Name", uid: "name", sortable: true
@@ -24,7 +25,7 @@ const LeaveTypesTableColumns: ColumnsProps[] = [{
 }, {
     name: "Applicable For", uid: "applicable_to_employee_types",
 }, {
-    name: "Duration Range", uid: "duration_range"
+    name: "Maximum Days", uid: "maximum_days"
 }, {
     name: "Paid Leave", uid: "paid_leave"
 }, {
@@ -54,8 +55,8 @@ export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
                 </div>
 
             </Case>
-            <Case of="duration_range">
-                <Typography>{`${item.min_duration} - ${item.max_duration} Day/s`}</Typography>
+            <Case of="maximum_days">
+                <Typography>{pluralize(item.max_duration, "Day")}</Typography>
             </Case>
             <Case of="applicable_to_employee_types">
                 <Chip

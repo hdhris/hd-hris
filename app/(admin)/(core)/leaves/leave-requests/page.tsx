@@ -8,7 +8,7 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import {
     approval_status_color_map, FilterItems, TableConfigurations
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
-import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
+import RequestForm, { normalizeDate } from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import CardView from "@/components/common/card-view/card-view";
 import {Avatar, Chip, cn, Input, ScrollShadow, User} from '@nextui-org/react';
@@ -17,10 +17,8 @@ import {capitalize} from "@nextui-org/shared-utils";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import CardTable from "@/components/common/card-view/card-table";
 import BorderCard from "@/components/common/BorderCard";
-import InputStyle from "@/lib/custom/styles/InputStyle";
 import {
     LuCheck,
-    LuSendHorizonal,
     LuX,
     LuBan,
     LuCalendarRange,
@@ -28,13 +26,15 @@ import {
     LuThumbsDown,
     LuPencil
 } from "react-icons/lu";
-import {icon_color, icon_size, icon_size_sm} from "@/lib/utils";
+import {icon_color, icon_size_sm} from "@/lib/utils";
 import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import {useSession} from "next-auth/react";
 import {FaReply} from "react-icons/fa";
 import dayjs from "dayjs";
 import {HolidayData} from "@/types/attendance-time/HolidayTypes";
+import {useHolidays} from "@/helper/holidays/unavailableDates";
+import {useLocale} from "@react-aria/i18n";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -51,6 +51,8 @@ function Page() {
         refreshInterval: 3000
     });
     const { data: holiday, isLoading: holidayLoading} = useQuery<HolidayData>(`/api/admin/attendance-time/holidays/${new Date().getFullYear()}`);
+    const {isDateUnavailable} = useHolidays()
+    let {locale} = useLocale();
 
     const allRequests = useMemo(() => {
         if (data) return data.data.map((item) => {
@@ -88,7 +90,7 @@ function Page() {
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))
         setSelectedRequest(selected)
-        console.log("Selected: ", selected)
+        // console.log("Selected: ", selected)
     }
 
     const onOpenDrawer = useCallback(() => {
@@ -96,7 +98,6 @@ function Page() {
     }, [setIsOpen])
 
     SetNavEndContent(() => {
-
         return (<>
             <Button {...uniformStyle()} onClick={onOpenDrawer}>
                 File A Leave

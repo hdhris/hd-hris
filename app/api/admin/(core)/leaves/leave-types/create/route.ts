@@ -1,6 +1,5 @@
 import {hasContentType} from "@/helper/content-type/content-type-check";
 import {NextRequest, NextResponse} from "next/server";
-import {Logger, LogLevel} from "@/lib/logger/Logger";
 import prisma from "@/prisma/prisma"
 import {LeaveTypeSchema} from "@/helper/zodValidation/leaves/leave-types-form/LeaveTypesForm";
 import {toGMT8} from "@/lib/utils/toGMT8";
@@ -48,7 +47,6 @@ export async function POST(request: NextRequest) {
                     carry_over: data_validation.data.carryOver,
                     paid_leave: data_validation.data.paidLeave,
                     is_active: data_validation.data.isActive,
-                    min_duration: data_validation.data.minDuration,
                     max_duration: data_validation.data.maxDuration,
                     attachment_required: data_validation.data.attachmentRequired,
                     is_applicable_to_all: is_applicable_for_all,

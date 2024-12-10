@@ -1,4 +1,5 @@
 import { toGMT8 } from "./toGMT8";
+import {pluralize} from "@/helper/pluralize/pluralize";
 
 export function calculateShiftLength(
     clockIn: string | null,
@@ -33,4 +34,22 @@ export function calculateShiftLength(
     const result = [hoursPart, minutesPart].filter(Boolean).join(compact ? " & " : " and ");
 
     return result || "0 minutes"; // If there are no hours or minutes, return '0 minutes'
+}
+
+
+export function formatDaysToReadableTime(days: number): string {
+    const totalMinutes = Math.round(days * 24 * 60); // Convert days to minutes
+    const hours = Math.floor(totalMinutes / 60);    // Extract hours
+    const minutes = totalMinutes % 60;             // Extract remaining minutes
+
+    // Convert hours into days if applicable
+    const totalHours = Math.floor(totalMinutes / 60);
+    const convertedDays = Math.floor(totalHours / 24);
+    const remainingHours = totalHours % 24;
+
+    if (convertedDays > 0) {
+        return `${pluralize(convertedDays, "day")}, ${pluralize(remainingHours, "hr")}, and ${pluralize(minutes, "min")}`;
+    } else {
+        return `${pluralize(hours, "hr")} and ${pluralize(minutes, "min")}`;
+    }
 }
