@@ -136,41 +136,37 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(req: Request) {
   const url = new URL(req.url);
-  const id = url.searchParams.get("id");
-
-  if (!id) return NextResponse.json({ error: "Department ID is required" }, { status: 400 });
+  const id = url.searchParams.get('id');
 
   try {
-    // Soft delete: Update the deleted_at field instead of removing the record
-    const department = await prisma.ref_departments.update({
-      where: { id: parseInt(id), trans_employees: { none: {} } },
-      data: { deleted_at: new Date() },
+    if (!id) {
+      // return NextResponse.json({ error: 'Deparment ID is required' }, { status: 400 });
+      throw new Error('Deparment ID is required');
+    }
+    const salarygrade = await prisma.ref_departments.findFirst({
+      where: { id: parseInt(id), trans_employees:{none:{}}}
+    });
+    
+    if (!salarygrade){
+      return NextResponse.json({
+        success: false,
+        message: 'Cannot delete department that has registered employees'
+      }, {status: 400})
+    }
+
+    await prisma.ref_departments.update({
+      where: { id: salarygrade.id},
+      data: { 
+        deleted_at: new Date(),
+        updated_at: new Date(),
+      },
     });
 
-    if (!department){
-      return NextResponse.json({message: 'Cannot delete department that has registered employees'},{status: 404});
-      }
-      return NextResponse.json({ message: 'Department marked as deleted', department });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2003') {
-          return NextResponse.json(
-            { 
-              status: "error",
-              message: "Cannot delete department that has registered employees" 
-            }, 
-            { status: 400 }
-          );
-        }
-      }
-      return NextResponse.json(
-        { 
-          status: "error",
-          message: "Cannot delete department that has registered employees" 
-        }, 
-        { status: 500 }
-      );
-    }
+    return NextResponse.json({ message: 'Deparment marked as deleted', salarygrade });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ message: error },{ status: 400 });
   }
+}

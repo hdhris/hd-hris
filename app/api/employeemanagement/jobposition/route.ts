@@ -13,7 +13,7 @@ const jobSchema = z.object({
     .transform((val) => new Prisma.Decimal(val)),
   is_active: z.boolean().default(true),
   superior_id: z.number().optional().nullable(),
-  department_id: z.number().optional().nullable(),
+
 });
 
 // Error handling function
@@ -86,7 +86,6 @@ export async function POST(req: Request) {
         pay_rate: validatedData.pay_rate,
         is_active: validatedData.is_active,
         superior_id: validatedData.superior_id,
-        department_id: validatedData.department_id,
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -128,41 +127,34 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
-  if (!id) {
-    return NextResponse.json({ error: 'Job ID is required' }, { status: 400 });
-  }
 
   try {
-    const job = await prisma.ref_job_classes.update({
-      where: { id: parseInt(id),trans_employees: { none: {} } },
+    if (!id) {
+      // return NextResponse.json({ error: 'Job ID is required' }, { status: 400 });
+      throw new Error('Job ID is required');
+    }
+    const jobclass = await prisma.ref_job_classes.findFirst({
+      where: { id: parseInt(id), trans_employees:{none:{}}}
+    });
+    
+    if (!jobclass){
+      return NextResponse.json({
+        success: false,
+        message: 'Cannot delete job that has registered employees'
+      }, {status: 400})
+    }
+
+    await prisma.ref_job_classes.update({
+      where: { id: jobclass.id},
       data: { 
         deleted_at: new Date(),
         updated_at: new Date(),
       },
     });
-    
-    if (!job){
-      return NextResponse.json({message: 'Cannot delete job position that has registered employees'},{status: 404});
-      }
-      return NextResponse.json({ message: 'Job position marked as deleted', job });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2003') {
-          return NextResponse.json(
-            { 
-              status: "error",
-              message: "Cannot delete job position that has registered employees" 
-            }, 
-            { status: 400 }
-          );
-        }
-      }
-      return NextResponse.json(
-        { 
-          status: "error",
-          message: "Cannot delete job position that has registered employees" 
-        }, 
-        { status: 500 }
-      );
-    }
+
+    return NextResponse.json({ message: 'Job marked as deleted', jobclass });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ message: error },{ status: 400 });
   }
+}
