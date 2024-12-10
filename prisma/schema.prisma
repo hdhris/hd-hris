@@ -533,21 +533,22 @@ model trans_employees {
 
 model trans_leaves {
   employee_id                                              Int
-  start_date                                               DateTime?          @db.Timestamp(6)
-  end_date                                                 DateTime?          @db.Timestamp(6)
-  status                                                   String?            @db.VarChar(10)
-  created_at                                               DateTime           @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
-  updated_at                                               DateTime           @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
-  id                                                       Int                @id @default(autoincrement())
-  leave_type_id                                            Int?
-  reason                                                   String?
+  start_date                                               DateTime          @db.Timestamp(6)
+  end_date                                                 DateTime          @db.Timestamp(6)
+  status                                                   String            @db.VarChar(10)
+  created_at                                               DateTime          @default(dbgenerated("'2024-06-02 00:41:35'::timestamp without time zone")) @db.Timestamp(6)
+  updated_at                                               DateTime          @default(dbgenerated("'2024-06-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  id                                                       Int               @id @default(autoincrement())
+  leave_type_id                                            Int
+  reason                                                   String
   created_by                                               Int?
-  deleted_at                                               DateTime?          @db.Timestamp(6)
-  evaluators                                               Json?
+  deleted_at                                               DateTime?         @db.Timestamp(6)
+  evaluators                                               Json
   files                                                    Json?
-  trans_employees_leaves                                   trans_employees    @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
-  trans_employees_trans_leaves_created_byTotrans_employees trans_employees?   @relation("trans_leaves_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
-  trans_leave_types                                        trans_leave_types? @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_leaves_type_id_fkey")
+  total_days                                               Decimal           @default(0) @db.Decimal
+  trans_employees_leaves                                   trans_employees   @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
+  trans_employees_trans_leaves_created_byTotrans_employees trans_employees?  @relation("trans_leaves_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
+  trans_leave_types                                        trans_leave_types @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_leaves_type_id_fkey")
 
   @@index([deleted_at])
 }

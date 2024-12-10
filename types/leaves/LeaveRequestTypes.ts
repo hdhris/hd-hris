@@ -88,7 +88,7 @@ interface EmployeeLeaveType {
 interface LeaveDetails {
     start_date: string; // ISO date string
     end_date: string;   // ISO date string
-    total_days?: number;
+    total_days: number;
     reason: string;
     status: "Pending" | "Approved" | "Rejected"
     created_at: string; // ISO date string

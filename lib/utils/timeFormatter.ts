@@ -34,3 +34,12 @@ export function calculateShiftLength(
 
     return result || "0 minutes"; // If there are no hours or minutes, return '0 minutes'
 }
+
+
+export function formatDaysToReadableTime(days: number): string {
+    const totalMinutes = Math.round(days * 24 * 60); // Convert days to minutes
+    const hours = Math.floor(totalMinutes / 60);    // Extract hours
+    const minutes = totalMinutes % 60;             // Extract remaining minutes
+
+    return `${hours} hours and ${minutes} minutes`;
+}

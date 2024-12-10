@@ -8,7 +8,7 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import {
     approval_status_color_map, FilterItems, TableConfigurations
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
-import RequestForm from "@/app/tests/RequestForm";
+import RequestForm, { normalizeDate } from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import CardView from "@/components/common/card-view/card-view";
 import {Avatar, Chip, cn, Input, ScrollShadow, User} from '@nextui-org/react';
@@ -17,10 +17,8 @@ import {capitalize} from "@nextui-org/shared-utils";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import CardTable from "@/components/common/card-view/card-table";
 import BorderCard from "@/components/common/BorderCard";
-import InputStyle from "@/lib/custom/styles/InputStyle";
 import {
     LuCheck,
-    LuSendHorizonal,
     LuX,
     LuBan,
     LuCalendarRange,
@@ -28,14 +26,13 @@ import {
     LuThumbsDown,
     LuPencil
 } from "react-icons/lu";
-import {icon_color, icon_size, icon_size_sm} from "@/lib/utils";
+import {icon_color, icon_size_sm} from "@/lib/utils";
 import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import {useSession} from "next-auth/react";
 import {FaReply} from "react-icons/fa";
 import dayjs from "dayjs";
 import {HolidayData} from "@/types/attendance-time/HolidayTypes";
-import {CalendarDate, isWeekend} from "@internationalized/date";
 import {useHolidays} from "@/helper/holidays/unavailableDates";
 import {useLocale} from "@react-aria/i18n";
 
@@ -63,27 +60,6 @@ function Page() {
                 id: item.created_by.id, name: item.created_by.name, picture: item.created_by.picture,
             }
 
-            const total_leave = dayjs(item.leave_details.end_date).diff(item.leave_details.start_date, 'days');
-
-            // Ensure the range is valid (start date should be before end date)
-
-            // Convert the start date string into a Date object, then into a CalendarDate
-            let startDate = new Date(item.leave_details.start_date);  // Parse the start date string into a Date object
-            let currentDate = new CalendarDate(startDate.getFullYear(), startDate.getMonth() + 1, startDate.getDate()); // Convert Date to CalendarDate (Month is 0-based, so add 1)
-
-            let validLeaveDays = 0; // Counter for valid leave days
-
-            // Iterate over the date range and check each date
-            for (let i = 0; i < total_leave; i++) {
-                // Check if the current date is a valid leave day (not a weekend, not an unavailable date)
-                if (!isWeekend(currentDate, locale) && !isDateUnavailable(currentDate)) {
-                    validLeaveDays++; // Increment if it's a valid leave day
-                }
-
-                // Move to the next day
-                currentDate = currentDate.add({days: 1}); // Add 1 day using CalendarDate's add method
-            }
-
             return {
                 id: item.id,
                 employee_id: item.employee_id,
@@ -96,7 +72,7 @@ function Page() {
                 leave_details: {
                     start_date: item.leave_details.start_date, // Format date here
                     end_date: item.leave_details.end_date,     // Format date here
-                    total_days: validLeaveDays,
+                    total_days: item.leave_details.total_days,
                     reason: item.leave_details.reason,
                     status: item.leave_details.status,
                     created_at: item.leave_details.created_at,
@@ -110,6 +86,24 @@ function Page() {
 
         return []
     }, [data, isDateUnavailable, locale])
+
+
+    // const haveExistingLeave = useCallback((date: DateValue) => {
+    //     //get the existing leave dates if not rejected
+    //     const existingLeaveDates = user?.employees
+    //         .filter(item => item.id === employeeIdSelected)
+    //         .map((employee) => employee.trans_leaves.filter((leave) => leave.leave_type_id && leave.status !== "Rejected"))
+    //         .flat() || [];
+    //
+    //     const currentDate = normalizeDate(new Date(date.year, date.month - 1, date.day));
+    //     return existingLeaveDates.some((leave) => {
+    //         const startDate = normalizeDate(new Date(leave.start_date));
+    //         const endDate = normalizeDate(new Date(leave.end_date));
+    //
+    //         return currentDate >= startDate && currentDate <= endDate; // Disable if within range
+    //     });
+    //
+    // }, [employeeIdSelected, user?.employees])
 
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))

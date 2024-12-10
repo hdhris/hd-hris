@@ -8,6 +8,7 @@ import {Status} from "@/components/status/Status";
 import {FilterProps} from "@/types/table/default_config";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import {Tooltip} from "@nextui-org/tooltip";
+import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
 
 
 const ApprovalColumns: ColumnsProps[] = [{
@@ -89,7 +90,7 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
                 <Typography>{item.leave_details.end_date}</Typography>
             </Case>
             <Case of="total_days">
-                <Typography>{item.leave_details.total_days}</Typography>
+                <Typography>{formatDaysToReadableTime(item.leave_details.total_days)}</Typography>
             </Case>
             <Case of="status">
                 <Status color={approval_status_color_map[item.leave_details.status.toLowerCase()]}>
