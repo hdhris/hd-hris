@@ -135,15 +135,35 @@ export async function DELETE(req: Request) {
 
   try {
     const employmentstatus = await prisma.ref_employment_status.update({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id), trans_employees:{none:{}}},
       data: { 
         deleted_at: new Date(),
         updated_at: new Date(),
       },
     });
     
+    if (!employmentstatus){
+    return NextResponse.json({message: 'Cannot delete employement status that has registered employees'},{status: 404});
+    }
     return NextResponse.json({ message: 'Employee Status marked as deleted', employmentstatus });
   } catch (error) {
-    return handleError(error, 'delete');
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2003') {
+        return NextResponse.json(
+          { 
+            status: "error",
+            message: "Cannot delete employement status that has registered employees" 
+          }, 
+          { status: 400 }
+        );
+      }
+    }
+    return NextResponse.json(
+      { 
+        status: "error",
+        message: "Cannot delete employement statusthat has registered employees" 
+      }, 
+      { status: 500 }
+    );
   }
 }

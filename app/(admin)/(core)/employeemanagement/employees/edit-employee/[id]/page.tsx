@@ -1,3 +1,4 @@
+// edit-employee/[id]/page.tsx
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { useForm, FormProvider } from "react-hook-form";
@@ -16,68 +17,67 @@ import EditPersonalInformationForm from "@/components/admin/employeescomponent/u
 import EditEducationalBackgroundForm from "@/components/admin/employeescomponent/update/EditEducationalBackgroundForm";
 import EditJobInformationForm from "@/components/admin/employeescomponent/update/EditJobInformationForm";
 import EditScheduleSelection from "@/components/admin/employeescomponent/update/EditScheduleSelection";
+import EditAccountForm from "@/components/admin/employeescomponent/update/EditAccount";
 
 type EmployeeFields = keyof EmployeeFormData;
-type Certificate = {
-  name?: string;
-  url: string | File;
-  fileName?: string;
+
+const tabFieldsMap = {
+  personal: [
+    "first_name",
+    "middle_name",
+    "last_name",
+    "suffix",
+    "extension",
+    "gender",
+    "email",
+    "contact_no",
+    "birthdate",
+    "addr_region",
+    "addr_province",
+    "addr_municipal",
+    "addr_baranggay",
+    "fathers_first_name",
+    "fathers_middle_name",
+    "fathers_last_name",
+    "mothers_first_name",
+    "mothers_middle_name",
+    "mothers_last_name",
+    "guardian_first_name",
+    "guardian_middle_name",
+    "guardian_last_name",
+    "picture",
+  ] as EmployeeFields[],
+  educational: [
+    "elementary",
+    "highSchool",
+    "seniorHighSchool",
+    "seniorHighStrand",
+    "tvlCourse",
+    "universityCollege",
+    "course",
+    "highestDegree",
+    "certificates",
+    "masters",
+    "mastersCourse",
+    "mastersYear",
+    "mastersCertificates",
+    "doctorate",
+    "doctorateCourse",
+    "doctorateYear",
+    "doctorateCertificates",
+  ] as EmployeeFields[],
+  job: [
+    "hired_at",
+    "department_id",
+    "job_id",
+    "employement_status_id",
+    "branch_id",
+    "salary_grade_id",
+    "batch_id",
+    "days_json",
+  ] as EmployeeFields[],
+  account: ["username", "password"] as EmployeeFields[],
 };
-const personalFields: EmployeeFields[] = [
-  "first_name",
-  "middle_name",
-  "last_name",
-  "suffix",
-  "extension",
-  "gender",
-  "email",
-  "contact_no",
-  "birthdate",
-  "addr_region",
-  "addr_province",
-  "addr_municipal",
-  "addr_baranggay",
-  "fathers_first_name",
-  "fathers_middle_name",
-  "fathers_last_name",
-  "mothers_first_name",
-  "mothers_middle_name",
-  "mothers_last_name",
-  "guardian_first_name",
-  "guardian_middle_name",
-  "guardian_last_name",
-];
-
-const educationalFields: EmployeeFields[] = [
-  "elementary",
-  "highSchool",
-  "seniorHighSchool",
-  "seniorHighStrand",
-  "tvlCourse",
-  "universityCollege",
-  "course",
-  "highestDegree",
-  "certificates",
-  "masters",
-  "mastersCourse",
-  "mastersYear",
-  "mastersCertificates",
-  "doctorate",
-  "doctorateCourse",
-  "doctorateYear",
-  "doctorateCertificates",
-];
-
-const jobFields: EmployeeFields[] = [
-  "hired_at",
-  "department_id",
-  "job_id",
-  "employement_status_id",
-  "branch_id",
-  "salary_grade_id",
-  "batch_id",
-  "days_json",
-];
 
 export default function EditEmployeePage({
   params,
@@ -89,8 +89,9 @@ export default function EditEmployeePage({
   const { edgestore } = useEdgeStore();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("personal");
-  const { data: employeeData, isLoading: isFetching } = useEmployeeData(params.id);
-
+  const { data: employeeData, isLoading: isFetching } = useEmployeeData(
+    params.id
+  );
 
   const methods = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
@@ -130,15 +131,12 @@ export default function EditEmployeePage({
       certificates: [],
       mastersCertificates: [],
       doctorateCertificates: [],
-     
       masters: "",
       mastersCourse: "",
       mastersYear: "",
-   
       doctorate: "",
       doctorateCourse: "",
       doctorateYear: "",
-    
       hired_at: "",
       department_id: "",
       job_id: "",
@@ -146,8 +144,63 @@ export default function EditEmployeePage({
       salary_grade_id: "",
       batch_id: "",
       days_json: [],
+      username: "",
+      password: "",
+      isPasswordModified: false,
     },
   });
+
+  const validateCurrentTab = async (tabKey: string): Promise<boolean> => {
+    const fieldsToValidate =
+      tabFieldsMap[tabKey as keyof typeof tabFieldsMap] || [];
+    return await methods.trigger(fieldsToValidate);
+  };
+
+  const handleTabChange = async (newTab: string) => {
+    const tabs = ["personal", "educational", "job", "account"];
+    const currentIndex = tabs.indexOf(activeTab);
+    const newIndex = tabs.indexOf(newTab);
+
+    if (newIndex > currentIndex) {
+      const isValid = await validateCurrentTab(activeTab);
+      if (!isValid) {
+        toast({
+          title: "Validation Error",
+          variant: "danger",
+          description: "Please fill in all required fields before proceeding.",
+          duration: 3000,
+        });
+        return;
+      }
+    }
+
+    setActiveTab(newTab);
+  };
+
+  const handleNext = async () => {
+    const tabs = ["personal", "educational", "job", "account"];
+    const currentIndex = tabs.indexOf(activeTab);
+
+    const isValid = await validateCurrentTab(activeTab);
+    if (isValid && currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
+    } else if (!isValid) {
+      toast({
+        title: "Validation Error",
+        variant: "danger",
+        description: "Please fill in all required fields before proceeding.",
+        duration: 3000,
+      });
+    }
+  };
+
+  const handlePrevious = () => {
+    const tabs = ["personal", "educational", "job", "account"];
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1]);
+    }
+  };
 
   const processCertificates = async (
     certificates: (string | File)[] = []
@@ -165,11 +218,197 @@ export default function EditEmployeePage({
           });
           return result.url;
         }
-        return cert; // If it's already a string URL, return it directly
+        return cert;
       })
     );
 
     return processed.filter((url): url is string => url !== null);
+  };
+
+  useEffect(() => {
+    const subscription = methods.watch((value, { name }) => {
+      if (name === "password") {
+        methods.setValue("isPasswordModified", true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [methods]);
+
+  const handleFormSubmit = async (data: EmployeeFormData) => {
+    setIsSubmitting(true);
+
+    try {
+      // Handle picture upload
+      let pictureUrl = typeof data.picture === "string" ? data.picture : "";
+      if (data.picture instanceof File) {
+        const result = await edgestore.publicFiles.upload({
+          file: data.picture,
+        });
+        pictureUrl = result.url;
+      }
+
+      // Process all certificates in parallel
+      const [certificates, mastersCertificates, doctorateCertificates] =
+        await Promise.all([
+          processCertificates(data.certificates),
+          processCertificates(data.mastersCertificates),
+          processCertificates(data.doctorateCertificates),
+        ]);
+
+      // Prepare schedule data
+      const schedules = data.batch_id
+        ? [
+            {
+              batch_id: parseInt(data.batch_id),
+              days_json: Array.isArray(data.days_json) ? data.days_json : [],
+            },
+          ]
+        : [];
+
+      // Prepare the main employee update data
+      const employeeData = {
+        picture: pictureUrl,
+        first_name: data.first_name,
+        middle_name: data.middle_name,
+        last_name: data.last_name,
+        suffix: data.suffix,
+        extension: data.extension,
+        gender: data.gender,
+        email: data.email,
+        contact_no: data.contact_no,
+        birthdate: data.birthdate
+          ? new Date(data.birthdate).toISOString()
+          : null,
+        hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
+
+        educational_bg_json: {
+          elementary: data.elementary,
+          highSchool: data.highSchool,
+          seniorHighSchool: data.seniorHighSchool,
+          seniorHighStrand: data.seniorHighStrand,
+          tvlCourse: data.tvlCourse,
+          universityCollege: data.universityCollege,
+          course: data.course,
+          highestDegree: data.highestDegree,
+          certificates,
+          masters: data.masters,
+          mastersCourse: data.mastersCourse,
+          mastersYear: data.mastersYear,
+          mastersCertificates,
+          doctorate: data.doctorate,
+          doctorateCourse: data.doctorateCourse,
+          doctorateYear: data.doctorateYear,
+          doctorateCertificates,
+        },
+
+        family_bg_json: {
+          fathers_first_name: data.fathers_first_name,
+          fathers_middle_name: data.fathers_middle_name,
+          fathers_last_name: data.fathers_last_name,
+          mothers_first_name: data.mothers_first_name,
+          mothers_middle_name: data.mothers_middle_name,
+          mothers_last_name: data.mothers_last_name,
+          guardian_first_name: data.guardian_first_name,
+          guardian_middle_name: data.guardian_middle_name,
+          guardian_last_name: data.guardian_last_name,
+        },
+
+        // Add reference connections for valid IDs
+        ...(data.branch_id && {
+          ref_branches: { connect: { id: parseInt(data.branch_id) } },
+        }),
+        ...(data.department_id && {
+          ref_departments: { connect: { id: parseInt(data.department_id) } },
+        }),
+        ...(data.job_id && {
+          ref_job_classes: { connect: { id: parseInt(data.job_id) } },
+        }),
+        ...(data.employement_status_id && {
+          ref_employment_status: {
+            connect: { id: parseInt(data.employement_status_id) },
+          },
+        }),
+        ...(data.salary_grade_id && {
+          ref_salary_grades: {
+            connect: { id: parseInt(data.salary_grade_id) },
+          },
+        }),
+        ...(data.addr_region && {
+          ref_addresses_trans_employees_addr_regionToref_addresses: {
+            connect: { id: parseInt(data.addr_region) },
+          },
+        }),
+        ...(data.addr_province && {
+          ref_addresses_trans_employees_addr_provinceToref_addresses: {
+            connect: { id: parseInt(data.addr_province) },
+          },
+        }),
+        ...(data.addr_municipal && {
+          ref_addresses_trans_employees_addr_municipalToref_addresses: {
+            connect: { id: parseInt(data.addr_municipal) },
+          },
+        }),
+        ...(data.addr_baranggay && {
+          ref_addresses_trans_employees_addr_baranggayToref_addresses: {
+            connect: { id: parseInt(data.addr_baranggay) },
+          },
+        }),
+
+        // Include schedules array
+        schedules,
+      };
+
+      // First update employee data
+      const employeeUpdateResponse = await axios.put(
+        `/api/employeemanagement/employees?id=${params.id}`,
+        employeeData
+      );
+
+      // Only update account if there's a new password
+      if (
+        employeeUpdateResponse.status === 200 &&
+        data.isPasswordModified &&
+        data.password?.trim()
+      ) {
+        try {
+          await axios.put(
+            `/api/employeemanagement/employees?id=${params.id}&type=account`,
+            {
+              username: data.username,
+              password: data.password,
+            }
+          );
+        } catch (accountError) {
+          console.error("Account update error:", accountError);
+          toast({
+            title: "Partial Update",
+            description:
+              "Employee updated but account update failed. Please try updating the account again.",
+            variant: "warning",
+            duration: 5000,
+          });
+          return;
+        }
+      }
+
+      router.push("/employeemanagement/employees");
+      toast({
+        title: "Success",
+        description: "Employee information successfully updated!",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Update error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update employee information. Please try again.",
+        variant: "danger",
+        duration: 5000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const fetchEmployeeData = useCallback(async () => {
@@ -181,27 +420,41 @@ export default function EditEmployeePage({
       if (employeeData.dim_schedules?.[0]?.days_json) {
         try {
           const daysJson = employeeData.dim_schedules[0].days_json;
-          daysArray = typeof daysJson === "string" ? JSON.parse(daysJson) : daysJson;
+          daysArray =
+            typeof daysJson === "string" ? JSON.parse(daysJson) : daysJson;
         } catch (error) {
           console.error("Error parsing days_json:", error);
         }
       }
 
       // Process educational background
-      const educationalBg = typeof employeeData.educational_bg_json === "string"
-        ? JSON.parse(employeeData.educational_bg_json || "{}")
-        : employeeData.educational_bg_json || {};
+      const educationalBg =
+        typeof employeeData.educational_bg_json === "string"
+          ? JSON.parse(employeeData.educational_bg_json || "{}")
+          : employeeData.educational_bg_json || {};
 
       // Process family background
-      const familyBg = typeof employeeData.family_bg_json === "string"
-        ? JSON.parse(employeeData.family_bg_json || "{}")
-        : employeeData.family_bg_json || {};
+      const familyBg =
+        typeof employeeData.family_bg_json === "string"
+          ? JSON.parse(employeeData.family_bg_json || "{}")
+          : employeeData.family_bg_json || {};
 
-      // Extract certificates as simple arrays of URLs
-      const certificates = Array.isArray(educationalBg.certificates) ? educationalBg.certificates : [];
-      const mastersCertificates = Array.isArray(educationalBg.mastersCertificates) ? educationalBg.mastersCertificates : [];
-      const doctorateCertificates = Array.isArray(educationalBg.doctorateCertificates) ? educationalBg.doctorateCertificates : [];
+      // Process certificates
+      const certificates = educationalBg.certificates || [];
+      const mastersCertificates = educationalBg.mastersCertificates || [];
+      const doctorateCertificates = educationalBg.doctorateCertificates || [];
 
+      // Get batch schedule
+      const batchId =
+        employeeData.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() ||
+        "";
+
+      // Get user account data
+      const userAccount = employeeData.userAccount;
+      const username = userAccount?.auth_credentials?.username || "";
+      const password = userAccount?.auth_credentials?.password || "";
+
+      // Reset form with all data
       methods.reset({
         picture: employeeData.picture || "",
         first_name: employeeData.first_name || "",
@@ -223,21 +476,47 @@ export default function EditEmployeePage({
         addr_municipal: employeeData.addr_municipal?.toString() || "",
         addr_baranggay: employeeData.addr_baranggay?.toString() || "",
         department_id: employeeData.department_id?.toString() || "",
-
         branch_id: employeeData.branch_id?.toString() || "",
         job_id: employeeData.job_id?.toString() || "",
         salary_grade_id: employeeData.salary_grade_id?.toString() || "",
-        employement_status_id: employeeData.employement_status_id?.toString() || "",
-        ...familyBg,
-        ...educationalBg,
-        certificates,
-        mastersCertificates,
-        doctorateCertificates,
-        batch_id:
-          employeeData.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() ||
-          "",
+        employement_status_id:
+          employeeData.employement_status_id?.toString() || "",
+        // Educational background
+        elementary: educationalBg.elementary || "",
+        highSchool: educationalBg.highSchool || "",
+        seniorHighSchool: educationalBg.seniorHighSchool || "",
+        seniorHighStrand: educationalBg.seniorHighStrand || "",
+        tvlCourse: educationalBg.tvlCourse || "",
+        universityCollege: educationalBg.universityCollege || "",
+        course: educationalBg.course || "",
+        highestDegree: educationalBg.highestDegree || "",
+        certificates: certificates,
+        masters: educationalBg.masters || "",
+        mastersCourse: educationalBg.mastersCourse || "",
+        mastersYear: educationalBg.mastersYear || "",
+        mastersCertificates: mastersCertificates,
+        doctorate: educationalBg.doctorate || "",
+        doctorateCourse: educationalBg.doctorateCourse || "",
+        doctorateYear: educationalBg.doctorateYear || "",
+        doctorateCertificates: doctorateCertificates,
+        // Family background
+        fathers_first_name: familyBg.fathers_first_name || "",
+        fathers_middle_name: familyBg.fathers_middle_name || "",
+        fathers_last_name: familyBg.fathers_last_name || "",
+        mothers_first_name: familyBg.mothers_first_name || "",
+        mothers_middle_name: familyBg.mothers_middle_name || "",
+        mothers_last_name: familyBg.mothers_last_name || "",
+        guardian_first_name: familyBg.guardian_first_name || "",
+        guardian_middle_name: familyBg.guardian_middle_name || "",
+        guardian_last_name: familyBg.guardian_last_name || "",
+        // Schedule
+        batch_id: batchId,
         days_json: daysArray,
-      });
+        // Account
+        username: username,
+        password: password,
+        isPasswordModified: false,
+      } as EmployeeFormData);
     } catch (error) {
       console.error("Error fetching employee data:", error);
       toast({
@@ -254,138 +533,6 @@ export default function EditEmployeePage({
     }
   }, [employeeData, fetchEmployeeData]);
 
-  const handleFormSubmit = async (data: EmployeeFormData) => {
-    setIsSubmitting(true);
-    try {
-      // Handle picture upload
-      let pictureUrl = typeof data.picture === "string" ? data.picture : "";
-      if (data.picture instanceof File) {
-        const result = await edgestore.publicFiles.upload({
-          file: data.picture,
-        });
-        pictureUrl = result.url;
-      }
-  
-      // Process all certificate types
-      const [certificates, mastersCertificates, doctorateCertificates] = await Promise.all([
-        processCertificates(data.certificates),
-        processCertificates(data.mastersCertificates),
-        processCertificates(data.doctorateCertificates),
-      ]);
-
-  
-      const educationalBackground = {
-        elementary: data.elementary,
-        highSchool: data.highSchool,
-        seniorHighSchool: data.seniorHighSchool,
-        seniorHighStrand: data.seniorHighStrand,
-        tvlCourse: data.tvlCourse,
-        universityCollege: data.universityCollege,
-        course: data.course,
-        highestDegree: data.highestDegree,
-        certificates, // Now just an array of URLs
-        masters: data.masters,
-        mastersCourse: data.mastersCourse,
-        mastersYear: data.mastersYear,
-        mastersCertificates, // Now just an array of URLs
-        doctorate: data.doctorate,
-        doctorateCourse: data.doctorateCourse,
-        doctorateYear: data.doctorateYear,
-        doctorateCertificates, // Now just an array of URLs
-      };
-  
-      const familyBackground = {
-        fathers_first_name: data.fathers_first_name,
-        fathers_middle_name: data.fathers_middle_name,
-        fathers_last_name: data.fathers_last_name,
-        mothers_first_name: data.mothers_first_name,
-        mothers_middle_name: data.mothers_middle_name,
-        mothers_last_name: data.mothers_last_name,
-        guardian_first_name: data.guardian_first_name,
-        guardian_middle_name: data.guardian_middle_name,
-        guardian_last_name: data.guardian_last_name,
-      };
-  
-      const fullData = {
-        ...data,
-        picture: pictureUrl,
-        birthdate: data.birthdate ? new Date(data.birthdate).toISOString() : null,
-        hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
-        addr_region: parseInt(data.addr_region, 10),
-        addr_province: parseInt(data.addr_province, 10),
-        addr_municipal: parseInt(data.addr_municipal, 10),
-        addr_baranggay: parseInt(data.addr_baranggay, 10),
-        department_id: parseInt(data.department_id, 10),
-        job_id: parseInt(data.job_id, 10),
-        branch_id: parseInt(data.branch_id, 10),
-        salary_grade_id: parseInt(data.salary_grade_id, 10),
-        employement_status_id: parseInt(data.employement_status_id, 10),
-        educational_bg_json: JSON.stringify(educationalBackground),
-        family_bg_json: JSON.stringify(familyBackground),
-        batch_id: parseInt(data.batch_id, 10),
-        schedules: [
-          {
-            batch_id: parseInt(data.batch_id, 10),
-            days_json: data.days_json,
-          },
-        ],
-      };
-  
-      const response = await axios.put(
-        `/api/employeemanagement/employees?id=${params.id}`,
-        fullData
-      );
-  
-      if (response.status === 200) {
-        router.push("/employeemanagement/employees");
-        toast({
-          title: "Success",
-          description: "Employee information successfully updated!",
-          duration: 3000,
-        });
-      }
-    } catch (error) {
-      console.error("Update error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update employee information. Please try again.",
-        duration: 5000,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleTabChange = async (key: string | number) => {
-    let fieldsToValidate: EmployeeFields[] = [];
-    const selectedTab = key as string;
-
-    switch (activeTab) {
-      case "personal":
-        fieldsToValidate = personalFields;
-        break;
-      case "educational":
-        fieldsToValidate = educationalFields;
-        break;
-      case "job":
-        fieldsToValidate = jobFields;
-        break;
-    }
-
-    const result = await methods.trigger(fieldsToValidate);
-    if (result) {
-      setActiveTab(selectedTab);
-    } else {
-      toast({
-        title: "Validation Error",
-        description:
-          "Please check all fields in the current tab before proceeding.",
-        variant: "danger",
-        duration: 3000,
-      });
-    }
-  };
-
   if (isFetching) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -394,22 +541,17 @@ export default function EditEmployeePage({
     );
   }
 
-  if (!employeeData) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <p>Loading employee data...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen w-full">
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleFormSubmit)} className="h-full">
+        <form
+          onSubmit={methods.handleSubmit(handleFormSubmit)}
+          className="h-full"
+        >
           <Tabs
             aria-label="Employee Information Tabs"
             selectedKey={activeTab}
-            onSelectionChange={handleTabChange}
+            onSelectionChange={(key) => handleTabChange(key as string)}
             className="w-full"
           >
             <Tab key="personal" title="Personal Information">
@@ -443,19 +585,23 @@ export default function EditEmployeePage({
                 </div>
               </div>
             </Tab>
+            <Tab key="account" title="Account">
+              <div className="w-full bg-white">
+                <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
+                  <EditAccountForm
+                    userId={params.id}
+                    email={employeeData?.email || ""}
+                  />
+                </div>
+              </div>
+            </Tab>
           </Tabs>
           <div className="fixed bottom-0 left-0 right-0 bg-white border-t">
-            <div className="container px-6 py-4 flex justify-end gap-4">
+            <div className="container px-6 py-4 flex justify-end items-center gap-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  const tabs = ["personal", "educational", "job"];
-                  const currentIndex = tabs.indexOf(activeTab);
-                  if (currentIndex > 0) {
-                    setActiveTab(tabs[currentIndex - 1]);
-                  }
-                }}
+                onClick={handlePrevious}
                 disabled={activeTab === "personal"}
                 className="flex items-center gap-2"
               >
@@ -463,68 +609,39 @@ export default function EditEmployeePage({
                 Previous
               </Button>
 
-              {activeTab === "job" ? (
+              {activeTab === "account" ? (
                 <Button
-                  type="button"
+                  type="submit"
                   disabled={isSubmitting}
-                  onClick={async () => {
-                    const jobTabValid = await methods.trigger(jobFields);
-                    if (!jobTabValid) {
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    const isValid = await methods.trigger();
+                    if (isValid) {
+                      methods.handleSubmit(handleFormSubmit)();
+                    } else {
                       toast({
                         title: "Validation Error",
-                        description: "Please check all required fields in the Job Information tab.",
+                        description: "Please fill in all required fields.",
                         variant: "danger",
                         duration: 3000,
                       });
-                      return;
-                    }
-
-                    try {
-                      setIsSubmitting(true);
-                      await handleFormSubmit(methods.getValues());
-                    } catch (error) {
-                      console.error("Submission error:", error);
-                      toast({
-                        title: "Error",
-                        description: "Failed to update employee information. Please try again.",
-                        variant: "danger",
-                        duration: 3000,
-                      });
-                    } finally {
-                      setIsSubmitting(false);
                     }
                   }}
                   className="flex items-center gap-2"
                 >
-                  {isSubmitting ? "Updating..." : "Update Employee"}
+                  {isSubmitting ? (
+                    <>
+                      <Spinner />
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Employee"
+                  )}
                 </Button>
               ) : (
                 <Button
                   type="button"
-                  onClick={async () => {
-                    const currentFields =
-                      activeTab === "personal"
-                        ? personalFields
-                        : activeTab === "educational"
-                        ? educationalFields
-                        : jobFields;
-
-                    const isValid = await methods.trigger(currentFields);
-                    if (isValid) {
-                      const tabs = ["personal", "educational", "job"];
-                      const currentIndex = tabs.indexOf(activeTab);
-                      if (currentIndex < tabs.length - 1) {
-                        setActiveTab(tabs[currentIndex + 1]);
-                      }
-                    } else {
-                      toast({
-                        title: "Validation Error",
-                        description: "Please complete all required fields before proceeding.",
-                        variant: "danger",
-                        duration: 3000,
-                      });
-                    }
-                  }}
+                  onClick={handleNext}
                   className="flex items-center gap-2"
                 >
                   Next

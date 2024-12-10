@@ -1,4 +1,4 @@
-// app/api/employeemanagement/employees/route.ts
+// app/api/employeemanagement/employees/CREATE.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { Prisma } from "@prisma/client";

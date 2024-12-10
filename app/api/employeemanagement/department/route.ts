@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { z } from "zod";
 
 declare global {
@@ -145,13 +145,32 @@ export async function DELETE(req: NextRequest) {
   try {
     // Soft delete: Update the deleted_at field instead of removing the record
     const department = await prisma.ref_departments.update({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id), trans_employees: { none: {} } },
       data: { deleted_at: new Date() },
     });
 
-    // logDatabaseOperation("SOFT DELETE department", department);
-    return NextResponse.json({ message: "Department soft deleted successfully" });
-  } catch (error) {
-    return handleError(error, "delete");
+    if (!department){
+      return NextResponse.json({message: 'Cannot delete department that has registered employees'},{status: 404});
+      }
+      return NextResponse.json({ message: 'Department marked as deleted', department });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          return NextResponse.json(
+            { 
+              status: "error",
+              message: "Cannot delete department that has registered employees" 
+            }, 
+            { status: 400 }
+          );
+        }
+      }
+      return NextResponse.json(
+        { 
+          status: "error",
+          message: "Cannot delete department that has registered employees" 
+        }, 
+        { status: 500 }
+      );
+    }
   }
-}

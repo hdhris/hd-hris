@@ -29,11 +29,12 @@ interface AddBranchProps {
 interface BranchFormData {
   name: string;
   status: string;
-  addr_region: string | null;
-  addr_province: string | null;
-  addr_municipal: string | null;
+  addr_region: string;
+  addr_province: string;
+  addr_municipal: string;
+  addr_baranggay: string;
 }
-//
+
 const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,9 +44,10 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
     defaultValues: {
       name: "",
       status: "active",
-      addr_region: null,
-      addr_province: null,
-      addr_municipal: null,
+      addr_region: "",
+      addr_province: "",
+      addr_municipal: "",
+      addr_baranggay: ""
     },
   });
 //
@@ -57,18 +59,14 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
     });
 
     try {
-      const convertToNumberOrNull = (value: string | null): number | null => {
-        if (value === null || value === "") return null;
-        const num = Number(value);
-        return isNaN(num) ? null : num;
-      };
 
       const filteredData = {
         ...data,
         is_active: data.status === "active",
-        addr_region: convertToNumberOrNull(data.addr_region),
-        addr_province: convertToNumberOrNull(data.addr_province),
-        addr_municipal: convertToNumberOrNull(data.addr_municipal),
+        addr_region: parseInt(data.addr_region, 10),
+        addr_province: parseInt(data.addr_province, 10),
+        addr_municipal: parseInt(data.addr_municipal, 10),
+        addr_baranggay: parseInt(data.addr_baranggay, 10),
       };
 
       const response = await axios.post(
@@ -136,7 +134,7 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
   return (
     <>
       <Add variant="solid" name="Add Branch" onClick={onOpen} />
-      <Drawer size="md" isOpen={isOpen} onClose={onClose} title="Edit Branch">
+      <Drawer size="md" isOpen={isOpen} onClose={onClose} title="Add Branch">
         <form id="drawer-form" onSubmit={methods.handleSubmit(onSubmit)}>
           <Form {...methods}>
             <div className="flex flex-col gap-4">
@@ -149,11 +147,12 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
                 items={[
                   { key: "active", label: "Active" },
                   { key: "inactive", label: "Inactive" },
+                
                 ]}
               />
 
               <Divider className="my-1" />
-              <strong>Address (Optional)</strong>
+              <strong>Address</strong>
 
               <AddressInput />
             </div>

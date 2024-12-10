@@ -7,10 +7,10 @@ import {
   ModalFooter,
   ModalHeader,
   Chip,
+  Spinner,
+  cn,
 } from "@nextui-org/react";
-import FormFields, {
-  FormInputProps,
-} from "@/components/common/forms/FormFields";
+import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
 import Text from "@/components/Text";
 import { Employee, Status } from "@/types/employeee/EmployeeType";
 import { UseFormReturn } from "react-hook-form";
@@ -18,6 +18,18 @@ import { BiErrorCircle, BiEdit } from "react-icons/bi";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import dayjs from "dayjs";
+import { z } from "zod";
+import { parseAbsoluteToLocal } from "@internationalized/date";
+import { DateStyle } from "@/lib/custom/styles/InputStyle";
+
+// Define the schema
+const statusFormSchema = z.object({
+  startDate: z.string().min(1, "Date is required"),
+  endDate: z.string().optional(),
+  reason: z.string().min(10, "Please provide a more detailed reason"),
+});
+
+type StatusFormData = z.infer<typeof statusFormSchema>;
 
 interface EmployeeStatusActionsProps {
   employee: Employee;
@@ -49,9 +61,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
 }) => {
   const { toast } = useToast();
   const [activeModal, setActiveModal] = useState<ModalType>(null);
-  const [isStatusUpdateSubmitting, setIsStatusUpdateSubmitting] =
-    useState(false);
-  const [isActivateSubmitting, setIsActivateSubmitting] = useState(false);
+  const [isStatusUpdateSubmitting, setIsStatusUpdateSubmitting] = useState(false);
   const [currentEmployee, setCurrentEmployee] = useState<Employee>(employee);
 
   useEffect(() => {
@@ -66,6 +76,12 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
   };
 
   const getFormFields = (type: ModalType): FormInputProps[] => {
+    const commonDateConfig = {
+      defaultValue: null,
+      classNames: DateStyle,
+      validationState: "valid"
+    };
+
     switch (type) {
       case "suspend":
         return [
@@ -74,12 +90,22 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             label: "Suspension Start Date",
             type: "date-picker",
             isRequired: true,
+            config: {
+              placeholder: "Select suspension start date",
+              maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
+              ...commonDateConfig
+            }
           },
           {
             name: "endDate",
             label: "Suspension End Date",
             type: "date-picker",
             isRequired: true,
+            config: {
+              placeholder: "Select suspension end date",
+              minValue: parseAbsoluteToLocal(dayjs().startOf('day').toISOString()),
+              ...commonDateConfig
+            }
           },
           {
             name: "reason",
@@ -89,6 +115,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             config: {
               minRows: 3,
               maxRows: 5,
+              placeholder: "Enter reason for suspension"
             },
           },
         ];
@@ -99,6 +126,11 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             label: "Resignation Date",
             type: "date-picker",
             isRequired: true,
+            config: {
+              placeholder: "Select resignation date",
+              maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
+              ...commonDateConfig
+            }
           },
           {
             name: "reason",
@@ -108,6 +140,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             config: {
               minRows: 3,
               maxRows: 5,
+              placeholder: "Enter reason for resignation"
             },
           },
         ];
@@ -118,6 +151,11 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             label: "Termination Date",
             type: "date-picker",
             isRequired: true,
+            config: {
+              placeholder: "Select termination date",
+              maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
+              ...commonDateConfig
+            }
           },
           {
             name: "reason",
@@ -127,6 +165,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             config: {
               minRows: 3,
               maxRows: 5,
+              placeholder: "Enter reason for termination"
             },
           },
         ];
@@ -135,16 +174,28 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     }
   };
 
-  const populateFormData = (type: ModalType) => {
-    let formData = {};
+  const validateDates = (data: StatusFormData, type: ModalType): string | null => {
+    if (type === 'suspend' && data.endDate) {
+      const startDate = dayjs(data.startDate);
+      const endDate = dayjs(data.endDate);
+      
+      if (endDate.isBefore(startDate)) {
+        return "End date must be after the start date";
+      }
+    }
+    return null;
+  };
 
+  const handleModalOpen = (type: ModalType) => {
+    setActiveModal(type);
+    let formData = {};
+    
     switch (type) {
       case "suspend":
         if (currentEmployee.suspension_json) {
-          const data =
-            typeof currentEmployee.suspension_json === "string"
-              ? JSON.parse(currentEmployee.suspension_json)
-              : currentEmployee.suspension_json;
+          const data = typeof currentEmployee.suspension_json === "string"
+            ? JSON.parse(currentEmployee.suspension_json)
+            : currentEmployee.suspension_json;
           formData = {
             startDate: dayjs(data.startDate).format("YYYY-MM-DD"),
             endDate: dayjs(data.endDate).format("YYYY-MM-DD"),
@@ -154,10 +205,9 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
         break;
       case "resign":
         if (currentEmployee.resignation_json) {
-          const data =
-            typeof currentEmployee.resignation_json === "string"
-              ? JSON.parse(currentEmployee.resignation_json)
-              : currentEmployee.resignation_json;
+          const data = typeof currentEmployee.resignation_json === "string"
+            ? JSON.parse(currentEmployee.resignation_json)
+            : currentEmployee.resignation_json;
           formData = {
             startDate: dayjs(data.resignationDate).format("YYYY-MM-DD"),
             reason: data.reason || data.resignationReason,
@@ -166,10 +216,9 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
         break;
       case "terminate":
         if (currentEmployee.termination_json) {
-          const data =
-            typeof currentEmployee.termination_json === "string"
-              ? JSON.parse(currentEmployee.termination_json)
-              : currentEmployee.termination_json;
+          const data = typeof currentEmployee.termination_json === "string"
+            ? JSON.parse(currentEmployee.termination_json)
+            : currentEmployee.termination_json;
           formData = {
             startDate: dayjs(data.terminationDate).format("YYYY-MM-DD"),
             reason: data.reason || data.terminationReason,
@@ -177,42 +226,55 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
         }
         break;
     }
-
+    
     methods.reset(formData);
   };
 
-  const handleModalOpen = (type: ModalType) => {
-    setActiveModal(type);
-    populateFormData(type);
-  };
-
-  const handleStatusUpdate = async (formData: any) => {
+  const handleStatusUpdate = async (formData: StatusFormData) => {
     setIsStatusUpdateSubmitting(true);
     try {
+      const validationResult = statusFormSchema.safeParse(formData);
+      
+      if (!validationResult.success) {
+        const errors = validationResult.error.errors;
+        toast({
+          title: "Validation Error",
+          description: errors[0].message,
+          variant: "danger",
+          duration: 3000,
+        });
+        return;
+      }
+
+      const dateError = validateDates(formData, activeModal!);
+      if (dateError) {
+        toast({
+          title: "Date Validation Error",
+          description: dateError,
+          variant: "danger",
+          duration: 3000,
+        });
+        return;
+      }
+
       let status: Status;
-      let toastVariant: "warning" | "default" | "destructive";
       let description: string;
 
       switch (activeModal) {
         case "suspend":
           status = "suspended";
-          toastVariant = "warning";
           description = "Employee has been suspended";
           break;
         case "resign":
           status = "resigned";
-          toastVariant = "default";
           description = "Employee has resigned";
           break;
         case "terminate":
           status = "terminated";
-          toastVariant = "destructive";
           description = "Employee has been terminated";
           break;
         default:
-          status = "active";
-          toastVariant = "default";
-          description = "Employee status updated successfully";
+          throw new Error("Invalid modal type");
       }
 
       const updateData = {
@@ -229,17 +291,15 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
 
       if (response.status === 200) {
         toast({
-          title: `Status Updated: ${
-            status.charAt(0).toUpperCase() + status.slice(1)
-          }`,
-          description: description,
+          title: `Status Updated: ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+          description,
           variant: "success",
           duration: 3000,
         });
         methods.reset();
         await onEmployeeUpdated();
         setActiveModal(null);
-        onClose(); // Close the drawer
+        onClose();
       }
     } catch (error) {
       console.error("Error updating status:", error);
@@ -254,45 +314,12 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     }
   };
 
-  // const handleActivate = async () => {
-  //   setIsActivateSubmitting(true);
-  //   try {
-  //     const response = await axios.put(
-  //       `/api/employeemanagement/employees?id=${currentEmployee.id}&type=status`,
-  //       {
-  //         status: "active" as Status,
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast({
-  //         title: "Status Updated: Active",
-  //         description: "Employee has been activated successfully",
-  //         variant: "success",
-  //         duration: 3000,
-  //       });
-  //       await onEmployeeUpdated();
-  //       onClose(); // Close the drawer
-  //     }
-  //   } catch (error) {
-  //     console.error("Error activating employee:", error);
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to activate employee. Please try again.",
-  //       variant: "danger",
-  //       duration: 5000,
-  //     });
-  //   } finally {
-  //     setIsActivateSubmitting(false);
-  //   }
-  // };
   const StatusDisplay = () => {
     const getStatusInfo = (): StatusInfo => {
       if (currentEmployee.suspension_json) {
-        const suspensionData =
-          typeof currentEmployee.suspension_json === "string"
-            ? JSON.parse(currentEmployee.suspension_json)
-            : currentEmployee.suspension_json;
+        const suspensionData = typeof currentEmployee.suspension_json === "string"
+          ? JSON.parse(currentEmployee.suspension_json)
+          : currentEmployee.suspension_json;
         return {
           type: "Suspended",
           modalType: "suspend",
@@ -305,10 +332,9 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
         };
       }
       if (currentEmployee.resignation_json) {
-        const resignationData =
-          typeof currentEmployee.resignation_json === "string"
-            ? JSON.parse(currentEmployee.resignation_json)
-            : currentEmployee.resignation_json;
+        const resignationData = typeof currentEmployee.resignation_json === "string"
+          ? JSON.parse(currentEmployee.resignation_json)
+          : currentEmployee.resignation_json;
         return {
           type: "Resigned",
           modalType: "resign",
@@ -320,10 +346,9 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
         };
       }
       if (currentEmployee.termination_json) {
-        const terminationData =
-          typeof currentEmployee.termination_json === "string"
-            ? JSON.parse(currentEmployee.termination_json)
-            : currentEmployee.termination_json;
+        const terminationData = typeof currentEmployee.termination_json === "string"
+          ? JSON.parse(currentEmployee.termination_json)
+          : currentEmployee.termination_json;
         return {
           type: "Terminated",
           modalType: "terminate",
@@ -360,9 +385,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                     ? "Start Date"
                     : status.type === "Resigned"
                     ? "Resignation Date"
-                    : status.type === "Terminated"
-                    ? "Termination Date"
-                    : "Date"}
+                    : "Termination Date"}
                   : {formatDate(status.data.startDate)}
                 </Text>
                 {status.type === "Suspended" && status.data.endDate && (
@@ -375,39 +398,22 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                 </Text>
               </div>
             )}
-          
-            </div>
-            </div>
-            <div className ="flex justify-end">
-            {status.type !== "Active" && (
-              <div className="flex gap-3 mt-4">
-                
-                <Button
-                  size="md"
-                  variant="shadow"
-                  startContent={<BiEdit className="text-default-500" />}
-                  onPress={() => handleModalOpen(status.modalType)}
-                  isDisabled={isStatusUpdateSubmitting || isActivateSubmitting}
-                >
-                  Edit Details
-                </Button>
-                
-                
-                {/* <Button
-                  size="md"
-                  color="success"
-                  variant="flat"
-                  onPress={handleActivate}
-                  isLoading={isActivateSubmitting}
-                  isDisabled={isStatusUpdateSubmitting}
-                >
-                  Activate Employee
-                </Button> */}
-              </div>
+          </div>
+          <div className="flex justify-end">
+            {status.data && (
+              <Button
+                size="md"
+                variant="shadow"
+                startContent={<BiEdit className="text-default-500" />}
+                onPress={() => handleModalOpen(status.modalType)}
+                isDisabled={isStatusUpdateSubmitting}
+              >
+                Edit Details
+              </Button>
             )}
-            </div>
-            </div>
-
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -417,22 +423,19 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
         return {
           title: "Suspend Employee",
           fields: getFormFields("suspend"),
-          warning:
-            "This action will suspend the employee and limit their system access.",
+          warning: "This action will suspend the employee and limit their system access.",
         };
       case "resign":
         return {
           title: "Employee Resignation",
           fields: getFormFields("resign"),
-          warning:
-            "This action will mark the employee as resigned and remove their system access.",
+          warning: "This action will mark the employee as resigned and remove their system access.",
         };
       case "terminate":
         return {
           title: "Employee Termination",
           fields: getFormFields("terminate"),
-          warning:
-            "This action will terminate the employee and remove all system access.",
+          warning: "This action will terminate the employee and remove all system access.",
         };
       default:
         return null;
@@ -440,8 +443,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
   };
 
   const modalContent = getModalContent();
-  const isActive =
-    !currentEmployee.suspension_json &&
+  const isActive = !currentEmployee.suspension_json &&
     !currentEmployee.resignation_json &&
     !currentEmployee.termination_json;
 
@@ -453,7 +455,6 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
       {isActive && (
         <>
           <Text className="text-xl font-semibold">Status Actions</Text>
-
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between p-6 border rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
               <div className="flex items-center gap-4">
@@ -467,7 +468,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                 color="warning"
                 variant="flat"
                 onPress={() => handleModalOpen("suspend")}
-                isDisabled={isStatusUpdateSubmitting || isActivateSubmitting}
+                isDisabled={isStatusUpdateSubmitting}
               >
                 Suspend
               </Button>
@@ -476,8 +477,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             <div className="flex items-center justify-between p-6 border rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
               <div className="flex items-center gap-4">
                 <BiErrorCircle className="h-6 w-6 text-danger" />
-                <Text className="text-gray-600">
-                  Permanently remove employee access
+                <Text className="text-gray-600">Permanently remove employee access
                 </Text>
               </div>
               <div className="flex gap-3">
@@ -486,7 +486,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                   color="default"
                   variant="flat"
                   onPress={() => handleModalOpen("resign")}
-                  isDisabled={isStatusUpdateSubmitting || isActivateSubmitting}
+                  isDisabled={isStatusUpdateSubmitting}
                 >
                   Resign
                 </Button>
@@ -495,7 +495,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                   color="danger"
                   variant="flat"
                   onPress={() => handleModalOpen("terminate")}
-                  isDisabled={isStatusUpdateSubmitting || isActivateSubmitting}
+                  isDisabled={isStatusUpdateSubmitting}
                 >
                   Terminate
                 </Button>
@@ -558,4 +558,5 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     </div>
   );
 };
+
 export default EmployeeStatusActions;

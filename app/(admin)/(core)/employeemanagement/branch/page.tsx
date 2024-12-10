@@ -52,21 +52,32 @@ const Page: React.FC = () => {
         title: "Confirm Delete",
         message: `Are you sure you want to delete '${name}' ?`,
       });
+      
       if (result === "yes") {
-        await axios.delete(`/api/employeemanagement/branch?id=${id}`);
+        const response = await axios.delete(`/api/employeemanagement/branch?id=${id}`);
+        
         toast({
-          title: "Deleted",
+          title: "Success",
           description: "Branch deleted successfully!",
           variant: "warning",
         });
+        
         await mutate();
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error: " + error,
-        variant: "danger",
-      });
+      if (axios.isAxiosError(error) && error.response) {
+        toast({
+          title: "Error",
+          description: error.response.data.message || "There are employees currently work with this branch",
+          variant: "danger",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          variant: "danger",
+        });
+      }
     }
   };
 

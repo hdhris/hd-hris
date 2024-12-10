@@ -8,6 +8,9 @@ import { Avatar, Button, Divider } from "@nextui-org/react";
 import Text from "@/components/Text";
 import { LuUserCircle2 } from "react-icons/lu";
 import AddressInput from "@/components/common/forms/address/AddressInput";
+import { DateStyle } from "@/lib/custom/styles/InputStyle";
+import { parseAbsoluteToLocal } from "@internationalized/date";
+import dayjs from "dayjs";
 
 const genderOptions = [
   { value: "M", label: "Male" },
@@ -212,6 +215,10 @@ const EditPersonalInformationForm: React.FC = () => {
       isRequired: true,
       config: {
         placeholder: "Select birthdate",
+        maxValue: parseAbsoluteToLocal(dayjs("2008-12-31").endOf('day').toISOString()),
+        defaultValue: null,
+        classNames: DateStyle,
+        validationState: "valid"
       },
     },
   ];

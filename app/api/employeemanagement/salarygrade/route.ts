@@ -126,15 +126,36 @@ export async function DELETE(req: Request) {
 
   try {
     const salary = await prisma.ref_salary_grades.update({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id), trans_employees: { none: {} }},
       data: { 
         deleted_at: new Date(),
         updated_at: new Date(),
       },
     });
     
-    return NextResponse.json({ message: 'Salary marked as deleted', salary });
-  } catch (error) {
-    return handleError(error, 'delete');
+   
+    if (!salary){
+      return NextResponse.json({message: 'Cannot delete Salary grade that has been use for employees'},{status: 404});
+      }
+      return NextResponse.json({ message: 'Salary grade marked as deleted', salary });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          return NextResponse.json(
+            { 
+              status: "error",
+              message: "Cannot delete Salary grade that has been use for employees" 
+            }, 
+            { status: 400 }
+          );
+        }
+      }
+      return NextResponse.json(
+        { 
+          status: "error",
+          message: "Cannot delete Salary grade that has been use for employees" 
+        }, 
+        { status: 500 }
+      );
+    }
   }
-}

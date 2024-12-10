@@ -24,7 +24,33 @@ export async function getEmployeeById(id: number, daysJson?: Record<string, bool
   });
 
   if (!employee) throw new Error("Employee not found");
-  return employee;
+
+  // Fetch user account information
+  let userAccount = null;
+  if (employee.email) {
+    userAccount = await prisma.trans_users.findFirst({
+      where: { email: employee.email },
+      select: {
+        id: true,
+        email: true,
+        auth_credentials: {
+          select: {
+            id: true,
+            username: true,
+            password: true,
+          },
+        },
+      },
+    });
+  }
+
+  
+  const employeeWithAccount = {
+    ...employee,
+    userAccount,
+  };
+
+  return employeeWithAccount;
 }
 
 export async function getAllEmployees(daysJson?: Record<string, boolean>) {
