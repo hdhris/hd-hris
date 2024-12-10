@@ -259,21 +259,22 @@ model ref_departments {
 }
 
 model ref_job_classes {
-  id              Int               @id @default(autoincrement())
-  name            String?           @db.VarChar(45)
-  superior_id     Int?
-  is_active       Boolean?
-  created_at      DateTime          @db.Timestamp(6)
-  updated_at      DateTime          @db.Timestamp(6)
-  deleted_at      DateTime?         @db.Timestamp(6)
-  department_id   Int?
-  pay_rate        Decimal?          @db.Decimal(10, 2)
-  basic_salary    Decimal?          @db.Decimal
-  for_probi       Boolean?
-  is_superior     Boolean           @default(false)
-  max_employees   Int?
-  ref_departments ref_departments?  @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
-  trans_employees trans_employees[]
+  id                Int                 @id @default(autoincrement())
+  name              String?             @db.VarChar(45)
+  superior_id       Int?
+  is_active         Boolean?
+  created_at        DateTime            @db.Timestamp(6)
+  updated_at        DateTime            @db.Timestamp(6)
+  deleted_at        DateTime?           @db.Timestamp(6)
+  department_id     Int?
+  pay_rate          Decimal?            @db.Decimal(10, 2)
+  basic_salary      Decimal?            @db.Decimal
+  for_probi         Boolean?
+  is_superior       Boolean             @default(false)
+  max_employees     Int?
+  ref_departments   ref_departments?    @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
+  trans_employees   trans_employees[]
+  trans_signatories trans_signatories[]
 
   @@index([deleted_at])
 }
@@ -527,7 +528,6 @@ model trans_employees {
   trans_overtimes_trans_overtimes_employee_idTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_employee_idTotrans_employees")
   trans_overtimes_trans_overtimes_approved_byTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_approved_byTotrans_employees")
   trans_payrolls                                                         trans_payrolls[]
-  trans_signatories                                                      trans_signatories[]
 
   @@index([deleted_at])
 }
@@ -852,14 +852,14 @@ model trans_leave_types {
 
 model trans_signatories {
   id                  Int                 @id(map: "ref_evaluators_pkey") @default(autoincrement())
-  employee_id         Int
+  job_id              Int
   signatory_role_id   Int
   signatory_path_id   Int
   order_number        Int
   updated_at          DateTime            @default(now()) @db.Timestamp(6)
   created_at          DateTime            @default(now()) @db.Timestamptz(6)
   deleted_at          DateTime?           @db.Timestamp(6)
-  trans_employees     trans_employees     @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_job_classes     ref_job_classes     @relation(fields: [job_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ref_signatory_paths ref_signatory_paths @relation(fields: [signatory_path_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ref_signatory_roles ref_signatory_roles @relation(fields: [signatory_role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
