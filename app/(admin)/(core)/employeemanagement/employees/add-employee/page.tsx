@@ -22,6 +22,7 @@ type EmployeeFields = keyof EmployeeFormData;
 
 const tabFieldsMap = {
   personal: [
+    "prefix",
     "first_name",
     "middle_name",
     "last_name",
@@ -78,6 +79,8 @@ const tabFieldsMap = {
   account: ["username", "password"] as EmployeeFields[],
 };
 
+
+
 export default function AddEmployeePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -88,6 +91,7 @@ export default function AddEmployeePage() {
   const methods = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
+      prefix: "",
       picture: "",
       first_name: "",
       middle_name: "",
@@ -263,6 +267,7 @@ export default function AddEmployeePage() {
           username: data.username,
           password: data.password,
         },
+        prefix: data.prefix,
         picture: pictureUrl,
         first_name: data.first_name,
         middle_name: data.middle_name,

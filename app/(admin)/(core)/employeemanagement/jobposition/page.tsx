@@ -90,9 +90,9 @@ const Page: React.FC = () => {
   const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "superior", name: "Superior", sortable: true },
+      { uid: "superior", name: "Next position", sortable: true },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
-      { uid: "pay_rate", name: "Payrate", sortable: true },
+      // { uid: "pay_rate", name: "Payrate", sortable: true },
       { uid: "status", name: "Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
@@ -132,12 +132,12 @@ const Page: React.FC = () => {
               </Chip>
             </div>
           );
-        case "pay_rate":
-          return (
-            <div className={cellClasses}>
-              <span>{job.pay_rate}</span>
-            </div>
-          );
+        // case "pay_rate":
+        //   return (
+        //     <div className={cellClasses}>
+        //       <span>{job.pay_rate}</span>
+        //     </div>
+        //   );
         case "actions":
           return (
             <TableActionButton

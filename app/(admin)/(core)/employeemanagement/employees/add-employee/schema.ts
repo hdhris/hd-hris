@@ -22,6 +22,7 @@ const checkEmailExists = async (email: string) => {
 };
 
 export const employeeSchema = z.object({
+  prefix: z.string().optional(),
   picture: z.union([z.instanceof(File), z.string()]).optional(),
   username: z.string().min(1, "Username is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),

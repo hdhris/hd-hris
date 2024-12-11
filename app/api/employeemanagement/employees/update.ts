@@ -44,6 +44,7 @@ async function updateEmployee(id: number, employeeData: any) {
           where: { id },
           data: {
             picture: employeeData.picture,
+            prefix: employeeData.prefix,
             first_name: employeeData.first_name,
             middle_name: employeeData.middle_name,
             last_name: employeeData.last_name,
@@ -129,9 +130,10 @@ async function updateEmployee(id: number, employeeData: any) {
 
 async function updateEmployeeAccount(
   id: number,
-  data: { username: string; password: string }
+  data: { username?: string; password?: string }
 ) {
   try {
+    // Find employee
     const employee = await prisma.trans_employees.findUnique({
       where: { id },
       select: {
@@ -140,12 +142,13 @@ async function updateEmployeeAccount(
       },
     });
 
-    if (!employee) {
+    if (!employee || !employee.email) {
       throw new Error("Employee not found");
     }
 
+    // Find user account
     const user = await prisma.trans_users.findFirst({
-      where: { email: employee.email! },
+      where: { email: employee.email },
     });
 
     if (!user) {
@@ -154,67 +157,82 @@ async function updateEmployeeAccount(
 
     // Get current credentials
     const currentCredentials = await prisma.auth_credentials.findFirst({
-      where: { user_id: user.id },
+      where: { user_id: user.id.toString() }, // Convert user.id to string
     });
 
-    // Only update what has changed
-    const updateData: any = {};
+    if (!currentCredentials) {
+      throw new Error("Credentials not found");
+    }
 
-    if (data.username && data.username !== currentCredentials?.username) {
+    const updateData: any = {};
+    let usernameUpdated = false;
+    let passwordUpdated = false;
+
+    // Handle username update
+    if (data.username && data.username !== currentCredentials.username) {
       // Check username uniqueness
       const existingUsername = await prisma.auth_credentials.findFirst({
         where: {
           username: data.username,
-          user_id: { not: user.id },
+          NOT: { user_id: user.id.toString() },
         },
       });
 
       if (existingUsername) {
         throw new Error("Username already taken");
       }
+
       updateData.username = data.username;
+      usernameUpdated = true;
     }
 
-    if (data.password) {
-      const encryptedPassword = await new SimpleAES().encryptData(
-        data.password
-      );
-      if (encryptedPassword !== currentCredentials?.password) {
-        updateData.password = encryptedPassword;
-      }
+    // Handle password update
+  if (data.password) {
+      const encryptedPassword = await new SimpleAES().encryptData(data.password);
+      updateData.password = encryptedPassword;
+      passwordUpdated = true;
     }
 
+    // Only update if there are changes
     if (Object.keys(updateData).length > 0) {
-      await prisma.auth_credentials.updateMany({
-        where: { user_id: user.id },
+      await prisma.auth_credentials.update({
+        where: { id: currentCredentials.id },
         data: updateData,
       });
 
-      if (updateData.password) {
-        sendEmail({
-          to: employee.email!,
-          subject: "Password Reset Notification",
-          text: `Hello ${employee.first_name}!
-            
-            Your account password has been reset.
-            Your new password is: ${data.password}
-            
-            Please change your password upon your next login for security purposes.
-            
-            Best regards,
-            HR Team`,
-        }).catch((error) =>
-          console.error("Failed to send password reset email:", error)
-        );
+      // Send email notification about the changes
+      try {
+        let emailText = `Hello ${employee.first_name}!\n\nYour account has been updated.\n`;
+        
+        if (passwordUpdated) {
+          emailText += `\nYour new password is: ${data.password}`;
+        }
+        
+        if (usernameUpdated) {
+          emailText += `\nYour new username is: ${data.username}`;
+        }
+        
+        emailText += `\n\nPlease use your updated credentials for your next login.\n\nBest regards,\nHR Team`;
+
+        await sendEmail({
+          to: employee.email,
+          subject: "Account Update Notification",
+          text: emailText,
+        });
+      } catch (emailError) {
+        console.error("Failed to send account update email:", emailError);
       }
     }
 
     return {
       success: true,
-      message:
-        Object.keys(updateData).length > 0
-          ? "Account updated successfully"
-          : "No changes were necessary",
+      message: Object.keys(updateData).length > 0
+        ? `Account updated successfully${usernameUpdated ? ' (username)' : ''}${passwordUpdated ? ' (password)' : ''}`
+        : "No changes were necessary",
+      updated: {
+        username: usernameUpdated,
+        password: passwordUpdated
+      }
     };
   } catch (error) {
     console.error("Account update error:", {

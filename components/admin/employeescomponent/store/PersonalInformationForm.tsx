@@ -32,6 +32,15 @@ const suffixOptions = [
   { value: "X", label: "X" },
 ];
 
+const prefixOptions = [
+  { value: "Mr.", label: "Mr." },
+  { value: "Ms.", label: "Ms." },
+  { value: "Mrs.", label: "Mrs." },
+  { value: "Dr.", label: "Dr." },
+  { value: "Prof.", label: "Prof." },
+  { value: "Hon.", label: "Hon." }
+];
+
 const extensionOptions = [
   { value: "A.C.A.", label: "A.C.A." },
   { value: "A.C.C.", label: "A.C.C." },
@@ -170,6 +179,15 @@ const PersonalInformationForm = () => {
     },
   ];
   const formSEFields: FormInputProps[] = [
+    {
+      name: "prefix",
+      label: "Prefix",
+      type: "auto-complete",
+      config: {
+        placeholder: "Enter Prefix",
+        options: prefixOptions,
+      },
+    },
     {
       name: "suffix",
       label: "Suffix",

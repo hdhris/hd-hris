@@ -16,7 +16,16 @@ const genderOptions = [
   { value: "M", label: "Male" },
   { value: "F", label: "Female" },
 ];
-//
+
+const prefixOptions = [
+  { value: "Mr.", label: "Mr." },
+  { value: "Ms.", label: "Ms." },
+  { value: "Mrs.", label: "Mrs." },
+  { value: "Dr.", label: "Dr." },
+  { value: "Prof.", label: "Prof." },
+  { value: "Hon.", label: "Hon." }
+];
+
 const suffixOptions = [
   { value: "Jr.", label: "Jr." },
   { value: "Sr.", label: "Sr." },
@@ -178,6 +187,15 @@ const EditPersonalInformationForm: React.FC = () => {
 
   const formSEFields: FormInputProps[] = [
     {
+      name: "prefix",
+      label: "Prefix",
+      type: "auto-complete",
+      config: {
+        placeholder: "Enter Prefix",
+        options: prefixOptions,
+      },
+    },
+    {
       name: "suffix",
       label: "Suffix",
       type: "auto-complete",
@@ -196,6 +214,8 @@ const EditPersonalInformationForm: React.FC = () => {
       },
     },
   ];
+
+  
 
   const formGBFields: FormInputProps[] = [
     {
@@ -393,7 +413,7 @@ const EditPersonalInformationForm: React.FC = () => {
       <div className="grid grid-cols-3 gap-4">
         <FormFields items={formNameFields} />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <FormFields items={formSEFields} />
       </div>
       <div className="grid grid-cols-2 gap-4">

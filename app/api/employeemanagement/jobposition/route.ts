@@ -7,10 +7,10 @@ const prisma = new PrismaClient();
 // Updated job schema for validation
 const jobSchema = z.object({
   name: z.string().min(1).max(45),
-  pay_rate: z
-    .string()
-    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
-    .transform((val) => new Prisma.Decimal(val)),
+  // pay_rate: z
+  //   .string()
+  //   .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
+  //   .transform((val) => new Prisma.Decimal(val)),
   is_active: z.boolean().default(true),
   superior_id: z.number().optional().nullable(),
 
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
     const job = await prisma.ref_job_classes.create({
       data: {
         name: validatedData.name,
-        pay_rate: validatedData.pay_rate,
+        // pay_rate: validatedData.pay_rate,
         is_active: validatedData.is_active,
         superior_id: validatedData.superior_id,
         created_at: new Date(),
