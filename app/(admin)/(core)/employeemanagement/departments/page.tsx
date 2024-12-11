@@ -6,7 +6,7 @@ import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddDepartment from "@/components/admin/employeescomponent/store/AddDepartment";
 import EditDepartment from "@/components/admin/employeescomponent/update/EditDepartment";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Chip } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
@@ -61,13 +61,18 @@ const Page: React.FC = () => {
         await mutate();
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error: " + error,
-        variant: "danger",
-      });
+
+      if(error instanceof AxiosError){
+        toast({
+          title: "Error",
+          description: error.response?.data.message,
+          variant: "danger",
+        });
+      }
+      
     }
   };
+
 
   const handleDepartmentUpdated = async () => {
     try {

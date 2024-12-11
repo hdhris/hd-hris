@@ -5,7 +5,7 @@ import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddJobPosition from "@/components/admin/employeescomponent/store/AddJob";
 import EditJobPosition from "@/components/admin/employeescomponent/update/EditJob";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Chip } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
@@ -67,11 +67,15 @@ const Page: React.FC = () => {
         await mutate();
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error: " + error,
-        variant: "danger",
-      });
+
+      if(error instanceof AxiosError){
+        toast({
+          title: "Error",
+          description: error.response?.data.message,
+          variant: "danger",
+        });
+      }
+      
     }
   };
 
@@ -86,9 +90,9 @@ const Page: React.FC = () => {
   const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "superior", name: "Superior", sortable: true },
+      { uid: "superior", name: "Next position", sortable: true },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
-      { uid: "pay_rate", name: "Payrate", sortable: true },
+      // { uid: "pay_rate", name: "Payrate", sortable: true },
       { uid: "status", name: "Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
@@ -128,12 +132,12 @@ const Page: React.FC = () => {
               </Chip>
             </div>
           );
-        case "pay_rate":
-          return (
-            <div className={cellClasses}>
-              <span>{job.pay_rate}</span>
-            </div>
-          );
+        // case "pay_rate":
+        //   return (
+        //     <div className={cellClasses}>
+        //       <span>{job.pay_rate}</span>
+        //     </div>
+        //   );
         case "actions":
           return (
             <TableActionButton

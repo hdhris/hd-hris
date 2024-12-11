@@ -4,6 +4,7 @@ export type EmployeeAll = {
   created_at: string;
   updated_at: string;
   id: number;
+  prefix:string;
   first_name: string;
   middle_name: string;
   last_name: string;

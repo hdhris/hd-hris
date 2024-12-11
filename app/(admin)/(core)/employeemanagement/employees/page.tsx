@@ -78,9 +78,10 @@ const Page: React.FC = () => {
             >
               <Avatar
                 src={employee.picture || ""}
-                alt={`${employee.first_name} ${employee.last_name}`}
+                alt={`${employee.prefix || ''} ${employee.first_name} ${employee.last_name}`}
               />
               <span>
+                {employee.prefix && `${employee.prefix} `}
                 {employee.first_name} {employee.last_name}
                 {employee.suffix ? `, ${employee.suffix}` : ""}
                 {employee.extension ? ` ${employee.extension}` : ""}
@@ -264,11 +265,14 @@ const Page: React.FC = () => {
                 <div className="flex flex-col gap-2">
                   <Avatar
                     src={employee.picture || ""}
-                    alt={`${employee.first_name} ${employee.last_name}`}
+                    alt={`${employee.prefix || ''} ${employee.first_name} ${employee.last_name}`}
                   />
                   <div className="flex flex-col">
                     <span className="font-medium">
+                      {employee.prefix && `${employee.prefix} `}
                       {employee.first_name} {employee.last_name}
+                      {employee.suffix ? `, ${employee.suffix}` : ""}
+                      {employee.extension ? ` ${employee.extension}` : ""}
                     </span>
                     <span className="text-sm text-gray-500">
                       {employee.ref_departments?.name || "N/A"} -{" "}
@@ -277,7 +281,6 @@ const Page: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  
                 </div>
               </div>
             </BorderCard>

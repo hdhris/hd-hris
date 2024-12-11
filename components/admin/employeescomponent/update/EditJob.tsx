@@ -25,10 +25,10 @@ const jobPositionSchema = z.object({
     .string()
     .min(1, "Position name is required")
     .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
-  pay_rate: z
-    .string()
-    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
-    .transform((val) => (val === "" ? "0.00" : val)),
+  // pay_rate: z
+  //   .string()
+  //   .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
+  //   .transform((val) => (val === "" ? "0.00" : val)),
 
   superior_id: z
     .string()
@@ -54,7 +54,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     resolver: zodResolver(jobPositionSchema),
     defaultValues: {
       name: "",
-      pay_rate: "0.00",
+      // pay_rate: "0.00",
       superior_id: "",
       is_active: true,
     },
@@ -78,7 +78,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
 
         methods.reset({
           name: job.name,
-          pay_rate: payRate, 
+          // pay_rate: payRate, 
           superior_id: job.superior_id ? job.superior_id.toString() : "",
           is_active: job.is_active,
         });
@@ -92,18 +92,18 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     }
   }, [isOpen, jobPositions, jobId, methods, toast]);
 
-  const handlePayRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      const formattedValue =
-        value === ""
-          ? "0.00"
-          : value.includes(".")
-          ? value.padEnd(value.indexOf(".") + 3, "0")
-          : value + ".00";
-      methods.setValue("pay_rate", formattedValue, { shouldValidate: true });
-    }
-  };
+  // const handlePayRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+  //   if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+  //     const formattedValue =
+  //       value === ""
+  //         ? "0.00"
+  //         : value.includes(".")
+  //         ? value.padEnd(value.indexOf(".") + 3, "0")
+  //         : value + ".00";
+  //     methods.setValue("pay_rate", formattedValue, { shouldValidate: true });
+  //   }
+  // };
 
  
 
@@ -132,18 +132,18 @@ const EditJob: React.FC<EditJobPositionProps> = ({
             })) || [],
       },
     },
-    {
-      name: "pay_rate",
-      label: "Pay Rate",
-      type: "text",
-      placeholder: "0.00",
-      description: "Pay rate must be 0 or greater (format: 0.00)",
-      config: {
-        onChange: handlePayRateChange,
-        value: methods.watch("pay_rate"),
-        pattern: "^\\d*\\.?\\d{0,2}$",
-      },
-    },
+    // {
+    //   name: "pay_rate",
+    //   label: "Pay Rate",
+    //   type: "text",
+    //   placeholder: "0.00",
+    //   description: "Pay rate must be 0 or greater (format: 0.00)",
+    //   config: {
+    //     onChange: handlePayRateChange,
+    //     value: methods.watch("pay_rate"),
+    //     pattern: "^\\d*\\.?\\d{0,2}$",
+    //   },
+    // },
 
     {
       name: "for_probi",
@@ -173,7 +173,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     try {
       const formattedData = {
         ...data,
-        pay_rate: parseFloat(data.pay_rate).toFixed(2),
+        // pay_rate: parseFloat(data.pay_rate).toFixed(2),
         superior_id: data.superior_id ? parseInt(data.superior_id) : null,
       };
 

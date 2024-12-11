@@ -129,41 +129,34 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
-  if (!id) {
-    return NextResponse.json({ error: 'Employee Status ID is required' }, { status: 400 });
-  }
 
   try {
-    const employmentstatus = await prisma.ref_employment_status.update({
-      where: { id: parseInt(id), trans_employees:{none:{}}},
+    if (!id) {
+      // return NextResponse.json({ error: 'Employee Status ID is required' }, { status: 400 });
+      throw new Error('Employee Status ID is required');
+    }
+    const employmentstatus = await prisma.ref_employment_status.findFirst({
+      where: { id: parseInt(id), trans_employees:{none:{}}}
+    });
+    
+    if (!employmentstatus){
+      return NextResponse.json({
+        success: false,
+        message: 'Cannot delete employement status that has registered employees'
+      }, {status: 400})
+    }
+
+    await prisma.ref_employment_status.update({
+      where: { id: employmentstatus.id},
       data: { 
         deleted_at: new Date(),
         updated_at: new Date(),
       },
     });
-    
-    if (!employmentstatus){
-    return NextResponse.json({message: 'Cannot delete employement status that has registered employees'},{status: 404});
-    }
+
     return NextResponse.json({ message: 'Employee Status marked as deleted', employmentstatus });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2003') {
-        return NextResponse.json(
-          { 
-            status: "error",
-            message: "Cannot delete employement status that has registered employees" 
-          }, 
-          { status: 400 }
-        );
-      }
-    }
-    return NextResponse.json(
-      { 
-        status: "error",
-        message: "Cannot delete employement statusthat has registered employees" 
-      }, 
-      { status: 500 }
-    );
+    console.log(error);
+    return NextResponse.json({ message: error },{ status: 400 });
   }
 }
