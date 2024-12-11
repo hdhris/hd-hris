@@ -12,6 +12,7 @@ export type Certificate = {
 
 export interface EmployeeFormData {
   picture: File | string;
+  prefix: string,
   first_name: string;
   middle_name: string;
   last_name: string;
@@ -61,17 +62,22 @@ export interface EmployeeFormData {
   days_json: string[];
   username?: string;
   password?: string;
-  isPasswordModified: boolean;
+  isNewAccount?: boolean;
+  isPasswordModified?: boolean;
 }
 
 
 
 
+
+
 export const employeeSchema = z.object({
+  prefix: z.string().optional().nullable(),
   picture: z.union([z.instanceof(File), z.string()]).optional(),
   username: z.string().optional(),
   password: z.string().min(6, "Password must be at least 6 characters").optional(),
   isPasswordModified: z.boolean().optional(),
+  isNewAccount: z.boolean().optional(),
   first_name: z
     .string()
     .min(1, "First name is required")

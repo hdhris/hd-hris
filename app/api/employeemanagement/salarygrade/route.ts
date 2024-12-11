@@ -120,42 +120,34 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
-  if (!id) {
-    return NextResponse.json({ error: 'salary ID is required' }, { status: 400 });
-  }
 
   try {
-    const salary = await prisma.ref_salary_grades.update({
-      where: { id: parseInt(id), trans_employees: { none: {} }},
+    if (!id) {
+      // return NextResponse.json({ error: 'Salary Grade ID is required' }, { status: 400 });
+      throw new Error('Salary Grade ID is required');
+    }
+    const salarygrade = await prisma.ref_salary_grades.findFirst({
+      where: { id: parseInt(id), trans_employees:{none:{}}}
+    });
+    
+    if (!salarygrade){
+      return NextResponse.json({
+        success: false,
+        message: 'Cannot delete salary grade that has been use by employees'
+      }, {status: 400})
+    }
+
+    await prisma.ref_salary_grades.update({
+      where: { id: salarygrade.id},
       data: { 
         deleted_at: new Date(),
         updated_at: new Date(),
       },
     });
-    
-   
-    if (!salary){
-      return NextResponse.json({message: 'Cannot delete Salary grade that has been use for employees'},{status: 404});
-      }
-      return NextResponse.json({ message: 'Salary grade marked as deleted', salary });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2003') {
-          return NextResponse.json(
-            { 
-              status: "error",
-              message: "Cannot delete Salary grade that has been use for employees" 
-            }, 
-            { status: 400 }
-          );
-        }
-      }
-      return NextResponse.json(
-        { 
-          status: "error",
-          message: "Cannot delete Salary grade that has been use for employees" 
-        }, 
-        { status: 500 }
-      );
-    }
+
+    return NextResponse.json({ message: 'Salary Grade marked as deleted', salarygrade });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ message: error },{ status: 400 });
   }
+}

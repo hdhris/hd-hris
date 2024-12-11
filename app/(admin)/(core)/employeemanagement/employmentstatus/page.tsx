@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Chip } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
@@ -63,7 +63,7 @@ const Page: React.FC = () => {
         message: `Are you sure you want to delete '${name}' ?`,
       });
       if (result === "yes") {
-        await axios.delete(`/api/employeemanagement/employmentstatus?id=${id}`);
+        const res = await axios.delete(`/api/employeemanagement/employmentstatus?id=${id}`);
         toast({
           title: "Deleted",
           description: "Employment Status deleted successfully!",
@@ -72,11 +72,15 @@ const Page: React.FC = () => {
         await mutate();
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error: " + error,
-        variant: "danger",
-      });
+
+      if(error instanceof AxiosError){
+        toast({
+          title: "Error",
+          description: error.response?.data.message,
+          variant: "danger",
+        });
+      }
+      
     }
   };
 

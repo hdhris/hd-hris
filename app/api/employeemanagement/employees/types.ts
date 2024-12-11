@@ -24,7 +24,7 @@ export const employeeSchema = z.object({
   addr_province: z.number().optional(),
   addr_municipal: z.number().optional(),
   addr_baranggay: z.number().optional(),
-  prefix: z.string().max(10).optional(),
+  prefix: z.string().max(10).optional().nullable(),
   statutory_no_json: z.any().optional(),
   family_bg_json: z.any().optional(),
   educational_bg_json: z.any().optional(),

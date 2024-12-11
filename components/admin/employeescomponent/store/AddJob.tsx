@@ -47,25 +47,25 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     resolver: zodResolver(jobPositionSchema),
     defaultValues: {
       name: "",
-      pay_rate: "0.00",
+      // pay_rate: "0.00",
       superior_id: "",
       is_active: true,
     },
     mode: "onChange",
   });
 
-  const handlePayRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      const formattedValue =
-        value === ""
-          ? "0.00"
-          : value.includes(".")
-          ? value.padEnd(value.indexOf(".") + 3, "0")
-          : value + ".00";
-      methods.setValue("pay_rate", formattedValue, { shouldValidate: true });
-    }
-  };
+  // const handlePayRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+  //   if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+  //     const formattedValue =
+  //       value === ""
+  //         ? "0.00"
+  //         : value.includes(".")
+  //         ? value.padEnd(value.indexOf(".") + 3, "0")
+  //         : value + ".00";
+  //     methods.setValue("pay_rate", formattedValue, { shouldValidate: true });
+  //   }
+  // };
 
  
 
@@ -80,7 +80,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     },
     {
       name: "superior_id",
-      label: "Superior Position",
+      label: "Next position",
       type: "auto-complete",
       placeholder: "Select superior position",
       description: "Select the superior position (optional)",
@@ -92,18 +92,18 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
           })) || [],
       },
     },
-    {
-      name: "pay_rate",
-      label: "Pay Rate",
-      type: "text",
-      placeholder: "0.00",
-      description: "Pay rate must be 0 or greater (format: 0.00)",
-      config: {
-        onChange: handlePayRateChange,
-        value: methods.watch("pay_rate"),
-        pattern: "^\\d*\\.?\\d{0,2}$",
-      },
-    },
+    // {
+    //   name: "pay_rate",
+    //   label: "Pay Rate",
+    //   type: "text",
+    //   placeholder: "0.00",
+    //   description: "Pay rate must be 0 or greater (format: 0.00)",
+    //   config: {
+    //     onChange: handlePayRateChange,
+    //     value: methods.watch("pay_rate"),
+    //     pattern: "^\\d*\\.?\\d{0,2}$",
+    //   },
+    // },
     {
       name: "is_active",
       label: "Is Active",

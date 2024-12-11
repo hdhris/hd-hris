@@ -23,6 +23,7 @@ type EmployeeFields = keyof EmployeeFormData;
 
 const tabFieldsMap = {
   personal: [
+    "prefix",
     "first_name",
     "middle_name",
     "last_name",
@@ -97,6 +98,7 @@ export default function EditEmployeePage({
     resolver: zodResolver(employeeSchema),
     mode: "onChange",
     defaultValues: {
+      prefix: "",
       picture: "",
       first_name: "",
       middle_name: "",
@@ -146,7 +148,8 @@ export default function EditEmployeePage({
       days_json: [],
       username: "",
       password: "",
-      isPasswordModified: false,
+      isNewAccount: false,
+    isPasswordModified: false,
     },
   });
 
@@ -230,8 +233,9 @@ export default function EditEmployeePage({
       if (name === "password") {
         methods.setValue("isPasswordModified", true);
       }
-    });
 
+    });
+  
     return () => subscription.unsubscribe();
   }, [methods]);
 
@@ -269,6 +273,7 @@ export default function EditEmployeePage({
       // Prepare the main employee update data
       const employeeData = {
         picture: pictureUrl,
+        prefix: data.prefix,
         first_name: data.first_name,
         middle_name: data.middle_name,
         last_name: data.last_name,
@@ -365,44 +370,90 @@ export default function EditEmployeePage({
         employeeData
       );
 
-      // Only update account if there's a new password
-      if (
-        employeeUpdateResponse.status === 200 &&
-        data.isPasswordModified &&
-        data.password?.trim()
-      ) {
-        try {
-          await axios.put(
-            `/api/employeemanagement/employees?id=${params.id}&type=account`,
-            {
-              username: data.username,
+      if (employeeUpdateResponse.status === 200) {
+        // Handle account update/creation
+        if (data.isPasswordModified || data.isNewAccount) {
+          try {
+            const accountData = {
               password: data.password,
+              isNewAccount: data.isNewAccount,
+            };
+  
+            const accountResponse = await axios.put(
+              `/api/employeemanagement/employees?id=${params.id}&type=account`,
+              accountData
+            );
+  
+            if (!accountResponse.data.success) {
+              throw new Error(accountResponse.data.message || "Failed to update account");
             }
-          );
-        } catch (accountError) {
-          console.error("Account update error:", accountError);
-          toast({
-            title: "Partial Update",
-            description:
-              "Employee updated but account update failed. Please try updating the account again.",
-            variant: "warning",
-            duration: 5000,
-          });
-          return;
+  
+            toast({
+              title: "Success",
+              description: data.isNewAccount
+                ? "Account created successfully!"
+                : "Password reset successful!",
+              duration: 3000,
+            });
+          } catch (error: any) {
+            if (error.response?.data?.message === "User account not found") {
+              // If no user account exists, create a new one
+              try {
+                const createAccountData = {
+                  password: data.password,
+                  isNewAccount: true,
+                };
+  
+                const createAccountResponse = await axios.put(
+                  `/api/employeemanagement/employees?id=${params.id}&type=account`,
+                  createAccountData
+                );
+  
+                if (!createAccountResponse.data.success) {
+                  throw new Error(createAccountResponse.data.message || "Failed to create account");
+                }
+  
+                toast({
+                  title: "Success",
+                  description: "Account created successfully!",
+                  duration: 3000,
+                });
+              } catch (createError: any) {
+                toast({
+                  title: "Error",
+                  description: createError.response?.data?.message || "Failed to create account",
+                  variant: "danger",
+                  duration: 5000,
+                });
+                setIsSubmitting(false);
+                return;
+              }
+            } else {
+              toast({
+                title: "Error",
+                description: error.response?.data?.message || "Failed to update account",
+                variant: "danger",
+                duration: 5000,
+              });
+              setIsSubmitting(false);
+              return;
+            }
+          }
         }
+  
+        // Navigate and show success toast
+        router.push("/employeemanagement/employees");
+        toast({
+          title: "Success",
+          description: "Employee information updated successfully!",
+          duration: 3000,
+        });
       }
-
-      router.push("/employeemanagement/employees");
-      toast({
-        title: "Success",
-        description: "Employee information successfully updated!",
-        duration: 3000,
-      });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Update error:", error);
       toast({
         title: "Error",
-        description: "Failed to update employee information. Please try again.",
+        description: error.response?.data?.message || "Failed to update employee",
         variant: "danger",
         duration: 5000,
       });
@@ -411,6 +462,7 @@ export default function EditEmployeePage({
     }
   };
 
+  
   const fetchEmployeeData = useCallback(async () => {
     if (!employeeData) return;
 
@@ -457,6 +509,7 @@ export default function EditEmployeePage({
       // Reset form with all data
       methods.reset({
         picture: employeeData.picture || "",
+        prefix: employeeData.prefix||"",
         first_name: employeeData.first_name || "",
         middle_name: employeeData.middle_name || "",
         last_name: employeeData.last_name || "",

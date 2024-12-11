@@ -3,7 +3,7 @@ import {employee_basic_details} from "@/server/employee-details-map/employee-det
 import {Evaluator, Evaluators, LeaveApplicationEvaluations} from "@/types/leaves/leave-evaluators-types";
 import {toGMT8} from "@/lib/utils/toGMT8";
 
-export const getSignatory = async (path: string, applicant_id: number, is_auto_approved?: boolean) => {
+export const getSignatory = async (path: string, applicant_id: number, is_auto_approved: boolean) => {
     try {
         const [signatories, applicant] = await Promise.all([
         prisma.trans_signatories.findMany({

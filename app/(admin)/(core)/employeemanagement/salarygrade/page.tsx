@@ -5,7 +5,7 @@ import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddSalaryGrade from "@/components/admin/employeescomponent/store/AddSalaryGrade";
 import EditSalaryGrade from "@/components/admin/employeescomponent/update/EditSalaryGrade";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
@@ -62,11 +62,15 @@ const Page: React.FC = () => {
         await mutate();
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error: " + error,
-        variant: "danger",
-      });
+
+      if(error instanceof AxiosError){
+        toast({
+          title: "Error",
+          description: error.response?.data.message,
+          variant: "danger",
+        });
+      }
+      
     }
   };
 
