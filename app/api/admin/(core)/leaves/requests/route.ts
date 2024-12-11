@@ -69,14 +69,14 @@ export async function GET(request: Request) {
         const approverDecision = evaluators.approver.decision.is_approved;
         const reviewerDecision = evaluators.reviewers?.decision.is_reviewed;
 
-// Determine the status based on the decisions
-        let status = "Approved"; // Default status is "Approved"
-
-        if (approverDecision === null || reviewerDecision === null) {
-            status = "Pending"; // If either the approver or reviewer has not made a final decision
-        } else if (!approverDecision || !reviewerDecision) {
-            status = "Rejected"
-        }
+        // // Determine the status based on the decisions
+        // let status = "Approved"; // Default status is "Approved"
+        //
+        // if (approverDecision === null || reviewerDecision === null) {
+        //     status = "Pending"; // If either the approver or reviewer has not made a final decision
+        // } else if (!approverDecision || !reviewerDecision) {
+        //     status = "Rejected"
+        // }
 
         return {
             id: items.id,

@@ -359,7 +359,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         }
 
         // Return the total work time adjusted for breaks
-        return (workingDays * totalWorkHours).toFixed(2);
+        return (workingDays * totalWorkHours);
     }
 
     const onDateRangePicker = useCallback((value: RangeValue<DateValue>) => {

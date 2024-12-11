@@ -1,13 +1,12 @@
 import {NextRequest, NextResponse} from "next/server";
 import {hasContentType} from "@/helper/content-type/content-type-check";
 import prisma from "@/prisma/prisma";
-import {auth} from "@/auth";
-import {v4 as uuidv4} from 'uuid';
-import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
-import {getEmpFullName} from "@/lib/utils/nameFormatter";
+// import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {InputJsonValue} from "@prisma/client/runtime/library";
 import {LeaveRequestFormValidation} from "@/helper/zodValidation/leaves/request-form/LeaveRequestFormValidation";
+import {auth} from "@/auth";
+import {getSignatory} from "@/server/signatory";
 
 export async function POST(req: NextRequest) {
     try {
@@ -15,7 +14,7 @@ export async function POST(req: NextRequest) {
         hasContentType(req);
 
         // Parse request body
-        const data = await req.json();
+        const data = await req.json()
         // Validate required fields
 
         const validate = LeaveRequestFormValidation.safeParse(data)
@@ -24,10 +23,9 @@ export async function POST(req: NextRequest) {
         const usedLeaveCredit = Number(data.used_leave / 1440).toFixed(2) // minutes to hrs
         // console.log("Creating Data: ", data)
 
-        if(Number(usedLeaveCredit) <= 0){
+        if (Number(usedLeaveCredit) <= 0) {
             return NextResponse.json({
-                success: false,
-                message: "Could not create leave. Duration is 0."
+                success: false, message: "Could not create leave. Duration is 0."
             }, {status: 400})
         }
 
@@ -43,128 +41,21 @@ export async function POST(req: NextRequest) {
             }, {status: 404})
         }
 
-        // Get the current user session
-        const session = await auth();
 
-        const signatories = await prisma.trans_signatories.findMany({
-            where: {
-                deleted_at: null
-            },
-            select: {
-                ref_signatory_paths: {
-                    select:{
-                        id: true,
-                        signatories_path: true,
-                    }
-                },
-                ref_signatory_roles: {
-                    select: {
-                        id: true,
-                        signatory_role_name: true
-                    }
-                },
-                trans_employees: {
-                    select: {
-                        id: true,
-                        prefix: true,
-                        first_name: true,
-                        middle_name: true,
-                        last_name: true,
-                        suffix: true,
-                        extension: true,
-                        ref_departments: {
-                            select: {
-                                id: true,
-                                name: true
-                            }
-                        },
-                        ref_job_classes: {
-                            select: {
-                                id: true,
-                                name: true
-                            }
-                        }
-                    }
-                }
-            }
-        })
-        // Find the reviewer's ID based on the session email
-        const reviewer = await prisma.trans_employees.findUnique({
-            where: {
-                email: session?.user.email!
-            }, select: {
-                id: true,
-                prefix: true,
-                first_name: true,
-                last_name: true,
-                suffix: true,
-                extension: true,
-                picture: true,
-                email: true
-            }
-        });
+        const signatory = await getSignatory("/leaves/leave-requests", validate.data.employee_id, true)
+        console.log("Signatories: ", signatory)
 
-        const employee = await prisma.trans_employees.findUnique({
-            where: {
-                id: validate.data.employee_id,
-            }, select: {
-                prefix: true,
-                first_name: true,
-                middle_name: true,
-                last_name: true,
-                suffix: true,
-                extension: true,
-                email: true,
-                picture: true
-            }
-        })
-
-        if (!reviewer) {
+        if(!signatory){
             return NextResponse.json({
-                success: false, message: "Reviewer not found. Ensure you are logged in with the correct account."
-            }, {status: 400});
+                success: false,
+                message: "Could not apply leave. Check the applicant details before to continue."
+            }, {status: 404})
         }
-
-        const approver_uuid = uuidv4()
-        const reviewer_uuid = uuidv4()
-        const emp_uuid = uuidv4()
-
+        const session =  await auth()
         const attachmentLinks = {
             url: data.url
         }
-        const evaluators: LeaveApplicationEvaluation = {
-            reviewers: {
-                decision: {
-                    is_reviewed: true, decisionDate: toGMT8().toISOString(), rejectedReason: null
-                }, reviewed_by: reviewer_uuid
-            }, // this is a brute force solution
-            approver: {
-                decision: {
-                    is_approved: true, decisionDate: null, rejectedReason: null
-                }, approved_by: approver_uuid
-            }, users: [{
-                id: approver_uuid,
-                name: "Cuello, John Rey",
-                role: "approver",
-                email: "johnreycuello2@gmail.com",
-                picture: "https://img.freepik.com/free-photo/portrait-young-handsome-businessman-wearing-suit-standing-with-crossed-arms-with-isolated-studio-white-background_1150-63219.jpg?t=st=1730875405~exp=1730879005~hmac=74c3e9b73f3b8e12a79b50f93fffb6031b7d8eea8620f97444241c47bb854f9f&w=996",
-                employee_id: 66
-            }, {
-                id: reviewer_uuid,
-                name: "Datumanong, Muhammad Nizam",
-                role: "reviewer",
-                email: "ndatumanong05@gmail.com",
-                picture: "https://files.edgestore.dev/6bc0cgi3ynpz46db/publicFiles/_public/72b8b592-e919-4f88-af00-6966a6f1ca7c.jpg",
-                employee_id: 2
-            }, {
-                id: emp_uuid,
-                name: getEmpFullName(employee),
-                role: "applicant",
-                picture: employee?.picture || "",
-                email: employee?.email || "",
-                employee_id: data.employee_id
-            }], comments: []
-        }
+
         // Start the transaction
         await prisma.$transaction(async (tx) => {
             // Create a leave record
@@ -176,10 +67,10 @@ export async function POST(req: NextRequest) {
                 leave_type_id: validate.data.leave_type_id,
                 created_at: toGMT8().toISOString(),
                 updated_at: toGMT8().toISOString(),
-                created_by: reviewer.id,
+                created_by: Number(session?.employee_id),
                 status: "Approved",
                 total_days: usedLeaveCredit, // mins to day
-                evaluators: evaluators as unknown as InputJsonValue,
+                evaluators: signatory as unknown as InputJsonValue,
                 files: attachmentLinks.url
             };
 
