@@ -18,9 +18,9 @@ export async function POST(req: NextRequest) {
         // Validate required fields
 
         const validate = LeaveRequestFormValidation.safeParse(data)
-        const remainingLeaveCredit = Number(data.total_days / 1440).toFixed(2) // minutes to hrs
+        const remainingLeaveCredit = Number(data.total_days / 1440) // minutes to hrs
 
-        const usedLeaveCredit = Number(data.used_leave / 1440).toFixed(2) // minutes to hrs
+        const usedLeaveCredit = Number(data.used_leave / 1440) // minutes to hrs
         // console.log("Creating Data: ", data)
 
         if (Number(usedLeaveCredit) <= 0) {
@@ -51,13 +51,14 @@ export async function POST(req: NextRequest) {
                 message: "Could not apply leave. Check the applicant details before to continue."
             }, {status: 404})
         }
-        const session =  await auth()
         const attachmentLinks = {
             url: data.url
         }
 
         // Start the transaction
         await prisma.$transaction(async (tx) => {
+            const session =  await auth()
+            console.log("Session: ", session)
             // Create a leave record
             const leaveRecord = {
                 employee_id: validate.data.employee_id,
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
                 leave_type_id: validate.data.leave_type_id,
                 created_at: toGMT8().toISOString(),
                 updated_at: toGMT8().toISOString(),
-                created_by: Number(session?.employee_id),
+                created_by: Number(session?.user.employee_id),
                 status: "Approved",
                 total_days: usedLeaveCredit, // mins to day
                 evaluators: signatory as unknown as InputJsonValue,

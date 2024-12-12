@@ -9,9 +9,9 @@ interface FlexibleEmailTemplateProps {
 }
 
 export const FlexibleEmailTemplate: React.FC<FlexibleEmailTemplateProps> = ({
-                                                                                companyName = process.env.APP_NAME,
-                                                                                companyLogo = process.env.BASE_URL + "/logo.svg",
-                                                                                companyWebsite = process.env.BASE_URL,
+                                                                                companyName = process.env.COMPANY_NAME,
+                                                                                companyLogo = process.env.COMPANY_LOGO + "/logo.svg",
+                                                                                companyWebsite = process.env.COMPANY_WEBSITE,
                                                                                 children,
                                                                             }) => {
     return (<Html>

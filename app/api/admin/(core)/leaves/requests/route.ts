@@ -3,10 +3,11 @@ import prisma from "@/prisma/prisma";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import dayjs from "dayjs";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
+// import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
+import {LeaveApplicationEvaluations} from "@/types/leaves/leave-evaluators-types";
 
 export const dynamic = "force-dynamic"
 
@@ -65,9 +66,9 @@ export async function GET(request: Request) {
 
 
     const employees_request: LeaveRequest[] = data.map(items => {
-        const evaluators = processJsonObject<LeaveApplicationEvaluation>(items.evaluators)!
-        const approverDecision = evaluators.approver.decision.is_approved;
-        const reviewerDecision = evaluators.reviewers?.decision.is_reviewed;
+        // const evaluators = processJsonObject<LeaveApplicationEvaluations>(items.evaluators)!
+        // const approverDecision = evaluators.approver.decision.is_approved;
+        // const reviewerDecision = evaluators.reviewers?.decision.is_reviewed;
 
         // // Determine the status based on the decisions
         // let status = "Approved"; // Default status is "Approved"
@@ -96,15 +97,15 @@ export async function GET(request: Request) {
                 reason: items.reason || "",
                 status: items.status as "Approved" | "Pending" | "Rejected",
                 total_days: formatDaysToReadableTime(items.total_days.toNumber()),
-                created_at: dayjs(items.created_at).format("YYYY-MM-DD"),
-                updated_at: dayjs(items.updated_at).format("YYYY-MM-DD"),
+                created_at: toGMT8(items.created_at).format("YYYY-MM-DD hh:mm A"),
+                updated_at: toGMT8(items.updated_at).format("YYYY-MM-DD hh:mm A"),
             },
             leave_type: {
                 id: items.trans_leave_types?.ref_leave_type_details?.id!,
                 name: items.trans_leave_types?.ref_leave_type_details?.name || "",
                 code: items.trans_leave_types?.ref_leave_type_details?.code || ""
             },
-            evaluators: processJsonObject<LeaveApplicationEvaluation>(items.evaluators)!,
+            evaluators: processJsonObject<LeaveApplicationEvaluations>(items.evaluators)!,
         }
 
     })

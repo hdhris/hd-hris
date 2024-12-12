@@ -416,8 +416,11 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
                 message: `Leave Days Exceeded ${pluralize(max, "day")}.`,
             });
             console.log("Error: Exceeded leave days");
+            console.log("Error Max: ", max)
             return; // Exit early on day validation failure
         }
+
+        console.log("Not Error Max: ", max)
 
         // Clear errors if all validations pass
         form.clearErrors("leave_date_range");
@@ -570,7 +573,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             setIsSubmitting(false); // Ensure the loading state is cleared
         }
 
-    }, [calculateLeaveDeduction, documentAttachments, employee?.id, employee_leave_type, isAttachmentRequired, toast, url, user?.employees])
+    }, [calculateLeaveDeduction, documentAttachments, employee?.id, employee_leave_type, form, handleModalOpen, isAttachmentRequired, toast, url, user?.employees])
 
 
     const LeaveRequestForm: FormInputProps[] = [{

@@ -6,35 +6,28 @@ import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {
-    approval_status_color_map, FilterItems, TableConfigurations
+    approval_status_color_map,
+    FilterItems,
+    TableConfigurations
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
-import RequestForm, { normalizeDate } from "@/components/admin/leaves/request-form/form/RequestForm";
+import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import CardView from "@/components/common/card-view/card-view";
-import {Avatar, Chip, cn, Input, ScrollShadow, User} from '@nextui-org/react';
+import {Autocomplete, AutocompleteItem, Avatar, Chip, cn, ScrollShadow, User} from '@nextui-org/react';
 import Typography, {Section} from "@/components/common/typography/Typography";
 import {capitalize} from "@nextui-org/shared-utils";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import CardTable from "@/components/common/card-view/card-table";
 import BorderCard from "@/components/common/BorderCard";
-import {
-    LuCheck,
-    LuX,
-    LuBan,
-    LuCalendarRange,
-    LuThumbsUp,
-    LuThumbsDown,
-    LuPencil
-} from "react-icons/lu";
-import {icon_color, icon_size_sm} from "@/lib/utils";
+import {LuBan, LuCalendarRange, LuPencil, LuSendHorizonal} from "react-icons/lu";
+import {icon_color, icon_size, icon_size_sm} from "@/lib/utils";
 import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import {useSession} from "next-auth/react";
-import {FaReply} from "react-icons/fa";
-import dayjs from "dayjs";
 import {HolidayData} from "@/types/attendance-time/HolidayTypes";
-import {useHolidays} from "@/helper/holidays/unavailableDates";
-import {useLocale} from "@react-aria/i18n";
+import {Evaluator} from "@/types/leaves/leave-evaluators-types";
+import CardView from "@/components/common/card-view/card-view";
+import {toGMT8} from "@/lib/utils/toGMT8";
+import {FaReply} from 'react-icons/fa';
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -47,12 +40,13 @@ function Page() {
     const [rows, setRows] = useState<number>(5)
     const [selectedRequest, setSelectedRequest] = useState<LeaveRequest>()
     const session = useSession()
+    const [commentMention, setCommentMention] = useState<boolean>(false)
     const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
-    const { data: holiday, isLoading: holidayLoading} = useQuery<HolidayData>(`/api/admin/attendance-time/holidays/${new Date().getFullYear()}`);
-    const {isDateUnavailable} = useHolidays()
-    let {locale} = useLocale();
+    const {
+        data: holiday, isLoading: holidayLoading
+    } = useQuery<HolidayData>(`/api/admin/attendance-time/holidays/${new Date().getFullYear()}`);
 
     const allRequests = useMemo(() => {
         if (data) return data.data.map((item) => {
@@ -79,13 +73,39 @@ function Page() {
                     updated_at: item.leave_details.updated_at
                 },
                 evaluators: item.evaluators,
-
                 created_by
             }
         })
 
         return []
     }, [data])
+
+    const signatories = useMemo(() => {
+        if (selectedRequest) {
+            const users = selectedRequest?.evaluators.users
+            const comments = selectedRequest?.evaluators.comments.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+            // Extract `comment_content` in the same order as `comments`
+            const comment_content = comments?.map((comment) => users?.find((user) => user.id === comment.author)!).filter(Boolean)!; // Filter out any undefined users (in case no match is found)
+            const evaluators = selectedRequest?.evaluators
+
+            // Iterate over all keys dynamically
+            const evaluatorsRecord: Record<string, Evaluator> | undefined = selectedRequest?.evaluators?.evaluators;
+
+            const signatories = Object.keys(evaluatorsRecord || {}).map((roleKey) => {
+                const evaluator = evaluatorsRecord?.[roleKey as keyof typeof evaluatorsRecord]; // Safely access the evaluator
+                const user = users?.find((user) => Number(user.id) === Number(evaluatorsRecord?.evaluated_by));
+                return {
+                    role: roleKey, evaluator, user,
+                };
+            });
+
+            return {
+                users, comment_content, evaluators, signatories, comments
+            }
+        }
+        return null
+    }, [selectedRequest])
+
 
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))
@@ -106,31 +126,20 @@ function Page() {
         </>)
     })
 
-    const users = selectedRequest?.evaluators.users
-    const comments = selectedRequest?.evaluators.comments.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-    // Extract `comment_content` in the same order as `comments`
-    const comment_content = comments?.map((comment) => users?.find((user) => user.id === comment.author)!).filter(Boolean)!; // Filter out any undefined users (in case no match is found)
-    const evaluators = selectedRequest?.evaluators
 
-    const approver = users?.find(user => user.id === evaluators?.approver.approved_by)
-    const reviewer = users?.find(user => user.id === evaluators?.reviewers.reviewed_by)
-    const approver_details = evaluators?.approver
-    const reviewer_details = evaluators?.reviewers
-    // const leave_progress = dayjs(selectedRequest?.leave_details.start_date).diff(dayjs(), "day")
-    const startDate = dayjs(selectedRequest?.leave_details.start_date);
-    const endDate = dayjs(selectedRequest?.leave_details.end_date);
+    // console.log("Selected: ", selectedRequest)
+    // console.log("Signatories: ", signatories)
 
-    const is_approver = users?.filter(user => user.id === approver_details?.approved_by).find(user => user.employee_id === session.data?.user?.employee_id)
-    const is_reviewer = users?.filter(user => user.id === reviewer_details?.reviewed_by).find(user => user.employee_id === session.data?.user?.employee_id)
 
-    // console.log("Is Approver: ", is_approver)
-    // console.log("Is Reviewer: ", is_reviewer)
-    const today = dayjs();
+    const startDate = toGMT8(selectedRequest?.leave_details.start_date);
+    const endDate = toGMT8(selectedRequest?.leave_details.end_date);
+
+    const today = toGMT8();
     const leave_progress = useMemo(() => {
         if (today.isBefore(startDate, 'day')) {
             return "Not Started";
         } else if (today.isAfter(endDate, 'day')) {
-            return"Finished";
+            return "Finished";
         } else {
             return "On Going";
         }
@@ -166,6 +175,7 @@ function Page() {
             // }}
         />
 
+
         {selectedRequest && <CardView
             onClose={() => setSelectedRequest(undefined)}
             header={<div className="flex flex-row items-center space-x-4 pb-2">
@@ -183,8 +193,8 @@ function Page() {
 
             </div>} body={<>
 
-        {/*<Section className="ms-0" title="Leave Type" subtitle="Type of leave apply by the employee."/>*/}
-        {/*<hr className="border border-default-400 space-y-2"/>*/}
+            {/*<Section className="ms-0" title="Leave Type" subtitle="Type of leave apply by the employee."/>*/}
+            {/*<hr className="border border-default-400 space-y-2"/>*/}
             <CardTable data={[{
                 label: "Leave Type", value: <div className="flex gap-4 items-center">
                     <Typography>{selectedRequest.leave_type.name}</Typography>
@@ -204,11 +214,12 @@ function Page() {
             }, {
                 label: "Total Days", value: selectedRequest.leave_details.total_days
             }, {
-                label: "Leave Progress Status", value: <Chip variant="flat" color={leave_progress === "Not Started" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
+                label: "Leave Progress Status", value: <Chip variant="flat"
+                                                             color={leave_progress === "Not Started" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
             }, {
                 label: "Created By", value: <>
                     <UserAvatarTooltip user={{
-                        name: selectedRequest.created_by.name,
+                        name: selectedRequest?.created_by.name,
                         picture: selectedRequest.created_by.picture,
                         id: selectedRequest.created_by.id
                     }} avatarProps={{
@@ -225,11 +236,10 @@ function Page() {
 
             <hr className="border border-default-400 space-y-2"/>
             <Section className="ms-0" title="Comment" subtitle="Comment of employee in regard to leave request."/>
-            <BorderCard className="h-fit p-2 pb-4">
+            <BorderCard className="h-fit p-2 pb-4 min-h-32">
                 <div className="flex flex-col gap-4 h-full mb-4">
-                    {comment_content?.map((content) => {
-                        const userComments = comments?.filter((comment) => comment.author === content.id);
-
+                    {signatories?.comment_content?.map((content) => {
+                        const userComments = signatories.comments?.filter((comment) => comment.author === content.id);
                         return (<div key={content.id}>
                             {/* Display the main user */}
                             <User
@@ -254,7 +264,7 @@ function Page() {
 
                                 {/* Display replies to the comment */}
                                 {comment.replies.map((reply) => {
-                                    const replier = users?.find((commenter) => commenter.id === reply.author);
+                                    const replier = signatories.users?.find((commenter) => commenter.id === reply.author);
 
                                     return (<div key={reply.id} className="ms-10">
                                         <User
@@ -283,14 +293,64 @@ function Page() {
                     })}
                 </div>
             </BorderCard>
-            {/*<div className="flex gap-2 items-center">*/}
-            {/*    <Input startContent={<Avatar classNames={{*/}
-            {/*        base: "h-7 w-7"*/}
-            {/*    }}*/}
-            {/*                                 src={session.data?.user?.image}*/}
-            {/*    />} color="primary" variant="bordered" placeholder="Add a comment..." classNames={InputStyle}/>*/}
-            {/*    <Button isIconOnly color="primary" variant="light"><LuSendHorizonal className={cn(icon_size)}/></Button>*/}
-            {/*</div>*/}
+            <div className="flex gap-2 items-center">
+                <Autocomplete
+                    items={signatories?.users.filter(item => Number(item.id) !== selectedRequest.created_by.id) || []}
+                    startContent={<Avatar
+                        classNames={{
+                            base: "h-7 w-7"
+                        }}
+                        // size="sm"
+                        src={session.data?.user?.image}
+                    />}
+                    onInputChange={(value) => {
+                        console.log("Users: ", signatories?.users)
+                        console.log("Created by: ", selectedRequest.created_by)
+                        if (value.length !== 0 && value.includes("@")) {
+                            setCommentMention(true)
+                        } else {
+                            setCommentMention(false)
+                        }
+                    }}
+                    disableSelectorIconRotation
+                    allowsCustomValue
+                    menuTrigger={commentMention ? "input" : "manual"}
+                    selectorIcon={null}
+                    color="primary"
+                    variant="bordered"
+                    isClearable={false}
+                    placeholder="Add a comment..."
+                    selectorButtonProps={{
+                        className: "hidden"
+                    }}
+                    className="h-auto"
+                    inputProps={{
+                        classNames: {
+                            input: [
+                                "min-h-10",
+                                "h-auto",
+                                "overflow-hidden", // Prevent scrollbars
+                            ],
+                        },
+                        style: {
+                            whiteSpace: "pre-wrap", // Enable wrapping
+                            wordWrap: "break-word", // Handle long words
+                        },
+                    }}
+                >
+                    {(item) => (<AutocompleteItem key={item.id} textValue={item.name}>
+                            <div className="flex gap-2 items-center">
+                                <Avatar alt={item.name} className="flex-shrink-0" size="sm" src={item.picture}/>
+                                <div className="flex flex-col">
+                                    <span className="text-small">{item.name}</span>
+                                    <span className="text-tiny text-default-400">{item.email}</span>
+                                </div>
+                            </div>
+                        </AutocompleteItem>)}
+                </Autocomplete>
+
+                <Button isIconOnly color="primary" variant="light"><LuSendHorizonal className={cn(icon_size)}/></Button>
+            </div>
             <hr className="border border-default-400 space-y-2"/>
             <Section className="ms-0" title="Reason" subtitle="Reason of employee in regard to leave request
             ."/>
@@ -305,102 +365,109 @@ function Page() {
             <Section className="ms-0" title="Evaluator's Decision"
                      subtitle="Summary of evaluator's feedback and decisions"/>
             <BorderCard heading={<Typography className="text-medium">Review Details</Typography>}>
-                <div className="flex justify-between items-center">
-                    <User
-                        className="justify-start p-2"
-                        name={<Typography className="text-sm font-semibold">{reviewer?.name}</Typography>}
-                        description={<Typography className="text-sm font-semibold !text-default-400/75">
-                            {reviewer?.email}
-                        </Typography>}
-                        avatarProps={{
-                            src: reviewer?.picture, classNames: {base: '!size-6'}, isBordered: true,
-                        }}
-                    />
-                    {!reviewer_details?.decision.is_reviewed && is_reviewer && <div className="flex gap-2">
-                        <Button size="sm" radius="full" isIconOnly variant="light"
-                            // onClick={handleReview.bind(null, item.id, "Approved")}
-                        >
-                            <LuThumbsUp className={cn("text-success", icon_size_sm)}/>
-                        </Button>
-                        <Button size="sm" radius="full" isIconOnly variant="light"
-                            // onClick={handleReview.bind(null, item.id, "Rejected")}
-                        >
-                            <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>
-                        </Button>
-                    </div>}
-                </div>
+                <></>
+                {/*<div className="flex justify-between items-center">*/}
+                {/*    <User*/}
+                {/*        className="justify-start p-2"*/}
+                {/*        name={<Typography className="text-sm font-semibold">{reviewer?.name}</Typography>}*/}
+                {/*        description={<Typography className="text-sm font-semibold !text-default-400/75">*/}
+                {/*            {reviewer?.email}*/}
+                {/*        </Typography>}*/}
+                {/*        avatarProps={{*/}
+                {/*            src: reviewer?.picture, classNames: {base: '!size-6'}, isBordered: true,*/}
+                {/*        }}*/}
+                {/*    />*/}
+                {/*    {!reviewer_details?.decision.is_reviewed && is_reviewer && <div className="flex gap-2">*/}
+                {/*        <Button size="sm" radius="full" isIconOnly variant="light"*/}
+                {/*            // onClick={handleReview.bind(null, item.id, "Approved")}*/}
+                {/*        >*/}
+                {/*            <LuThumbsUp className={cn("text-success", icon_size_sm)}/>*/}
+                {/*        </Button>*/}
+                {/*        <Button size="sm" radius="full" isIconOnly variant="light"*/}
+                {/*            // onClick={handleReview.bind(null, item.id, "Rejected")}*/}
+                {/*        >*/}
+                {/*            <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*/}
+                {/*        </Button>*/}
+                {/*    </div>}*/}
+                {/*</div>*/}
 
-                {/*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*/}
-                {reviewer_details?.decision.is_reviewed  && <CardTable data={[{
-                    label: "Status",
-                    value: reviewer_details?.decision.is_reviewed ?
-                        <LuCheck className={cn("text-success", icon_size_sm)}/> :
-                        <LuX className={cn("text-danger", icon_size_sm)}/>
-                }, {
-                    label: "Decision Date", value: dayjs(reviewer_details?.decision.decisionDate).format("YYYY-MM-DD")
-                }, {
-                    label: "Rejected Reason",
-                    value: reviewer_details?.decision.rejectedReason ? reviewer_details?.decision.rejectedReason : ""
-                },]}/>}
+                {/*/!*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*!/*/}
+                {/*{reviewer_details?.decision.is_reviewed && <CardTable data={[{*/}
+                {/*    label: "Status",*/}
+                {/*    value: reviewer_details?.decision.is_reviewed ?*/}
+                {/*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*/}
+                {/*        <LuX className={cn("text-danger", icon_size_sm)}/>*/}
+                {/*}, {*/}
+                {/*    label: "Decision Date", value: dayjs(reviewer_details?.decision.decisionDate).format("YYYY-MM-DD")*/}
+                {/*}, {*/}
+                {/*    label: "Rejected Reason",*/}
+                {/*    value: reviewer_details?.decision.rejectedReason ? reviewer_details?.decision.rejectedReason : ""*/}
+                {/*},]}/>}*/}
             </BorderCard>
             <BorderCard heading={<Typography className="text-medium">Approved Details</Typography>}>
                 <div className="flex justify-between items-center">
-                    <User
-                        className="justify-start p-2"
-                        name={<Typography className="text-sm font-semibold">{approver?.name}</Typography>}
-                        description={<Typography className="text-sm font-semibold !text-default-400/75">
-                            {approver?.email}
-                        </Typography>}
-                        avatarProps={{
-                            src: approver?.picture, classNames: {base: '!size-6'}, isBordered: true,
-                        }}
-                    />
-                    {!approver_details?.decision.is_approved && is_approver && <div className="flex gap-2">
-                        <Button size="sm" radius="full" isIconOnly variant="light"
-                            // onClick={handleReview.bind(null, item.id, "Approved")}
-                        >
-                            <LuThumbsUp className={cn("text-success", icon_size_sm)}/>
-                        </Button>
-                        <Button size="sm" radius="full" isIconOnly variant="light"
-                            // onClick={handleReview.bind(null, item.id, "Rejected")}
-                        >
-                            <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>
-                        </Button>
-                    </div>}
+                    {/*<User*/}
+                    {/*    className="justify-start p-2"*/}
+                    {/*    name={<Typography className="text-sm font-semibold">{approver?.name}</Typography>}*/}
+                    {/*    description={<Typography className="text-sm font-semibold !text-default-400/75">*/}
+                    {/*        {approver?.email}*/}
+                    {/*    </Typography>}*/}
+                    {/*    avatarProps={{*/}
+                    {/*        src: approver?.picture, classNames: {base: '!size-6'}, isBordered: true,*/}
+                    {/*    }}*/}
+                    {/*/>*/}
+                    {/*{!approver_details?.decision.is_approved && is_approver && <div className="flex gap-2">*/}
+                    {/*    <Button size="sm" radius="full" isIconOnly variant="light"*/}
+                    {/*        // onClick={handleReview.bind(null, item.id, "Approved")}*/}
+                    {/*    >*/}
+                    {/*        <LuThumbsUp className={cn("text-success", icon_size_sm)}/>*/}
+                    {/*    </Button>*/}
+                    {/*    <Button size="sm" radius="full" isIconOnly variant="light"*/}
+                    {/*        // onClick={handleReview.bind(null, item.id, "Rejected")}*/}
+                    {/*    >*/}
+                    {/*        <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*/}
+                    {/*    </Button>*/}
+                    {/*</div>}*/}
                 </div>
-                    {/*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*/}
-                    {approver_details?.decision.is_approved && <CardTable data={[{
-                        label: "Status",
-                        value: approver_details?.decision.is_approved ?
-                            <LuCheck className={cn("text-success", icon_size_sm)}/> :
-                            <LuX className={cn("text-danger", icon_size_sm)}/>
-                    }, {
-                        label: "Decision Date",
-                        value: dayjs(approver_details?.decision.decisionDate).format("YYYY-MM-DD")
-                    }, {
-                        label: "Rejected Reason",
-                        value: approver_details?.decision.rejectedReason ? approver_details?.decision.rejectedReason : ""
-                    },]}/>}
+                {/*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*/}
+                {/*{approver_details?.decision.is_approved && <CardTable data={[{*/}
+                {/*    label: "Status",*/}
+                {/*    value: approver_details?.decision.is_approved ?*/}
+                {/*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*/}
+                {/*        <LuX className={cn("text-danger", icon_size_sm)}/>*/}
+                {/*}, {*/}
+                {/*    label: "Decision Date", value: dayjs(approver_details?.decision.decisionDate).format("YYYY-MM-DD")*/}
+                {/*}, {*/}
+                {/*    label: "Rejected Reason",*/}
+                {/*    value: approver_details?.decision.rejectedReason ? approver_details?.decision.rejectedReason : ""*/}
+                {/*},]}/>}*/}
             </BorderCard>
 
         </>} onDanger={<>
             <Section className="ms-0" title="Edit Leave"
                      subtitle="Edit the leave request">
-                <Button isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"} startContent={<LuPencil />}{...uniformStyle()}>Edit</Button>
+                <Button
+                    isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
+                    startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
             </Section>
             <hr className="border border-destructive/20"/>
             <Section className="ms-0" title="Extend Leave"
                      subtitle="Extend the leave request">
-                <Button isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"} startContent={<LuCalendarRange />} {...uniformStyle()}>Extend</Button>
+                <Button
+                    isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
+                    startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>
             </Section>
             <hr className="border border-destructive/20"/>
             <Section className="ms-0" title="Cancel"
                      subtitle="Cancel the leave request">
-                <Button isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"} startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
+                <Button
+                    isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
+                    startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
             </Section>
         </>}/>}
 
-    </section>);
+    </section>)
+
 }
 
 export default Page;

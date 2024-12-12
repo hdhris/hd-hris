@@ -54,7 +54,9 @@ export async function POST(req: NextRequest) {
             })
         ])
         await sendEmail({
-            to: String(employeeInfo?.email), subject: "Submission of Your Leave Application", html: await generateEmailBody({
+            to: String(employeeInfo?.email),
+            subject: "Submission of Your Leave Application",
+            html: await generateEmailBody({
                 name: String(employeeInfo?.last_name),
                 message: 
                     `${'Thank you for submitting your leave application. We wanted to inform you that your request has been successfully received and is currently under review by the HR team.'
