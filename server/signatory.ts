@@ -135,6 +135,6 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
 
     } catch (error) {
         console.log("Error: ", error)
-        return "Error while fetching data."
+        return null
     }
 }

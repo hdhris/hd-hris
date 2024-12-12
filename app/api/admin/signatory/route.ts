@@ -7,7 +7,7 @@ import {getSignatory} from "@/server/signatory";
 export async function GET() {
     try {
         // const path = await req.json()
-        const signatories = await getSignatory("/leaves/leave-requests", 10)
+        const signatories = await getSignatory("/leaves/leave-requests", 10, true)
         return NextResponse.json({signatories})
 
     } catch (error) {
