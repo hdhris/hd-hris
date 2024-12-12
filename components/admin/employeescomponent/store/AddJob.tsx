@@ -81,7 +81,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     {
       name: "superior_id",
       label: "Next position",
-      type: "auto-complete",
+      type: "select",
       placeholder: "Select superior position",
       description: "Select the superior position (optional)",
       config: {

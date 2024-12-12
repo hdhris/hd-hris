@@ -65,17 +65,6 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     if (isOpen && jobPositions && jobId) {
       const job = jobPositions.find((job) => job.id === jobId);
       if (job) {
-        const payRate =
-          typeof job.pay_rate === "number"
-            ? job.pay_rate.toFixed(2)
-            : parseFloat(job.pay_rate).toFixed(2) || "0.00";
-
-        const basicSalary = !job.basic_salary
-          ? "0.00"
-          : typeof job.basic_salary === "number"
-          ? job.basic_salary.toFixed(2)
-          : parseFloat(job.basic_salary).toFixed(2);
-
         methods.reset({
           name: job.name,
           // pay_rate: payRate, 
@@ -145,14 +134,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     //   },
     // },
 
-    {
-      name: "for_probi",
-      label: "For probationary",
-      type: "switch",
-      config: {
-        defaultSelected: true,
-      },
-    },
+  
     {
       name: "is_active",
       label: "Is Active",
