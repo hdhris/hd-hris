@@ -22,6 +22,7 @@ const checkEmailExists = async (email: string) => {
 };
 
 export const employeeSchema = z.object({
+  privilege_id: z.string().min(1, "Access level is required"),
   prefix: z.string().optional(),
   picture: z.union([z.instanceof(File), z.string()]).optional(),
   username: z.string().min(1, "Username is required"),

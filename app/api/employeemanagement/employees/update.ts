@@ -6,14 +6,15 @@ import SimpleAES from "@/lib/cryptography/3des";
 import { sendEmail } from "@/lib/utils/sendEmail";
 import { employeeSchema, StatusUpdateInput, statusUpdateSchema } from "./types";
 
-
 declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const prisma = globalThis.prisma || new PrismaClient({
-  log: ['error'], // Only log errors regardless of environment
-});
+const prisma =
+  globalThis.prisma ||
+  new PrismaClient({
+    log: ["error"], // Only log errors regardless of environment
+  });
 
 if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
 
@@ -130,7 +131,7 @@ async function updateEmployee(id: number, employeeData: any) {
 
 async function updateEmployeeAccount(
   id: number,
-  data: { username?: string; password?: string }
+  data: { username?: string; password?: string; privilege_id?: string }
 ) {
   try {
     // Find employee
@@ -146,96 +147,173 @@ async function updateEmployeeAccount(
       throw new Error("Employee not found");
     }
 
-    // Find user account
-    const user = await prisma.trans_users.findFirst({
+    // Find or create user account
+    let user = await prisma.trans_users.findFirst({
       where: { email: employee.email },
     });
 
+    // If no user exists, create one
     if (!user) {
-      throw new Error("User account not found");
+      user = await prisma.trans_users.create({
+        data: {
+          email: employee.email,
+          name: employee.first_name,
+          // Add any other required fields for user creation
+        },
+      });
     }
 
-    // Get current credentials
-    const currentCredentials = await prisma.auth_credentials.findFirst({
-      where: { user_id: user.id.toString() }, // Convert user.id to string
+    // Find existing credentials
+    let currentCredentials = await prisma.auth_credentials.findFirst({
+      where: { user_id: user.id.toString() },
     });
-
-    if (!currentCredentials) {
-      throw new Error("Credentials not found");
-    }
 
     const updateData: any = {};
     let usernameUpdated = false;
     let passwordUpdated = false;
 
-    // Handle username update
-    if (data.username && data.username !== currentCredentials.username) {
+    // If no credentials exist, we'll create new ones
+    if (!currentCredentials) {
+      if (!data.username || !data.password) {
+        throw new Error("Username and password required for new account");
+      }
+
       // Check username uniqueness
       const existingUsername = await prisma.auth_credentials.findFirst({
-        where: {
-          username: data.username,
-          NOT: { user_id: user.id.toString() },
-        },
+        where: { username: data.username },
       });
 
       if (existingUsername) {
         throw new Error("Username already taken");
       }
 
-      updateData.username = data.username;
+      // Create new credentials
+      const encryptedPassword = await new SimpleAES().encryptData(
+        data.password
+      );
+      currentCredentials = await prisma.auth_credentials.create({
+        data: {
+          user_id: user.id.toString(),
+          username: data.username,
+          password: encryptedPassword,
+        },
+      });
+
       usernameUpdated = true;
-    }
-
-    // Handle password update
-  if (data.password) {
-      const encryptedPassword = await new SimpleAES().encryptData(data.password);
-      updateData.password = encryptedPassword;
       passwordUpdated = true;
+
+      if (data.privilege_id) {
+        await prisma.acl_user_access_control.create({
+          data: {
+            employee_id: id,
+            user_id: user.id.toString(),
+            privilege_id: parseInt(data.privilege_id),
+            created_at: new Date(),
+          },
+        });
+      }
+
+    } else {
+      // Handle updates for existing credentials
+      if (data.username && data.username !== currentCredentials.username) {
+        const existingUsername = await prisma.auth_credentials.findFirst({
+          where: {
+            username: data.username,
+            NOT: { user_id: user.id.toString() },
+          },
+        });
+
+        if (existingUsername) {
+          throw new Error("Username already taken");
+        }
+
+        updateData.username = data.username;
+        usernameUpdated = true;
+      }
+
+      if (data.password) {
+        updateData.password = await new SimpleAES().encryptData(data.password);
+        passwordUpdated = true;
+      }
+
+      // Only update if there are changes
+      if (Object.keys(updateData).length > 0) {
+        await prisma.auth_credentials.update({
+          where: { id: currentCredentials.id },
+          data: updateData,
+        });
+      }
     }
 
-    // Only update if there are changes
     if (Object.keys(updateData).length > 0) {
       await prisma.auth_credentials.update({
         where: { id: currentCredentials.id },
         data: updateData,
       });
+    }
 
-      // Send email notification about the changes
-      try {
-        let emailText = `Hello ${employee.first_name}!\n\nYour account has been updated.\n`;
-        
-        if (passwordUpdated) {
-          emailText += `\nYour new password is: ${data.password}`;
+    // Add here - for existing accounts
+    if (data.privilege_id) {
+      await prisma.acl_user_access_control.upsert({
+        where: {
+          user_id: user.id.toString(),
+        },
+        create: {
+          employee_id: id,
+          user_id: user.id.toString(),
+          privilege_id: parseInt(data.privilege_id),
+          created_at: new Date()
+        },
+        update: {
+          privilege_id: parseInt(data.privilege_id),
+          update_at: new Date()
         }
-        
-        if (usernameUpdated) {
-          emailText += `\nYour new username is: ${data.username}`;
-        }
-        
-        emailText += `\n\nPlease use your updated credentials for your next login.\n\nBest regards,\nHR Team`;
+      });
+    }
 
-        await sendEmail({
-          to: employee.email,
-          subject: "Account Update Notification",
-          text: emailText,
-        });
-      } catch (emailError) {
-        console.error("Failed to send account update email:", emailError);
+    // Send email notification about the changes
+    try {
+      let emailText = `Hello ${employee.first_name}!\n\nYour account has been ${
+        currentCredentials ? "updated" : "created"
+      }.\n`;
+
+      if (passwordUpdated) {
+        emailText += `\nYour new password is: ${data.password}`;
       }
+
+      if (usernameUpdated) {
+        emailText += `\nYour new username is: ${data.username}`;
+      }
+
+      emailText += `\n\nPlease use these credentials for your next login.\n\nBest regards,\nHR Team`;
+
+      await sendEmail({
+        to: employee.email,
+        subject: `Account ${
+          currentCredentials ? "Update" : "Creation"
+        } Notification`,
+        text: emailText,
+      });
+    } catch (emailError) {
+      console.error("Failed to send account email:", emailError);
     }
 
     return {
       success: true,
-      message: Object.keys(updateData).length > 0
-        ? `Account updated successfully${usernameUpdated ? ' (username)' : ''}${passwordUpdated ? ' (password)' : ''}`
-        : "No changes were necessary",
+      message: currentCredentials
+        ? `Account ${
+            Object.keys(updateData).length > 0 ? "updated" : "unchanged"
+          }${usernameUpdated ? " (username)" : ""}${
+            passwordUpdated ? " (password)" : ""
+          }`
+        : "Account created successfully",
       updated: {
         username: usernameUpdated,
-        password: passwordUpdated
-      }
+        password: passwordUpdated,
+      },
     };
   } catch (error) {
-    console.error("Account update error:", {
+    console.error("Account operation error:", {
       error,
       stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString(),

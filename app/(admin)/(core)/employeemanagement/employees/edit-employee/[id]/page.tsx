@@ -7,10 +7,9 @@ import { employeeSchema, type EmployeeFormData } from "../schema";
 import { useToast } from "@/components/ui/use-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { Form } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Tabs, Tab, Spinner } from "@nextui-org/react";
+import { Tabs, Tab, Spinner, Button } from "@nextui-org/react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useEmployeeData } from "@/services/queries";
 import EditPersonalInformationForm from "@/components/admin/employeescomponent/update/EditPersonalInformationForm";
@@ -77,7 +76,6 @@ const tabFieldsMap = {
     "batch_id",
     "days_json",
   ] as EmployeeFields[],
-  account: ["username", "password"] as EmployeeFields[],
 };
 
 export default function EditEmployeePage({
@@ -146,10 +144,6 @@ export default function EditEmployeePage({
       salary_grade_id: "",
       batch_id: "",
       days_json: [],
-      username: "",
-      password: "",
-      isNewAccount: false,
-    isPasswordModified: false,
     },
   });
 
@@ -227,17 +221,6 @@ export default function EditEmployeePage({
 
     return processed.filter((url): url is string => url !== null);
   };
-
-  useEffect(() => {
-    const subscription = methods.watch((value, { name }) => {
-      if (name === "password") {
-        methods.setValue("isPasswordModified", true);
-      }
-
-    });
-  
-    return () => subscription.unsubscribe();
-  }, [methods]);
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
@@ -323,6 +306,10 @@ export default function EditEmployeePage({
         ...(data.branch_id && {
           ref_branches: { connect: { id: parseInt(data.branch_id) } },
         }),
+
+        ...(data.privilege_id && {
+          sys_privileges: { connect: { id: parseInt(data.privilege_id) } },
+        }),
         ...(data.department_id && {
           ref_departments: { connect: { id: parseInt(data.department_id) } },
         }),
@@ -371,77 +358,6 @@ export default function EditEmployeePage({
       );
 
       if (employeeUpdateResponse.status === 200) {
-        // Handle account update/creation
-        if (data.isPasswordModified || data.isNewAccount) {
-          try {
-            const accountData = {
-              password: data.password,
-              isNewAccount: data.isNewAccount,
-            };
-  
-            const accountResponse = await axios.put(
-              `/api/employeemanagement/employees?id=${params.id}&type=account`,
-              accountData
-            );
-  
-            if (!accountResponse.data.success) {
-              throw new Error(accountResponse.data.message || "Failed to update account");
-            }
-  
-            toast({
-              title: "Success",
-              description: data.isNewAccount
-                ? "Account created successfully!"
-                : "Password reset successful!",
-              duration: 3000,
-            });
-          } catch (error: any) {
-            if (error.response?.data?.message === "User account not found") {
-              // If no user account exists, create a new one
-              try {
-                const createAccountData = {
-                  password: data.password,
-                  isNewAccount: true,
-                };
-  
-                const createAccountResponse = await axios.put(
-                  `/api/employeemanagement/employees?id=${params.id}&type=account`,
-                  createAccountData
-                );
-  
-                if (!createAccountResponse.data.success) {
-                  throw new Error(createAccountResponse.data.message || "Failed to create account");
-                }
-  
-                toast({
-                  title: "Success",
-                  description: "Account created successfully!",
-                  duration: 3000,
-                });
-              } catch (createError: any) {
-                toast({
-                  title: "Error",
-                  description: createError.response?.data?.message || "Failed to create account",
-                  variant: "danger",
-                  duration: 5000,
-                });
-                setIsSubmitting(false);
-                return;
-              }
-            } else {
-              toast({
-                title: "Error",
-                description: error.response?.data?.message || "Failed to update account",
-                variant: "danger",
-                duration: 5000,
-              });
-              setIsSubmitting(false);
-              return;
-            }
-          }
-        }
-  
-        // Navigate and show success toast
         router.push("/employeemanagement/employees");
         toast({
           title: "Success",
@@ -453,7 +369,8 @@ export default function EditEmployeePage({
       console.error("Update error:", error);
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to update employee",
+        description:
+          error.response?.data?.message || "Failed to update employee",
         variant: "danger",
         duration: 5000,
       });
@@ -462,12 +379,13 @@ export default function EditEmployeePage({
     }
   };
 
-  
   const fetchEmployeeData = useCallback(async () => {
     if (!employeeData) return;
 
     try {
       // Process days_json
+      const accountData = employeeData.userAccount?.auth_credentials || null;
+
       let daysArray: string[] = [];
       if (employeeData.dim_schedules?.[0]?.days_json) {
         try {
@@ -509,7 +427,7 @@ export default function EditEmployeePage({
       // Reset form with all data
       methods.reset({
         picture: employeeData.picture || "",
-        prefix: employeeData.prefix||"",
+        prefix: employeeData.prefix || "",
         first_name: employeeData.first_name || "",
         middle_name: employeeData.middle_name || "",
         last_name: employeeData.last_name || "",
@@ -566,9 +484,8 @@ export default function EditEmployeePage({
         batch_id: batchId,
         days_json: daysArray,
         // Account
-        username: username,
-        password: password,
-        isPasswordModified: false,
+        username: accountData?.username || "",
+        privilege_id: accountData?.privilege_id?.toString() || "",
       } as EmployeeFormData);
     } catch (error) {
       console.error("Error fetching employee data:", error);
@@ -614,6 +531,7 @@ export default function EditEmployeePage({
                 </div>
               </div>
             </Tab>
+
             <Tab key="educational" title="Educational Background">
               <div className="w-full bg-white">
                 <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
@@ -621,6 +539,7 @@ export default function EditEmployeePage({
                 </div>
               </div>
             </Tab>
+
             <Tab key="job" title="Job Information">
               <div className="w-full bg-white">
                 <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
@@ -638,71 +557,84 @@ export default function EditEmployeePage({
                 </div>
               </div>
             </Tab>
+
             <Tab key="account" title="Account">
               <div className="w-full bg-white">
                 <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
                   <EditAccountForm
                     userId={params.id}
                     email={employeeData?.email || ""}
+                    hasAccount={
+                      !!employeeData?.userAccount?.auth_credentials?.username
+                    }
                   />
                 </div>
               </div>
             </Tab>
           </Tabs>
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t">
-            <div className="container px-6 py-4 flex justify-end items-center gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={activeTab === "personal"}
-                className="flex items-center gap-2"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Previous
-              </Button>
 
-              {activeTab === "account" ? (
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    const isValid = await methods.trigger();
-                    if (isValid) {
-                      methods.handleSubmit(handleFormSubmit)();
-                    } else {
-                      toast({
-                        title: "Validation Error",
-                        description: "Please fill in all required fields.",
-                        variant: "danger",
-                        duration: 3000,
-                      });
-                    }
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Spinner />
-                      Updating...
-                    </>
-                  ) : (
-                    "Update Employee"
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  className="flex items-center gap-2"
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              )}
+          {activeTab !== "account" && (
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t">
+              <div className="container px-6 py-4 flex justify-end items-center gap-4">
+                {activeTab === "personal" && (
+                  <Button
+                    type="button"
+                    color="primary"
+                    onClick={() => handleTabChange("educational")}
+                    className="flex items-center gap-2"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                )}
+
+                {activeTab === "educational" && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="bordered"
+                      onClick={() => handleTabChange("personal")}
+                      className="flex items-center gap-2"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      color="primary"
+                      onClick={() => handleTabChange("job")}
+                      className="flex items-center gap-2"
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </>
+                )}
+
+                {activeTab === "job" && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="bordered"
+                      onClick={() => handleTabChange("educational")}
+                      className="flex items-center gap-2"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+                    <Button
+                      type="submit"
+                      color="primary"
+                      isLoading={isSubmitting}
+                      className="flex items-center gap-2"
+                    >
+                      {isSubmitting ? "Updating..." : "Update Employee"}
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </form>
       </FormProvider>
     </div>
