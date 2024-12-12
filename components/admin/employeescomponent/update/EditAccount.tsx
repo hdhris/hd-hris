@@ -2,72 +2,137 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
 import { useFormContext } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { usePrivilegesData } from "@/services/queries";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@nextui-org/react";
 
 interface EditAccountProps {
   userId: string;
   email: string;
+  hasAccount: boolean;
+  currentPrivilegeId?: string;
 }
 
-const EditAccount: React.FC<EditAccountProps> = ({ userId, email }) => {
+const EditAccount: React.FC<EditAccountProps> = ({ 
+  userId, 
+  email, 
+  hasAccount, 
+  currentPrivilegeId 
+}) => {
   const router = useRouter();
   const [showResetPassword, setShowResetPassword] = React.useState(false);
   const [showCreateAccount, setShowCreateAccount] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isPrivilegeUpdating, setIsPrivilegeUpdating] = React.useState(false);
   const { setValue, formState: { errors }, getValues, reset } = useFormContext();
   const { toast } = useToast();
+  const { data: privileges = [] } = usePrivilegesData();
 
-  const formFields: FormInputProps[] = showResetPassword || showCreateAccount ? [
-    {
-      name: "username",
-      type: "text" as const,
-      label: "Username",
-      isRequired: showCreateAccount,
-      config: {
-        placeholder: "Enter username",
-        errorMessage: errors.username?.message as string,
-      },
-    },
-    {
-      name: "password",
-      type: "password" as const,
-      label: getValues("isNewAccount") ? "Password" : "New Password",
-      isRequired: true,
-      config: {
-        placeholder: getValues("isNewAccount") ? "Create password" : "Enter new password",
-        errorMessage: errors.password?.message as string,
-      },
+  // Initialize current privilege ID in form
+  React.useEffect(() => {
+    if (currentPrivilegeId) {
+      setValue("privilege_id", currentPrivilegeId);
     }
-  ] : [];
+  }, [currentPrivilegeId, setValue]);
+
+  const privilegeOptions = privileges.reduce((acc: any[], privilege) => {
+    if (privilege && privilege.id && privilege.name) {
+      acc.push({ value: privilege.id.toString(), label: privilege.name });
+    }
+    return acc;
+  }, []);
+
+  const formFields: FormInputProps[] = React.useMemo(() => {
+    if (showCreateAccount) {
+      return [
+        {
+          name: "username",
+          type: "text",
+          label: "Username",
+          isRequired: true,
+          config: {
+            placeholder: "Enter username",
+            errorMessage: errors.username?.message as string,
+          },
+        },
+        {
+          name: "password",
+          type: "password",
+          label: "Password",
+          isRequired: true,
+          config: {
+            placeholder: "Create password",
+            errorMessage: errors.password?.message as string,
+          },
+        },
+        {
+          name: "privilege_id",
+          label: "Access Level",
+          type: "select",
+          isRequired: true,
+          config: {
+            placeholder: "Select access level",
+            options: privilegeOptions,
+          },
+        },
+      ];
+    }
+
+    if (showResetPassword) {
+      return [
+        {
+          name: "password",
+          type: "password",
+          label: "New Password",
+          isRequired: true,
+          config: {
+            placeholder: "Enter new password",
+            errorMessage: errors.password?.message as string,
+          },
+        },
+      ];
+    }
+
+    return [];
+  }, [showCreateAccount, showResetPassword, errors, privilegeOptions]);
 
   const handleShowForm = () => {
-    const hasUsername = !!getValues('username');
-    if (!hasUsername) {
-      // If there's no existing username, show the create account form
+    if (!hasAccount) {
       setShowCreateAccount(true);
       setShowResetPassword(false);
-      setValue('isNewAccount', true);
-      setValue('isPasswordModified', true);
-      setValue('password', ''); // Clear the password field
+      setValue("isNewAccount", true);
+      setValue("isPasswordModified", true);
+      setValue("password", "");
+      setValue("privilege_id", "");
     } else {
-      // Otherwise, show the reset password form
       setShowResetPassword(true);
       setShowCreateAccount(false);
-      setValue('isNewAccount', false);
-      setValue('isPasswordModified', true);
-      setValue('password', ''); // Clear the password field
+      setValue("isNewAccount", false);
+      setValue("isPasswordModified", true);
+      setValue("password", "");
     }
   };
+
   const handleCancel = () => {
-    // Redirect to employees management page
-    router.push("/employeemanagement/employees");
+    if (isLoading) return;
+    setShowResetPassword(false);
+    setShowCreateAccount(false);
+    reset({
+      username: getValues("username"),
+      privilege_id: getValues("privilege_id"),
+      password: "",
+    });
   };
 
   const handleSubmit = async () => {
     try {
+      setIsLoading(true);
       const accountData = {
-        username: getValues("username"),
+        ...(showCreateAccount && {
+          username: getValues("username"),
+          privilege_id: getValues("privilege_id"),
+        }),
         password: getValues("password"),
       };
 
@@ -77,34 +142,70 @@ const EditAccount: React.FC<EditAccountProps> = ({ userId, email }) => {
       );
 
       if (response.data.success) {
-        // Redirect after successful submission
-        router.push("/employeemanagement/employees");
-        
-        // Show success toast
+        setShowResetPassword(false);
+        setShowCreateAccount(false);
         toast({
           title: "Success",
-          description: "Employee information updated successfully!",
+          description: response.data.message,
           duration: 3000,
         });
+        setValue("password", "");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.response?.data?.message || "Failed to update account",
+        variant: "danger",
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        // Clear the password field after successful submission
-        setValue('password', '');
-      } else {
+  const handlePrivilegeChange = async (privilegeId: string) => {
+    try {
+      setIsPrivilegeUpdating(true);
+      const response = await axios.put(
+        `/api/employeemanagement/employees?id=${userId}&type=account`,
+        { privilege_id: privilegeId }
+      );
+
+      if (response.data.success) {
         toast({
-          title: "Error",
-          description: response.data.message,
-          variant: "danger",
-          duration: 5000,
+          title: "Success",
+          description: "Privilege updated successfully",
+          duration: 3000,
         });
       }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to update account",
+        description:
+          error.response?.data?.message || "Failed to update privilege",
         variant: "danger",
         duration: 5000,
       });
+    } finally {
+      setIsPrivilegeUpdating(false);
     }
+  };
+
+  const privilegeField: FormInputProps = {
+    name: "privilege_id",
+    label: "Access Level",
+    type: "select",
+    isRequired: true,
+    config: {
+      placeholder: "Select access level",
+      options: privilegeOptions,
+      defaultValue: currentPrivilegeId,
+      onChange: ((e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        setValue("privilege_id", value);
+      }) as any,
+    },
   };
 
   return (
@@ -115,9 +216,10 @@ const EditAccount: React.FC<EditAccountProps> = ({ userId, email }) => {
           <Button
             type="button"
             onClick={handleShowForm}
-            variant="outline"
+            variant="bordered"
+            isDisabled={isLoading}
           >
-            {!getValues("username") ? "Create Account" : "Reset Password"}
+            {!hasAccount ? "Create Account" : "Reset Password"}
           </Button>
         )}
       </div>
@@ -125,14 +227,30 @@ const EditAccount: React.FC<EditAccountProps> = ({ userId, email }) => {
       <div className="mb-4">
         <p className="text-sm text-gray-500">Associated Email: {email}</p>
         <p className="text-sm text-gray-500">
-          Account Status: {getValues("username") ? "Active" : "No Account"}
+          Account Status: {hasAccount ? "Active" : "No Account"}
         </p>
-        {getValues("username") && (
+        {hasAccount && (
           <p className="text-sm text-gray-500">
             Username: {getValues("username")}
           </p>
         )}
       </div>
+
+      {hasAccount && (
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="flex-grow">
+            <FormFields items={[privilegeField]} />
+          </div>
+          <Button
+            type="button"
+            color="primary"
+            onClick={() => handlePrivilegeChange(getValues("privilege_id"))}
+            isLoading={isPrivilegeUpdating}
+          >
+            Update Privilege
+          </Button>
+        </div>
+      )}
 
       {(showResetPassword || showCreateAccount) && (
         <>
@@ -140,17 +258,22 @@ const EditAccount: React.FC<EditAccountProps> = ({ userId, email }) => {
           <div className="flex gap-2 justify-end mt-4">
             <Button
               type="button"
-              variant="outline"
+              variant="bordered"
+              color="primary"
               onClick={handleCancel}
+              isDisabled={isLoading}
             >
-              Cancel {showCreateAccount ? "Account Creation" : "Password Reset"}
+              Cancel{" "}
+              {showCreateAccount ? "Account Creation" : "Password Reset"}
             </Button>
             <Button
               type="button"
+              color="primary"
               onClick={handleSubmit}
-              disabled={showCreateAccount && !getValues("username")}
+              isLoading={isLoading}
+              isDisabled={isLoading || (showCreateAccount && !getValues("username"))}
             >
-              {showCreateAccount ? "Create Account" : "Reset account"}
+              {showCreateAccount ? "Create Account" : "Reset Password"}
             </Button>
           </div>
         </>

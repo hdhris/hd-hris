@@ -6,7 +6,6 @@ import { employeeSchema, type EmployeeFormData } from "./schema";
 import { useToast } from "@/components/ui/use-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { Form } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { mutate } from "swr";
 import { useRouter } from "next/navigation";
@@ -15,7 +14,7 @@ import EducationalBackgroundForm from "@/components/admin/employeescomponent/sto
 import JobInformationForm from "@/components/admin/employeescomponent/store/JobInformation";
 import PersonalInformationForm from "@/components/admin/employeescomponent/store/PersonalInformationForm";
 import ScheduleSelection from "@/components/admin/employeescomponent/store/ScheduleSelection";
-import { Tabs, Tab, Spinner } from "@nextui-org/react";
+import { Tabs, Tab, Spinner, Button } from "@nextui-org/react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 
 type EmployeeFields = keyof EmployeeFormData;
@@ -76,7 +75,7 @@ const tabFieldsMap = {
     "batch_id",
     "days_json",
   ] as EmployeeFields[],
-  account: ["username", "password"] as EmployeeFields[],
+  account: ["username", "password", "privilege_id"] as EmployeeFields[],
 };
 
 
@@ -142,6 +141,7 @@ export default function AddEmployeePage() {
       days_json: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       username: "",
       password: "password",
+      privilege_id: "",
     },
     mode: "onChange",
   });
@@ -266,6 +266,7 @@ export default function AddEmployeePage() {
         credentials: {
           username: data.username,
           password: data.password,
+          privilege_id: data.privilege_id  // Add this
         },
         prefix: data.prefix,
         picture: pictureUrl,
@@ -439,7 +440,7 @@ export default function AddEmployeePage() {
         <div className="container px-6 py-4 flex justify-end items-center gap-4">
           <Button
             type="button"
-            variant="outline"
+            variant="bordered"
             onClick={handlePrevious}
             disabled={activeTab === "personal"}
             className="flex items-center gap-2"
@@ -469,10 +470,7 @@ export default function AddEmployeePage() {
               className="flex items-center gap-2"
             >
               {isSubmitting ? (
-                <>
-                  <Spinner/>
-                  Submitting...
-                </>
+                "Submitting"
               ) : (
                 "Submit"
               )}
@@ -480,6 +478,7 @@ export default function AddEmployeePage() {
           ) : (
             <Button
               type="button"
+              color="primary"
               onClick={handleNext}
               className="flex items-center gap-2"
             >

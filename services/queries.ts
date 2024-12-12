@@ -83,7 +83,7 @@ export function useEmployeesData() {
 }
 
 export function useEmployeeData(id: string | null) {
-    return useSWR<Employee & { userAccount: { id: number; email: string; auth_credentials: { id: number; username: string; password: string } } | null }>(
+    return useSWR<Employee & { userAccount: { id: number; email: string; auth_credentials: { id: number; username: string; password: string ; privilege_id: number;} } | null }>(
       id ? `/api/employeemanagement/employees?id=${id}` : null,
       fetcher
     );
@@ -100,6 +100,11 @@ export function useResignedTerminatedEmployees() {
     })
 }
 
+export function usePrivilegesData() {
+    return useSWR<Privilege[]>('/api/employeemanagement/privileges', fetcher, {
+        // revalidateOnFocus: false, refreshInterval: 3000
+    })
+} 
 
 export function useDepartmentsData() {
     return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {//

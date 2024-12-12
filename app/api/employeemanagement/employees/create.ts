@@ -87,6 +87,16 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
           },
         });
 
+        // NEW Step: Create access control record
+        await tx.acl_user_access_control.create({
+          data: {
+            employee_id: newEmployee.id,
+            user_id: newUser.id,
+            privilege_id: Number(credentials.privilege_id),
+            created_at: new Date()
+          }
+        });
+
         // Step 4: Handle job and department connections
         if (job_id) {
           await tx.trans_employees.update({
@@ -153,16 +163,17 @@ export async function POST(request: NextRequest) {
     if (
       !data?.employee?.email ||
       !data?.credentials?.username ||
-      !data?.credentials?.password
+      !data?.credentials?.password ||
+      !data?.credentials?.privilege_id  // Add this check
     ) {
       return NextResponse.json(
         {
-          message: "Email, username and password are required",
+          message: "Email, username, password and privilege level are required",
         },
         { status: 400 }
       );
     }
-
+    
     // Validate employee data
     let validatedData;
     try {

@@ -46,48 +46,7 @@ export async function POST(req: NextRequest) {
         // Get the current user session
         const session = await auth();
 
-        const signatories = await prisma.trans_signatories.findMany({
-            where: {
-                deleted_at: null
-            },
-            select: {
-                ref_signatory_paths: {
-                    select:{
-                        id: true,
-                        signatories_path: true,
-                    }
-                },
-                ref_signatory_roles: {
-                    select: {
-                        id: true,
-                        signatory_role_name: true
-                    }
-                },
-                trans_employees: {
-                    select: {
-                        id: true,
-                        prefix: true,
-                        first_name: true,
-                        middle_name: true,
-                        last_name: true,
-                        suffix: true,
-                        extension: true,
-                        ref_departments: {
-                            select: {
-                                id: true,
-                                name: true
-                            }
-                        },
-                        ref_job_classes: {
-                            select: {
-                                id: true,
-                                name: true
-                            }
-                        }
-                    }
-                }
-            }
-        })
+   
         // Find the reviewer's ID based on the session email
         const reviewer = await prisma.trans_employees.findUnique({
             where: {

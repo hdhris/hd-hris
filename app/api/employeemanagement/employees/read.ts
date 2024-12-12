@@ -20,7 +20,20 @@ export async function getEmployeeById(id: number, daysJson?: Record<string, bool
           }
         : undefined,
     },
-    include: getBaseEmployeeInclude(),
+    include: {
+      ...getBaseEmployeeInclude(),
+      acl_user_access_control: {
+        select: {
+          privilege_id: true,
+          sys_privileges: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!employee) throw new Error("Employee not found");
@@ -44,10 +57,20 @@ export async function getEmployeeById(id: number, daysJson?: Record<string, bool
     });
   }
 
+  const privilege = Array.isArray(employee.acl_user_access_control)
+  ? employee.acl_user_access_control[0]?.sys_privileges
+  : null;
+
+const privilegeId = Array.isArray(employee.acl_user_access_control)
+  ? employee.acl_user_access_control[0]?.privilege_id
+  : null;
+
   
   const employeeWithAccount = {
     ...employee,
     userAccount,
+    privilege,
+    privilegeId,
   };
 
   return employeeWithAccount;
