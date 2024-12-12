@@ -12,7 +12,7 @@ export type EmployeeAll = {
   suffix: string;
   extension: string;
   birthdate: string;
-
+  privilege_id: string;
   fathers_first_name?: string;
   fathers_middle_name?: string;
   fathers_last_name?: string;
