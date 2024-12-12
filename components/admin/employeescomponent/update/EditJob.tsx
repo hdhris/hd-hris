@@ -181,9 +181,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       if (axios.isAxiosError(error) && error.response) {
         toast({
           title: "Error",
-          description:
-            error.response.data.message ||
-            "Failed to update job position. Please try again.",
+          description: error.response.data.error, 
           duration: 3000,
         });
       } else {

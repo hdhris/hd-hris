@@ -66,9 +66,7 @@ const AddDepartment: React.FC<AddDepartmentProps> = ({ onDepartmentAdded }) => {
       if (axios.isAxiosError(error) && error.response) {
         toast({
           title: "Error",
-          description:
-            error.response.data.message ||
-            "Failed to add department. Please try again.",
+          description: error.response.data.error, 
           duration: 3000,
         });
       } else {

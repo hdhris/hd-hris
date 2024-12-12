@@ -150,9 +150,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       if (axios.isAxiosError(error) && error.response) {
         toast({
           title: "Error",
-          description:
-            error.response.data.message ||
-            "Failed to add job position. Please try again.",
+          description: error.response.data.error, 
           duration: 3000,
         });
       } else {

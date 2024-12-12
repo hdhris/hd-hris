@@ -15,6 +15,20 @@ const departmentSchema = z.object({
   is_active: z.boolean().optional(),
 });
 
+async function checkDuplicateName(name: string, excludeId?: number) {
+  const existingJob = await prisma.ref_departments.findFirst({
+    where: {
+      name: {
+        equals: name,
+        mode: "insensitive",
+      },
+      deleted_at: null,
+      id: excludeId ? { not: excludeId } : undefined,
+    },
+  });
+  return existingJob;
+}
+
 function handleError(error: unknown, operation: string) {
   console.error(`Error during ${operation} operation:`, error);
   if (error instanceof z.ZodError) {
@@ -22,9 +36,12 @@ function handleError(error: unknown, operation: string) {
       { error: "Invalid data", details: error.errors },
       { status: 400 }
     );
-  }//
+  } //
   return NextResponse.json(
-    { error: `Failed to ${operation} department`, message: (error as Error).message },
+    {
+      error: `Failed to ${operation} department`,
+      message: (error as Error).message,
+    },
     { status: 500 }
   );
 }
@@ -41,6 +58,14 @@ export async function POST(req: NextRequest) {
 
     const validatedData = departmentSchema.parse(data);
     // console.log("Validated data:", validatedData);
+
+    const existingDept = await checkDuplicateName(validatedData.name);
+    if (existingDept) {
+      return NextResponse.json(
+        { error: "A department with this name already exists" },
+        { status: 400 }
+      );
+    }
 
     const department = await prisma.ref_departments.create({
       data: {
@@ -76,16 +101,16 @@ async function getDepartmentById(id: number) {
     where: { id, deleted_at: null },
     include: {
       _count: {
-        select: { trans_employees: true }
-      }
-    }
+        select: { trans_employees: true },
+      },
+    },
   });
 
   if (!department) throw new Error("Department not found");
-  
+
   const departmentWithCount = {
     ...department,
-    employeeCount: department._count.trans_employees
+    employeeCount: department._count.trans_employees,
   };
 
   // logDatabaseOperation("GET department by ID", departmentWithCount);
@@ -97,14 +122,14 @@ async function getAllDepartments() {
     where: { deleted_at: null },
     include: {
       _count: {
-        select: { trans_employees: true }
-      }
-    }
+        select: { trans_employees: true },
+      },
+    },
   });
 
-  const departmentsWithCount = departments.map(dept => ({
+  const departmentsWithCount = departments.map((dept) => ({
     ...dept,
-    employeeCount: dept._count.trans_employees
+    employeeCount: dept._count.trans_employees,
   }));
 
   // logDatabaseOperation("GET all departments", departmentsWithCount);
@@ -116,12 +141,23 @@ export async function PUT(req: NextRequest) {
   const id = url.searchParams.get("id");
 
   if (!id) {
-    return NextResponse.json({ error: "Department ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Department ID is required" },
+      { status: 400 }
+    );
   }
 
   try {
     const data = await req.json();
-
+    if (data.name) {
+      const existingDept = await checkDuplicateName(data.name, parseInt(id));
+      if (existingDept) {
+        return NextResponse.json(
+          { error: "A deparment with this name already exists" },
+          { status: 400 }
+        );
+      }
+    }
     const department = await prisma.ref_departments.update({
       where: { id: parseInt(id) },
       data: {
@@ -132,41 +168,50 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json(department);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to update department" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update department" },
+      { status: 500 }
+    );
   }
 }
 
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
-  const id = url.searchParams.get('id');
+  const id = url.searchParams.get("id");
 
   try {
     if (!id) {
       // return NextResponse.json({ error: 'Deparment ID is required' }, { status: 400 });
-      throw new Error('Deparment ID is required');
+      throw new Error("Deparment ID is required");
     }
     const salarygrade = await prisma.ref_departments.findFirst({
-      where: { id: parseInt(id), trans_employees:{none:{}}}
+      where: { id: parseInt(id), trans_employees: { none: {} } },
     });
-    
-    if (!salarygrade){
-      return NextResponse.json({
-        success: false,
-        message: 'Cannot delete department that has registered employees'
-      }, {status: 400})
+
+    if (!salarygrade) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Cannot delete department that has registered employees",
+        },
+        { status: 400 }
+      );
     }
 
     await prisma.ref_departments.update({
-      where: { id: salarygrade.id},
-      data: { 
+      where: { id: salarygrade.id },
+      data: {
         deleted_at: new Date(),
         updated_at: new Date(),
       },
     });
 
-    return NextResponse.json({ message: 'Deparment marked as deleted', salarygrade });
+    return NextResponse.json({
+      message: "Deparment marked as deleted",
+      salarygrade,
+    });
   } catch (error) {
     console.log(error);
-    return NextResponse.json({ message: error },{ status: 400 });
+    return NextResponse.json({ message: error }, { status: 400 });
   }
 }
