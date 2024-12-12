@@ -1,5 +1,5 @@
 import React from "react";
-import {LeaveApplicationEvaluations} from "@/types/leaves/leave-evaluators-types";
+import {Evaluations} from "@/types/leaves/leave-evaluators-types";
 
 interface DimSchedule {
     days_json: string[];
@@ -85,16 +85,6 @@ interface EmployeeLeaveType {
 }
 
 
-interface LeaveDetails {
-    start_date: string; // ISO date string
-    end_date: string;   // ISO date string
-    total_days: string;
-    reason: string;
-    status: "Pending" | "Approved" | "Rejected"
-    created_at: string; // ISO date string
-    updated_at: string; // ISO date string
-}
-
 export interface LeaveRequest {
     id: number;
     employee_id: number;
@@ -104,7 +94,17 @@ export interface LeaveRequest {
     created_by: LeaveRequestCreatedBy;
     leave_type: EmployeeLeaveType;
     leave_details: LeaveDetails;
-    evaluators: LeaveApplicationEvaluations;
+    evaluators: Evaluations;
+}
+
+interface LeaveDetails {
+    start_date: string; // ISO date string
+    end_date: string;   // ISO date string
+    total_days: string;
+    reason: string;
+    status: "Pending" | "Approved" | "Rejected"
+    created_at: string; // ISO date string
+    updated_at: string; // ISO date string
 }
 
 //for leave applications

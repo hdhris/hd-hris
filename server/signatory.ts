@@ -1,7 +1,7 @@
 import prisma from "@/prisma/prisma";
 import {employee_basic_details} from "@/server/employee-details-map/employee-details-map";
-import {Evaluator, LeaveApplicationEvaluations} from "@/types/leaves/leave-evaluators-types";
 import {toGMT8} from "@/lib/utils/toGMT8";
+import {Evaluator} from "@/types/leaves/leave-evaluators-types";
 
 export const getSignatory = async (path: string, applicant_id: number, is_auto_approved: boolean) => {
     try {
@@ -86,33 +86,6 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
         });
 
         return {
-            evaluators: Object.fromEntries(employeeDetails
-                .reduce((acc, employee) => {
-                    const roles = employee.ref_job_classes?.trans_signatories.map((signatory) => signatory.ref_signatory_roles?.signatory_role_name);
-
-                    roles?.forEach((role) => {
-                        if (role) {
-                            const matchingSignatory = signatories.find((item) => item.ref_signatory_roles?.signatory_role_name === role);
-
-                            if (matchingSignatory) {
-                                acc.push([role, // Key for the evaluator
-                                    {
-                                        evaluated_by: employee.id,
-                                        decision: {
-                                            is_decided: is_auto_approved || null,
-                                            rejectedReason: null,
-                                            decisionDate: is_auto_approved ? toGMT8() : null,
-                                        }, order_number: matchingSignatory.order_number,
-                                    } as Evaluator, // Explicitly define this as an Evaluator
-                                ]);
-                            }
-                        }
-                    });
-
-                    return acc;
-                }, [] as [string, Evaluator][]) // Ensure the accumulator is of the correct type
-                .sort((a, b) => a[1].order_number - b[1].order_number) // Sort by order_number
-            ), // Convert the array to an object
             users: [...employeeDetails.map((employee) => ({
                 id: String(employee.id),
                 name: `${employee.first_name} ${employee.last_name}`,
@@ -123,15 +96,47 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
                     .map((signatory) => signatory.ref_signatory_roles?.signatory_role_name)
                     .filter(Boolean)
                     .join(", ") || "applicant",
-            })), {
-                id: applicant.id,
-                name: `${applicant.first_name} ${applicant.last_name}`,
-                email: applicant.email,
-                picture: applicant.picture,
-                role: "applicant",
-            },], comments: [], // Add comment data dynamically if applicable
-            is_automatic_approved: is_auto_approved
-        } as LeaveApplicationEvaluations;
+            })),
+                {
+                    id: applicant.id,
+                    name: `${applicant.first_name} ${applicant.last_name}`,
+                    email: applicant.email,
+                    picture: applicant.picture,
+                    role: "applicant",
+                }],
+            comments: [], // Add comment data dynamically if applicable
+            evaluators: employeeDetails
+                .reduce((acc, employee) => {
+                    const roles = employee.ref_job_classes?.trans_signatories.map(
+                        (signatory) => signatory.ref_signatory_roles?.signatory_role_name
+                    );
+
+                    roles?.forEach((role) => {
+                        if (role) {
+                            const matchingSignatory = signatories.find(
+                                (item) => item.ref_signatory_roles?.signatory_role_name === role
+                            );
+
+                            if (matchingSignatory) {
+                                acc.push({
+                                    role,
+                                    evaluated_by: employee.id,
+                                    decision: {
+                                        is_decided: is_auto_approved || null,
+                                        rejectedReason: null,
+                                        decisionDate: is_auto_approved ? toGMT8().toDate() : null,
+                                    },
+                                    order_number: matchingSignatory.order_number,
+                                });
+                            }
+                        }
+                    });
+
+                    return acc;
+                }, [] as Evaluator[]) // Ensure the accumulator is of the correct type
+                .sort((a, b) => a.order_number - b.order_number), // Sort by order_number
+            is_automatic_approved: is_auto_approved,
+        }
 
     } catch (error) {
         console.log("Error: ", error)

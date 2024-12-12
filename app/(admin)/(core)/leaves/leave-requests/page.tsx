@@ -24,7 +24,6 @@ import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import {useSession} from "next-auth/react";
 import {HolidayData} from "@/types/attendance-time/HolidayTypes";
-import {Evaluator} from "@/types/leaves/leave-evaluators-types";
 import CardView from "@/components/common/card-view/card-view";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {FaReply} from 'react-icons/fa';
@@ -89,18 +88,18 @@ function Page() {
             const evaluators = selectedRequest?.evaluators
 
             // Iterate over all keys dynamically
-            const evaluatorsRecord: Record<string, Evaluator> | undefined = selectedRequest?.evaluators?.evaluators;
+            // const evaluatorsRecord: Record<string, Evaluator> | undefined = selectedRequest?.evaluators?.evaluators;
 
-            const signatories = Object.keys(evaluatorsRecord || {}).map((roleKey) => {
-                const evaluator = evaluatorsRecord?.[roleKey as keyof typeof evaluatorsRecord]; // Safely access the evaluator
-                const user = users?.find((user) => Number(user.id) === Number(evaluatorsRecord?.evaluated_by));
-                return {
-                    role: roleKey, evaluator, user,
-                };
-            });
+            // const signatories = Object.keys(evaluatorsRecord || {}).map((roleKey) => {
+            //     const evaluator = evaluatorsRecord?.[roleKey as keyof typeof evaluatorsRecord]; // Safely access the evaluator
+            //     const user = users?.find((user) => Number(user.id) === Number(evaluatorsRecord?.evaluated_by));
+            //     return {
+            //         role: roleKey, evaluator, user,
+            //     };
+            // });
 
             return {
-                users, comment_content, evaluators, signatories, comments
+                users, comment_content, evaluators, comments
             }
         }
         return null
@@ -323,20 +322,21 @@ function Page() {
                     selectorButtonProps={{
                         className: "hidden"
                     }}
-                    className="h-auto"
-                    inputProps={{
-                        classNames: {
-                            input: [
-                                "min-h-10",
-                                "h-auto",
-                                "overflow-hidden", // Prevent scrollbars
-                            ],
-                        },
-                        style: {
-                            whiteSpace: "pre-wrap", // Enable wrapping
-                            wordWrap: "break-word", // Handle long words
-                        },
-                    }}
+                    className="h-fit"
+                    // inputProps={{
+                    //     // classNames: {
+                    //     //     input: [
+                    //     //         "min-h-10",
+                    //     //         "h-auto",
+                    //     //         "overflow-hidden", // Prevent scrollbars
+                    //     //     ],
+                    //     // },
+                    //     // style: {
+                    //     //     whiteSpace: "pre-wrap", // Enable wrapping
+                    //     //     wordWrap: "break-word", // Handle long words
+                    //     // },
+                    //     "aria-multiline": true
+                    // }}
                 >
                     {(item) => (<AutocompleteItem key={item.id} textValue={item.name}>
                             <div className="flex gap-2 items-center">

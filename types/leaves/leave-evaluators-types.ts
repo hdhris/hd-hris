@@ -1,30 +1,30 @@
-export interface Evaluator {
-    evaluated_by: number;
-    decision: {
-        is_decided: boolean | null;
-        rejectedReason: string | null;
-        decisionDate: Date | null;
-    } | null;
-    order_number: number
-}
-
-// Define the Evaluators type as a Record
-export type Evaluators = Record<string, Evaluator>;
-
-export interface LeaveApplicationEvaluations {
-    evaluators: Evaluators
-    users: User[]; // List of users involved
-    comments: Comment[]; // Comments and replies
-    is_automatic_approved: boolean
-}
-
-export interface User {
-    id: string;
+interface User {
+    id: string | number;
     name: string;
-    email?: string;
-    picture: string;
-    employee_id?: number;
-    role: string
+    role: string;
+    email: string;
+    picture?: string; // Optional as some users may not have a picture
+    employee_id?: number; // Optional to account for missing data
+}
+
+interface Decision {
+    is_decided: boolean | null;
+    decisionDate: Date | null;
+    rejectedReason: string | null;
+}
+
+export interface Evaluator {
+    role: string;
+    decision: Decision;
+    evaluated_by: number; // Reference to a user (employee_id)
+    order_number: number;
+}
+
+export interface Evaluations {
+    users: User[];
+    comments: Comment[]; // Assuming comments is a string array, can be updated if further details are provided
+    evaluators: Evaluator[];
+    is_automatic_approved: boolean;
 }
 
 export interface Comment {
@@ -41,5 +41,3 @@ export interface Reply {
     timestamp: string;
     message: string;
 }
-
-

@@ -1,13 +1,12 @@
 import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
-import dayjs from "dayjs";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 // import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
-import {LeaveApplicationEvaluations} from "@/types/leaves/leave-evaluators-types";
+import {Evaluations} from "@/types/leaves/leave-evaluators-types";
 
 export const dynamic = "force-dynamic"
 
@@ -105,11 +104,10 @@ export async function GET(request: Request) {
                 name: items.trans_leave_types?.ref_leave_type_details?.name || "",
                 code: items.trans_leave_types?.ref_leave_type_details?.code || ""
             },
-            evaluators: processJsonObject<LeaveApplicationEvaluations>(items.evaluators)!,
+            evaluators: processJsonObject<Evaluations>(items.evaluators)!,
         }
 
     })
-
 
 
     return NextResponse.json({

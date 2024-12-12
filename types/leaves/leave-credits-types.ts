@@ -68,3 +68,4 @@ export interface EmployeeLeaveCreditFormSetup {
     employees: Employee[]
     leave_types: LeaveTypeForEmployee[]
 }
+
