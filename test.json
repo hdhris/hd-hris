@@ -1,59 +1,66 @@
 {
   "users": [
     {
-      "id": "5",
-      "name": "Baby Cindy Gawid",
-      "role": "reviewer",
-      "email": "cindygawid26@gmail.com",
-      "picture": "https://img.freepik.com/free-photo/business-concept-portrait-confident-young-businesswoman-keeping-arms-crossed-looking-camera-w_1258-104422.jpg?t=st=1730812234~exp=1730815834~hmac=14ad66fb31a70607a2187e2db3cbfaf922394ccdaaca98f00df0728fded1022e&w=996",
-      "employee_id": 5
-    },
-    {
-      "id": "132",
-      "name": "Frances Jay Concepcion",
+      "id": "0d368c0f-007a-4342-8fe1-f96365944cae",
+      "name": "Cuello, John Rey",
       "role": "approver",
-      "email": "concepcionfrancejay100000@gmail.com",
-      "picture": "",
-      "employee_id": 132
+      "email": "johnreycuello2@gmail.com",
+      "picture": "https://img.freepik.com/free-photo/portrait-young-handsome-businessman-wearing-suit-standing-with-crossed-arms-with-isolated-studio-white-background_1150-63219.jpg?t=st=1730875405~exp=1730879005~hmac=74c3e9b73f3b8e12a79b50f93fffb6031b7d8eea8620f97444241c47bb854f9f&w=996",
+      "employee_id": 66
     },
     {
-      "id": "93",
-      "name": "france france france",
-      "role": "verifier",
-      "email": "france@yahoo.com",
-      "picture": "https://files.edgestore.dev/6bc0cgi3ynpz46db/publicFiles/_public/7e7eaccd-34ee-47c8-bec9-c7ec7cbe553a.png",
-      "employee_id": 93
-    },
-    {
-      "id": 2,
-      "name": "Muhammad Nizam Datumanong",
-      "role": "applicant",
+      "id": "3aaa67f5-a5c9-4e01-aa62-58895ea8d379",
+      "name": "Datumanong, Muhammad Nizam",
+      "role": "reviewer",
       "email": "ndatumanong05@gmail.com",
-      "picture": "https://files.edgestore.dev/6bc0cgi3ynpz46db/publicFiles/_public/72b8b592-e919-4f88-af00-6966a6f1ca7c.jpg"
-    }
-  ],
-  "comments": [],
-  "evaluators": [
-    {
-      "role": "approver",
-      "decision": {
-        "is_decided": null,
-        "decisionDate": null,
-        "rejectedReason": null
-      },
-      "evaluated_by": 132,
-      "order_number": 3
+      "picture": "https://files.edgestore.dev/6bc0cgi3ynpz46db/publicFiles/_public/72b8b592-e919-4f88-af00-6966a6f1ca7c.jpg",
+      "employee_id": 2
     },
     {
-      "role": "reviewer",
-      "decision": {
-        "is_decided": null,
-        "decisionDate": null,
-        "rejectedReason": null
-      },
-      "evaluated_by": 132,
-      "order_number": 3
+      "id": "9f3b8c0a-4e12-4237-b91f-fbdc71234567",
+      "name": "Doe, Jane",
+      "role": "applicant",
+      "picture": "https://example.com/janedoe.jpg"
     }
   ],
-  "is_automatic_approved": false
+  "approver": {
+    "decision": {
+      "is_approved": true,
+      "decisionDate": "2024-11-24T12:55:50.751Z",
+      "rejectedReason": null
+    },
+    "approved_by": "0d368c0f-007a-4342-8fe1-f96365944cae"
+  },
+  "comments": [
+    {
+      "id": "1",
+      "author": "9f3b8c0a-4e12-4237-b91f-fbdc71234567",
+      "message": "I have submitted the application and attached all required documents. Please let me know if anything is missing.",
+      "replies": [
+        {
+          "id": "1.1",
+          "author": "3aaa67f5-a5c9-4e01-aa62-58895ea8d379",
+          "message": "Thank you, Jane. I've reviewed the documents and everything seems in order.",
+          "timestamp": "2024-11-24T12:00:00Z"
+        }
+      ],
+      "timestamp": "2024-11-24T10:00:00Z"
+    },
+    {
+      "id": "2",
+      "author": "0d368c0f-007a-4342-8fe1-f96365944cae",
+      "message": "The application is approved. Congratulations, Jane!",
+      "replies": [],
+      "timestamp": "2024-11-24T14:30:00Z"
+    }
+  ],
+  "reviewers": {
+    "decision": {
+      "is_reviewed": true,
+      "decisionDate": "2024-11-24T12:55:50.751Z",
+      "rejectedReason": null
+    },
+    "reviewed_by": "3aaa67f5-a5c9-4e01-aa62-58895ea8d379"
+  }
 }
+

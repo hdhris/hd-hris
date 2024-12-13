@@ -12,21 +12,26 @@ import {
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
 import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import {Autocomplete, AutocompleteItem, Avatar, Chip, cn, ScrollShadow, User} from '@nextui-org/react';
+import {Avatar, Chip, cn, ScrollShadow, Spinner, Textarea, User} from '@nextui-org/react';
 import Typography, {Section} from "@/components/common/typography/Typography";
 import {capitalize} from "@nextui-org/shared-utils";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import CardTable from "@/components/common/card-view/card-table";
 import BorderCard from "@/components/common/BorderCard";
 import {LuBan, LuCalendarRange, LuPencil, LuSendHorizonal} from "react-icons/lu";
-import {icon_color, icon_size, icon_size_sm} from "@/lib/utils";
+import {icon_color, icon_size_sm} from "@/lib/utils";
 import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import {useSession} from "next-auth/react";
 import {HolidayData} from "@/types/attendance-time/HolidayTypes";
 import CardView from "@/components/common/card-view/card-view";
 import {toGMT8} from "@/lib/utils/toGMT8";
-import {FaReply} from 'react-icons/fa';
+import {TextAreaProps} from "@nextui-org/input";
+import {Comment} from "@/types/leaves/leave-evaluators-types";
+import {axiosInstance} from "@/services/fetcher";
+import {useToast} from "@/components/ui/use-toast";
+import {v4 as uuidv4} from "uuid"
+import { FaReply } from 'react-icons/fa';
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -38,8 +43,9 @@ function Page() {
     const [page, setPage] = useState<number>(1)
     const [rows, setRows] = useState<number>(5)
     const [selectedRequest, setSelectedRequest] = useState<LeaveRequest>()
-    const session = useSession()
-    const [commentMention, setCommentMention] = useState<boolean>(false)
+    const [onReply, setOnReply] = useState<string | null>(null)
+    const [comment, setComment] = useState<string | null>()
+    const [loading, setLoading] = useState<boolean>(false)
     const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
@@ -47,6 +53,8 @@ function Page() {
         data: holiday, isLoading: holidayLoading
     } = useQuery<HolidayData>(`/api/admin/attendance-time/holidays/${new Date().getFullYear()}`);
 
+    const session = useSession()
+    const {toast} = useToast()
     const allRequests = useMemo(() => {
         if (data) return data.data.map((item) => {
             const created_by = {
@@ -84,19 +92,8 @@ function Page() {
             const users = selectedRequest?.evaluators.users
             const comments = selectedRequest?.evaluators.comments.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
             // Extract `comment_content` in the same order as `comments`
-            const comment_content = comments?.map((comment) => users?.find((user) => user.id === comment.author)!).filter(Boolean)!; // Filter out any undefined users (in case no match is found)
+            const comment_content = comments?.map((comment) => users?.find((user) => Number(user.id) === Number(comment.author))!).filter(Boolean)!; // Filter out any undefined users (in case no match is found)
             const evaluators = selectedRequest?.evaluators
-
-            // Iterate over all keys dynamically
-            // const evaluatorsRecord: Record<string, Evaluator> | undefined = selectedRequest?.evaluators?.evaluators;
-
-            // const signatories = Object.keys(evaluatorsRecord || {}).map((roleKey) => {
-            //     const evaluator = evaluatorsRecord?.[roleKey as keyof typeof evaluatorsRecord]; // Safely access the evaluator
-            //     const user = users?.find((user) => Number(user.id) === Number(evaluatorsRecord?.evaluated_by));
-            //     return {
-            //         role: roleKey, evaluator, user,
-            //     };
-            // });
 
             return {
                 users, comment_content, evaluators, comments
@@ -110,6 +107,10 @@ function Page() {
         const selected = allRequests.find(item => item.id === Number(key))
         setSelectedRequest(selected)
         // console.log("Selected: ", selected)
+    }
+
+    const onCommentSend = () => {
+
     }
 
     const onOpenDrawer = useCallback(() => {
@@ -126,8 +127,8 @@ function Page() {
     })
 
 
-    // console.log("Selected: ", selectedRequest)
-    // console.log("Signatories: ", signatories)
+    console.log("Selected: ", selectedRequest)
+    console.log("Signatories: ", signatories)
 
 
     const startDate = toGMT8(selectedRequest?.leave_details.start_date);
@@ -143,6 +144,52 @@ function Page() {
             return "On Going";
         }
     }, [endDate, startDate, today])
+
+    const handleOnReply = (id: number) => {
+        const userCommentDetails = signatories?.users?.find(item => Number(item.id) === Number(id))
+        // alert("user comment" + JSON.stringify(userComment))
+
+
+    }
+
+    const handleOnSend = async (comment: string, id?: number) => {
+        setLoading(true)
+        if (id) {
+            const sendReply = signatories?.users?.find(item => item.id === id)
+
+        }
+            const userCommentDetails = signatories?.users?.find(item => Number(item.id) === Number(session.data?.user.employee_id))
+            const userComment:Comment = {
+                id: uuidv4(),
+                author: String(userCommentDetails?.id),
+                timestamp: toGMT8().toISOString(),
+                message: comment,
+                replies: []
+            }
+
+
+            try{
+                const res = await axiosInstance.post("/api/admin/leaves/requests/comment-reply", userComment)
+                if(res.status !== 200) {
+                    toast({
+                        title: "Error",
+                        description: "Could not comment at this time. Try again later.",
+                        variant: "danger"
+                    })
+                    return
+                }
+                setComment("")
+            }catch(error) {
+                console.log("Error: ", error)
+                toast({
+                    title: "Error",
+                    description: "Server error. Try again later",
+                    variant: "danger"
+                })
+            }
+        setLoading(false)
+    }
+
     return (<section className='w-full h-full flex gap-4 overflow-hidden'>
         <DataDisplay
             isLoading={isLoading}
@@ -237,119 +284,77 @@ function Page() {
             <Section className="ms-0" title="Comment" subtitle="Comment of employee in regard to leave request."/>
             <BorderCard className="h-fit p-2 pb-4 min-h-32">
                 <div className="flex flex-col gap-4 h-full mb-4">
-                    {signatories?.comment_content?.map((content) => {
-                        const userComments = signatories.comments?.filter((comment) => comment.author === content.id);
-                        return (<div key={content.id}>
-                            {/* Display the main user */}
-                            <User
-                                className="justify-start p-2"
-                                name={<Typography className="text-sm font-semibold">{content.name}</Typography>}
-                                description={<Typography className="text-sm font-semibold !text-default-400/75">
-                                    {capitalize(content.role)}
-                                </Typography>}
-                                avatarProps={{
-                                    src: content.picture, classNames: {base: '!size-6'}, isBordered: true,
-                                }}
-                            />
+                    {selectedRequest.evaluators.comments.map(comment => {
+                        const commenters = selectedRequest.evaluators.users.filter(commenter => Number(commenter.id) === Number(comment.author))
+                        const comments = commenters.map(item => ({
+                            ...item,
+                            ...comment
+                        }))
+                        return(
+                            <>{
+                                comments.map(comment_thread => {
+                                    return(
+                                        <div key={comment_thread.id} className="flex flex-col gap-2">
+                                            <User
+                                                className="justify-start p-2"
+                                                name={
+                                                    <Typography
+                                                        className="text-sm font-semibold">{comment_thread.name}</Typography>}
+                                                description={<Typography
+                                                    className="text-sm font-semibold !text-default-400/75">
+                                                    {capitalize(comment_thread.role)}
+                                                </Typography>}
+                                                avatarProps={{
+                                                    src: comment_thread.picture,
+                                                    classNames: {base: '!size-6'},
+                                                    isBordered: true,
+                                                }}
+                                            />
 
+                                            <div className="flex flex-col gap-2 ml-2">
+                                                <Typography className="text-sm indent-4">{comment_thread.message}</Typography>
+                                                <div className="flex gap-2">
+                                                    <Typography
+                                                        className="text-sm text-gray-500/75">{toGMT8(comment_thread.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
+                                                    <Typography
+                                                        className="text-sm font-semibold">Reply</Typography>
+                                                </div>
 
-                            {/* Display user's comments */}
-                            {userComments?.map((comment) => (<div key={comment.id} className="ms-5 space-y-4">
-                                <div className="flex gap-2">
-                                    <Typography className="text-sm indent-4">{comment.message}</Typography>
-                                    <Button isIconOnly variant="light" size="sm"><FaReply
-                                        className={cn(icon_size_sm, icon_color)}/></Button>
-                                </div>
+                                            </div>
+                                            {comment_thread.replies.map(replies => {
+                                                return (
+                                                    <div key={replies.id} className="flex flex-col gap-2 ml-4">
+                                                        <Typography
+                                                            className="text-sm indent-4">{replies.message}</Typography>
+                                                        <div className="flex gap-2">
+                                                            <Typography
+                                                                className="text-sm text-gray-500/75">{toGMT8(replies.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
+                                                            <Typography
+                                                                className="text-sm font-semibold">Reply</Typography>
+                                                        </div>
 
-                                {/* Display replies to the comment */}
-                                {comment.replies.map((reply) => {
-                                    const replier = signatories.users?.find((commenter) => commenter.id === reply.author);
+                                                    </div>
+                                                )
+                                            })}
 
-                                    return (<div key={reply.id} className="ms-10">
-                                        <User
-                                            className="justify-start p-2"
-                                            name={<Typography className="text-sm font-semibold">
-                                                {replier?.name}
-                                            </Typography>}
-                                            description={<Typography
-                                                className="text-sm font-semibold !text-default-400/75">
-                                                {capitalize(replier?.role || '')}
-                                            </Typography>}
-                                            avatarProps={{
-                                                src: replier?.picture, classNames: {base: '!size-6'}, isBordered: true,
-                                            }}
-                                        />
-                                        <div className="flex gap-2 w-[90%]">
-                                            <Typography
-                                                className="text-sm indent-4 pl-4">{reply.message}</Typography>
-                                            <Button isIconOnly variant="light" size="sm"><FaReply
-                                                className={cn(icon_size_sm, icon_color)}/></Button>
                                         </div>
-                                    </div>);
-                                })}
-                            </div>))}
-                        </div>);
+
+                                    )
+                                })
+                            }</>
+                        )
                     })}
                 </div>
+
+
             </BorderCard>
             <div className="flex gap-2 items-center">
-                <Autocomplete
-                    items={signatories?.users.filter(item => Number(item.id) !== selectedRequest.created_by.id) || []}
-                    startContent={<Avatar
-                        classNames={{
-                            base: "h-7 w-7"
-                        }}
-                        // size="sm"
-                        src={session.data?.user?.image}
-                    />}
-                    onInputChange={(value) => {
-                        console.log("Users: ", signatories?.users)
-                        console.log("Created by: ", selectedRequest.created_by)
-                        if (value.length !== 0 && value.includes("@")) {
-                            setCommentMention(true)
-                        } else {
-                            setCommentMention(false)
-                        }
-                    }}
-                    disableSelectorIconRotation
-                    allowsCustomValue
-                    menuTrigger={commentMention ? "input" : "manual"}
-                    selectorIcon={null}
-                    color="primary"
-                    variant="bordered"
-                    isClearable={false}
-                    placeholder="Add a comment..."
-                    selectorButtonProps={{
-                        className: "hidden"
-                    }}
-                    className="h-fit"
-                    // inputProps={{
-                    //     // classNames: {
-                    //     //     input: [
-                    //     //         "min-h-10",
-                    //     //         "h-auto",
-                    //     //         "overflow-hidden", // Prevent scrollbars
-                    //     //     ],
-                    //     // },
-                    //     // style: {
-                    //     //     whiteSpace: "pre-wrap", // Enable wrapping
-                    //     //     wordWrap: "break-word", // Handle long words
-                    //     // },
-                    //     "aria-multiline": true
-                    // }}
-                >
-                    {(item) => (<AutocompleteItem key={item.id} textValue={item.name}>
-                            <div className="flex gap-2 items-center">
-                                <Avatar alt={item.name} className="flex-shrink-0" size="sm" src={item.picture}/>
-                                <div className="flex flex-col">
-                                    <span className="text-small">{item.name}</span>
-                                    <span className="text-tiny text-default-400">{item.email}</span>
-                                </div>
-                            </div>
-                        </AutocompleteItem>)}
-                </Autocomplete>
-
-                <Button isIconOnly color="primary" variant="light"><LuSendHorizonal className={cn(icon_size)}/></Button>
+                <CommentInput isSending={loading}
+                              onSend={handleOnSend.bind(null, comment!)}
+                              value={comment!}
+                              onValueChange={(value) => {
+                                  setComment(value)
+                              }}/>
             </div>
             <hr className="border border-default-400 space-y-2"/>
             <Section className="ms-0" title="Reason" subtitle="Reason of employee in regard to leave request
@@ -471,3 +476,27 @@ function Page() {
 }
 
 export default Page;
+
+const CommentInput = ({onSend, isSending, ...rest}: TextAreaProps & { onSend?: () => void, isSending?: boolean }) => {
+    const session = useSession()
+    return (<div className="flex gap-2 w-full">
+            <Avatar
+                classNames={{
+                    base: "h-7 w-7"
+                }}
+                src={session.data?.user?.image}
+            />
+            <Textarea variant="bordered"
+                      color="primary"
+                      maxRows={3}
+                      placeholder="Add comment..."
+                      {...rest}
+            />
+            <Button variant="light" isIconOnly size="sm" className="self-end" onClick={onSend}>
+                {isSending ? <Spinner size="sm"/> : <LuSendHorizonal
+                    className={cn(icon_size_sm, icon_color)}
+                />}
+
+            </Button>
+        </div>)
+}

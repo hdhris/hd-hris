@@ -547,7 +547,6 @@ model trans_leaves {
   evaluators                                               Json
   files                                                    Json?
   total_days                                               Decimal           @db.Decimal
-  is_auto_approved                                         Boolean           @default(false)
   trans_employees_leaves                                   trans_employees   @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
   trans_employees_trans_leaves_created_byTotrans_employees trans_employees?  @relation("trans_leaves_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
   trans_leave_types                                        trans_leave_types @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_leaves_type_id_fkey")
