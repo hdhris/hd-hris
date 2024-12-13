@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
         const data = await req.json();
 
-        console.log("Data: ", data)
+        console.log("Data Reply: ", data)
         // Retrieve the evaluation data
         const evaluation = await prisma.trans_leaves.findUnique({
             where: {
@@ -38,7 +38,8 @@ export async function POST(req: NextRequest) {
         // };
 
         // Inject the new comment into the comments array
-        evaluationComment.comments.push(data);
+        // evaluationComment.comments.push(data);
+        evaluationComment.comments.filter(item => item.id === data.id)[0].replies.push(data.replies[0]);
 
 
         console.log("Submit: ", evaluationComment)

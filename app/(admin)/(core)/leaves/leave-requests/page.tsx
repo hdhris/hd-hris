@@ -1,14 +1,12 @@
 "use client"
-import React, {Key, useCallback, useMemo, useState} from 'react';
+import React, {Key, useCallback, useEffect, useMemo, useState} from 'react';
 import {Button} from "@nextui-org/button";
 import {usePaginateQuery, useQuery} from "@/services/queries";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {
-    approval_status_color_map,
-    FilterItems,
-    TableConfigurations
+    approval_status_color_map, FilterItems, TableConfigurations
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
 import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
@@ -31,7 +29,7 @@ import {Comment} from "@/types/leaves/leave-evaluators-types";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import {v4 as uuidv4} from "uuid"
-import { FaReply } from 'react-icons/fa';
+import {isEqual} from "lodash";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -43,8 +41,10 @@ function Page() {
     const [page, setPage] = useState<number>(1)
     const [rows, setRows] = useState<number>(5)
     const [selectedRequest, setSelectedRequest] = useState<LeaveRequest>()
-    const [onReply, setOnReply] = useState<string | null>(null)
+    const [reply, setReply] = useState<string | null>(null)
+    const [isReplySubmit, setIsReplySubmit] = useState<boolean>(false)
     const [comment, setComment] = useState<string | null>()
+    const [commentId, setCommentId] = useState<string>()
     const [loading, setLoading] = useState<boolean>(false)
     const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
@@ -87,6 +87,13 @@ function Page() {
         return []
     }, [data])
 
+    useEffect(() => {
+        const id = selectedRequest?.id
+        if (!isEqual(allRequests, selectedRequest)) {
+            setSelectedRequest(allRequests.find((item) => item.id === id))
+        }
+    }, [allRequests, selectedRequest]);
+
     const signatories = useMemo(() => {
         if (selectedRequest) {
             const users = selectedRequest?.evaluators.users
@@ -101,7 +108,6 @@ function Page() {
         }
         return null
     }, [selectedRequest])
-
 
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))
@@ -127,10 +133,6 @@ function Page() {
     })
 
 
-    console.log("Selected: ", selectedRequest)
-    console.log("Signatories: ", signatories)
-
-
     const startDate = toGMT8(selectedRequest?.leave_details.start_date);
     const endDate = toGMT8(selectedRequest?.leave_details.end_date);
 
@@ -145,48 +147,58 @@ function Page() {
         }
     }, [endDate, startDate, today])
 
-    const handleOnReply = (id: number) => {
-        const userCommentDetails = signatories?.users?.find(item => Number(item.id) === Number(id))
-        // alert("user comment" + JSON.stringify(userComment))
+    const handleOnReply = async (id: string) => {
+        const userReply = signatories?.comments?.find(item => item.id === id)
 
-
+        const submitReply: Comment = {
+            ...userReply!,
+            replies: [{id: uuidv4(), author: String(session.data?.user.employee_id), message: reply!, timestamp: toGMT8().toISOString()}]
+        }
+        setIsReplySubmit(true)
+        try {
+            const res = await axiosInstance.post("/api/admin/leaves/requests/reply", submitReply)
+            if (res.status !== 200) {
+                toast({
+                    title: "Error", description: "Could not comment at this time. Try again later.", variant: "danger"
+                })
+                return
+            }
+            setComment("")
+        } catch (error) {
+            console.log("Error: ", error)
+            toast({
+                title: "Error", description: "Server error. Try again later", variant: "danger"
+            })
+        }
+        setIsReplySubmit(false)
     }
 
-    const handleOnSend = async (comment: string, id?: number) => {
+    const handleOnSend = async (comment: string) => {
         setLoading(true)
-        if (id) {
-            const sendReply = signatories?.users?.find(item => item.id === id)
-
+        const userCommentDetails = signatories?.users?.find(item => Number(item.id) === Number(session.data?.user.employee_id))
+        const userComment: Comment = {
+            id: uuidv4(),
+            author: String(userCommentDetails?.id),
+            timestamp: toGMT8().toISOString(),
+            message: comment,
+            replies: []
         }
-            const userCommentDetails = signatories?.users?.find(item => Number(item.id) === Number(session.data?.user.employee_id))
-            const userComment:Comment = {
-                id: uuidv4(),
-                author: String(userCommentDetails?.id),
-                timestamp: toGMT8().toISOString(),
-                message: comment,
-                replies: []
-            }
 
-
-            try{
-                const res = await axiosInstance.post("/api/admin/leaves/requests/comment-reply", userComment)
-                if(res.status !== 200) {
-                    toast({
-                        title: "Error",
-                        description: "Could not comment at this time. Try again later.",
-                        variant: "danger"
-                    })
-                    return
-                }
-                setComment("")
-            }catch(error) {
-                console.log("Error: ", error)
+        try {
+            const res = await axiosInstance.post("/api/admin/leaves/requests/comment", userComment)
+            if (res.status !== 200) {
                 toast({
-                    title: "Error",
-                    description: "Server error. Try again later",
-                    variant: "danger"
+                    title: "Error", description: "Could not comment at this time. Try again later.", variant: "danger"
                 })
+                return
             }
+            setComment("")
+        } catch (error) {
+            console.log("Error: ", error)
+            toast({
+                title: "Error", description: "Server error. Try again later", variant: "danger"
+            })
+        }
         setLoading(false)
     }
 
@@ -282,71 +294,72 @@ function Page() {
 
             <hr className="border border-default-400 space-y-2"/>
             <Section className="ms-0" title="Comment" subtitle="Comment of employee in regard to leave request."/>
-            <BorderCard className="h-fit p-2 pb-4 min-h-32">
+            <BorderCard className="h-fit p-2 pb-4 min-h-32 max-h-80 overflow-y-scroll">
                 <div className="flex flex-col gap-4 h-full mb-4">
                     {selectedRequest.evaluators.comments.map(comment => {
                         const commenters = selectedRequest.evaluators.users.filter(commenter => Number(commenter.id) === Number(comment.author))
                         const comments = commenters.map(item => ({
-                            ...item,
-                            ...comment
+                            ...item, ...comment
                         }))
-                        return(
-                            <>{
-                                comments.map(comment_thread => {
-                                    return(
-                                        <div key={comment_thread.id} className="flex flex-col gap-2">
-                                            <User
-                                                className="justify-start p-2"
-                                                name={
-                                                    <Typography
-                                                        className="text-sm font-semibold">{comment_thread.name}</Typography>}
-                                                description={<Typography
-                                                    className="text-sm font-semibold !text-default-400/75">
-                                                    {capitalize(comment_thread.role)}
-                                                </Typography>}
-                                                avatarProps={{
-                                                    src: comment_thread.picture,
-                                                    classNames: {base: '!size-6'},
-                                                    isBordered: true,
-                                                }}
-                                            />
+                        return (<>{comments.map(comment_thread => {
+                                return (<div key={comment_thread.id} className="flex flex-col gap-2">
+                                        <User
+                                            className="justify-start p-2"
+                                            name={<Typography
+                                                className="text-sm font-semibold">{comment_thread.name}</Typography>}
+                                            description={<Typography
+                                                className="text-sm font-semibold !text-default-400/75">
+                                                {capitalize(comment_thread.role)}
+                                            </Typography>}
+                                            avatarProps={{
+                                                src: comment_thread.picture,
+                                                classNames: {base: '!size-6'},
+                                                isBordered: true,
+                                            }}
+                                        />
 
-                                            <div className="flex flex-col gap-2 ml-2">
-                                                <Typography className="text-sm indent-4">{comment_thread.message}</Typography>
-                                                <div className="flex gap-2">
-                                                    <Typography
-                                                        className="text-sm text-gray-500/75">{toGMT8(comment_thread.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
-                                                    <Typography
-                                                        className="text-sm font-semibold">Reply</Typography>
-                                                </div>
-
+                                        <div className="flex flex-col gap-2 ml-2">
+                                            <Typography
+                                                className="text-medium indent-4">{comment_thread.message}</Typography>
+                                            <div className="flex gap-2">
+                                                <Typography
+                                                    className="text-sm text-gray-500/50">{toGMT8(comment_thread.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
+                                                <Typography
+                                                    className="text-sm font-semibold cursor-pointer text-gray-500/50"
+                                                    onClick={() => {
+                                                        setCommentId(comment_thread.id)
+                                                        setReply("")
+                                                    }}>Reply</Typography>
                                             </div>
-                                            {comment_thread.replies.map(replies => {
-                                                return (
-                                                    <div key={replies.id} className="flex flex-col gap-2 ml-4">
-                                                        <Typography
-                                                            className="text-sm indent-4">{replies.message}</Typography>
-                                                        <div className="flex gap-2">
-                                                            <Typography
-                                                                className="text-sm text-gray-500/75">{toGMT8(replies.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
-                                                            <Typography
-                                                                className="text-sm font-semibold">Reply</Typography>
-                                                        </div>
-
-                                                    </div>
-                                                )
-                                            })}
-
                                         </div>
+                                        {comment_thread.replies.map(replies => {
+                                            return (<div key={replies.id} className="flex flex-col gap-2 ml-4">
+                                                    <Typography
+                                                        className="text-sm indent-4">{replies.message}</Typography>
+                                                    <div className="flex gap-2">
+                                                        <Typography
+                                                            className="text-sm text-gray-500/50">{toGMT8(replies.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
+                                                        <Typography
+                                                            className="text-sm font-semibold">Reply</Typography>
+                                                    </div>
 
-                                    )
-                                })
-                            }</>
-                        )
+                                                </div>)
+                                        })}
+                                        {commentId === comment_thread.id && <CommentInput
+                                            placeholder="Reply..."
+                                            isSending={isReplySubmit}
+                                            value={reply || ""}
+                                            onSend={handleOnReply.bind(null, comment_thread.id)}
+                                            onValueChange={(value) => {
+                                                setReply(value);
+                                            }}
+                                        />}
+                                    </div>
+
+                                )
+                            })}</>)
                     })}
                 </div>
-
-
             </BorderCard>
             <div className="flex gap-2 items-center">
                 <CommentInput isSending={loading}
@@ -477,26 +490,32 @@ function Page() {
 
 export default Page;
 
-const CommentInput = ({onSend, isSending, ...rest}: TextAreaProps & { onSend?: () => void, isSending?: boolean }) => {
+interface CommentInputProps extends TextAreaProps {
+    onSend?: () => void,
+    isSending?: boolean
+    placeholder?: string
+}
+
+const CommentInput = ({onSend, isSending, placeholder, ...rest}: CommentInputProps) => {
     const session = useSession()
     return (<div className="flex gap-2 w-full">
-            <Avatar
-                classNames={{
-                    base: "h-7 w-7"
-                }}
-                src={session.data?.user?.image}
-            />
-            <Textarea variant="bordered"
-                      color="primary"
-                      maxRows={3}
-                      placeholder="Add comment..."
-                      {...rest}
-            />
-            <Button variant="light" isIconOnly size="sm" className="self-end" onClick={onSend}>
-                {isSending ? <Spinner size="sm"/> : <LuSendHorizonal
-                    className={cn(icon_size_sm, icon_color)}
-                />}
+        <Avatar
+            classNames={{
+                base: "h-7 w-7"
+            }}
+            src={session.data?.user?.image}
+        />
+        <Textarea variant="bordered"
+                  color="primary"
+                  maxRows={3}
+                  placeholder={placeholder || "Add comment..."}
+                  {...rest}
+        />
+        <Button variant="light" isIconOnly size="sm" className="self-end" onClick={onSend}>
+            {isSending ? <Spinner size="sm"/> : <LuSendHorizonal
+                className={cn(icon_size_sm, icon_color)}
+            />}
 
-            </Button>
-        </div>)
+        </Button>
+    </div>)
 }
