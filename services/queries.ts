@@ -15,6 +15,7 @@ import { SalaryGrade } from "@/types/employeee/SalaryType";
 import { EmploymentStatus } from "@/types/employeee/EmploymentStatusType";
 import {EmployeeLeaveCreditFormSetup} from "@/types/leaves/leave-credits-types";
 import {EmploymentStatusDetails} from "@/types/employment-status/employment-status";
+import { Accounts } from "@/types/employeee/AccountType";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -83,7 +84,7 @@ export function useEmployeesData() {
 }
 
 export function useEmployeeData(id: string | null) {
-    return useSWR<Employee & { userAccount: { id: number; email: string; auth_credentials: { id: number; username: string; password: string ; privilege_id: number;} } | null }>(
+    return useSWR<Employee & Accounts>(
       id ? `/api/employeemanagement/employees?id=${id}` : null,
       fetcher
     );

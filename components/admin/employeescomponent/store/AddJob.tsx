@@ -24,10 +24,6 @@ const jobPositionSchema = z.object({
     .string()
     .min(1, "Position name is required")
     .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
-  pay_rate: z
-    .string()
-    .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
-    .transform((val) => (val === "" ? "0.00" : val)),
   superior_id: z
     .string()
     .nullish()
@@ -81,7 +77,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     {
       name: "superior_id",
       label: "Next position",
-      type: "auto-complete",
+      type: "select",
       placeholder: "Select superior position",
       description: "Select the superior position (optional)",
       config: {
@@ -124,7 +120,6 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     try {
       const formattedData = {
         ...data,
-        pay_rate: parseFloat(data.pay_rate).toFixed(2),
         superior_id: data.superior_id ? parseInt(data.superior_id) : null,
       };
 
@@ -137,7 +132,6 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
         onJobAdded();
         methods.reset({
           name: "",
-          pay_rate: "0.00",
           superior_id: "",
           is_active: true,
         });
@@ -156,9 +150,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       if (axios.isAxiosError(error) && error.response) {
         toast({
           title: "Error",
-          description:
-            error.response.data.message ||
-            "Failed to add job position. Please try again.",
+          description: error.response.data.error, 
           duration: 3000,
         });
       } else {

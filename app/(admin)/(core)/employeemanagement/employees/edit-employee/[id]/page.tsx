@@ -383,8 +383,12 @@ export default function EditEmployeePage({
     if (!employeeData) return;
 
     try {
-      // Process days_json
       const accountData = employeeData.userAccount?.auth_credentials || null;
+      const privilegeData = employeeData.acl_user_access_control || null;
+  
+      // Log to check if we're getting the privilege data
+      // console.log("Privilege Data:", privilegeData);
+  
 
       let daysArray: string[] = [];
       if (employeeData.dim_schedules?.[0]?.days_json) {
@@ -421,8 +425,6 @@ export default function EditEmployeePage({
 
       // Get user account data
       const userAccount = employeeData.userAccount;
-      const username = userAccount?.auth_credentials?.username || "";
-      const password = userAccount?.auth_credentials?.password || "";
 
       // Reset form with all data
       methods.reset({
@@ -484,8 +486,8 @@ export default function EditEmployeePage({
         batch_id: batchId,
         days_json: daysArray,
         // Account
+        privilege_id: privilegeData?.privilege_id?.toString() || "",
         username: accountData?.username || "",
-        privilege_id: accountData?.privilege_id?.toString() || "",
       } as EmployeeFormData);
     } catch (error) {
       console.error("Error fetching employee data:", error);
@@ -567,6 +569,7 @@ export default function EditEmployeePage({
                     hasAccount={
                       !!employeeData?.userAccount?.auth_credentials?.username
                     }
+                    currentPrivilegeId={employeeData?.acl_user_access_control?.privilege_id || ""}
                   />
                 </div>
               </div>

@@ -20,6 +20,11 @@ const EditAccount: React.FC<EditAccountProps> = ({
   hasAccount, 
   currentPrivilegeId 
 }) => {
+
+  React.useEffect(() => {
+    console.log("Current Privilege ID changed:", currentPrivilegeId);
+  }, [currentPrivilegeId]);
+
   const router = useRouter();
   const [showResetPassword, setShowResetPassword] = React.useState(false);
   const [showCreateAccount, setShowCreateAccount] = React.useState(false);
@@ -141,6 +146,15 @@ const EditAccount: React.FC<EditAccountProps> = ({
         accountData
       );
 
+      if (response.status === 200) {
+        router.push("/employeemanagement/employees");
+        toast({
+          title: "Success",
+          description: "Employee new account created successfully!",
+          duration: 3000,
+        });
+      }
+
       if (response.data.success) {
         setShowResetPassword(false);
         setShowCreateAccount(false);
@@ -171,6 +185,15 @@ const EditAccount: React.FC<EditAccountProps> = ({
         `/api/employeemanagement/employees?id=${userId}&type=account`,
         { privilege_id: privilegeId }
       );
+
+      if (response.status === 200) {
+        router.push("/employeemanagement/employees");
+        toast({
+          title: "Success",
+          description: "Employee information updated successfully!",
+          duration: 3000,
+        });
+      }
 
       if (response.data.success) {
         toast({
@@ -237,7 +260,7 @@ const EditAccount: React.FC<EditAccountProps> = ({
       </div>
 
       {hasAccount && (
-        <div className="flex items-center space-x-4 mb-4">
+        <div className="flex items-end space-x-4 mb-4">
           <div className="flex-grow">
             <FormFields items={[privilegeField]} />
           </div>
