@@ -4,11 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="editing signatory interface">
-      <change afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/reply/route.ts" afterDir="false" />
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="adding reply">
+      <change afterPath="$PROJECT_DIR$/components/email-templates/leaves/leave-approved.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/logo.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/comment-reply/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/comment/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/comment/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/comment/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/reply/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/reply/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/email/notification-email.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/email/notification-email.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/leave-evaluators-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/leave-evaluators-types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,8 +23,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript JSX File" />
         <option value="TypeScript File" />
+        <option value="TypeScript JSX File" />
       </list>
     </option>
   </component>
@@ -80,36 +85,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;JavaScript Debug.localhost:3000.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
-    &quot;database.data.extractors.current.export.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
-    &quot;database.data.extractors.current.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Xero/WebstormProjects/Capstone/HD-HRIS/app/tests&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.codeium.AppSettingsConfigurable&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS\\node_modules\\typescript\\lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript Debug.localhost:3000.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.codeium.enabled": "true",
+    "database.data.extractors.current.export.id": "Comma-separated (CSV)_id",
+    "database.data.extractors.current.id": "Comma-separated (CSV)_id",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Xero/WebstormProjects/Capstone/HD-HRIS/public",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.codeium.AppSettingsConfigurable",
+    "ts.external.directory.path": "C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\public" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\tests" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\admin\leaves\credits\forms\edit" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\common" />
-      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\public" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS" />
     </key>
     <key name="MoveFile.RECENT_KEYS">

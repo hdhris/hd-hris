@@ -1,16 +1,14 @@
-import {Body, Column, Container, Head, Hr, Html, Img, Section, Tailwind, Text,} from '@react-email/components';
+import {Body, Column, Container, Head, Hr, Html, Img, Link, Section, Tailwind, Text,} from '@react-email/components';
 import * as React from 'react';
 
 interface FlexibleEmailTemplateProps {
     companyName?: string;
-    companyLogo?: string;
     companyWebsite?: string;
     children: React.ReactNode;
 }
 
 export const FlexibleEmailTemplate: React.FC<FlexibleEmailTemplateProps> = ({
                                                                                 companyName = process.env.COMPANY_NAME,
-                                                                                companyLogo = process.env.COMPANY_LOGO + "/logo.svg",
                                                                                 companyWebsite = process.env.COMPANY_WEBSITE,
                                                                                 children,
                                                                             }) => {
@@ -21,12 +19,13 @@ export const FlexibleEmailTemplate: React.FC<FlexibleEmailTemplateProps> = ({
                     <Container className="h-full w-full ">
                         <Section>
                             <Column className="px-4">
-                                <Img
-                                    src={companyLogo}
-                                    className="size-24"
-                                    alt={`${companyName} logo`}
-                                    style={logo}
-                                />
+                                {/*<Img*/}
+                                {/*    alt="Logo"*/}
+                                {/*    className="mx-auto"*/}
+                                {/*    height={250}*/}
+                                {/*    src="https://hd-hris.vercel.app/logo.svg"*/}
+                                {/*/>*/}
+                                <img src="https://files.edgestore.dev/6bc0cgi3ynpz46db/publicFiles/_public/72b8b592-e919-4f88-af00-6966a6f1ca7c.jpg" alt="logo" className="mx-auto h-64"/>
                             </Column>
 
                         </Section>
@@ -48,6 +47,12 @@ export const FlexibleEmailTemplate: React.FC<FlexibleEmailTemplateProps> = ({
                         </Section>
                         <Hr style={hr}/>
                         <Section style={footerSection}>
+                            <Text className="text-gray-800 mt-6">
+                                {"If you have any questions or require further assistance, please feel free to reach out to us at "}
+                                <Link href="mailto:support@example.com" className="text-blue-600 underline">
+                                    support@example.com
+                                </Link>.
+                            </Text>
                             <div className="mt-4">
                                 <Text style={footer}>
                                     © {new Date().getFullYear()} {companyName}. All rights reserved.
@@ -63,7 +68,6 @@ export const FlexibleEmailTemplate: React.FC<FlexibleEmailTemplateProps> = ({
                         </Section>
                     </Container>
                 </Tailwind>
-
             </Body>
         </Html>);
 };

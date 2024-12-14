@@ -28,6 +28,8 @@ export interface Evaluations {
 }
 
 export interface Comment {
+    applicant_email: string
+    leave_id: number
     id: string;
     author: string; // Reference to a User ID
     timestamp: string;

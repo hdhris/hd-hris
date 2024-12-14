@@ -1,12 +1,14 @@
 "use client"
-import React, {Key, useCallback, useEffect, useMemo, useState} from 'react';
+import React, {Fragment, Key, useCallback, useEffect, useMemo, useState} from 'react';
 import {Button} from "@nextui-org/button";
 import {usePaginateQuery, useQuery} from "@/services/queries";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {
-    approval_status_color_map, FilterItems, TableConfigurations
+    approval_status_color_map,
+    FilterItems,
+    TableConfigurations
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
 import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
@@ -133,6 +135,7 @@ function Page() {
     })
 
 
+    console.log("Signatories: ", signatories)
     const startDate = toGMT8(selectedRequest?.leave_details.start_date);
     const endDate = toGMT8(selectedRequest?.leave_details.end_date);
 
@@ -150,9 +153,17 @@ function Page() {
     const handleOnReply = async (id: string) => {
         const userReply = signatories?.comments?.find(item => item.id === id)
 
+
         const submitReply: Comment = {
             ...userReply!,
-            replies: [{id: uuidv4(), author: String(session.data?.user.employee_id), message: reply!, timestamp: toGMT8().toISOString()}]
+            applicant_email: selectedRequest?.email!,
+            leave_id: selectedRequest?.id!,
+            replies: [{
+                id: uuidv4(),
+                author: String(session.data?.user.employee_id),
+                message: reply!,
+                timestamp: toGMT8().toISOString()
+            }]
         }
         setIsReplySubmit(true)
         try {
@@ -177,6 +188,8 @@ function Page() {
         setLoading(true)
         const userCommentDetails = signatories?.users?.find(item => Number(item.id) === Number(session.data?.user.employee_id))
         const userComment: Comment = {
+            applicant_email: selectedRequest?.email!,
+            leave_id: selectedRequest?.id!,
             id: uuidv4(),
             author: String(userCommentDetails?.id),
             timestamp: toGMT8().toISOString(),
@@ -294,14 +307,17 @@ function Page() {
 
             <hr className="border border-default-400 space-y-2"/>
             <Section className="ms-0" title="Comment" subtitle="Comment of employee in regard to leave request."/>
-            <BorderCard className="h-fit p-2 pb-4 min-h-32 max-h-80 overflow-y-scroll">
-                <div className="flex flex-col gap-4 h-full mb-4">
-                    {selectedRequest.evaluators.comments.map(comment => {
-                        const commenters = selectedRequest.evaluators.users.filter(commenter => Number(commenter.id) === Number(comment.author))
-                        const comments = commenters.map(item => ({
-                            ...item, ...comment
-                        }))
-                        return (<>{comments.map(comment_thread => {
+
+                <ScrollShadow size={20} className="min-h-32 max-h-72">
+                    <div className="flex flex-col gap-10 h-full mb-4">
+                        {selectedRequest.evaluators.comments.map(comment => {
+                            const commenters = selectedRequest.evaluators.users.filter(commenter => Number(commenter.id) === Number(comment.author))
+                            const comments = commenters.map(item => ({
+                                ...item, ...comment
+                            }))
+
+
+                            return (<Fragment key={comment.id}>{comments.map(comment_thread => {
                                 return (<div key={comment_thread.id} className="flex flex-col gap-2">
                                         <User
                                             className="justify-start p-2"
@@ -323,9 +339,9 @@ function Page() {
                                                 className="text-medium indent-4">{comment_thread.message}</Typography>
                                             <div className="flex gap-2">
                                                 <Typography
-                                                    className="text-sm text-gray-500/50">{toGMT8(comment_thread.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
+                                                    className="text-sm !text-default-400/75">{toGMT8(comment_thread.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
                                                 <Typography
-                                                    className="text-sm font-semibold cursor-pointer text-gray-500/50"
+                                                    className="text-sm font-semibold cursor-pointer !text-default-400/75"
                                                     onClick={() => {
                                                         setCommentId(comment_thread.id)
                                                         setReply("")
@@ -333,34 +349,62 @@ function Page() {
                                             </div>
                                         </div>
                                         {comment_thread.replies.map(replies => {
-                                            return (<div key={replies.id} className="flex flex-col gap-2 ml-4">
-                                                    <Typography
-                                                        className="text-sm indent-4">{replies.message}</Typography>
-                                                    <div className="flex gap-2">
+                                            const replier = selectedRequest.evaluators.users.filter(item => Number(item.id) === Number(replies.author))
+                                            const reply = replier.map(item => ({
+                                                ...item, ...replies
+                                            }))
+                                            return (reply.map(reply => {
+                                                return (<div key={replies.id} className="ms-10 my-3">
+                                                    <User
+                                                        className="justify-start p-2"
+                                                        name={<Typography
+                                                            className="text-sm font-semibold">{reply.name}</Typography>}
+                                                        description={<Typography
+                                                            className="text-sm font-semibold !text-default-400/75">
+                                                            {capitalize(reply.role)}
+                                                        </Typography>}
+                                                        avatarProps={{
+                                                            src: reply.picture,
+                                                            classNames: {base: '!size-6'},
+                                                            isBordered: true,
+                                                        }}
+                                                    />
+                                                    <div className="flex flex-col gap-2 ml-4">
                                                         <Typography
-                                                            className="text-sm text-gray-500/50">{toGMT8(replies.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
-                                                        <Typography
-                                                            className="text-sm font-semibold">Reply</Typography>
-                                                    </div>
+                                                            className="text-medium indent-4">{replies.message}</Typography>
+                                                        <div className="flex gap-2">
+                                                            <Typography
+                                                                className="text-sm !text-default-400/75">{toGMT8(replies.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
+                                                            <Typography
+                                                                className="text-sm font-semibold cursor-pointer !text-default-400/75"
+                                                                onClick={() => {
+                                                                    setCommentId(comment_thread.id)
+                                                                    setReply("")
+                                                                }}>Reply</Typography>
+                                                        </div>
 
+                                                    </div>
                                                 </div>)
+                                            }))
                                         })}
-                                        {commentId === comment_thread.id && <CommentInput
-                                            placeholder="Reply..."
-                                            isSending={isReplySubmit}
-                                            value={reply || ""}
-                                            onSend={handleOnReply.bind(null, comment_thread.id)}
-                                            onValueChange={(value) => {
-                                                setReply(value);
-                                            }}
-                                        />}
+                                        {commentId === comment_thread.id && <div className="ms-10">
+                                            <CommentInput
+                                                placeholder="Reply..."
+                                                isSending={isReplySubmit}
+                                                value={reply || ""}
+                                                onSend={handleOnReply.bind(null, comment_thread.id)}
+                                                onValueChange={(value) => {
+                                                    setReply(value);
+                                                }}
+                                            />
+                                        </div>}
                                     </div>
 
                                 )
-                            })}</>)
-                    })}
-                </div>
-            </BorderCard>
+                            })}</Fragment>)
+                        })}
+                    </div>
+                </ScrollShadow>
             <div className="flex gap-2 items-center">
                 <CommentInput isSending={loading}
                               onSend={handleOnSend.bind(null, comment!)}
