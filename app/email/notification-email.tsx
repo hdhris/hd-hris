@@ -1,4 +1,17 @@
-import {Body, Column, Container, Head, Hr, Html, Img, Link, Section, Tailwind, Text,} from '@react-email/components';
+import {
+    Body,
+    Column,
+    Container,
+    Head,
+    Hr,
+    Html,
+    Img,
+    Link,
+    Row,
+    Section,
+    Tailwind,
+    Text,
+} from '@react-email/components';
 import * as React from 'react';
 
 interface FlexibleEmailTemplateProps {
@@ -18,15 +31,18 @@ export const FlexibleEmailTemplate: React.FC<FlexibleEmailTemplateProps> = ({
                 <Tailwind>
                     <Container className="h-full w-full ">
                         <Section>
-                            <Column className="px-4">
-                                {/*<Img*/}
-                                {/*    alt="Logo"*/}
-                                {/*    className="mx-auto"*/}
-                                {/*    height={250}*/}
-                                {/*    src="https://hd-hris.vercel.app/logo.svg"*/}
-                                {/*/>*/}
-                                <img src="https://files.edgestore.dev/6bc0cgi3ynpz46db/publicFiles/_public/72b8b592-e919-4f88-af00-6966a6f1ca7c.jpg" alt="logo" className="mx-auto h-64"/>
-                            </Column>
+                            <Row className="px-4 flex gap-5">
+                                <Img
+                                    alt="Logo"
+                                    className="mx-auto"
+                                    height={64}
+                                    src="https://hd-hris.vercel.app/logo.png"
+                                />
+                                <Column>
+                                    <Text className="font-semibold text-medium">HD-HRiS</Text>
+                                    <Text>Purok Pagkakaisa, Bo.2, Koronadal City, South Cotabato</Text>
+                                </Column>
+                            </Row>
 
                         </Section>
                         <Hr style={hr}/>

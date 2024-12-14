@@ -136,7 +136,8 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
     const handleModalOpen = useCallback((value: boolean) => {
         setIsModalOpen(value);
         onOpen(value);
-    }, [onOpen]);
+        form.reset()
+    }, [form, onOpen]);
 
     const haveExistingLeave = useCallback((date: DateValue) => {
         //get the existing leave dates if not rejected
@@ -200,96 +201,6 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         return availableDaysCount - 1;
     }, [dateUnavailable]);
 
-
-    // const calculateRemainingLeaveCredit = (startDate: DateValue, endDate: DateValue, basedDays: number): string => {
-    //     // Define working hours (9:30 AM to 5:00 PM)
-    //     const workingStartHour = 9 + 0.5;  // 9:30 AM (9 + 30 minutes)
-    //     const workingEndHour = 17;        // 5:00 PM
-    //     const workingMinutesPerDay = (workingEndHour - workingStartHour) * 60;  // 7.5 hours per day in minutes
-    //
-    //     // Convert start and end dates to dayjs objects
-    //     const start = dayjs(startDate.toString());
-    //     const end = dayjs(endDate.toString());
-    //
-    //     // Get the timestamp of the start and end dates
-    //     const startTime = start.toDate().getTime();
-    //     const endTime = end.toDate().getTime();
-    //
-    //     // Calculate the total difference in milliseconds
-    //     const diffInMilliseconds = Math.abs(endTime - startTime);
-    //
-    //     // Convert milliseconds to minutes and hours
-    //     const diffInMinutes = Math.floor((diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60)); // Minutes difference
-    //     const diffInHours = Math.floor((diffInMilliseconds % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); // Hours difference
-    //
-    //     // Calculate the worked time (in minutes)
-    //     const workedMinutes = diffInHours * 60 + diffInMinutes;
-    //
-    //     // Limit the worked time to the working hours for the given day
-    //     const workingStartTime = start.set('hour', 9).set('minute', 30).set('second', 0).set('millisecond', 0);
-    //     const workingEndTime = start.set('hour', 17).set('minute', 0).set('second', 0).set('millisecond', 0);
-    //
-    //     // Adjust worked minutes if the start time is before the working hours
-    //     if (start.isBefore(workingStartTime)) {
-    //         start.set('hour', 9).set('minute', 30); // Set to the working start time
-    //     }
-    //
-    //     // Adjust worked minutes if the end time is after the working hours
-    //     if (end.isAfter(workingEndTime)) {
-    //         end.set('hour', 17).set('minute', 0); // Set to the working end time
-    //     }
-    //
-    //     // Calculate the number of working minutes between the start and end times
-    //     const totalWorkedMinutes = end.diff(start, 'minute');
-    //
-    //     // Calculate the total working hours for the day (as fractional days)
-    //     const workedFractionalDay = totalWorkedMinutes / workingMinutesPerDay;
-    //
-    //     // Calculate available days excluding weekends and holidays
-    //     const availableDaysCount = countAvailableDays(parseDate(start.toDate().toISOString() ), parseDate(end.toDate().toISOString()));  // Function to calculate available working days excluding weekends
-    //
-    //     // Calculate the fractional deduction based on available working days
-    //     const fractionalDeduction =
-    //         (availableDaysCount - 1) + workedFractionalDay;
-    //
-    //     // Calculate the remaining days (as a decimal)
-    //     const remainingDays = basedDays - fractionalDeduction;
-    //
-    //     // Output the remaining days as a decimal
-    //     console.log('Remaining Days (as decimal):', remainingDays.toFixed(2));
-    //
-    //     return remainingDays.toFixed(2);
-    // };
-
-    // function calculateRemainingLeave(availableLeaveDays: number, requestedLeaveDays: number, requestedLeaveHours: number, requestedLeaveMinutes: number, workHoursPerDay: number): { hours: number, minutes: number } {
-    //
-    //     const clockInTime = new Date(`2024-12-10T${maxMinTime?.time_in}:00`);
-    //     const clockOutTime = new Date(`2024-12-10T${maxMinTime?.time_out}:00`);
-    //
-    //     // Calculate the total work time in milliseconds
-    //     const workDuration = clockOutTime.getTime() - clockInTime.getTime();
-    //
-    //     // Convert work duration from milliseconds to hours
-    //     const workHours = workDuration / (1000 * 60 * 60);
-    //
-    //     // Subtract lunch break hours
-    //     const totalWorkHours = workHours - 60;
-    //
-    //     // Convert total available leave to hours
-    //     const availableLeaveInHours = availableLeaveDays * totalWorkHours;
-    //
-    //     // Convert requested leave to hours and minutes into total minutes for easy calculation
-    //     const requestedLeaveInMinutes = (requestedLeaveDays * totalWorkHours * 60) + (requestedLeaveHours * 60) + requestedLeaveMinutes;
-    //
-    //     // Remaining leave in minutes
-    //     const remainingLeaveInMinutes = availableLeaveInHours * 60 - requestedLeaveInMinutes;
-    //
-    //     // Convert remaining leave from minutes back to hours and minutes
-    //     const remainingHours = Math.floor(remainingLeaveInMinutes / 60);
-    //     const remainingMinutes = remainingLeaveInMinutes % 60;
-    //
-    //     return { hours: remainingHours, minutes: remainingMinutes };
-    // }
 
     function calculateLeaveDeduction(startTimeStr: string, endTimeStr: string) {
         // Extract break times (assuming `break_min` is in minutes)
@@ -480,7 +391,10 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             // Flatten the nested array and find the specific leave type
             const flatLeave = leave?.flat(); // Flatten the array
             const specificLeave = flatLeave?.find(leave => leave.leave_type_id === values.leave_type_id)?.remaining_days || 0;
+            const usedLeave = flatLeave?.find(leave => leave.leave_type_id === values.leave_type_id);
+            // employee_leave_type.filter(item => item.)
 
+            console.log("Used: ", usedLeave)
             // console.log("Specific Leave: ", specificLeave);
             // console.log("Remaining: ", user?.employees);
             const leaveDeduction = calculateLeaveDeduction(values.leave_date_range.start, values.leave_date_range.end);
@@ -488,7 +402,10 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             // console.log("Leave Deduction: ", leaveDeduction);
 
             // console.log("Used: ", specificLeave);
+
+            //remaining =  allocated - used
             const total_leave_credit = (specificLeave * 1440) - Number(leaveDeduction);
+            // const total_used_days =
             // console.log("Used: ", (specificLeave * 1440))
             // console.log("Leave Credit: ", total_leave_credit)
             if (employee_leave_type?.some((lt) => lt.is_attachment_required) && !documentAttachments) {

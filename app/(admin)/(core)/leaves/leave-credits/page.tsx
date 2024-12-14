@@ -82,7 +82,6 @@ function Page() {
 
     const handleSelect = (edited: EditCreditProp) => {
         setViewCredit(edited)
-        console.log("Edited: ", edited)
 
     }
 

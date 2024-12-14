@@ -174,7 +174,9 @@ export async function POST(req: NextRequest) {
                     },
                     data: {
                         remaining_days: remainingLeaveCredit,
-                        used_days: usedLeaveCredit,
+                        used_days: {
+                            increment: usedLeaveCredit
+                        },
                         updated_at: new Date(),
                     },
                 });
