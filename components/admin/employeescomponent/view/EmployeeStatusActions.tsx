@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -21,6 +23,7 @@ import dayjs from "dayjs";
 import { z } from "zod";
 import { parseAbsoluteToLocal } from "@internationalized/date";
 import { DateStyle } from "@/lib/custom/styles/InputStyle";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 
 // Define the schema
 const statusFormSchema = z.object({
@@ -78,7 +81,6 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
   const today = dayjs().startOf('day');
   const getFormFields = (type: ModalType): FormInputProps[] => {
     const commonDateConfig = {
-     
       classNames: DateStyle,
       validationState: "valid"
     };
@@ -91,7 +93,6 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             label: "Suspension Start Date",
             type: "date-picker",
             isRequired: true,
-            
             config: {
               placeholder: "Select suspension start date",
               maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
@@ -183,7 +184,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     if (type === 'suspend' && data.endDate) {
       const startDate = dayjs(data.startDate);
       const endDate = dayjs(data.endDate);
-      
+
       if (endDate.isBefore(startDate)) {
         return "End date must be after the start date";
       }
@@ -194,7 +195,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
   const handleModalOpen = (type: ModalType) => {
     setActiveModal(type);
     let formData = {};
-    
+
     const today = dayjs().startOf('day').toISOString();
 
     switch (type) {
@@ -248,7 +249,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
         }
         break;
     }
-    
+
     methods.reset(formData);
   };
 
@@ -256,7 +257,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     setIsStatusUpdateSubmitting(true);
     try {
       const validationResult = statusFormSchema.safeParse(formData);
-      
+
       if (!validationResult.success) {
         const errors = validationResult.error.errors;
         toast({
@@ -350,7 +351,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             endDate: suspensionData.endDate,
             reason: suspensionData.reason || suspensionData.suspensionReason,
           },
-          color: "warning",
+          color: "warning" as const,
         };
       }
       if (currentEmployee.resignation_json) {
@@ -364,7 +365,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             startDate: resignationData.resignationDate,
             reason: resignationData.reason || resignationData.resignationReason,
           },
-          color: "default",
+          color: "default" as const,
         };
       }
       if (currentEmployee.termination_json) {
@@ -378,66 +379,73 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             startDate: terminationData.terminationDate,
             reason: terminationData.reason || terminationData.terminationReason,
           },
-          color: "danger",
+          color: "danger" as const,
         };
       }
       return {
         type: "Active",
         modalType: null,
         data: null,
-        color: "success",
+        color: "success" as const,
       };
     };
 
     const status = getStatusInfo();
-
-    return (
-      <div className="mb-4 p-6 border rounded-xl bg-gray-50">
-        <div className="flex justify-between items-start">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Chip size="md" color={status.color as any} variant="flat">
-                {status.type}
-              </Chip>
-            </div>
-            {status.data && (
-              <div className="space-y-2">
-                <Text className="text-md text-black-800">
-                  {status.type === "Suspended"
-                    ? "Start Date"
-                    : status.type === "Resigned"
-                    ? "Resignation Date"
-                    : "Termination Date"}
-                  : {formatDate(status.data.startDate)}
-                </Text>
-                {status.type === "Suspended" && status.data.endDate && (
-                  <Text className="text-md text-black-800">
-                    End Date: {formatDate(status.data.endDate)}
-                  </Text>
-                )}
-                <Text className="text-lg text-black-800">
-                  Reason: {status.data.reason}
-                </Text>
-              </div>
-            )}
-          </div>
-          <div className="flex justify-end">
-            {status.data && (
-              <Button
-                size="md"
-                variant="shadow"
-                startContent={<BiEdit className="text-default-500" />}
-                onPress={() => handleModalOpen(status.modalType)}
-                isDisabled={isStatusUpdateSubmitting}
-              >
-                Edit Details
-              </Button>
-            )}
-          </div>
+    
+   
+  return (
+    <div className="space-y-2 font-black">
+      <div className="space-y-2">
+        <div>
+          <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium">
+            {status.type === "Suspended"
+              ? "Start Date"
+              : status.type === "Resigned"
+              ? "Resignation Date"
+              : "Termination Date"}
+          </Text>
+          <Text className="text-sm text-gray-800 font-light">
+            {status.data ? formatDate(status.data.startDate) : "-"}
+          </Text>
         </div>
+
+        {status.type === "Suspended" && (
+          <div>
+            <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium">
+              End Date
+            </Text>
+            <Text className="text-sm text-gray-800 font-light">
+              {status.data?.endDate ? formatDate(status.data.endDate) : "-"}
+            </Text>
+          </div>
+        )}
       </div>
-    );
-  };
+
+      <div className="border rounded-xl p-4 bg-gray-50">
+        <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium mb-1">
+          Reason
+        </Text>
+        <Text className="text-sm text-gray-800 font-light">
+          {status.data?.reason || "-"}
+        </Text>
+
+        {status.data && (
+          <div className="flex justify-end mt-2">
+            <Button 
+              size="sm"
+              variant="light"
+              startContent={<BiEdit className="text-default-500" />}
+              onPress={() => handleModalOpen(status.modalType)}
+              isDisabled={isStatusUpdateSubmitting}
+            >
+              Edit Details
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
   const getModalContent = () => {
     switch (activeModal) {
@@ -469,62 +477,65 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     !currentEmployee.resignation_json &&
     !currentEmployee.termination_json;
 
-  return (
-    <div className="space-y-6">
-      <Text className="text-xl font-semibold">Employee Status</Text>
-      <StatusDisplay />
+  const Section = ({ children, title, subtitle, className }: any) => {
+    return (
+      <div className={`p-6 border rounded-xl bg-gray-50 ${className}`}>
+        <div className="flex justify-between items-center">
+          <div>
+            <Text className="text-lg font-semibold">{title}</Text>
+            <Text className="text-sm text-gray-600">{subtitle}</Text>
+          </div>
+        </div>
+        <div className="mt-4">{children}</div>
+      </div>
+    )
+  }
 
-      {isActive && (
-        <>
-          <Text className="text-xl font-semibold">Status Actions</Text>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between p-6 border rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-              <div className="flex items-center gap-4">
-                <BiErrorCircle className="h-6 w-6 text-warning" />
-                <Text className="text-gray-600">
-                  Temporarily suspend employee access
-                </Text>
-              </div>
+  return (
+    <div className="space-y-4">
+
+      {isActive ? (
+        <div className="space-y-4">
+          <Section
+            className="ms-0"
+            title="Temporary Suspension"
+            subtitle="Temporarily suspend employee access"
+          >
+            <Button
+              startContent={<BiErrorCircle />}
+              {...uniformStyle({ color: "warning" })}
+              onPress={() => handleModalOpen("suspend")}
+              isDisabled={isStatusUpdateSubmitting}
+            >
+              Suspend
+            </Button>
+          </Section>
+
+          <Section
+            className="ms-0"
+            title="Permanent Removal"
+            subtitle="Permanently remove employee access"
+          >
+            <div className="flex gap-3">
               <Button
-                size="sm"
-                color="warning"
-                variant="flat"
-                onPress={() => handleModalOpen("suspend")}
+                {...uniformStyle()}
+                onPress={() => handleModalOpen("resign")}
                 isDisabled={isStatusUpdateSubmitting}
               >
-                Suspend
+                Resign
+              </Button>
+              <Button
+                {...uniformStyle({ color: "danger" })}
+                onPress={() => handleModalOpen("terminate")}
+                isDisabled={isStatusUpdateSubmitting}
+              >
+                Terminate
               </Button>
             </div>
-
-            <div className="flex items-center justify-between p-6 border rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-              <div className="flex items-center gap-4">
-                <BiErrorCircle className="h-6 w-6 text-danger" />
-                <Text className="text-gray-600">Permanently remove employee access
-                </Text>
-              </div>
-              <div className="flex gap-3">
-                <Button
-                  size="sm"
-                  color="default"
-                  variant="flat"
-                  onPress={() => handleModalOpen("resign")}
-                  isDisabled={isStatusUpdateSubmitting}
-                >
-                  Resign
-                </Button>
-                <Button
-                  size="sm"
-                  color="danger"
-                  variant="flat"
-                  onPress={() => handleModalOpen("terminate")}
-                  isDisabled={isStatusUpdateSubmitting}
-                >
-                  Terminate
-                </Button>
-              </div>
-            </div>
-          </div>
-        </>
+          </Section>
+        </div>
+      ) : (
+        <StatusDisplay />
       )}
 
       {modalContent && (
@@ -582,3 +593,4 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
 };
 
 export default EmployeeStatusActions;
+

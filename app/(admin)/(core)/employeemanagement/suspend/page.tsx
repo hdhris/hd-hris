@@ -1,60 +1,43 @@
 "use client";
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState } from "react";
 import { useSuspendedEmployees } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
-import { Avatar, Chip, Button, Spinner } from "@nextui-org/react";
-import { toast } from "@/components/ui/use-toast";
-import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
+import { Avatar, Chip, Button } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
+import Text from "@/components/Text";
 import dayjs from "dayjs";
 import axios from "axios";
+import { toast } from "@/components/ui/use-toast";
 import showDialog from "@/lib/utils/confirmDialog";
-import Text from "@/components/Text";
+import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 
-const LoadingAndEmptyState: React.FC<{
-  isLoading: boolean;
-  isEmpty: boolean;
-}> = ({ isLoading, isEmpty }) => {
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-[400px]">
-        <Spinner> Loading... </Spinner>
+const EmptyState: React.FC = () => {
+  return (
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
+      <div className="text-center space-y-3">
+        <Text className="text-xl font-bold text-gray-700">No Suspended Employees Found</Text>
+        <Text className="text-gray-500">There are no suspended employees at the moment.</Text>
+        <Text className="text-sm text-gray-400">Suspended employees will appear here when their status changes.</Text>
       </div>
-    );
-  }
-
-  if (isEmpty) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[400px] text-gray-500">
-        <Text  className="text-medium font-semibold">No suspended employees found</Text>
-        <Text className="text-sm mt-2">When employees are suspended, they will appear here</Text>
-      </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 };
 
 const Page: React.FC = () => {
-  const {
-    data: suspendedEmployees = [],
-    mutate,
-    isLoading,
-  } = useSuspendedEmployees();
+  const { data: suspendedEmployees, mutate, isLoading } = useSuspendedEmployees();
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isActivating, setIsActivating] = useState<number | null>(null);
 
-  const handleEmployeeUpdated = useCallback(async () => {
+  const handleEmployeeUpdated = async () => {
     try {
       await mutate();
     } catch (error) {
       console.error("Error updating employee data:", error);
     }
-  }, [mutate]);
+  };
 
-  const handleActivate = useCallback(async (employee: Employee) => {
+  const handleActivate = async (employee: Employee) => {
     try {
       const result = await showDialog({
         title: "Confirm Activation",
@@ -89,26 +72,17 @@ const Page: React.FC = () => {
     } finally {
       setIsActivating(null);
     }
-  }, [mutate]);
+  };
 
-  const handleRowClick = useCallback((employee: Employee) => {
+  const handleRowClick = (employee: Employee) => {
     setSelectedEmployee(employee);
-    setIsViewModalOpen(true);
-  }, []);
+  };
 
-  const calculateDuration = useCallback((startDate: string, endDate: string): string => {
-    const start = dayjs(startDate);
-    const end = dayjs(endDate);
-    const days = end.diff(start, "day");
-    return `${days} days`;
-  }, []);
-
-  const TableConfigurations = useMemo(() => ({
+  const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
       { uid: "department", name: "Department", sortable: true },
       { uid: "position", name: "Position", sortable: true },
-      { uid: "duration", name: "Duration", sortable: true },
       { uid: "suspendedDate", name: "Suspended Date", sortable: true },
       { uid: "endDate", name: "End Date", sortable: true },
       { uid: "reason", name: "Suspended Reason" },
@@ -116,7 +90,7 @@ const Page: React.FC = () => {
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
-      const cellClasses = "cursor-pointer hover:bg-gray-50";
+      const cellClasses = "cursor-pointer";
       const suspensionData =
         employee.suspension_json &&
         (typeof employee.suspension_json === "string"
@@ -151,17 +125,6 @@ const Page: React.FC = () => {
           return (
             <div className={cellClasses} onClick={() => handleRowClick(employee)}>
               {employee.ref_job_classes?.name || "N/A"}
-            </div>
-          );
-        case "duration":
-          return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
-              {suspensionData
-                ? calculateDuration(
-                    suspensionData.startDate,
-                    suspensionData.endDate
-                  )
-                : "N/A"}
             </div>
           );
         case "suspendedDate":
@@ -209,17 +172,9 @@ const Page: React.FC = () => {
           return <div>-</div>;
       }
     },
-  }), [handleRowClick, handleActivate, isActivating, calculateDuration]);
+  };
 
-  const sortProps = useMemo(() => ({
-    sortItems: [
-      { name: "First Name", key: "first_name" as keyof Employee },
-      { name: "Last Name", key: "last_name" as keyof Employee },
-      { name: "Suspended Date", key: "suspension_json" as keyof Employee },
-    ],
-  }), []);
-
-  const FilterItems = useMemo(() => [
+  const FilterItems = [
     {
       category: "Department",
       filtered: suspendedEmployees?.length 
@@ -235,79 +190,39 @@ const Page: React.FC = () => {
             }))
         : [],
     },
-  ], [suspendedEmployees]);
+  ];
 
-  const renderListDisplay = useCallback((employee: Employee) => {
-    const suspensionData =
-      employee.suspension_json &&
-      (typeof employee.suspension_json === "string"
-        ? JSON.parse(employee.suspension_json)
-        : employee.suspension_json);
-    
-    return (
-      <div
-        className="w-full cursor-pointer"
-        onClick={() => handleRowClick(employee)}
-      >
-        <BorderCard className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Avatar
-                src={employee.picture || ""}
-                alt={`${employee.first_name} ${employee.last_name}`}
-              />
-              <div className="flex flex-col">
-                <span className="font-medium">
-                  {employee.first_name} {employee.last_name}
-                </span>
-                <span className="text-sm text-gray-500">
-                  {employee.ref_departments?.name || "N/A"} -{" "}
-                  {employee.ref_job_classes?.name || "N/A"}
-                </span>
-                <span className="text-xs text-gray-500">
-                  Duration:{" "}
-                  {suspensionData
-                    ? calculateDuration(
-                        suspensionData.startDate,
-                        suspensionData.endDate
-                      )
-                    : "N/A"}
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <Chip color="warning" size="sm">
-                Suspended
-              </Chip>
-              <div onClick={(e) => e.stopPropagation()}>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  color="success"
-                  isLoading={isActivating === employee.id}
-                  onPress={() => handleActivate(employee)}
-                >
-                  Unsuspend
-                </Button>
-              </div>
-            </div>
-          </div>
-        </BorderCard>
-      </div>
-    );
-  }, [handleRowClick, handleActivate, isActivating, calculateDuration]);
+  const sortProps = {
+    sortItems: [
+      { name: "First Name", key: "first_name" as keyof Employee },
+      { name: "Last Name", key: "last_name" as keyof Employee },
+      { name: "Suspended Date", key: "suspension_json" as keyof Employee },
+    ],
+  };
 
-  if (isLoading || !suspendedEmployees?.length) {
+  if (isLoading) {
     return (
-      <LoadingAndEmptyState 
-        isLoading={isLoading} 
-        isEmpty={!suspendedEmployees?.length} 
-      />
+      <section className='w-full h-full flex gap-4 overflow-hidden'>
+        <DataDisplay
+          defaultDisplay="table"
+          title="Suspended Employees"
+          data={[]}
+          isLoading={true}
+          onTableDisplay={{
+            config: TableConfigurations,
+            layout: "auto"
+          }}
+        />
+      </section>
     );
   }
 
+  if (!suspendedEmployees || suspendedEmployees.length === 0) {
+    return <EmptyState />;
+  }
+
   return (
-    <div className="h-[calc(100vh-150px)] overflow-hidden">
+    <section className='w-full h-full flex gap-4 overflow-hidden'>
       <DataDisplay
         defaultDisplay="table"
         title="Suspended Employees"
@@ -315,35 +230,30 @@ const Page: React.FC = () => {
         filterProps={{
           filterItems: FilterItems,
         }}
-        isLoading={isLoading}
+        isLoading={false}
         onTableDisplay={{
           config: TableConfigurations,
           className: "h-full overflow-auto",
           layout: "auto",
         }}
         paginationProps={{
-          data_length: suspendedEmployees?.length || 0,
+          data_length: suspendedEmployees.length,
         }}
         searchProps={{
           searchingItemKey: ["first_name", "last_name"],
         }}
         sortProps={sortProps}
-        onListDisplay={renderListDisplay}
       />
 
       {selectedEmployee && (
         <ViewEmployee
-          isOpen={isViewModalOpen}
-          onClose={() => {
-            setIsViewModalOpen(false);
-            setSelectedEmployee(null);
-          }}
           employee={selectedEmployee}
+          onClose={() => setSelectedEmployee(null)}
           onEmployeeUpdated={handleEmployeeUpdated}
           sortedEmployees={suspendedEmployees}
         />
       )}
-    </div>
+    </section>
   );
 };
 

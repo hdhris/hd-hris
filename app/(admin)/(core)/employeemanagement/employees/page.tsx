@@ -5,35 +5,43 @@ import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import AddEmployee from "@/components/admin/employeescomponent/store/AddEmployees";
-import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
 import Text from "@/components/Text";
 import dayjs from "dayjs";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
+import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 
 const EmptyState: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
       <div className="text-center space-y-3">
-        <Text className="text-xl font-bold text-gray-700">No Employees Found</Text>
-        <Text className="text-gray-500">There are no active employees at the moment.</Text>
-        <Text className="text-sm text-gray-400">Click the &apos;Add Employee&apos; button above to get started.</Text>
+        <Text className="text-xl font-bold text-gray-700">
+          No Employees Found
+        </Text>
+        <Text className="text-gray-500">
+          There are no active employees at the moment.
+        </Text>
+        <Text className="text-sm text-gray-400">
+          Click the &apos;Add Employee&apos; button above to get started.
+        </Text>
       </div>
     </div>
   );
 };
+
 const Page: React.FC = () => {
   const { data: employees, mutate, isLoading } = useEmployeesData();
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const router = useRouter();
 
   const handleEditEmployee = (employeeId: number) => {
-    router.push(`/employeemanagement/employees/edit-employee/${employeeId.toString()}`);
+    router.push(
+      `/employeemanagement/employees/edit-employee/${employeeId.toString()}`
+    );
   };
 
   const handleEmployeeUpdated = async () => {
@@ -52,7 +60,6 @@ const Page: React.FC = () => {
 
   const handleRowClick = (employee: Employee) => {
     setSelectedEmployee(employee);
-    setIsViewModalOpen(true);
   };
 
   const TableConfigurations = {
@@ -60,25 +67,44 @@ const Page: React.FC = () => {
       { uid: "name", name: "Name", sortable: true },
       { uid: "department", name: "Department", sortable: true },
       { uid: "position", name: "Position", sortable: true },
-      { uid: "contact", name: "Contact" },
+      {
+        uid: "contact",
+        name: "Contact",
+        cellRenderer: (employee: Employee) => (
+          <div className="flex flex-col">
+            <span className="break-all">{employee.email || "N/A"}</span>
+            {employee.contact_no && (
+              <span className="break-all">+63{employee.contact_no}</span>
+            )}
+          </div>
+        ),
+        cellStyle: {
+          maxWidth: 200,
+          "@media (max-width: 768px)": {
+            maxWidth: "100%",
+            whiteSpace: "normal",
+          },
+        },
+      },
       { uid: "hiredate", name: "Hired Date", sortable: true },
       { uid: "employmentstatus", name: "Employment Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
-      const cellClasses = "cursor-pointer hover:bg-gray-50";
 
       switch (key) {
         case "name":
           return (
             <div
-              className={`flex items-center gap-4 ${cellClasses}`}
+              className="flex items-center gap-4 cursor-pointer"
               onClick={() => handleRowClick(employee)}
             >
               <Avatar
                 src={employee.picture || ""}
-                alt={`${employee.prefix || ''} ${employee.first_name} ${employee.last_name}`}
+                alt={`${employee.prefix || ""} ${employee.first_name} ${
+                  employee.last_name
+                }`}
               />
               <span>
                 {employee.prefix && `${employee.prefix} `}
@@ -91,7 +117,7 @@ const Page: React.FC = () => {
         case "department":
           return (
             <div
-              className={cellClasses}
+              className="cursor-pointer"
               onClick={() => handleRowClick(employee)}
             >
               {employee.ref_departments?.name || "N/A"}
@@ -100,26 +126,29 @@ const Page: React.FC = () => {
         case "position":
           return (
             <div
-              className={cellClasses}
+              className="cursor-pointer"
               onClick={() => handleRowClick(employee)}
             >
               {employee.ref_job_classes?.name || "N/A"}
             </div>
           );
+
         case "contact":
           return (
             <div
-              className={`flex flex-col ${cellClasses}`}
+              className="flex flex-col cursor-pointer"
               onClick={() => handleRowClick(employee)}
             >
-              <span>{employee.email || "N/A"}</span>
-              <span>+63{employee.contact_no || "N/A"}</span>
+              <span className="break-all">{employee.email || "N/A"}</span>
+              {employee.contact_no && (
+                <span className="break-all">+63{employee.contact_no}</span>
+              )}
             </div>
           );
         case "hiredate":
           return (
             <div
-              className={cellClasses}
+              className="cursor-pointer"
               onClick={() => handleRowClick(employee)}
             >
               {employee.hired_at
@@ -130,35 +159,23 @@ const Page: React.FC = () => {
         case "employmentstatus":
           return (
             <div
-            className={cellClasses}
-            onClick={() => handleRowClick(employee)}
-          >
-            {employee.ref_employment_status?.name || "N/A"}
-          </div>
+              className="cursor-pointer"
+              onClick={() => handleRowClick(employee)}
+            >
+              {employee.ref_employment_status?.name || "N/A"}
+            </div>
           );
         case "actions":
           return (
             <TableActionButton
               name={`${employee.first_name} ${employee.last_name}`}
-            
-               
-                onEdit={() => handleEditEmployee(employee.id)}              
+              onEdit={() => handleEditEmployee(employee.id)}
             />
           );
         default:
           return <div>-</div>;
       }
     },
-  };
-
-  const sortProps = {
-    sortItems: [
-      { name: "First Name", key: "first_name" as keyof Employee },
-      { name: "Last Name", key: "last_name" as keyof Employee },
-      { name: "Created", key: "created_at" as keyof Employee },
-      { name: "Updated", key: "updated_at" as keyof Employee },
-      { name: "Hired Date", key: "hired_at" as keyof Employee },
-    ],
   };
 
   const FilterItems = [
@@ -169,22 +186,20 @@ const Page: React.FC = () => {
           key: "is_regular",
           value: true,
           name: "Regular",
-          uid: "probationary",
+          uid: "regular",
         },
         {
           key: "is_regular",
           value: false,
           name: "Probationary",
-          uid: "regular",
+          uid: "probationary",
         },
       ],
     },
     {
       category: "Department",
-      filtered: employees?.length 
-        ? Array.from(
-            new Set(employees.map((e) => e.ref_departments?.name))
-          )
+      filtered: employees?.length
+        ? Array.from(new Set(employees.map((e) => e.ref_departments?.name)))
             .filter(Boolean)
             .map((dept) => ({
               key: "ref_departments.name",
@@ -197,9 +212,7 @@ const Page: React.FC = () => {
     {
       category: "Job Position",
       filtered: employees?.length
-        ? Array.from(
-            new Set(employees.map((e) => e.ref_job_classes?.name))
-          )
+        ? Array.from(new Set(employees.map((e) => e.ref_job_classes?.name)))
             .filter(Boolean)
             .map((job) => ({
               key: "ref_job_classes.name",
@@ -211,9 +224,19 @@ const Page: React.FC = () => {
     },
   ];
 
+  const sortProps = {
+    sortItems: [
+      { name: "First Name", key: "first_name" as keyof Employee },
+      { name: "Last Name", key: "last_name" as keyof Employee },
+      { name: "Created", key: "created_at" as keyof Employee },
+      { name: "Updated", key: "updated_at" as keyof Employee },
+      { name: "Hired Date", key: "hired_at" as keyof Employee },
+    ],
+  };
+
   if (isLoading) {
     return (
-      <div className="h-[calc(100vh-150px)] overflow-hidden">
+      <section className="w-full h-full flex">
         <DataDisplay
           defaultDisplay="table"
           title="Active Employees"
@@ -221,11 +244,10 @@ const Page: React.FC = () => {
           isLoading={true}
           onTableDisplay={{
             config: TableConfigurations,
-            className: "h-full overflow-auto",
             layout: "auto",
           }}
         />
-      </div>
+      </section>
     );
   }
 
@@ -234,7 +256,7 @@ const Page: React.FC = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-150px)] overflow-hidden">
+    <section className="w-full h-full flex">
       <DataDisplay
         defaultDisplay="table"
         title="Active Employees"
@@ -245,7 +267,6 @@ const Page: React.FC = () => {
         isLoading={false}
         onTableDisplay={{
           config: TableConfigurations,
-          className: "h-full overflow-auto",
           layout: "auto",
         }}
         paginationProps={{
@@ -255,53 +276,17 @@ const Page: React.FC = () => {
           searchingItemKey: ["first_name", "last_name", "email", "contact_no"],
         }}
         sortProps={sortProps}
-        onListDisplay={(employee) => (
-          <div
-            className="w-full cursor-pointer"
-            onClick={() => handleRowClick(employee)}
-          >
-            <BorderCard className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-2">
-                  <Avatar
-                    src={employee.picture || ""}
-                    alt={`${employee.prefix || ''} ${employee.first_name} ${employee.last_name}`}
-                  />
-                  <div className="flex flex-col">
-                    <span className="font-medium">
-                      {employee.prefix && `${employee.prefix} `}
-                      {employee.first_name} {employee.last_name}
-                      {employee.suffix ? `, ${employee.suffix}` : ""}
-                      {employee.extension ? ` ${employee.extension}` : ""}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {employee.ref_departments?.name || "N/A"} -{" "}
-                      {employee.ref_job_classes?.name || "N/A"}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                </div>
-              </div>
-            </BorderCard>
-          </div>
-        )}
       />
 
       {selectedEmployee && (
         <ViewEmployee
-          isOpen={isViewModalOpen}
-          onClose={() => {
-            setIsViewModalOpen(false);
-            setSelectedEmployee(null);
-          }}
           employee={selectedEmployee}
+          onClose={() => setSelectedEmployee(null)}
           onEmployeeUpdated={handleEmployeeUpdated}
           sortedEmployees={employees}
         />
       )}
-
-    </div>
+    </section>
   );
 };
 
