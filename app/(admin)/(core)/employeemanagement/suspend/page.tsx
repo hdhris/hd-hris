@@ -74,8 +74,9 @@ const Page: React.FC = () => {
     }
   };
 
-  const handleRowClick = (employee: Employee) => {
-    setSelectedEmployee(employee);
+  const handleOnSelected = (key: React.Key) => {
+    const selected = suspendedEmployees?.find(item => item.id === Number(key));
+    setSelectedEmployee(selected ?? null);
   };
 
   const TableConfigurations = {
@@ -90,7 +91,6 @@ const Page: React.FC = () => {
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
-      const cellClasses = "cursor-pointer";
       const suspensionData =
         employee.suspension_json &&
         (typeof employee.suspension_json === "string"
@@ -100,10 +100,7 @@ const Page: React.FC = () => {
       switch (key) {
         case "name":
           return (
-            <div
-              className={`flex items-center gap-4 ${cellClasses}`}
-              onClick={() => handleRowClick(employee)}
-            >
+            <div className="flex items-center gap-4">
               <Avatar
                 src={employee.picture || ""}
                 alt={`${employee.first_name} ${employee.last_name}`}
@@ -116,20 +113,12 @@ const Page: React.FC = () => {
             </div>
           );
         case "department":
-          return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
-              {employee.ref_departments?.name || "N/A"}
-            </div>
-          );
+          return <div>{employee.ref_departments?.name || "N/A"}</div>;
         case "position":
-          return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
-              {employee.ref_job_classes?.name || "N/A"}
-            </div>
-          );
+          return <div>{employee.ref_job_classes?.name || "N/A"}</div>;
         case "suspendedDate":
           return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
+            <div>
               {suspensionData
                 ? dayjs(suspensionData.startDate).format("MMM DD, YYYY")
                 : "N/A"}
@@ -137,7 +126,7 @@ const Page: React.FC = () => {
           );
         case "endDate":
           return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
+            <div>
               {suspensionData
                 ? dayjs(suspensionData.endDate).format("MMM DD, YYYY")
                 : "N/A"}
@@ -145,10 +134,7 @@ const Page: React.FC = () => {
           );
         case "reason":
           return (
-            <div
-              className={`${cellClasses} max-w-md truncate`}
-              onClick={() => handleRowClick(employee)}
-            >
+            <div className="max-w-md truncate">
               {suspensionData
                 ? suspensionData.reason || suspensionData.suspensionReason
                 : "N/A"}
@@ -233,8 +219,8 @@ const Page: React.FC = () => {
         isLoading={false}
         onTableDisplay={{
           config: TableConfigurations,
-          className: "h-full overflow-auto",
           layout: "auto",
+          onRowAction: handleOnSelected
         }}
         paginationProps={{
           data_length: suspendedEmployees.length,
@@ -243,16 +229,17 @@ const Page: React.FC = () => {
           searchingItemKey: ["first_name", "last_name"],
         }}
         sortProps={sortProps}
+        onView={selectedEmployee && (
+          <div className="max-w-[500px] overflow-y-auto">
+            <ViewEmployee
+              employee={selectedEmployee}
+              onClose={() => setSelectedEmployee(null)}
+              onEmployeeUpdated={handleEmployeeUpdated}
+              sortedEmployees={suspendedEmployees}
+            />
+          </div>
+        )}
       />
-
-      {selectedEmployee && (
-        <ViewEmployee
-          employee={selectedEmployee}
-          onClose={() => setSelectedEmployee(null)}
-          onEmployeeUpdated={handleEmployeeUpdated}
-          sortedEmployees={suspendedEmployees}
-        />
-      )}
     </section>
   );
 };

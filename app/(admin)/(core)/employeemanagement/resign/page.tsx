@@ -73,8 +73,9 @@ const Page: React.FC = () => {
     }
   };
 
-  const handleRowClick = (employee: Employee) => {
-    setSelectedEmployee(employee);
+  const handleOnSelected = (key: React.Key) => {
+    const selected = resignedTerminatedEmployees?.find(item => item.id === Number(key));
+    setSelectedEmployee(selected ?? null);
   };
 
   const getEmployeeStatus = (employee: Employee) => {
@@ -124,16 +125,12 @@ const Page: React.FC = () => {
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
-      const cellClasses = "cursor-pointer";
       const status = getEmployeeStatus(employee);
 
       switch (key) {
         case "name":
           return (
-            <div
-              className={`flex items-center gap-4 ${cellClasses}`}
-              onClick={() => handleRowClick(employee)}
-            >
+            <div className={`flex items-center gap-4`}>
               <Avatar
                 src={employee.picture || ""}
                 alt={`${employee.first_name} ${employee.last_name}`}
@@ -146,20 +143,12 @@ const Page: React.FC = () => {
             </div>
           );
         case "department":
-          return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
-              {employee.ref_departments?.name || "N/A"}
-            </div>
-          );
+          return <div>{employee.ref_departments?.name || "N/A"}</div>;
         case "position":
-          return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
-              {employee.ref_job_classes?.name || "N/A"}
-            </div>
-          );
+          return <div>{employee.ref_job_classes?.name || "N/A"}</div>;
         case "type":
           return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
+            <div>
               <Chip color={status.color} size="sm" variant="flat">
                 {status.type}
               </Chip>
@@ -167,16 +156,13 @@ const Page: React.FC = () => {
           );
         case "date":
           return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
+            <div>
               {status.date ? dayjs(status.date).format("MMM DD, YYYY") : "N/A"}
             </div>
           );
         case "reason":
           return (
-            <div
-              className={`${cellClasses} max-w-md truncate`}
-              onClick={() => handleRowClick(employee)}
-            >
+            <div className={`max-w-md truncate`}>
               {status.reason || "N/A"}
             </div>
           );
@@ -256,7 +242,7 @@ const Page: React.FC = () => {
   }
 
   return (
-    <section className='w-full h-full flex gap-4 overflow-hidden'>
+    <section className='w-full h-full flex gap-4'>
       <DataDisplay
         defaultDisplay="table"
         title="Former Employees"
@@ -267,8 +253,8 @@ const Page: React.FC = () => {
         isLoading={false}
         onTableDisplay={{
           config: TableConfigurations,
-          className: "h-full overflow-auto",
           layout: "auto",
+          onRowAction: handleOnSelected
         }}
         paginationProps={{
           data_length: resignedTerminatedEmployees.length,
@@ -277,19 +263,19 @@ const Page: React.FC = () => {
           searchingItemKey: ["first_name", "last_name"],
         }}
         sortProps={sortProps}
+        onView={selectedEmployee && (
+          <div className="max-w-[500px] overflow-y-auto">
+            <ViewEmployee
+              employee={selectedEmployee}
+              onClose={() => setSelectedEmployee(null)}
+              onEmployeeUpdated={handleEmployeeUpdated}
+              sortedEmployees={resignedTerminatedEmployees}
+            />
+          </div>
+        )}
       />
-
-      {selectedEmployee && (
-        <ViewEmployee
-          employee={selectedEmployee}
-          onClose={() => setSelectedEmployee(null)}
-          onEmployeeUpdated={handleEmployeeUpdated}
-          sortedEmployees={resignedTerminatedEmployees}
-        />
-      )}
     </section>
   );
 };
 
 export default Page;
-

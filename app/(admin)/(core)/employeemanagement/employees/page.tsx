@@ -6,26 +6,19 @@ import { Avatar, Chip } from "@nextui-org/react";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import AddEmployee from "@/components/admin/employeescomponent/store/AddEmployees";
 import DataDisplay from "@/components/common/data-display/data-display";
-import BorderCard from "@/components/common/BorderCard";
 import Text from "@/components/Text";
 import dayjs from "dayjs";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation';
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 
 const EmptyState: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
       <div className="text-center space-y-3">
-        <Text className="text-xl font-bold text-gray-700">
-          No Employees Found
-        </Text>
-        <Text className="text-gray-500">
-          There are no active employees at the moment.
-        </Text>
-        <Text className="text-sm text-gray-400">
-          Click the &apos;Add Employee&apos; button above to get started.
-        </Text>
+        <Text className="text-xl font-bold text-gray-700">No Employees Found</Text>
+        <Text className="text-gray-500">There are no active employees at the moment.</Text>
+        <Text className="text-sm text-gray-400">Click the &apos;Add Employee&apos; button above to get started.</Text>
       </div>
     </div>
   );
@@ -33,15 +26,11 @@ const EmptyState: React.FC = () => {
 
 const Page: React.FC = () => {
   const { data: employees, mutate, isLoading } = useEmployeesData();
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
-    null
-  );
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const router = useRouter();
 
   const handleEditEmployee = (employeeId: number) => {
-    router.push(
-      `/employeemanagement/employees/edit-employee/${employeeId.toString()}`
-    );
+    router.push(`/employeemanagement/employees/edit-employee/${employeeId.toString()}`);
   };
 
   const handleEmployeeUpdated = async () => {
@@ -58,8 +47,9 @@ const Page: React.FC = () => {
     </div>
   ));
 
-  const handleRowClick = (employee: Employee) => {
-    setSelectedEmployee(employee);
+  const handleOnSelected = (key: React.Key) => {
+    const selected = employees?.find(item => item.id === Number(key));
+    setSelectedEmployee(selected ?? null);
   };
 
   const TableConfigurations = {
@@ -67,25 +57,7 @@ const Page: React.FC = () => {
       { uid: "name", name: "Name", sortable: true },
       { uid: "department", name: "Department", sortable: true },
       { uid: "position", name: "Position", sortable: true },
-      {
-        uid: "contact",
-        name: "Contact",
-        cellRenderer: (employee: Employee) => (
-          <div className="flex flex-col">
-            <span className="break-all">{employee.email || "N/A"}</span>
-            {employee.contact_no && (
-              <span className="break-all">+63{employee.contact_no}</span>
-            )}
-          </div>
-        ),
-        cellStyle: {
-          maxWidth: 200,
-          "@media (max-width: 768px)": {
-            maxWidth: "100%",
-            whiteSpace: "normal",
-          },
-        },
-      },
+      { uid: "contact", name: "Contact" },
       { uid: "hiredate", name: "Hired Date", sortable: true },
       { uid: "employmentstatus", name: "Employment Status", sortable: true },
       { uid: "actions", name: "Actions" },
@@ -96,15 +68,10 @@ const Page: React.FC = () => {
       switch (key) {
         case "name":
           return (
-            <div
-              className="flex items-center gap-4 cursor-pointer"
-              onClick={() => handleRowClick(employee)}
-            >
+            <div className="flex items-center gap-4">
               <Avatar
                 src={employee.picture || ""}
-                alt={`${employee.prefix || ""} ${employee.first_name} ${
-                  employee.last_name
-                }`}
+                alt={`${employee.prefix || ''} ${employee.first_name} ${employee.last_name}`}
               />
               <span>
                 {employee.prefix && `${employee.prefix} `}
@@ -115,42 +82,19 @@ const Page: React.FC = () => {
             </div>
           );
         case "department":
-          return (
-            <div
-              className="cursor-pointer"
-              onClick={() => handleRowClick(employee)}
-            >
-              {employee.ref_departments?.name || "N/A"}
-            </div>
-          );
+          return <div>{employee.ref_departments?.name || "N/A"}</div>;
         case "position":
-          return (
-            <div
-              className="cursor-pointer"
-              onClick={() => handleRowClick(employee)}
-            >
-              {employee.ref_job_classes?.name || "N/A"}
-            </div>
-          );
-
+          return <div>{employee.ref_job_classes?.name || "N/A"}</div>;
         case "contact":
           return (
-            <div
-              className="flex flex-col cursor-pointer"
-              onClick={() => handleRowClick(employee)}
-            >
-              <span className="break-all">{employee.email || "N/A"}</span>
-              {employee.contact_no && (
-                <span className="break-all">+63{employee.contact_no}</span>
-              )}
+            <div className="flex flex-col">
+              <span>{employee.email || "N/A"}</span>
+              <span>+63{employee.contact_no || "N/A"}</span>
             </div>
           );
         case "hiredate":
           return (
-            <div
-              className="cursor-pointer"
-              onClick={() => handleRowClick(employee)}
-            >
+            <div>
               {employee.hired_at
                 ? dayjs(employee.hired_at).format("MMM DD, YYYY")
                 : "N/A"}
@@ -158,10 +102,7 @@ const Page: React.FC = () => {
           );
         case "employmentstatus":
           return (
-            <div
-              className="cursor-pointer"
-              onClick={() => handleRowClick(employee)}
-            >
+            <div className="flex items-center justify-center">
               {employee.ref_employment_status?.name || "N/A"}
             </div>
           );
@@ -169,7 +110,7 @@ const Page: React.FC = () => {
           return (
             <TableActionButton
               name={`${employee.first_name} ${employee.last_name}`}
-              onEdit={() => handleEditEmployee(employee.id)}
+              onEdit={() => handleEditEmployee(employee.id)}              
             />
           );
         default:
@@ -180,26 +121,26 @@ const Page: React.FC = () => {
 
   const FilterItems = [
     {
-      category: "Work Status",
-      filtered: [
-        {
-          key: "is_regular",
-          value: true,
-          name: "Regular",
-          uid: "regular",
-        },
-        {
-          key: "is_regular",
-          value: false,
-          name: "Probationary",
-          uid: "probationary",
-        },
-      ],
+      category: "Employee status",
+      filtered: employees?.length 
+        ? Array.from(
+            new Set(employees.map((e) => e.ref_employment_status?.name))
+          )
+            .filter(Boolean)
+            .map((empstat) => ({
+              key: "ref_employment_status.name",
+              value: empstat || "",
+              name: empstat || "",
+              uid: empstat|| "",
+            }))
+        : [],
     },
     {
       category: "Department",
-      filtered: employees?.length
-        ? Array.from(new Set(employees.map((e) => e.ref_departments?.name)))
+      filtered: employees?.length 
+        ? Array.from(
+            new Set(employees.map((e) => e.ref_departments?.name))
+          )
             .filter(Boolean)
             .map((dept) => ({
               key: "ref_departments.name",
@@ -212,7 +153,9 @@ const Page: React.FC = () => {
     {
       category: "Job Position",
       filtered: employees?.length
-        ? Array.from(new Set(employees.map((e) => e.ref_job_classes?.name)))
+        ? Array.from(
+            new Set(employees.map((e) => e.ref_job_classes?.name))
+          )
             .filter(Boolean)
             .map((job) => ({
               key: "ref_job_classes.name",
@@ -236,7 +179,7 @@ const Page: React.FC = () => {
 
   if (isLoading) {
     return (
-      <section className="w-full h-full flex">
+      <section className='w-full h-full flex'>
         <DataDisplay
           defaultDisplay="table"
           title="Active Employees"
@@ -244,7 +187,7 @@ const Page: React.FC = () => {
           isLoading={true}
           onTableDisplay={{
             config: TableConfigurations,
-            layout: "auto",
+            layout: "auto"
           }}
         />
       </section>
@@ -254,9 +197,8 @@ const Page: React.FC = () => {
   if (!employees || employees.length === 0) {
     return <EmptyState />;
   }
-
   return (
-    <section className="w-full h-full flex">
+    <section className='w-full h-full flex gap-4'>
       <DataDisplay
         defaultDisplay="table"
         title="Active Employees"
@@ -268,6 +210,7 @@ const Page: React.FC = () => {
         onTableDisplay={{
           config: TableConfigurations,
           layout: "auto",
+          onRowAction: handleOnSelected
         }}
         paginationProps={{
           data_length: employees.length,
@@ -276,16 +219,17 @@ const Page: React.FC = () => {
           searchingItemKey: ["first_name", "last_name", "email", "contact_no"],
         }}
         sortProps={sortProps}
+        onView={selectedEmployee && (
+          <div className="max-w-[500px] overflow-y-auto">
+          <ViewEmployee
+            employee={selectedEmployee}
+            onClose={() => setSelectedEmployee(null)}
+            onEmployeeUpdated={handleEmployeeUpdated}
+            sortedEmployees={employees}
+          />
+          </div>
+        )}
       />
-
-      {selectedEmployee && (
-        <ViewEmployee
-          employee={selectedEmployee}
-          onClose={() => setSelectedEmployee(null)}
-          onEmployeeUpdated={handleEmployeeUpdated}
-          sortedEmployees={employees}
-        />
-      )}
     </section>
   );
 };
