@@ -112,57 +112,58 @@ function DataDisplayControl<T>({
     }
 
     return (<div className={cn("flex flex-col h-full w-full px-2", className?.wrapper)}>
-        <div className={cn("sticky top-0 z-10 pb-3 flex justify-between items-center", className?.upper)}>
-            <div className="flex justify-start items-center gap-3">
-                {searchProps &&
-                    <Search value={searchValue} onChange={handleOnSearch} {...searchProps} className="flex-1"/>}
-                {filterProps && <Filter
-                    filterValue={filter}
-                    onChange={handleOnFilterChange}
-                    {...filterProps!}
-                />}
-                {sortProps && <Sort
-                    onSortChange={onSortChange}
-                    initialValue={sortDescriptor}
-                    {...sortProps}
-                />}
-                {addFunction && addFunction}
-            </div>
-            <div className="flex justify-end gap-3">
-                <DataMigration onImport={onImport!} onExport={onExport!}/>
+        <div className="w-full overflow-x-auto mb-2">
+            <div className={cn("sticky top-0 z-10 pb-3 flex justify-between items-center", className?.upper)}>
+                <div className="flex justify-start items-center gap-3">
+                    {searchProps && <Search value={searchValue} onChange={handleOnSearch} {...searchProps}/>}
+                    {filterProps && <Filter
+                        filterValue={filter}
+                        onChange={handleOnFilterChange}
+                        {...filterProps!}
+                    />}
+                    {sortProps && <Sort
+                        onSortChange={onSortChange}
+                        initialValue={sortDescriptor}
+                        {...sortProps}
+                    />}
+                    {addFunction && addFunction}
+                </div>
+                <div className="flex justify-end gap-3">
+                    <DataMigration onImport={onImport!} onExport={onExport!}/>
+                </div>
             </div>
         </div>
-        <div className="flex justify-between pb-3 items-center">
-            {title && <Typography className="text-medium font-semibold text-primary/50">
-                <CountUp start={0} end={paginationProps?.data_length || 0} prefix="Total of " suffix={` ${title}`}/>
-                {/*{ title ? Total < CountUp start={0} end={values.length}/>}*/}
-                {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
-            </Typography>}
-            {paginationProps && <div className="flex mr-0 ml-auto items-center gap-2">
-                <Typography className="text-medium font-semibold text-primary/50">
-                    Show
-                </Typography>
-                <Select
-                    aria-label="Rows Per Page"
-                    className="w-[75px]"
-                    size="sm"
-                    radius="md"
-                    variant="bordered"
-                    color="primary"
-                    selectedKeys={new Set([String(rows)])}
-                    onSelectionChange={handleOnRowsPerPageChange}
-                    {...rowSelectionProps}
-                >
-                    <SelectItem key={5}>5</SelectItem>
-                    <SelectItem key={10}>10</SelectItem>
-                    <SelectItem key={15}>15</SelectItem>
-                    <SelectItem key={20}>20</SelectItem>
-                </Select>
-                <Typography className="text-medium font-semibold text-primary/50">
-                    entries
-                </Typography>
-            </div>}
-        </div>
+            <div className="flex justify-between pb-3 items-center">
+                {title && <Typography className="text-medium font-semibold text-primary/50">
+                    <CountUp start={0} end={paginationProps?.data_length || 0} prefix="Total of " suffix={` ${title}`}/>
+                    {/*{ title ? Total < CountUp start={0} end={values.length}/>}*/}
+                    {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
+                </Typography>}
+                {paginationProps && <div className="flex mr-0 ml-auto items-center gap-2">
+                    <Typography className="text-medium font-semibold text-primary/50">
+                        Show
+                    </Typography>
+                    <Select
+                        aria-label="Rows Per Page"
+                        className="w-[75px]"
+                        size="sm"
+                        radius="md"
+                        variant="bordered"
+                        color="primary"
+                        selectedKeys={new Set([String(rows)])}
+                        onSelectionChange={handleOnRowsPerPageChange}
+                        {...rowSelectionProps}
+                    >
+                        <SelectItem key={5}>5</SelectItem>
+                        <SelectItem key={10}>10</SelectItem>
+                        <SelectItem key={15}>15</SelectItem>
+                        <SelectItem key={20}>20</SelectItem>
+                    </Select>
+                    <Typography className="text-medium font-semibold text-primary/50">
+                        entries
+                    </Typography>
+                </div>}
+            </div>
 
         {children(items, sortDescriptor, onSortChange)}
 
@@ -179,15 +180,16 @@ function DataDisplayControl<T>({
                     </Button>)}
             </div>
             {/* Pagination centered */}
-            {paginationProps && values.length > 0 && <div className={cn("flex-1 flex justify-center", className?.lower?.paginationClassname)}>
-                <Pagination
-                    showControls
-                    total={totalPages}
-                    page={page}
-                    onChange={onPageChange}
-                    {...paginationProps}
-                />
-            </div>}
+            {paginationProps && values.length > 0 &&
+                <div className={cn("flex-1 flex justify-center", className?.lower?.paginationClassname)}>
+                    <Pagination
+                        showControls
+                        total={totalPages}
+                        page={page}
+                        onChange={onPageChange}
+                        {...paginationProps}
+                    />
+                </div>}
 
             <div className={cn("flex justify-end", className?.lower?.buttonClassname)}>
                 {displayMethods > 1 && (<ButtonGroup variant="light" color="primary" isIconOnly {...buttonGroupProps}>
