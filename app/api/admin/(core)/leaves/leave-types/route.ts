@@ -18,7 +18,8 @@ export async function GET(request: Request) {
 
 
         // Fetch employee counts and employee details concurrently
-        const [data, total_items, employeeCountData, employees] = await Promise.all([prisma.ref_leave_type_details.findMany({
+        const [data, total_items, employeeCountData, employees] = await Promise.all([
+            prisma.ref_leave_type_details.findMany({
             where: {
                 trans_leave_types: {
                     some: {
@@ -39,7 +40,6 @@ export async function GET(request: Request) {
                 updated_at: "desc"
             }, take: perPage, skip: (page - 1) * perPage
         }),
-
             prisma.ref_leave_type_details.count({
                 where: {
                     trans_leave_types: {
@@ -48,7 +48,8 @@ export async function GET(request: Request) {
                         }
                     }
                 },
-            }), prisma.trans_leaves.groupBy({
+            }),
+            prisma.trans_leaves.groupBy({
                 by: ["leave_type_id", "employee_id"],
             }), prisma.trans_employees.findMany({
                 select: {
@@ -67,15 +68,16 @@ export async function GET(request: Request) {
 
         // console.log("Data: ", data)
 
-// Create a map for current employees by type_id for faster lookup
+        // Create a map for current employees by type_id for faster lookup
         const employeeMap = new Map<number, number[]>();
 
-// Populate the map with employee IDs grouped by type_id
+        // Populate the map with employee IDs grouped by type_id
         employeeCountData.forEach(empCount => {
             if (empCount.leave_type_id !== null && empCount.employee_id !== null) {
                 const typeId = empCount.leave_type_id as number;
-                const employeeId = empCount.employee_id as number;
 
+
+                const employeeId = empCount.employee_id as number;
                 // If the map already has this type_id, push the employee_id to the existing array
                 if (employeeMap.has(typeId)) {
                     employeeMap.get(typeId)?.push(employeeId);
@@ -83,26 +85,27 @@ export async function GET(request: Request) {
                     // Otherwise, create a new array with the employee_id
                     employeeMap.set(typeId, [employeeId]);
                 }
+
             }
         });
 
-
         // Map the leave types with current employee details
         const result = data.map(leaveType => {
-            const currentEmployeesIds = employeeMap.get(leaveType.id) || [];
-            const empAvails = employees.filter(employee => currentEmployeesIds.includes(employee.id)).map((emp) => {
+            let empId: number[] = []
+            leaveType.trans_leave_types.forEach(item => {
+                const employee_id = employeeMap.get(item.id) || null
+                if(employee_id !== null){
+                    empId = [...employee_id]
+                }
+            })
+
+            const empAvails = employees.filter(employee => empId.includes(employee.id)).map((emp) => {
                 return {
                     id: emp.id, name: getEmpFullName(emp), picture: emp.picture
                 }
 
             });
 
-            // const employmentStatus = leaveType.trans_leave_types.filter(item => item.ref_employment_status);
-            // if (employmentStatus) {
-            //     logger.debug(employmentStatus);
-            // } else {
-            //     logger.debug("No matching employment status found");
-            // }
             return {
                 id: leaveType.id,
                 name: leaveType.name,

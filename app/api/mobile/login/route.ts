@@ -26,7 +26,17 @@ export async function POST(req: NextRequest) {
         where: {
           email: credential?.trans_users.email
         },
-        ...emp_rev_include.employee_detail,
+        select: {
+          ...emp_rev_include.employee_detail.select,
+          dim_schedules: {
+            where: {
+              end_date: null,
+            },
+            include: {
+              ref_batch_schedules: true,
+            }
+          }
+        }
       });
 
       return NextResponse.json(user);

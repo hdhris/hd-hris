@@ -122,7 +122,7 @@ function LeaveTypeTable() {
     // }
 
 
-    return (<section className='w-full h-full flex gap-4'>
+    return (
         <DataDisplay
             title="Leave Types"
             data={leaveData}
@@ -165,10 +165,8 @@ function LeaveTypeTable() {
             //         title: "Import",
             //     }
             // }}
-            defaultDisplay="table"/>
-
-        <LeaveTypesDetails {...leaveType!} onClose={() => setLeaveType(undefined)}/>
-    </section>);
+            onView={<LeaveTypesDetails {...leaveType!} onClose={() => setLeaveType(undefined)}/>}
+            defaultDisplay="table"/>);
 }
 
 export default LeaveTypeTable;

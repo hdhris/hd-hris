@@ -1,54 +1,35 @@
-export type EvaluatorsTypes = {
-    approver: {
-        approved_by: {
-            id: string; // Unique ID for the approval
-            employee_id: number; // ID of the employee who is the approver
-            name: string;
-            picture: string;
-            email: string | null
-        }
-        decision: {
-            is_approved: boolean | null; // Indicates whether the request is approved (null if undecided)
-            rejectedReason: string | null; // Reason for rejection (null if not rejected)
-            decisionDate: Date | null; // Date the decision was made (null if not decided yet)
-        };
-        comments: string; // Comments from the approver (e.g., "Awaiting final approval")
-    };
-    reviewers?: { // A single reviewer object, not an array
-        reviewed_by: {
-            id: string; // Unique ID for the reviewer
-            employee_id: number; // ID of the employee who is the approver
-            name: string;
-            picture: string;
-            email: string | null
-        }
-        decision: {
-            is_reviewed: boolean | null; // Indicates whether the request has been reviewed (null if not reviewed)
-            rejectedReason: string | null; // Reason for rejection (null if not rejected)
-            decisionDate: Date | null; // Date the review decision was made (null if not reviewed yet)
-        };
-        comments: string; // Comments from the reviewer (e.g., "Leave request complies with company policy")
-    };
-};
-
+interface User {
+    id: number;
+    name: string;
+    role: string;
+    email: string;
+    picture?: string; // Optional as some users may not have a picture
+    employee_id?: number; // Optional to account for missing data
+}
 
 interface Decision {
-    is_approved?: boolean | null;
-    is_reviewed?: boolean | null;
-    decisionDate: string | null;
+    is_decided: boolean | null;
+    decisionDate: Date | null;
     rejectedReason: string | null;
 }
 
-interface User {
-    id: string;
-    name: string;
-    email?: string;
-    picture: string;
-    employee_id?: number;
-    role: "approver" | "reviewer" | "applicant";
+export interface Evaluator {
+    role: string;
+    decision: Decision;
+    evaluated_by: number; // Reference to a user (employee_id)
+    order_number: number;
 }
 
-interface Comment {
+export interface Evaluations {
+    users: User[];
+    comments: Comment[]; // Assuming comments is a string array, can be updated if further details are provided
+    evaluators: Evaluator[];
+    is_automatic_approved: boolean;
+}
+
+export interface Comment {
+    applicant_email: string
+    leave_id: number
     id: string;
     author: string; // Reference to a User ID
     timestamp: string;
@@ -56,22 +37,9 @@ interface Comment {
     replies: Reply[];
 }
 
-interface Reply {
+export interface Reply {
     id: string;
     author: string; // Reference to a User ID
     timestamp: string;
     message: string;
-}
-
-export interface LeaveApplicationEvaluation {
-    approver: {
-        decision: Decision;
-        approved_by: string; // Reference to a User ID
-    };
-    reviewers: {
-        decision: Decision;
-        reviewed_by: string; // Reference to a User ID
-    };
-    users: User[];
-    comments: Comment[];
 }

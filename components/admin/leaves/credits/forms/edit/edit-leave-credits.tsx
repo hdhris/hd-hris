@@ -91,6 +91,8 @@ function EditLeaveCredits({employee, isOpen, onOpen}: EditLeaveCreditsProps) {
                     leave_type_id: Number(item.leave_type_id), // Convert leave_type_id to a number
                     allocated_days: formLeave!.allocated_days, // Take updated allocated_days
                     carry_forward_days: formLeave!.carry_forward_days, // Take updated carry_forward_days
+                    used_days: item.used_days,
+                    remaining_days: item.remaining_days,
                 };
             });
 

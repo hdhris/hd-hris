@@ -1,12 +1,13 @@
 import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
-import dayjs from "dayjs";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
+// import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
 import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
+import {Evaluations} from "@/types/leaves/leave-evaluators-types";
+import dayjs from "dayjs";
 
 export const dynamic = "force-dynamic"
 
@@ -65,18 +66,18 @@ export async function GET(request: Request) {
 
 
     const employees_request: LeaveRequest[] = data.map(items => {
-        const evaluators = processJsonObject<LeaveApplicationEvaluation>(items.evaluators)!
-        const approverDecision = evaluators.approver.decision.is_approved;
-        const reviewerDecision = evaluators.reviewers?.decision.is_reviewed;
+        // const evaluators = processJsonObject<LeaveApplicationEvaluations>(items.evaluators)!
+        // const approverDecision = evaluators.approver.decision.is_approved;
+        // const reviewerDecision = evaluators.reviewers?.decision.is_reviewed;
 
-// Determine the status based on the decisions
-        let status = "Approved"; // Default status is "Approved"
-
-        if (approverDecision === null || reviewerDecision === null) {
-            status = "Pending"; // If either the approver or reviewer has not made a final decision
-        } else if (!approverDecision || !reviewerDecision) {
-            status = "Rejected"
-        }
+        // // Determine the status based on the decisions
+        // let status = "Approved"; // Default status is "Approved"
+        //
+        // if (approverDecision === null || reviewerDecision === null) {
+        //     status = "Pending"; // If either the approver or reviewer has not made a final decision
+        // } else if (!approverDecision || !reviewerDecision) {
+        //     status = "Rejected"
+        // }
 
         return {
             id: items.id,
@@ -91,24 +92,23 @@ export async function GET(request: Request) {
                 name: getEmpFullName(items.trans_employees_trans_leaves_created_byTotrans_employees)
             },
             leave_details: {
-                start_date: toGMT8(items.start_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
-                end_date: toGMT8(items.end_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
+                start_date: dayjs(items.start_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
+                end_date: dayjs(items.end_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
                 reason: items.reason || "",
                 status: items.status as "Approved" | "Pending" | "Rejected",
                 total_days: formatDaysToReadableTime(items.total_days.toNumber()),
-                created_at: dayjs(items.created_at).format("YYYY-MM-DD"),
-                updated_at: dayjs(items.updated_at).format("YYYY-MM-DD"),
+                created_at: toGMT8(items.created_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
+                updated_at: toGMT8(items.updated_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
             },
             leave_type: {
                 id: items.trans_leave_types?.ref_leave_type_details?.id!,
                 name: items.trans_leave_types?.ref_leave_type_details?.name || "",
                 code: items.trans_leave_types?.ref_leave_type_details?.code || ""
             },
-            evaluators: processJsonObject<LeaveApplicationEvaluation>(items.evaluators)!,
+            evaluators: processJsonObject<Evaluations>(items.evaluators)!,
         }
 
     })
-
 
 
     return NextResponse.json({

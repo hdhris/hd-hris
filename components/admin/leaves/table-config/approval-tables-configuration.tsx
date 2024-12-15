@@ -44,26 +44,26 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
         // }
 
 
-        const evaluators = []
-        const is_approved = item.evaluators.approver.decision.is_approved
-        const is_reviewed = item.evaluators.reviewers?.decision.is_reviewed
-        if (is_approved) {
-            const approver = item.evaluators.approver.approved_by
-            const approved_by = item.evaluators.users.find(item => item.id === approver)
-            const approver_data = {
-                type: "Approved", ...approved_by
-            }
-            evaluators.push(approver_data)
-        }
-
-        if (is_reviewed) {
-            const reviewer = item.evaluators.reviewers.reviewed_by
-            const reviewed_by = item.evaluators.users.find(item => item.id === reviewer)
-            const reviewer_data = {
-                type: "Reviewed", ...reviewed_by
-            }
-            evaluators.push(reviewer_data)
-        }
+        // const evaluators = []
+        // const is_approved = item.evaluators.approver.decision.is_approved
+        // const is_reviewed = item.evaluators.reviewers?.decision.is_reviewed
+        // if (is_approved) {
+        //     const approver = item.evaluators.approver.approved_by
+        //     const approved_by = item.evaluators.users.find(item => item.id === approver)
+        //     const approver_data = {
+        //         type: "Approved", ...approved_by
+        //     }
+        //     evaluators.push(approver_data)
+        // }
+        //
+        // if (is_reviewed) {
+        //     const reviewer = item.evaluators.reviewers.reviewed_by
+        //     const reviewed_by = item.evaluators.users.find(item => item.id === reviewer)
+        //     const reviewer_data = {
+        //         type: "Reviewed", ...reviewed_by
+        //     }
+        //     evaluators.push(reviewer_data)
+        // }
         // const leave_status = item.
         // const cellValue = item[columnKey as keyof LeaveRequest];
         return (<Switch expression={columnKey as string}>
@@ -100,17 +100,17 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
             </Case>
             <Case of="evaluated_by">
                 <div className="flex">
-                    <AvatarGroup>
-                        {evaluators.length > 0 ? evaluators.map((evaluator, index) => {
-                            return (
+                    {/*<AvatarGroup>*/}
+                    {/*    {evaluators.length > 0 ? evaluators.map((evaluator, index) => {*/}
+                    {/*        return (*/}
 
-                                <Tooltip key={index} content={evaluator.type + " - " + evaluator.name}>
-                                    <Avatar isBordered size="sm" src={evaluator.picture}/>
-                                </Tooltip>
+                    {/*            <Tooltip key={index} content={evaluator.type + " - " + evaluator.name}>*/}
+                    {/*                <Avatar isBordered size="sm" src={evaluator.picture}/>*/}
+                    {/*            </Tooltip>*/}
 
-                            )
-                        }) : null}
-                    </AvatarGroup>
+                    {/*        )*/}
+                    {/*    }) : null}*/}
+                    {/*</AvatarGroup>*/}
                 </div>
             </Case>
             {/*<Case of="status">*/}

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/prisma/prisma";
+import {toGMT8} from "@/lib/utils/toGMT8";
+import { Decimal } from "@prisma/client/runtime/library";
+import { Prisma } from "@prisma/client";
 
 // Define the Zod schema for LeaveCreditUpdate validation
 const LeaveCreditUpdateSchema = z.array(
@@ -22,19 +25,24 @@ export async function POST(req: NextRequest) {
         const data = await req.json();
 
         // Validate the incoming data against the Zod schema
+
         const parsedData = LeaveCreditUpdateSchema.parse(data);
 
 
         // Perform individual updates for each record
-        for (const item of parsedData) {
+        console.log("Data: ", data)
+        for (const item of data) {
+            console.log("Remaining: ", item.remaining_days)
+            console.log("Used Days: ", item.used_days)
+            console.log("Allocated: ", item.allocated_days)
             await prisma.dim_leave_balances.update({
                 where: { id: item.id },
                 data: {
                     year: new Date().getFullYear(),
                     allocated_days: item.allocated_days,
-                    remaining_days: item.allocated_days,
+                    remaining_days: new Prisma.Decimal(item.allocated_days).minus(item.used_days ?? 0),
                     carry_forward_days: item.carry_forward_days ?? 0,
-                    updated_at: new Date(),
+                    updated_at: toGMT8().toISOString(),
                 },
             });
         }
