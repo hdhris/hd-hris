@@ -7,6 +7,7 @@ import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
 import {Evaluations} from "@/types/leaves/leave-evaluators-types";
+import dayjs from "dayjs";
 
 export const dynamic = "force-dynamic"
 
@@ -96,8 +97,8 @@ export async function GET(request: Request) {
                 reason: items.reason || "",
                 status: items.status as "Approved" | "Pending" | "Rejected",
                 total_days: formatDaysToReadableTime(items.total_days.toNumber()),
-                created_at: toGMT8(items.created_at).format("YYYY-MM-DD hh:mm A"),
-                updated_at: toGMT8(items.updated_at).format("YYYY-MM-DD hh:mm A"),
+                created_at: toGMT8(items.created_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
+                updated_at: toGMT8(items.updated_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
             },
             leave_type: {
                 id: items.trans_leave_types?.ref_leave_type_details?.id!,
