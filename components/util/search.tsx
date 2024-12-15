@@ -12,7 +12,7 @@ function Search<T>({value, onChange, searchingItemKey, ...rest}: SearchProps<T>)
         {...rest}
         variant="bordered"
         radius="md"
-        className={cn("w-[250px] lg:w-[400px]", rest.className)}
+        className={cn("w-[250px] xl:w-[400px]", rest.className)}
         placeholder={Array.isArray(searchingItemKey) && searchingItemKey.length > 0 ? `Search by ${searchingItemKey
             .map((item) => {
                 // Convert nested keys array into dot-notation string

@@ -112,7 +112,7 @@ function DataDisplayControl<T>({
     }
 
     return (<div className={cn("flex flex-col h-full w-full px-2", className?.wrapper)}>
-        <div className="w-full overflow-x-auto mb-2">
+        <div className="w-full overflow-x-auto overflow-y-hidden mb-2">
             <div className={cn("sticky top-0 z-10 pb-3 flex justify-between items-center", className?.upper)}>
                 <div className="flex justify-start items-center gap-3">
                     {searchProps && <Search value={searchValue} onChange={handleOnSearch} {...searchProps}/>}
