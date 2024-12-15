@@ -338,17 +338,12 @@ model ref_training_programs {
 }
 
 model sys_notifications {
-  id              Int              @id @default(autoincrement())
-  employee_id     Int?
-  content         String?
-  seen_at         DateTime?        @db.Timestamp(6)
-  read_at         DateTime?        @db.Timestamp(6)
-  created_at      DateTime?        @db.Timestamp(6)
-  deleted_at      DateTime?        @db.Timestamp(6)
-  updated_at      DateTime?        @db.Timestamp(6)
-  trans_employees trans_employees? @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_notification_employees1")
-
-  @@index([deleted_at, employee_id])
+  id                  Int                 @id @default(autoincrement())
+  notification_id     Int
+  read_at             DateTime?           @db.Timestamp(6)
+  created_at          DateTime            @db.Timestamp(6)
+  deleted_at          DateTime?           @db.Timestamp(6)
+  trans_notifications trans_notifications @relation(fields: [notification_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model sys_privileges {
@@ -509,7 +504,6 @@ model trans_employees {
   ref_training_programs                                                  ref_training_programs[]
   sys_help_report_sys_help_report_reporter_idTotrans_employees           sys_help_report[]              @relation("sys_help_report_reporter_idTotrans_employees")
   sys_help_report_sys_help_report_reviewer_idTotrans_employees           sys_help_report[]              @relation("sys_help_report_reviewer_idTotrans_employees")
-  sys_notifications                                                      sys_notifications[]
   sys_variables                                                          sys_variables?
   trans_attendance_details                                               trans_attendance_details[]
   trans_cash_advances_trans_cash_advances_employee_idTotrans_employees   trans_cash_advances[]          @relation("trans_cash_advances_employee_idTotrans_employees")
@@ -571,6 +565,7 @@ model trans_overtimes {
   comment                              String?
   rendered_mins                        Int?
   deleted_at                           DateTime?        @db.Timestamp(6)
+  evaluators                           Json?
   trans_employees_overtimes            trans_employees? @relation("trans_overtimes_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_overtime_employee_employee_id")
   trans_employees_overtimes_approvedBy trans_employees? @relation("trans_overtimes_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_overtimes_trans_employees_2")
 }
@@ -610,6 +605,7 @@ model trans_users {
   acl_user_access_control acl_user_access_control?
   auth_accounts           auth_accounts[]
   auth_credentials        auth_credentials?
+  trans_notifications     trans_notifications[]
 }
 
 model trans_payrolls {
@@ -865,4 +861,35 @@ model trans_signatories {
   ref_signatory_roles       ref_signatory_roles @relation(fields: [signatory_role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([deleted_at])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_notification_priorities {
+  id            BigInt @id @default(autoincrement())
+  priority_name String
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ref_notification_types {
+  id                  Int                   @id @default(autoincrement())
+  type_name           String                @db.VarChar
+  description         String
+  trans_notifications trans_notifications[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model trans_notifications {
+  id                     Int                    @id @default(autoincrement())
+  title                  String
+  message                String
+  notification_types_id  Int
+  status                 String                 @db.VarChar
+  timestamp              DateTime               @db.Timestamp(6)
+  user_id                String
+  created_at             DateTime               @default(now()) @db.Timestamptz(6)
+  sys_notifications      sys_notifications[]
+  ref_notification_types ref_notification_types @relation(fields: [notification_types_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  trans_users            trans_users            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
