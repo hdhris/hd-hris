@@ -39,7 +39,7 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
   return await prisma.$transaction(
     async (tx) => {
       try {
-        // Step 1: Check if username or email already exists
+
         const existingUser = await tx.trans_users.findFirst({
           where: {
             OR: [
@@ -53,7 +53,6 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
           throw new Error("Username or email already exists");
         }
 
-        // Step 2: Create user account and credentials
         const newUser = await tx.trans_users.create({
           data: {
             name: employee.first_name,
@@ -69,7 +68,7 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
           },
         });
 
-        // Step 3: Create employee record
+    
         const educationalBackground = parseJsonInput(educational_bg_json);
         const familyBackground = parseJsonInput(family_bg_json);
 
@@ -87,7 +86,7 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
           },
         });
 
-        // NEW Step: Create access control record
+       
         await tx.acl_user_access_control.create({
           data: {
             employee_id: newEmployee.id,
@@ -97,7 +96,7 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
           }
         });
 
-        // Step 4: Handle job and department connections
+        
         if (job_id) {
           await tx.trans_employees.update({
             where: { id: newEmployee.id },
@@ -225,6 +224,14 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
 
+    if (error instanceof Error && error.message === "Username or email already exists") {
+      return NextResponse.json(
+        {
+          message: "Username or email already exists",
+        },
+        { status: 409 }
+      );
+    }
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       switch (error.code) {
         case "P2002":

@@ -16,7 +16,7 @@ const genderOptions = [
   { value: "M", label: "Male" },
   { value: "F", label: "Female" },
 ];
-//
+
 const suffixOptions = [
   { value: "Jr.", label: "Jr." },
   { value: "Sr.", label: "Sr." },
@@ -332,7 +332,7 @@ const PersonalInformationForm = () => {
       },
     },
     {
-      name: "mothers_last_name",
+      name: "guardian_last_name",
       label: "Guardian's last name",
       type: "text",
       config: {

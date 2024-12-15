@@ -16,7 +16,7 @@ const departmentSchema = z.object({
 });
 
 async function checkDuplicateName(name: string, excludeId?: number) {
-  const existingJob = await prisma.ref_departments.findFirst({
+  const existingDept = await prisma.ref_departments.findFirst({
     where: {
       name: {
         equals: name,
@@ -26,7 +26,7 @@ async function checkDuplicateName(name: string, excludeId?: number) {
       id: excludeId ? { not: excludeId } : undefined,
     },
   });
-  return existingJob;
+  return existingDept;
 }
 
 function handleError(error: unknown, operation: string) {
