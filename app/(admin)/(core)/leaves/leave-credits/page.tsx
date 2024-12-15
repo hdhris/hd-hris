@@ -86,7 +86,8 @@ function Page() {
     }
 
 
-    return (<section className='w-full h-full flex gap-4 overflow-hidden'>
+    return (
+        <>
         <DataDisplay
             // onSelect={(key) => alert(Number(key))}
             addFunction={<DropdownList
@@ -148,68 +149,68 @@ function Page() {
                     title: "Import",
                 }
             }}
+            onView={viewCredit && <CardView
+                title="Leave Credit"
+                onClose={() => setViewCredit(undefined)}
+                onEdit={() => onEditOpenDrawer(viewCredit)}
+                header={<div className="flex flex-row items-center space-x-4 pb-2">
+                    <User name={<div className="flex gap-2">
+                        <Typography>{viewCredit.name}</Typography>
+                        <Chip
+                            {...uniformChipStyle(viewCredit.employment_status)}
+                            variant="bordered"
+                        >{capitalize(viewCredit.employment_status)}</Chip>
+                    </div>}
+                          description={viewCredit.department}
+                          classNames={{
+                              name: "text-medium font-semibold", description: "text-sm font-semibold text-default-400/80"
+                          }}
+                          avatarProps={{
+                              src: viewCredit.picture!
+                          }}/>
+
+                </div>}
+
+                body={<div className="space-y-4">
+                    <Accordion showDivider={false} defaultSelectedKeys={["0"]} aria-label="Leave Credits"
+                               aria-labelledby="Leave Credits">
+                        {viewCredit.leave_credits && viewCredit.leave_credits?.length > 0 ? (viewCredit.leave_credits.map((leave, index) => {
+                            const percent = (leave.remaining_days / leave.allocated_days) * 100;
+                            const color = percent > 75 ? "success" : percent > 50 ? "warning" : "danger";
+
+                            return (<AccordionItem
+                                aria-labelledby="Leave Credits"
+                                className="overflow-hidden"
+                                key={index}
+                                aria-label={leave.leave_type.name}
+                                title={<>
+                                    <div className="flex justify-between text-sm">
+                                        <span>{leave.leave_type.name}</span>
+                                        <CountUp start={0} end={percent} suffix=" %"/>
+                                    </div>
+                                    <Progress aria-label="Leave Credit Progress" color={color} value={percent}
+                                              className="h-2"/>
+                                </>}
+                            >
+                                <CardTable data={[{
+                                    label: "Allocated Days", value: leave.allocated_days
+                                }, {label: "Remaining Days", value: leave.remaining_days}, {
+                                    label: "Used Days", value: leave.used_days
+                                }, {
+                                    label: "Carry Forward", value: leave.carry_forward_days
+                                },]}/>
+                            </AccordionItem>);
+                        })) : (<NoData message="No Leave Credit"/>)}
+                    </Accordion>
+
+                </div>}
+                footer={<></>}
+
+            />}
         />
 
-        {viewCredit && <CardView
-            title="Leave Credit"
-            onClose={() => setViewCredit(undefined)}
-            onEdit={() => onEditOpenDrawer(viewCredit)}
-            header={<div className="flex flex-row items-center space-x-4 pb-2">
-                <User name={<div className="flex gap-2">
-                    <Typography>{viewCredit.name}</Typography>
-                    <Chip
-                        {...uniformChipStyle(viewCredit.employment_status)}
-                        variant="bordered"
-                    >{capitalize(viewCredit.employment_status)}</Chip>
-                </div>}
-                      description={viewCredit.department}
-                      classNames={{
-                          name: "text-medium font-semibold", description: "text-sm font-semibold text-default-400/80"
-                      }}
-                      avatarProps={{
-                          src: viewCredit.picture!
-                      }}/>
-
-            </div>}
-
-            body={<div className="space-y-4">
-                <Accordion showDivider={false} defaultSelectedKeys={["0"]} aria-label="Leave Credits"
-                           aria-labelledby="Leave Credits">
-                    {viewCredit.leave_credits && viewCredit.leave_credits?.length > 0 ? (viewCredit.leave_credits.map((leave, index) => {
-                        const percent = (leave.remaining_days / leave.allocated_days) * 100;
-                        const color = percent > 75 ? "success" : percent > 50 ? "warning" : "danger";
-
-                        return (<AccordionItem
-                            aria-labelledby="Leave Credits"
-                            className="overflow-hidden"
-                            key={index}
-                            aria-label={leave.leave_type.name}
-                            title={<>
-                                <div className="flex justify-between text-sm">
-                                    <span>{leave.leave_type.name}</span>
-                                    <CountUp start={0} end={percent} suffix=" %"/>
-                                </div>
-                                <Progress aria-label="Leave Credit Progress" color={color} value={percent}
-                                          className="h-2"/>
-                            </>}
-                        >
-                            <CardTable data={[{
-                                label: "Allocated Days", value: leave.allocated_days
-                            }, {label: "Remaining Days", value: leave.remaining_days}, {
-                                label: "Used Days", value: leave.used_days
-                            }, {
-                                label: "Carry Forward", value: leave.carry_forward_days
-                            },]}/>
-                        </AccordionItem>);
-                    })) : (<NoData message="No Leave Credit"/>)}
-                </Accordion>
-
-            </div>}
-            footer={<></>}
-
-        />}
         {editCredit && <EditLeaveCredits onOpen={setIsEdit} isOpen={isEdit} employee={editCredit}/>}
-    </section>);
+    </>);
 }
 
 export default Page;

@@ -155,10 +155,7 @@ function Page() {
 
 
         const submitReply: Comment = {
-            ...userReply!,
-            applicant_email: selectedRequest?.email!,
-            leave_id: selectedRequest?.id!,
-            replies: [{
+            ...userReply!, applicant_email: selectedRequest?.email!, leave_id: selectedRequest?.id!, replies: [{
                 id: uuidv4(),
                 author: String(session.data?.user.employee_id),
                 message: reply!,
@@ -215,320 +212,318 @@ function Page() {
         setLoading(false)
     }
 
-    return (<section className='w-full h-full flex gap-4 overflow-hidden'>
-        <DataDisplay
-            isLoading={isLoading}
-            defaultDisplay="table"
-            data={allRequests || []}
-            title="Leave Requests"
-            filterProps={{
-                filterItems: FilterItems
-            }}
-            onTableDisplay={{
-                config: TableConfigurations, layout: "auto", onRowAction: handleOnSelected
-            }}
-            searchProps={{
-                searchingItemKey: ["name"]
-            }}
-            sortProps={{
-                sortItems: [{
-                    name: "ID", key: "id"
-                }]
-            }}
-            rowSelectionProps={{
-                onRowChange: setRows
-            }}
-            paginationProps={{
-                loop: true, data_length: data?.totalItems!, onChange: setPage
-            }}
-            // onListDisplay={(data) => {
-            //     return (<BorderCard>{data.name}</BorderCard>)
-            // }}
-        />
+    return (
+            <DataDisplay
+                isLoading={isLoading}
+                defaultDisplay="table"
+                data={allRequests || []}
+                title="Leave Requests"
+                filterProps={{
+                    filterItems: FilterItems
+                }}
+                onTableDisplay={{
+                    config: TableConfigurations, layout: "auto", onRowAction: handleOnSelected
+                }}
+                searchProps={{
+                    searchingItemKey: ["name"]
+                }}
+                sortProps={{
+                    sortItems: [{
+                        name: "ID", key: "id"
+                    }]
+                }}
+                rowSelectionProps={{
+                    onRowChange: setRows
+                }}
+                paginationProps={{
+                    loop: true, data_length: data?.totalItems!, onChange: setPage
+                }}
+                // onListDisplay={(data) => {
+                //     return (<BorderCard>{data.name}</BorderCard>)
+                // }}
+                onView={
+                    selectedRequest && <CardView
+                        onClose={() => setSelectedRequest(undefined)}
+                        header={<div className="flex flex-row items-center space-x-4 pb-2">
+                            <UserMail
+                                name={<div className="flex gap-10">
+                                    <Typography className="font-semibold">{selectedRequest.name}</Typography>
+                                    <Chip
+                                        size="sm"
+                                        color={approval_status_color_map[selectedRequest.leave_details.status.toLowerCase()]}>{capitalize(selectedRequest.leave_details.status)}</Chip>
+
+                                </div>}
+                                picture={selectedRequest.picture!}
+                                email={selectedRequest.email || "No Email"}
+                            />
+
+                        </div>} body={<>
+
+                        {/*<Section className="ms-0" title="Leave Type" subtitle="Type of leave apply by the employee."/>*/}
+                        {/*<hr className="border border-default-400 space-y-2"/>*/}
+                        <CardTable data={[{
+                            label: "Leave Type", value: <div className="flex gap-4 items-center">
+                                <Typography>{selectedRequest.leave_type.name}</Typography>
+                                <Chip style={{
+                                    background: getColor(selectedRequest.leave_type.code, 0.2),
+                                    borderColor: getColor(selectedRequest.leave_type.code, 0.5),
+                                    color: getColor(selectedRequest.leave_type.code)
+                                }} size="sm" variant="bordered" classNames={{
+                                    content: "font-bold",
+                                }}>
+                                    {selectedRequest.leave_type.code}
+                                </Chip></div>
+                        }, {
+                            label: "Start Date", value: selectedRequest.leave_details.start_date
+                        }, {
+                            label: "End Date", value: selectedRequest.leave_details.end_date
+                        }, {
+                            label: "Total Days", value: selectedRequest.leave_details.total_days
+                        }, {
+                            label: "Leave Progress Status", value: <Chip variant="flat"
+                                                                         color={leave_progress === "Not Started" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
+                        }, {
+                            label: "Created By", value: <>
+                                <UserAvatarTooltip user={{
+                                    name: selectedRequest?.created_by.name,
+                                    picture: selectedRequest.created_by.picture,
+                                    id: selectedRequest.created_by.id
+                                }} avatarProps={{
+                                    classNames: {
+                                        base: '!size-6'
+                                    }, isBordered: true
+                                }}/>
+                            </>
+                        }, {
+                            label: "Created At", value: selectedRequest.leave_details.created_at
+                        }, {
+                            label: "Updated At", value: selectedRequest.leave_details.updated_at
+                        },]}/>
+
+                        <hr className="border border-default-400 space-y-2"/>
+                        <Section className="ms-0" title="Comment" subtitle="Comment of employee in regard to leave request."/>
+
+                        <ScrollShadow size={20} className="min-h-32 max-h-72">
+                            <div className="flex flex-col gap-10 h-full mb-4">
+                                {selectedRequest.evaluators.comments.map(comment => {
+                                    const commenters = selectedRequest.evaluators.users.filter(commenter => Number(commenter.id) === Number(comment.author))
+                                    const comments = commenters.map(item => ({
+                                        ...item, ...comment
+                                    }))
 
 
-        {selectedRequest && <CardView
-            onClose={() => setSelectedRequest(undefined)}
-            header={<div className="flex flex-row items-center space-x-4 pb-2">
-                <UserMail
-                    name={<div className="flex gap-10">
-                        <Typography className="font-semibold">{selectedRequest.name}</Typography>
-                        <Chip
-                            size="sm"
-                            color={approval_status_color_map[selectedRequest.leave_details.status.toLowerCase()]}>{capitalize(selectedRequest.leave_details.status)}</Chip>
+                                    return (<Fragment key={comment.id}>{comments.map(comment_thread => {
+                                        return (<div key={comment_thread.id} className="flex flex-col gap-2">
+                                                <User
+                                                    className="justify-start p-2"
+                                                    name={<Typography
+                                                        className="text-sm font-semibold">{comment_thread.name}</Typography>}
+                                                    description={<Typography
+                                                        className="text-sm font-semibold !text-default-400/75">
+                                                        {capitalize(comment_thread.role)}
+                                                    </Typography>}
+                                                    avatarProps={{
+                                                        src: comment_thread.picture,
+                                                        classNames: {base: '!size-6'},
+                                                        isBordered: true,
+                                                    }}
+                                                />
 
-                    </div>}
-                    picture={selectedRequest.picture!}
-                    email={selectedRequest.email || "No Email"}
-                />
+                                                <div className="flex flex-col gap-2 ml-2">
+                                                    <Typography
+                                                        className="text-medium indent-4">{comment_thread.message}</Typography>
+                                                    <div className="flex gap-2">
+                                                        <Typography
+                                                            className="text-sm !text-default-400/75">{toGMT8(comment_thread.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
+                                                        <Typography
+                                                            className="text-sm font-semibold cursor-pointer !text-default-400/75"
+                                                            onClick={() => {
+                                                                setCommentId(comment_thread.id)
+                                                                setReply("")
+                                                            }}>Reply</Typography>
+                                                    </div>
+                                                </div>
+                                                {comment_thread.replies.map(replies => {
+                                                    const replier = selectedRequest.evaluators.users.filter(item => Number(item.id) === Number(replies.author))
+                                                    const reply = replier.map(item => ({
+                                                        ...item, ...replies
+                                                    }))
+                                                    return (reply.map(reply => {
+                                                        return (<div key={replies.id} className="ms-10 my-3">
+                                                            <User
+                                                                className="justify-start p-2"
+                                                                name={<Typography
+                                                                    className="text-sm font-semibold">{reply.name}</Typography>}
+                                                                description={<Typography
+                                                                    className="text-sm font-semibold !text-default-400/75">
+                                                                    {capitalize(reply.role)}
+                                                                </Typography>}
+                                                                avatarProps={{
+                                                                    src: reply.picture,
+                                                                    classNames: {base: '!size-6'},
+                                                                    isBordered: true,
+                                                                }}
+                                                            />
+                                                            <div className="flex flex-col gap-2 ml-4">
+                                                                <Typography
+                                                                    className="text-medium indent-4">{replies.message}</Typography>
+                                                                <div className="flex gap-2">
+                                                                    <Typography
+                                                                        className="text-sm !text-default-400/75">{toGMT8(replies.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
+                                                                    <Typography
+                                                                        className="text-sm font-semibold cursor-pointer !text-default-400/75"
+                                                                        onClick={() => {
+                                                                            setCommentId(comment_thread.id)
+                                                                            setReply("")
+                                                                        }}>Reply</Typography>
+                                                                </div>
 
-            </div>} body={<>
-
-            {/*<Section className="ms-0" title="Leave Type" subtitle="Type of leave apply by the employee."/>*/}
-            {/*<hr className="border border-default-400 space-y-2"/>*/}
-            <CardTable data={[{
-                label: "Leave Type", value: <div className="flex gap-4 items-center">
-                    <Typography>{selectedRequest.leave_type.name}</Typography>
-                    <Chip style={{
-                        background: getColor(selectedRequest.leave_type.code, 0.2),
-                        borderColor: getColor(selectedRequest.leave_type.code, 0.5),
-                        color: getColor(selectedRequest.leave_type.code)
-                    }} size="sm" variant="bordered" classNames={{
-                        content: "font-bold",
-                    }}>
-                        {selectedRequest.leave_type.code}
-                    </Chip></div>
-            }, {
-                label: "Start Date", value: selectedRequest.leave_details.start_date
-            }, {
-                label: "End Date", value: selectedRequest.leave_details.end_date
-            }, {
-                label: "Total Days", value: selectedRequest.leave_details.total_days
-            }, {
-                label: "Leave Progress Status", value: <Chip variant="flat"
-                                                             color={leave_progress === "Not Started" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
-            }, {
-                label: "Created By", value: <>
-                    <UserAvatarTooltip user={{
-                        name: selectedRequest?.created_by.name,
-                        picture: selectedRequest.created_by.picture,
-                        id: selectedRequest.created_by.id
-                    }} avatarProps={{
-                        classNames: {
-                            base: '!size-6'
-                        }, isBordered: true
-                    }}/>
-                </>
-            }, {
-                label: "Created At", value: selectedRequest.leave_details.created_at
-            }, {
-                label: "Updated At", value: selectedRequest.leave_details.updated_at
-            },]}/>
-
-            <hr className="border border-default-400 space-y-2"/>
-            <Section className="ms-0" title="Comment" subtitle="Comment of employee in regard to leave request."/>
-
-                <ScrollShadow size={20} className="min-h-32 max-h-72">
-                    <div className="flex flex-col gap-10 h-full mb-4">
-                        {selectedRequest.evaluators.comments.map(comment => {
-                            const commenters = selectedRequest.evaluators.users.filter(commenter => Number(commenter.id) === Number(comment.author))
-                            const comments = commenters.map(item => ({
-                                ...item, ...comment
-                            }))
-
-
-                            return (<Fragment key={comment.id}>{comments.map(comment_thread => {
-                                return (<div key={comment_thread.id} className="flex flex-col gap-2">
-                                        <User
-                                            className="justify-start p-2"
-                                            name={<Typography
-                                                className="text-sm font-semibold">{comment_thread.name}</Typography>}
-                                            description={<Typography
-                                                className="text-sm font-semibold !text-default-400/75">
-                                                {capitalize(comment_thread.role)}
-                                            </Typography>}
-                                            avatarProps={{
-                                                src: comment_thread.picture,
-                                                classNames: {base: '!size-6'},
-                                                isBordered: true,
-                                            }}
-                                        />
-
-                                        <div className="flex flex-col gap-2 ml-2">
-                                            <Typography
-                                                className="text-medium indent-4">{comment_thread.message}</Typography>
-                                            <div className="flex gap-2">
-                                                <Typography
-                                                    className="text-sm !text-default-400/75">{toGMT8(comment_thread.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
-                                                <Typography
-                                                    className="text-sm font-semibold cursor-pointer !text-default-400/75"
-                                                    onClick={() => {
-                                                        setCommentId(comment_thread.id)
-                                                        setReply("")
-                                                    }}>Reply</Typography>
-                                            </div>
-                                        </div>
-                                        {comment_thread.replies.map(replies => {
-                                            const replier = selectedRequest.evaluators.users.filter(item => Number(item.id) === Number(replies.author))
-                                            const reply = replier.map(item => ({
-                                                ...item, ...replies
-                                            }))
-                                            return (reply.map(reply => {
-                                                return (<div key={replies.id} className="ms-10 my-3">
-                                                    <User
-                                                        className="justify-start p-2"
-                                                        name={<Typography
-                                                            className="text-sm font-semibold">{reply.name}</Typography>}
-                                                        description={<Typography
-                                                            className="text-sm font-semibold !text-default-400/75">
-                                                            {capitalize(reply.role)}
-                                                        </Typography>}
-                                                        avatarProps={{
-                                                            src: reply.picture,
-                                                            classNames: {base: '!size-6'},
-                                                            isBordered: true,
+                                                            </div>
+                                                        </div>)
+                                                    }))
+                                                })}
+                                                {commentId === comment_thread.id && <div className="ms-10">
+                                                    <CommentInput
+                                                        placeholder="Reply..."
+                                                        isSending={isReplySubmit}
+                                                        value={reply || ""}
+                                                        onSend={handleOnReply.bind(null, comment_thread.id)}
+                                                        onValueChange={(value) => {
+                                                            setReply(value);
                                                         }}
                                                     />
-                                                    <div className="flex flex-col gap-2 ml-4">
-                                                        <Typography
-                                                            className="text-medium indent-4">{replies.message}</Typography>
-                                                        <div className="flex gap-2">
-                                                            <Typography
-                                                                className="text-sm !text-default-400/75">{toGMT8(replies.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
-                                                            <Typography
-                                                                className="text-sm font-semibold cursor-pointer !text-default-400/75"
-                                                                onClick={() => {
-                                                                    setCommentId(comment_thread.id)
-                                                                    setReply("")
-                                                                }}>Reply</Typography>
-                                                        </div>
+                                                </div>}
+                                            </div>
 
-                                                    </div>
-                                                </div>)
-                                            }))
-                                        })}
-                                        {commentId === comment_thread.id && <div className="ms-10">
-                                            <CommentInput
-                                                placeholder="Reply..."
-                                                isSending={isReplySubmit}
-                                                value={reply || ""}
-                                                onSend={handleOnReply.bind(null, comment_thread.id)}
-                                                onValueChange={(value) => {
-                                                    setReply(value);
-                                                }}
-                                            />
-                                        </div>}
-                                    </div>
-
-                                )
-                            })}</Fragment>)
-                        })}
-                    </div>
-                </ScrollShadow>
-            <div className="flex gap-2 items-center">
-                <CommentInput isSending={loading}
-                              onSend={handleOnSend.bind(null, comment!)}
-                              value={comment!}
-                              onValueChange={(value) => {
-                                  setComment(value)
-                              }}/>
-            </div>
-            <hr className="border border-default-400 space-y-2"/>
-            <Section className="ms-0" title="Reason" subtitle="Reason of employee in regard to leave request
+                                        )
+                                    })}</Fragment>)
+                                })}
+                            </div>
+                        </ScrollShadow>
+                        <div className="flex gap-2 items-center">
+                            <CommentInput isSending={loading}
+                                          onSend={handleOnSend.bind(null, comment!)}
+                                          value={comment!}
+                                          onValueChange={(value) => {
+                                              setComment(value)
+                                          }}/>
+                        </div>
+                        <hr className="border border-default-400 space-y-2"/>
+                        <Section className="ms-0" title="Reason" subtitle="Reason of employee in regard to leave request
             ."/>
-            <BorderCard className="h-36">
-                <ScrollShadow size={20}>
-                    <Typography className="indent-4 text-sm">
-                        {selectedRequest.leave_details.reason}
-                    </Typography>
-                </ScrollShadow>
-            </BorderCard>
-            <hr className="border border-default-400 space-y-2"/>
-            <Section className="ms-0" title="Evaluator's Decision"
-                     subtitle="Summary of evaluator's feedback and decisions"/>
-            <BorderCard heading={<Typography className="text-medium">Review Details</Typography>}>
-                <></>
-                {/*<div className="flex justify-between items-center">*/}
-                {/*    <User*/}
-                {/*        className="justify-start p-2"*/}
-                {/*        name={<Typography className="text-sm font-semibold">{reviewer?.name}</Typography>}*/}
-                {/*        description={<Typography className="text-sm font-semibold !text-default-400/75">*/}
-                {/*            {reviewer?.email}*/}
-                {/*        </Typography>}*/}
-                {/*        avatarProps={{*/}
-                {/*            src: reviewer?.picture, classNames: {base: '!size-6'}, isBordered: true,*/}
-                {/*        }}*/}
-                {/*    />*/}
-                {/*    {!reviewer_details?.decision.is_reviewed && is_reviewer && <div className="flex gap-2">*/}
-                {/*        <Button size="sm" radius="full" isIconOnly variant="light"*/}
-                {/*            // onClick={handleReview.bind(null, item.id, "Approved")}*/}
-                {/*        >*/}
-                {/*            <LuThumbsUp className={cn("text-success", icon_size_sm)}/>*/}
-                {/*        </Button>*/}
-                {/*        <Button size="sm" radius="full" isIconOnly variant="light"*/}
-                {/*            // onClick={handleReview.bind(null, item.id, "Rejected")}*/}
-                {/*        >*/}
-                {/*            <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*/}
-                {/*        </Button>*/}
-                {/*    </div>}*/}
-                {/*</div>*/}
+                        <BorderCard className="h-36">
+                            <ScrollShadow size={20}>
+                                <Typography className="indent-4 text-sm">
+                                    {selectedRequest.leave_details.reason}
+                                </Typography>
+                            </ScrollShadow>
+                        </BorderCard>
+                        <hr className="border border-default-400 space-y-2"/>
+                        <Section className="ms-0" title="Evaluator's Decision"
+                                 subtitle="Summary of evaluator's feedback and decisions"/>
+                        <BorderCard heading={<Typography className="text-medium">Review Details</Typography>}>
+                            <></>
+                            {/*<div className="flex justify-between items-center">*/}
+                            {/*    <User*/}
+                            {/*        className="justify-start p-2"*/}
+                            {/*        name={<Typography className="text-sm font-semibold">{reviewer?.name}</Typography>}*/}
+                            {/*        description={<Typography className="text-sm font-semibold !text-default-400/75">*/}
+                            {/*            {reviewer?.email}*/}
+                            {/*        </Typography>}*/}
+                            {/*        avatarProps={{*/}
+                            {/*            src: reviewer?.picture, classNames: {base: '!size-6'}, isBordered: true,*/}
+                            {/*        }}*/}
+                            {/*    />*/}
+                            {/*    {!reviewer_details?.decision.is_reviewed && is_reviewer && <div className="flex gap-2">*/}
+                            {/*        <Button size="sm" radius="full" isIconOnly variant="light"*/}
+                            {/*            // onClick={handleReview.bind(null, item.id, "Approved")}*/}
+                            {/*        >*/}
+                            {/*            <LuThumbsUp className={cn("text-success", icon_size_sm)}/>*/}
+                            {/*        </Button>*/}
+                            {/*        <Button size="sm" radius="full" isIconOnly variant="light"*/}
+                            {/*            // onClick={handleReview.bind(null, item.id, "Rejected")}*/}
+                            {/*        >*/}
+                            {/*            <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*/}
+                            {/*        </Button>*/}
+                            {/*    </div>}*/}
+                            {/*</div>*/}
 
-                {/*/!*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*!/*/}
-                {/*{reviewer_details?.decision.is_reviewed && <CardTable data={[{*/}
-                {/*    label: "Status",*/}
-                {/*    value: reviewer_details?.decision.is_reviewed ?*/}
-                {/*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*/}
-                {/*        <LuX className={cn("text-danger", icon_size_sm)}/>*/}
-                {/*}, {*/}
-                {/*    label: "Decision Date", value: dayjs(reviewer_details?.decision.decisionDate).format("YYYY-MM-DD")*/}
-                {/*}, {*/}
-                {/*    label: "Rejected Reason",*/}
-                {/*    value: reviewer_details?.decision.rejectedReason ? reviewer_details?.decision.rejectedReason : ""*/}
-                {/*},]}/>}*/}
-            </BorderCard>
-            <BorderCard heading={<Typography className="text-medium">Approved Details</Typography>}>
-                <div className="flex justify-between items-center">
-                    {/*<User*/}
-                    {/*    className="justify-start p-2"*/}
-                    {/*    name={<Typography className="text-sm font-semibold">{approver?.name}</Typography>}*/}
-                    {/*    description={<Typography className="text-sm font-semibold !text-default-400/75">*/}
-                    {/*        {approver?.email}*/}
-                    {/*    </Typography>}*/}
-                    {/*    avatarProps={{*/}
-                    {/*        src: approver?.picture, classNames: {base: '!size-6'}, isBordered: true,*/}
-                    {/*    }}*/}
-                    {/*/>*/}
-                    {/*{!approver_details?.decision.is_approved && is_approver && <div className="flex gap-2">*/}
-                    {/*    <Button size="sm" radius="full" isIconOnly variant="light"*/}
-                    {/*        // onClick={handleReview.bind(null, item.id, "Approved")}*/}
-                    {/*    >*/}
-                    {/*        <LuThumbsUp className={cn("text-success", icon_size_sm)}/>*/}
-                    {/*    </Button>*/}
-                    {/*    <Button size="sm" radius="full" isIconOnly variant="light"*/}
-                    {/*        // onClick={handleReview.bind(null, item.id, "Rejected")}*/}
-                    {/*    >*/}
-                    {/*        <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*/}
-                    {/*    </Button>*/}
-                    {/*</div>}*/}
-                </div>
-                {/*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*/}
-                {/*{approver_details?.decision.is_approved && <CardTable data={[{*/}
-                {/*    label: "Status",*/}
-                {/*    value: approver_details?.decision.is_approved ?*/}
-                {/*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*/}
-                {/*        <LuX className={cn("text-danger", icon_size_sm)}/>*/}
-                {/*}, {*/}
-                {/*    label: "Decision Date", value: dayjs(approver_details?.decision.decisionDate).format("YYYY-MM-DD")*/}
-                {/*}, {*/}
-                {/*    label: "Rejected Reason",*/}
-                {/*    value: approver_details?.decision.rejectedReason ? approver_details?.decision.rejectedReason : ""*/}
-                {/*},]}/>}*/}
-            </BorderCard>
+                            {/*/!*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*!/*/}
+                            {/*{reviewer_details?.decision.is_reviewed && <CardTable data={[{*/}
+                            {/*    label: "Status",*/}
+                            {/*    value: reviewer_details?.decision.is_reviewed ?*/}
+                            {/*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*/}
+                            {/*        <LuX className={cn("text-danger", icon_size_sm)}/>*/}
+                            {/*}, {*/}
+                            {/*    label: "Decision Date", value: dayjs(reviewer_details?.decision.decisionDate).format("YYYY-MM-DD")*/}
+                            {/*}, {*/}
+                            {/*    label: "Rejected Reason",*/}
+                            {/*    value: reviewer_details?.decision.rejectedReason ? reviewer_details?.decision.rejectedReason : ""*/}
+                            {/*},]}/>}*/}
+                        </BorderCard>
+                        <BorderCard heading={<Typography className="text-medium">Approved Details</Typography>}>
+                            <div className="flex justify-between items-center">
+                                {/*<User*/}
+                                {/*    className="justify-start p-2"*/}
+                                {/*    name={<Typography className="text-sm font-semibold">{approver?.name}</Typography>}*/}
+                                {/*    description={<Typography className="text-sm font-semibold !text-default-400/75">*/}
+                                {/*        {approver?.email}*/}
+                                {/*    </Typography>}*/}
+                                {/*    avatarProps={{*/}
+                                {/*        src: approver?.picture, classNames: {base: '!size-6'}, isBordered: true,*/}
+                                {/*    }}*/}
+                                {/*/>*/}
+                                {/*{!approver_details?.decision.is_approved && is_approver && <div className="flex gap-2">*/}
+                                {/*    <Button size="sm" radius="full" isIconOnly variant="light"*/}
+                                {/*        // onClick={handleReview.bind(null, item.id, "Approved")}*/}
+                                {/*    >*/}
+                                {/*        <LuThumbsUp className={cn("text-success", icon_size_sm)}/>*/}
+                                {/*    </Button>*/}
+                                {/*    <Button size="sm" radius="full" isIconOnly variant="light"*/}
+                                {/*        // onClick={handleReview.bind(null, item.id, "Rejected")}*/}
+                                {/*    >*/}
+                                {/*        <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*/}
+                                {/*    </Button>*/}
+                                {/*</div>}*/}
+                            </div>
+                            {/*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*/}
+                            {/*{approver_details?.decision.is_approved && <CardTable data={[{*/}
+                            {/*    label: "Status",*/}
+                            {/*    value: approver_details?.decision.is_approved ?*/}
+                            {/*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*/}
+                            {/*        <LuX className={cn("text-danger", icon_size_sm)}/>*/}
+                            {/*}, {*/}
+                            {/*    label: "Decision Date", value: dayjs(approver_details?.decision.decisionDate).format("YYYY-MM-DD")*/}
+                            {/*}, {*/}
+                            {/*    label: "Rejected Reason",*/}
+                            {/*    value: approver_details?.decision.rejectedReason ? approver_details?.decision.rejectedReason : ""*/}
+                            {/*},]}/>}*/}
+                        </BorderCard>
 
-        </>} onDanger={<>
-            <Section className="ms-0" title="Edit Leave"
-                     subtitle="Edit the leave request">
-                <Button
-                    isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
-                    startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
-            </Section>
-            <hr className="border border-destructive/20"/>
-            <Section className="ms-0" title="Extend Leave"
-                     subtitle="Extend the leave request">
-                <Button
-                    isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
-                    startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>
-            </Section>
-            <hr className="border border-destructive/20"/>
-            <Section className="ms-0" title="Cancel"
-                     subtitle="Cancel the leave request">
-                <Button
-                    isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
-                    startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
-            </Section>
-        </>}/>}
-
-    </section>)
+                    </>} onDanger={<>
+                        <Section className="ms-0" title="Edit Leave"
+                                 subtitle="Edit the leave request">
+                            <Button
+                                isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
+                                startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
+                        </Section>
+                        <hr className="border border-destructive/20"/>
+                        <Section className="ms-0" title="Extend Leave"
+                                 subtitle="Extend the leave request">
+                            <Button
+                                isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
+                                startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>
+                        </Section>
+                        <hr className="border border-destructive/20"/>
+                        <Section className="ms-0" title="Cancel"
+                                 subtitle="Cancel the leave request">
+                            <Button
+                                isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
+                                startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
+                        </Section>
+                    </>}/>
+                }
+            />)
 
 }
 

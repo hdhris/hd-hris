@@ -22,7 +22,7 @@ interface CardViewProps {
 }
 
 function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, onDanger, editProps, deleteProps}: CardViewProps) {
-    return (<div className="w-[700px] space-y-4 rounded border border-default-400/20 overflow-hidden grid grid-rows-[auto_1fr] pb-6" id={id}>
+    return (<div className="w-full space-y-4 rounded border border-default-400/20 overflow-hidden grid grid-rows-[auto_1fr] pb-6" id={id}>
         <div
             className="flex justify-between sticky top-0 bg-[#FAFAFA] z-10 px-4 py-2 border-b border-default-400/50">
             {header}

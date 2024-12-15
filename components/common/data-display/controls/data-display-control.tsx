@@ -169,7 +169,7 @@ function DataDisplayControl<T>({
         {/* Bottom pagination */}
         <div
             className={cn("sticky bottom-0 z-10 py-2 shadow-sm flex justify-between items-center w-full", className?.lower)}>
-            <div className={cn("flex justify-start items-center gap-2", className?.lower.selectedKeysClassname)}>
+            <div className={cn("flex justify-start items-center gap-2", className?.lower?.selectedKeysClassname)}>
                 <Typography className="text-medium font-semibold text-primary/50">
                     {selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}
                 </Typography>
@@ -179,7 +179,7 @@ function DataDisplayControl<T>({
                     </Button>)}
             </div>
             {/* Pagination centered */}
-            {paginationProps && values.length > 0 && <div className={cn("flex-1 flex justify-center", className?.lower.paginationClassname)}>
+            {paginationProps && values.length > 0 && <div className={cn("flex-1 flex justify-center", className?.lower?.paginationClassname)}>
                 <Pagination
                     showControls
                     total={totalPages}
@@ -189,7 +189,7 @@ function DataDisplayControl<T>({
                 />
             </div>}
 
-            <div className={cn("flex justify-end", className?.lower.buttonClassname)}>
+            <div className={cn("flex justify-end", className?.lower?.buttonClassname)}>
                 {displayMethods > 1 && (<ButtonGroup variant="light" color="primary" isIconOnly {...buttonGroupProps}>
                     {isTable && (<Tooltip content="Table">
                         <Button onClick={() => handleOnDisplayChange("table")}

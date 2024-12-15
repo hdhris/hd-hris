@@ -4,8 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="modifying schema">
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="Merge remote-tracking branch 'github/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-credits/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-types/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-types/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/card-view/card-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/card-view/card-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/data-display/controls/data-display-control.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/data-display/controls/data-display-control.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/data-display/data-display.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/data-display/data-display.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/data-display/types/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/data-display/types/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prisma/dbml/schema.dbml" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/dbml/schema.dbml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,12 +67,12 @@
       </RecentBranches>
     </option>
   </component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Xero-John/HD-HRIS.git&quot;,
-    &quot;accountId&quot;: &quot;6e4282f2-6bc3-41b3-a11d-0daeb34fe1b4&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Xero-John/HD-HRIS.git",
+    "accountId": "834de9a5-5f9a-4fe1-b241-c4e75a4cbf0b"
   }
-}</component>
+}]]></component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -175,15 +184,7 @@
       <workItem from="1733874734453" duration="68789000" />
       <workItem from="1734002364762" duration="24911000" />
       <workItem from="1734098410028" duration="9815000" />
-      <workItem from="1734230093858" duration="6367000" />
-    </task>
-    <task id="LOCAL-00003" summary="updating No data component - adding Icon">
-      <option name="closed" value="true" />
-      <created>1732358507528</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1732358507528</updated>
+      <workItem from="1734230093858" duration="17118000" />
     </task>
     <task id="LOCAL-00004" summary="fixing the pagination in data display and fixing the interface in leave credit">
       <option name="closed" value="true" />
@@ -569,7 +570,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734238890200</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="Merge remote-tracking branch 'github/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
+      <option name="closed" value="true" />
+      <created>1734239093730</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1734239093730</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -598,7 +607,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="testing pdf" />
     <MESSAGE value="adding a payslip pdf" />
     <MESSAGE value="fixing route in payslip" />
     <MESSAGE value="fixing route in payelip" />
@@ -623,6 +631,7 @@
     <MESSAGE value="editing signatory interface" />
     <MESSAGE value="fixing replies" />
     <MESSAGE value="modifying schema" />
-    <option name="LAST_COMMIT_MESSAGE" value="modifying schema" />
+    <MESSAGE value="Merge remote-tracking branch 'github/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'github/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
   </component>
 </project>
