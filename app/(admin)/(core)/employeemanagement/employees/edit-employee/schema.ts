@@ -74,7 +74,6 @@ export interface EmployeeFormData {
 
 export const employeeSchema = z.object({
   prefix: z.string().optional().nullable(),
-  privilege_id: z.string().min(1, "Access level is required"),
   picture: z.union([z.instanceof(File), z.string()]).optional(),
   username: z.string().optional(),
   password: z.string().min(6, "Password must be at least 6 characters").optional(),

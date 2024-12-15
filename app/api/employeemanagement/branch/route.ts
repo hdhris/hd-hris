@@ -14,9 +14,23 @@ const branchSchema = z.object({
   addr_municipal: z.number().nullable(),
   addr_province: z.number().nullable(),
   addr_region: z.number().nullable(),
-  addr_baranggay: z.number().nullable(), // Include baranggay validation
+  addr_baranggay: z.number().nullable(),
   is_active: z.boolean().optional(),
 });
+
+async function checkDuplicateName(name: string, excludeId?: number) {
+  const existingBranch = await prisma.ref_branches.findFirst({
+    where: {
+      name: {
+        equals: name,
+        mode: "insensitive",
+      },
+      deleted_at: null,
+      id: excludeId ? { not: excludeId } : undefined,
+    },
+  });
+  return existingBranch;
+}
 
 // Error Handling Helper
 function handleError(error: unknown, operation: string) {
@@ -47,10 +61,23 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     // console.log("Incoming data:", data);
+    const existingBranch = await checkDuplicateName(data.name);
+    if (existingBranch) {
+      return NextResponse.json(
+        { error: "A branch with this name already exists" },
+        { status: 400 }
+      );
+    }
 
     // Validate the incoming data against the schema
     const validatedData = branchSchema.parse(data);
-    // console.log("Validated data:", validatedData);
+     const existingSalgrade = await checkDuplicateName(validatedData.name);
+     if (existingSalgrade) {
+       return NextResponse.json(
+         { error: "A salary grade with this name already exists" },
+         { status: 400 }
+       );
+     }
 
     // Create the branch
     const branch = await prisma.ref_branches.create({
@@ -119,7 +146,18 @@ export async function PUT(req: NextRequest) {
   try {
     const data = await req.json();
     const validatedData = branchSchema.parse(data);
-
+    if (validatedData.name) {
+      const existingBranch = await checkDuplicateName(
+        validatedData.name,
+        parseInt(id)
+      );
+      if (existingBranch) {
+        return NextResponse.json(
+          { error: "A Branch with this name already exists" },
+          { status: 400 }
+        );
+      }
+    }
     const branch = await prisma.ref_branches.update({
       where: { id: parseInt(id) },
       data: {
@@ -165,21 +203,21 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ message: "Branch deleted successfully" });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2003') {
+      if (error.code === "P2003") {
         return NextResponse.json(
-          { 
+          {
             status: "error",
-            message: "Cannot delete branch that has registered employees" 
-          }, 
+            message: "Cannot delete branch that has registered employees",
+          },
           { status: 400 }
         );
       }
     }
     return NextResponse.json(
-      { 
+      {
         status: "error",
-        message: "Cannot delete branch that has registered employees" 
-      }, 
+        message: "Cannot delete branch that has registered employees",
+      },
       { status: 500 }
     );
   }

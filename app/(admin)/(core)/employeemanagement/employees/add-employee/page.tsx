@@ -6,7 +6,7 @@ import { employeeSchema, type EmployeeFormData } from "./schema";
 import { useToast } from "@/components/ui/use-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { Form } from "@/components/ui/form";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { mutate } from "swr";
 import { useRouter } from "next/navigation";
 import AddAccount from "@/components/admin/employeescomponent/store/AddAccount";
@@ -225,17 +225,15 @@ export default function AddEmployeePage() {
               temporary: false,
             },
           });
-          // Return just the URL string for database storage
           return result.url;
         }
-        // If it's already a string URL, return it directly
         return cert;
       })
     );
 
-    // Filter out any null values and ensure we have an array of URLs
     return processed.filter((url): url is string => url !== null);
   };
+
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
     try {
@@ -266,7 +264,7 @@ export default function AddEmployeePage() {
         credentials: {
           username: data.username,
           password: data.password,
-          privilege_id: data.privilege_id  // Add this
+          privilege_id: data.privilege_id
         },
         prefix: data.prefix,
         picture: pictureUrl,
@@ -295,7 +293,7 @@ export default function AddEmployeePage() {
           universityCollege: data.universityCollege,
           course: data.course,
           highestDegree: data.highestDegree,
-          certificates: filteredCertificates, // This should be an array of URLs
+          certificates: filteredCertificates,
           mastersCertificates: mastersCertificates,
           doctorateCertificates: doctorateCertificates,
           masters: data.masters,
@@ -362,7 +360,6 @@ export default function AddEmployeePage() {
           errorMessage = "Server error. Please try again later";
         }
       }
-
       toast({
         title: "Error",
         description: errorMessage,
@@ -452,6 +449,7 @@ export default function AddEmployeePage() {
           {activeTab === "account" ? (
             <Button
               type="submit"
+              color="primary"
               disabled={isSubmitting}
               onClick={async (e) => {
                 e.preventDefault();

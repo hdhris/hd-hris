@@ -9,6 +9,20 @@ const employmentstatusSchema = z.object({
   name: z.string().min(1).max(45),
 });
 
+async function checkDuplicateName(name: string, excludeId?: number) {
+  const existingEmpstatus = await prisma.ref_employment_status.findFirst({
+    where: {
+      name: {
+        equals: name,
+        mode: 'insensitive',
+      },
+      deleted_at: null,
+      id: excludeId ? { not: excludeId } : undefined,
+    },
+  });
+  return existingEmpstatus;
+}
+
 // Error handling function
 function handleError(error: unknown, operation: string) {
   console.error(`Error during ${operation} operation:`, error);
@@ -85,7 +99,13 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
     const validatedData = employmentstatusSchema.parse(data);
-    
+      const existingEmpstatus = await checkDuplicateName(validatedData.name);
+        if (existingEmpstatus) {
+          return NextResponse.json(
+            { error: "An employment status with this name already exists" },
+            { status: 400 }
+          );
+        }
     const employmentstatus = await prisma.ref_employment_status.create({
       data: {
         name: validatedData.name,
@@ -107,7 +127,17 @@ export async function PUT(req: Request) {
   }
 
   try {
+    
     const data = await req.json();
+     if (data.name) {
+          const existingEmpstatus = await checkDuplicateName(data.name, parseInt(id));
+          if (existingEmpstatus) {
+            return NextResponse.json(
+              { error: "An existing employment status with this name already exists" },
+              { status: 400 }
+            );
+          }
+        }
     const validatedData = employmentstatusSchema.partial().parse(data);
     
     const empstatus = await prisma.ref_employment_status.update({
@@ -124,7 +154,6 @@ export async function PUT(req: Request) {
   }
 }
 
-
 // DELETE - Soft delete a employmentstatus class
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
@@ -138,7 +167,7 @@ export async function DELETE(req: Request) {
     const employmentstatus = await prisma.ref_employment_status.findFirst({
       where: { id: parseInt(id), trans_employees:{none:{}}}
     });
-    
+
     if (!employmentstatus){
       return NextResponse.json({
         success: false,

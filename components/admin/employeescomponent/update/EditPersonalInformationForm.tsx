@@ -342,7 +342,7 @@ const EditPersonalInformationForm: React.FC = () => {
       },
     },
     {
-      name: "mothers_last_name",
+      name: "guardian_last_name",
       label: "Guardian's last name",
       type: "text",
       config: {
