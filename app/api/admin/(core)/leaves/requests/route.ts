@@ -92,8 +92,8 @@ export async function GET(request: Request) {
                 name: getEmpFullName(items.trans_employees_trans_leaves_created_byTotrans_employees)
             },
             leave_details: {
-                start_date: toGMT8(items.start_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
-                end_date: toGMT8(items.end_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
+                start_date: dayjs(items.start_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
+                end_date: dayjs(items.end_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
                 reason: items.reason || "",
                 status: items.status as "Approved" | "Pending" | "Rejected",
                 total_days: formatDaysToReadableTime(items.total_days.toNumber()),
