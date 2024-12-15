@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useResignedTerminatedEmployees } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip, Button } from "@nextui-org/react";
@@ -10,23 +10,66 @@ import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import showDialog from "@/lib/utils/confirmDialog";
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
+import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 
 const EmptyState: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
       <div className="text-center space-y-3">
-        <Text className="text-xl font-bold text-gray-700">No Former Employees Found</Text>
-        <Text className="text-gray-500">There are no resigned or terminated employees at the moment.</Text>
-        <Text className="text-sm text-gray-400">When employees resign or are terminated, they will appear here.</Text>
+        <Text className="text-xl font-bold text-gray-700">
+          No Former Employees Found
+        </Text>
+        <Text className="text-gray-500">
+          There are no resigned or terminated employees at the moment.
+        </Text>
+        <Text className="text-sm text-gray-400">
+          When employees resign or are terminated, they will appear here.
+        </Text>
       </div>
     </div>
   );
 };
 
 const Page: React.FC = () => {
-  const { data: resignedTerminatedEmployees, mutate, isLoading } = useResignedTerminatedEmployees();
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const {
+    data: resignedTerminatedEmployees,
+    mutate,
+    isLoading,
+  } = useResignedTerminatedEmployees();
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const [isActivating, setIsActivating] = useState<number | null>(null);
+
+  type Signatory = {
+    id: string | number;
+    name: string;
+    picture?: string;
+    role?: string;
+  };
+
+  // Extract signatories for the selected employee
+  const signatories = useMemo<Signatory[]>(() => {
+    if (!selectedEmployee) return [];
+
+    const statusData = selectedEmployee.termination_json
+      ? typeof selectedEmployee.termination_json === "string"
+        ? JSON.parse(selectedEmployee.termination_json)
+        : selectedEmployee.termination_json
+      : typeof selectedEmployee.resignation_json === "string"
+      ? JSON.parse(selectedEmployee.resignation_json)
+      : selectedEmployee.resignation_json;
+
+    // Extract and transform signatories
+    return (
+      statusData?.signatories?.users?.map((user: any) => ({
+        id: user.id,
+        name: user.name,
+        picture: user.picture,
+        role: user.role,
+      })) || []
+    );
+  }, [selectedEmployee]);
 
   const handleEmployeeUpdated = async () => {
     try {
@@ -74,7 +117,9 @@ const Page: React.FC = () => {
   };
 
   const handleOnSelected = (key: React.Key) => {
-    const selected = resignedTerminatedEmployees?.find(item => item.id === Number(key));
+    const selected = resignedTerminatedEmployees?.find(
+      (item) => item.id === Number(key)
+    );
     setSelectedEmployee(selected ?? null);
   };
 
@@ -121,10 +166,18 @@ const Page: React.FC = () => {
       { uid: "type", name: "Type", sortable: true },
       { uid: "date", name: "Date", sortable: true },
       { uid: "reason", name: "Reason" },
+      { uid: "signatories", name: "Approved By", sortable: false },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
+      const statusData = employee.termination_json
+        ? typeof employee.termination_json === "string"
+          ? JSON.parse(employee.termination_json)
+          : employee.termination_json
+        : typeof employee.resignation_json === "string"
+        ? JSON.parse(employee.resignation_json)
+        : employee.resignation_json;
       const status = getEmployeeStatus(employee);
 
       switch (key) {
@@ -162,8 +215,47 @@ const Page: React.FC = () => {
           );
         case "reason":
           return (
-            <div className={`max-w-md truncate`}>
-              {status.reason || "N/A"}
+            <div className={`max-w-md truncate`}>{status.reason || "N/A"}</div>
+          );
+
+        case "signatories":
+          const suspensionSignatories: Signatory[] =
+            statusData?.signatories?.users?.map((user: any) => ({
+              id: user.id,
+              name: user.name,
+              picture: user.picture,
+              role: user.role,
+            })) || [];
+          return (
+            <div className="flex items-center gap-2">
+              {suspensionSignatories.map((signatory) => (
+                <UserAvatarTooltip
+                  key={signatory.id}
+                  user={{
+                    name: signatory.name,
+                    picture: signatory.picture,
+                    id: signatory.id,
+                  }}
+                  avatarProps={{
+                    classNames: { base: "!size-6" },
+                    isBordered: true,
+                  }}
+                />
+              ))}
+              {statusData?.initiatedBy && (
+                <UserAvatarTooltip
+                  key={statusData.initiatedBy.id}
+                  user={{
+                    name: statusData.initiatedBy.name,
+                    picture: statusData.initiatedBy.picture,
+                    id: statusData.initiatedBy.id,
+                  }}
+                  avatarProps={{
+                    classNames: { base: "!size-6" },
+                    isBordered: true,
+                  }}
+                />
+              )}
             </div>
           );
         case "actions":
@@ -191,7 +283,9 @@ const Page: React.FC = () => {
       category: "Department",
       filtered: resignedTerminatedEmployees?.length
         ? Array.from(
-            new Set(resignedTerminatedEmployees.map((e) => e.ref_departments?.name))
+            new Set(
+              resignedTerminatedEmployees.map((e) => e.ref_departments?.name)
+            )
           )
             .filter(Boolean)
             .map((dept) => ({
@@ -206,7 +300,12 @@ const Page: React.FC = () => {
       category: "Type",
       filtered: [
         { key: "type", value: "Resigned", name: "Resigned", uid: "resigned" },
-        { key: "type", value: "Terminated", name: "Terminated", uid: "terminated" },
+        {
+          key: "type",
+          value: "Terminated",
+          name: "Terminated",
+          uid: "terminated",
+        },
       ],
     },
   ];
@@ -216,13 +315,13 @@ const Page: React.FC = () => {
       { name: "First Name", key: "first_name" as keyof Employee },
       { name: "Last Name", key: "last_name" as keyof Employee },
       { name: "Department", key: "department" as keyof Employee },
-      { name: "Date", key: "updated_at" as keyof Employee },
+      { name: "Updated", key: "updated_at" as keyof Employee },
     ],
   };
 
   if (isLoading) {
     return (
-      <section className='w-full h-full flex gap-4 overflow-hidden'>
+      <section className="w-full h-full flex gap-4 overflow-hidden">
         <DataDisplay
           defaultDisplay="table"
           title="Former Employees"
@@ -230,19 +329,22 @@ const Page: React.FC = () => {
           isLoading={true}
           onTableDisplay={{
             config: TableConfigurations,
-            layout: "auto"
+            layout: "auto",
           }}
         />
       </section>
     );
   }
 
-  if (!resignedTerminatedEmployees || resignedTerminatedEmployees.length === 0) {
+  if (
+    !resignedTerminatedEmployees ||
+    resignedTerminatedEmployees.length === 0
+  ) {
     return <EmptyState />;
   }
 
   return (
-    <section className='w-full h-full flex gap-4'>
+    <section className="w-full h-full flex gap-4">
       <DataDisplay
         defaultDisplay="table"
         title="Former Employees"
@@ -254,7 +356,7 @@ const Page: React.FC = () => {
         onTableDisplay={{
           config: TableConfigurations,
           layout: "auto",
-          onRowAction: handleOnSelected
+          onRowAction: handleOnSelected,
         }}
         paginationProps={{
           data_length: resignedTerminatedEmployees.length,
@@ -263,16 +365,19 @@ const Page: React.FC = () => {
           searchingItemKey: ["first_name", "last_name"],
         }}
         sortProps={sortProps}
-        onView={selectedEmployee && (
-          <div className="max-w-[500px] overflow-y-auto">
-            <ViewEmployee
-              employee={selectedEmployee}
-              onClose={() => setSelectedEmployee(null)}
-              onEmployeeUpdated={handleEmployeeUpdated}
-              sortedEmployees={resignedTerminatedEmployees}
-            />
-          </div>
-        )}
+        onView={
+          selectedEmployee && (
+            <div className="max-w-[500px] overflow-y-auto">
+              <ViewEmployee
+                employee={selectedEmployee}
+                onClose={() => setSelectedEmployee(null)}
+                onEmployeeUpdated={handleEmployeeUpdated}
+                sortedEmployees={resignedTerminatedEmployees}
+                signatories={signatories}
+              />
+            </div>
+          )
+        }
       />
     </section>
   );

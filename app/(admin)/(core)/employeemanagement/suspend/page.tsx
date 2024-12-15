@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useSuspendedEmployees } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip, Button } from "@nextui-org/react";
@@ -11,22 +11,35 @@ import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import showDialog from "@/lib/utils/confirmDialog";
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
+import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 
 const EmptyState: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
       <div className="text-center space-y-3">
-        <Text className="text-xl font-bold text-gray-700">No Suspended Employees Found</Text>
-        <Text className="text-gray-500">There are no suspended employees at the moment.</Text>
-        <Text className="text-sm text-gray-400">Suspended employees will appear here when their status changes.</Text>
+        <Text className="text-xl font-bold text-gray-700">
+          No Suspended Employees Found
+        </Text>
+        <Text className="text-gray-500">
+          There are no suspended employees at the moment.
+        </Text>
+        <Text className="text-sm text-gray-400">
+          Suspended employees will appear here when their status changes.
+        </Text>
       </div>
     </div>
   );
 };
 
 const Page: React.FC = () => {
-  const { data: suspendedEmployees, mutate, isLoading } = useSuspendedEmployees();
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const {
+    data: suspendedEmployees,
+    mutate,
+    isLoading,
+  } = useSuspendedEmployees();
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const [isActivating, setIsActivating] = useState<number | null>(null);
 
   const handleEmployeeUpdated = async () => {
@@ -75,9 +88,38 @@ const Page: React.FC = () => {
   };
 
   const handleOnSelected = (key: React.Key) => {
-    const selected = suspendedEmployees?.find(item => item.id === Number(key));
+    const selected = suspendedEmployees?.find(
+      (item) => item.id === Number(key)
+    );
     setSelectedEmployee(selected ?? null);
   };
+
+  type Signatory = {
+    id: string | number;
+    name: string;
+    picture?: string;
+    role?: string;
+  };
+
+  // Extract signatories for the selected employee
+  const signatories = useMemo<Signatory[]>(() => {
+    if (!selectedEmployee?.suspension_json) return [];
+
+    const suspensionData =
+      typeof selectedEmployee.suspension_json === "string"
+        ? JSON.parse(selectedEmployee.suspension_json)
+        : selectedEmployee.suspension_json;
+
+    // Extract and transform signatories
+    return (
+      suspensionData.signatories?.users?.map((user: any) => ({
+        id: user.id,
+        name: user.name,
+        picture: user.picture,
+        role: user.role,
+      })) || []
+    );
+  }, [selectedEmployee]);
 
   const TableConfigurations = {
     columns: [
@@ -87,6 +129,7 @@ const Page: React.FC = () => {
       { uid: "suspendedDate", name: "Suspended Date", sortable: true },
       { uid: "endDate", name: "End Date", sortable: true },
       { uid: "reason", name: "Suspended Reason" },
+      { uid: "signatories", name: "Approved By", sortable: false },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
@@ -140,6 +183,48 @@ const Page: React.FC = () => {
                 : "N/A"}
             </div>
           );
+
+        case "signatories":
+          const suspensionSignatories: Signatory[] =
+            suspensionData?.signatories?.users?.map((user: any) => ({
+              id: user.id,
+              name: user.name,
+              picture: user.picture,
+              role: user.role,
+            })) || [];
+          return (
+            <div className="flex items-center gap-2">
+              {suspensionSignatories.map((signatory) => (
+                <UserAvatarTooltip
+                  key={signatory.id}
+                  user={{
+                    name: signatory.name,
+                    picture: signatory.picture,
+                    id: signatory.id,
+                  }}
+                  avatarProps={{
+                    classNames: { base: "!size-6" },
+                    isBordered: true,
+                  }}
+                />
+              ))}
+              {suspensionData?.initiatedBy && (
+                <UserAvatarTooltip
+                  key={suspensionData.initiatedBy.id}
+                  user={{
+                    name: suspensionData.initiatedBy.name,
+                    picture: suspensionData.initiatedBy.picture,
+                    id: suspensionData.initiatedBy.id,
+                  }}
+                  avatarProps={{
+                    classNames: { base: "!size-6" },
+                    isBordered: true,
+                  }}
+                />
+              )}
+            </div>
+          );
+
         case "actions":
           return (
             <div onClick={(e) => e.stopPropagation()}>
@@ -163,7 +248,7 @@ const Page: React.FC = () => {
   const FilterItems = [
     {
       category: "Department",
-      filtered: suspendedEmployees?.length 
+      filtered: suspendedEmployees?.length
         ? Array.from(
             new Set(suspendedEmployees.map((e) => e.ref_departments?.name))
           )
@@ -182,13 +267,13 @@ const Page: React.FC = () => {
     sortItems: [
       { name: "First Name", key: "first_name" as keyof Employee },
       { name: "Last Name", key: "last_name" as keyof Employee },
-      { name: "Suspended Date", key: "suspension_json" as keyof Employee },
+      { name: "Updated", key: "updated_at" as keyof Employee },
     ],
   };
 
   if (isLoading) {
     return (
-      <section className='w-full h-full flex gap-4 overflow-hidden'>
+      <section className="w-full h-full flex gap-4 overflow-hidden">
         <DataDisplay
           defaultDisplay="table"
           title="Suspended Employees"
@@ -196,7 +281,7 @@ const Page: React.FC = () => {
           isLoading={true}
           onTableDisplay={{
             config: TableConfigurations,
-            layout: "auto"
+            layout: "auto",
           }}
         />
       </section>
@@ -208,7 +293,7 @@ const Page: React.FC = () => {
   }
 
   return (
-    <section className='w-full h-full flex gap-4 overflow-hidden'>
+    <section className="w-full h-full flex gap-4 overflow-hidden">
       <DataDisplay
         defaultDisplay="table"
         title="Suspended Employees"
@@ -220,7 +305,7 @@ const Page: React.FC = () => {
         onTableDisplay={{
           config: TableConfigurations,
           layout: "auto",
-          onRowAction: handleOnSelected
+          onRowAction: handleOnSelected,
         }}
         paginationProps={{
           data_length: suspendedEmployees.length,
@@ -229,16 +314,19 @@ const Page: React.FC = () => {
           searchingItemKey: ["first_name", "last_name"],
         }}
         sortProps={sortProps}
-        onView={selectedEmployee && (
-          <div className="max-w-[500px] overflow-y-auto">
-            <ViewEmployee
-              employee={selectedEmployee}
-              onClose={() => setSelectedEmployee(null)}
-              onEmployeeUpdated={handleEmployeeUpdated}
-              sortedEmployees={suspendedEmployees}
-            />
-          </div>
-        )}
+        onView={
+          selectedEmployee && (
+            <div className="max-w-[500px] overflow-y-auto">
+              <ViewEmployee
+                employee={selectedEmployee}
+                onClose={() => setSelectedEmployee(null)}
+                onEmployeeUpdated={handleEmployeeUpdated}
+                sortedEmployees={suspendedEmployees}
+                signatories={signatories}
+              />
+            </div>
+          )
+        }
       />
     </section>
   );

@@ -226,6 +226,7 @@ const Page: React.FC = () => {
             onClose={() => setSelectedEmployee(null)}
             onEmployeeUpdated={handleEmployeeUpdated}
             sortedEmployees={employees}
+            
           />
           </div>
         )}
