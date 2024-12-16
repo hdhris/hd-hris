@@ -17,6 +17,7 @@ import EditEducationalBackgroundForm from "@/components/admin/employeescomponent
 import EditJobInformationForm from "@/components/admin/employeescomponent/update/EditJobInformationForm";
 import EditScheduleSelection from "@/components/admin/employeescomponent/update/EditScheduleSelection";
 import EditAccountForm from "@/components/admin/employeescomponent/update/EditAccount";
+import { mutate } from "swr";
 
 type EmployeeFields = keyof EmployeeFormData;
 
@@ -32,7 +33,7 @@ const tabFieldsMap = {
     "email",
     "contact_no",
     "birthdate",
-    "addr_region",
+  "addr_region",
     "addr_province",
     "addr_municipal",
     "addr_baranggay",
@@ -224,17 +225,23 @@ export default function EditEmployeePage({
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
-
+  
     try {
+      toast({
+        title: "Updating",
+        description: "Updating employee information...",
+      });
+  
       // Handle picture upload
       let pictureUrl = typeof data.picture === "string" ? data.picture : "";
       if (data.picture instanceof File) {
         const result = await edgestore.publicFiles.upload({
           file: data.picture,
+          options: { temporary: false },
         });
         pictureUrl = result.url;
       }
-
+  
       // Process all certificates in parallel
       const [certificates, mastersCertificates, doctorateCertificates] =
         await Promise.all([
@@ -242,21 +249,12 @@ export default function EditEmployeePage({
           processCertificates(data.mastersCertificates),
           processCertificates(data.doctorateCertificates),
         ]);
-
-      // Prepare schedule data
-      const schedules = data.batch_id
-        ? [
-            {
-              batch_id: parseInt(data.batch_id),
-              days_json: Array.isArray(data.days_json) ? data.days_json : [],
-            },
-          ]
-        : [];
-
-      // Prepare the main employee update data
+  
+      // Prepare employee data - similar structure to create endpoint
       const employeeData = {
-        picture: pictureUrl,
+        // Basic Information
         prefix: data.prefix,
+        picture: pictureUrl,
         first_name: data.first_name,
         middle_name: data.middle_name,
         last_name: data.last_name,
@@ -269,8 +267,11 @@ export default function EditEmployeePage({
           ? new Date(data.birthdate).toISOString()
           : null,
         hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
-
-        educational_bg_json: {
+        addr_region: parseInt(data.addr_region, 10),
+        addr_province: parseInt(data.addr_province, 10),
+        addr_municipal: parseInt(data.addr_municipal, 10),
+        addr_baranggay: parseInt(data.addr_baranggay, 10),
+        educational_bg_json: JSON.stringify({
           elementary: data.elementary,
           highSchool: data.highSchool,
           seniorHighSchool: data.seniorHighSchool,
@@ -279,18 +280,18 @@ export default function EditEmployeePage({
           universityCollege: data.universityCollege,
           course: data.course,
           highestDegree: data.highestDegree,
-          certificates,
+          certificates: certificates,
+          mastersCertificates: mastersCertificates,
+          doctorateCertificates: doctorateCertificates,
           masters: data.masters,
           mastersCourse: data.mastersCourse,
           mastersYear: data.mastersYear,
-          mastersCertificates,
+
           doctorate: data.doctorate,
           doctorateCourse: data.doctorateCourse,
           doctorateYear: data.doctorateYear,
-          doctorateCertificates,
-        },
-
-        family_bg_json: {
+        }),
+        family_bg_json: JSON.stringify({
           fathers_first_name: data.fathers_first_name,
           fathers_middle_name: data.fathers_middle_name,
           fathers_last_name: data.fathers_last_name,
@@ -300,64 +301,27 @@ export default function EditEmployeePage({
           guardian_first_name: data.guardian_first_name,
           guardian_middle_name: data.guardian_middle_name,
           guardian_last_name: data.guardian_last_name,
-        },
-
-        // Add reference connections for valid IDs
-        ...(data.branch_id && {
-          ref_branches: { connect: { id: parseInt(data.branch_id) } },
         }),
-
-        ...(data.privilege_id && {
-          sys_privileges: { connect: { id: parseInt(data.privilege_id) } },
-        }),
-        ...(data.department_id && {
-          ref_departments: { connect: { id: parseInt(data.department_id) } },
-        }),
-        ...(data.job_id && {
-          ref_job_classes: { connect: { id: parseInt(data.job_id) } },
-        }),
-        ...(data.employement_status_id && {
-          ref_employment_status: {
-            connect: { id: parseInt(data.employement_status_id) },
+        department_id: parseInt(data.department_id, 10),
+        job_id: parseInt(data.job_id, 10),
+        employement_status_id: parseInt(data.employement_status_id, 10),
+        branch_id: parseInt(data.branch_id, 10),
+        salary_grade_id: parseInt(data.salary_grade_id, 10),
+        batch_id: parseInt(data.batch_id, 10),
+        schedules: [
+          {
+            days_json: data.days_json,
+            batch_id: parseInt(data.batch_id, 10),
           },
-        }),
-        ...(data.salary_grade_id && {
-          ref_salary_grades: {
-            connect: { id: parseInt(data.salary_grade_id) },
-          },
-        }),
-        ...(data.addr_region && {
-          ref_addresses_trans_employees_addr_regionToref_addresses: {
-            connect: { id: parseInt(data.addr_region) },
-          },
-        }),
-        ...(data.addr_province && {
-          ref_addresses_trans_employees_addr_provinceToref_addresses: {
-            connect: { id: parseInt(data.addr_province) },
-          },
-        }),
-        ...(data.addr_municipal && {
-          ref_addresses_trans_employees_addr_municipalToref_addresses: {
-            connect: { id: parseInt(data.addr_municipal) },
-          },
-        }),
-        ...(data.addr_baranggay && {
-          ref_addresses_trans_employees_addr_baranggayToref_addresses: {
-            connect: { id: parseInt(data.addr_baranggay) },
-          },
-        }),
-
-        // Include schedules array
-        schedules,
+        ],
       };
-
-      // First update employee data
-      const employeeUpdateResponse = await axios.put(
+      const response = await axios.put(
         `/api/employeemanagement/employees?id=${params.id}`,
         employeeData
       );
-
-      if (employeeUpdateResponse.status === 200) {
+  
+      if (response.status === 200) {
+        mutate(`/api/employeemanagement/employees?id=${params.id}`, response.data);
         router.push("/employeemanagement/employees");
         toast({
           title: "Success",
@@ -365,12 +329,26 @@ export default function EditEmployeePage({
           duration: 3000,
         });
       }
-    } catch (error: any) {
-      console.error("Update error:", error);
+    } catch (error) {
+      let errorMessage = "An unexpected error occurred";
+
+      if (!navigator.onLine) {
+        errorMessage = "Please check your internet connection and try again";
+      } else if (axios.isAxiosError(error)) {
+        errorMessage =
+          error.response?.data?.message || "Failed to create employee";
+
+        if (error.code === "ECONNABORTED") {
+          errorMessage = "Request timed out. Please try again";
+        } else if (error.response?.status === 409) {
+          errorMessage = "Username or email already exists";
+        } else if (error.response?.status === 500) {
+          errorMessage = "Server error. Please try again later";
+        }
+      }
       toast({
         title: "Error",
-        description:
-          error.response?.data?.message || "Failed to update employee",
+        description: errorMessage,
         variant: "danger",
         duration: 5000,
       });
@@ -383,8 +361,12 @@ export default function EditEmployeePage({
     if (!employeeData) return;
 
     try {
-      // Process days_json
       const accountData = employeeData.userAccount?.auth_credentials || null;
+      const privilegeData = employeeData.acl_user_access_control || null;
+  
+      // Log to check if we're getting the privilege data
+      // console.log("Privilege Data:", privilegeData);
+  
 
       let daysArray: string[] = [];
       if (employeeData.dim_schedules?.[0]?.days_json) {
@@ -421,8 +403,6 @@ export default function EditEmployeePage({
 
       // Get user account data
       const userAccount = employeeData.userAccount;
-      const username = userAccount?.auth_credentials?.username || "";
-      const password = userAccount?.auth_credentials?.password || "";
 
       // Reset form with all data
       methods.reset({
@@ -484,8 +464,8 @@ export default function EditEmployeePage({
         batch_id: batchId,
         days_json: daysArray,
         // Account
+        privilege_id: privilegeData?.privilege_id?.toString() || "",
         username: accountData?.username || "",
-        privilege_id: accountData?.privilege_id?.toString() || "",
       } as EmployeeFormData);
     } catch (error) {
       console.error("Error fetching employee data:", error);
@@ -567,6 +547,7 @@ export default function EditEmployeePage({
                     hasAccount={
                       !!employeeData?.userAccount?.auth_credentials?.username
                     }
+                    currentPrivilegeId={employeeData?.acl_user_access_control?.privilege_id || ""}
                   />
                 </div>
               </div>

@@ -191,33 +191,60 @@ const EducationalBackgroundForm = () => {
     addedFiles: FileState[],
     certificateType: "basic" | "masters" | "doctorate"
   ) => {
-    // Update file states with the actual files
-    switch (certificateType) {
-      case "masters":
-        setMastersFileStates(prev => [...prev, ...addedFiles]);
-        break;
-      case "doctorate":
-        setDoctorateFileStates(prev => [...prev, ...addedFiles]);
-        break;
-      default:
-        setBasicFileStates(prev => [...prev, ...addedFiles]);
+    // Get current certificates based on type
+    const currentCerts = certificateType === "masters"
+      ? mastersCertificates
+      : certificateType === "doctorate"
+        ? doctorateCertificates
+        : certificates;
+  
+    // Check for duplicates
+    const existingUrls = new Set(currentCerts.map(cert =>
+      typeof cert === 'string' ? cert : cert.name
+    ));
+    
+    const newFiles = addedFiles.filter(file =>
+      !existingUrls.has(file.file?.name || '')
+    );
+  
+    if (newFiles.length === 0) {
+      toast({
+        title: "Warning",
+        description: "These files have already been uploaded",
+        variant: "warning",
+      });
+      return;
     }
   
-    const uploadPromises = addedFiles.map(async (addedFileState) => {
+    switch (certificateType) {
+      case "masters":
+        setMastersFileStates((prev) => [...prev, ...newFiles]);
+        break;
+      case "doctorate":
+        setDoctorateFileStates((prev) => [...prev, ...newFiles]);
+        break;
+      default:
+        setBasicFileStates((prev) => [...prev, ...newFiles]);
+    }
+  
+    const uploadPromises = newFiles.map(async (addedFileState) => {
       try {
         if (!addedFileState.file || !(addedFileState.file instanceof File)) {
           throw new Error("Invalid file");
         }
   
-        // Create a copy of the file to preserve its data
-        const fileData = new File([addedFileState.file], addedFileState.file.name, {
-          type: addedFileState.file.type
-        });
+        const fileData = new File(
+          [addedFileState.file],
+          addedFileState.file.name,
+          {
+            type: addedFileState.file.type,
+          }
+        );
   
         const result = await edgestore.publicFiles.upload({
           file: fileData,
           options: {
-            temporary: false
+            temporary: false,
           },
           onProgressChange: async (progress) => {
             updateFileProgress(addedFileState.key, progress, certificateType);
@@ -225,41 +252,38 @@ const EducationalBackgroundForm = () => {
               await new Promise((resolve) => setTimeout(resolve, 1000));
               updateFileProgress(addedFileState.key, "COMPLETE", certificateType);
             }
-          }
+          },
         });
-  
-        // Store both the file and URL
-        const uploadedFile = {
-          file: fileData,
-          url: result.url
-        };
   
         switch (certificateType) {
           case "masters": {
-            setMastersCertificates(prev => [...prev, uploadedFile.url]);
-            setValue("mastersCertificates", getValues("mastersCertificates").concat(uploadedFile.url));
+            const updatedCerts = [...mastersCertificates, result.url];
+            setMastersCertificates(updatedCerts);
+            setValue("mastersCertificates", updatedCerts);
             break;
           }
           case "doctorate": {
-            setDoctorateCertificates(prev => [...prev, uploadedFile.url]);
-            setValue("doctorateCertificates", getValues("doctorateCertificates").concat(uploadedFile.url));
+            const updatedCerts = [...doctorateCertificates, result.url];
+            setDoctorateCertificates(updatedCerts);
+            setValue("doctorateCertificates", updatedCerts);
             break;
           }
           default: {
-            setCertificates(prev => [...prev, uploadedFile.url]);
-            setValue("certificates", getValues("certificates").concat(uploadedFile.url));
+            const updatedCerts = [...certificates, result.url];
+            setCertificates(updatedCerts);
+            setValue("certificates", updatedCerts);
             break;
           }
         }
   
-        return uploadedFile;
+        return result.url;
       } catch (err) {
         console.error("File upload error:", err);
         updateFileProgress(addedFileState.key, "ERROR", certificateType);
         toast({
           title: "Error",
           description: `Failed to upload ${addedFileState.file.name}. Please try again.`,
-          variant: "danger"
+          variant: "danger",
         });
       }
     });
@@ -270,7 +294,7 @@ const EducationalBackgroundForm = () => {
       console.error("Upload process error:", err);
     }
   };
-  
+
   const formFields: FormInputProps[] = [
     {
       name: "elementary",

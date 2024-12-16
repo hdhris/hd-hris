@@ -9,6 +9,7 @@ import {FilterProps} from "@/types/table/default_config";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import {Tooltip} from "@nextui-org/tooltip";
 import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
+import {capitalize} from "@nextui-org/shared-utils";
 
 
 const ApprovalColumns: ColumnsProps[] = [{
@@ -32,40 +33,9 @@ export const approval_status_color_map: Record<string, BadgeProps["color"]> = {
 }
 export const TableConfigurations: TableConfigProps<LeaveRequest> = {
     columns: ApprovalColumns, rowCell: (item: LeaveRequest, columnKey: React.Key) => {
-        // const handleReview = async (key: React.Key, method: "Approved" | "Rejected") => {
-        //     const res = await axiosInstance.post("/api/admin/leaves/requests/reviewed", {
-        //         id: key, method
-        //     })
-        //     if (res.status === 200) {
-        //         alert("Success")
-        //     } else {
-        //         alert("Failed")
-        //     }
-        // }
-
-
-        // const evaluators = []
-        // const is_approved = item.evaluators.approver.decision.is_approved
-        // const is_reviewed = item.evaluators.reviewers?.decision.is_reviewed
-        // if (is_approved) {
-        //     const approver = item.evaluators.approver.approved_by
-        //     const approved_by = item.evaluators.users.find(item => item.id === approver)
-        //     const approver_data = {
-        //         type: "Approved", ...approved_by
-        //     }
-        //     evaluators.push(approver_data)
-        // }
-        //
-        // if (is_reviewed) {
-        //     const reviewer = item.evaluators.reviewers.reviewed_by
-        //     const reviewed_by = item.evaluators.users.find(item => item.id === reviewer)
-        //     const reviewer_data = {
-        //         type: "Reviewed", ...reviewed_by
-        //     }
-        //     evaluators.push(reviewer_data)
-        // }
-        // const leave_status = item.
-        // const cellValue = item[columnKey as keyof LeaveRequest];
+        const evaluators = item.evaluators.evaluators
+        const users = item.evaluators.users
+        const evaluated_by = users.filter(user => evaluators.some(evaluator => Number(evaluator.evaluated_by) === Number(user.id)) && user.role !== "applicant")
         return (<Switch expression={columnKey as string}>
             <Case of="name">
                 <User
@@ -99,18 +69,17 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
 
             </Case>
             <Case of="evaluated_by">
-                <div className="flex">
-                    {/*<AvatarGroup>*/}
-                    {/*    {evaluators.length > 0 ? evaluators.map((evaluator, index) => {*/}
-                    {/*        return (*/}
+                <div className="flex justify-center">
+                    <AvatarGroup>
+                        {evaluators.length > 0 ? evaluated_by.map((evaluator, index) => {
+                            return (
+                                <Tooltip key={index} content={capitalize(evaluator.role) + " - " + evaluator.name}>
+                                    <Avatar isBordered size="sm" src={evaluator.picture}/>
+                                </Tooltip>
 
-                    {/*            <Tooltip key={index} content={evaluator.type + " - " + evaluator.name}>*/}
-                    {/*                <Avatar isBordered size="sm" src={evaluator.picture}/>*/}
-                    {/*            </Tooltip>*/}
-
-                    {/*        )*/}
-                    {/*    }) : null}*/}
-                    {/*</AvatarGroup>*/}
+                            )
+                        }) : null}
+                    </AvatarGroup>
                 </div>
             </Case>
             {/*<Case of="status">*/}
@@ -132,13 +101,13 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
 
             {/*</Case>*/}
             {/*<Case of="reviewed_by">*/}
-            {/*    {item.status !== "Pending" ?*/}
-            {/*        <Tooltip className="pointer-events-auto" content={item.approvedBy?.name}>*/}
-            {/*            <Avatar*/}
-            {/*                size="sm"*/}
-            {/*                src={item.approvedBy?.picture}*/}
-            {/*            />*/}
-            {/*        </Tooltip> : ""}*/}
+            {/*    /!*{item.status !== "Pending" ?*!/*/}
+            {/*    /!*    <Tooltip className="pointer-events-auto" content={item.approvedBy?.name}>*!/*/}
+            {/*    /!*        <Avatar*!/*/}
+            {/*    /!*            size="sm"*!/*/}
+            {/*    /!*            src={item.approvedBy?.picture}*!/*/}
+            {/*    /!*        />*!/*/}
+            {/*    /!*    </Tooltip> : ""}*!/*/}
             {/*</Case>*/}
             {/*<Default>*/}
             {/*    <Typography>{cellValue as string}</Typography>*/}

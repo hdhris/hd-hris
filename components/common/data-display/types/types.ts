@@ -40,8 +40,8 @@ export interface DataTableProps<T> extends Omit<TableProps, "aria-label"> {
 
 export interface DataControlProps {
     className?: {
-        wrapper: string; upper: string; lower: {
-            selectedKeysClassname: string; paginationClassname: string; buttonClassname: string;
+        wrapper?: string; upper?: string; lower?: {
+            selectedKeysClassname?: string; paginationClassname?: string; buttonClassname?: string;
         };
     }
 }

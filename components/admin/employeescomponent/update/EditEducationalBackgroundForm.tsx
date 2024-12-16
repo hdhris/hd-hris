@@ -11,6 +11,28 @@ import Text from "@/components/Text";
 import { Button } from "@nextui-org/button";
 import { useToast } from "@/components/ui/use-toast";
 
+// Add these interface and helper function
+interface FileInfo {
+  originalName: string;
+  url: string;
+}
+
+// Add the file name extractor
+const extractFileName = (file: string | File): string => {
+  if (file instanceof File) {
+    return file.name;
+  }
+  
+  try {
+    const urlParts = file.split('/');
+    const encodedFileName = urlParts[urlParts.length - 1];
+    return decodeURIComponent(encodedFileName);
+  } catch {
+    return 'Unknown file';
+  }
+};
+
+
 const EditEducationalBackgroundForm = () => {
   const formContext = useFormContext();
   const { watch, setValue, getValues } = formContext;
@@ -25,8 +47,17 @@ const EditEducationalBackgroundForm = () => {
   const [certificates, setCertificates] = useState<(string | File)[]>([]);
   const [mastersCertificates, setMastersCertificates] = useState<(string | File)[]>([]);
   const [doctorateCertificates, setDoctorateCertificates] = useState<(string | File)[]>([]);
+  const [fileInfoMap, setFileInfoMap] = useState<Record<string, FileInfo>>({});
   const { toast } = useToast();
 
+  const getOriginalFilename = (url: string): string => {
+    try {
+      const urlParts = decodeURIComponent(url).split('/');
+      return urlParts[urlParts.length - 1];
+    } catch {
+      return url.split('/').pop() || 'Unknown file';
+    }
+  };
   const elementary = watch("elementary");
   const highSchool = watch("highSchool");
   const seniorHighSchool = watch("seniorHighSchool");
@@ -63,54 +94,55 @@ const EditEducationalBackgroundForm = () => {
     setValue,
   ]);
 
-  useEffect(() => {
-    const existingCertificates = (getValues("certificates") || [])
-      .map((cert: any) =>
-        cert
-          ? typeof cert === "string"
-            ? cert
-            : cert.fileUrl || cert.url
-          : null
-      )
-      .filter(Boolean); 
+ // In EditEducationalBackgroundForm, update the initialization useEffect:
 
-    const existingMastersCertificates = (getValues("mastersCertificates") || [])
-      .map((cert: any) =>
-        cert
-          ? typeof cert === "string"
-            ? cert
-            : cert.fileUrl || cert.url
-          : null
-      )
-      .filter(Boolean);
+useEffect(() => {
+  const initializeCertificates = () => {
+    // Process each certificate type
+    const processCertificates = (values: any[] = []) => {
+      return [...new Set(values.map(cert => {
+        if (!cert) return null;
+        if (typeof cert === "string") return cert;
+        return cert.fileUrl || cert.url;
+      }).filter(Boolean))];
+    };
 
-    const existingDoctorateCertificates = (
-      getValues("doctorateCertificates") || []
-    )
-      .map((cert: any) =>
-        cert
-          ? typeof cert === "string"
-            ? cert
-            : cert.fileUrl || cert.url
-          : null
-      )
-      .filter(Boolean);
+    // Get current values from form
+    const currentCertificates = processCertificates(getValues("certificates"));
+    const currentMastersCerts = processCertificates(getValues("mastersCertificates"));
+    const currentDoctorateCerts = processCertificates(getValues("doctorateCertificates"));
 
+    // Create file states for each certificate
     const createFileStates = (urls: string[]) =>
       urls.map((url) => ({
-        key: url ? url.split("/").pop() || "unknown" : "unknown",
-        file: new File([], url ? url.split("/").pop() || "unknown" : "unknown"),
+        key: url,
+        file: new File([], getOriginalFilename(url)),
         progress: "COMPLETE" as const,
       }));
 
-    setBasicFileStates(createFileStates(existingCertificates));
-    setMastersFileStates(createFileStates(existingMastersCertificates));
-    setDoctorateFileStates(createFileStates(existingDoctorateCertificates));
+    // Update states
+    setBasicFileStates(createFileStates(currentCertificates));
+    setMastersFileStates(createFileStates(currentMastersCerts));
+    setDoctorateFileStates(createFileStates(currentDoctorateCerts));
 
-    setCertificates(existingCertificates);
-    setMastersCertificates(existingMastersCertificates);
-    setDoctorateCertificates(existingDoctorateCertificates);
-  }, [getValues]);
+    setCertificates(currentCertificates);
+    setMastersCertificates(currentMastersCerts);
+    setDoctorateCertificates(currentDoctorateCerts);
+
+    // Update fileInfoMap
+    const newFileInfoMap: Record<string, FileInfo> = {};
+    [...currentCertificates, ...currentMastersCerts, ...currentDoctorateCerts]
+      .forEach(url => {
+        newFileInfoMap[url] = {
+          originalName: getOriginalFilename(url),
+          url
+        };
+      });
+    setFileInfoMap(newFileInfoMap);
+  };
+
+  initializeCertificates();
+}, [getValues]); // Add formContext as a dependency if needed
 
   function updateFileProgress(
     key: string,
@@ -183,19 +215,43 @@ const EditEducationalBackgroundForm = () => {
     addedFiles: FileState[],
     certificateType: "basic" | "masters" | "doctorate"
   ) => {
-    // Update file states with the actual files
-    switch (certificateType) {
-      case "masters":
-        setMastersFileStates((prev) => [...prev, ...addedFiles]);
-        break;
-      case "doctorate":
-        setDoctorateFileStates((prev) => [...prev, ...addedFiles]);
-        break;
-      default:
-        setBasicFileStates((prev) => [...prev, ...addedFiles]);
+    // Get current certificates based on type
+    const currentCerts = certificateType === "masters" 
+      ? mastersCertificates 
+      : certificateType === "doctorate" 
+        ? doctorateCertificates 
+        : certificates;
+
+    // Check for duplicates
+    const existingUrls = new Set(currentCerts.map(cert => 
+      typeof cert === 'string' ? cert : cert.name
+    ));
+    
+    const newFiles = addedFiles.filter(file => 
+      !existingUrls.has(file.file?.name || '')
+    );
+
+    if (newFiles.length === 0) {
+      toast({
+        title: "Warning",
+        description: "These files have already been uploaded",
+        variant: "warning",
+      });
+      return;
     }
 
-    const uploadPromises = addedFiles.map(async (addedFileState) => {
+    switch (certificateType) {
+      case "masters":
+        setMastersFileStates((prev) => [...prev, ...newFiles]);
+        break;
+      case "doctorate":
+        setDoctorateFileStates((prev) => [...prev, ...newFiles]);
+        break;
+      default:
+        setBasicFileStates((prev) => [...prev, ...newFiles]);
+    }
+
+    const uploadPromises = newFiles.map(async (addedFileState) => {
       try {
         if (!addedFileState.file || !(addedFileState.file instanceof File)) {
           throw new Error("Invalid file");
@@ -218,38 +274,37 @@ const EditEducationalBackgroundForm = () => {
             updateFileProgress(addedFileState.key, progress, certificateType);
             if (progress === 100) {
               await new Promise((resolve) => setTimeout(resolve, 1000));
-              updateFileProgress(
-                addedFileState.key,
-                "COMPLETE",
-                certificateType
-              );
+              updateFileProgress(addedFileState.key, "COMPLETE", certificateType);
             }
           },
         });
 
+        // Store the original filename mapping
+        setFileInfoMap(prev => ({
+          ...prev,
+          [result.url]: {
+            originalName: fileData.name,
+            url: result.url
+          }
+        }));
+
         switch (certificateType) {
           case "masters": {
-            setMastersCertificates((prev) => [...prev, result.url]);
-            setValue(
-              "mastersCertificates",
-              getValues("mastersCertificates").concat(result.url)
-            );
+            const updatedCerts = [...mastersCertificates, result.url];
+            setMastersCertificates(updatedCerts);
+            setValue("mastersCertificates", updatedCerts);
             break;
           }
           case "doctorate": {
-            setDoctorateCertificates((prev) => [...prev, result.url]);
-            setValue(
-              "doctorateCertificates",
-              getValues("doctorateCertificates").concat(result.url)
-            );
+            const updatedCerts = [...doctorateCertificates, result.url];
+            setDoctorateCertificates(updatedCerts);
+            setValue("doctorateCertificates", updatedCerts);
             break;
           }
           default: {
-            setCertificates((prev) => [...prev, result.url]);
-            setValue(
-              "certificates",
-              getValues("certificates").concat(result.url)
-            );
+            const updatedCerts = [...certificates, result.url];
+            setCertificates(updatedCerts);
+            setValue("certificates", updatedCerts);
             break;
           }
         }
@@ -448,219 +503,220 @@ const EditEducationalBackgroundForm = () => {
         <div className="space-y-2">
           {certificates.map((certificate, index) => (
             <div key={index} className="flex justify-between items-center">
-              <div>
+              <div className="truncate max-w-md">
                 {certificate
-                  ? typeof certificate === "string"? certificate.split("/").pop() || "Unknown"
-                  : certificate instanceof File
-                  ? certificate.name
-                  : "Unknown file"
-                : "Unknown file"}
-            </div>
-            <div className="space-x-2">
-              {certificate && typeof certificate === "string" && (
+                  ? typeof certificate === "string"
+                    ? fileInfoMap[certificate]?.originalName || extractFileName(certificate)
+                    : certificate instanceof File
+                    ? certificate.name
+                    : "Unknown file"
+                  : "Unknown file"}
+              </div>
+              <div className="space-x-2">
+                {certificate && typeof certificate === "string" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(certificate, "_blank")}
+                  >
+                    View
+                  </Button>
+                )}
                 <Button
-                  variant="ghost"
+                  color="danger"
                   size="sm"
-                  onClick={() => window.open(certificate, "_blank")}
+                  onClick={() => handleRemove(index, "basic")}
                 >
-                  Download
+                  Remove
                 </Button>
-              )}
-              <Button
-                color="danger"
-                size="sm"
-                onClick={() => handleRemove(index, "basic")}
-              >
-                Remove
-              </Button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-    )}
-    <FormFields
-      items={[
-        {
-          name: "certificates",
-          label: "Basic Certificates",
-          type: "text",
-          Component: ({ onChange }) => (
-            <FileDropzone
-              value={basicFileStates}
-              onChange={(files) => {
-                setBasicFileStates(files);
-                onChange(files.map((f) => f.file));
-              }}
-              onFilesAdded={(addedFiles) =>
-                handleFileUpload(addedFiles, "basic")
-              }
-              dropzoneOptions={{
-                accept: {
-                  "application/pdf": [".pdf"],
-                  "image/jpeg": [".jpg", ".jpeg"],
-                  "image/png": [".png"],
-                  "image/webp": [".webp"],
-                },
-                maxSize: 5 * 1024 * 1024,
-              }}
-            />
-          ),
-        },
-      ]}
-    />
-  
-    {/* Masters Certificates */}
-    {masters && (
-      <>
-        <Divider />
-        <Text className="text-medium font-semibold">
-          Masters Certificates
-        </Text>
-        {/* Masters Certificates */}
-        {masters && mastersCertificates?.length > 0 && (
-          <div className="space-y-2">
-            {mastersCertificates.map((certificate, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <div>
-                  {certificate
-                    ? typeof certificate === "string"
-                      ? certificate.split("/").pop() || "Unknown"
-                      : certificate instanceof File
-                      ? certificate.name
-                      : "Unknown file"
-                    : "Unknown file"}
-                </div>
-                <div className="space-x-2">
-                  {certificate && typeof certificate === "string" && (
+          ))}
+        </div>
+      )}
+      <FormFields
+        items={[
+          {
+            name: "certificates",
+            label: "Basic Certificates",
+            type: "text",
+            Component: ({ onChange }) => (
+              <FileDropzone
+                value={basicFileStates}
+                onChange={(files) => {
+                  setBasicFileStates(files);
+                  onChange(files.map((f) => f.file));
+                }}
+                onFilesAdded={(addedFiles) =>
+                  handleFileUpload(addedFiles, "basic")
+                }
+                dropzoneOptions={{
+                  accept: {
+                    "application/pdf": [".pdf"],
+                    "image/jpeg": [".jpg", ".jpeg"],
+                    "image/png": [".png"],
+                    "image/webp": [".webp"],
+                  },
+                  maxSize: 5 * 1024 * 1024,
+                }}
+              />
+            ),
+          },
+        ]}
+      />
+
+      {/* Masters Certificates */}
+      {masters && (
+        <>
+          <Divider />
+          <Text className="text-medium font-semibold">
+            Masters Certificates
+          </Text>
+          {masters && mastersCertificates?.length > 0 && (
+            <div className="space-y-2">
+              {mastersCertificates.map((certificate, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <div className="truncate max-w-md">
+                    {certificate
+                      ? typeof certificate === "string"
+                        ? fileInfoMap[certificate]?.originalName || extractFileName(certificate)
+                        : certificate instanceof File
+                        ? certificate.name
+                        : "Unknown file"
+                      : "Unknown file"}
+                  </div>
+                  <div className="space-x-2">
+                    {certificate && typeof certificate === "string" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.open(certificate, "_blank")}
+                      >
+                        View
+                      </Button>
+                    )}
                     <Button
-                      variant="ghost"
+                      color="danger"
                       size="sm"
-                      onClick={() => window.open(certificate, "_blank")}
+                      onClick={() => handleRemove(index, "masters")}
                     >
-                      Download
+                      Remove
                     </Button>
-                  )}
-                  <Button
-                    color="danger"
-                    size="sm"
-                    onClick={() => handleRemove(index, "masters")}
-                  >
-                    Remove
-                  </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-        <FormFields
-          items={[
-            {
-              name: "mastersCertificates",
-              label: "Masters Certificates",
-              type: "text",
-              Component: ({ onChange }) => (
-                <FileDropzone
-                  value={mastersFileStates}
-                  onChange={(files) => {
-                    setMastersFileStates(files);
-                    onChange(files.map((f) => f.file));
-                  }}
-                  onFilesAdded={(addedFiles) =>
-                    handleFileUpload(addedFiles, "masters")
-                  }
-                  dropzoneOptions={{
-                    accept: {
-                      "application/pdf": [".pdf"],
-                      "image/jpeg": [".jpg", ".jpeg"],
-                      "image/png": [".png"],
-                      "image/webp": [".webp"],
-                    },
-                    maxSize: 5 * 1024 * 1024,
-                  }}
-                />
-              ),
-            },
-          ]}
-        />
-      </>
-    )}
-  
-    {/* Doctorate Certificates */}
-    {doctorate && (
-      <>
-        <Divider />
-        <Text className="text-medium font-semibold">
-          Doctorate Certificates
-        </Text>
-        {/* Doctorate Certificates */}
-        {doctorate && doctorateCertificates?.length > 0 && (
-          <div className="space-y-2">
-            {doctorateCertificates.map((certificate, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <div>
-                  {certificate
-                    ? typeof certificate === "string"
-                      ? certificate.split("/").pop() || "Unknown"
-                      : certificate instanceof File
-                      ? certificate.name
-                      : "Unknown file"
-                    : "Unknown file"}
-                </div>
-                <div className="space-x-2">
-                  {certificate && typeof certificate === "string" && (
+              ))}
+            </div>
+          )}
+          <FormFields
+            items={[
+              {
+                name: "mastersCertificates",
+                label: "Masters Certificates",
+                type: "text",
+                Component: ({ onChange }) => (
+                  <FileDropzone
+                    value={mastersFileStates}
+                    onChange={(files) => {
+                      setMastersFileStates(files);
+                      onChange(files.map((f) => f.file));
+                    }}
+                    onFilesAdded={(addedFiles) =>
+                      handleFileUpload(addedFiles, "masters")
+                    }
+                    dropzoneOptions={{
+                      accept: {
+                        "application/pdf": [".pdf"],
+                        "image/jpeg": [".jpg", ".jpeg"],
+                        "image/png": [".png"],
+                        "image/webp": [".webp"],
+                      },
+                      maxSize: 5 * 1024 * 1024,
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
+        </>
+      )}
+
+      {/* Doctorate Certificates */}
+      {doctorate && (
+        <>
+          <Divider />
+          <Text className="text-medium font-semibold">
+            Doctorate Certificates
+          </Text>
+          {doctorate && doctorateCertificates?.length > 0 && (
+            <div className="space-y-2">
+              {doctorateCertificates.map((certificate, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <div className="truncate max-w-md">
+                    {certificate
+                      ? typeof certificate === "string"
+                        ? fileInfoMap[certificate]?.originalName || extractFileName(certificate)
+                        : certificate instanceof File
+                        ? certificate.name
+                        : "Unknown file"
+                      : "Unknown file"}
+                  </div>
+                  <div className="space-x-2">
+                    {certificate && typeof certificate === "string" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.open(certificate, "_blank")}
+                      >
+                        View
+                      </Button>
+                    )}
                     <Button
-                      variant="ghost"
+                      color="danger"
                       size="sm"
-                      onClick={() => window.open(certificate, "_blank")}
+                      onClick={() => handleRemove(index, "doctorate")}
                     >
-                      Download
+                      Remove
                     </Button>
-                  )}
-                  <Button
-                    color="danger"
-                    size="sm"
-                    onClick={() => handleRemove(index, "doctorate")}
-                  >
-                    Remove
-                  </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-        <FormFields
-          items={[
-            {
-              name: "doctorateCertificates",
-              label: "Doctorate Certificates",
-              type: "text",
-              Component: ({ onChange }) => (
-                <FileDropzone
-                  value={doctorateFileStates}
-                  onChange={(files) => {
-                    setDoctorateFileStates(files);
-                    onChange(files.map((f) => f.file));
-                  }}
-                  onFilesAdded={(addedFiles) =>
-                    handleFileUpload(addedFiles, "doctorate")
-                  }
-                  dropzoneOptions={{
-                    accept: {
-                      "application/pdf": [".pdf"],
-                      "image/jpeg": [".jpg", ".jpeg"],
-                      "image/png": [".png"],
-                      "image/webp": [".webp"],
-                    },
-                    maxSize: 5 * 1024 * 1024,
-                  }}
-                />
-              ),
-            },
-          ]}
-        />
-      </>
-    )}
-  </div>
+              ))}
+            </div>
+          )}
+          <FormFields
+            items={[
+              {
+                name: "doctorateCertificates",
+                label: "Doctorate Certificates",
+                type: "text",
+                Component: ({ onChange }) => (
+                  <FileDropzone
+                    value={doctorateFileStates}
+                    onChange={(files) => {
+                      setDoctorateFileStates(files);
+                      onChange(files.map((f) => f.file));
+                    }}
+                    onFilesAdded={(addedFiles) =>
+                      handleFileUpload(addedFiles, "doctorate")
+                    }
+                    dropzoneOptions={{
+                      accept: {
+                        "application/pdf": [".pdf"],
+                        "image/jpeg": [".jpg", ".jpeg"],
+                        "image/png": [".png"],
+                        "image/webp": [".webp"],
+                      },
+                      maxSize: 5 * 1024 * 1024,
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
+        </>
+      )}
+    </div>
   );
+  //
 };
+//
 export default EditEducationalBackgroundForm;

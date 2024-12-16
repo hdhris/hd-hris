@@ -21,6 +21,7 @@ import FormFields, {
 import AddressInput from "@/components/common/forms/address/AddressInput";
 import Drawer from "@/components/common/Drawer";
 import { Form } from "@/components/ui/form";
+import { config } from "process";
 
 interface AddBranchProps {
   onBranchAdded: () => void;
@@ -85,31 +86,16 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
           onClose();
         }, 500);
       }
+    
     } catch (error) {
       console.error("Error submitting form:", error);
-
       if (axios.isAxiosError(error) && error.response) {
-        const errorMessage =
-          error.response.data.error ||
-          "Failed to add branch. Please try again.";
-        const errorDetails = error.response.data.details;
-
-        if (errorDetails) {
-          const formattedErrors = errorDetails
-            .map((err: any) => `${err.path.join(".")}: ${err.message}`)
-            .join(", ");
-          toast({
-            title: "Validation Error",
-            description: formattedErrors,
-            duration: 5000,
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: errorMessage,
-            duration: 3000,
-          });
-        }
+        toast({
+          title: "Error",
+          description: error.response.data.error, 
+          variant:"danger",
+          duration: 3000,
+        });
       } else {
         toast({
           title: "Error",
@@ -121,7 +107,6 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
       setIsSubmitting(false);
     }
   };
-
   const formInputs: FormInputProps[] = [
     {
       name: "name",
@@ -144,10 +129,10 @@ const AddBranch: React.FC<AddBranchProps> = ({ onBranchAdded }) => {
                 label="Status"
                 isRequired
                 placeholder="Select status"
+                isDisabled
                 items={[
                   { key: "active", label: "Active" },
                   { key: "inactive", label: "Inactive" },
-                
                 ]}
               />
 

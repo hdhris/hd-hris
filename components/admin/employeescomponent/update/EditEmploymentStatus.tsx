@@ -109,9 +109,7 @@ const EditSalaryGrade: React.FC<EditEmploymentStatusProps> = ({
       if (axios.isAxiosError(error) && error.response) {
         toast({
           title: "Error",
-          description:
-            error.response.data.message ||
-            "Failed to update employment status. Please try again.",
+          description: error.response.data.error, 
           duration: 3000,
         });
       } else {

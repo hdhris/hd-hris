@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -259,22 +263,23 @@ model ref_departments {
 }
 
 model ref_job_classes {
-  id                Int                 @id @default(autoincrement())
-  name              String?             @db.VarChar(45)
-  superior_id       Int?
-  is_active         Boolean?
-  created_at        DateTime            @db.Timestamp(6)
-  updated_at        DateTime            @db.Timestamp(6)
-  deleted_at        DateTime?           @db.Timestamp(6)
-  department_id     Int?
-  pay_rate          Decimal?            @db.Decimal(10, 2)
-  basic_salary      Decimal?            @db.Decimal
-  for_probi         Boolean?
-  is_superior       Boolean             @default(false)
-  max_employees     Int?
-  ref_departments   ref_departments?    @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
-  trans_employees   trans_employees[]
-  trans_signatories trans_signatories[]
+  id                       Int                 @id @default(autoincrement())
+  name                     String?             @db.VarChar(45)
+  superior_id              Int?
+  is_active                Boolean?
+  created_at               DateTime            @db.Timestamp(6)
+  updated_at               DateTime            @db.Timestamp(6)
+  deleted_at               DateTime?           @db.Timestamp(6)
+  department_id            Int?
+  pay_rate                 Decimal?            @db.Decimal(10, 2)
+  basic_salary             Decimal?            @db.Decimal
+  for_probi                Boolean?
+  is_superior              Boolean             @default(false)
+  max_employees            Int?
+  max_department_instances Int?
+  ref_departments          ref_departments?    @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
+  trans_employees          trans_employees[]
+  trans_signatories        trans_signatories[]
 
   @@index([deleted_at])
 }
@@ -338,12 +343,14 @@ model ref_training_programs {
 }
 
 model sys_notifications {
-  id                  Int                 @id @default(autoincrement())
-  notification_id     Int
-  read_at             DateTime?           @db.Timestamp(6)
-  created_at          DateTime            @db.Timestamp(6)
-  deleted_at          DateTime?           @db.Timestamp(6)
-  trans_notifications trans_notifications @relation(fields: [notification_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                          Int                          @id @default(autoincrement())
+  notification_id             Int
+  read_at                     DateTime?                    @db.Timestamp(6)
+  created_at                  DateTime                     @db.Timestamp(6)
+  deleted_at                  DateTime?                    @db.Timestamp(6)
+  notification_priorities     Int?
+  trans_notifications         trans_notifications          @relation(fields: [notification_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_notification_priorities ref_notification_priorities? @relation(fields: [notification_priorities], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model sys_privileges {
@@ -868,8 +875,9 @@ model trans_signatories {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ref_notification_priorities {
-  id            BigInt @id @default(autoincrement())
-  priority_name String
+  id                Int                 @id @default(autoincrement())
+  priority_name     String
+  sys_notifications sys_notifications[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments

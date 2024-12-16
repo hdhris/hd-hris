@@ -22,17 +22,6 @@ export async function getEmployeeById(id: number, daysJson?: Record<string, bool
     },
     include: {
       ...getBaseEmployeeInclude(),
-      acl_user_access_control: {
-        select: {
-          privilege_id: true,
-          sys_privileges: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      },
     },
   });
 
@@ -57,20 +46,30 @@ export async function getEmployeeById(id: number, daysJson?: Record<string, bool
     });
   }
 
-  const privilege = Array.isArray(employee.acl_user_access_control)
-  ? employee.acl_user_access_control[0]?.sys_privileges
-  : null;
+  // Get privilege data directly from acl_user_access_control
+  const privilegeData = await prisma.acl_user_access_control.findFirst({
+    where: {
+      employee_id: id
+    },
+    select: {
+      privilege_id: true,
+      sys_privileges: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    }
+  });
 
-const privilegeId = Array.isArray(employee.acl_user_access_control)
-  ? employee.acl_user_access_control[0]?.privilege_id
-  : null;
-
-  
   const employeeWithAccount = {
     ...employee,
     userAccount,
-    privilege,
-    privilegeId,
+    acl_user_access_control: privilegeData ? {
+      privilege_id: privilegeData.privilege_id.toString(), 
+      sys_privileges: privilegeData.sys_privileges
+    } : null
+  
   };
 
   return employeeWithAccount;

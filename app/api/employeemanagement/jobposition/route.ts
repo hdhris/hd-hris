@@ -15,6 +15,20 @@ const jobSchema = z.object({
   superior_id: z.number().optional().nullable(),
 
 });
+//check if name exist
+async function checkDuplicateName(name: string, excludeId?: number) {
+  const existingJob = await prisma.ref_job_classes.findFirst({
+    where: {
+      name: {
+        equals: name,
+        mode: 'insensitive',
+      },
+      deleted_at: null,
+      id: excludeId ? { not: excludeId } : undefined,
+    },
+  });
+  return existingJob;
+}
 
 // Error handling function
 function handleError(error: unknown, operation: string) {
@@ -80,6 +94,14 @@ export async function POST(req: Request) {
     const data = await req.json();
     const validatedData = jobSchema.parse(data);
     
+    //call
+    const existingJob = await checkDuplicateName(validatedData.name);
+if (existingJob) {
+  return NextResponse.json(
+    { error: 'A job position with this name already exists' },
+    { status: 400 }
+  );
+}
     const job = await prisma.ref_job_classes.create({
       data: {
         name: validatedData.name,
@@ -108,7 +130,16 @@ export async function PUT(req: Request) {
   try {
     const data = await req.json();
     const validatedData = jobSchema.partial().parse(data);
-    
+    //call
+    if (validatedData.name) {
+      const existingJob = await checkDuplicateName(validatedData.name, parseInt(id));
+      if (existingJob) {
+        return NextResponse.json(
+          { error: 'A job position with this name already exists' },
+          { status: 400 }
+        );
+      }
+    }
     const job = await prisma.ref_job_classes.update({
       where: { id: parseInt(id) },
       data: {

@@ -105,9 +105,7 @@ const EditDepartment: React.FC<EditDepartmentProps> = ({
       if (axios.isAxiosError(error) && error.response) {
         toast({
           title: "Error",
-          description:
-            error.response.data.message ||
-            "Failed to update department. Please try again.",
+          description: error.response.data.error, 
           duration: 3000,
         });
       } else {

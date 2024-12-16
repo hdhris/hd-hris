@@ -10,16 +10,16 @@ export type Certificate = {
   fileName?: string;
 };
 
-const checkEmailExists = async (email: string) => {
-  try {
-    const response = await axios.get(
-      `/api/employeemanagement/check-email?email=${email}`
-    );
-    return !response.data.exists;
-  } catch (error) {
-    return false;
-  }
-};
+// const checkEmailExists = async (email: string) => {
+//   try {
+//     const response = await axios.get(
+//       `/api/employeemanagement/check-email?email=${email}`
+//     );
+//     return !response.data.exists;
+//   } catch (error) {
+//     return false;
+//   }
+// };
 
 export const employeeSchema = z.object({
   privilege_id: z.string().min(1, "Access level is required"),
@@ -44,10 +44,7 @@ export const employeeSchema = z.object({
   gender: z.string().min(1, "Gender is required"),
   email: z
     .string()
-    .email("Please enter a valid email address")
-    .refine(async (email) => await checkEmailExists(email), {
-      message: "This email is already registered",
-    }),
+    .email("Please enter a valid email address"),
   contact_no: z
     .string()
     .min(1, "Contact number is required")

@@ -18,14 +18,21 @@ const JobInformationForm: React.FC = () => {
   const { data: empstatuses = [] } = useEmploymentStatusData();
 
   const departmentOptions = departments.reduce((acc: any[], dept) => {
-    if (dept && dept.id && dept.name) {
+    if (dept && dept.id && dept.name && dept.is_active) {  
       acc.push({ value: dept.id.toString(), label: dept.name });
     }
     return acc;
   }, []);
-
+  
+  const jobOptions = jobTitles.reduce((acc: any[], job) => {
+    if (job && job.id && job.name && job.is_active) { 
+      acc.push({ value: job.id.toString(), label: job.name });
+    }
+    return acc;
+  }, []);
+  
   const branchOptions = branches.reduce((acc: any[], branch) => {
-    if (branch && branch.id && branch.name) {
+    if (branch && branch.id && branch.name && branch.is_active) {  
       acc.push({ value: branch.id.toString(), label: branch.name });
     }
     return acc;
@@ -40,20 +47,12 @@ const JobInformationForm: React.FC = () => {
 
   const salaryGradeOptions = salaries.reduce((acc: any[], salary) => {
     if (salary && salary.id && salary.name && salary.amount) {
-      acc.push({ value: salary.id.toString(), label: `${salary.name}: P${Number(salary.amount).toFixed(2)}` });
+      acc.push({ value: salary.id.toString(), label: `${salary.name}: ₱${Number(salary.amount).toFixed(2)}` });
     }
     return acc;
   }, []);
   
-  const jobOptions = jobTitles
-    .filter((jt) => jt.for_probi === (watch("is_regular") === "false"))
-    .reduce((acc: any[], job) => {
-      if (job && job.id && job.name) {
-        acc.push({ value: job.id.toString(), label: job.name });
-      }
-      return acc;
-    }, []);
-
+  
   const formBasicFields: FormInputProps[] = [
     {
       name: "department_id",

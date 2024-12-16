@@ -4,16 +4,16 @@
 
 Table dim_employee_benefits {
   id Int [pk, increment]
-  employee_id Int
-  plan_id Int
-  enrollment_date DateTime
+  employee_id Int [not null]
+  plan_id Int [not null]
+  enrollment_date DateTime [not null]
   created_at DateTime [not null]
   updated_at DateTime [not null]
   terminated_at DateTime
-  coverage_amount Decimal
-  contribution_amount Decimal
-  ref_benefit_plans ref_benefit_plans
-  trans_employees trans_employees
+  coverage_amount Decimal [not null]
+  contribution_amount Decimal [not null]
+  ref_benefit_plans ref_benefit_plans [not null]
+  trans_employees trans_employees [not null]
   trans_benefit_contributions trans_benefit_contributions [not null]
 }
 
@@ -46,7 +46,7 @@ Table dim_leave_balances {
   updated_at DateTime [not null]
   deleted_at DateTime
   leave_type_id Int [not null]
-  ref_leave_types ref_leave_types [not null]
+  trans_leave_types trans_leave_types [not null]
   trans_employees trans_employees [not null]
 }
 
@@ -69,6 +69,10 @@ Table dim_schedules {
   created_at DateTime [not null]
   updated_at DateTime [not null]
   deleted_at DateTime
+  start_date DateTime
+  end_date DateTime
+  clock_in DateTime
+  clock_out DateTime
   ref_batch_schedules ref_batch_schedules
   trans_employees trans_employees
 }
@@ -232,27 +236,10 @@ Table ref_job_classes {
   for_probi Boolean
   is_superior Boolean [not null, default: false]
   max_employees Int
-  ref_evaluators ref_evaluators [not null]
+  max_department_instances Int
   ref_departments ref_departments
   trans_employees trans_employees [not null]
-}
-
-Table ref_leave_types {
-  id Int [pk, increment]
-  applicable_to_employee_types String [not null]
-  code String [not null]
-  created_at DateTime [not null]
-  deleted_at DateTime
-  description String [not null]
-  is_active Boolean [not null]
-  max_duration Decimal [not null]
-  min_duration Decimal [not null]
-  name String [not null]
-  paid_leave Boolean [not null]
-  updated_at DateTime
-  carry_over Boolean [not null]
-  dim_leave_balances dim_leave_balances [not null]
-  trans_leaves trans_leaves [not null]
+  trans_signatories trans_signatories [not null]
 }
 
 Table ref_payheads {
@@ -300,20 +287,22 @@ Table ref_training_programs {
   created_at DateTime [not null]
   updated_at DateTime [not null]
   deleted_at DateTime
+  type String [not null]
+  instructor_name String
   dim_training_participants dim_training_participants [not null]
   dim_training_schedules dim_training_schedules [not null]
+  trans_employees trans_employees
 }
 
 Table sys_notifications {
   id Int [pk, increment]
-  employee_id Int
-  content String
-  seen_at DateTime
+  notification_id Int [not null]
   read_at DateTime
-  created_at DateTime
+  created_at DateTime [not null]
   deleted_at DateTime
-  updated_at DateTime
-  trans_employees trans_employees
+  notification_priorities Int
+  trans_notifications trans_notifications [not null]
+  ref_notification_priorities ref_notification_priorities
 }
 
 Table sys_privileges {
@@ -448,8 +437,7 @@ Table trans_employees {
   suspension_json Json
   resignation_json Json
   termination_json Json
-  is_regular Boolean
-  employement_status_id Int
+  employement_status_id Int [not null]
   salary_grade_id Int
   acl_user_access_control acl_user_access_control
   dim_employee_benefits dim_employee_benefits [not null]
@@ -462,9 +450,9 @@ Table trans_employees {
   dim_training_participants dim_training_participants [not null]
   fact_performance_evaluations fact_performance_evaluations [not null]
   log_attendances log_attendances [not null]
+  ref_training_programs ref_training_programs [not null]
   sys_help_report_sys_help_report_reporter_idTotrans_employees sys_help_report [not null]
   sys_help_report_sys_help_report_reviewer_idTotrans_employees sys_help_report [not null]
-  sys_notifications sys_notifications [not null]
   sys_variables sys_variables
   trans_attendance_details trans_attendance_details [not null]
   trans_cash_advances_trans_cash_advances_employee_idTotrans_employees trans_cash_advances [not null]
@@ -476,31 +464,34 @@ Table trans_employees {
   ref_addresses_trans_employees_addr_municipalToref_addresses ref_addresses
   ref_addresses_trans_employees_addr_baranggayToref_addresses ref_addresses
   ref_branches ref_branches
-  ref_employment_status ref_employment_status
+  ref_employment_status ref_employment_status [not null]
   ref_salary_grades ref_salary_grades
   trans_leaves_trans_leaves_employee_idTotrans_employees trans_leaves [not null]
   trans_leaves_trans_leaves_created_byTotrans_employees trans_leaves [not null]
   trans_overtimes_trans_overtimes_employee_idTotrans_employees trans_overtimes [not null]
   trans_overtimes_trans_overtimes_approved_byTotrans_employees trans_overtimes [not null]
+  trans_overtimes_trans_overtimes_created_byTotrans_employees trans_overtimes [not null]
   trans_payrolls trans_payrolls [not null]
 }
 
 Table trans_leaves {
   employee_id Int [not null]
-  start_date DateTime
-  end_date DateTime
-  status String
+  start_date DateTime [not null]
+  end_date DateTime [not null]
+  status String [not null]
   created_at DateTime [not null]
   updated_at DateTime [not null]
   id Int [pk, increment]
-  type_id Int
-  reason String
+  leave_type_id Int [not null]
+  reason String [not null]
   created_by Int
   deleted_at DateTime
-  evaluators Json
+  evaluators Json [not null]
+  files Json
+  total_days Decimal [not null]
   trans_employees_leaves trans_employees [not null]
-  ref_leave_types ref_leave_types
   trans_employees_trans_leaves_created_byTotrans_employees trans_employees
+  trans_leave_types trans_leave_types [not null]
 }
 
 Table trans_overtimes {
@@ -520,8 +511,11 @@ Table trans_overtimes {
   comment String
   rendered_mins Int
   deleted_at DateTime
+  evaluators Json
+  created_by Int
   trans_employees_overtimes trans_employees
   trans_employees_overtimes_approvedBy trans_employees
+  trans_employees_overtimes_createdBy trans_employees
 }
 
 Table trans_payhead_breakdowns {
@@ -561,6 +555,7 @@ Table trans_users {
   acl_user_access_control acl_user_access_control
   auth_accounts auth_accounts [not null]
   auth_credentials auth_credentials
+  trans_notifications trans_notifications [not null]
 }
 
 Table trans_payrolls {
@@ -704,13 +699,29 @@ Table dim_payhead_specific_amounts {
   Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
-Table sec_sessions {
-  sessionToken String [unique, not null]
-  userId String [not null]
-  expires DateTime [not null]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
+Table ref_employment_status {
   id Int [pk, increment]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  deleted_at DateTime
+  name String [not null]
+  trans_employees trans_employees [not null]
+  trans_leave_types trans_leave_types [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table ref_salary_grades {
+  id Int [pk, increment]
+  name String [not null]
+  amount Decimal [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  deleted_at DateTime
+  rate_per_hour Decimal
+  trans_employees trans_employees [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Table ref_benefits_contribution_table {
@@ -734,42 +745,103 @@ Table ref_benefits_contribution_table {
   Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
-Table ref_employment_status {
+Table ref_leave_type_details {
   id Int [pk, increment]
+  code String [unique, not null]
+  description String [not null]
+  is_active Boolean [not null]
+  max_duration Decimal [not null]
+  name String [not null]
+  paid_leave Boolean [not null]
+  carry_over Boolean [not null]
+  attachment_required Boolean [not null, default: false]
+  is_applicable_to_all Boolean [not null, default: false]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  trans_leave_types trans_leave_types [not null]
+}
+
+Table ref_signatory_paths {
+  id Int [pk, increment]
+  signatories_path String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  trans_signatories trans_signatories [not null]
+}
+
+Table ref_signatory_roles {
+  id Int [pk, increment]
+  signatory_role_name String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  trans_signatories trans_signatories [not null]
+}
+
+Table trans_leave_types {
+  id Int [pk, increment]
+  leave_type_details_id Int [not null]
+  employment_status_id Int [not null]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [default: `now()`, not null]
   deleted_at DateTime
-  name String [not null]
-  trans_employees trans_employees [not null]
+  dim_leave_balances dim_leave_balances [not null]
+  ref_employment_status ref_employment_status [not null]
+  ref_leave_type_details ref_leave_type_details [not null]
+  trans_leaves trans_leaves [not null]
 
-  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+  indexes {
+    (leave_type_details_id, employment_status_id) [unique]
+  }
 }
 
-Table ref_evaluators {
+Table trans_signatories {
   id Int [pk, increment]
   job_id Int [not null]
-  signatories_path String [not null]
-  role_name String [not null]
+  signatory_role_id Int [not null]
+  signatory_path_id Int [not null]
   order_number Int [not null]
   updated_at DateTime [default: `now()`, not null]
   created_at DateTime [default: `now()`, not null]
   deleted_at DateTime
+  is_apply_to_all_signatory Boolean [not null, default: false]
   ref_job_classes ref_job_classes [not null]
+  ref_signatory_paths ref_signatory_paths [not null]
+  ref_signatory_roles ref_signatory_roles [not null]
+}
+
+Table ref_notification_priorities {
+  id Int [pk, increment]
+  priority_name String [not null]
+  sys_notifications sys_notifications [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table ref_notification_types {
+  id Int [pk, increment]
+  type_name String [not null]
+  description String [not null]
+  trans_notifications trans_notifications [not null]
 
   Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
-Table ref_salary_grades {
+Table trans_notifications {
   id Int [pk, increment]
-  name String [not null]
-  amount Decimal [not null]
+  title String [not null]
+  message String [not null]
+  notification_types_id Int [not null]
+  status String [not null]
+  timestamp DateTime [not null]
+  user_id String [not null]
   created_at DateTime [default: `now()`, not null]
-  updated_at DateTime [default: `now()`, not null]
-  deleted_at DateTime
-  trans_employees trans_employees [not null]
+  sys_notifications sys_notifications [not null]
+  ref_notification_types ref_notification_types [not null]
+  trans_users trans_users [not null]
 
-  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Ref: dim_employee_benefits.plan_id > ref_benefit_plans.id [delete: No Action]
@@ -780,7 +852,7 @@ Ref: dim_incident_reports.employee_id > trans_employees.id [delete: No Action]
 
 Ref: dim_incident_reports.reported_by > trans_employees.id [delete: No Action]
 
-Ref: dim_leave_balances.leave_type_id > ref_leave_types.id [delete: No Action]
+Ref: dim_leave_balances.leave_type_id > trans_leave_types.id [delete: No Action]
 
 Ref: dim_leave_balances.employee_id > trans_employees.id [delete: No Action]
 
@@ -814,7 +886,11 @@ Ref: ref_benefit_plans.deduction_id > ref_payheads.id [delete: No Action]
 
 Ref: ref_job_classes.department_id > ref_departments.id [delete: No Action]
 
-Ref: sys_notifications.employee_id > trans_employees.id [delete: No Action]
+Ref: ref_training_programs.employee_instructor_id > trans_employees.id [delete: No Action]
+
+Ref: sys_notifications.notification_id > trans_notifications.id [delete: No Action]
+
+Ref: sys_notifications.notification_priorities > ref_notification_priorities.id [delete: No Action]
 
 Ref: sys_variables.employee_id - trans_employees.id [delete: No Action]
 
@@ -856,13 +932,15 @@ Ref: trans_employees.salary_grade_id > ref_salary_grades.id [delete: No Action]
 
 Ref: trans_leaves.employee_id > trans_employees.id [delete: No Action]
 
-Ref: trans_leaves.type_id > ref_leave_types.id [delete: No Action]
-
 Ref: trans_leaves.created_by > trans_employees.id [delete: No Action]
+
+Ref: trans_leaves.leave_type_id > trans_leave_types.id [delete: No Action]
 
 Ref: trans_overtimes.employee_id > trans_employees.id [delete: No Action]
 
 Ref: trans_overtimes.approved_by > trans_employees.id [delete: No Action]
+
+Ref: trans_overtimes.created_by > trans_employees.id [delete: No Action]
 
 Ref: trans_payhead_breakdowns.payhead_id > ref_payheads.id [delete: No Action]
 
@@ -894,4 +972,16 @@ Ref: dim_payhead_specific_amounts.payhead_id > ref_payheads.id [delete: No Actio
 
 Ref: ref_benefits_contribution_table.plan_id > ref_benefit_plans.id [delete: No Action]
 
-Ref: ref_evaluators.job_id > ref_job_classes.id [delete: No Action]
+Ref: trans_leave_types.employment_status_id > ref_employment_status.id [delete: No Action]
+
+Ref: trans_leave_types.leave_type_details_id > ref_leave_type_details.id [delete: No Action]
+
+Ref: trans_signatories.job_id > ref_job_classes.id [delete: No Action]
+
+Ref: trans_signatories.signatory_path_id > ref_signatory_paths.id [delete: No Action]
+
+Ref: trans_signatories.signatory_role_id > ref_signatory_roles.id [delete: No Action]
+
+Ref: trans_notifications.notification_types_id > ref_notification_types.id [delete: No Action]
+
+Ref: trans_notifications.user_id > trans_users.id [delete: No Action]

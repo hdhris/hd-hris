@@ -63,7 +63,6 @@ const ScheduleSelection: React.FC = () => {
     if (!data?.batch || data.batch.length === 0) {
       return <p>No batch schedules available</p>;
     }
-
     return data.batch.map((schedule) => {
       if (!schedule || !schedule.id) return null;
 

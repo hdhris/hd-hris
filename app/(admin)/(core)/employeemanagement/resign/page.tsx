@@ -1,64 +1,86 @@
 "use client";
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useResignedTerminatedEmployees } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
-import { Avatar, Chip, Button, Spinner } from "@nextui-org/react";
-import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
+import { Avatar, Chip, Button } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
-import BorderCard from "@/components/common/BorderCard";
-import dayjs from "dayjs";
 import Text from "@/components/Text";
+import dayjs from "dayjs";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import showDialog from "@/lib/utils/confirmDialog";
+import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
+import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 
-const LoadingAndEmptyState: React.FC<{
-  isLoading: boolean;
-  isEmpty: boolean;
-}> = ({ isLoading, isEmpty }) => {
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-[400px]">
-        <Spinner>Loading...</Spinner>
-      </div>
-    );
-  }
-
-  if (isEmpty) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[400px] text-gray-500">
-        <Text className="text-lg font-medium">No former employees found</Text>
-        <Text className="text-sm mt-2">
-          When employees resign or are terminated, they will appear here
+const EmptyState: React.FC = () => {
+  return (
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
+      <div className="text-center space-y-3">
+        <Text className="text-xl font-bold text-gray-700">
+          No Former Employees Found
+        </Text>
+        <Text className="text-gray-500">
+          There are no resigned or terminated employees at the moment.
+        </Text>
+        <Text className="text-sm text-gray-400">
+          When employees resign or are terminated, they will appear here.
         </Text>
       </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 };
 
 const Page: React.FC = () => {
   const {
-    data: resignedTerminatedEmployees = [],
+    data: resignedTerminatedEmployees,
     mutate,
     isLoading,
   } = useResignedTerminatedEmployees();
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const [isActivating, setIsActivating] = useState<number | null>(null);
 
-  const handleEmployeeUpdated = useCallback(async () => {
+  type Signatory = {
+    id: string | number;
+    name: string;
+    picture?: string;
+    role?: string;
+  };
+
+  // Extract signatories for the selected employee
+  const signatories = useMemo<Signatory[]>(() => {
+    if (!selectedEmployee) return [];
+
+    const statusData = selectedEmployee.termination_json
+      ? typeof selectedEmployee.termination_json === "string"
+        ? JSON.parse(selectedEmployee.termination_json)
+        : selectedEmployee.termination_json
+      : typeof selectedEmployee.resignation_json === "string"
+      ? JSON.parse(selectedEmployee.resignation_json)
+      : selectedEmployee.resignation_json;
+
+    // Extract and transform signatories
+    return (
+      statusData?.signatories?.users?.map((user: any) => ({
+        id: user.id,
+        name: user.name,
+        picture: user.picture,
+        role: user.role,
+      })) || []
+    );
+  }, [selectedEmployee]);
+
+  const handleEmployeeUpdated = async () => {
     try {
       await mutate();
     } catch (error) {
       console.error("Error updating employee data:", error);
     }
-  }, [mutate]);
+  };
 
-  const handleActivate = useCallback(async (employee: Employee) => {
+  const handleActivate = async (employee: Employee) => {
     try {
-      const status = employee.termination_json ? "terminated" : "resigned";
       const result = await showDialog({
         title: "Confirm Reactivation",
         message: `Are you sure you want to reactivate ${employee.first_name} ${employee.last_name}?`,
@@ -78,30 +100,30 @@ const Page: React.FC = () => {
             title: "Success",
             description: "Employee reactivated successfully",
             variant: "success",
-            duration: 3000,
           });
           await mutate();
         }
       }
     } catch (error) {
-      console.error("Error activating employee:", error);
+      console.error("Error reactivating employee:", error);
       toast({
         title: "Error",
         description: "Failed to reactivate employee. Please try again.",
         variant: "danger",
-        duration: 5000,
       });
     } finally {
       setIsActivating(null);
     }
-  }, [mutate]);
+  };
 
-  const handleRowClick = useCallback((employee: Employee) => {
-    setSelectedEmployee(employee);
-    setIsViewModalOpen(true);
-  }, []);
+  const handleOnSelected = (key: React.Key) => {
+    const selected = resignedTerminatedEmployees?.find(
+      (item) => item.id === Number(key)
+    );
+    setSelectedEmployee(selected ?? null);
+  };
 
-  const getEmployeeStatus = useCallback((employee: Employee) => {
+  const getEmployeeStatus = (employee: Employee) => {
     if (employee.termination_json) {
       const terminationData =
         typeof employee.termination_json === "string"
@@ -134,9 +156,9 @@ const Page: React.FC = () => {
       reason: "N/A",
       color: "default" as const,
     };
-  }, []);
+  };
 
-  const TableConfigurations = useMemo(() => ({
+  const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
       { uid: "department", name: "Department", sortable: true },
@@ -144,20 +166,24 @@ const Page: React.FC = () => {
       { uid: "type", name: "Type", sortable: true },
       { uid: "date", name: "Date", sortable: true },
       { uid: "reason", name: "Reason" },
+      { uid: "signatories", name: "Approved By", sortable: false },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
-      const cellClasses = "cursor-pointer hover:bg-gray-50";
+      const statusData = employee.termination_json
+        ? typeof employee.termination_json === "string"
+          ? JSON.parse(employee.termination_json)
+          : employee.termination_json
+        : typeof employee.resignation_json === "string"
+        ? JSON.parse(employee.resignation_json)
+        : employee.resignation_json;
       const status = getEmployeeStatus(employee);
 
       switch (key) {
         case "name":
           return (
-            <div
-              className={`flex items-center gap-4 ${cellClasses}`}
-              onClick={() => handleRowClick(employee)}
-            >
+            <div className={`flex items-center gap-4`}>
               <Avatar
                 src={employee.picture || ""}
                 alt={`${employee.first_name} ${employee.last_name}`}
@@ -170,20 +196,12 @@ const Page: React.FC = () => {
             </div>
           );
         case "department":
-          return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
-              {employee.ref_departments?.name || "N/A"}
-            </div>
-          );
+          return <div>{employee.ref_departments?.name || "N/A"}</div>;
         case "position":
-          return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
-              {employee.ref_job_classes?.name || "N/A"}
-            </div>
-          );
+          return <div>{employee.ref_job_classes?.name || "N/A"}</div>;
         case "type":
           return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
+            <div>
               <Chip color={status.color} size="sm" variant="flat">
                 {status.type}
               </Chip>
@@ -191,17 +209,53 @@ const Page: React.FC = () => {
           );
         case "date":
           return (
-            <div className={cellClasses} onClick={() => handleRowClick(employee)}>
+            <div>
               {status.date ? dayjs(status.date).format("MMM DD, YYYY") : "N/A"}
             </div>
           );
         case "reason":
           return (
-            <div
-              className={`${cellClasses} max-w-md truncate`}
-              onClick={() => handleRowClick(employee)}
-            >
-              {status.reason || "N/A"}
+            <div className={`max-w-md truncate`}>{status.reason || "N/A"}</div>
+          );
+
+        case "signatories":
+          const suspensionSignatories: Signatory[] =
+            statusData?.signatories?.users?.map((user: any) => ({
+              id: user.id,
+              name: user.name,
+              picture: user.picture,
+              role: user.role,
+            })) || [];
+          return (
+            <div className="flex items-center gap-2">
+              {suspensionSignatories.map((signatory) => (
+                <UserAvatarTooltip
+                  key={signatory.id}
+                  user={{
+                    name: signatory.name,
+                    picture: signatory.picture,
+                    id: signatory.id,
+                  }}
+                  avatarProps={{
+                    classNames: { base: "!size-6" },
+                    isBordered: true,
+                  }}
+                />
+              ))}
+              {statusData?.initiatedBy && (
+                <UserAvatarTooltip
+                  key={statusData.initiatedBy.id}
+                  user={{
+                    name: statusData.initiatedBy.name,
+                    picture: statusData.initiatedBy.picture,
+                    id: statusData.initiatedBy.id,
+                  }}
+                  avatarProps={{
+                    classNames: { base: "!size-6" },
+                    isBordered: true,
+                  }}
+                />
+              )}
             </div>
           );
         case "actions":
@@ -222,23 +276,16 @@ const Page: React.FC = () => {
           return <div>-</div>;
       }
     },
-  }), [handleRowClick, handleActivate, isActivating, getEmployeeStatus]);
+  };
 
-  const sortProps = useMemo(() => ({
-    sortItems: [
-      { name: "First Name", key: "first_name" as keyof Employee },
-      { name: "Last Name", key: "last_name" as keyof Employee },
-      { name: "Department", key: "department" as keyof Employee },
-      { name: "Date", key: "updated_at" as keyof Employee },
-    ],
-  }), []);
-
-  const FilterItems = useMemo(() => [
+  const FilterItems = [
     {
       category: "Department",
       filtered: resignedTerminatedEmployees?.length
         ? Array.from(
-            new Set(resignedTerminatedEmployees.map((e) => e.ref_departments?.name))
+            new Set(
+              resignedTerminatedEmployees.map((e) => e.ref_departments?.name)
+            )
           )
             .filter(Boolean)
             .map((dept) => ({
@@ -261,66 +308,43 @@ const Page: React.FC = () => {
         },
       ],
     },
-  ], [resignedTerminatedEmployees]);
+  ];
 
-  const renderListDisplay = useCallback((employee: Employee) => {
-    const status = getEmployeeStatus(employee);
+  const sortProps = {
+    sortItems: [
+      { name: "First Name", key: "first_name" as keyof Employee },
+      { name: "Last Name", key: "last_name" as keyof Employee },
+      { name: "Department", key: "department" as keyof Employee },
+      { name: "Updated", key: "updated_at" as keyof Employee },
+    ],
+  };
 
+  if (isLoading) {
     return (
-      <div className="w-full cursor-pointer" onClick={() => handleRowClick(employee)}>
-        <BorderCard className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Avatar
-                src={employee.picture || ""}
-                alt={`${employee.first_name} ${employee.last_name}`}
-              />
-              <div className="flex flex-col">
-                <span className="font-medium">
-                  {employee.first_name} {employee.last_name}
-                </span>
-                <span className="text-sm text-gray-500">
-                  {employee.ref_departments?.name || "N/A"} -{" "}
-                  {employee.ref_job_classes?.name || "N/A"}
-                </span>
-                <span className="text-xs text-gray-500">
-                  Date: {status.date ? dayjs(status.date).format("MMM DD, YYYY") : "N/A"}
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <Chip color={status.color} size="sm">
-                {status.type}
-              </Chip>
-              <div onClick={(e) => e.stopPropagation()}>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  color="success"
-                  isLoading={isActivating === employee.id}
-                  onPress={() => handleActivate(employee)}
-                >
-                  Reactivate
-                </Button>
-              </div>
-            </div>
-          </div>
-        </BorderCard>
-      </div>
-    );
-  }, [handleRowClick, handleActivate, isActivating, getEmployeeStatus]);
-
-  if (isLoading || !resignedTerminatedEmployees?.length) {
-    return (
-      <LoadingAndEmptyState 
-        isLoading={isLoading} 
-        isEmpty={!resignedTerminatedEmployees?.length} 
-      />
+      <section className="w-full h-full flex gap-4 overflow-hidden">
+        <DataDisplay
+          defaultDisplay="table"
+          title="Former Employees"
+          data={[]}
+          isLoading={true}
+          onTableDisplay={{
+            config: TableConfigurations,
+            layout: "auto",
+          }}
+        />
+      </section>
     );
   }
 
+  if (
+    !resignedTerminatedEmployees ||
+    resignedTerminatedEmployees.length === 0
+  ) {
+    return <EmptyState />;
+  }
+
   return (
-    <div className="h-[calc(100vh-150px)] overflow-hidden">
+    <section className="w-full h-full flex gap-4">
       <DataDisplay
         defaultDisplay="table"
         title="Former Employees"
@@ -328,35 +352,34 @@ const Page: React.FC = () => {
         filterProps={{
           filterItems: FilterItems,
         }}
-        isLoading={isLoading}
+        isLoading={false}
         onTableDisplay={{
           config: TableConfigurations,
-          className: "h-full overflow-auto",
           layout: "auto",
+          onRowAction: handleOnSelected,
         }}
         paginationProps={{
-          data_length: resignedTerminatedEmployees?.length || 0,
+          data_length: resignedTerminatedEmployees.length,
         }}
         searchProps={{
           searchingItemKey: ["first_name", "last_name"],
         }}
         sortProps={sortProps}
-        onListDisplay={renderListDisplay}
+        onView={
+          selectedEmployee && (
+            <div className="max-w-[500px] overflow-y-auto">
+              <ViewEmployee
+                employee={selectedEmployee}
+                onClose={() => setSelectedEmployee(null)}
+                onEmployeeUpdated={handleEmployeeUpdated}
+                sortedEmployees={resignedTerminatedEmployees}
+                signatories={signatories}
+              />
+            </div>
+          )
+        }
       />
-
-      {selectedEmployee && (
-        <ViewEmployee
-          isOpen={isViewModalOpen}
-          onClose={() => {
-            setIsViewModalOpen(false);
-            setSelectedEmployee(null);
-          }}
-          employee={selectedEmployee}
-          onEmployeeUpdated={handleEmployeeUpdated}
-          sortedEmployees={resignedTerminatedEmployees}
-        />
-      )}
-    </div>
+    </section>
   );
 };
 

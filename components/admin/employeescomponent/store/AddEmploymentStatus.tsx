@@ -90,9 +90,8 @@ const AddEmploymentStatus: React.FC<AddEmploymentStatusProps> = ({ onEmploymentS
       if (axios.isAxiosError(error) && error.response) {
         toast({
           title: "Error",
-          description:
-            error.response.data.message ||
-            "Failed to add new employment status. Please try again.",
+          description: error.response.data.error, 
+          variant:"danger",
           duration: 3000,
         });
       } else {

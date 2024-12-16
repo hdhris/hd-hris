@@ -127,12 +127,21 @@ const EditBranch: React.FC<EditBranchProps> = ({
         }, 500);
       }
     } catch (error) {
-      console.error("Error updating branch:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update branch. Please try again.",
-        duration: 3000,
-      });
+      console.error("Error submitting form:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        toast({
+          title: "Error",
+          description: error.response.data.error, 
+          variant:"danger",
+          duration: 3000,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred. Please try again.",
+          duration: 3000,
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -1,11 +1,13 @@
-// app/api/employeemanagement/employees/UPDATE.ts
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import SimpleAES from "@/lib/cryptography/3des";
 import { sendEmail } from "@/lib/utils/sendEmail";
 import { employeeSchema, StatusUpdateInput, statusUpdateSchema } from "./types";
-
+import { parseJsonInput } from "./utils";
+import { getSession } from "next-auth/react"
+import { getSignatory } from "@/server/signatory"; 
+import { auth } from "@/auth";
 declare global {
   var prisma: PrismaClient | undefined;
 }
@@ -13,7 +15,7 @@ declare global {
 const prisma =
   globalThis.prisma ||
   new PrismaClient({
-    log: ["error"], // Only log errors regardless of environment
+    log: ["error"],
   });
 
 if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
@@ -26,95 +28,96 @@ process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
 });
 
+async function validateEmailUpdate(id: number, newEmail: string) {
+  const existingEmployee = await prisma.trans_employees.findFirst({
+    where: {
+      email: newEmail,
+      NOT: {
+        id: id,
+      },
+    },
+  });
+
+  if (existingEmployee) {
+    throw new Error("Email already in use by another employee");
+  }
+}
+
 async function updateEmployee(id: number, employeeData: any) {
+  const {
+    schedules,
+    job_id,
+    department_id,
+    educational_bg_json,
+    family_bg_json,
+    ...rest
+  } = employeeData;
+
   return await prisma.$transaction(
     async (tx) => {
       try {
+        if (employeeData.email) {
+          await validateEmailUpdate(id, employeeData.email);
+        }
+
         const existingEmployee = await tx.trans_employees.findUnique({
           where: { id },
-          include: {
-            dim_schedules: true,
-          },
         });
 
         if (!existingEmployee) {
           throw new Error("Employee not found");
         }
 
+        const educationalBackground = parseJsonInput(educational_bg_json);
+        const familyBackground = parseJsonInput(family_bg_json);
+
         const updatedEmployee = await tx.trans_employees.update({
           where: { id },
           data: {
-            picture: employeeData.picture,
-            prefix: employeeData.prefix,
-            first_name: employeeData.first_name,
-            middle_name: employeeData.middle_name,
-            last_name: employeeData.last_name,
-            suffix: employeeData.suffix,
-            extension: employeeData.extension,
-            gender: employeeData.gender,
-            email: employeeData.email,
-            contact_no: employeeData.contact_no,
-            birthdate: employeeData.birthdate
-              ? new Date(employeeData.birthdate)
-              : undefined,
-            hired_at: employeeData.hired_at
-              ? new Date(employeeData.hired_at)
-              : undefined,
+            ...rest,
+            branch_id: Number(rest.branch_id),
+            employement_status_id: Number(rest.employement_status_id),
+            hired_at: rest.hired_at ? new Date(rest.hired_at) : null,
+            birthdate: rest.birthdate ? new Date(rest.birthdate) : null,
+            educational_bg_json: educationalBackground,
+            family_bg_json: familyBackground,
+            created_at: new Date(),
             updated_at: new Date(),
-            educational_bg_json: employeeData.educational_bg_json,
-            family_bg_json: employeeData.family_bg_json,
-
-            addr_region: employeeData.addr_region
-              ? Number(employeeData.addr_region)
-              : undefined,
-            addr_province: employeeData.addr_province
-              ? Number(employeeData.addr_province)
-              : undefined,
-            addr_municipal: employeeData.addr_municipal
-              ? Number(employeeData.addr_municipal)
-              : undefined,
-            addr_baranggay: employeeData.addr_baranggay
-              ? Number(employeeData.addr_baranggay)
-              : undefined,
-            branch_id: employeeData.branch_id
-              ? Number(employeeData.branch_id)
-              : undefined,
-            employement_status_id: employeeData.employement_status_id
-              ? Number(employeeData.employement_status_id)
-              : undefined,
-          },
-          include: {
-            dim_schedules: true,
-            ref_branches: true,
-            ref_departments: true,
-            ref_job_classes: true,
-            ref_employment_status: true,
-            ref_salary_grades: true,
           },
         });
 
-        // Handle schedule updates
-        if (Array.isArray(employeeData.schedules)) {
-          await tx.dim_schedules.deleteMany({
-            where: { employee_id: id },
+        if (job_id) {
+          await tx.trans_employees.update({
+            where: { id: updatedEmployee.id },
+            data: { ref_job_classes: { connect: { id: Number(job_id) } } },
           });
-
-          if (employeeData.schedules.length > 0) {
-            await tx.dim_schedules.createMany({
-              data: employeeData.schedules.map((schedule: any) => ({
-                employee_id: id,
-                batch_id: Number(schedule.batch_id),
-                days_json: schedule.days_json,
-                created_at: new Date(),
-                updated_at: new Date(),
-              })),
-            });
-          }
         }
 
-        return updatedEmployee;
+        if (department_id) {
+          await tx.trans_employees.update({
+            where: { id: updatedEmployee.id },
+            data: {
+              ref_departments: { connect: { id: Number(department_id) } },
+            },
+          });
+        }
+
+        // Step 5: Create schedules if provided
+        if (Array.isArray(schedules) && schedules.length > 0) {
+          await tx.dim_schedules.createMany({
+            data: schedules.map((schedule: any) => ({
+              employee_id: updatedEmployee.id,
+              batch_id: Number(schedule.batch_id),
+              days_json: schedule.days_json,
+              created_at: new Date(),
+              updated_at: new Date(),
+            })),
+          });
+        }
+
+        return { employee: updatedEmployee };
       } catch (error) {
-        console.error("Update transaction failed:", {
+        console.error("Transaction error:", {
           error,
           stack: error instanceof Error ? error.stack : undefined,
           timestamp: new Date().toISOString(),
@@ -134,7 +137,6 @@ async function updateEmployeeAccount(
   data: { username?: string; password?: string; privilege_id?: string }
 ) {
   try {
-    // Find employee
     const employee = await prisma.trans_employees.findUnique({
       where: { id },
       select: {
@@ -147,113 +149,46 @@ async function updateEmployeeAccount(
       throw new Error("Employee not found");
     }
 
-    // Find or create user account
     let user = await prisma.trans_users.findFirst({
       where: { email: employee.email },
     });
 
-    // If no user exists, create one
     if (!user) {
       user = await prisma.trans_users.create({
         data: {
           email: employee.email,
           name: employee.first_name,
-          // Add any other required fields for user creation
         },
       });
     }
 
-    // Find existing credentials
     let currentCredentials = await prisma.auth_credentials.findFirst({
       where: { user_id: user.id.toString() },
     });
 
-    const updateData: any = {};
-    let usernameUpdated = false;
-    let passwordUpdated = false;
+    let emailText = `Hello ${employee.first_name}!\n\n`;
+    let emailSubject = "";
+    let updates = [];
 
-    // If no credentials exist, we'll create new ones
-    if (!currentCredentials) {
-      if (!data.username || !data.password) {
-        throw new Error("Username and password required for new account");
-      }
-
-      // Check username uniqueness
-      const existingUsername = await prisma.auth_credentials.findFirst({
-        where: { username: data.username },
-      });
-
-      if (existingUsername) {
-        throw new Error("Username already taken");
-      }
-
-      // Create new credentials
-      const encryptedPassword = await new SimpleAES().encryptData(
-        data.password
+    // Handle privilege update
+    if (data.privilege_id) {
+      const previousPrivilege = await prisma.acl_user_access_control.findUnique(
+        {
+          where: {
+            user_id: user.id.toString(),
+          },
+          include: {
+            sys_privileges: true,
+          },
+        }
       );
-      currentCredentials = await prisma.auth_credentials.create({
-        data: {
-          user_id: user.id.toString(),
-          username: data.username,
-          password: encryptedPassword,
+
+      const newPrivilege = await prisma.sys_privileges.findUnique({
+        where: {
+          id: parseInt(data.privilege_id),
         },
       });
 
-      usernameUpdated = true;
-      passwordUpdated = true;
-
-      if (data.privilege_id) {
-        await prisma.acl_user_access_control.create({
-          data: {
-            employee_id: id,
-            user_id: user.id.toString(),
-            privilege_id: parseInt(data.privilege_id),
-            created_at: new Date(),
-          },
-        });
-      }
-
-    } else {
-      // Handle updates for existing credentials
-      if (data.username && data.username !== currentCredentials.username) {
-        const existingUsername = await prisma.auth_credentials.findFirst({
-          where: {
-            username: data.username,
-            NOT: { user_id: user.id.toString() },
-          },
-        });
-
-        if (existingUsername) {
-          throw new Error("Username already taken");
-        }
-
-        updateData.username = data.username;
-        usernameUpdated = true;
-      }
-
-      if (data.password) {
-        updateData.password = await new SimpleAES().encryptData(data.password);
-        passwordUpdated = true;
-      }
-
-      // Only update if there are changes
-      if (Object.keys(updateData).length > 0) {
-        await prisma.auth_credentials.update({
-          where: { id: currentCredentials.id },
-          data: updateData,
-        });
-      }
-    }
-
-    if (Object.keys(updateData).length > 0) {
-      await prisma.auth_credentials.update({
-        where: { id: currentCredentials.id },
-        data: updateData,
-      });
-    }
-
-    // Add here - for existing accounts
-    if (data.privilege_id) {
       await prisma.acl_user_access_control.upsert({
         where: {
           user_id: user.id.toString(),
@@ -262,54 +197,60 @@ async function updateEmployeeAccount(
           employee_id: id,
           user_id: user.id.toString(),
           privilege_id: parseInt(data.privilege_id),
-          created_at: new Date()
+          created_at: new Date(),
         },
         update: {
           privilege_id: parseInt(data.privilege_id),
-          update_at: new Date()
-        }
+          update_at: new Date(),
+        },
       });
+
+      if (
+        newPrivilege &&
+        (!previousPrivilege ||
+          previousPrivilege.privilege_id !== parseInt(data.privilege_id))
+      ) {
+        emailText += `Your account privileges have been updated to: ${newPrivilege.name}\n\n`;
+        updates.push("privilege");
+      }
     }
 
-    // Send email notification about the changes
-    try {
-      let emailText = `Hello ${employee.first_name}!\n\nYour account has been ${
-        currentCredentials ? "updated" : "created"
-      }.\n`;
-
-      if (passwordUpdated) {
-        emailText += `\nYour new password is: ${data.password}`;
-      }
-
-      if (usernameUpdated) {
-        emailText += `\nYour new username is: ${data.username}`;
-      }
-
-      emailText += `\n\nPlease use these credentials for your next login.\n\nBest regards,\nHR Team`;
-
-      await sendEmail({
-        to: employee.email,
-        subject: `Account ${
-          currentCredentials ? "Update" : "Creation"
-        } Notification`,
-        text: emailText,
+    // Handle password reset
+    if (data.password && currentCredentials) {
+      const encryptedPassword = await new SimpleAES().encryptData(
+        data.password
+      );
+      await prisma.auth_credentials.update({
+        where: { id: currentCredentials.id },
+        data: { password: encryptedPassword },
       });
-    } catch (emailError) {
-      console.error("Failed to send account email:", emailError);
+
+      emailText += `Your password has been reset. Your new password is: ${data.password}\n\n`;
+      updates.push("password");
+    }
+
+    // Send email if there were any updates
+    if (updates.length > 0) {
+      emailText += `Please log in to the app to access your updated account.\n\nBest regards,\nHR Team`;
+      emailSubject = `Account Update: ${updates.join(" and ")} updated`;
+
+      try {
+        await sendEmail({
+          to: employee.email,
+          subject: emailSubject,
+          text: emailText,
+        });
+      } catch (emailError) {
+        console.error("Failed to send account update email:", emailError);
+      }
     }
 
     return {
       success: true,
-      message: currentCredentials
-        ? `Account ${
-            Object.keys(updateData).length > 0 ? "updated" : "unchanged"
-          }${usernameUpdated ? " (username)" : ""}${
-            passwordUpdated ? " (password)" : ""
-          }`
-        : "Account created successfully",
+      message: `Account updated successfully (${updates.join(", ")})`,
       updated: {
-        username: usernameUpdated,
-        password: passwordUpdated,
+        password: updates.includes("password"),
+        privilege: updates.includes("privilege"),
       },
     };
   } catch (error) {
@@ -324,12 +265,37 @@ async function updateEmployeeAccount(
 
 async function updateEmployeeStatus(id: number, data: StatusUpdateInput) {
   try {
-    const { status, reason, date, endDate } = data;
+   const session = await auth();
 
+    const { status, reason, date, endDate } = data;
     const updateData: Prisma.trans_employeesUpdateInput = {
       updated_at: new Date(),
     };
 
+    
+
+    const signatoryPath = 
+      status === 'suspended' ? 'employee_suspension' :
+      status === 'resigned' ? 'employee_resignation' :
+      status === 'terminated' ? 'employee_termination' : null;
+
+    const signatories = signatoryPath 
+      ? await getSignatory(signatoryPath, id, false) 
+      : null;
+
+    // Transform signatories to a simple JSON object
+    const transformedSignatories = signatories ? {
+      users: signatories.users.map(user => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        role: user.role
+      }))
+    } : null;
+
+    
+    // Rest of your existing logic, using session if needed
     if (status === "active") {
       updateData.suspension_json = Prisma.JsonNull;
       updateData.resignation_json = Prisma.JsonNull;
@@ -341,18 +307,36 @@ async function updateEmployeeStatus(id: number, data: StatusUpdateInput) {
             suspensionReason: reason,
             startDate: date,
             endDate: endDate,
+            signatories: transformedSignatories,
+            initiatedBy: session?.user ? {
+              id: session.user.id,
+              name: session.user.name,
+              picture: session.user.image
+            } : null
           };
           break;
         case "resigned":
           updateData.resignation_json = {
             resignationReason: reason,
             resignationDate: date,
+            signatories: transformedSignatories,
+            initiatedBy: session?.user ? {
+              id: session.user.id,
+              name: session.user.name,
+              picture: session.user.image
+            } : null
           };
           break;
         case "terminated":
           updateData.termination_json = {
             terminationReason: reason,
             terminationDate: date,
+            signatories: transformedSignatories,
+            initiatedBy: session?.user ? {
+              id: session.user.id,
+              name: session.user.name,
+              picture: session.user.image
+            } : null
           };
           break;
       }
@@ -382,22 +366,17 @@ export async function PUT(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        {
-          message: "Employee ID is required",
-        },
+        { message: "Employee ID is required" },
         { status: 400 }
       );
     }
 
-    // Validate request body
     let data;
     try {
       data = await req.json();
     } catch (e) {
       return NextResponse.json(
-        {
-          message: "Invalid request body",
-        },
+        { message: "Invalid request body" },
         { status: 400 }
       );
     }
@@ -405,9 +384,7 @@ export async function PUT(req: NextRequest) {
     const employeeId = parseInt(id);
     if (isNaN(employeeId)) {
       return NextResponse.json(
-        {
-          message: "Invalid employee ID format",
-        },
+        { message: "Invalid employee ID format" },
         { status: 400 }
       );
     }
@@ -422,23 +399,17 @@ export async function PUT(req: NextRequest) {
             switch (error.message) {
               case "Employee not found":
                 return NextResponse.json(
-                  {
-                    message: "Employee not found",
-                  },
+                  { message: "Employee not found" },
                   { status: 404 }
                 );
               case "User account not found":
                 return NextResponse.json(
-                  {
-                    message: "User account not found",
-                  },
+                  { message: "User account not found" },
                   { status: 404 }
                 );
               case "Username already taken":
                 return NextResponse.json(
-                  {
-                    message: "Username already taken",
-                  },
+                  { message: "Username already taken" },
                   { status: 409 }
                 );
               default:
@@ -486,9 +457,7 @@ export async function PUT(req: NextRequest) {
             error.message === "Employee not found"
           ) {
             return NextResponse.json(
-              {
-                message: "Employee not found",
-              },
+              { message: "Employee not found" },
               { status: 404 }
             );
           }
@@ -497,16 +466,12 @@ export async function PUT(req: NextRequest) {
             switch (error.code) {
               case "P2002":
                 return NextResponse.json(
-                  {
-                    message: "Unique constraint violation",
-                  },
+                  { message: "Unique constraint violation" },
                   { status: 409 }
                 );
               case "P2003":
                 return NextResponse.json(
-                  {
-                    message: "Invalid reference to related record",
-                  },
+                  { message: "Invalid reference to related record" },
                   { status: 400 }
                 );
               default:
@@ -525,9 +490,7 @@ export async function PUT(req: NextRequest) {
 
           if (error instanceof Prisma.PrismaClientValidationError) {
             return NextResponse.json(
-              {
-                message: "Invalid data format",
-              },
+              { message: "Invalid data format" },
               { status: 400 }
             );
           }

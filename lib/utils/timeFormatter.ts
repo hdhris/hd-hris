@@ -36,20 +36,19 @@ export function calculateShiftLength(
     return result || "0 minutes"; // If there are no hours or minutes, return '0 minutes'
 }
 
-
 export function formatDaysToReadableTime(days: number): string {
     const totalMinutes = Math.round(days * 24 * 60); // Convert days to minutes
-    const hours = Math.floor(totalMinutes / 60);    // Extract hours
-    const minutes = totalMinutes % 60;             // Extract remaining minutes
+    const totalHours = Math.floor(totalMinutes / 60); // Total hours
+    const convertedDays = Math.floor(totalHours / 24); // Convert hours into days
+    const remainingHours = totalHours % 24; // Remaining hours after converting to days
+    const minutes = totalMinutes % 60; // Remaining minutes
 
-    // Convert hours into days if applicable
-    const totalHours = Math.floor(totalMinutes / 60);
-    const convertedDays = Math.floor(totalHours / 24);
-    const remainingHours = totalHours % 24;
+    const dayPart = convertedDays > 0 ? pluralize(convertedDays, "day") : null;
+    const hourPart = remainingHours > 0 ? pluralize(remainingHours, "hr") : null;
+    const minutePart = minutes > 0 ? pluralize(minutes, "min") : null;
 
-    if (convertedDays > 0) {
-        return `${pluralize(convertedDays, "day")}, ${pluralize(remainingHours, "hr")}, and ${pluralize(minutes, "min")}`;
-    } else {
-        return `${pluralize(hours, "hr")} and ${pluralize(minutes, "min")}`;
-    }
+    // Combine the non-null parts
+    const readableParts = [dayPart, hourPart, minutePart].filter(Boolean);
+
+    return readableParts.join(", ");
 }
