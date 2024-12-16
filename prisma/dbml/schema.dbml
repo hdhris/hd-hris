@@ -469,7 +469,6 @@ Table trans_employees {
   trans_leaves_trans_leaves_employee_idTotrans_employees trans_leaves [not null]
   trans_leaves_trans_leaves_created_byTotrans_employees trans_leaves [not null]
   trans_overtimes_trans_overtimes_employee_idTotrans_employees trans_overtimes [not null]
-  trans_overtimes_trans_overtimes_approved_byTotrans_employees trans_overtimes [not null]
   trans_overtimes_trans_overtimes_created_byTotrans_employees trans_overtimes [not null]
   trans_payrolls trans_payrolls [not null]
 }
@@ -505,16 +504,10 @@ Table trans_overtimes {
   clock_out DateTime
   requested_mins Int
   reason String
-  approved_by Int
-  approved_at DateTime
-  rate_per_hour Decimal
-  comment String
-  rendered_mins Int
   deleted_at DateTime
   evaluators Json
   created_by Int
   trans_employees_overtimes trans_employees
-  trans_employees_overtimes_approvedBy trans_employees
   trans_employees_overtimes_createdBy trans_employees
 }
 
@@ -937,8 +930,6 @@ Ref: trans_leaves.created_by > trans_employees.id [delete: No Action]
 Ref: trans_leaves.leave_type_id > trans_leave_types.id [delete: No Action]
 
 Ref: trans_overtimes.employee_id > trans_employees.id [delete: No Action]
-
-Ref: trans_overtimes.approved_by > trans_employees.id [delete: No Action]
 
 Ref: trans_overtimes.created_by > trans_employees.id [delete: No Action]
 

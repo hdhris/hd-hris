@@ -21,8 +21,8 @@ import { UserEmployee, UserReviewer } from "@/helper/include-emp-and-reviewr/inc
 import { Evaluations } from "../leaves/leave-evaluators-types";
 
 export type ApprovalStatusType = "pending" | "approved" | "rejected"; 
-export const approvalStatusColorMap: Record<string, "danger" | "success" | "default"> = {
-  pending: "default",
+export const approvalStatusColorMap: Record<string, "danger" | "success" | "warning"> = {
+  pending: "warning",
   approved: "success",
   rejected: "danger",
 };
@@ -38,11 +38,6 @@ export interface OvertimeEntry {
   clock_out: string; // ISO date string
   requested_mins: number;
   reason: string;
-  approved_by: number;
-  approved_at: string; // ISO date string
-  rate_per_hour: string;
-  comment: string;
-  rendered_mins: number;
   deleted_at: string | null; // Nullable for deleted entries
   trans_employees_overtimes: UserEmployee; // Employee details
   trans_employees_overtimes_approvedBy: UserReviewer; // Approver details

@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
                     evaluators,
                     created_at: toGMT8().toISOString(),
                     updated_at: toGMT8().toISOString(),
-                    files: ['https://i.kym-cdn.com/entries/icons/facebook/000/050/187/4541e987-5d55-421f-968d-04f99fb6a68c-1702995843784.jpg'],
+                    // files: ['https://i.kym-cdn.com/entries/icons/facebook/000/050/187/4541e987-5d55-421f-968d-04f99fb6a68c-1702995843784.jpg'],
                 },
             }),
             prisma.trans_employees.findFirst({

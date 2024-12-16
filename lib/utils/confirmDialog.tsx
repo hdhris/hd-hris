@@ -45,6 +45,10 @@ const showDialog = async ({
                 {...rest}
                 isOpen={isOpen}
                 onOpenChange={setIsOpen}
+                onClose={()=>{
+                    setIsOpen(false);
+                    resolve("cancel");
+                }}
                 isDismissable={false}
                 isKeyboardDismissDisabled={true}
                 size="sm"
