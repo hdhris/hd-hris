@@ -6,12 +6,14 @@ import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { OvertimeEntry, approvalStatusColorMap } from "@/types/attendance-time/OvertimeType";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
-import { Button, Chip, Tooltip, Avatar } from "@nextui-org/react";
+import { Button, Chip, Tooltip, Avatar, AvatarGroup } from "@nextui-org/react";
+import { capitalize } from "lodash";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import { IoCloseSharp, IoCheckmarkSharp } from "react-icons/io5";
 
-export function overtimePageConfigTable(onUpdate: (id: number, status: string)=> Promise<void>): TableConfigProps<OvertimeEntry> {
+export function overtimePageConfigTable(): TableConfigProps<OvertimeEntry> {
+
     return {
         columns: [
             { uid: "overtime_date", name: "Overtime Date", sortable: true },
@@ -19,9 +21,13 @@ export function overtimePageConfigTable(onUpdate: (id: number, status: string)=>
             { uid: "clock_in", name: "Clock In", sortable: true },
             { uid: "clock_out", name: "Clock Out", sortable: true },
             { uid: "duration", name: "Duration", sortable: true },
-            { uid: "action", name: "Action" },
+            { uid: "status", name: "Status" },
+            { uid: "evaluators", name: "Evaluators" },
         ],
         rowCell: (item, columnKey) => {
+            function getUserById (id: number){
+                return item?.evaluators?.users.find((user) => Number(user.id) === id || user.employee_id === id);
+            }
             switch (columnKey) {
                 case "name":
                     return (
@@ -40,39 +46,24 @@ export function overtimePageConfigTable(onUpdate: (id: number, status: string)=>
                     return <strong>{toGMT8(item.clock_out).format("hh:mm a")}</strong>;
                 case "duration":
                     return <p>{calculateShiftLength(item.clock_in, item.clock_out, 0, true)}</p>;
-                case "action":
-                    return item.status === "pending" ? (
-                        <AcceptReject
-                            onAccept={async()=> await onUpdate(item.id, "approved")}
-                            onReject={async()=> await onUpdate(item.id, "rejected")}
-                        />
-                    ) : (
-                        <div className="flex justify-between w-36 items-center">
-                            <Chip
-                                startContent={
-                                    item.status === "approved" ? (
-                                        <FaCheckCircle size={18} />
-                                    ) : (
-                                        <IoMdCloseCircle size={18} />
-                                    )
-                                }
-                                variant="flat"
-                                color={approvalStatusColorMap[item.status]}
-                                className="capitalize"
-                            >
-                                {item.status}
-                            </Chip>
-                            {item.trans_employees_overtimes_approvedBy && (
-                                <Tooltip className="pointer-events-auto" content={item.approvedBy_full_name}>
-                                    <Avatar
-                                        isBordered
-                                        radius="full"
-                                        size="sm"
-                                        src={item?.trans_employees_overtimes_approvedBy?.picture ?? ""}
-                                    />
+                case "status":
+                    return (
+                        <Chip variant="flat" color={approvalStatusColorMap[item.status]}>
+                            {capitalize(item.status)}
+                        </Chip>
+                    );
+                case "evaluators":
+                    return (
+                        <AvatarGroup isBordered>
+                            {item.evaluators.evaluators.map(evaluator => (
+                                <Tooltip key={evaluator.evaluated_by} className="cursor-pointer" content={getUserById(evaluator.evaluated_by)?.name}>
+                                    <Avatar color={
+                                        evaluator.decision.is_decided === null ? "warning" :
+                                        evaluator.decision.is_decided === false ? "danger" : "success"
+                                    } src={getUserById(evaluator.evaluated_by)?.picture}/>
                                 </Tooltip>
-                            )}
-                        </div>
+                            ))}
+                        </AvatarGroup>
                     );
                 default:
                     return <></>;

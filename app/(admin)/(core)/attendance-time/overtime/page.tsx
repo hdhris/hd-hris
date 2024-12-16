@@ -1,9 +1,6 @@
 "use client";
-import axios from "axios";
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@/services/queries";
-import { toast } from "@/components/ui/use-toast";
-import showDialog from "@/lib/utils/confirmDialog";
 import { overtimePageConfigTable } from "./config";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
 import TableData from "@/components/tabledata/TableData";
@@ -26,40 +23,11 @@ function Page() {
         };
     }, [overtimes]);
 
-    const onUpdate = async (id: number, status: string) => {
-        const isApproved = status === "approved";
-
-        const response = await showDialog({
-            title: `${isApproved ? "Appoval" : "Rejection"}`,
-            message: `Do you confirm to ${isApproved ? "approve" : "reject"} ${
-                getOvertimeById(id)!.trans_employees_overtimes.last_name
-            }'s overtime application?`,
-            preferredAnswer: isApproved ? "yes" : "no",
-        });
-        if (response === "yes") {
-            try {
-                await axios.post("/api/admin/attendance-time/overtime/update", { id, status, userID });
-                mutate();
-                toast({
-                    title: isApproved ? "Approved" : "Rejected",
-                    description: "Overtime has been " + status,
-                    variant: isApproved ? "success" : "default",
-                });
-            } catch (error) {
-                console.log(error);
-                toast({
-                    title: "An error has occured",
-                    // description: String(error),
-                    variant: "danger",
-                });
-            }
-        }
-    };
     return (
         <div className="flex h-full">
             <TableData 
                 items={overtimes || []}
-                config={overtimePageConfigTable(onUpdate)}
+                config={overtimePageConfigTable()}
                 isLoading={isLoading}
                 onRowAction={(key: React.Key)=> {
                     const item = getOvertimeById(Number(key));
@@ -69,6 +37,7 @@ function Page() {
             <ViewOvertime
                 onClose={()=>setViewOvertime(null)}
                 overtime={viewOvertime}
+                mutate={mutate}
             />
         </div>
     );

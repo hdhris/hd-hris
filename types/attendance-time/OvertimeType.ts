@@ -21,8 +21,8 @@ import { UserEmployee, UserReviewer } from "@/helper/include-emp-and-reviewr/inc
 import { Evaluations } from "../leaves/leave-evaluators-types";
 
 export type ApprovalStatusType = "pending" | "approved" | "rejected"; 
-export const approvalStatusColorMap: Record<string, "danger" | "success" | "default"> = {
-  pending: "default",
+export const approvalStatusColorMap: Record<string, "danger" | "success" | "warning"> = {
+  pending: "warning",
   approved: "success",
   rejected: "danger",
 };
