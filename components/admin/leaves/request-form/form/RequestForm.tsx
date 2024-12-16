@@ -184,8 +184,8 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         let availableDaysCount = 0;
 
         // Normalize start and end dates
-        let currentDate = normalizeDate(new Date(startDate.year, startDate.month - 1, startDate.day));
-        const endDateCopy = normalizeDate(new Date(endDate.year, endDate.month - 1, endDate.day));
+        let currentDate = normalizeDate(new Date(startDate.year, startDate.month, startDate.day));
+        const endDateCopy = normalizeDate(new Date(endDate.year, endDate.month, endDate.day));
 
         // Loop through each day from startDate to endDate
         while (currentDate <= endDateCopy) {
@@ -202,7 +202,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
     }, [dateUnavailable]);
 
 
-    function calculateLeaveDeduction(startTimeStr: string, endTimeStr: string) {
+    const calculateLeaveDeduction = useCallback((startTimeStr: string, endTimeStr: string) =>  {
         // Extract break times (assuming `break_min` is in minutes)
         const breakTimes = user?.employees
             .filter(item => item.id === employeeIdSelected)  // Filter by selected employee
@@ -221,14 +221,16 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         const start = normalizeDate(startTime);
         const end = normalizeDate(endTime);
 
-        // Calculate total duration in minutes (from startTime to endTime)
-        const totalDuration = endTime.getTime() - startTime.getTime();
-        let totalMinutes = totalDuration / (1000 * 60); // Convert milliseconds to minutes
 
         // Calculate work duration (difference between clock-in and clock-out in minutes)
         const clock_in = new Date(`2024-12-10T${maxMinTime?.time_in}`);
         const clock_out = new Date(`2024-12-10T${maxMinTime?.time_out}`);
         const workDuration = dayjs(clock_in).diff(dayjs(clock_out), 'minutes', true);
+
+        const startLeave = toGMT8(toGMT8(startTimeStr).format("HH:mm:ss"))
+        const endLeave = toGMT8(toGMT8(endTimeStr).format("HH:mm:ss"))
+        let leaveDif = Math.abs(startLeave.diff(endLeave, "minutes"))
+
 
         // Adjust for break time in hours and calculate total work hours
         let totalWorkHours = Math.abs(workDuration) - breakTimes;
@@ -251,27 +253,33 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         // console.log("Break Times (in hours):", breakTimes);
         // console.log("Total Work Hours (before break adjustment):", totalWorkHours);
         // console.log("Working Days: ", workingDays);
-        // console.log("Work Duration: ", workDuration);
-        // console.log("Total Minutes: ", totalMinutes)
+        // // console.log("Work Duration: ", workDuration);
+        // // console.log("Total Minutes: ", totalMinutes)
         // console.log("Passes through 12:00 PM to 1:00 PM?:", passesLunchBreak);
-
-        // Deduct break time if the leave period passes through the lunch break
+        // console.log("Start Leave: ", startLeave)
+        // console.log("End Leave: ", endLeave)
+        // // Deduct break time if the leave period passes through the lunch break
+        //
+        // console.log("Before Different: ", leaveDif)
         if (passesLunchBreak) {
             // console.log("Deducting lunch break time (1 hour)...");
 
             // Subtract 1 hour if the leave period passes through the lunch break
-            totalMinutes -= breakTimes; // Deduct 1 hour (lunch break duration)
+            // totalMinutes -= breakTimes; // Deduct 1 hour (lunch break duration)
+            leaveDif -= breakTimes
         }
+        // console.log("After Different: ", leaveDif)
 
         // console.log("Total Work Hours (after lunch break deduction):", totalWorkHours);
         // console.log("Total Work Minutes (after lunch break deduction):", totalMinutes);
         if(workingDays === 0) {
-            return totalMinutes
+            return leaveDif
         }
 
+        // console.log("Per Hour: ", (totalWorkHours / 60), (leaveDif / 60))
         // Return the total work time adjusted for breaks
-        return (workingDays * totalWorkHours);
-    }
+        return ((workingDays * totalWorkHours) + leaveDif);
+    }, [countAvailableDays, employeeIdSelected, maxMinTime?.time_in, maxMinTime?.time_out, user?.employees])
 
     const onDateRangePicker = useCallback((value: RangeValue<DateValue>) => {
         const startDate = value?.start as ZonedDateTime;
@@ -391,10 +399,10 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             // Flatten the nested array and find the specific leave type
             const flatLeave = leave?.flat(); // Flatten the array
             const specificLeave = flatLeave?.find(leave => leave.leave_type_id === values.leave_type_id)?.remaining_days || 0;
-            const usedLeave = flatLeave?.find(leave => leave.leave_type_id === values.leave_type_id);
+            // const usedLeave = flatLeave?.find(leave => leave.leave_type_id === values.leave_type_id);
             // employee_leave_type.filter(item => item.)
 
-            console.log("Used: ", usedLeave)
+            // console.log("Used: ", usedLeave)
             // console.log("Specific Leave: ", specificLeave);
             // console.log("Remaining: ", user?.employees);
             const leaveDeduction = calculateLeaveDeduction(values.leave_date_range.start, values.leave_date_range.end);
@@ -414,7 +422,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
                 });
                 return; // Stop execution if validation fails
             }
-            console.log("Is req: ", isAttachmentRequired)
+            // console.log("Is req: ", isAttachmentRequired)
 
             if(!isAttachmentRequired){
                 setUrl([])
@@ -423,6 +431,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             // Prepare the payload
 
 
+            console.log("Use Days: ", leaveDeduction / 60)
             const items = {
                 id: employee?.id, ...values,
                 leave_type_id: values.leave_type_id,
@@ -490,12 +499,12 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             setIsSubmitting(false); // Ensure the loading state is cleared
         }
 
-    }, [calculateLeaveDeduction, documentAttachments, employee?.id, employee_leave_type, form, handleModalOpen, isAttachmentRequired, toast, url, user?.employees])
+    }, [calculateLeaveDeduction, documentAttachments, employee?.id, employee_leave_type, isAttachmentRequired, toast, url, user?.employees])
 
 
     const LeaveRequestForm: FormInputProps[] = [{
         inputDisabled: !form.watch("leave_type_id"), isRequired: true, name: "leave_date_range", // type: "date-range-picker",
-        label: "Date of Leave", Component: (field) => {
+        label: "Date of Leave", Component: () => {
             return (<DateRangePicker
                 aria-label="Date Range"
                 isDisabled={!form.watch("leave_type_id")}
@@ -561,7 +570,3 @@ export default RequestForm;
 
 export const normalizeDate = (inputDate: Date) => new Date(inputDate.getFullYear(), inputDate.getMonth(), inputDate.getDate());
 
-const timeInHours = (time: string) => {
-    const [hours, minutes] = time.split(":").map(Number); // Split and convert to numbers
-    return hours + minutes / 60
-}

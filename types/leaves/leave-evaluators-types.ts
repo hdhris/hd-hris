@@ -1,10 +1,12 @@
-interface User {
+export interface User {
     id: number;
     name: string;
     role: string;
     email: string;
     picture?: string; // Optional as some users may not have a picture
     employee_id?: number; // Optional to account for missing data
+    position: string
+    department: string
 }
 
 interface Decision {

@@ -4,11 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="adding onView In DataDisplay v1">
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx">
+      <change afterPath="$PROJECT_DIR$/components/common/evaluators/evaluators.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/data-display/controls/data-display-control.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/data-display/controls/data-display-control.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/util/search.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/util/search.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/actions/AcceptReject.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/actions/AcceptReject.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/custom/styles/SizeRadius.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/custom/styles/SizeRadius.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/signatory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/signatory.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,12 +64,12 @@
       </RecentBranches>
     </option>
   </component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Xero-John/HD-HRIS.git",
-    "accountId": "834de9a5-5f9a-4fe1-b241-c4e75a4cbf0b"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Xero-John/HD-HRIS.git&quot;,
+    &quot;accountId&quot;: &quot;834de9a5-5f9a-4fe1-b241-c4e75a4cbf0b&quot;
   }
-}]]></component>
+}</component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -89,13 +92,14 @@
     &quot;database.data.extractors.current.export.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
     &quot;database.data.extractors.current.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Xero/WebstormProjects/Capstone/HD-HRIS/public&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Xero/WebstormProjects/Capstone/HD-HRIS-V2&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS\\node_modules\\typescript\\lib&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Xero\\WebstormProjects\\Capstone\\HD-HRIS-V2\\node_modules\\typescript\\lib&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
   &quot;keyToStringList&quot;: {
@@ -106,11 +110,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS-V2" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\public" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\tests" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\admin\leaves\credits\forms\edit" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\common" />
-      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\admin\leaves\request-form\form" />
@@ -178,79 +182,11 @@
       <workItem from="1733874734453" duration="68789000" />
       <workItem from="1734002364762" duration="24911000" />
       <workItem from="1734098410028" duration="9815000" />
-      <workItem from="1734230093858" duration="19164000" />
-    </task>
-    <task id="LOCAL-00006" summary="adding email-services.ts">
-      <option name="closed" value="true" />
-      <created>1732372307873</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1732372307873</updated>
-    </task>
-    <task id="LOCAL-00007" summary="adding an alert message to the leave credit form">
-      <option name="closed" value="true" />
-      <created>1732374837862</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1732374837862</updated>
-    </task>
-    <task id="LOCAL-00008" summary="fixing leave RequestForm.tsx">
-      <option name="closed" value="true" />
-      <created>1732380091489</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1732380091489</updated>
-    </task>
-    <task id="LOCAL-00009" summary="fixing leave RequestForm.tsx v2">
-      <option name="closed" value="true" />
-      <created>1732459383790</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1732459383790</updated>
-    </task>
-    <task id="LOCAL-00010" summary="cleaning">
-      <option name="closed" value="true" />
-      <created>1732463104400</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1732463104400</updated>
-    </task>
-    <task id="LOCAL-00011" summary="cleaning">
-      <option name="closed" value="true" />
-      <created>1732463302497</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1732463302497</updated>
-    </task>
-    <task id="LOCAL-00012" summary="cleaning">
-      <option name="closed" value="true" />
-      <created>1732463317198</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1732463317198</updated>
-    </task>
-    <task id="LOCAL-00013" summary="cleaning">
-      <option name="closed" value="true" />
-      <created>1732463402963</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1732463402963</updated>
-    </task>
-    <task id="LOCAL-00014" summary="fixing leave types">
-      <option name="closed" value="true" />
-      <created>1732466301489</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1732466301489</updated>
+      <workItem from="1734230093858" duration="31307000" />
+      <workItem from="1734313213738" duration="9708000" />
+      <workItem from="1734359851187" duration="25000" />
+      <workItem from="1734359889255" duration="8106000" />
+      <workItem from="1734369129045" duration="7031000" />
     </task>
     <task id="LOCAL-00015" summary="fixing leave types">
       <option name="closed" value="true" />
@@ -572,7 +508,79 @@
       <option name="project" value="LOCAL" />
       <updated>1734270744353</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="adding onView In DataDisplay v2">
+      <option name="closed" value="true" />
+      <created>1734271489504</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1734271489504</updated>
+    </task>
+    <task id="LOCAL-00056" summary="destructuring comments.tsx">
+      <option name="closed" value="true" />
+      <created>1734313402065</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1734313402065</updated>
+    </task>
+    <task id="LOCAL-00057" summary="destructuring comments.tsx">
+      <option name="closed" value="true" />
+      <created>1734313863298</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1734313863298</updated>
+    </task>
+    <task id="LOCAL-00058" summary="updating signatories">
+      <option name="closed" value="true" />
+      <created>1734322251592</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1734322251592</updated>
+    </task>
+    <task id="LOCAL-00059" summary="schema.dbml">
+      <option name="closed" value="true" />
+      <created>1734360540896</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1734360540896</updated>
+    </task>
+    <task id="LOCAL-00060" summary="fixing calculation in leave RequestForm.tsx">
+      <option name="closed" value="true" />
+      <created>1734367443912</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1734367443912</updated>
+    </task>
+    <task id="LOCAL-00061" summary="Merge remote-tracking branch 'origin/france'&#10;&#10;# Conflicts:&#10;#&#9;prisma/schema.prisma">
+      <option name="closed" value="true" />
+      <created>1734370526076</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1734370526077</updated>
+    </task>
+    <task id="LOCAL-00062" summary="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx">
+      <option name="closed" value="true" />
+      <created>1734371094340</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1734371094340</updated>
+    </task>
+    <task id="LOCAL-00063" summary="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx">
+      <option name="closed" value="true" />
+      <created>1734371318083</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1734371318084</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -601,13 +609,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixing route in payelip" />
-    <MESSAGE value="final fix" />
-    <MESSAGE value="final fix v2" />
-    <MESSAGE value="fixing leave types, and adding logger" />
-    <MESSAGE value="adding indexes in schema.prisma" />
-    <MESSAGE value="adding leave credit" />
-    <MESSAGE value="fixing leave credit v1" />
     <MESSAGE value="fixing benefits v1" />
     <MESSAGE value="merging with nizam" />
     <MESSAGE value="merging" />
@@ -626,6 +627,13 @@
     <MESSAGE value="Merge remote-tracking branch 'github/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="adding onView In DataDisplay" />
     <MESSAGE value="adding onView In DataDisplay v1" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding onView In DataDisplay v1" />
+    <MESSAGE value="adding onView In DataDisplay v2" />
+    <MESSAGE value="destructuring comments.tsx" />
+    <MESSAGE value="updating signatories" />
+    <MESSAGE value="schema.dbml" />
+    <MESSAGE value="fixing calculation in leave RequestForm.tsx" />
+    <MESSAGE value="Merge remote-tracking branch 'origin/france'&#10;&#10;# Conflicts:&#10;#&#9;prisma/schema.prisma" />
+    <MESSAGE value="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx" />
   </component>
 </project>

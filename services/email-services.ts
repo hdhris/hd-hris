@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
 
 export const sendEmail = async ({to, subject, html, ...rest}: Omit<Mail.Options, "from">) => {
     const options: Mail.Options = {
-        from: 'noreply <teacheducjohn@gmail.com>',
+        from: `noreply <${process.env.SMTP_USERNAME}>`,
         to: to,
         subject: subject,
         html: html,

@@ -42,15 +42,10 @@ export async function GET(req: NextRequest) {
                 where: {
                     deleted_at: null,
                     is_active: true,
-                    ref_departments: {
-                        deleted_at: null,
-                        is_active: true,
-                    },
                 },
                 select: {
                     id: true,
                     name: true,
-                    department_id: true,
                 },
             }),
             prisma.ref_employment_status.findMany({

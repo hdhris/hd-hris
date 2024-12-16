@@ -4,8 +4,8 @@ import prisma from "@/prisma/prisma";
 export async function POST(req: NextRequest) {
   const data = await req.json();
   try {
-    console.log(data);
-
+    // console.log(data);
+    // return NextResponse.json({ status: 200 });
     const updated = await prisma.trans_overtimes.update({
       where: {
         id : data.id,
@@ -14,12 +14,12 @@ export async function POST(req: NextRequest) {
         ...data,
       },
     })
-    console.log("Updated: ",updated)
+    console.log(updated)
     return NextResponse.json({ status: 200 });
   } catch (error) {
-    console.error("Error:", error); // Log the error for debugging
+    console.error(error); // Log the error for debugging
     return NextResponse.json(
-      { error: "Failed to post data: " + error },
+      { error },
       { status: 500 }
     );
   }

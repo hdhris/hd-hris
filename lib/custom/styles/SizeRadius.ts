@@ -9,11 +9,12 @@ type colorType =
   | "primary"
   | "secondary";
   
-type sizeType = "md" | "sm" | "lg";
+type sizeType = "md" | "sm" | "lg" ;
+type radiusType = "md" | "sm" | "lg" | "full" | "none";
 
 interface uniformProps {
   size?: sizeType;
-  radius?: sizeType;
+  radius?: radiusType;
   color?: colorType;
 }
 

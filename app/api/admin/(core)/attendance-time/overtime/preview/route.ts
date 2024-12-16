@@ -18,9 +18,6 @@ export async function GET(req: NextRequest) {
         trans_employees_overtimes: {
           ...emp_rev_include.employee_detail
         },
-        trans_employees_overtimes_approvedBy : {
-          ...emp_rev_include.reviewer_detail
-        }
       },
     });
 

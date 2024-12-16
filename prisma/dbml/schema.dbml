@@ -218,7 +218,6 @@ Table ref_departments {
   created_at DateTime
   updated_at DateTime
   deleted_at DateTime
-  ref_job_classes ref_job_classes [not null]
   trans_employees trans_employees [not null]
 }
 
@@ -230,13 +229,8 @@ Table ref_job_classes {
   created_at DateTime [not null]
   updated_at DateTime [not null]
   deleted_at DateTime
-  department_id Int
-  pay_rate Decimal
-  basic_salary Decimal
-  for_probi Boolean
-  is_superior Boolean [not null, default: false]
   max_employees Int
-  ref_departments ref_departments
+  max_department_instances Int
   trans_employees trans_employees [not null]
   trans_signatories trans_signatories [not null]
 }
@@ -468,7 +462,6 @@ Table trans_employees {
   trans_leaves_trans_leaves_employee_idTotrans_employees trans_leaves [not null]
   trans_leaves_trans_leaves_created_byTotrans_employees trans_leaves [not null]
   trans_overtimes_trans_overtimes_employee_idTotrans_employees trans_overtimes [not null]
-  trans_overtimes_trans_overtimes_approved_byTotrans_employees trans_overtimes [not null]
   trans_overtimes_trans_overtimes_created_byTotrans_employees trans_overtimes [not null]
   trans_payrolls trans_payrolls [not null]
 }
@@ -504,17 +497,11 @@ Table trans_overtimes {
   clock_out DateTime
   requested_mins Int
   reason String
-  approved_by Int
-  approved_at DateTime
-  rate_per_hour Decimal
-  comment String
-  rendered_mins Int
   deleted_at DateTime
   evaluators Json
   created_by Int
   trans_employees_overtimes trans_employees
-  trans_employees_overtimes_approvedBy trans_employees
-  trans_employees_trans_overtimes_created_byTotrans_employees trans_employees
+  trans_employees_overtimes_createdBy trans_employees
 }
 
 Table trans_payhead_breakdowns {
@@ -821,6 +808,9 @@ Table ref_notification_types {
   type_name String [not null]
   description String [not null]
   trans_notifications trans_notifications [not null]
+
+  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Table trans_notifications {
@@ -835,6 +825,9 @@ Table trans_notifications {
   sys_notifications sys_notifications [not null]
   ref_notification_types ref_notification_types [not null]
   trans_users trans_users [not null]
+
+  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Ref: dim_employee_benefits.plan_id > ref_benefit_plans.id [delete: No Action]
@@ -876,8 +869,6 @@ Ref: fact_training_records.schedule_id > dim_training_schedules.id [delete: No A
 Ref: log_attendances.employee_id > trans_employees.id [delete: No Action]
 
 Ref: ref_benefit_plans.deduction_id > ref_payheads.id [delete: No Action]
-
-Ref: ref_job_classes.department_id > ref_departments.id [delete: No Action]
 
 Ref: ref_training_programs.employee_instructor_id > trans_employees.id [delete: No Action]
 
@@ -930,8 +921,6 @@ Ref: trans_leaves.created_by > trans_employees.id [delete: No Action]
 Ref: trans_leaves.leave_type_id > trans_leave_types.id [delete: No Action]
 
 Ref: trans_overtimes.employee_id > trans_employees.id [delete: No Action]
-
-Ref: trans_overtimes.approved_by > trans_employees.id [delete: No Action]
 
 Ref: trans_overtimes.created_by > trans_employees.id [delete: No Action]
 

@@ -64,7 +64,8 @@ export async function POST(req: NextRequest) {
             true
         );
 
-        if (!signatory) {
+        console.log("Signatory: ", signatory)
+        if (signatory === null) {
             return NextResponse.json(
                 {
                     success: false,
