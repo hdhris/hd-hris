@@ -4,8 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="Merge remote-tracking branch 'origin/france'&#10;&#10;# Conflicts:&#10;#&#9;prisma/schema.prisma">
-      <change beforePath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/forms/FormFields.tsx" afterDir="false" />
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx">
+      <change afterPath="$PROJECT_DIR$/components/common/evaluators/evaluators.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/actions/AcceptReject.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/actions/AcceptReject.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/custom/styles/SizeRadius.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/custom/styles/SizeRadius.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/signatory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/signatory.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,8 +21,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript JSX File" />
         <option value="TypeScript File" />
+        <option value="TypeScript JSX File" />
       </list>
     </option>
   </component>
@@ -180,23 +186,7 @@
       <workItem from="1734313213738" duration="9708000" />
       <workItem from="1734359851187" duration="25000" />
       <workItem from="1734359889255" duration="8106000" />
-      <workItem from="1734369129045" duration="1924000" />
-    </task>
-    <task id="LOCAL-00013" summary="cleaning">
-      <option name="closed" value="true" />
-      <created>1732463402963</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1732463402963</updated>
-    </task>
-    <task id="LOCAL-00014" summary="fixing leave types">
-      <option name="closed" value="true" />
-      <created>1732466301489</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1732466301489</updated>
+      <workItem from="1734369129045" duration="7031000" />
     </task>
     <task id="LOCAL-00015" summary="fixing leave types">
       <option name="closed" value="true" />
@@ -574,7 +564,23 @@
       <option name="project" value="LOCAL" />
       <updated>1734370526077</updated>
     </task>
-    <option name="localTasksCounter" value="62" />
+    <task id="LOCAL-00062" summary="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx">
+      <option name="closed" value="true" />
+      <created>1734371094340</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1734371094340</updated>
+    </task>
+    <task id="LOCAL-00063" summary="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx">
+      <option name="closed" value="true" />
+      <created>1734371318083</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1734371318084</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -603,7 +609,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixing leave credit v1" />
     <MESSAGE value="fixing benefits v1" />
     <MESSAGE value="merging with nizam" />
     <MESSAGE value="merging" />
@@ -628,6 +633,7 @@
     <MESSAGE value="schema.dbml" />
     <MESSAGE value="fixing calculation in leave RequestForm.tsx" />
     <MESSAGE value="Merge remote-tracking branch 'origin/france'&#10;&#10;# Conflicts:&#10;#&#9;prisma/schema.prisma" />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/france'&#10;&#10;# Conflicts:&#10;#&#9;prisma/schema.prisma" />
+    <MESSAGE value="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx" />
   </component>
 </project>

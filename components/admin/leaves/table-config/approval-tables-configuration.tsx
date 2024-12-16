@@ -22,7 +22,7 @@ const ApprovalColumns: ColumnsProps[] = [{
 }, {
     name: 'End Date', uid: 'end_date', sortable: true
 }, {
-    name: 'Total Days', uid: 'total_days', sortable: true
+    name: 'Duration Of Leave', uid: 'duration_of_leave', sortable: true
 }, {
     name: 'Status', uid: 'status', sortable: true
 }, {
@@ -60,7 +60,7 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
             <Case of="end_date">
                 <Typography>{toGMT8(item.leave_details.end_date).format("MMM DD, YYYY hh:mm a")}</Typography>
             </Case>
-            <Case of="total_days">
+            <Case of="duration_of_leave">
                 <Typography>{item.leave_details.total_days}</Typography>
             </Case>
             <Case of="status">
@@ -73,9 +73,10 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
                 <div className="flex justify-center">
                     <AvatarGroup>
                         {evaluators.length > 0 ? evaluated_by.map((evaluator, index) => {
+                            const evaluated = evaluators.find(item => Number(item.evaluated_by) === Number(evaluator.id))
                             return (
                                 <Tooltip key={index} content={capitalize(evaluator.role) + " - " + evaluator.name}>
-                                    <Avatar isBordered size="sm" src={evaluator.picture}/>
+                                    <Avatar isBordered size="sm" src={evaluator.picture} color={evaluated?.decision.is_decided === null ? "warning" : evaluated?.decision.is_decided ? "success" : "danger"}/>
                                 </Tooltip>
 
                             )
