@@ -12,11 +12,6 @@ export async function GET(req: NextRequest) {
                 employee_id,
                 deleted_at: null, 
             },
-            include: {
-                trans_employees_overtimes_approvedBy: {
-                    ...emp_rev_include.reviewer_detail,
-                },
-            },
             orderBy: {
                 updated_at: 'desc'
             }

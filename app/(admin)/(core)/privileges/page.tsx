@@ -22,10 +22,10 @@ export default function page() {
   return (
     <>
       {/* <div>Privileges</div> */}
-      {/* <BinaryTree data={treeData} /> */}
+      <BinaryTree data={treeData} />
       
       {/* <PrivilegePage/> */}
-      <PrivilegeCheckboxes/>
+      {/* <PrivilegeCheckboxes/> */}
     </>
   );
 }
