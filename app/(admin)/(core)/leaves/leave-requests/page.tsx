@@ -260,8 +260,6 @@ function Page() {
 
                         </div>} body={<>
 
-                        {/*<Section className="ms-0" title="Leave Type" subtitle="Type of leave apply by the employee."/>*/}
-                        {/*<hr className="border border-default-400 space-y-2"/>*/}
                         <CardTable data={[{
                             label: "Leave Type", value: <div className="flex gap-4 items-center">
                                 <Typography>{selectedRequest.leave_type.name}</Typography>
@@ -321,125 +319,7 @@ function Page() {
                             />
                             <hr className="border border-default-400 space-y-2"/>
                         </>}
-                        {/*<ScrollShadow size={20} className="min-h-32 max-h-72">*/}
-                        {/*    <div className="flex flex-col gap-10 h-full mb-4">*/}
-{/*/!*                                {selectedRequest.evaluators.comments.map(comment => {*!/*/}
-{/*/!*                                    const commenters = selectedRequest.evaluators.users.filter(commenter => Number(commenter.id) === Number(comment.author)).map(({id, ...rest}) => ({id: Number(id), ...rest}))*!/*/}
 
-{/*/!*                                    const uniqueIds = new Set(commenters.map(user => user.id));*!/*/}
-{/*/!*                                    const hasDuplicates = uniqueIds.size !== commenters.length;*!/*/}
-
-{/*// Step 2: If there are duplicates, filter by role "approver"*/}
-{/*/!*                                    let result;*!/*/}
-{/*/!*                                    if (hasDuplicates) {*!/*/}
-{/*/!*                                        const uniqueApproversSet = new Map();*!/*/}
-{/*/!*                                        commenters*!/*/}
-{/*/!*                                            .filter(user => user.role === "approver")*!/*/}
-{/*/!*                                            .forEach(user => uniqueApproversSet.set(user.id, user));*!/*/}
-{/*/!*                                        result = Array.from(uniqueApproversSet.values());*!/*/}
-{/*/!*                                    } else {*!/*/}
-{/*/!*                                        result = commenters; // No duplicates, return as is*!/*/}
-{/*/!*                                    }*!/*/}
-
-{/*/!*                                    const comments = result.map(item => ({*!/*/}
-{/*/!*                                        ...item, ...comment*!/*/}
-{/*/!*                                    }))*!/*/}
-{/*/!*                                    return (<Fragment key={comment.id}>{comments.map(comment_thread => {*!/*/}
-{/*/!*                                        return (<div key={comment_thread.id} className="flex flex-col gap-2">*!/*/}
-{/*/!*                                                <User*!/*/}
-{/*/!*                                                    className="justify-start p-2"*!/*/}
-{/*/!*                                                    name={<Typography*!/*/}
-{/*/!*                                                        className="text-sm font-semibold">{comment_thread.name}</Typography>}*!/*/}
-{/*/!*                                                    description={<Typography*!/*/}
-{/*/!*                                                        className="text-sm font-semibold !text-default-400/75">*!/*/}
-{/*/!*                                                        {capitalize(comment_thread.role)}*!/*/}
-{/*/!*                                                    </Typography>}*!/*/}
-{/*/!*                                                    avatarProps={{*!/*/}
-{/*/!*                                                        src: comment_thread.picture,*!/*/}
-{/*/!*                                                        classNames: {base: '!size-6'},*!/*/}
-{/*/!*                                                        isBordered: true,*!/*/}
-{/*/!*                                                    }}*!/*/}
-{/*/!*                                                />*!/*/}
-
-{/*/!*                                                <div className="flex flex-col gap-2 ml-2">*!/*/}
-{/*/!*                                                    <Typography*!/*/}
-{/*/!*                                                        className="text-medium indent-4">{comment_thread.message}</Typography>*!/*/}
-{/*/!*                                                    <div className="flex gap-2">*!/*/}
-{/*/!*                                                        <Typography*!/*/}
-{/*/!*                                                            className="text-sm !text-default-400/75">{toGMT8(comment_thread.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>*!/*/}
-{/*/!*                                                        <Typography*!/*/}
-{/*/!*                                                            className="text-sm font-semibold cursor-pointer !text-default-400/75"*!/*/}
-{/*/!*                                                            onClick={() => {*!/*/}
-{/*/!*                                                                setCommentId(comment_thread.id)*!/*/}
-{/*/!*                                                                setReply("")*!/*/}
-{/*/!*                                                            }}>Reply</Typography>*!/*/}
-{/*/!*                                                    </div>*!/*/}
-{/*/!*                                                </div>*!/*/}
-{/*/!*                                                {comment_thread.replies.map((replies: Reply) => {*!/*/}
-{/*/!*                                                    const replier = selectedRequest.evaluators.users.filter(item => Number(item.id) === Number(replies.author))*!/*/}
-{/*/!*                                                    const reply = replier.map(item => ({*!/*/}
-{/*/!*                                                        ...item, ...replies*!/*/}
-{/*/!*                                                    }))*!/*/}
-{/*/!*                                                    return (reply.map(reply => {*!/*/}
-{/*/!*                                                        return (<div key={replies.id} className="ms-10 my-3">*!/*/}
-{/*/!*                                                            <User*!/*/}
-{/*/!*                                                                className="justify-start p-2"*!/*/}
-{/*/!*                                                                name={<Typography*!/*/}
-{/*/!*                                                                    className="text-sm font-semibold">{reply.name}</Typography>}*!/*/}
-{/*/!*                                                                description={<Typography*!/*/}
-{/*/!*                                                                    className="text-sm font-semibold !text-default-400/75">*!/*/}
-{/*/!*                                                                    {capitalize(reply.role)}*!/*/}
-{/*/!*                                                                </Typography>}*!/*/}
-{/*/!*                                                                avatarProps={{*!/*/}
-{/*/!*                                                                    src: reply.picture,*!/*/}
-{/*/!*                                                                    classNames: {base: '!size-6'},*!/*/}
-{/*/!*                                                                    isBordered: true,*!/*/}
-{/*/!*                                                                }}*!/*/}
-{/*/!*                                                            />*!/*/}
-{/*/!*                                                            <div className="flex flex-col gap-2 ml-4">*!/*/}
-{/*/!*                                                                <Typography*!/*/}
-{/*/!*                                                                    className="text-medium indent-4">{replies.message}</Typography>*!/*/}
-{/*/!*                                                                <div className="flex gap-2">*!/*/}
-{/*/!*                                                                    <Typography*!/*/}
-{/*/!*                                                                        className="text-sm !text-default-400/75">{toGMT8(replies.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>*!/*/}
-{/*/!*                                                                    <Typography*!/*/}
-{/*/!*                                                                        className="text-sm font-semibold cursor-pointer !text-default-400/75"*!/*/}
-{/*/!*                                                                        onClick={() => {*!/*/}
-{/*/!*                                                                            setCommentId(comment_thread.id)*!/*/}
-{/*/!*                                                                            setReply("")*!/*/}
-{/*/!*                                                                        }}>Reply</Typography>*!/*/}
-{/*/!*                                                                </div>*!/*/}
-
-{/*/!*                                                            </div>*!/*/}
-{/*/!*                                                        </div>)*!/*/}
-{/*/!*                                                    }))*!/*/}
-{/*/!*                                                })}*!/*/}
-{/*/!*                                                {commentId === comment_thread.id && <div className="ms-10">*!/*/}
-{/*/!*                                                    <CommentInput*!/*/}
-{/*/!*                                                        placeholder="Reply..."*!/*/}
-{/*/!*                                                        isSending={isReplySubmit}*!/*/}
-{/*/!*                                                        value={reply || ""}*!/*/}
-{/*/!*                                                        onSend={handleOnReply.bind(null, comment_thread.id)}*!/*/}
-{/*/!*                                                        onValueChange={(value) => {*!/*/}
-{/*/!*                                                            setReply(value);*!/*/}
-{/*/!*                                                        }}*!/*/}
-{/*/!*                                                    />*!/*/}
-{/*/!*                                                </div>}*!/*/}
-{/*/!*                                            </div>*!/*/}
-
-{/*/!*                                        )*!/*/}
-{/*/!*                                    })}</Fragment>)*!/*/}
-{/*/!*                                })}*!/*/}
-{/*                            </div>*/}
-{/*                        </ScrollShadow>*/}
-{/*                        <div className="flex gap-2 items-center">*/}
-{/*                            <CommentInput isSending={loading}*/}
-{/*                                          onSend={handleOnSend.bind(null, comment!)}*/}
-{/*                                          value={comment!}*/}
-{/*                                          onValueChange={(value) => {*/}
-{/*                                              setComment(value)*/}
-{/*                                          }}/>*/}
-{/*                        </div>*/}
                         <Section className="ms-0" title="Reason" subtitle="Reason of employee in regard to leave request."/>
                         <BorderCard className="h-36">
                             <ScrollShadow size={20}>
@@ -448,10 +328,7 @@ function Page() {
                                 </Typography>
                             </ScrollShadow>
                         </BorderCard>
-                        {/*{*/}
-                        {/*    signatories?.users?.some(user => Number(user.id) === session.data?.user.employee_id) &&*/}
-                        {/*    */}
-                        {/*}*/}
+
                         <hr className="border border-default-400 space-y-2"/>
                         <Section className="ms-0" title="Evaluator's Decision"
                                  subtitle="Summary of evaluator's feedback and decisions"/>
@@ -473,83 +350,6 @@ function Page() {
                                 </BorderCard>
                             )
                         })}
-
-
-                            {/*<div className="flex justify-between items-center">*/}
-                            {/*    <User*/}
-                            {/*        className="justify-start p-2"*/}
-                            {/*        name={<Typography className="text-sm font-semibold">{reviewer?.name}</Typography>}*/}
-                            {/*        description={<Typography className="text-sm font-semibold !text-default-400/75">*/}
-                            {/*            {reviewer?.email}*/}
-                            {/*        </Typography>}*/}
-                            {/*        avatarProps={{*/}
-                            {/*            src: reviewer?.picture, classNames: {base: '!size-6'}, isBordered: true,*/}
-                            {/*        }}*/}
-                            {/*    />*/}
-                                {/*{!reviewer_details?.decision.is_reviewed && is_reviewer && <div className="flex gap-2">*/}
-                                {/*    <Button size="sm" radius="full" isIconOnly variant="light"*/}
-                                {/*        // onClick={handleReview.bind(null, item.id, "Approved")}*/}
-                                {/*    >*/}
-                                {/*        <LuThumbsUp className={cn("text-success", icon_size_sm)}/>*/}
-                                {/*    </Button>*/}
-                                {/*    <Button size="sm" radius="full" isIconOnly variant="light"*/}
-                                {/*        // onClick={handleReview.bind(null, item.id, "Rejected")}*/}
-                                {/*    >*/}
-                                {/*        <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*/}
-                                {/*    </Button>*/}
-                                {/*</div>}*/}
-                            {/*</div>*/}
-
-                            {/*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*/}
-                            {/*{reviewer_details?.decision.is_reviewed && <CardTable data={[{*/}
-                            {/*    label: "Status",*/}
-                            {/*    value: reviewer_details?.decision.is_reviewed ?*/}
-                            {/*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*/}
-                            {/*        <LuX className={cn("text-danger", icon_size_sm)}/>*/}
-                            {/*}, {*/}
-                            {/*    label: "Decision Date", value: dayjs(reviewer_details?.decision.decisionDate).format("YYYY-MM-DD")*/}
-                            {/*}, {*/}
-                            {/*    label: "Rejected Reason",*/}
-                            {/*    value: reviewer_details?.decision.rejectedReason ? reviewer_details?.decision.rejectedReason : ""*/}
-                            {/*},]}/>}*/}
-                        {/*<BorderCard heading={<Typography className="text-medium">Approved Details</Typography>}>*/}
-                        {/*    <div className="flex justify-between items-center">*/}
-                        {/*        /!*<User*!/*/}
-                        {/*        /!*    className="justify-start p-2"*!/*/}
-                        {/*        /!*    name={<Typography className="text-sm font-semibold">{approver?.name}</Typography>}*!/*/}
-                        {/*        /!*    description={<Typography className="text-sm font-semibold !text-default-400/75">*!/*/}
-                        {/*        /!*        {approver?.email}*!/*/}
-                        {/*        /!*    </Typography>}*!/*/}
-                        {/*        /!*    avatarProps={{*!/*/}
-                        {/*        /!*        src: approver?.picture, classNames: {base: '!size-6'}, isBordered: true,*!/*/}
-                        {/*        /!*    }}*!/*/}
-
-                        {/*        /!*{!approver_details?.decision.is_approved && is_approver && <div className="flex gap-2">*!/*/}
-                        {/*        /!*    <Button size="sm" radius="full" isIconOnly variant="light"*!/*/}
-                        {/*        /!*        // onClick={handleReview.bind(null, item.id, "Approved")}*!/*/}
-                        {/*        /!*    >*!/*/}
-                        {/*        /!*        <LuThumbsUp className={cn("text-success", icon_size_sm)}/>*!/*/}
-                        {/*        /!*    </Button>*!/*/}
-                        {/*        /!*    <Button size="sm" radius="full" isIconOnly variant="light"*!/*/}
-                        {/*        /!*        // onClick={handleReview.bind(null, item.id, "Rejected")}*!/*/}
-                        {/*        /!*    >*!/*/}
-                        {/*        /!*        <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*!/*/}
-                        {/*        /!*    </Button>*!/*/}
-                        {/*        /!*</div>}*!/*/}
-                        {/*    </div>*/}
-                        {/*    /!*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*!/*/}
-                        {/*    /!*{approver_details?.decision.is_approved && <CardTable data={[{*!/*/}
-                        {/*    /!*    label: "Status",*!/*/}
-                        {/*    /!*    value: approver_details?.decision.is_approved ?*!/*/}
-                        {/*    /!*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*!/*/}
-                        {/*    /!*        <LuX className={cn("text-danger", icon_size_sm)}/>*!/*/}
-                        {/*    /!*}, {*!/*/}
-                        {/*    /!*    label: "Decision Date", value: dayjs(approver_details?.decision.decisionDate).format("YYYY-MM-DD")*!/*/}
-                        {/*    /!*}, {*!/*/}
-                        {/*    /!*    label: "Rejected Reason",*!/*/}
-                        {/*    /!*    value: approver_details?.decision.rejectedReason ? approver_details?.decision.rejectedReason : ""*!/*/}
-                        {/*    /!*},]}/>}*!/*/}
-                        {/*</BorderCard>*/}
 
                     </>} onDanger={<>
                         <Section className="ms-0" title="Edit Leave"
@@ -579,33 +379,3 @@ function Page() {
 }
 
 export default Page;
-
-interface CommentInputProps extends TextAreaProps {
-    onSend?: () => void,
-    isSending?: boolean
-    placeholder?: string
-}
-
-const CommentInput = ({onSend, isSending, placeholder, ...rest}: CommentInputProps) => {
-    const session = useSession()
-    return (<div className="flex gap-2 w-full">
-        <Avatar
-            classNames={{
-                base: "h-7 w-7"
-            }}
-            src={session.data?.user?.image}
-        />
-        <Textarea variant="bordered"
-                  color="primary"
-                  maxRows={3}
-                  placeholder={placeholder || "Add comment..."}
-                  {...rest}
-        />
-        <Button variant="light" isIconOnly size="sm" className="self-end" onClick={onSend}>
-            {isSending ? <Spinner size="sm"/> : <LuSendHorizonal
-                className={cn(icon_size_sm, icon_color)}
-            />}
-
-        </Button>
-    </div>)
-}

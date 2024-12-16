@@ -167,7 +167,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                     </FormLabel>)}
                 {item.isRequired && <span className="ml-2 inline text-destructive text-medium"> *</span>}
                 <FormControl className="space-y-2 w-full">
-                    {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
+                    {item.Component ? (item.Component()) : (<SwitchCase expression={item.type}>
                         <Case of="auto-complete">
                             <Autocomplete
                                 disableSelectorIconRotation
