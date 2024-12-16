@@ -28,14 +28,6 @@ export async function POST(req: NextRequest) {
         },
         select: {
           ...emp_rev_include.employee_detail.select,
-          dim_schedules: {
-            where: {
-              end_date: null,
-            },
-            include: {
-              ref_batch_schedules: true,
-            }
-          }
         }
       });
 

@@ -176,25 +176,24 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 id={item.name}
                                 aria-label={item.name}
                                 disabled={item.inputDisabled}
+                                defaultItems={(item.config as any)?.options ?? undefined}
                                 autoFocus={item.isFocus}
-                                {...field}
                                 size={size}
                                 variant="bordered"
                                 radius="sm"
-                                inputValue={field.value ? String(field.value) : undefined}
-                                onSelectionChange={(value) => {
-                                    field.onChange(value)
+                                // inputValue={field.value ? String(field.value) : undefined}
+                                selectedKey={field.value ? String(field.value) : null}
+                                onSelectionChange={(e) => {
+                                    field.onChange(e);
                                 }}
-                                onInputChange={(value) => {
-                                    field.onChange(value)
-                                }}
+                                {...field}
                             >
                                 {(item.config as any)?.options?.map((option: GroupInputOptions) => {
                                     return(
-                                        <AutocompleteItem key={option.value}
+                                        <AutocompleteItem textValue={option.label} key={option.value}
                                                           {...((item.config as any)?.autocompleteItem as Omit<AutocompleteItemProps, "key">)}
                                         >
-                                            {option.label}
+                                            <p>{option.label}</p>
                                         </AutocompleteItem>)
                                 })}
                             </Autocomplete>
