@@ -12,7 +12,7 @@ import {
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
 import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import {Avatar, Chip, cn, ScrollShadow, Spinner, Textarea} from '@nextui-org/react';
+import {Avatar, Chip, cn, ScrollShadow, Spinner, Textarea, User} from '@nextui-org/react';
 import Typography, {Section} from "@/components/common/typography/Typography";
 import {capitalize} from "@nextui-org/shared-utils";
 import UserMail from "@/components/common/avatar/user-info-mail";
@@ -119,9 +119,9 @@ function Page() {
         // console.log("Selected: ", selected)
     }
 
-    const onCommentSend = () => {
-
-    }
+    // const onCommentSend = () => {
+    //
+    // }
 
     const onOpenDrawer = useCallback(() => {
         setIsOpen(true)
@@ -448,11 +448,33 @@ function Page() {
                                 </Typography>
                             </ScrollShadow>
                         </BorderCard>
+                        {/*{*/}
+                        {/*    signatories?.users?.some(user => Number(user.id) === session.data?.user.employee_id) &&*/}
+                        {/*    */}
+                        {/*}*/}
                         <hr className="border border-default-400 space-y-2"/>
                         <Section className="ms-0" title="Evaluator's Decision"
                                  subtitle="Summary of evaluator's feedback and decisions"/>
-                        <BorderCard heading={<Typography className="text-medium">Review Details</Typography>}>
-                            <></>
+                        {signatories?.users?.filter(item => item.role.toLowerCase() !== "applicant").map(item => {
+                            return (
+                                <BorderCard key={item.id} heading={<Typography className="text-medium">{capitalize(item.role)} Details</Typography>}>
+                                    <div className="flex justify-between items-center">
+                                        <User
+                                            className="justify-start p-2"
+                                            name={<Typography className="text-sm font-semibold">{item?.name}</Typography>}
+                                            description={<Typography className="text-sm font-semibold !text-default-400/75">
+                                                {item?.email}
+                                            </Typography>}
+                                            avatarProps={{
+                                                src: item?.picture, classNames: {base: '!size-6'}, isBordered: true,
+                                            }}
+                                        />
+                                    </div>
+                                </BorderCard>
+                            )
+                        })}
+
+
                             {/*<div className="flex justify-between items-center">*/}
                             {/*    <User*/}
                             {/*        className="justify-start p-2"*/}
@@ -464,46 +486,7 @@ function Page() {
                             {/*            src: reviewer?.picture, classNames: {base: '!size-6'}, isBordered: true,*/}
                             {/*        }}*/}
                             {/*    />*/}
-                            {/*    {!reviewer_details?.decision.is_reviewed && is_reviewer && <div className="flex gap-2">*/}
-                            {/*        <Button size="sm" radius="full" isIconOnly variant="light"*/}
-                            {/*            // onClick={handleReview.bind(null, item.id, "Approved")}*/}
-                            {/*        >*/}
-                            {/*            <LuThumbsUp className={cn("text-success", icon_size_sm)}/>*/}
-                            {/*        </Button>*/}
-                            {/*        <Button size="sm" radius="full" isIconOnly variant="light"*/}
-                            {/*            // onClick={handleReview.bind(null, item.id, "Rejected")}*/}
-                            {/*        >*/}
-                            {/*            <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*/}
-                            {/*        </Button>*/}
-                            {/*    </div>}*/}
-                            {/*</div>*/}
-
-                            {/*/!*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*!/*/}
-                            {/*{reviewer_details?.decision.is_reviewed && <CardTable data={[{*/}
-                            {/*    label: "Status",*/}
-                            {/*    value: reviewer_details?.decision.is_reviewed ?*/}
-                            {/*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*/}
-                            {/*        <LuX className={cn("text-danger", icon_size_sm)}/>*/}
-                            {/*}, {*/}
-                            {/*    label: "Decision Date", value: dayjs(reviewer_details?.decision.decisionDate).format("YYYY-MM-DD")*/}
-                            {/*}, {*/}
-                            {/*    label: "Rejected Reason",*/}
-                            {/*    value: reviewer_details?.decision.rejectedReason ? reviewer_details?.decision.rejectedReason : ""*/}
-                            {/*},]}/>}*/}
-                        </BorderCard>
-                        <BorderCard heading={<Typography className="text-medium">Approved Details</Typography>}>
-                            <div className="flex justify-between items-center">
-                                {/*<User*/}
-                                {/*    className="justify-start p-2"*/}
-                                {/*    name={<Typography className="text-sm font-semibold">{approver?.name}</Typography>}*/}
-                                {/*    description={<Typography className="text-sm font-semibold !text-default-400/75">*/}
-                                {/*        {approver?.email}*/}
-                                {/*    </Typography>}*/}
-                                {/*    avatarProps={{*/}
-                                {/*        src: approver?.picture, classNames: {base: '!size-6'}, isBordered: true,*/}
-                                {/*    }}*/}
-                                {/*/>*/}
-                                {/*{!approver_details?.decision.is_approved && is_approver && <div className="flex gap-2">*/}
+                                {/*{!reviewer_details?.decision.is_reviewed && is_reviewer && <div className="flex gap-2">*/}
                                 {/*    <Button size="sm" radius="full" isIconOnly variant="light"*/}
                                 {/*        // onClick={handleReview.bind(null, item.id, "Approved")}*/}
                                 {/*    >*/}
@@ -515,20 +498,58 @@ function Page() {
                                 {/*        <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*/}
                                 {/*    </Button>*/}
                                 {/*</div>}*/}
-                            </div>
+                            {/*</div>*/}
+
                             {/*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*/}
-                            {/*{approver_details?.decision.is_approved && <CardTable data={[{*/}
+                            {/*{reviewer_details?.decision.is_reviewed && <CardTable data={[{*/}
                             {/*    label: "Status",*/}
-                            {/*    value: approver_details?.decision.is_approved ?*/}
+                            {/*    value: reviewer_details?.decision.is_reviewed ?*/}
                             {/*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*/}
                             {/*        <LuX className={cn("text-danger", icon_size_sm)}/>*/}
                             {/*}, {*/}
-                            {/*    label: "Decision Date", value: dayjs(approver_details?.decision.decisionDate).format("YYYY-MM-DD")*/}
+                            {/*    label: "Decision Date", value: dayjs(reviewer_details?.decision.decisionDate).format("YYYY-MM-DD")*/}
                             {/*}, {*/}
                             {/*    label: "Rejected Reason",*/}
-                            {/*    value: approver_details?.decision.rejectedReason ? approver_details?.decision.rejectedReason : ""*/}
+                            {/*    value: reviewer_details?.decision.rejectedReason ? reviewer_details?.decision.rejectedReason : ""*/}
                             {/*},]}/>}*/}
-                        </BorderCard>
+                        {/*<BorderCard heading={<Typography className="text-medium">Approved Details</Typography>}>*/}
+                        {/*    <div className="flex justify-between items-center">*/}
+                        {/*        /!*<User*!/*/}
+                        {/*        /!*    className="justify-start p-2"*!/*/}
+                        {/*        /!*    name={<Typography className="text-sm font-semibold">{approver?.name}</Typography>}*!/*/}
+                        {/*        /!*    description={<Typography className="text-sm font-semibold !text-default-400/75">*!/*/}
+                        {/*        /!*        {approver?.email}*!/*/}
+                        {/*        /!*    </Typography>}*!/*/}
+                        {/*        /!*    avatarProps={{*!/*/}
+                        {/*        /!*        src: approver?.picture, classNames: {base: '!size-6'}, isBordered: true,*!/*/}
+                        {/*        /!*    }}*!/*/}
+
+                        {/*        /!*{!approver_details?.decision.is_approved && is_approver && <div className="flex gap-2">*!/*/}
+                        {/*        /!*    <Button size="sm" radius="full" isIconOnly variant="light"*!/*/}
+                        {/*        /!*        // onClick={handleReview.bind(null, item.id, "Approved")}*!/*/}
+                        {/*        /!*    >*!/*/}
+                        {/*        /!*        <LuThumbsUp className={cn("text-success", icon_size_sm)}/>*!/*/}
+                        {/*        /!*    </Button>*!/*/}
+                        {/*        /!*    <Button size="sm" radius="full" isIconOnly variant="light"*!/*/}
+                        {/*        /!*        // onClick={handleReview.bind(null, item.id, "Rejected")}*!/*/}
+                        {/*        /!*    >*!/*/}
+                        {/*        /!*        <LuThumbsDown className={cn("text-danger", icon_size_sm)}/>*!/*/}
+                        {/*        /!*    </Button>*!/*/}
+                        {/*        /!*</div>}*!/*/}
+                        {/*    </div>*/}
+                        {/*    /!*{reviewer?.id === reviewer_details?.reviewed_by && CardD}*!/*/}
+                        {/*    /!*{approver_details?.decision.is_approved && <CardTable data={[{*!/*/}
+                        {/*    /!*    label: "Status",*!/*/}
+                        {/*    /!*    value: approver_details?.decision.is_approved ?*!/*/}
+                        {/*    /!*        <LuCheck className={cn("text-success", icon_size_sm)}/> :*!/*/}
+                        {/*    /!*        <LuX className={cn("text-danger", icon_size_sm)}/>*!/*/}
+                        {/*    /!*}, {*!/*/}
+                        {/*    /!*    label: "Decision Date", value: dayjs(approver_details?.decision.decisionDate).format("YYYY-MM-DD")*!/*/}
+                        {/*    /!*}, {*!/*/}
+                        {/*    /!*    label: "Rejected Reason",*!/*/}
+                        {/*    /!*    value: approver_details?.decision.rejectedReason ? approver_details?.decision.rejectedReason : ""*!/*/}
+                        {/*    /!*},]}/>}*!/*/}
+                        {/*</BorderCard>*/}
 
                     </>} onDanger={<>
                         <Section className="ms-0" title="Edit Leave"
