@@ -42,8 +42,6 @@ export const emp_rev_include = {
                 select: {
                     id: true,
                     name: true,
-                    pay_rate: true,
-                    basic_salary: true,
                 },
             },
             dim_schedules: {
@@ -95,8 +93,6 @@ export interface UserEmployee {
     ref_job_classes: {
         id: number;
         name: string;
-        pay_rate: string;
-        basic_salary: string;
     };
     dim_schedules: EmployeeSchedule[];
 }
