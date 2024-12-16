@@ -97,12 +97,16 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
                     .map((signatory) => signatory.ref_signatory_roles?.signatory_role_name)
                     .filter(Boolean)
                     .join(", ") || "applicant",
+                position: employee.ref_job_classes?.name,
+                department: employee.ref_departments?.name,
             })),
                 {
                     id: applicant.id,
                     name: getEmpFullName(applicant),
                     email: applicant.email,
                     picture: applicant.picture,
+                    position: applicant.ref_job_classes?.name,
+                    department: applicant.ref_departments?.name,
                     role: "applicant",
                 }],
             comments: [], // Add comment data dynamically if applicable
