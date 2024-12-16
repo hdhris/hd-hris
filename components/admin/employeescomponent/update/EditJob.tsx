@@ -25,17 +25,15 @@ const jobPositionSchema = z.object({
     .string()
     .min(1, "Position name is required")
     .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
-  // pay_rate: z
-  //   .string()
-  //   .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
-  //   .transform((val) => (val === "" ? "0.00" : val)),
 
   superior_id: z
     .string()
     .nullish()
     .transform((val) => val || null),
   is_active: z.boolean().default(true),
-
+  is_superior: z.boolean().default(false),
+  max_employees: z.number().nullish(),
+  max_department_instances: z.number().nullish(),
 });
 
 type JobPositionFormData = z.infer<typeof jobPositionSchema>;
@@ -54,9 +52,11 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     resolver: zodResolver(jobPositionSchema),
     defaultValues: {
       name: "",
-      // pay_rate: "0.00",
       superior_id: "",
+      max_employees: 0,
+      max_department_instances: 0,
       is_active: true,
+      is_superior: false,
     },
     mode: "onChange",
   });
@@ -67,9 +67,10 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       if (job) {
         methods.reset({
           name: job.name,
-          // pay_rate: payRate, 
           superior_id: job.superior_id ? job.superior_id.toString() : "",
-          is_active: job.is_active,
+          is_superior: job.is_superior,
+          max_employees: job.max_employees,
+          max_department_instances: job.max_department_instances,
         });
       } else {
         toast({
@@ -80,21 +81,6 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       }
     }
   }, [isOpen, jobPositions, jobId, methods, toast]);
-
-  // const handlePayRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = e.target.value;
-  //   if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-  //     const formattedValue =
-  //       value === ""
-  //         ? "0.00"
-  //         : value.includes(".")
-  //         ? value.padEnd(value.indexOf(".") + 3, "0")
-  //         : value + ".00";
-  //     methods.setValue("pay_rate", formattedValue, { shouldValidate: true });
-  //   }
-  // };
-
- 
 
   const formFields: FormInputProps[] = [
     {
@@ -121,20 +107,34 @@ const EditJob: React.FC<EditJobPositionProps> = ({
             })) || [],
       },
     },
-    // {
-    //   name: "pay_rate",
-    //   label: "Pay Rate",
-    //   type: "text",
-    //   placeholder: "0.00",
-    //   description: "Pay rate must be 0 or greater (format: 0.00)",
-    //   config: {
-    //     onChange: handlePayRateChange,
-    //     value: methods.watch("pay_rate"),
-    //     pattern: "^\\d*\\.?\\d{0,2}$",
-    //   },
-    // },
-
-  
+    {
+      name: "max_employees",
+      label: "Employee Limit",
+      type: "number",
+      placeholder: "Enter a number or leave blank for no limit",
+      isRequired: false,
+      description:
+        "Specify the maximum number of employees allowed for this position. Leave the field blank if there's no restriction.",
+    },
+    {
+      name: "max_department_instances",
+      label: "Maximum Positions per Department",
+      type: "number",
+      placeholder: "Enter a number or leave blank for no limit",
+      isRequired: false,
+      description:
+        "Set the maximum number of positions allowed in each department for this job. Leave blank if there's no restriction.",
+    },
+    {
+      name: "is_superior",
+      label: "Is Department Head",
+      type: "switch",
+      config: {
+        defaultSelected: false,
+      },
+      description:
+        "Setting a job position as department head means it will oversee other positions in the department. Only one head position per department is allowed.",
+    },
     {
       name: "is_active",
       label: "Is Active",
@@ -155,7 +155,6 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     try {
       const formattedData = {
         ...data,
-        // pay_rate: parseFloat(data.pay_rate).toFixed(2),
         superior_id: data.superior_id ? parseInt(data.superior_id) : null,
       };
 
@@ -181,7 +180,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       if (axios.isAxiosError(error) && error.response) {
         toast({
           title: "Error",
-          description: error.response.data.error, 
+          description: error.response.data.error,
           duration: 3000,
         });
       } else {

@@ -29,6 +29,9 @@ const jobPositionSchema = z.object({
     .nullish()
     .transform((val) => val || null),
   is_active: z.boolean().default(true),
+  is_superior: z.boolean().default(false),
+  max_employees: z.number().nullish(),
+  max_department_instances: z.number().nullish(),
 });
 
 type JobPositionFormData = z.infer<typeof jobPositionSchema>;
@@ -43,27 +46,14 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     resolver: zodResolver(jobPositionSchema),
     defaultValues: {
       name: "",
-      // pay_rate: "0.00",
       superior_id: "",
+      max_employees: 0,
+      max_department_instances: 0,
       is_active: true,
+      is_superior: false,
     },
     mode: "onChange",
   });
-
-  // const handlePayRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = e.target.value;
-  //   if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-  //     const formattedValue =
-  //       value === ""
-  //         ? "0.00"
-  //         : value.includes(".")
-  //         ? value.padEnd(value.indexOf(".") + 3, "0")
-  //         : value + ".00";
-  //     methods.setValue("pay_rate", formattedValue, { shouldValidate: true });
-  //   }
-  // };
-
- 
 
   const formFields: FormInputProps[] = [
     {
@@ -88,18 +78,34 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
           })) || [],
       },
     },
-    // {
-    //   name: "pay_rate",
-    //   label: "Pay Rate",
-    //   type: "text",
-    //   placeholder: "0.00",
-    //   description: "Pay rate must be 0 or greater (format: 0.00)",
-    //   config: {
-    //     onChange: handlePayRateChange,
-    //     value: methods.watch("pay_rate"),
-    //     pattern: "^\\d*\\.?\\d{0,2}$",
-    //   },
-    // },
+    {
+      name: "max_employees",
+      label: "Employee Limit",
+      type: "number",
+      placeholder: "Enter a number or leave blank for no limit",
+      isRequired: false,
+      description:
+        "Specify the maximum number of employees allowed for this position. Leave the field blank if there's no restriction.",
+    },
+    {
+      name: "max_department_instances",
+      label: "Maximum Positions per Department",
+      type: "number",
+      placeholder: "Enter a number or leave blank for no limit",
+      isRequired: false,
+      description:
+        "Set the maximum number of positions allowed in each department for this job. Leave blank if there's no restriction.",
+    },
+    {
+      name: "is_superior",
+      label: "Is Department Head",
+      type: "switch",
+      config: {
+        defaultSelected: false,
+      },
+      description:
+        "Setting a job position as department head means it will oversee other positions in the department. Only one head position per department is allowed.",
+    },
     {
       name: "is_active",
       label: "Is Active",
@@ -150,7 +156,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       if (axios.isAxiosError(error) && error.response) {
         toast({
           title: "Error",
-          description: error.response.data.error, 
+          description: error.response.data.error,
           duration: 3000,
         });
       } else {

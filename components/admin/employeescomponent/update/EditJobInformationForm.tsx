@@ -1,8 +1,17 @@
 "use client";
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
-import { useDepartmentsData, useJobpositionData, useBranchesData, useSalaryGradeData, useEmploymentStatusData } from "@/services/queries";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
+import {
+  useDepartmentsData,
+  useJobpositionData,
+  useBranchesData,
+  useSalaryGradeData,
+  useEmploymentStatusData,
+  useEmployeesData,
+} from "@/services/queries";
 import { DateStyle } from "@/lib/custom/styles/InputStyle";
 import { parseAbsoluteToLocal } from "@internationalized/date";
 import dayjs from "dayjs";
@@ -14,38 +23,113 @@ const EditJobInformationForm: React.FC = () => {
   const { data: branches = [] } = useBranchesData();
   const { data: salaries = [] } = useSalaryGradeData();
   const { data: empstatuses = [] } = useEmploymentStatusData();
+  const { data: employees = [] } = useEmployeesData();
 
   const departmentOptions = departments.reduce((acc: any[], dept) => {
-    if (dept && dept.id && dept.name && dept.is_active) {  
+    if (dept && dept.id && dept.name && dept.is_active) {
       acc.push({ value: dept.id.toString(), label: dept.name });
     }
     return acc;
   }, []);
   
   const jobOptions = jobTitles.reduce((acc: any[], job) => {
-    if (job && job.id && job.name && job.is_active) { 
+    if (job && job.id && job.name && job.is_active) {
+      // Check if max_employees
+      if (job.max_employees !== null && job.max_employees > 0) {
+
+        // Count the number of employees assigned to this job position
+        const employeeCount = employees.filter(
+          (employee) => Number(employee.job_id) === job.id
+        ).length;
+
+        // Include the current employee's job position even if it has reached the max_employees limit
+        if (
+          employeeCount >= job.max_employees &&
+          Number(watch("job_id")) !== job.id
+        ) {
+          // Skip adding this job position to the options
+          return acc;
+        }
+      }
+
+      // Check if max_department_instances limit is reached for the selected department
+      if (
+        job.max_department_instances !== null &&
+        job.max_department_instances > 0
+      ) {
+        const selectedDepartmentId = Number(watch("department_id"));
+
+        // Count the number of employees assigned to this job position in the selected department
+        const departmentInstanceCount = employees.filter(
+          (employee) =>
+            Number(employee.job_id) === job.id &&
+            Number(employee.department_id) === selectedDepartmentId
+        ).length;
+
+        if (
+          departmentInstanceCount >= job.max_department_instances &&
+          Number(watch("job_id")) !== job.id
+        ) {
+          // Skip adding this job position to the options
+          return acc;
+        }
+      }
+
+      // Check if the job position is marked as "is_superior"
+      if (job.is_superior) {
+        const selectedDepartmentId = Number(watch("department_id"));
+
+        // Check if there is already an employee assigned to a superior position in the selected department
+        const hasSuperiorInDepartment = employees.some(
+          (employee) =>
+            Number(employee.department_id) === selectedDepartmentId &&
+            jobTitles.some(
+              (jobTitle) =>
+                jobTitle.id === Number(employee.job_id) && jobTitle.is_superior
+            )
+        );
+
+        if (
+          hasSuperiorInDepartment &&
+          !employees.some(
+            (employee) =>
+              Number(employee.department_id) === selectedDepartmentId &&
+              Number(employee.job_id) === job.id
+          )
+        ) {
+          return acc;
+        }
+      }
+
+      // Add the job position to the options
       acc.push({ value: job.id.toString(), label: job.name });
     }
     return acc;
   }, []);
-  
+
   const branchOptions = branches.reduce((acc: any[], branch) => {
-    if (branch && branch.id && branch.name && branch.is_active) {  
+    if (branch && branch.id && branch.name && branch.is_active) {
       acc.push({ value: branch.id.toString(), label: branch.name });
     }
     return acc;
   }, []);
 
-  const employmentstatusOptions = empstatuses.reduce((acc: any[], empstatuses) => {
-    if (empstatuses && empstatuses.id && empstatuses.name) {
-      acc.push({ value: empstatuses.id.toString(), label: empstatuses.name });
-    }
-    return acc;
-  }, []);
+  const employmentstatusOptions = empstatuses.reduce(
+    (acc: any[], empstatuses) => {
+      if (empstatuses && empstatuses.id && empstatuses.name) {
+        acc.push({ value: empstatuses.id.toString(), label: empstatuses.name });
+      }
+      return acc;
+    },
+    []
+  );
 
   const salaryGradeOptions = salaries.reduce((acc: any[], salary) => {
     if (salary && salary.id && salary.name && salary.amount) {
-      acc.push({ value: salary.id.toString(), label: `${salary.name}: ₱${Number(salary.amount).toFixed(2)}` });
+      acc.push({
+        value: salary.id.toString(),
+        label: `${salary.name}: ₱${Number(salary.amount).toFixed(2)}`,
+      });
     }
     return acc;
   }, []);
@@ -68,10 +152,10 @@ const EditJobInformationForm: React.FC = () => {
       isRequired: true,
       config: {
         placeholder: "Select hire date",
-        maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
+        maxValue: parseAbsoluteToLocal(dayjs().endOf("day").toISOString()),
         defaultValue: null,
-        classNames: DateStyle,  
-        validationState: "valid"
+        classNames: DateStyle,
+        validationState: "valid",
       },
     },
     {

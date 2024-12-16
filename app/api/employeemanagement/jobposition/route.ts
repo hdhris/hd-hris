@@ -7,13 +7,11 @@ const prisma = new PrismaClient();
 // Updated job schema for validation
 const jobSchema = z.object({
   name: z.string().min(1).max(45),
-  // pay_rate: z
-  //   .string()
-  //   .regex(/^\d*\.?\d{0,2}$/, "Invalid decimal format")
-  //   .transform((val) => new Prisma.Decimal(val)),
   is_active: z.boolean().default(true),
   superior_id: z.number().optional().nullable(),
-
+  is_superior: z.boolean().default(false),
+  max_employees: z.number().optional().nullable(),
+  max_department_instances: z.number().optional().nullable(),
 });
 //check if name exist
 async function checkDuplicateName(name: string, excludeId?: number) {
@@ -108,6 +106,9 @@ if (existingJob) {
         // pay_rate: validatedData.pay_rate,
         is_active: validatedData.is_active,
         superior_id: validatedData.superior_id,
+        max_employees: validatedData.max_employees,
+        max_department_instances: validatedData.max_department_instances,
+        is_superior: validatedData.is_superior,
         created_at: new Date(),
         updated_at: new Date(),
       },

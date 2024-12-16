@@ -9,16 +9,22 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import Text from "@/components/Text";
 import dayjs from "dayjs";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 
 const EmptyState: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
       <div className="text-center space-y-3">
-        <Text className="text-xl font-bold text-gray-700">No Employees Found</Text>
-        <Text className="text-gray-500">There are no active employees at the moment.</Text>
-        <Text className="text-sm text-gray-400">Click the &apos;Add Employee&apos; button above to get started.</Text>
+        <Text className="text-xl font-bold text-gray-700">
+          No Employees Found
+        </Text>
+        <Text className="text-gray-500">
+          There are no active employees at the moment.
+        </Text>
+        <Text className="text-sm text-gray-400">
+          Click the &apos;Add Employee&apos; button above to get started.
+        </Text>
       </div>
     </div>
   );
@@ -26,11 +32,15 @@ const EmptyState: React.FC = () => {
 
 const Page: React.FC = () => {
   const { data: employees, mutate, isLoading } = useEmployeesData();
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const router = useRouter();
 
   const handleEditEmployee = (employeeId: number) => {
-    router.push(`/employeemanagement/employees/edit-employee/${employeeId.toString()}`);
+    router.push(
+      `/employeemanagement/employees/edit-employee/${employeeId.toString()}`
+    );
   };
 
   const handleEmployeeUpdated = async () => {
@@ -48,7 +58,7 @@ const Page: React.FC = () => {
   ));
 
   const handleOnSelected = (key: React.Key) => {
-    const selected = employees?.find(item => item.id === Number(key));
+    const selected = employees?.find((item) => item.id === Number(key));
     setSelectedEmployee(selected ?? null);
   };
 
@@ -71,9 +81,11 @@ const Page: React.FC = () => {
             <div className="flex items-center gap-4">
               <Avatar
                 src={employee.picture || ""}
-                alt={`${employee.prefix || ''} ${employee.first_name} ${employee.last_name}`}
+                alt={`${employee.prefix || ""} ${employee.first_name} ${
+                  employee.last_name
+                }`}
               />
-              <span>
+              <span className="capitalize">
                 {employee.prefix && `${employee.prefix} `}
                 {employee.first_name} {employee.last_name}
                 {employee.suffix ? `, ${employee.suffix}` : ""}
@@ -102,7 +114,7 @@ const Page: React.FC = () => {
           );
         case "employmentstatus":
           return (
-            <div className="flex items-center justify-center">
+            <div className="pl-8 capitalize">
               {employee.ref_employment_status?.name || "N/A"}
             </div>
           );
@@ -110,7 +122,7 @@ const Page: React.FC = () => {
           return (
             <TableActionButton
               name={`${employee.first_name} ${employee.last_name}`}
-              onEdit={() => handleEditEmployee(employee.id)}              
+              onEdit={() => handleEditEmployee(employee.id)}
             />
           );
         default:
@@ -122,7 +134,7 @@ const Page: React.FC = () => {
   const FilterItems = [
     {
       category: "Employee status",
-      filtered: employees?.length 
+      filtered: employees?.length
         ? Array.from(
             new Set(employees.map((e) => e.ref_employment_status?.name))
           )
@@ -131,16 +143,14 @@ const Page: React.FC = () => {
               key: "ref_employment_status.name",
               value: empstat || "",
               name: empstat || "",
-              uid: empstat|| "",
+              uid: empstat || "",
             }))
         : [],
     },
     {
       category: "Department",
-      filtered: employees?.length 
-        ? Array.from(
-            new Set(employees.map((e) => e.ref_departments?.name))
-          )
+      filtered: employees?.length
+        ? Array.from(new Set(employees.map((e) => e.ref_departments?.name)))
             .filter(Boolean)
             .map((dept) => ({
               key: "ref_departments.name",
@@ -153,9 +163,7 @@ const Page: React.FC = () => {
     {
       category: "Job Position",
       filtered: employees?.length
-        ? Array.from(
-            new Set(employees.map((e) => e.ref_job_classes?.name))
-          )
+        ? Array.from(new Set(employees.map((e) => e.ref_job_classes?.name)))
             .filter(Boolean)
             .map((job) => ({
               key: "ref_job_classes.name",
@@ -179,7 +187,7 @@ const Page: React.FC = () => {
 
   if (isLoading) {
     return (
-      <section className='w-full h-full flex'>
+      <section className="w-full h-full flex">
         <DataDisplay
           defaultDisplay="table"
           title="Active Employees"
@@ -187,7 +195,7 @@ const Page: React.FC = () => {
           isLoading={true}
           onTableDisplay={{
             config: TableConfigurations,
-            layout: "auto"
+            layout: "auto",
           }}
         />
       </section>
@@ -198,7 +206,7 @@ const Page: React.FC = () => {
     return <EmptyState />;
   }
   return (
-    <section className='w-full h-full flex gap-4'>
+    <section className="w-full h-full flex gap-4">
       <DataDisplay
         defaultDisplay="table"
         title="Active Employees"
@@ -210,7 +218,7 @@ const Page: React.FC = () => {
         onTableDisplay={{
           config: TableConfigurations,
           layout: "auto",
-          onRowAction: handleOnSelected
+          onRowAction: handleOnSelected,
         }}
         paginationProps={{
           data_length: employees.length,
@@ -219,17 +227,18 @@ const Page: React.FC = () => {
           searchingItemKey: ["first_name", "last_name", "email", "contact_no"],
         }}
         sortProps={sortProps}
-        onView={selectedEmployee && (
-          <div className="max-w-[500px] overflow-y-auto">
-          <ViewEmployee
-            employee={selectedEmployee}
-            onClose={() => setSelectedEmployee(null)}
-            onEmployeeUpdated={handleEmployeeUpdated}
-            sortedEmployees={employees}
-            
-          />
-          </div>
-        )}
+        onView={
+          selectedEmployee && (
+            <div className="max-w-[500px] overflow-y-auto">
+              <ViewEmployee
+                employee={selectedEmployee}
+                onClose={() => setSelectedEmployee(null)}
+                onEmployeeUpdated={handleEmployeeUpdated}
+                sortedEmployees={employees}
+              />
+            </div>
+          )
+        }
       />
     </section>
   );
