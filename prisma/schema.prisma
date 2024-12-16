@@ -576,7 +576,7 @@ model trans_overtimes {
   created_by                                                  Int?
   trans_employees_overtimes                                   trans_employees? @relation("trans_overtimes_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_overtime_employee_employee_id")
   trans_employees_overtimes_approvedBy                        trans_employees? @relation("trans_overtimes_approved_byTotrans_employees", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_overtimes_trans_employees_2")
-  trans_employees_trans_overtimes_created_byTotrans_employees trans_employees? @relation("trans_overtimes_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  trans_employees_overtimes_createdBy trans_employees? @relation("trans_overtimes_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model trans_payhead_breakdowns {

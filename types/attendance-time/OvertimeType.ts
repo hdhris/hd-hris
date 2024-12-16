@@ -18,6 +18,7 @@
 // }
 
 import { UserEmployee, UserReviewer } from "@/helper/include-emp-and-reviewr/include";
+import { Evaluations } from "../leaves/leave-evaluators-types";
 
 export type ApprovalStatusType = "pending" | "approved" | "rejected"; 
 export const approvalStatusColorMap: Record<string, "danger" | "success" | "default"> = {
@@ -47,6 +48,7 @@ export interface OvertimeEntry {
   trans_employees_overtimes_approvedBy: UserReviewer; // Approver details
   full_name: string;
   approvedBy_full_name: string;
+  evaluators: Evaluations;
 };
 
 export interface OvertimeResponse {
