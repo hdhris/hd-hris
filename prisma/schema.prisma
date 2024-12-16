@@ -256,7 +256,6 @@ model ref_departments {
   created_at      DateTime?         @db.Timestamp(6)
   updated_at      DateTime?         @db.Timestamp(6)
   deleted_at      DateTime?         @db.Timestamp(6)
-  ref_job_classes ref_job_classes[]
   trans_employees trans_employees[]
 
   @@index([deleted_at])
@@ -270,14 +269,8 @@ model ref_job_classes {
   created_at               DateTime            @db.Timestamp(6)
   updated_at               DateTime            @db.Timestamp(6)
   deleted_at               DateTime?           @db.Timestamp(6)
-  department_id            Int?
-  pay_rate                 Decimal?            @db.Decimal(10, 2)
-  basic_salary             Decimal?            @db.Decimal
-  for_probi                Boolean?
-  is_superior              Boolean             @default(false)
   max_employees            Int?
   max_department_instances Int?
-  ref_departments          ref_departments?    @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ref_job_classes_ref_departments_1")
   trans_employees          trans_employees[]
   trans_signatories        trans_signatories[]
 

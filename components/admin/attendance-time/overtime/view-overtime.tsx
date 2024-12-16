@@ -76,11 +76,11 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
         if (overtime?.evaluators?.evaluators?.length) {
             return (
                 <div className="space-y-2">
-                    {overtime.evaluators.evaluators.map((item) => {
+                    {overtime.evaluators.evaluators.map((item, index) => {
                         const isApproving =
                             item.order_number === currentEvaluatingOrderNumber && item.evaluated_by === userID;
                         return (
-                            <Card shadow="none" className="border p-2">
+                            <Card key={index} shadow="none" className="border p-2">
                                 <div className="flex flex-row justify-between items-center">
                                     <UserMail
                                         size="sm"

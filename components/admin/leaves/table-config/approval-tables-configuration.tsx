@@ -10,6 +10,7 @@ import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
 import {Tooltip} from "@nextui-org/tooltip";
 import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
 import {capitalize} from "@nextui-org/shared-utils";
+import {toGMT8} from "@/lib/utils/toGMT8";
 
 
 const ApprovalColumns: ColumnsProps[] = [{
@@ -54,10 +55,10 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
                 <Typography>{item.leave_type.name}</Typography>
             </Case>
             <Case of="start_date">
-                <Typography>{item.leave_details.start_date}</Typography>
+                <Typography>{toGMT8(item.leave_details.start_date).format("MMM DD, YYYY hh:mm a")}</Typography>
             </Case>
             <Case of="end_date">
-                <Typography>{item.leave_details.end_date}</Typography>
+                <Typography>{toGMT8(item.leave_details.end_date).format("MMM DD, YYYY hh:mm a")}</Typography>
             </Case>
             <Case of="total_days">
                 <Typography>{item.leave_details.total_days}</Typography>
