@@ -21,6 +21,9 @@ export async function GET(req: NextRequest) {
                         ref_leave_type_details: true,
                     }
                 },
+            },
+            orderBy: {
+                updated_at: 'desc'
             }
         })
         return NextResponse.json(leaves);

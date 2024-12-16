@@ -11,28 +11,34 @@ export async function GET(request: Request) {
     const overtimes = await prisma.trans_overtimes.findMany({
       where: {
         deleted_at: null,
-        trans_employees_overtimes: {
-          deleted_at: null,
-        }
       },
       orderBy: {
-        updated_at: "desc",
+        created_at: "desc",
       },
       include: {
         trans_employees_overtimes: {
           ...emp_rev_include.employee_detail
         },
-        trans_employees_overtimes_createdBy: {
+        trans_employees_overtimes_approvedBy: {
           ...emp_rev_include.reviewer_detail
         },
       },
     });
 
-    return NextResponse.json(overtimes);
+    const overtimesWithFullNames = overtimes.map((overtime) => {
+      return {
+        ...overtime,
+        full_name: getEmpFullName(overtime.trans_employees_overtimes),
+        approvedBy_full_name: getEmpFullName(
+          overtime.trans_employees_overtimes_approvedBy
+        ),
+      };
+    });
+
+    return NextResponse.json(overtimesWithFullNames);
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
-      { error },
+      { error: "Failed to fetch data" },
       { status: 500 }
     );
   }
