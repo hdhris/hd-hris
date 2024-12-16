@@ -70,7 +70,7 @@ async function getJobById(id: number) {
       deleted_at: null,
     },
     include: {
-      ref_departments: true,
+  
       trans_employees: true,
     },
   });
@@ -82,7 +82,7 @@ async function getAllJobs() {
   return await prisma.ref_job_classes.findMany({
     where: { deleted_at: null },
     include: {
-      ref_departments: true,
+   
       trans_employees: true,
     },
   });
