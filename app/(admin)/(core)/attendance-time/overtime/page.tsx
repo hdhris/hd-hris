@@ -6,16 +6,25 @@ import { useEmployeeId } from "@/hooks/employeeIdHook";
 import TableData from "@/components/tabledata/TableData";
 import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
 import ViewOvertime from "@/components/admin/attendance-time/overtime/view-overtime";
+import FileOvertime from "@/components/admin/attendance-time/overtime/file-overtime";
+import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
+import { Button } from "@nextui-org/react";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 
 function Page() {
-    const userID = useEmployeeId();
+    const [showFiling, setShowFiling] = useState(false);
+    const [viewOvertime, setViewOvertime] = useState<OvertimeEntry | null>(null);
+    SetNavEndContent(() => (
+        <Button {...uniformStyle()} onClick={() => setShowFiling(true)}>
+            File Overtime
+        </Button>
+    ));
+    
     const {
         data: overtimes,
         isLoading,
         mutate,
     } = useQuery<OvertimeEntry[]>("/api/admin/attendance-time/overtime", { refreshInterval: 60000 });
-
-    const [viewOvertime, setViewOvertime] = useState<OvertimeEntry|null>(null);
 
     const getOvertimeById = useMemo(() => {
         return (id: number) => {
@@ -25,20 +34,17 @@ function Page() {
 
     return (
         <div className="flex h-full">
-            <TableData 
+            <TableData
                 items={overtimes || []}
                 config={overtimePageConfigTable()}
                 isLoading={isLoading}
-                onRowAction={(key: React.Key)=> {
+                onRowAction={(key: React.Key) => {
                     const item = getOvertimeById(Number(key));
-                    setViewOvertime(item||null)
+                    setViewOvertime(item || null);
                 }}
             />
-            <ViewOvertime
-                onClose={()=>setViewOvertime(null)}
-                overtime={viewOvertime}
-                mutate={mutate}
-            />
+            <ViewOvertime onClose={() => setViewOvertime(null)} overtime={viewOvertime} mutate={mutate} />
+            <FileOvertime isOpen={showFiling} onClose={() => setShowFiling(false)} />
         </div>
     );
 }

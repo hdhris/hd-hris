@@ -57,7 +57,7 @@ export function overtimePageConfigTable(): TableConfigProps<OvertimeEntry> {
                         <AvatarGroup isBordered>
                             {item.evaluators.evaluators.map(evaluator => (
                                 <Tooltip key={evaluator.evaluated_by} className="cursor-pointer" content={getUserById(evaluator.evaluated_by)?.name}>
-                                    <Avatar color={
+                                    <Avatar size="sm" color={
                                         evaluator.decision.is_decided === null ? "warning" :
                                         evaluator.decision.is_decided === false ? "danger" : "success"
                                     } src={getUserById(evaluator.evaluated_by)?.picture}/>
