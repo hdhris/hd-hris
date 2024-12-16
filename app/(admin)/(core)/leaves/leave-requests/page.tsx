@@ -12,7 +12,7 @@ import {
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
 import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import {Avatar, Chip, cn, ScrollShadow, Spinner, Textarea, User} from '@nextui-org/react';
+import {Avatar, Chip, cn, ScrollShadow, Spinner, Textarea} from '@nextui-org/react';
 import Typography, {Section} from "@/components/common/typography/Typography";
 import {capitalize} from "@nextui-org/shared-utils";
 import UserMail from "@/components/common/avatar/user-info-mail";
@@ -27,7 +27,7 @@ import {HolidayData} from "@/types/attendance-time/HolidayTypes";
 import CardView from "@/components/common/card-view/card-view";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {TextAreaProps} from "@nextui-org/input";
-import {Comment, Reply} from "@/types/leaves/leave-evaluators-types";
+import {Comment} from "@/types/leaves/leave-evaluators-types";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import {v4 as uuidv4} from "uuid"
@@ -44,11 +44,10 @@ function Page() {
     const [page, setPage] = useState<number>(1)
     const [rows, setRows] = useState<number>(5)
     const [selectedRequest, setSelectedRequest] = useState<LeaveRequest>()
-    // const [reply, setReply] = useState<string | null>(null)
     const [isReplySubmit, setIsReplySubmit] = useState<boolean>(false)
     const [comment, setComment] = useState<string | null>()
-    const [commentId, setCommentId] = useState<string>()
     const [loading, setLoading] = useState<boolean>(false)
+    const [isSuccess, setIsSuccess] = useState<boolean>(false)
     const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
@@ -112,7 +111,7 @@ function Page() {
         return null
     }, [selectedRequest])
 
-    console.log("User: ", signatories?.users)
+    // console.log("User: ", signatories?.users)
 
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))
@@ -138,7 +137,7 @@ function Page() {
     })
 
 
-    console.log("Signatories: ", signatories)
+    // console.log("Signatories: ", signatories)
     const startDate = toGMT8(selectedRequest?.leave_details.start_date);
     const endDate = toGMT8(selectedRequest?.leave_details.end_date);
 
@@ -154,9 +153,8 @@ function Page() {
     }, [endDate, startDate, today])
 
     const handleOnReply = async (id: string, message: string) => {
+
         const userReply = signatories?.comments?.find(item => item.id === id)
-
-
         const submitReply: Comment = {
             ...userReply!, applicant_email: selectedRequest?.email!, leave_id: selectedRequest?.id!, replies: [{
                 id: uuidv4(),
@@ -174,7 +172,7 @@ function Page() {
                 })
                 return
             }
-            setComment("")
+            setIsSuccess(true)
         } catch (error) {
             console.log("Error: ", error)
             toast({
@@ -205,7 +203,7 @@ function Page() {
                 })
                 return
             }
-            setComment("")
+            setIsSuccess(true)
         } catch (error) {
             console.log("Error: ", error)
             toast({
@@ -304,20 +302,25 @@ function Page() {
                         },]}/>
 
                         <hr className="border border-default-400 space-y-2"/>
-                        <Section className="ms-0" title="Comment" subtitle="Comment of employee in regard to leave request."/>
-
+                        {signatories?.users?.some(user => Number(user.id) === session.data?.user.employee_id) && <>
+                            <Section className="ms-0" title="Comment"
+                                     subtitle="Comment of employee in regard to leave request."/>
                             <Comments
+                                isSendingReply={isReplySubmit}
+                                isSendingComment={loading}
                                 comments={selectedRequest.evaluators.comments}
                                 users={selectedRequest.evaluators.users}
                                 onComment={async (value) => {
-                                    console.log("Comment: ", value)
                                     await handleOnSend(value)
                                 }}
+                                isClearableComment
+                                isClearableReply
                                 onReply={async (value, reply) => {
-                                    console.log("Reply: ", value)
                                     await handleOnReply(value, reply)
                                 }}
                             />
+                            <hr className="border border-default-400 space-y-2"/>
+                        </>}
                         {/*<ScrollShadow size={20} className="min-h-32 max-h-72">*/}
                         {/*    <div className="flex flex-col gap-10 h-full mb-4">*/}
 {/*/!*                                {selectedRequest.evaluators.comments.map(comment => {*!/*/}
@@ -437,9 +440,7 @@ function Page() {
 {/*                                              setComment(value)*/}
 {/*                                          }}/>*/}
 {/*                        </div>*/}
-                        <hr className="border border-default-400 space-y-2"/>
-                        <Section className="ms-0" title="Reason" subtitle="Reason of employee in regard to leave request
-            ."/>
+                        <Section className="ms-0" title="Reason" subtitle="Reason of employee in regard to leave request."/>
                         <BorderCard className="h-36">
                             <ScrollShadow size={20}>
                                 <Typography className="indent-4 text-sm">

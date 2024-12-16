@@ -1,4 +1,4 @@
-import React, {Fragment, useState} from 'react';
+import React, {Fragment, useCallback, useState} from 'react';
 import {Avatar, cn, ScrollShadow, Spinner, Textarea, User} from "@nextui-org/react";
 import Typography from "@/components/common/typography/Typography";
 import {capitalize} from "@nextui-org/shared-utils";
@@ -10,24 +10,46 @@ import {icon_color, icon_size_sm} from "@/lib/utils";
 import {Comment, Reply, User as UserEvaluator} from "@/types/leaves/leave-evaluators-types";
 import {TextAreaProps} from "@nextui-org/input";
 
-interface CommentsProps{
+interface CommentsProps {
     comments: Comment[],
     users: UserEvaluator[]
     onComment: (comment: string) => void
     onReply: (id: string, message: string) => void
+    isClearableComment?: boolean
+    isClearableReply?: boolean
+    isSendingReply?: boolean
+    isSendingComment?: boolean
 }
-function Comments({comments, users, onComment, onReply}: CommentsProps) {
+
+function Comments({
+                      comments,
+                      users,
+                      onComment,
+                      onReply,
+                      isClearableComment,
+                      isClearableReply,
+                      isSendingReply,
+                      isSendingComment
+                  }: CommentsProps) {
     const [reply, setReply] = useState<string | null>(null)
-    // const [isReplySubmit, setIsReplySubmit] = useState<boolean>(false)
     const [comment, setComment] = useState<string | null>()
     const [commentId, setCommentId] = useState<string>()
 
+    const handleOnClearReply = useCallback(() => {
+        if (isClearableReply) setReply("")
+    }, [isClearableReply])
+    const handleOnClearComment = useCallback(() => {
+        if (isClearableComment) setComment("")
+    }, [isClearableComment])
     return (
         <>
             <ScrollShadow size={20} className="min-h-32 max-h-72">
                 <div className="flex flex-col gap-10 h-full mb-4">
                     {comments.map(comment => {
-                        const commenters = users.filter(commenter => Number(commenter.id) === Number(comment.author)).map(({id, ...rest}) => ({id: Number(id), ...rest}))
+                        const commenters = users.filter(commenter => Number(commenter.id) === Number(comment.author)).map(({
+                                                                                                                               id,
+                                                                                                                               ...rest
+                                                                                                                           }) => ({id: Number(id), ...rest}))
 
                         const uniqueIds = new Set(commenters.map(user => user.id));
                         const hasDuplicates = uniqueIds.size !== commenters.length;
@@ -122,10 +144,15 @@ function Comments({comments, users, onComment, onReply}: CommentsProps) {
                                             placeholder="Reply..."
                                             // isSending={isReplySubmit}
                                             value={reply || ""}
-                                            onSend={() => onReply(comment_thread.id, reply!)}
+                                            onSend={() => {
+                                                onReply(comment_thread.id, reply!)
+                                                handleOnClearReply()
+                                            }}
                                             onValueChange={(value) => {
                                                 setReply(value);
                                             }}
+                                            disabled={!reply}
+                                            isSending={isSendingReply}
                                         />
                                     </div>}
                                 </div>
@@ -137,11 +164,17 @@ function Comments({comments, users, onComment, onReply}: CommentsProps) {
             </ScrollShadow>
             <div className="flex gap-2 items-center">
                 <CommentInput
-                              onSend={onComment.bind(null, comment!)}
-                              value={comment!}
-                              onValueChange={(value) => {
-                                  setComment(value)
-                              }}/>
+                    isSending={isSendingComment}
+                    onSend={() => {
+                        onComment(comment!)
+                        handleOnClearComment()
+                    }}
+                    value={comment!}
+                    disabled={!comment}
+                    onValueChange={(value) => {
+                        setComment(value)
+                    }}/>
+
             </div>
         </>
     );
@@ -153,9 +186,10 @@ interface CommentInputProps extends TextAreaProps {
     onSend?: () => void,
     isSending?: boolean
     placeholder?: string
+    disabled?: boolean
 }
 
-const CommentInput = ({onSend, isSending, placeholder, ...rest}: CommentInputProps) => {
+const CommentInput = ({onSend, isSending, placeholder, disabled, ...rest}: CommentInputProps) => {
     const session = useSession()
     return (<div className="flex gap-2 w-full">
         <Avatar
@@ -170,7 +204,7 @@ const CommentInput = ({onSend, isSending, placeholder, ...rest}: CommentInputPro
                   placeholder={placeholder || "Add comment..."}
                   {...rest}
         />
-        <Button variant="light" isIconOnly size="sm" className="self-end" onClick={onSend}>
+        <Button variant="light" isIconOnly size="sm" className="self-end" onClick={onSend} isDisabled={disabled}>
             {isSending ? <Spinner size="sm"/> : <LuSendHorizonal
                 className={cn(icon_size_sm, icon_color)}
             />}

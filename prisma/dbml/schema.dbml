@@ -236,6 +236,7 @@ Table ref_job_classes {
   for_probi Boolean
   is_superior Boolean [not null, default: false]
   max_employees Int
+  max_department_instances Int
   ref_departments ref_departments
   trans_employees trans_employees [not null]
   trans_signatories trans_signatories [not null]
@@ -514,7 +515,7 @@ Table trans_overtimes {
   created_by Int
   trans_employees_overtimes trans_employees
   trans_employees_overtimes_approvedBy trans_employees
-  trans_employees_trans_overtimes_created_byTotrans_employees trans_employees
+  trans_employees_overtimes_createdBy trans_employees
 }
 
 Table trans_payhead_breakdowns {
@@ -821,6 +822,9 @@ Table ref_notification_types {
   type_name String [not null]
   description String [not null]
   trans_notifications trans_notifications [not null]
+
+  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Table trans_notifications {
@@ -835,6 +839,9 @@ Table trans_notifications {
   sys_notifications sys_notifications [not null]
   ref_notification_types ref_notification_types [not null]
   trans_users trans_users [not null]
+
+  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Ref: dim_employee_benefits.plan_id > ref_benefit_plans.id [delete: No Action]

@@ -490,7 +490,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             setIsSubmitting(false); // Ensure the loading state is cleared
         }
 
-    }, [calculateLeaveDeduction, documentAttachments, employee?.id, employee_leave_type, form, handleModalOpen, isAttachmentRequired, toast, url, user?.employees])
+    }, [calculateLeaveDeduction, documentAttachments, employee?.id, employee_leave_type, isAttachmentRequired, toast, url, user?.employees])
 
 
     const LeaveRequestForm: FormInputProps[] = [{

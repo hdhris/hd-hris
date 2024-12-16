@@ -2,11 +2,11 @@ import prisma from "@/prisma/prisma";
 import {employee_basic_details} from "@/server/employee-details-map/employee-details-map";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {Evaluator} from "@/types/leaves/leave-evaluators-types";
+import {getEmpFullName} from "@/lib/utils/nameFormatter";
 
 export const getSignatory = async (path: string, applicant_id: number, is_auto_approved: boolean) => {
     try {
-        const [signatories, applicant] = await Promise.all([
-            prisma.trans_signatories.findMany({
+        const [signatories, applicant] = await Promise.all([prisma.trans_signatories.findMany({
             where: {
                 ref_signatory_paths: {
                     signatories_path: path
@@ -14,8 +14,7 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
             }, include: {
                 ref_signatory_paths: true, ref_signatory_roles: true, ref_job_classes: true
             },
-        }),
-        prisma.trans_employees.findUnique({
+        }), prisma.trans_employees.findUnique({
             where: {
                 id: applicant_id, deleted_at: null
             }, select: {
@@ -87,10 +86,10 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
             },
         });
 
-        const result = {
+        const data = {
             users: [...employeeDetails.map((employee) => ({
                 id: String(employee.id),
-                name: `${employee.first_name} ${employee.last_name}`,
+                name: getEmpFullName(employee),
                 email: employee.email,
                 picture: employee.picture,
                 employee_id: employee.id,
@@ -101,7 +100,7 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
             })),
                 {
                     id: applicant.id,
-                    name: `${applicant.first_name} ${applicant.last_name}`,
+                    name: getEmpFullName(applicant),
                     email: applicant.email,
                     picture: applicant.picture,
                     role: "applicant",
@@ -140,8 +139,8 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
             is_automatic_approved: is_auto_approved,
         }
 
-        return result
-
+        console.log("Data: ", data)
+        return data
     } catch (error) {
         console.log("Error: ", error)
         return null
