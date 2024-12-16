@@ -27,11 +27,12 @@ import {HolidayData} from "@/types/attendance-time/HolidayTypes";
 import CardView from "@/components/common/card-view/card-view";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {TextAreaProps} from "@nextui-org/input";
-import {Comment} from "@/types/leaves/leave-evaluators-types";
+import {Comment, Reply} from "@/types/leaves/leave-evaluators-types";
 import {axiosInstance} from "@/services/fetcher";
 import {useToast} from "@/components/ui/use-toast";
 import {v4 as uuidv4} from "uuid"
 import {isEqual} from "lodash";
+import Comments from "@/components/common/comments/comments";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -43,7 +44,7 @@ function Page() {
     const [page, setPage] = useState<number>(1)
     const [rows, setRows] = useState<number>(5)
     const [selectedRequest, setSelectedRequest] = useState<LeaveRequest>()
-    const [reply, setReply] = useState<string | null>(null)
+    // const [reply, setReply] = useState<string | null>(null)
     const [isReplySubmit, setIsReplySubmit] = useState<boolean>(false)
     const [comment, setComment] = useState<string | null>()
     const [commentId, setCommentId] = useState<string>()
@@ -98,7 +99,7 @@ function Page() {
 
     const signatories = useMemo(() => {
         if (selectedRequest) {
-            const users = selectedRequest?.evaluators.users
+            const users = selectedRequest?.evaluators.users.map(({id, ...rest}) => ({id: Number(id), ...rest}))
             const comments = selectedRequest?.evaluators.comments.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
             // Extract `comment_content` in the same order as `comments`
             const comment_content = comments?.map((comment) => users?.find((user) => Number(user.id) === Number(comment.author))!).filter(Boolean)!; // Filter out any undefined users (in case no match is found)
@@ -110,6 +111,8 @@ function Page() {
         }
         return null
     }, [selectedRequest])
+
+    console.log("User: ", signatories?.users)
 
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))
@@ -150,7 +153,7 @@ function Page() {
         }
     }, [endDate, startDate, today])
 
-    const handleOnReply = async (id: string) => {
+    const handleOnReply = async (id: string, message: string) => {
         const userReply = signatories?.comments?.find(item => item.id === id)
 
 
@@ -158,7 +161,7 @@ function Page() {
             ...userReply!, applicant_email: selectedRequest?.email!, leave_id: selectedRequest?.id!, replies: [{
                 id: uuidv4(),
                 author: String(session.data?.user.employee_id),
-                message: reply!,
+                message: message,
                 timestamp: toGMT8().toISOString()
             }]
         }
@@ -303,111 +306,137 @@ function Page() {
                         <hr className="border border-default-400 space-y-2"/>
                         <Section className="ms-0" title="Comment" subtitle="Comment of employee in regard to leave request."/>
 
-                        <ScrollShadow size={20} className="min-h-32 max-h-72">
-                            <div className="flex flex-col gap-10 h-full mb-4">
-                                {selectedRequest.evaluators.comments.map(comment => {
-                                    const commenters = selectedRequest.evaluators.users.filter(commenter => Number(commenter.id) === Number(comment.author))
-                                    const comments = commenters.map(item => ({
-                                        ...item, ...comment
-                                    }))
+                            <Comments
+                                comments={selectedRequest.evaluators.comments}
+                                users={selectedRequest.evaluators.users}
+                                onComment={async (value) => {
+                                    console.log("Comment: ", value)
+                                    await handleOnSend(value)
+                                }}
+                                onReply={async (value, reply) => {
+                                    console.log("Reply: ", value)
+                                    await handleOnReply(value, reply)
+                                }}
+                            />
+                        {/*<ScrollShadow size={20} className="min-h-32 max-h-72">*/}
+                        {/*    <div className="flex flex-col gap-10 h-full mb-4">*/}
+{/*/!*                                {selectedRequest.evaluators.comments.map(comment => {*!/*/}
+{/*/!*                                    const commenters = selectedRequest.evaluators.users.filter(commenter => Number(commenter.id) === Number(comment.author)).map(({id, ...rest}) => ({id: Number(id), ...rest}))*!/*/}
 
+{/*/!*                                    const uniqueIds = new Set(commenters.map(user => user.id));*!/*/}
+{/*/!*                                    const hasDuplicates = uniqueIds.size !== commenters.length;*!/*/}
 
-                                    return (<Fragment key={comment.id}>{comments.map(comment_thread => {
-                                        return (<div key={comment_thread.id} className="flex flex-col gap-2">
-                                                <User
-                                                    className="justify-start p-2"
-                                                    name={<Typography
-                                                        className="text-sm font-semibold">{comment_thread.name}</Typography>}
-                                                    description={<Typography
-                                                        className="text-sm font-semibold !text-default-400/75">
-                                                        {capitalize(comment_thread.role)}
-                                                    </Typography>}
-                                                    avatarProps={{
-                                                        src: comment_thread.picture,
-                                                        classNames: {base: '!size-6'},
-                                                        isBordered: true,
-                                                    }}
-                                                />
+{/*// Step 2: If there are duplicates, filter by role "approver"*/}
+{/*/!*                                    let result;*!/*/}
+{/*/!*                                    if (hasDuplicates) {*!/*/}
+{/*/!*                                        const uniqueApproversSet = new Map();*!/*/}
+{/*/!*                                        commenters*!/*/}
+{/*/!*                                            .filter(user => user.role === "approver")*!/*/}
+{/*/!*                                            .forEach(user => uniqueApproversSet.set(user.id, user));*!/*/}
+{/*/!*                                        result = Array.from(uniqueApproversSet.values());*!/*/}
+{/*/!*                                    } else {*!/*/}
+{/*/!*                                        result = commenters; // No duplicates, return as is*!/*/}
+{/*/!*                                    }*!/*/}
 
-                                                <div className="flex flex-col gap-2 ml-2">
-                                                    <Typography
-                                                        className="text-medium indent-4">{comment_thread.message}</Typography>
-                                                    <div className="flex gap-2">
-                                                        <Typography
-                                                            className="text-sm !text-default-400/75">{toGMT8(comment_thread.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
-                                                        <Typography
-                                                            className="text-sm font-semibold cursor-pointer !text-default-400/75"
-                                                            onClick={() => {
-                                                                setCommentId(comment_thread.id)
-                                                                setReply("")
-                                                            }}>Reply</Typography>
-                                                    </div>
-                                                </div>
-                                                {comment_thread.replies.map(replies => {
-                                                    const replier = selectedRequest.evaluators.users.filter(item => Number(item.id) === Number(replies.author))
-                                                    const reply = replier.map(item => ({
-                                                        ...item, ...replies
-                                                    }))
-                                                    return (reply.map(reply => {
-                                                        return (<div key={replies.id} className="ms-10 my-3">
-                                                            <User
-                                                                className="justify-start p-2"
-                                                                name={<Typography
-                                                                    className="text-sm font-semibold">{reply.name}</Typography>}
-                                                                description={<Typography
-                                                                    className="text-sm font-semibold !text-default-400/75">
-                                                                    {capitalize(reply.role)}
-                                                                </Typography>}
-                                                                avatarProps={{
-                                                                    src: reply.picture,
-                                                                    classNames: {base: '!size-6'},
-                                                                    isBordered: true,
-                                                                }}
-                                                            />
-                                                            <div className="flex flex-col gap-2 ml-4">
-                                                                <Typography
-                                                                    className="text-medium indent-4">{replies.message}</Typography>
-                                                                <div className="flex gap-2">
-                                                                    <Typography
-                                                                        className="text-sm !text-default-400/75">{toGMT8(replies.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>
-                                                                    <Typography
-                                                                        className="text-sm font-semibold cursor-pointer !text-default-400/75"
-                                                                        onClick={() => {
-                                                                            setCommentId(comment_thread.id)
-                                                                            setReply("")
-                                                                        }}>Reply</Typography>
-                                                                </div>
+{/*/!*                                    const comments = result.map(item => ({*!/*/}
+{/*/!*                                        ...item, ...comment*!/*/}
+{/*/!*                                    }))*!/*/}
+{/*/!*                                    return (<Fragment key={comment.id}>{comments.map(comment_thread => {*!/*/}
+{/*/!*                                        return (<div key={comment_thread.id} className="flex flex-col gap-2">*!/*/}
+{/*/!*                                                <User*!/*/}
+{/*/!*                                                    className="justify-start p-2"*!/*/}
+{/*/!*                                                    name={<Typography*!/*/}
+{/*/!*                                                        className="text-sm font-semibold">{comment_thread.name}</Typography>}*!/*/}
+{/*/!*                                                    description={<Typography*!/*/}
+{/*/!*                                                        className="text-sm font-semibold !text-default-400/75">*!/*/}
+{/*/!*                                                        {capitalize(comment_thread.role)}*!/*/}
+{/*/!*                                                    </Typography>}*!/*/}
+{/*/!*                                                    avatarProps={{*!/*/}
+{/*/!*                                                        src: comment_thread.picture,*!/*/}
+{/*/!*                                                        classNames: {base: '!size-6'},*!/*/}
+{/*/!*                                                        isBordered: true,*!/*/}
+{/*/!*                                                    }}*!/*/}
+{/*/!*                                                />*!/*/}
 
-                                                            </div>
-                                                        </div>)
-                                                    }))
-                                                })}
-                                                {commentId === comment_thread.id && <div className="ms-10">
-                                                    <CommentInput
-                                                        placeholder="Reply..."
-                                                        isSending={isReplySubmit}
-                                                        value={reply || ""}
-                                                        onSend={handleOnReply.bind(null, comment_thread.id)}
-                                                        onValueChange={(value) => {
-                                                            setReply(value);
-                                                        }}
-                                                    />
-                                                </div>}
-                                            </div>
+{/*/!*                                                <div className="flex flex-col gap-2 ml-2">*!/*/}
+{/*/!*                                                    <Typography*!/*/}
+{/*/!*                                                        className="text-medium indent-4">{comment_thread.message}</Typography>*!/*/}
+{/*/!*                                                    <div className="flex gap-2">*!/*/}
+{/*/!*                                                        <Typography*!/*/}
+{/*/!*                                                            className="text-sm !text-default-400/75">{toGMT8(comment_thread.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>*!/*/}
+{/*/!*                                                        <Typography*!/*/}
+{/*/!*                                                            className="text-sm font-semibold cursor-pointer !text-default-400/75"*!/*/}
+{/*/!*                                                            onClick={() => {*!/*/}
+{/*/!*                                                                setCommentId(comment_thread.id)*!/*/}
+{/*/!*                                                                setReply("")*!/*/}
+{/*/!*                                                            }}>Reply</Typography>*!/*/}
+{/*/!*                                                    </div>*!/*/}
+{/*/!*                                                </div>*!/*/}
+{/*/!*                                                {comment_thread.replies.map((replies: Reply) => {*!/*/}
+{/*/!*                                                    const replier = selectedRequest.evaluators.users.filter(item => Number(item.id) === Number(replies.author))*!/*/}
+{/*/!*                                                    const reply = replier.map(item => ({*!/*/}
+{/*/!*                                                        ...item, ...replies*!/*/}
+{/*/!*                                                    }))*!/*/}
+{/*/!*                                                    return (reply.map(reply => {*!/*/}
+{/*/!*                                                        return (<div key={replies.id} className="ms-10 my-3">*!/*/}
+{/*/!*                                                            <User*!/*/}
+{/*/!*                                                                className="justify-start p-2"*!/*/}
+{/*/!*                                                                name={<Typography*!/*/}
+{/*/!*                                                                    className="text-sm font-semibold">{reply.name}</Typography>}*!/*/}
+{/*/!*                                                                description={<Typography*!/*/}
+{/*/!*                                                                    className="text-sm font-semibold !text-default-400/75">*!/*/}
+{/*/!*                                                                    {capitalize(reply.role)}*!/*/}
+{/*/!*                                                                </Typography>}*!/*/}
+{/*/!*                                                                avatarProps={{*!/*/}
+{/*/!*                                                                    src: reply.picture,*!/*/}
+{/*/!*                                                                    classNames: {base: '!size-6'},*!/*/}
+{/*/!*                                                                    isBordered: true,*!/*/}
+{/*/!*                                                                }}*!/*/}
+{/*/!*                                                            />*!/*/}
+{/*/!*                                                            <div className="flex flex-col gap-2 ml-4">*!/*/}
+{/*/!*                                                                <Typography*!/*/}
+{/*/!*                                                                    className="text-medium indent-4">{replies.message}</Typography>*!/*/}
+{/*/!*                                                                <div className="flex gap-2">*!/*/}
+{/*/!*                                                                    <Typography*!/*/}
+{/*/!*                                                                        className="text-sm !text-default-400/75">{toGMT8(replies.timestamp).format("MM/DD/YYYY hh:mm A")}</Typography>*!/*/}
+{/*/!*                                                                    <Typography*!/*/}
+{/*/!*                                                                        className="text-sm font-semibold cursor-pointer !text-default-400/75"*!/*/}
+{/*/!*                                                                        onClick={() => {*!/*/}
+{/*/!*                                                                            setCommentId(comment_thread.id)*!/*/}
+{/*/!*                                                                            setReply("")*!/*/}
+{/*/!*                                                                        }}>Reply</Typography>*!/*/}
+{/*/!*                                                                </div>*!/*/}
 
-                                        )
-                                    })}</Fragment>)
-                                })}
-                            </div>
-                        </ScrollShadow>
-                        <div className="flex gap-2 items-center">
-                            <CommentInput isSending={loading}
-                                          onSend={handleOnSend.bind(null, comment!)}
-                                          value={comment!}
-                                          onValueChange={(value) => {
-                                              setComment(value)
-                                          }}/>
-                        </div>
+{/*/!*                                                            </div>*!/*/}
+{/*/!*                                                        </div>)*!/*/}
+{/*/!*                                                    }))*!/*/}
+{/*/!*                                                })}*!/*/}
+{/*/!*                                                {commentId === comment_thread.id && <div className="ms-10">*!/*/}
+{/*/!*                                                    <CommentInput*!/*/}
+{/*/!*                                                        placeholder="Reply..."*!/*/}
+{/*/!*                                                        isSending={isReplySubmit}*!/*/}
+{/*/!*                                                        value={reply || ""}*!/*/}
+{/*/!*                                                        onSend={handleOnReply.bind(null, comment_thread.id)}*!/*/}
+{/*/!*                                                        onValueChange={(value) => {*!/*/}
+{/*/!*                                                            setReply(value);*!/*/}
+{/*/!*                                                        }}*!/*/}
+{/*/!*                                                    />*!/*/}
+{/*/!*                                                </div>}*!/*/}
+{/*/!*                                            </div>*!/*/}
+
+{/*/!*                                        )*!/*/}
+{/*/!*                                    })}</Fragment>)*!/*/}
+{/*/!*                                })}*!/*/}
+{/*                            </div>*/}
+{/*                        </ScrollShadow>*/}
+{/*                        <div className="flex gap-2 items-center">*/}
+{/*                            <CommentInput isSending={loading}*/}
+{/*                                          onSend={handleOnSend.bind(null, comment!)}*/}
+{/*                                          value={comment!}*/}
+{/*                                          onValueChange={(value) => {*/}
+{/*                                              setComment(value)*/}
+{/*                                          }}/>*/}
+{/*                        </div>*/}
                         <hr className="border border-default-400 space-y-2"/>
                         <Section className="ms-0" title="Reason" subtitle="Reason of employee in regard to leave request
             ."/>

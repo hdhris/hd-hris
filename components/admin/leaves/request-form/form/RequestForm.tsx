@@ -448,19 +448,19 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
                 });
 
                 // Reset the form and close the modal if necessary
-                form.reset({
-                    employee_id: 0,
-                    reason: "",
-                    leave_type_id: 0, // Ensure the leave_type_id has a default value
-                    leave_date_range: {
-                        start: "",
-                        end: ""
-                    }
-                });
-
-                handleModalOpen(false)
-                setDocumentAttachments([])
-                setUrl([])
+                // form.reset({
+                //     employee_id: 0,
+                //     reason: "",
+                //     leave_type_id: 0, // Ensure the leave_type_id has a default value
+                //     leave_date_range: {
+                //         start: "",
+                //         end: ""
+                //     }
+                // });
+                //
+                // handleModalOpen(false)
+                // setDocumentAttachments([])
+                // setUrl([])
 
                 if (employee?.id) {
                     setIsModalOpen(false);

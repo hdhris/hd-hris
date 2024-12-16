@@ -1,7 +1,8 @@
 "use client"
 import React, {Key, useCallback, useEffect, useMemo, useState} from 'react';
 import {
-    filterLeaveTypes, LeaveTypeTableConfiguration
+    filterLeaveTypes,
+    LeaveTypeTableConfiguration
 } from "@/components/admin/leaves/leave-types/display/table/config/leave-type-table-config";
 import {usePaginateQuery} from "@/services/queries";
 import {LeaveRequestPaginate, LeaveType} from "@/types/leaves/LeaveTypes";
@@ -9,7 +10,6 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import LeaveTypeForm from "@/components/admin/leaves/leave-types/form/LeaveTypeForm";
 import Typography from "@/components/common/typography/Typography";
-import {Selection} from "@nextui-org/react";
 import {getColor} from "@/helper/background-color-generator/generator";
 import {Chip} from "@nextui-org/chip";
 import {Button} from "@nextui-org/button";
@@ -25,6 +25,8 @@ import EmployeesAvatar from "@/components/common/avatar/employees-avatar";
 import CardTable from "@/components/common/card-view/card-table";
 import {capitalize} from "@nextui-org/shared-utils";
 import {AxiosError} from "axios";
+import Head from 'next/head';
+import useDocumentTitle from "@/hooks/useDocumentTitle";
 
 
 function LeaveTypeTable() {
@@ -36,6 +38,7 @@ function LeaveTypeTable() {
     const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/leave-types", page, rows, {
         refreshInterval: 3000
     });
+    useDocumentTitle("Manage Leave Types")
     const leaveData = useMemo(() => {
         if (!data?.data) {
             return []
@@ -122,7 +125,7 @@ function LeaveTypeTable() {
     // }
 
 
-    return (
+    return (<>
         <DataDisplay
             title="Leave Types"
             data={leaveData}
@@ -149,9 +152,7 @@ function LeaveTypeTable() {
                 loop: true, data_length: data?.totalItems!, onChange: setPage
             }}
             onTableDisplay={{
-                config: LeaveTypeTableConfiguration,
-                onRowAction: handleRowKey,
-                layout: "auto"
+                config: LeaveTypeTableConfiguration, onRowAction: handleRowKey, layout: "auto"
             }}
 
 
@@ -166,13 +167,13 @@ function LeaveTypeTable() {
             //     }
             // }}
             onView={<LeaveTypesDetails {...leaveType!} onClose={() => setLeaveType(undefined)}/>}
-            defaultDisplay="table"/>);
+            defaultDisplay="table"/></>);
 }
 
 export default LeaveTypeTable;
 
 
-const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void}) => {
+const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => void }) => {
     const {toast} = useToast()
     const curr_emp = props.current_employees
     const [editOpen, setEditOpen] = useState<boolean>(false)
@@ -205,33 +206,30 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
         })
 
         const deletedIds = {
-            leave_type_id: props.id,
-            employee_status_id: props.applicable_to_employee_types.id
+            leave_type_id: props.id, employee_status_id: props.applicable_to_employee_types.id
         }
 
         if (res === "yes") {
             setLoading(true)
-            try{
+            try {
                 const res = await axiosInstance.post('/api/admin/leaves/leave-types/delete', deletedIds)
                 if (res.status !== 200) {
                     toast({
                         title: "Error", description: res.data.message, variant: "danger",
                     })
                 }
-            }catch (error){
+            } catch (error) {
                 console.log(error)
-                if(error instanceof Error) {
+                if (error instanceof Error) {
                     toast({
                         title: "Error", description: error.message, variant: "danger",
                     })
-                } else if(error instanceof AxiosError){
+                } else if (error instanceof AxiosError) {
                     toast({
                         title: "Error", description: error.response?.data.message, variant: "danger",
                     })
                 }
             }
-
-
 
 
         }
@@ -270,31 +268,29 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & {onClose: () => void
                     </Typography>
                 </div>
             </div>}
-            body={
-            <CardTable data={[
-            //     {
-            //     label: "Minimum Days", value: pluralize(props.min_duration, "day")
-            // },
+            body={<CardTable data={[//     {
+                //     label: "Minimum Days", value: pluralize(props.min_duration, "day")
+                // },
                 {label: "Maximum Days", value: pluralize(props.max_duration, "day")}, {
-                label: "Applicable for", value: capitalize(props.applicable_to_employee_types.name)
-            }, {
-                label: "Current Usage", value: <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>
-            },{
-                label: "Leave Compensation Status", value: props.paid_leave ? "Paid Leave" : "Unpaid Leave"
-            },{
-                label: "Attachment Status", value: props.attachment_required ? "Required" : "Not Required"
-            },{
-                label: "Created At", value: props.created_at
-            },{
-                label: "Updated At", value: props.updated_at
-            },]}/>
-        } footer={<></>}/>}
+                    label: "Applicable for", value: capitalize(props.applicable_to_employee_types.name)
+                }, {
+                    label: "Current Usage",
+                    value: <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>
+                }, {
+                    label: "Leave Compensation Status", value: props.paid_leave ? "Paid Leave" : "Unpaid Leave"
+                }, {
+                    label: "Attachment Status", value: props.attachment_required ? "Required" : "Not Required"
+                }, {
+                    label: "Created At", value: props.created_at
+                }, {
+                    label: "Updated At", value: props.updated_at
+                },]}/>} footer={<></>}/>}
 
-            <LeaveTypeForm
-                isOpen={editOpen}
-                onOpen={setEditOpen}
-                data={data}
-                title="Update Leave Type"
-                description="Kindly update the details for the leave type provided below."/>
+        <LeaveTypeForm
+            isOpen={editOpen}
+            onOpen={setEditOpen}
+            data={data}
+            title="Update Leave Type"
+            description="Kindly update the details for the leave type provided below."/>
     </>)
 }

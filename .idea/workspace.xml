@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="adding onView In DataDisplay v1">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/common/data-display/controls/data-display-control.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/data-display/controls/data-display-control.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/util/search.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/util/search.tsx" afterDir="false" />
-    </list>
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="destructuring comments.tsx" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -18,8 +13,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript File" />
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
@@ -61,12 +56,12 @@
       </RecentBranches>
     </option>
   </component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Xero-John/HD-HRIS.git",
-    "accountId": "834de9a5-5f9a-4fe1-b241-c4e75a4cbf0b"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Xero-John/HD-HRIS.git&quot;,
+    &quot;accountId&quot;: &quot;834de9a5-5f9a-4fe1-b241-c4e75a4cbf0b&quot;
   }
-}]]></component>
+}</component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -178,23 +173,8 @@
       <workItem from="1733874734453" duration="68789000" />
       <workItem from="1734002364762" duration="24911000" />
       <workItem from="1734098410028" duration="9815000" />
-      <workItem from="1734230093858" duration="19164000" />
-    </task>
-    <task id="LOCAL-00006" summary="adding email-services.ts">
-      <option name="closed" value="true" />
-      <created>1732372307873</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1732372307873</updated>
-    </task>
-    <task id="LOCAL-00007" summary="adding an alert message to the leave credit form">
-      <option name="closed" value="true" />
-      <created>1732374837862</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1732374837862</updated>
+      <workItem from="1734230093858" duration="31307000" />
+      <workItem from="1734313213738" duration="325000" />
     </task>
     <task id="LOCAL-00008" summary="fixing leave RequestForm.tsx">
       <option name="closed" value="true" />
@@ -572,7 +552,23 @@
       <option name="project" value="LOCAL" />
       <updated>1734270744353</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="adding onView In DataDisplay v2">
+      <option name="closed" value="true" />
+      <created>1734271489504</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1734271489504</updated>
+    </task>
+    <task id="LOCAL-00056" summary="destructuring comments.tsx">
+      <option name="closed" value="true" />
+      <created>1734313402065</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1734313402065</updated>
+    </task>
+    <option name="localTasksCounter" value="57" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -601,8 +597,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixing route in payelip" />
-    <MESSAGE value="final fix" />
     <MESSAGE value="final fix v2" />
     <MESSAGE value="fixing leave types, and adding logger" />
     <MESSAGE value="adding indexes in schema.prisma" />
@@ -626,6 +620,8 @@
     <MESSAGE value="Merge remote-tracking branch 'github/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="adding onView In DataDisplay" />
     <MESSAGE value="adding onView In DataDisplay v1" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding onView In DataDisplay v1" />
+    <MESSAGE value="adding onView In DataDisplay v2" />
+    <MESSAGE value="destructuring comments.tsx" />
+    <option name="LAST_COMMIT_MESSAGE" value="destructuring comments.tsx" />
   </component>
 </project>

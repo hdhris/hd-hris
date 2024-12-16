@@ -21,7 +21,7 @@ export default function DateComponent({ onClockShow }: Props) {
         const updateDate = () =>
             setDate(
                 dayjs()
-                    .format(`DD MMM YYYY ddd ${onClockShow ? "hh:mm A" : "HH:mm"}`)
+                    .format(`DD MMM YYYY ddd ${onClockShow ? "hh:mm A" : "hh:mm A"}`)
                     .split(" ")
             );
         updateDate(); // Set initial date
@@ -59,6 +59,9 @@ export default function DateComponent({ onClockShow }: Props) {
                             </Typography>
                             <Typography className="font-semibold text-2xl">
                                 {date[4].split(":")[1]}
+                            </Typography>
+                            <Typography className="font-semibold text-lg">
+                                {date[5]}
                             </Typography>
                         </div>
                     </div>

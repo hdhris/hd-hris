@@ -48,20 +48,20 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        if (data.total_days <= 0) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Invalid days of leave.",
-                },
-                { status: 404 }
-            );
-        }
+        // if (data.total_days <= 0) {
+        //     return NextResponse.json(
+        //         {
+        //             success: false,
+        //             message: "Invalid days of leave.",
+        //         },
+        //         { status: 404 }
+        //     );
+        // }
 
         const signatory = await getSignatory(
             "/leaves/leave-requests",
             validate.data.employee_id,
-            true
+            false
         );
 
         if (!signatory) {
@@ -140,51 +140,51 @@ export async function POST(req: NextRequest) {
         }
 
         // Start the transaction
-        await prisma.$transaction(
-            async (tx) => {
-                // Create a leave record
-                const leaveRecord = {
-                    employee_id: validate.data.employee_id,
-                    start_date: toGMT8(
-                        validate.data.leave_date_range.start
-                    ).toISOString(),
-                    end_date: toGMT8(
-                        validate.data.leave_date_range.end
-                    ).toISOString(),
-                    reason: validate.data.reason,
-                    leave_type_id: validate.data.leave_type_id,
-                    created_at: toGMT8().toISOString(),
-                    updated_at: toGMT8().toISOString(),
-                    created_by: Number(session?.user.employee_id),
-                    status: "Approved",
-                    total_days: usedLeaveCredit, // mins to day
-                    evaluators: signatory as unknown as InputJsonValue,
-                    files: attachmentLinks.url,
-                };
-
-                // Create leave request in the database
-                await tx.trans_leaves.create({
-                    data: leaveRecord,
-                });
-
-                // Update the leave balance
-                await tx.dim_leave_balances.update({
-                    where: {
-                        id: leaveBalance.id,
-                    },
-                    data: {
-                        remaining_days: remainingLeaveCredit,
-                        used_days: {
-                            increment: usedLeaveCredit
-                        },
-                        updated_at: new Date(),
-                    },
-                });
-            },
-            {
-                timeout: 10000, // Set the timeout to 10 seconds
-            }
-        );
+        // await prisma.$transaction(
+        //     async (tx) => {
+        //         // Create a leave record
+        //         const leaveRecord = {
+        //             employee_id: validate.data.employee_id,
+        //             start_date: toGMT8(
+        //                 validate.data.leave_date_range.start
+        //             ).toISOString(),
+        //             end_date: toGMT8(
+        //                 validate.data.leave_date_range.end
+        //             ).toISOString(),
+        //             reason: validate.data.reason,
+        //             leave_type_id: validate.data.leave_type_id,
+        //             created_at: toGMT8().toISOString(),
+        //             updated_at: toGMT8().toISOString(),
+        //             created_by: Number(session?.user.employee_id),
+        //             status: "Approved",
+        //             total_days: usedLeaveCredit, // mins to day
+        //             evaluators: signatory as unknown as InputJsonValue,
+        //             files: attachmentLinks.url,
+        //         };
+        //
+        //         // Create leave request in the database
+        //         await tx.trans_leaves.create({
+        //             data: leaveRecord,
+        //         });
+        //
+        //         // Update the leave balance
+        //         await tx.dim_leave_balances.update({
+        //             where: {
+        //                 id: leaveBalance.id,
+        //             },
+        //             data: {
+        //                 remaining_days: remainingLeaveCredit,
+        //                 used_days: {
+        //                     increment: usedLeaveCredit
+        //                 },
+        //                 updated_at: new Date(),
+        //             },
+        //         });
+        //     },
+        //     {
+        //         timeout: 10000, // Set the timeout to 10 seconds
+        //     }
+        // );
 
         const approvedLeave = await approved_leave_email({
             name: getEmpFullName(leaveBalance.trans_employees),

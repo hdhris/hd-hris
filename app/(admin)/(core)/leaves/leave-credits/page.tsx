@@ -24,6 +24,8 @@ import {capitalize} from "@nextui-org/shared-utils";
 import {Card} from "@nextui-org/card";
 import CardTable from "@/components/common/card-view/card-table";
 import EditLeaveCredits from '@/components/admin/leaves/credits/forms/edit/edit-leave-credits';
+import useDocumentTitle from "@/hooks/useDocumentTitle";
+import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
 
 
 export interface EditCreditProp extends Omit<LeaveCredits, "leave_balance"> {
@@ -54,6 +56,7 @@ function Page() {
         refreshInterval: 3000
     }, `&year=${year}`);
 
+    useDocumentTitle("Leave Credits")
     const leaveCredit = useMemo(() => {
         return data?.data || [];
     }, [data?.data]);
@@ -193,9 +196,9 @@ function Page() {
                                 </>}
                             >
                                 <CardTable data={[{
-                                    label: "Allocated Days", value: leave.allocated_days
-                                }, {label: "Remaining Days", value: leave.remaining_days}, {
-                                    label: "Used Days", value: leave.used_days
+                                    label: "Allocated Days", value: formatDaysToReadableTime(leave.allocated_days)
+                                }, {label: "Remaining Days", value: formatDaysToReadableTime(leave.remaining_days)}, {
+                                    label: "Used Days", value: formatDaysToReadableTime(leave.used_days)
                                 }, {
                                     label: "Carry Forward", value: leave.carry_forward_days
                                 },]}/>

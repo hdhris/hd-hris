@@ -5,7 +5,8 @@ import {Evaluator} from "@/types/leaves/leave-evaluators-types";
 
 export const getSignatory = async (path: string, applicant_id: number, is_auto_approved: boolean) => {
     try {
-        const [signatories, applicant] = await Promise.all([prisma.trans_signatories.findMany({
+        const [signatories, applicant] = await Promise.all([
+            prisma.trans_signatories.findMany({
             where: {
                 ref_signatory_paths: {
                     signatories_path: path
@@ -13,7 +14,8 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
             }, include: {
                 ref_signatory_paths: true, ref_signatory_roles: true, ref_job_classes: true
             },
-        }), prisma.trans_employees.findUnique({
+        }),
+        prisma.trans_employees.findUnique({
             where: {
                 id: applicant_id, deleted_at: null
             }, select: {
@@ -85,7 +87,7 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
             },
         });
 
-        return {
+        const result = {
             users: [...employeeDetails.map((employee) => ({
                 id: String(employee.id),
                 name: `${employee.first_name} ${employee.last_name}`,
@@ -137,6 +139,8 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
                 .sort((a, b) => a.order_number - b.order_number), // Sort by order_number
             is_automatic_approved: is_auto_approved,
         }
+
+        return result
 
     } catch (error) {
         console.log("Error: ", error)
