@@ -14,17 +14,12 @@ interface EditAccountProps {
   currentPrivilegeId?: string;
 }
 
-const EditAccount: React.FC<EditAccountProps> = ({ 
-  userId, 
-  email, 
-  hasAccount, 
-  currentPrivilegeId 
+const EditAccount: React.FC<EditAccountProps> = ({
+  userId,
+  email,
+  hasAccount,
+  currentPrivilegeId,
 }) => {
-
-  React.useEffect(() => {
-    console.log("Current Privilege ID changed:", currentPrivilegeId);
-  }, [currentPrivilegeId]);
-
   const router = useRouter();
   const [showResetPassword, setShowResetPassword] = React.useState(false);
   const [showCreateAccount, setShowCreateAccount] = React.useState(false);
@@ -63,12 +58,21 @@ const EditAccount: React.FC<EditAccountProps> = ({
         },
         {
           name: "password",
-          type: "password",
+          type: "text",
           label: "Password",
           isRequired: true,
           config: {
             placeholder: "Create password",
             errorMessage: errors.password?.message as string,
+            defaultValue: "password",
+            minLength: 8,  // Add minimum length
+            pattern: "^.{8,}$", // Regex pattern for 8 or more characters
+            validation: (value: string) => {
+              if (value.length < 8) {
+                return "Password must be at least 8 characters long";
+              }
+              return true;
+            }
           },
         },
         {
@@ -88,12 +92,21 @@ const EditAccount: React.FC<EditAccountProps> = ({
       return [
         {
           name: "password",
-          type: "password",
+          type: "text",  
           label: "New Password",
           isRequired: true,
           config: {
             placeholder: "Enter new password",
             errorMessage: errors.password?.message as string,
+            defaultValue: "password",
+            minLength: 8,  // Add minimum length
+            pattern: "^.{8,}$", // Regex pattern for 8 or more characters
+            validation: (value: string) => {
+              if (value.length < 8) {
+                return "Password must be at least 8 characters long";
+              }
+              return true;
+            }
           },
         },
       ];
@@ -108,14 +121,14 @@ const EditAccount: React.FC<EditAccountProps> = ({
       setShowResetPassword(false);
       setValue("isNewAccount", true);
       setValue("isPasswordModified", true);
-      setValue("password", "");
+      setValue("password", "password");
       setValue("privilege_id", "");
     } else {
       setShowResetPassword(true);
       setShowCreateAccount(false);
       setValue("isNewAccount", false);
       setValue("isPasswordModified", true);
-      setValue("password", "");
+      setValue("password", "password");  
     }
   };
 
@@ -133,43 +146,51 @@ const EditAccount: React.FC<EditAccountProps> = ({
   const handleSubmit = async () => {
     try {
       setIsLoading(true);
-      const accountData = {
-        ...(showCreateAccount && {
-          username: getValues("username"),
-          privilege_id: getValues("privilege_id"),
-        }),
-        password: getValues("password"),
-      };
-
+      const accountData = showCreateAccount 
+        ? {
+            username: getValues("username"),
+            privilege_id: getValues("privilege_id"),
+            password: getValues("password"),
+          }
+        : {
+            password: getValues("password"),
+          };
+  
       const response = await axios.put(
         `/api/employeemanagement/employees?id=${userId}&type=account`,
         accountData
       );
-
-      if (response.status === 200) {
-        router.push("/employeemanagement/employees");
-        toast({
-          title: "Success",
-          description: "Employee new account created successfully!",
-          duration: 3000,
-        });
-      }
-
+      
       if (response.data.success) {
-        setShowResetPassword(false);
-        setShowCreateAccount(false);
         toast({
           title: "Success",
           description: response.data.message,
           duration: 3000,
         });
+
+        setShowResetPassword(false);
+        setShowCreateAccount(false);
         setValue("password", "");
+
+        // Wait for toast before redirect
+        setTimeout(() => {
+          router.push("/employeemanagement/employees");
+        }, 1500);
       }
     } catch (error: any) {
+      let errorMessage = "An unexpected error occurred";
+      
+      if (error.response?.status === 404) {
+        errorMessage = "Employee not found";
+      } else if (error.response?.status === 409) {
+        errorMessage = "Username already exists";
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
       toast({
         title: "Error",
-        description:
-          error.response?.data?.message || "Failed to update account",
+        description: errorMessage,
         variant: "danger",
         duration: 5000,
       });
@@ -186,15 +207,6 @@ const EditAccount: React.FC<EditAccountProps> = ({
         { privilege_id: privilegeId }
       );
 
-      if (response.status === 200) {
-        router.push("/employeemanagement/employees");
-        toast({
-          title: "Success",
-          description: "Employee information updated successfully!",
-          duration: 3000,
-        });
-      }
-
       if (response.data.success) {
         toast({
           title: "Success",
@@ -205,30 +217,13 @@ const EditAccount: React.FC<EditAccountProps> = ({
     } catch (error: any) {
       toast({
         title: "Error",
-        description:
-          error.response?.data?.message || "Failed to update privilege",
+        description: error.response?.data?.message || "Failed to update privilege",
         variant: "danger",
         duration: 5000,
       });
     } finally {
       setIsPrivilegeUpdating(false);
     }
-  };
-
-  const privilegeField: FormInputProps = {
-    name: "privilege_id",
-    label: "Access Level",
-    type: "select",
-    isRequired: true,
-    config: {
-      placeholder: "Select access level",
-      options: privilegeOptions,
-      defaultValue: currentPrivilegeId,
-      onChange: ((e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-        setValue("privilege_id", value);
-      }) as any,
-    },
   };
 
   return (
@@ -262,7 +257,21 @@ const EditAccount: React.FC<EditAccountProps> = ({
       {hasAccount && (
         <div className="flex items-end space-x-4 mb-4">
           <div className="flex-grow">
-            <FormFields items={[privilegeField]} />
+            <FormFields
+              items={[
+                {
+                  name: "privilege_id",
+                  label: "Access Level",
+                  type: "select",
+                  isRequired: true,
+                  config: {
+                    placeholder: "Select access level",
+                    options: privilegeOptions,
+                    defaultValue: currentPrivilegeId,
+                  },
+                },
+              ]}
+            />
           </div>
           <Button
             type="button"
@@ -286,8 +295,7 @@ const EditAccount: React.FC<EditAccountProps> = ({
               onClick={handleCancel}
               isDisabled={isLoading}
             >
-              Cancel{" "}
-              {showCreateAccount ? "Account Creation" : "Password Reset"}
+              Cancel
             </Button>
             <Button
               type="button"
