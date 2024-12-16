@@ -5,7 +5,9 @@ import SimpleAES from "@/lib/cryptography/3des";
 import { sendEmail } from "@/lib/utils/sendEmail";
 import { employeeSchema, StatusUpdateInput, statusUpdateSchema } from "./types";
 import { parseJsonInput } from "./utils";
-
+import { getSession } from "next-auth/react"
+import { getSignatory } from "@/server/signatory"; 
+import { auth } from "@/auth";
 declare global {
   var prisma: PrismaClient | undefined;
 }
@@ -263,12 +265,37 @@ async function updateEmployeeAccount(
 
 async function updateEmployeeStatus(id: number, data: StatusUpdateInput) {
   try {
-    const { status, reason, date, endDate } = data;
+   const session = await auth();
 
+    const { status, reason, date, endDate } = data;
     const updateData: Prisma.trans_employeesUpdateInput = {
       updated_at: new Date(),
     };
 
+    
+
+    const signatoryPath = 
+      status === 'suspended' ? 'employee_suspension' :
+      status === 'resigned' ? 'employee_resignation' :
+      status === 'terminated' ? 'employee_termination' : null;
+
+    const signatories = signatoryPath 
+      ? await getSignatory(signatoryPath, id, false) 
+      : null;
+
+    // Transform signatories to a simple JSON object
+    const transformedSignatories = signatories ? {
+      users: signatories.users.map(user => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        role: user.role
+      }))
+    } : null;
+
+    
+    // Rest of your existing logic, using session if needed
     if (status === "active") {
       updateData.suspension_json = Prisma.JsonNull;
       updateData.resignation_json = Prisma.JsonNull;
@@ -280,18 +307,36 @@ async function updateEmployeeStatus(id: number, data: StatusUpdateInput) {
             suspensionReason: reason,
             startDate: date,
             endDate: endDate,
+            signatories: transformedSignatories,
+            initiatedBy: session?.user ? {
+              id: session.user.id,
+              name: session.user.name,
+              picture: session.user.image
+            } : null
           };
           break;
         case "resigned":
           updateData.resignation_json = {
             resignationReason: reason,
             resignationDate: date,
+            signatories: transformedSignatories,
+            initiatedBy: session?.user ? {
+              id: session.user.id,
+              name: session.user.name,
+              picture: session.user.image
+            } : null
           };
           break;
         case "terminated":
           updateData.termination_json = {
             terminationReason: reason,
             terminationDate: date,
+            signatories: transformedSignatories,
+            initiatedBy: session?.user ? {
+              id: session.user.id,
+              name: session.user.name,
+              picture: session.user.image
+            } : null
           };
           break;
       }

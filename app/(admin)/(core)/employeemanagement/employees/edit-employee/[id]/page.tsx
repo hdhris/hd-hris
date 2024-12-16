@@ -33,7 +33,7 @@ const tabFieldsMap = {
     "email",
     "contact_no",
     "birthdate",
-    "addr_region",
+  "addr_region",
     "addr_province",
     "addr_municipal",
     "addr_baranggay",
