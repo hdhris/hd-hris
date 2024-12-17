@@ -203,28 +203,6 @@ function Page() {
         setLoading(false)
     }
 
-    const getUserById = useMemo(() => {
-        return (id: number) => {
-            return signatories?.evaluators?.users.find((user) => Number(user.id) === id || user.employee_id === id);
-        };
-    }, [signatories]);
-
-    const currentEvaluatingOrderNumber = useMemo(() => {
-        let orderNumber = 0;
-        if (signatories?.evaluators?.evaluators?.length) {
-            const sortedEvaluators = signatories.evaluators.evaluators.sort((a, b) => a.order_number - b.order_number);
-
-            for (const item of sortedEvaluators) {
-                if (item.decision.is_decided === null) {
-                    orderNumber = item.order_number;
-                    break;
-                }
-            }
-        }
-        return orderNumber;
-    }, [signatories]);
-
-    const onUpdate = (approval: string)=> {}
 
     return (<DataDisplay
         isLoading={isLoading}

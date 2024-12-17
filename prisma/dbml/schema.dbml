@@ -231,6 +231,7 @@ Table ref_job_classes {
   deleted_at DateTime
   max_employees Int
   max_department_instances Int
+  is_superior Boolean [default: false]
   trans_employees trans_employees [not null]
   trans_signatories trans_signatories [not null]
 }
@@ -752,6 +753,7 @@ Table ref_signatory_paths {
   signatories_path String [not null]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [default: `now()`, not null]
+  signatories_name String [not null, default: '']
   trans_signatories trans_signatories [not null]
 }
 

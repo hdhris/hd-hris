@@ -816,6 +816,7 @@ model ref_signatory_paths {
   signatories_path  String
   created_at        DateTime            @default(now()) @db.Timestamptz(6)
   updated_at        DateTime            @default(now()) @db.Timestamptz(6)
+  signatories_name  String              @default("")
   trans_signatories trans_signatories[]
 }
 

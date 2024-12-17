@@ -16,6 +16,7 @@ import { EmploymentStatus } from "@/types/employeee/EmploymentStatusType";
 import {EmployeeLeaveCreditFormSetup} from "@/types/leaves/leave-credits-types";
 import {EmploymentStatusDetails} from "@/types/employment-status/employment-status";
 import { Accounts } from "@/types/employeee/AccountType";
+import {SignatoryPath} from "@/types/signatory/signatory-types";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -206,6 +207,11 @@ export function useTableLength(table: keyof typeof prisma, options?: Omit<SWRCon
 
 export function useEmploymentStatusTypes() {
     return useSWR<EmploymentStatusDetails[]>('/api/admin/employment-status', {
+        revalidateOnFocus: true, keepPreviousData: true
+    })
+}
+export function useSignatories() {
+    return useSWR<SignatoryPath[]>('/api/admin/signatory', {
         revalidateOnFocus: true, keepPreviousData: true
     })
 }

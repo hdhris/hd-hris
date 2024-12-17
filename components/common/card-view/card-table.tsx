@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {ReactNode} from 'react';
 interface CardTableData {
-    value: any,
-    label: string
+    value: any | ReactNode,
+    label: ReactNode
 }
 
 function CardTable({data}: {data: CardTableData[] }) {
