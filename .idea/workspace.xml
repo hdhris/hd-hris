@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx">
-      <change afterPath="$PROJECT_DIR$/components/common/evaluators/evaluators.tsx" afterDir="false" />
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="revise evaluators approval components">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/actions/AcceptReject.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/actions/AcceptReject.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/leaves/table-config/approval-tables-configuration.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/custom/styles/SizeRadius.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/custom/styles/SizeRadius.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/signatory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/signatory.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -186,15 +181,8 @@
       <workItem from="1734313213738" duration="9708000" />
       <workItem from="1734359851187" duration="25000" />
       <workItem from="1734359889255" duration="8106000" />
-      <workItem from="1734369129045" duration="7031000" />
-    </task>
-    <task id="LOCAL-00015" summary="fixing leave types">
-      <option name="closed" value="true" />
-      <created>1732466575551</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1732466575551</updated>
+      <workItem from="1734369129045" duration="7157000" />
+      <workItem from="1734404866692" duration="541000" />
     </task>
     <task id="LOCAL-00016" summary="fixing PayheadUI not PayheadUi">
       <option name="closed" value="true" />
@@ -580,7 +568,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734371318084</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="revise evaluators approval components">
+      <option name="closed" value="true" />
+      <created>1734376438894</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1734376438895</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -609,7 +605,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixing benefits v1" />
     <MESSAGE value="merging with nizam" />
     <MESSAGE value="merging" />
     <MESSAGE value="fixes" />
@@ -634,6 +629,7 @@
     <MESSAGE value="fixing calculation in leave RequestForm.tsx" />
     <MESSAGE value="Merge remote-tracking branch 'origin/france'&#10;&#10;# Conflicts:&#10;#&#9;prisma/schema.prisma" />
     <MESSAGE value="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx" />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx" />
+    <MESSAGE value="revise evaluators approval components" />
+    <option name="LAST_COMMIT_MESSAGE" value="revise evaluators approval components" />
   </component>
 </project>
