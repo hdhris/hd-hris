@@ -13,6 +13,7 @@ import {toGMT8} from "@/lib/utils/toGMT8";
 import axios from "axios";
 import {toast} from "@/components/ui/use-toast";
 import {axiosInstance} from "@/services/fetcher";
+import CardTable from "@/components/common/card-view/card-table";
 
 interface EvaluatorsProp{
     evaluation: Evaluations
@@ -69,7 +70,7 @@ function Evaluators({evaluation, selectedEmployee, mutate, onClose, evaluatorsAp
                                     ...evaluator,
                                     decision: {
                                         is_decided: isApproved,
-                                        decisionDate: toGMT8().toDate(),
+                                        decisionDate: toGMT8().toISOString(),
                                         rejectedReason: rejectReason === "" ? null : rejectReason,
                                     },
                                 };
@@ -80,7 +81,7 @@ function Evaluators({evaluation, selectedEmployee, mutate, onClose, evaluatorsAp
                                     ...evaluator,
                                     decision: {
                                         is_decided: false,
-                                        decisionDate: toGMT8().toDate(),
+                                        decisionDate: toGMT8().toISOString(),
                                         rejectedReason:
                                             evaluator.evaluated_by === currentUser?.id
                                                 ? rejectReason
@@ -101,10 +102,8 @@ function Evaluators({evaluation, selectedEmployee, mutate, onClose, evaluatorsAp
                    })
                     mutate();
                     onClose && onClose();
+                    setRejectReason("")
 
-                    // console.log("Selected User: ", {name, id})
-                    // console.log("New Evaluator: ", newEvaluators)
-                    // console.log("isAllApproved: ", isAllApproved ? "approved" : isStillPending ? "pending" : "rejected")
                     toast({
                         title: isApproved ? "Signatory Approved" : "Signatories Rejected",
                         description: "Overtime has been " + status,
@@ -174,15 +173,38 @@ function Evaluators({evaluation, selectedEmployee, mutate, onClose, evaluatorsAp
                                 </Chip>
                             )}
                         </div>
-                        {isApproving && (
-                            <Textarea
-                                placeholder="Reason for rejection"
-                                value={rejectReason}
-                                onValueChange={setRejectReason}
+                        <div className="mt-2">
+                            {isApproving && (
+                                <Textarea
+                                    color="primary"
+                                    variant="bordered"
+                                    placeholder="Reason for rejection"
+                                    value={rejectReason}
+                                    onValueChange={setRejectReason}
+                                />
+                            )}
+
+                            <CardTable
+                                data={[
+                                    ...(item.decision.decisionDate
+                                        ? [
+                                            {
+                                                label: "Decision Date",
+                                                value: toGMT8(item.decision.decisionDate).format(
+                                                    "MMM DD, YYYY hh:mm A"
+                                                ),
+                                            },
+                                        ]
+                                        : []),
+                                    ...(item.decision.rejectedReason ? [{
+                                        label: "Rejected Reason",
+                                        value: item.decision.rejectedReason,
+                                    }] : []),
+                                ]}
                             />
-                        )}
+                        </div>
                     </BorderCard>
-                )
+            )
             })
         }</>
     );

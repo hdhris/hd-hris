@@ -14,6 +14,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { FaRegCalendarAlt, FaRegUserCircle } from "react-icons/fa";
 import { MdHowToVote, MdOutlineGroups2, MdOutlineMessage } from "react-icons/md";
 import { TbClockCheck, TbClockUp, TbClockX } from "react-icons/tb";
+import CardTable from "@/components/common/card-view/card-table";
 
 interface ViewOvertimeProps {
     overtime: OvertimeEntry | null;
@@ -122,13 +123,36 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                                         </Chip>
                                     )}
                                 </div>
+                                <div className="mt-2">
                                 {isApproving && (
                                     <Textarea
+                                        color="primary"
+                                        variant="bordered"
                                         placeholder="Reason for rejection"
                                         value={rejectReason}
                                         onValueChange={setRejectReason}
                                     />
                                 )}
+                                <CardTable
+                                    data={[
+                                        ...(item.decision.decisionDate
+                                            ? [
+                                                {
+                                                    label: "Decision Date",
+                                                    value: toGMT8(item.decision.decisionDate).format(
+                                                        "MMM DD, YYYY hh:mm A"
+                                                    ),
+                                                },
+                                            ]
+                                            : []),
+                                    ...(item.decision.rejectedReason ? [{
+                                            label: "Rejected Reason",
+                                            value: item.decision.rejectedReason,
+                                        }] : []),
+                                    ]}
+                                />
+
+                                </div>
                             </Card>
                         );
                     })}
@@ -158,7 +182,7 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                                     ...evaluator,
                                     decision: {
                                         is_decided: isApproved,
-                                        decisionDate: toGMT8().toDate(),
+                                        decisionDate: toGMT8().toISOString(),
                                         rejectedReason: rejectReason === "" ? null : rejectReason,
                                     },
                                 };
@@ -169,7 +193,7 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                                     ...evaluator,
                                     decision: {
                                         is_decided: false,
-                                        decisionDate: toGMT8().toDate(),
+                                        decisionDate: toGMT8().toISOString(),
                                         rejectedReason:
                                             evaluator.evaluated_by === userID
                                                 ? rejectReason

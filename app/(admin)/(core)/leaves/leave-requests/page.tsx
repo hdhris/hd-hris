@@ -346,7 +346,7 @@ function Page() {
             <Evaluators evaluation={selectedRequest.evaluators || []}
                         selectedEmployee={selectedRequest}
                         mutate={mutate}
-                        evaluatorsApi={''}
+                        evaluatorsApi={'/api/admin/leaves/requests/evaluation-decision'}
             />
         </>} onDanger={<>
             {/*<Section className="ms-0" title="Edit Leave"*/}

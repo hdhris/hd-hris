@@ -11,7 +11,7 @@ export interface User {
 
 interface Decision {
     is_decided: boolean | null;
-    decisionDate: Date | null;
+    decisionDate: string | null;
     rejectedReason: string | null;
 }
 

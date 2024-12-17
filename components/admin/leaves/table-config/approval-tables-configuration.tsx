@@ -30,7 +30,7 @@ const ApprovalColumns: ColumnsProps[] = [{
 }]
 
 export const approval_status_color_map: Record<string, BadgeProps["color"]> = {
-    approved: "success", rejected: "danger", pending: "warning", canceled: "danger"
+    approved: "success", rejected: "danger", pending: "warning", canceled: "danger",
 }
 export const TableConfigurations: TableConfigProps<LeaveRequest> = {
     columns: ApprovalColumns, rowCell: (item: LeaveRequest, columnKey: React.Key) => {
@@ -65,7 +65,7 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
             </Case>
             <Case of="status">
                 <Status color={approval_status_color_map[item.leave_details.status.toLowerCase()]}>
-                    <Typography className="text-sm">{item.leave_details.status}</Typography>
+                    <Typography className="text-sm">{capitalize(item.leave_details.status)}</Typography>
                 </Status>
 
             </Case>
