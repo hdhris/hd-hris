@@ -4,9 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="revise evaluators approval components">
+    <list default="true" id="18fa59a4-996b-464a-afea-08db2b5e7bc5" name="Changes" comment="merging with france">
+      <change afterPath="$PROJECT_DIR$/server/signatories/post-evaluation.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(admin)/(core)/leaves/leave-requests/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/overtime/update/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/attendance-time/overtime/update/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/(core)/leaves/requests/create/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/admin/signatory/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/signatory/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/employeemanagement/employees/update.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/employeemanagement/employees/update.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/mobile/leaves/file/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/mobile/leaves/file/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/mobile/overtime/file/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/mobile/overtime/file/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/attendance-time/overtime/view-overtime.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/attendance-time/overtime/view-overtime.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/admin/employeescomponent/view/ViewEmployee.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/admin/employeescomponent/view/ViewEmployee.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/common/evaluators/evaluators.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/common/evaluators/evaluators.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/signatory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/signatories/signatory.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/leaves/LeaveRequestTypes.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,8 +28,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript File" />
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
@@ -112,11 +124,11 @@
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\common" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS-V2\server\signatories" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\components\admin\leaves\request-form\form" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\auth\forgot" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\auth" />
       <recent name="C:\Users\Xero\WebstormProjects\Capstone\HD-HRIS\app\auth\login" />
-      <recent name="C:\Users\Xero\WebstormProjects\HD-HRIS\HD-HRIS\assets" />
     </key>
   </component>
   <component name="RunManager">
@@ -182,15 +194,7 @@
       <workItem from="1734359851187" duration="25000" />
       <workItem from="1734359889255" duration="8106000" />
       <workItem from="1734369129045" duration="7157000" />
-      <workItem from="1734404866692" duration="541000" />
-    </task>
-    <task id="LOCAL-00016" summary="fixing PayheadUI not PayheadUi">
-      <option name="closed" value="true" />
-      <created>1732469625892</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1732469625892</updated>
+      <workItem from="1734404866692" duration="5370000" />
     </task>
     <task id="LOCAL-00017" summary="fixing LeaveRequest v1">
       <option name="closed" value="true" />
@@ -576,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734376438895</updated>
     </task>
-    <option name="localTasksCounter" value="65" />
+    <task id="LOCAL-00065" summary="merging with france">
+      <option name="closed" value="true" />
+      <created>1734405573301</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1734405573302</updated>
+    </task>
+    <option name="localTasksCounter" value="66" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -605,7 +617,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="merging with nizam" />
     <MESSAGE value="merging" />
     <MESSAGE value="fixes" />
     <MESSAGE value="fixes v2" />
@@ -630,6 +641,7 @@
     <MESSAGE value="Merge remote-tracking branch 'origin/france'&#10;&#10;# Conflicts:&#10;#&#9;prisma/schema.prisma" />
     <MESSAGE value="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;app/(admin)/(core)/leaves/leave-requests/page.tsx" />
     <MESSAGE value="revise evaluators approval components" />
-    <option name="LAST_COMMIT_MESSAGE" value="revise evaluators approval components" />
+    <MESSAGE value="merging with france" />
+    <option name="LAST_COMMIT_MESSAGE" value="merging with france" />
   </component>
 </project>

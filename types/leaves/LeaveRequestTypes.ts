@@ -131,39 +131,39 @@ interface LeaveApplication {
     reason: string;
     created_by: number;
     deleted_at: string | null;
-    evaluators: Evaluators;
+    evaluators: Evaluations;
     files: string[] | null; // Adjust based on the structure of "files" if available
 }
-
-interface Evaluators {
-    users: EvaluatorUser[];
-    approver: ApproverDecision;
-    comments: any[]; // Replace `any` if comments structure is known
-    reviewers: ReviewerDecision;
-}
-
-interface EvaluatorUser {
-    id: string; // UUID
-    name: string;
-    role: string;
-    email: string;
-    picture: string; // URL string
-    employee_id: number;
-}
-
-interface ApproverDecision {
-    decision: Decision;
-    approved_by: string; // UUID
-}
-
-interface ReviewerDecision {
-    decision: Decision;
-    reviewed_by: string; // UUID
-}
-
-interface Decision {
-    is_approved?: boolean; // Present in approver decision
-    is_reviewed?: boolean; // Present in reviewer decision
-    decisionDate: string | null; // ISO 8601 date string
-    rejectedReason: string | null;
-}
+//
+// interface Evaluators {
+//     users: EvaluatorUser[];
+//     approver: ApproverDecision;
+//     comments: any[]; // Replace `any` if comments structure is known
+//     reviewers: ReviewerDecision;
+// }
+//
+// interface EvaluatorUser {
+//     id: string; // UUID
+//     name: string;
+//     role: string;
+//     email: string;
+//     picture: string; // URL string
+//     employee_id: number;
+// }
+//
+// interface ApproverDecision {
+//     decision: Decision;
+//     approved_by: string; // UUID
+// }
+//
+// interface ReviewerDecision {
+//     decision: Decision;
+//     reviewed_by: string; // UUID
+// }
+//
+// interface Decision {
+//     is_approved?: boolean; // Present in approver decision
+//     is_reviewed?: boolean; // Present in reviewer decision
+//     decisionDate: string | null; // ISO 8601 date string
+//     rejectedReason: string | null;
+// }

@@ -189,6 +189,8 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                         status: isAllApproved ? "approved" : isStillPending ? "pending" : "rejected",
                         evaluators: newEvaluators,
                     });
+
+                    console.log("new Evaluators: ", newEvaluators)
                     mutate();
                     onClose();
                     toast({
