@@ -73,6 +73,79 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
         return orderNumber;
     }, [overtime]);
 
+    const onUpdate = useCallback(
+        async (status: ApprovalStatusType) => {
+            const isApproved = status === "approved";
+
+            const response = await showDialog({
+                title: `${isApproved ? "Approval" : "Rejection"}`,
+                message: `Do you confirm to ${isApproved ? "approve" : "reject"} ${
+                    overtime?.trans_employees_overtimes.last_name
+                }'s overtime application?`,
+                preferredAnswer: isApproved ? "yes" : "no",
+            });
+            if (response === "yes") {
+                try {
+                    const updatedEvaluators = overtime!.evaluators.evaluators.map((evaluator) => {
+                        if (isApproved) {
+                            if (evaluator.evaluated_by === userID) {
+                                return {
+                                    ...evaluator,
+                                    decision: {
+                                        is_decided: isApproved,
+                                        decisionDate: toGMT8().toISOString(),
+                                        rejectedReason: rejectReason === "" ? null : rejectReason,
+                                    },
+                                };
+                            }
+                        } else {
+                            if (evaluator.decision.is_decided === null) {
+                                return {
+                                    ...evaluator,
+                                    decision: {
+                                        is_decided: false,
+                                        decisionDate: toGMT8().toISOString(),
+                                        rejectedReason:
+                                            evaluator.evaluated_by === userID
+                                                ? rejectReason
+                                                : "Signatory is unsuccessful",
+                                    },
+                                };
+                            }
+                        }
+                        return evaluator;
+                    });
+                    let newEvaluators = overtime!.evaluators;
+                    newEvaluators["evaluators"] = updatedEvaluators;
+                    const isAllApproved = newEvaluators.evaluators.every((item) => item.decision.is_decided === true);
+                    const isStillPending = newEvaluators.evaluators.some((item) => item.decision.is_decided === null);
+                    await axios.post("/api/admin/attendance-time/overtime/update", {
+                        id: overtime?.id,
+                        status: isAllApproved ? "approved" : isStillPending ? "pending" : "rejected",
+                        evaluators: newEvaluators,
+                    });
+
+                    console.log("new Evaluators: ", newEvaluators)
+                    mutate();
+                    onClose();
+                    toast({
+                        title: isApproved ? "Signatory Approved" : "Signatories Rejected",
+                        description: "Overtime has been " + status,
+                        variant: isApproved ? "success" : "default",
+                    });
+                } catch (error) {
+                    console.log(error);
+                    toast({
+                        title: "An error has occured",
+                        // description: String(error),
+                        variant: "danger",
+                    });
+                }
+            }
+        },
+        [overtime, mutate, onClose, userID, rejectReason]
+    );
+
     const Evaluators = useMemo(() => {
         if (overtime?.evaluators?.evaluators?.length) {
             return (
@@ -160,80 +233,9 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
             );
         }
         return false;
-    }, [overtime, getUserById, currentEvaluatingOrderNumber, userID, rejectReason]);
+    }, [overtime?.evaluators.evaluators, currentEvaluatingOrderNumber, userID, getUserById, rejectReason, onUpdate]);
 
-    const onUpdate = useCallback(
-        async (status: ApprovalStatusType) => {
-            const isApproved = status === "approved";
 
-            const response = await showDialog({
-                title: `${isApproved ? "Appoval" : "Rejection"}`,
-                message: `Do you confirm to ${isApproved ? "approve" : "reject"} ${
-                    overtime?.trans_employees_overtimes.last_name
-                }'s overtime application?`,
-                preferredAnswer: isApproved ? "yes" : "no",
-            });
-            if (response === "yes") {
-                try {
-                    const updatedEvaluators = overtime!.evaluators.evaluators.map((evaluator) => {
-                        if (isApproved) {
-                            if (evaluator.evaluated_by === userID) {
-                                return {
-                                    ...evaluator,
-                                    decision: {
-                                        is_decided: isApproved,
-                                        decisionDate: toGMT8().toISOString(),
-                                        rejectedReason: rejectReason === "" ? null : rejectReason,
-                                    },
-                                };
-                            }
-                        } else {
-                            if (evaluator.decision.is_decided === null) {
-                                return {
-                                    ...evaluator,
-                                    decision: {
-                                        is_decided: false,
-                                        decisionDate: toGMT8().toISOString(),
-                                        rejectedReason:
-                                            evaluator.evaluated_by === userID
-                                                ? rejectReason
-                                                : "Signatory is unsuccessful",
-                                    },
-                                };
-                            }
-                        }
-                        return evaluator;
-                    });
-                    let newEvaluators = overtime!.evaluators;
-                    newEvaluators["evaluators"] = updatedEvaluators;
-                    const isAllApproved = newEvaluators.evaluators.every((item) => item.decision.is_decided === true);
-                    const isStillPending = newEvaluators.evaluators.some((item) => item.decision.is_decided === null);
-                    await axios.post("/api/admin/attendance-time/overtime/update", {
-                        id: overtime?.id,
-                        status: isAllApproved ? "approved" : isStillPending ? "pending" : "rejected",
-                        evaluators: newEvaluators,
-                    });
-
-                    console.log("new Evaluators: ", newEvaluators)
-                    mutate();
-                    onClose();
-                    toast({
-                        title: isApproved ? "Signatory Approved" : "Signatories Rejected",
-                        description: "Overtime has been " + status,
-                        variant: isApproved ? "success" : "default",
-                    });
-                } catch (error) {
-                    console.log(error);
-                    toast({
-                        title: "An error has occured",
-                        // description: String(error),
-                        variant: "danger",
-                    });
-                }
-            }
-        },
-        [overtime, userID, rejectReason, mutate]
-    );
 
     return (
         <Drawer

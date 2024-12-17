@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
                     created_at: toGMT8().toISOString(),
                     updated_at: toGMT8().toISOString(),
                     created_by: Number(session?.user.employee_id),
-                    status: "Approved",
+                    status: "approved",
                     total_days: usedLeaveCredit, // mins to day
                     evaluators: signatory as unknown as InputJsonValue,
                     files: attachmentLinks.url,

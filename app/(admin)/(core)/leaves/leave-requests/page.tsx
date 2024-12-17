@@ -343,7 +343,7 @@ function Page() {
             <hr className="border border-default-400 space-y-2"/>
             <Section className="ms-0" title="Evaluator's Decision"
                      subtitle="Summary of evaluator's feedback and decisions"/>
-            <Evaluators evaluation={selectedRequest.evaluators || []}
+            <Evaluators type="Leave Request" evaluation={selectedRequest.evaluators || []}
                         selectedEmployee={selectedRequest}
                         mutate={mutate}
                         evaluatorsApi={'/api/admin/leaves/requests/evaluation-decision'}
