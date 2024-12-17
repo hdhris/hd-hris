@@ -129,7 +129,7 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
                                     decision: {
                                         is_decided: is_auto_approved || null,
                                         rejectedReason: null,
-                                        decisionDate: is_auto_approved ? toGMT8().toDate() : null,
+                                        decisionDate: is_auto_approved ? toGMT8().toISOString() : null,
                                     },
                                     order_number: matchingSignatory.order_number,
                                 });
