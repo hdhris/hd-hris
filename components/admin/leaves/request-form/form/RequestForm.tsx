@@ -518,6 +518,8 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
                 minValue={today(getLocalTimeZone())}
                 isDateUnavailable={dateUnavailable}
                 onChange={onDateRangePicker}
+                color="default"
+                labelPlacement="outside"
             />)
         }
     }, {

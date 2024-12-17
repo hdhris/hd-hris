@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
 
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed/admin/seed.ts"
+  },
   "dependencies": {
     "@auth/prisma-adapter": "^2.1.0",
     "@axe-core/react": "^4.9.0",

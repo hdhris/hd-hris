@@ -16,7 +16,7 @@ export async function PUT(req: NextRequest) {
         const userId = session?.user.id; // Corrected userId reference
         console.log("Update Id: ", userId);
 
-        // const updateSchema = provider?.provider === "credential" ? updateProfileSchema.omit({username: true}) : updateProfileSchema;
+        // const updateSchema = provider?.provider === "user-credential" ? updateProfileSchema.omit({username: true}) : updateProfileSchema;
         const parsedData = updateProfileSchema.omit({username: true}).parse(data);
 
         // Validate the parsed data

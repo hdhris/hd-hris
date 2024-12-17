@@ -3,7 +3,7 @@ import prisma from "@/prisma/prisma";
 import { employee_basic_details } from "@/server/employee-details-map/employee-details-map";
 import { SignatoryEmployeeDetails, SignatoryPath } from "@/types/signatory/signatory-types";
 
-
+export const dynamic = "force-dynamic"
 // API Handler
 export async function GET() {
     try {
