@@ -2,9 +2,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator dbml {
-  provider = "prisma-dbml-generator"
-}
+// generator dbml {
+//   provider = "prisma-dbml-generator"
+// }
 
 datasource db {
   provider  = "postgresql"
@@ -271,6 +271,7 @@ model ref_job_classes {
   deleted_at               DateTime?           @db.Timestamp(6)
   max_employees            Int?
   max_department_instances Int?
+  is_superior              Boolean?            @default(false)
   trans_employees          trans_employees[]
   trans_signatories        trans_signatories[]
 

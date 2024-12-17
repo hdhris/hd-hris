@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useDepartmentsData } from "@/services/queries";
+import { useDepartmentsData, useEmployeesData } from "@/services/queries";
 import { Department } from "@/types/employeee/DepartmentType";
 import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
@@ -12,24 +12,49 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import BorderCard from "@/components/common/BorderCard";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import showDialog from "@/lib/utils/confirmDialog";
+import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 
 const Page: React.FC = () => {
   const { data: departments, error, mutate } = useDepartmentsData();
+  const { data: employees = [] } = useEmployeesData();
   const [sortedDepartments, setSortedDepartments] = useState<Department[]>([]);
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<
+    number | null
+  >(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-//
+
   useEffect(() => {
     if (departments) {
       const sorted = sortDepartmentsByRecentActivity(departments);
-      setSortedDepartments(sorted);
+      setSortedDepartments(
+        sorted.map((dept) => ({
+          ...dept,
+          employeeCount: countDepartmentEmployees(dept.id),
+        }))
+      );
     }
-  }, [departments]);
+  }, [departments, employees]);
 
-  const sortDepartmentsByRecentActivity = (departments: Department[]) => {
+  const findDepartmentHead = (departmentId: number) => {
+    return employees.find(
+      (employee) =>
+        Number(employee.department_id) === departmentId &&
+        employee.ref_job_classes?.is_superior === true
+    );
+  };
+
+  const countDepartmentEmployees = (departmentId: number): number => {
+    return employees.filter(
+      (employee) => Number(employee.department_id) === departmentId
+    ).length;
+  };
+
+  const sortDepartmentsByRecentActivity = (
+    departments: Department[]
+  ): Department[] => {
     return [...departments].sort((a, b) => {
-      const dateA = new Date(a.updated_at || a.created_at).getTime();
-      const dateB = new Date(b.updated_at || b.created_at).getTime();
+      const dateA = new Date(a.updated_at).getTime();
+      const dateB = new Date(b.updated_at).getTime();
       return dateB - dateA;
     });
   };
@@ -61,25 +86,27 @@ const Page: React.FC = () => {
         await mutate();
       }
     } catch (error) {
-
-      if(error instanceof AxiosError){
+      if (error instanceof AxiosError) {
         toast({
           title: "Error",
           description: error.response?.data.message,
           variant: "danger",
         });
       }
-      
     }
   };
-
 
   const handleDepartmentUpdated = async () => {
     try {
       const updatedData = await mutate();
       if (updatedData) {
         const sorted = sortDepartmentsByRecentActivity(updatedData);
-        setSortedDepartments(sorted);
+        setSortedDepartments(
+          sorted.map((dept) => ({
+            ...dept,
+            employeeCount: countDepartmentEmployees(dept.id),
+          }))
+        );
       }
     } catch (error) {
       console.error("Error updating department data:", error);
@@ -89,37 +116,64 @@ const Page: React.FC = () => {
   const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
+      { uid: "departmentHead", name: "Department Head", sortable: false, width: "15%" }, 
       { uid: "color", name: "Color", sortable: false },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
       { uid: "status", name: "Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
-    rowCell: (department: Department, columnKey: React.Key): React.ReactElement => {
+    rowCell: (
+      department: Department,
+      columnKey: React.Key
+    ): React.ReactElement => {
       const key = columnKey as string;
-      const cellClasses = "cursor-pointer hover:bg-gray-50";
+      const cellClasses = "cursor-pointer capitalize";
+      const departmentHead = findDepartmentHead(department.id);
 
       switch (key) {
         case "name":
           return (
-            <div className={cellClasses}>
+            <div className={cellClasses} >
               <span>{department.name}</span>
             </div>
           );
+          case "departmentHead":
+            return (
+              <div>
+                {departmentHead ? (
+                  <div className="pl-8">
+                    <UserAvatarTooltip
+                      user={{
+                        name: `${departmentHead.first_name} ${departmentHead.last_name}`, 
+                        picture: departmentHead.picture || "",
+                        id: departmentHead.id,
+                      }}
+                      avatarProps={{
+                        classNames: { base: "!size-9" },
+                        isBordered: true, 
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <span className="text-gray-400">No department head</span>
+                )}
+              </div>
+            );
         case "color":
           return (
             <div className={cellClasses}>
               <div className="flex items-center">
                 <div
                   className="w-6 h-6 rounded-full mr-2"
-                  style={{ backgroundColor: department.color || 'gray' }}
+                  style={{ backgroundColor: department.color || "gray" }}
                 ></div>
               </div>
             </div>
           );
         case "employeeCount":
           return (
-            <div className={cellClasses}>
-              <span>{department.employeeCount}</span>
+            <div className="pl-8">
+              <span className="font-extrabold">{department.employeeCount}</span>
             </div>
           );
         case "status":
@@ -166,16 +220,17 @@ const Page: React.FC = () => {
       ],
     },
   ];
+
   return (
     <div className="h-[calc(100vh-150px)] overflow-hidden">
       <DataDisplay
-      defaultDisplay="table"
-        title='Departments'
+        defaultDisplay="table"
+        title="Departments"
         data={sortedDepartments}
         filterProps={{
           filterItems: FilterItems,
         }}
-      isLoading={!departments && !error}
+        isLoading={!departments && !error}
         onTableDisplay={{
           config: TableConfigurations,
           className: "h-full overflow-auto",
@@ -190,11 +245,31 @@ const Page: React.FC = () => {
             <BorderCard className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex flex-col">
-                  <span className="font-medium">{department.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{department.name}</span>
+                    {(() => {
+                      const departmentHead = findDepartmentHead(department.id);
+                      return (
+                        departmentHead && (
+                          <UserAvatarTooltip
+                            user={{
+                              name: `${departmentHead.first_name} ${departmentHead.last_name}`,
+                              picture: departmentHead.picture || "",
+                              id: departmentHead.id,
+                            }}
+                            avatarProps={{
+                              classNames: { base: "!size-6" },
+                              isBordered: true,
+                            }}
+                          />
+                        )
+                      );
+                    })()}
+                  </div>
                   <div className="flex items-center mt-1">
                     <div
                       className="w-4 h-4 rounded-full mr-2"
-                      style={{ backgroundColor: department.color || 'gray' }}
+                      style={{ backgroundColor: department.color || "gray" }}
                     ></div>
                     <span className="text-sm text-gray-500">
                       {department.employeeCount} employees
@@ -214,9 +289,8 @@ const Page: React.FC = () => {
           </div>
         )}
         paginationProps={{
-          data_length: departments?.length
+          data_length: departments?.length,
         }}
-        
       />
 
       {selectedDepartmentId !== null && (
