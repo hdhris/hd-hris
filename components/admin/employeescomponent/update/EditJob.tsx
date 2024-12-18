@@ -93,10 +93,10 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     },
     {
       name: "superior_id",
-      label: "Superior Position",
+      label: "next position",
       type: "select",
-      placeholder: "Select superior position",
-      description: "Select the superior position (optional)",
+      placeholder: "Select next position",
+      description: "Select the next position fot promotion(optional)",
       config: {
         options:
           jobPositions

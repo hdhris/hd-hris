@@ -229,14 +229,14 @@ const Page: React.FC = () => {
         sortProps={sortProps}
         onView={
           selectedEmployee && (
-            <div className="max-w-[500px] overflow-y-auto">
+          
               <ViewEmployee
                 employee={selectedEmployee}
                 onClose={() => setSelectedEmployee(null)}
                 onEmployeeUpdated={handleEmployeeUpdated}
                 sortedEmployees={employees}
               />
-            </div>
+            
           )
         }
       />

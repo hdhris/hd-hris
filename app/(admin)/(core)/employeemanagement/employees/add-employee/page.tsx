@@ -16,6 +16,7 @@ import PersonalInformationForm from "@/components/admin/employeescomponent/store
 import ScheduleSelection from "@/components/admin/employeescomponent/store/ScheduleSelection";
 import { Tabs, Tab, Spinner, Button } from "@nextui-org/react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 type EmployeeFields = keyof EmployeeFormData;
 
@@ -77,8 +78,6 @@ const tabFieldsMap = {
   ] as EmployeeFields[],
   account: ["username", "password", "privilege_id"] as EmployeeFields[],
 };
-
-
 
 export default function AddEmployeePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -234,7 +233,6 @@ export default function AddEmployeePage() {
     return processed.filter((url): url is string => url !== null);
   };
 
-
   const handleFormSubmit = async (data: EmployeeFormData) => {
     try {
       setIsSubmitting(true);
@@ -242,20 +240,34 @@ export default function AddEmployeePage() {
         title: "Submitting",
         description: "Adding new employee...",
       });
-  
+
       let pictureUrl = typeof data.picture === "string" ? data.picture : "";
       if (data.picture instanceof File) {
         const result = await uploadFile(data.picture);
         pictureUrl = result.fileUrl;
       }
-  
+      //handledate
+      const handleDate = (dateString: string | null) => {
+        if (!dateString) return null;
+
+        // Create a date object and set it to noon GMT+8
+        const date = new Date(dateString);
+        const gmt8Date = toGMT8(date)
+          .hour(12)
+          .minute(0)
+          .second(0)
+          .millisecond(0);
+
+        return gmt8Date.toISOString();
+      };
+
       const [filteredCertificates, mastersCertificates, doctorateCertificates] =
         await Promise.all([
           processCertificates(data.certificates),
           processCertificates(data.mastersCertificates),
           processCertificates(data.doctorateCertificates),
         ]);
-  
+
       const employeeData = {
         employee: {
           first_name: data.first_name,
@@ -264,7 +276,7 @@ export default function AddEmployeePage() {
         credentials: {
           username: data.username,
           password: data.password,
-          privilege_id: data.privilege_id
+          privilege_id: data.privilege_id,
         },
         prefix: data.prefix,
         picture: pictureUrl,
@@ -276,10 +288,8 @@ export default function AddEmployeePage() {
         gender: data.gender,
         email: data.email,
         contact_no: data.contact_no,
-        birthdate: data.birthdate
-          ? new Date(data.birthdate).toISOString()
-          : null,
-        hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
+        birthdate: handleDate(data.birthdate),
+        hired_at: handleDate(data.hired_at),
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
         addr_municipal: parseInt(data.addr_municipal, 10),
@@ -467,11 +477,7 @@ export default function AddEmployeePage() {
               }}
               className="flex items-center gap-2"
             >
-              {isSubmitting ? (
-                "Submitting"
-              ) : (
-                "Submit"
-              )}
+              {isSubmitting ? "Submitting" : "Submit"}
             </Button>
           ) : (
             <Button

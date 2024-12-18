@@ -1,48 +1,58 @@
 "use client";
-
+import React, { useState } from "react";
 import { useQuery } from "@/services/queries";
-import { TableConfigProps } from "@/types/table/TableDataTypes";
-import { Button, Chip, Select, SelectItem } from "@nextui-org/react";
-import { Key, useState, useMemo, useCallback } from "react";
-import SearchFilter from "@/components/common/filter/SearchFilter";
-import TableData from "@/components/tabledata/TableData";
+import { Avatar, Chip } from "@nextui-org/react";
+import DataDisplay from "@/components/common/data-display/data-display";
+import Text from "@/components/Text";
 import dayjs from "dayjs";
-import { useRouter } from "next/navigation";
 import { TrainingRecord } from "./types";
+import ViewRecord from "./emprecords/ViewRecord";
+import { toGMT8 } from "@/lib/utils/toGMT8";
+
+const EmptyState: React.FC = () => {
+  return (
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
+      <div className="text-center space-y-3">
+        <Text className="text-xl font-bold text-gray-700">
+          No Training Records Found
+        </Text>
+        <Text className="text-gray-500">
+          There are no training records at the moment.
+        </Text>
+        <Text className="text-sm text-gray-400">
+          Training records will appear here when they are created.
+        </Text>
+      </div>
+    </div>
+  );
+};
 
 export default function TrainingRecordsTable() {
-  const router = useRouter();
-  const [selectedType, setSelectedType] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const { data: records = [], isLoading } = useQuery<TrainingRecord[]>(
+  const {
+    data: records = [],
+    isLoading,
+    mutate,
+  } = useQuery<TrainingRecord[]>(
     `/api/admin/trainings-and-seminars/emprecords/list`
   );
-
-  const filterRecords = useCallback((
-    records: TrainingRecord[], 
-    type: string = "all", 
-    status: string = "all"
-  ) => {
-    return records.filter((record) => {
-      const typeMatch =
-        type === "all" ||
-        record.ref_training_programs.type === type;
-      const statusMatch =
-        status === "all" ||
-        (status === "active" &&
-          record.ref_training_programs.is_active) ||
-        (status === "inactive" &&
-          !record.ref_training_programs.is_active);
-      return typeMatch && statusMatch;
-    });
-  }, []);
-
-  const filteredRecords = useMemo(() => 
-    filterRecords(records, selectedType, selectedStatus), 
-    [records, selectedType, selectedStatus, filterRecords]
+  const [selectedRecord, setSelectedRecord] = useState<TrainingRecord | null>(
+    null
   );
 
-  const config: TableConfigProps<TrainingRecord> = {
+  const handleRecordUpdated = async () => {
+    try {
+      await mutate();
+    } catch (error) {
+      console.error("Error updating record data:", error);
+    }
+  };
+
+  const handleOnSelected = (key: React.Key) => {
+    const selected = records?.find((item) => item.id === Number(key));
+    setSelectedRecord(selected ?? null);
+  };
+
+  const TableConfigurations = {
     columns: [
       { uid: "employee", name: "Employee", sortable: true },
       { uid: "program", name: "Program Name", sortable: true },
@@ -52,29 +62,42 @@ export default function TrainingRecordsTable() {
       { uid: "dates", name: "Schedule", sortable: true },
       { uid: "status", name: "Status", sortable: true },
     ],
-    rowCell: (item, columnKey) => {
-      switch (columnKey) {
+    rowCell: (
+      record: TrainingRecord,
+      columnKey: React.Key
+    ): React.ReactElement => {
+      const key = columnKey as string;
+
+      switch (key) {
         case "employee":
           return (
-            <div>
-              <p className="font-medium">
-                {`${item.trans_employees?.first_name || "N/A"} ${
-                  item.trans_employees?.last_name || "N/A"
+            <div className="flex items-center gap-4">
+              <Avatar
+                src={record.trans_employees?.picture || ""}
+                alt={`${record.trans_employees?.first_name || "N/A"} ${
+                  record.trans_employees?.last_name || "N/A"
                 }`}
-              </p>
-              <p className="text-small text-gray-500">
-                {item.trans_employees?.ref_departments?.name || "N/A"}
-              </p>
+              />
+              <div>
+                <p className="font-medium">
+                  {`${record.trans_employees?.first_name || "N/A"} ${
+                    record.trans_employees?.last_name || "N/A"
+                  }`}
+                </p>
+                <p className="text-small text-gray-500">
+                  {record.trans_employees?.ref_departments?.name || "N/A"}
+                </p>
+              </div>
             </div>
           );
         case "program":
           return (
             <div>
               <p className="font-medium">
-                {item.ref_training_programs?.name || "N/A"}
+                {record.ref_training_programs?.name || "N/A"}
               </p>
               <p className="text-small text-gray-500">
-                {item.ref_training_programs?.location || "N/A"}
+                {record.ref_training_programs?.location || "N/A"}
               </p>
             </div>
           );
@@ -82,40 +105,38 @@ export default function TrainingRecordsTable() {
           return (
             <Chip
               color={
-                item.ref_training_programs?.type === "training"
+                record.ref_training_programs?.type === "training"
                   ? "primary"
                   : "secondary"
               }
               variant="flat"
             >
-              {item.ref_training_programs?.type || "N/A"}
+              {record.ref_training_programs?.type || "N/A"}
             </Chip>
           );
         case "instructor":
           return (
-            <p>
-              {`${item.ref_training_programs?.instructor_name || "N/A"}`}
-            </p>
+            <p>{record.ref_training_programs?.instructor_name || "N/A"}</p>
           );
         case "duration":
           return (
-            <p>{item.ref_training_programs?.hour_duration || "N/A"} hours</p>
+            <p>{record.ref_training_programs?.hour_duration || "N/A"} hours</p>
           );
         case "dates":
           return (
             <div className="text-small">
               <p>
                 Start:{" "}
-                {item.ref_training_programs?.start_date
-                  ? dayjs(item.ref_training_programs.start_date).format(
+                {record.ref_training_programs?.start_date
+                  ? toGMT8(record.ref_training_programs.start_date).format(
                       "MMM DD, YYYY"
                     )
                   : "N/A"}
               </p>
               <p>
                 End:{" "}
-                {item.ref_training_programs?.end_date
-                  ? dayjs(item.ref_training_programs.end_date).format(
+                {record.ref_training_programs?.end_date
+                  ? toGMT8(record.ref_training_programs.end_date).format(
                       "MMM DD, YYYY"
                     )
                   : "N/A"}
@@ -126,24 +147,26 @@ export default function TrainingRecordsTable() {
           return (
             <div className="flex flex-col gap-1">
               <Chip
-                color={getStatusColor(item.status || "unknown")}
+                color={getStatusColor(record.status || "unknown")}
                 variant="dot"
               >
-                {item.status || "N/A"}
+                {record.status || "N/A"}
               </Chip>
               <Chip
                 color={
-                  item.ref_training_programs?.is_active ? "success" : "danger"
+                  record.ref_training_programs?.is_active ? "success" : "danger"
                 }
                 size="sm"
                 variant="flat"
               >
-                {item.ref_training_programs?.is_active ? "Active" : "Inactive"}
+                {record.ref_training_programs?.is_active
+                  ? "Active"
+                  : "Inactive"}
               </Chip>
             </div>
           );
         default:
-          return <></>;
+          return <div>-</div>;
       }
     },
   };
@@ -161,67 +184,105 @@ export default function TrainingRecordsTable() {
     }
   };
 
-  const handleRowAction = (key: Key) => {
-    router.push(`/trainings-and-seminars/emprecords/view/${key}`);
+  const FilterItems = [
+    {
+      category: "Type",
+      filtered: Array.from(
+        new Set(records.map((r) => r.ref_training_programs?.type))
+      )
+        .filter(Boolean)
+        .map((type) => ({
+          key: "ref_training_programs.type",  // Changed from just ref_training_programs
+          value: type || "",
+          name: type || "",
+          uid: type || "",
+        })),
+    },
+    {
+      category: "Status",
+      filtered: Array.from(
+        new Set(records.map((r) => r.status))
+      )
+        .filter(Boolean)
+        .map((status) => ({
+          key: "status",
+          value: status || "",
+          name: status || "",
+          uid: status || "",
+        })),
+    }
+  ];
+
+  const sortProps = {
+    sortItems: [
+      { name: "Program", key: "ref_training_programs" as keyof TrainingRecord },
+      { name: "Status", key: "status" as keyof TrainingRecord },
+      {
+        name: "Enrollment Date",
+        key: "enrollement_date" as keyof TrainingRecord,
+      },
+    ],
   };
 
-  return (
-    <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex gap-4">
-          <Select
-            label="Type"
-            selectedKeys={[selectedType]}
-            onChange={(e) => {
-              setSelectedType(e.target.value);
-            }}
-            className="w-32"
-          >
-            <SelectItem key="all" value="all">
-              All
-            </SelectItem>
-            <SelectItem key="training" value="training">
-              Training
-            </SelectItem>
-            <SelectItem key="seminars" value="seminars">
-              Seminars
-            </SelectItem>
-          </Select>
-          <Select
-            label="Status"
-            selectedKeys={[selectedStatus]}
-            onChange={(e) => {
-              setSelectedStatus(e.target.value);
-            }}
-            className="w-32"
-          >
-            <SelectItem key="all" value="all">
-              All
-            </SelectItem>
-            <SelectItem key="active" value="active">
-              Active
-            </SelectItem>
-            <SelectItem key="inactive" value="inactive">
-              Inactive
-            </SelectItem>
-          </Select>
-        </div>
-        <SearchFilter
-          searchConfig={[
-            { key: ["trans_employees", "first_name"], label: "Employee Name" },
-            { key: ["ref_training_programs", "name"], label: "Program Name" },
-          ]}
-          items={records}
-          setResults={() => {}} // Placeholder, as filtering is now handled internally
+  if (isLoading) {
+    return (
+      <section className="w-full h-full flex gap-4 overflow-hidden">
+        <DataDisplay
+          defaultDisplay="table"
+          title="Training Records"
+          data={[]}
+          isLoading={true}
+          onTableDisplay={{
+            config: TableConfigurations,
+            layout: "auto",
+          }}
         />
-      </div>
-      <TableData
-        config={config}
-        items={filteredRecords}
-        isLoading={isLoading}
-        title="Training & Seminar Records"
-        onRowAction={handleRowAction}
+      </section>
+    );
+  }
+
+  if (!records || records.length === 0) {
+    return <EmptyState />;
+  }
+
+  return (
+    <section className="w-full h-full flex gap-4 overflow-hidden">
+      <DataDisplay
+        defaultDisplay="table"
+        title="Training Records"
+        data={records}
+        filterProps={{
+          filterItems: FilterItems,
+        }}
+        isLoading={false}
+        onTableDisplay={{
+          config: TableConfigurations,
+          layout: "auto",
+          onRowAction: handleOnSelected,
+        }}
+        paginationProps={{
+          data_length: records.length,
+        }}
+        searchProps={{
+          searchingItemKey: [
+            "trans_employees",
+            "ref_training_programs",
+            "status",
+          ],
+        }}
+        sortProps={sortProps}
+        // In your TrainingRecordsTable component
+        onView={
+          selectedRecord && (
+            <ViewRecord
+              record={selectedRecord}
+              onClose={() => setSelectedRecord(null)}
+              onRecordUpdated={handleRecordUpdated}
+              sortedRecords={records}
+            />
+          )
+        }
       />
-    </div>
+    </section>
   );
 }

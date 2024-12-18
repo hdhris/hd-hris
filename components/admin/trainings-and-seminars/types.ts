@@ -1,4 +1,4 @@
-// components/admin/trainings-and-seminars/emprecords/types.ts
+// types.ts
 export interface TrainingRecord {
     id: number;
     employee_id: number;
@@ -23,6 +23,8 @@ export interface TrainingRecord {
         };
     };
     trans_employees: {
+        picture: string;
+        email:string;
         first_name: string;
         last_name: string;
         ref_departments: {
@@ -30,3 +32,18 @@ export interface TrainingRecord {
         };
     };
 }
+
+// Define searchable paths for type safety
+export type SearchableTrainingKeys = 
+  | "trans_employees.first_name" 
+  | "trans_employees.last_name"
+  | "ref_training_programs.name"
+  | "ref_training_programs.type"
+  | "status";
+
+// Define sortable paths
+export type SortableTrainingKeys = 
+  | "ref_training_programs.name"
+  | "ref_training_programs.start_date"
+  | "status"
+  | "enrollement_date";

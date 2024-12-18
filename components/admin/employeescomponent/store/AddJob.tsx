@@ -68,8 +68,8 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       name: "superior_id",
       label: "Next position",
       type: "select",
-      placeholder: "Select superior position",
-      description: "Select the superior position (optional)",
+      placeholder: "Select next position",
+      description: "Select the next position for this job for promotion (optional)",
       config: {
         options:
           jobPositions?.map((job) => ({

@@ -432,9 +432,9 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
         {status.data && (
           <div className="flex justify-end mt-2">
             <Button 
-              size="sm"
-              variant="light"
-              startContent={<BiEdit className="text-default-500" />}
+              size="md"
+              color="primary"
+              startContent={<BiEdit className="text-default-100" />}
               onPress={() => handleModalOpen(status.modalType)}
               isDisabled={isStatusUpdateSubmitting}
             >

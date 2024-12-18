@@ -37,6 +37,8 @@ export async function GET(req: NextRequest) {
                 },
                 trans_employees: {
                     select: {
+                        picture:true,
+                        email:true,
                         first_name: true,
                         last_name: true,
                         ref_departments: {

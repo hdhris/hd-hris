@@ -14,6 +14,7 @@ import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
 import SearchFilter from "@/components/common/filter/SearchFilter";
 import { mutate } from "swr";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 interface Seminar {
   id: number;
@@ -73,8 +74,8 @@ export default function SeminarTable() {
         case "dates":
           return (
             <div className="text-small">
-              <p>Start: {new Date(item.start_date).toLocaleDateString()}</p>
-              <p>End: {new Date(item.end_date).toLocaleDateString()}</p>
+              <p>Start: {toGMT8(item.start_date).format("MMM DD, YYYY")}</p>
+              <p>End: {toGMT8(item.end_date).format("MMM DD, YYYY")}</p>
             </div>
           );
         case "status":

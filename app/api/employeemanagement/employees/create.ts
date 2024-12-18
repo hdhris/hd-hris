@@ -6,14 +6,17 @@ import SimpleAES from "@/lib/cryptography/3des";
 import { sendEmail } from "@/lib/utils/sendEmail";
 import { employeeSchema } from "./types";
 import { parseJsonInput } from "./utils";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const prisma = globalThis.prisma || new PrismaClient({
-  log: ['error'], // Only log errors regardless of environment
-});
+const prisma =
+  globalThis.prisma ||
+  new PrismaClient({
+    log: ["error"], // Only log errors regardless of environment
+  });
 
 if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
 
@@ -39,7 +42,6 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
   return await prisma.$transaction(
     async (tx) => {
       try {
-
         const existingUser = await tx.trans_users.findFirst({
           where: {
             OR: [
@@ -68,7 +70,17 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
           },
         });
 
-    
+        const parseDates = (dateString: string | null) => {
+          if (!dateString) return null;
+          const date = new Date(dateString);
+          return toGMT8(date)
+            .hour(12)
+            .minute(0)
+            .second(0)
+            .millisecond(0)
+            .toDate();
+        };
+
         const educationalBackground = parseJsonInput(educational_bg_json);
         const familyBackground = parseJsonInput(family_bg_json);
 
@@ -77,26 +89,24 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
             ...rest,
             branch_id: Number(rest.branch_id),
             employement_status_id: Number(rest.employement_status_id),
-            hired_at: rest.hired_at ? new Date(rest.hired_at) : null,
-            birthdate: rest.birthdate ? new Date(rest.birthdate) : null,
+            hired_at: rest.hired_at ? parseDates(rest.hired_at) : null,
+            birthdate: rest.birthdate ? parseDates(rest.birthdate) : null,
             educational_bg_json: educationalBackground,
             family_bg_json: familyBackground,
-            created_at: new Date(),
-            updated_at: new Date(),
+            created_at: toGMT8().toISOString(),
+            updated_at: toGMT8().toISOString(),
           },
         });
 
-       
         await tx.acl_user_access_control.create({
           data: {
             employee_id: newEmployee.id,
             user_id: newUser.id,
             privilege_id: Number(credentials.privilege_id),
-            created_at: new Date()
-          }
+            created_at: new Date(),
+          },
         });
 
-        
         if (job_id) {
           await tx.trans_employees.update({
             where: { id: newEmployee.id },
@@ -163,7 +173,7 @@ export async function POST(request: NextRequest) {
       !data?.employee?.email ||
       !data?.credentials?.username ||
       !data?.credentials?.password ||
-      !data?.credentials?.privilege_id  // Add this check
+      !data?.credentials?.privilege_id // Add this check
     ) {
       return NextResponse.json(
         {
@@ -172,7 +182,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Validate employee data
     let validatedData;
     try {
@@ -224,7 +234,10 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
 
-    if (error instanceof Error && error.message === "Username or email already exists") {
+    if (
+      error instanceof Error &&
+      error.message === "Username or email already exists"
+    ) {
       return NextResponse.json(
         {
           message: "Username or email already exists",
