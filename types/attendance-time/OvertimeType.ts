@@ -1,22 +1,4 @@
 
-// interface Employee {
-//   id: number;
-//   picture: string;
-//   last_name: string;
-//   first_name: string;
-//   middle_name: string;
-//   email: string;
-//   ref_departments: {
-//     id: number;
-//     name: string;
-//   };
-//   ref_job_classes: {
-//     id: number;
-//     name: string;
-//     pay_rate: number;
-//   };
-// }
-
 import { UserEmployee, UserReviewer } from "@/helper/include-emp-and-reviewr/include";
 import { Evaluations } from "../leaves/leave-evaluators-types";
 
@@ -40,9 +22,7 @@ export interface OvertimeEntry {
   reason: string;
   deleted_at: string | null; // Nullable for deleted entries
   trans_employees_overtimes: UserEmployee; // Employee details
-  trans_employees_overtimes_approvedBy: UserReviewer; // Approver details
-  full_name: string;
-  approvedBy_full_name: string;
+  trans_employees_overtimes_createdBy: UserReviewer; // Approver details
   evaluators: Evaluations;
 };
 

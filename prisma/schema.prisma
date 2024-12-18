@@ -93,6 +93,7 @@ model dim_schedules {
   end_date            DateTime?            @db.Timestamptz(6)
   clock_in            DateTime?            @db.Time(6)
   clock_out           DateTime?            @db.Time(6)
+  break_min           Int?
   ref_batch_schedules ref_batch_schedules? @relation(fields: [batch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_schedules_ref_batch_schedule_2")
   trans_employees     trans_employees?     @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_schedule_employees1")
 
@@ -334,17 +335,6 @@ model ref_training_programs {
   trans_employees           trans_employees?            @relation(fields: [employee_instructor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([deleted_at])
-}
-
-model sys_notifications {
-  id                          Int                          @id @default(autoincrement())
-  notification_id             Int
-  read_at                     DateTime?                    @db.Timestamp(6)
-  created_at                  DateTime                     @db.Timestamp(6)
-  deleted_at                  DateTime?                    @db.Timestamp(6)
-  notification_priorities     Int?
-  trans_notifications         trans_notifications          @relation(fields: [notification_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ref_notification_priorities ref_notification_priorities? @relation(fields: [notification_priorities], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model sys_privileges {
@@ -592,17 +582,18 @@ model trans_payroll_date {
 }
 
 model trans_users {
-  id                      String                   @id(map: "User_pkey") @default(dbgenerated("gen_random_uuid()"))
-  name                    String
-  email                   String                   @unique(map: "User_email_key")
-  emailVerified           DateTime?
-  image                   String?
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime?
-  acl_user_access_control acl_user_access_control?
-  auth_accounts           auth_accounts[]
-  auth_credentials        auth_credentials?
-  trans_notifications     trans_notifications[]
+  id                        String                      @id(map: "User_pkey") @default(dbgenerated("gen_random_uuid()"))
+  name                      String
+  email                     String                      @unique(map: "User_email_key")
+  emailVerified             DateTime?
+  image                     String?
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime?
+  preferences               Json                        @default("{}")
+  acl_user_access_control   acl_user_access_control?
+  auth_accounts             auth_accounts[]
+  auth_credentials          auth_credentials?
+  sys_notification_contents sys_notification_contents[]
 }
 
 model trans_payrolls {
@@ -816,6 +807,7 @@ model ref_signatory_paths {
   signatories_path  String
   created_at        DateTime            @default(now()) @db.Timestamptz(6)
   updated_at        DateTime            @default(now()) @db.Timestamptz(6)
+  signatories_name  String              @default("")
   trans_signatories trans_signatories[]
 }
 
@@ -860,34 +852,37 @@ model trans_signatories {
   @@index([deleted_at])
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model ref_notification_priorities {
-  id                Int                 @id @default(autoincrement())
-  priority_name     String
-  sys_notifications sys_notifications[]
+model sys_notification_contents {
+  id                       Int                        @id(map: "trans_notifications_pkey") @default(autoincrement())
+  title                    String
+  message                  String
+  notification_types_id    Int
+  status                   String                     @db.VarChar
+  timestamp                DateTime                   @db.Timestamp(6)
+  user_id                  String
+  created_at               DateTime                   @default(now()) @db.Timestamptz(6)
+  sys_notification_types   sys_notification_types     @relation(fields: [notification_types_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_notifications_notification_types_id_fkey")
+  trans_users              trans_users                @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_notifications_user_id_fkey")
+  sys_notifications_status sys_notifications_status[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model ref_notification_types {
-  id                  Int                   @id @default(autoincrement())
-  type_name           String                @db.VarChar
-  description         String
-  trans_notifications trans_notifications[]
+model sys_notification_types {
+  id                        Int                         @id(map: "ref_notification_types_pkey") @default(autoincrement())
+  type_name                 String                      @db.VarChar
+  description               String
+  sys_notification_contents sys_notification_contents[]
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model trans_notifications {
-  id                     Int                    @id @default(autoincrement())
-  title                  String
-  message                String
-  notification_types_id  Int
-  status                 String                 @db.VarChar
-  timestamp              DateTime               @db.Timestamp(6)
-  user_id                String
-  created_at             DateTime               @default(now()) @db.Timestamptz(6)
-  sys_notifications      sys_notifications[]
-  ref_notification_types ref_notification_types @relation(fields: [notification_types_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  trans_users            trans_users            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model sys_notifications_status {
+  id                        Int                       @id(map: "sys_notifications_pkey") @default(autoincrement())
+  notification_id           Int
+  read_at                   DateTime?                 @db.Timestamp(6)
+  created_at                DateTime                  @db.Timestamp(6)
+  deleted_at                DateTime?                 @db.Timestamp(6)
+  notification_priorities   Int?
+  sys_notification_contents sys_notification_contents @relation(fields: [notification_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sys_notifications_notification_id_fkey")
 }

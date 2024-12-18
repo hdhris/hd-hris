@@ -1,7 +1,7 @@
 import { BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
 
 export const emp_rev_include = {
-    employee_detail: {
+    employee_full_detail: {
         select: {
             id: true,
             last_name: true,
@@ -50,6 +50,44 @@ export const emp_rev_include = {
                 },
                 include: {
                     ref_batch_schedules: true,
+                },
+            },
+        },
+    },
+    employee_detail: {
+        select: {
+            id: true,
+            last_name: true,
+            middle_name: true,
+            first_name: true,
+            prefix: true,
+            suffix: true,
+            extension: true,
+            email: true,
+            contact_no: true,
+            picture: true,
+            ref_employment_status: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+            ref_departments: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+            ref_branches: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+            ref_job_classes: {
+                select: {
+                    id: true,
+                    name: true,
                 },
             },
         },
@@ -109,6 +147,7 @@ interface EmployeeSchedule {
   end_date: string | null; // ISO timestamp or null
   clock_in: string | null; // ISO timestamp or null
   clock_out: string | null; // ISO timestamp or null
+  break_min: number | null;
   ref_batch_schedules: BatchSchedule;
 }
 

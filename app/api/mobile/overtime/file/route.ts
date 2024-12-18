@@ -17,7 +17,10 @@ export async function GET(req: NextRequest) {
                 deleted_at: null,
                 status: {
                     not: 'rejected',
-                }
+                },
+                date: {
+                    gte: toGMT8().toISOString(),
+                },
             },
             select: {
                 clock_in: true,

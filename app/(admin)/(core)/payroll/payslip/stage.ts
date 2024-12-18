@@ -127,7 +127,7 @@ export async function stageTable(
         const daySchedule = employeeScheduleMap.get(emp.id);
         const timeSchedule = batchScheduleMap.get(daySchedule?.batch_id || 0);
     
-        const ratePerHour =  40; //parseFloat(String(emp.ref_salary_grades.amount)) || 0.0;
+        const ratePerHour = parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0;
         const baseVariables: BaseValueProp = {
           rate_p_hr: ratePerHour,
           total_shft_hr: 80,

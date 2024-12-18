@@ -73,6 +73,7 @@ Table dim_schedules {
   end_date DateTime
   clock_in DateTime
   clock_out DateTime
+  break_min Int
   ref_batch_schedules ref_batch_schedules
   trans_employees trans_employees
 }
@@ -231,6 +232,7 @@ Table ref_job_classes {
   deleted_at DateTime
   max_employees Int
   max_department_instances Int
+  is_superior Boolean [default: false]
   trans_employees trans_employees [not null]
   trans_signatories trans_signatories [not null]
 }
@@ -285,17 +287,6 @@ Table ref_training_programs {
   dim_training_participants dim_training_participants [not null]
   dim_training_schedules dim_training_schedules [not null]
   trans_employees trans_employees
-}
-
-Table sys_notifications {
-  id Int [pk, increment]
-  notification_id Int [not null]
-  read_at DateTime
-  created_at DateTime [not null]
-  deleted_at DateTime
-  notification_priorities Int
-  trans_notifications trans_notifications [not null]
-  ref_notification_priorities ref_notification_priorities
 }
 
 Table sys_privileges {
@@ -538,10 +529,11 @@ Table trans_users {
   image String
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime
+  preferences Json [not null, default: '{}']
   acl_user_access_control acl_user_access_control
   auth_accounts auth_accounts [not null]
   auth_credentials auth_credentials
-  trans_notifications trans_notifications [not null]
+  sys_notification_contents sys_notification_contents [not null]
 }
 
 Table trans_payrolls {
@@ -752,6 +744,7 @@ Table ref_signatory_paths {
   signatories_path String [not null]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [default: `now()`, not null]
+  signatories_name String [not null, default: '']
   trans_signatories trans_signatories [not null]
 }
 
@@ -795,25 +788,7 @@ Table trans_signatories {
   ref_signatory_roles ref_signatory_roles [not null]
 }
 
-Table ref_notification_priorities {
-  id Int [pk, increment]
-  priority_name String [not null]
-  sys_notifications sys_notifications [not null]
-
-  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
-}
-
-Table ref_notification_types {
-  id Int [pk, increment]
-  type_name String [not null]
-  description String [not null]
-  trans_notifications trans_notifications [not null]
-
-  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
-}
-
-Table trans_notifications {
+Table sys_notification_contents {
   id Int [pk, increment]
   title String [not null]
   message String [not null]
@@ -822,12 +797,32 @@ Table trans_notifications {
   timestamp DateTime [not null]
   user_id String [not null]
   created_at DateTime [default: `now()`, not null]
-  sys_notifications sys_notifications [not null]
-  ref_notification_types ref_notification_types [not null]
+  sys_notification_types sys_notification_types [not null]
   trans_users trans_users [not null]
+  sys_notifications_status sys_notifications_status [not null]
 
   Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table sys_notification_types {
+  id Int [pk, increment]
+  type_name String [not null]
+  description String [not null]
+  sys_notification_contents sys_notification_contents [not null]
+
+  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table sys_notifications_status {
+  id Int [pk, increment]
+  notification_id Int [not null]
+  read_at DateTime
+  created_at DateTime [not null]
+  deleted_at DateTime
+  notification_priorities Int
+  sys_notification_contents sys_notification_contents [not null]
 }
 
 Ref: dim_employee_benefits.plan_id > ref_benefit_plans.id [delete: No Action]
@@ -871,10 +866,6 @@ Ref: log_attendances.employee_id > trans_employees.id [delete: No Action]
 Ref: ref_benefit_plans.deduction_id > ref_payheads.id [delete: No Action]
 
 Ref: ref_training_programs.employee_instructor_id > trans_employees.id [delete: No Action]
-
-Ref: sys_notifications.notification_id > trans_notifications.id [delete: No Action]
-
-Ref: sys_notifications.notification_priorities > ref_notification_priorities.id [delete: No Action]
 
 Ref: sys_variables.employee_id - trans_employees.id [delete: No Action]
 
@@ -964,6 +955,8 @@ Ref: trans_signatories.signatory_path_id > ref_signatory_paths.id [delete: No Ac
 
 Ref: trans_signatories.signatory_role_id > ref_signatory_roles.id [delete: No Action]
 
-Ref: trans_notifications.notification_types_id > ref_notification_types.id [delete: No Action]
+Ref: sys_notification_contents.notification_types_id > sys_notification_types.id [delete: No Action]
 
-Ref: trans_notifications.user_id > trans_users.id [delete: No Action]
+Ref: sys_notification_contents.user_id > trans_users.id [delete: No Action]
+
+Ref: sys_notifications_status.notification_id > sys_notification_contents.id [delete: No Action]
