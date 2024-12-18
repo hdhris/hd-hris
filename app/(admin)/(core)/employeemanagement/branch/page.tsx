@@ -135,8 +135,8 @@ const Page: React.FC = () => {
               <Chip
                 className="capitalize"
                 color={branch.is_active ? "success" : "danger"}
-                size="sm"
-                variant="flat"
+                size="md"
+                variant="dot"
               >
                 {branch.is_active ? "Active" : "Inactive"}
               </Chip>

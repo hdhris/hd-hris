@@ -144,8 +144,10 @@ const JobInformationForm: React.FC = () => {
         placeholder: "Select hire date",
         maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
         defaultValue: new Date().toISOString(),
-        classNames: DateStyle,  
+        classNames: DateStyle, 
+        showMonthAndYearPickers:true, 
         validationState: "valid"
+        
       },
     },
     {

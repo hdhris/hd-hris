@@ -129,7 +129,7 @@ const Page: React.FC = () => {
       { uid: "suspendedDate", name: "Suspended Date", sortable: true },
       { uid: "endDate", name: "End Date", sortable: true },
       { uid: "reason", name: "Suspended Reason" },
-      { uid: "signatories", name: "Approved By", sortable: false },
+      { uid: "signatories", name: "Suspended by", sortable: false },
       { uid: "actions", name: "Actions" },
     ],
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
@@ -203,7 +203,7 @@ const Page: React.FC = () => {
                     id: signatory.id,
                   }}
                   avatarProps={{
-                    classNames: { base: "!size-6" },
+                    classNames: { base: "!size-9" },
                     isBordered: true,
                   }}
                 />
@@ -217,7 +217,7 @@ const Page: React.FC = () => {
                     id: suspensionData.initiatedBy.id,
                   }}
                   avatarProps={{
-                    classNames: { base: "!size-6" },
+                    classNames: { base: "!size-9" },
                     isBordered: true,
                   }}
                 />
@@ -316,7 +316,7 @@ const Page: React.FC = () => {
         sortProps={sortProps}
         onView={
           selectedEmployee && (
-            <div className="max-w-[500px] overflow-y-auto">
+          
               <ViewEmployee
                 employee={selectedEmployee}
                 onClose={() => setSelectedEmployee(null)}
@@ -324,7 +324,7 @@ const Page: React.FC = () => {
                 sortedEmployees={suspendedEmployees}
                 signatories={signatories}
               />
-            </div>
+          
           )
         }
       />

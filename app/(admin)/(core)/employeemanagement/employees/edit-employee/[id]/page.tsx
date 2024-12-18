@@ -18,6 +18,7 @@ import EditJobInformationForm from "@/components/admin/employeescomponent/update
 import EditScheduleSelection from "@/components/admin/employeescomponent/update/EditScheduleSelection";
 import EditAccountForm from "@/components/admin/employeescomponent/update/EditAccount";
 import { mutate } from "swr";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 type EmployeeFields = keyof EmployeeFormData;
 
@@ -33,7 +34,7 @@ const tabFieldsMap = {
     "email",
     "contact_no",
     "birthdate",
-  "addr_region",
+    "addr_region",
     "addr_province",
     "addr_municipal",
     "addr_baranggay",
@@ -225,13 +226,13 @@ export default function EditEmployeePage({
 
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
-  
+
     try {
       toast({
         title: "Updating",
         description: "Updating employee information...",
       });
-  
+
       // Handle picture upload
       let pictureUrl = typeof data.picture === "string" ? data.picture : "";
       if (data.picture instanceof File) {
@@ -241,7 +242,20 @@ export default function EditEmployeePage({
         });
         pictureUrl = result.url;
       }
-  
+
+      const handleDate = (dateString: string | null) => {
+        if (!dateString) return null;
+
+        const date = new Date(dateString);
+        const gmt8Date = toGMT8(date)
+          .hour(12)
+          .minute(0)
+          .second(0)
+          .millisecond(0);
+
+        return gmt8Date.toISOString();
+      };
+
       // Process all certificates in parallel
       const [certificates, mastersCertificates, doctorateCertificates] =
         await Promise.all([
@@ -249,7 +263,7 @@ export default function EditEmployeePage({
           processCertificates(data.mastersCertificates),
           processCertificates(data.doctorateCertificates),
         ]);
-  
+
       // Prepare employee data - similar structure to create endpoint
       const employeeData = {
         // Basic Information
@@ -263,10 +277,8 @@ export default function EditEmployeePage({
         gender: data.gender,
         email: data.email,
         contact_no: data.contact_no,
-        birthdate: data.birthdate
-          ? new Date(data.birthdate).toISOString()
-          : null,
-        hired_at: data.hired_at ? new Date(data.hired_at).toISOString() : null,
+        birthdate: handleDate(data.birthdate),
+        hired_at: handleDate(data.hired_at),
         addr_region: parseInt(data.addr_region, 10),
         addr_province: parseInt(data.addr_province, 10),
         addr_municipal: parseInt(data.addr_municipal, 10),
@@ -319,9 +331,12 @@ export default function EditEmployeePage({
         `/api/employeemanagement/employees?id=${params.id}`,
         employeeData
       );
-  
+
       if (response.status === 200) {
-        mutate(`/api/employeemanagement/employees?id=${params.id}`, response.data);
+        mutate(
+          `/api/employeemanagement/employees?id=${params.id}`,
+          response.data
+        );
         router.push("/employeemanagement/employees");
         toast({
           title: "Success",
@@ -363,10 +378,9 @@ export default function EditEmployeePage({
     try {
       const accountData = employeeData.userAccount?.auth_credentials || null;
       const privilegeData = employeeData.acl_user_access_control || null;
-  
+
       // Log to check if we're getting the privilege data
       // console.log("Privilege Data:", privilegeData);
-  
 
       let daysArray: string[] = [];
       if (employeeData.dim_schedules?.[0]?.days_json) {
@@ -417,10 +431,10 @@ export default function EditEmployeePage({
         email: employeeData.email || "",
         contact_no: employeeData.contact_no || "",
         birthdate: employeeData.birthdate
-          ? new Date(employeeData.birthdate).toISOString().split("T")[0]
+          ? toGMT8(employeeData.birthdate).toISOString().split("T")[0]
           : "",
         hired_at: employeeData.hired_at
-          ? new Date(employeeData.hired_at).toISOString().split("T")[0]
+          ? toGMT8(employeeData.hired_at).toISOString().split("T")[0]
           : "",
         addr_region: employeeData.addr_region?.toString() || "",
         addr_province: employeeData.addr_province?.toString() || "",
@@ -547,7 +561,9 @@ export default function EditEmployeePage({
                     hasAccount={
                       !!employeeData?.userAccount?.auth_credentials?.username
                     }
-                    currentPrivilegeId={employeeData?.acl_user_access_control?.privilege_id || ""}
+                    currentPrivilegeId={
+                      employeeData?.acl_user_access_control?.privilege_id || ""
+                    }
                   />
                 </div>
               </div>

@@ -209,7 +209,7 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
             picture={employee?.picture || ""}
             email={employee?.email || "No Email"}
           />
-          <Chip size="md" color={getStatusColor(isActive)} variant="flat">
+          <Chip size="md" color={getStatusColor(isActive)} variant="dot">
             {isActive
               ? "Active"
               : employee.suspension_json
@@ -223,8 +223,9 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
         </div>
       }
       body={
-        <>
+        <div className="max-w-[400px] overflow-y-auto">
           <CardTable
+          
             data={[
               {
                 label: "Department",
@@ -320,7 +321,7 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
             )}
 
           <hr className="border border-default-400 space-y-2" />
-        </>
+        </div>
       }
       onDanger={
         <FormProvider {...statusMethods}>

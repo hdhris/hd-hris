@@ -98,7 +98,7 @@ const Page: React.FC = () => {
     ],
     rowCell: (job: JobPosition, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
-      const cellClasses = "cursor-pointer hover:bg-gray-50";
+      const cellClasses = "cursor-pointer";
 
       switch (key) {
         case "name":
@@ -115,8 +115,8 @@ const Page: React.FC = () => {
           );
         case "employeeCount":
           return (
-            <div className={cellClasses}>
-              <span>{job.trans_employees?.length || 0}</span>
+            <div className="pl-8">
+              <span >{job.trans_employees?.length || 0}</span>
             </div>
           );
         case "status":
@@ -125,8 +125,8 @@ const Page: React.FC = () => {
               <Chip
                 className="capitalize"
                 color={job.is_active ? "success" : "danger"}
-                size="sm"
-                variant="flat"
+                size="md"
+                variant="dot"
               >
                 {job.is_active ? "Active" : "Inactive"}
               </Chip>

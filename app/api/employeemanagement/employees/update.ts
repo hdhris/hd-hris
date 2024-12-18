@@ -8,6 +8,7 @@ import { parseJsonInput } from "./utils";
 import { getSession } from "next-auth/react"
 import { getSignatory } from "@/server/signatory"; 
 import { auth } from "@/auth";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 declare global {
   var prisma: PrismaClient | undefined;
 }
@@ -67,7 +68,16 @@ async function updateEmployee(id: number, employeeData: any) {
         if (!existingEmployee) {
           throw new Error("Employee not found");
         }
-
+        const parseDates = (dateString: string | null) => {
+          if (!dateString) return null;
+          const date = new Date(dateString);
+          return toGMT8(date)
+            .hour(12)
+            .minute(0)
+            .second(0)
+            .millisecond(0)
+            .toDate();
+        };
         const educationalBackground = parseJsonInput(educational_bg_json);
         const familyBackground = parseJsonInput(family_bg_json);
 
@@ -77,12 +87,12 @@ async function updateEmployee(id: number, employeeData: any) {
             ...rest,
             branch_id: Number(rest.branch_id),
             employement_status_id: Number(rest.employement_status_id),
-            hired_at: rest.hired_at ? new Date(rest.hired_at) : null,
-            birthdate: rest.birthdate ? new Date(rest.birthdate) : null,
+            hired_at: rest.hired_at ? parseDates(rest.hired_at) : null,
+            birthdate: rest.birthdate ? parseDates(rest.birthdate) : null,
             educational_bg_json: educationalBackground,
             family_bg_json: familyBackground,
-            created_at: new Date(),
-            updated_at: new Date(),
+            created_at: toGMT8().toISOString(),
+            updated_at: toGMT8().toISOString(),
           },
         });
 
