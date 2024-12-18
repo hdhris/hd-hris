@@ -90,7 +90,6 @@ async function attendanceData({
                     const daySchedule = employeeScheduleMap.get(employeeId);
                     // const timeSchedule = batchScheduleMap.get(daySchedule?.batch_id || 0);
                     const timeSchedule = getEmployeeSchedule(employeeSchedule, employeeId, date); //batchScheduleMap.get(daySchedule?.batch_id || 0);
-                    console.log(timeSchedule);
 
                     // Initialize a record for the employee incase if it is null
                     if (!statusesByDate[date][employeeId]) {
@@ -104,7 +103,6 @@ async function attendanceData({
                     if (!daySchedule || !timeSchedule) return;
 
                     const timeIn = toGMT8(timeSchedule.clock_in!).subtract(offset, "hours");
-                    // console.log("Fetched: ", timeSchedule.clock_in, "Offsetted: ", timeIn.toISOString());
                     const timeOut = toGMT8(timeSchedule.clock_out!).subtract(offset, "hours");
 
                     // If current day does not exists in employee's schedule
@@ -249,7 +247,6 @@ async function attendanceData({
                     // some attendance category (e.g AM-in, AM-out, PM-in, and PM-out) is left unstated.
                     // Perform a validation if it is considered "ABSENT" or "NO BREAK"
 
-                    console.log(statusesByDate);
                     // If not punched IN at morning, mark as absent
                     if (!statusesByDate[date][employeeId].amIn) {
                         statusesByDate[date][employeeId].amIn = {
