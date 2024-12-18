@@ -5,7 +5,7 @@ import {ControllerRenderProps, FieldValues, useFormContext} from "react-hook-for
 import InputStyle, {DateStyle} from "@/lib/custom/styles/InputStyle";
 import {SelectionProp} from "./types/SelectionProp";
 import {InputProps, TextAreaProps} from "@nextui-org/input";
-import {Select, SelectItem} from "@nextui-org/select";
+import {Select, SelectItem} from "@nextui-org/react";
 import {
     Autocomplete,
     AutocompleteItem,
@@ -337,7 +337,6 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 selectedKeys={new Set<Key>([field.value as Key]) || "all"} // Cast field.value to Key
                                 {...field}
                                 {...(item.config as Omit<SelectProps, "label">)}
-
                             >
                                 {/*<Radio value="buenos-aires">Buenos Aires</Radio>*/}
                                 {(item.config as any)?.options?.map((option: GroupInputOptions) => (

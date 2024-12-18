@@ -26,6 +26,6 @@ export const pluralize = (n: number, baseWord: string): string => {
         return `${n} ${baseWord + "es"}`;
     }
 
-    // Default case: add "s"
+    // Default case: create "s"
      return `${n} ${baseWord + "s"}`;
 };

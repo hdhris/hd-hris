@@ -115,7 +115,7 @@ const AddSalaryGrade: React.FC<AddSalaryGradeProps> = ({ onSalaryAdded }) => {
           title: "Error",
           description:
             error.response.data.message ||
-            "Failed to add new salary grade. Please try again.",
+            "Failed to create new salary grade. Please try again.",
           duration: 3000,
         });
       } else {

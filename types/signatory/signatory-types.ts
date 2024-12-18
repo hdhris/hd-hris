@@ -36,3 +36,8 @@ export interface SignatoryPath {
     name: string
     signatories: Signatory[];
 }
+
+export interface SignatoryRoles{
+    id: number
+    signatory_role_name: string
+}

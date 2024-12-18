@@ -9,7 +9,7 @@ type GridCardProps<T extends { key: React.Key }> = {
 };
 
 export default function GridCard<T extends { key: React.Key }>({data, header, body}: GridCardProps<T>) {
-    // Since `key` is guaranteed in `T`, no need to add it manually
+    // Since `key` is guaranteed in `T`, no need to create it manually
     const dataWithKey = data.map((item, index) => ({
         ...item, key: item.key as number, // The key is already present
     }));

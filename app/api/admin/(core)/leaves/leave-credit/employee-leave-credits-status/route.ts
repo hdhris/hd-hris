@@ -43,7 +43,6 @@ export async function GET() {
             }, select: {
                 id: true,
                 name: true,
-                is_applicable_to_all: true,
                 trans_leave_types: {
                     select: {
                         ref_employment_status: {
@@ -74,7 +73,7 @@ export async function GET() {
             return{
                 id: item.id,
                 name: item.name,
-                applicable_to_employee_types: item.is_applicable_to_all ? "all" : item.trans_leave_types.map(item => item.ref_employment_status.name)[0]
+                applicable_to_employee_types: item.trans_leave_types.map(item => item.ref_employment_status.name)
             }
         })
 

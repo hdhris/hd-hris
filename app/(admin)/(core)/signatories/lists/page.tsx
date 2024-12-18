@@ -1,5 +1,5 @@
 "use client"
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useMemo} from 'react';
 import DataDisplay from '@/components/common/data-display/data-display';
 import {useSignatories} from "@/services/queries";
 import BorderCard from "@/components/common/BorderCard";
@@ -14,44 +14,40 @@ import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {icon_size_sm} from "@/lib/utils";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
-import AddSignatoryForm from "@/components/admin/signatory/list-form/add-signatory-form";
+import SignatoryForm from "@/components/admin/signatory/list-form/add-signatory-form";
+import AddJobRoleForm from "@/components/admin/signatory/list-form/add-job-role/add-job-role-form";
+import {JobTypes} from "@/types/signatory/job/job-types";
+import {SignatoryRoles} from "@/types/signatory/signatory-types";
 
 function Page() {
-    const {data, isLoading} = useSignatories()
-    const [isOpen, setIsOpen] = useState<boolean>(false)
+    const {data, isLoading, mutate} = useSignatories()
     const signatories = useMemo(() => {
         if (data) {
             return data
         }
-
         return []
     }, [data])
 
-    const onOpenDrawer = useCallback(() => {
-        setIsOpen(true)
-    }, [setIsOpen])
 
     SetNavEndContent(() => {
-        return (<>
-                <Button {...uniformStyle()} onClick={onOpenDrawer}>
-                    Add Signatory
-                </Button>
-                <AddSignatoryForm isOpen={isOpen} onOpen={setIsOpen}/>
-            </>)
+        return (<SignatoryForm/>)
     })
-    return (<DataDisplay
+    return (
+        <DataDisplay
         isLoading={isLoading}
         data={signatories}
         defaultDisplay="grid"
         searchProps={{
             searchingItemKey: ["name"]
         }}
-        onGridDisplay={(data, key) => {
+        onGridDisplay={(data) => {
+            console.log("Test: ", data.signatories.map(item => ({id: item.job_classes.id, name: item.job_classes.name})))
+            const jobs: JobTypes[] = data.signatories.map(item => ({id: item.job_classes.id, name: item.job_classes.name}))
+            const roles: SignatoryRoles[] = data.signatories.map(item => ({id: item.signatory_roles.id, signatory_role_name: item.signatory_roles.signatory_role_name}))
             return (<>
                 <BorderCard className="w-full max-w-[450px]">
                     <Section className="ms-0" title={data.name} subtitle="">
-                        <Button {...uniformStyle()} variant="light" isIconOnly><LuPlus
-                            className={icon_size_sm}/></Button>
+                        <AddJobRoleForm id={data.id} name={data.name} existingJobs={jobs} existingRoles={roles}/>
                     </Section>
                     <div className="h-80 mt-4 pb-4 px-2 overflow-y-auto">
                         <AnimatedList className="mt-2">
@@ -88,3 +84,4 @@ function Page() {
 }
 
 export default Page;
+

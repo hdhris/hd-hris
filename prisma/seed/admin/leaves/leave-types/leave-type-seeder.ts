@@ -15,7 +15,6 @@ export async function seedLeaveTypes(prisma: any) {
                 "paid_leave": true,
                 "carry_over": true,
                 "attachment_required": false,
-                "is_applicable_to_all": true,
                 "created_at": new Date(),
                 "updated_at": new Date()
             },
@@ -28,7 +27,6 @@ export async function seedLeaveTypes(prisma: any) {
                 "paid_leave": true,
                 "carry_over": false,
                 "attachment_required": true,
-                "is_applicable_to_all": false,
                 "created_at": new Date(),
                 "updated_at": new Date()
             },
@@ -41,7 +39,6 @@ export async function seedLeaveTypes(prisma: any) {
                 "paid_leave": true,
                 "carry_over": false,
                 "attachment_required": true,
-                "is_applicable_to_all": false,
                 "created_at": new Date(),
                 "updated_at": new Date()
             },
@@ -54,7 +51,6 @@ export async function seedLeaveTypes(prisma: any) {
                 "paid_leave": true,
                 "carry_over": false,
                 "attachment_required": true,
-                "is_applicable_to_all": false,
                 "created_at": new Date(),
                 "updated_at": new Date()
             },
@@ -67,7 +63,6 @@ export async function seedLeaveTypes(prisma: any) {
                 "paid_leave": true,
                 "carry_over": false,
                 "attachment_required": true,
-                "is_applicable_to_all": false,
                 "created_at": new Date(),
                 "updated_at": new Date()
             },
@@ -80,7 +75,6 @@ export async function seedLeaveTypes(prisma: any) {
                 "paid_leave": true,
                 "carry_over": false,
                 "attachment_required": true,
-                "is_applicable_to_all": false,
                 "created_at": new Date(),
                 "updated_at": new Date()
             },
@@ -93,7 +87,6 @@ export async function seedLeaveTypes(prisma: any) {
                 "paid_leave": true,
                 "carry_over": false,
                 "attachment_required": true,
-                "is_applicable_to_all": false,
                 "created_at": new Date(),
                 "updated_at": new Date()
             },
@@ -106,7 +99,6 @@ export async function seedLeaveTypes(prisma: any) {
                 "paid_leave": true,
                 "carry_over": true,
                 "attachment_required": false,
-                "is_applicable_to_all": true,
                 "created_at": new Date(),
                 "updated_at": new Date()
             },
@@ -119,7 +111,6 @@ export async function seedLeaveTypes(prisma: any) {
                 "paid_leave": true,
                 "carry_over": true,
                 "attachment_required": false,
-                "is_applicable_to_all": false,
                 "created_at": new Date(),
                 "updated_at": new Date()
             },
@@ -132,7 +123,6 @@ export async function seedLeaveTypes(prisma: any) {
                 "paid_leave": true,
                 "carry_over": false,
                 "attachment_required": false,
-                "is_applicable_to_all": true,
                 "created_at": new Date(),
                 "updated_at": new Date()
             }

@@ -7,10 +7,6 @@ function RootLayout({children}: { children: React.ReactNode }) {
             key: 'lists',
             title: 'Signatory Lists',
             path: 'lists'
-        }, {
-            key: 'configuration',
-            title: 'Signatory Configuration',
-            path: 'configuration'
         }
     ]
     return (

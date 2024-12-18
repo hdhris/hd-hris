@@ -12,7 +12,7 @@ interface ApplicableTo{
 }
 export interface LeaveType {
     id: number;
-    applicable_to_employee_types: ApplicableTo; // Adjust if needed
+    applicable_to_employee_types: ApplicableTo[]; // Adjust if needed
     attachment_required: boolean;
     code: string;
     created_at: string; // You might consider using Date if you want to handle dates directly
@@ -38,7 +38,7 @@ export interface LeaveRequestPaginate {
 export interface LeaveTypeForEmployee{
     id: number;
     name: string;
-    applicable_to_employee_types: string;
+    applicable_to_employee_types: string[];
 }
 
 

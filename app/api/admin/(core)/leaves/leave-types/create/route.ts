@@ -11,35 +11,21 @@ export async function POST(request: NextRequest) {
         const data = await request.json();
 
 
-        const data_validation = await LeaveTypeSchema.safeParseAsync(data)
+        console.log("Data Received: ", data)
+        const data_validation = await LeaveTypeSchema.omit({applicableToEmployeeTypes: true}).safeParseAsync(data)
 
 
 
         if(data_validation.success){
             const verify = await prisma.ref_leave_type_details.findUnique({
                 where: {
-                    code: data_validation.data.code
+                    code: data_validation.data.code,
+                    name: data_validation.data.name,
                 }
             })
-            if(verify) return NextResponse.json({success: false, message: "Cannot have duplicate code. Try Again"}, {status: 409})
-            const is_applicable_for_all = data_validation.data.applicableToEmployeeTypes === "all"
-            let employee_status_ids = []
-            if(is_applicable_for_all){
-                const ids =  await prisma.ref_employment_status.findMany({
-                    where: {
-                        deleted_at: null
-                    },
-                    select: {
-                        id: true
-                    }
-                })
+            if(verify) return NextResponse.json({success: false, message: "Cannot have duplicate name or code. Try Again"}, {status: 409})
 
-                employee_status_ids = [...ids.map(id => id.id)]
-            } else {
-                employee_status_ids.push(Number(data_validation.data.applicableToEmployeeTypes))
-            }
-
-            await prisma.ref_leave_type_details.create({
+            const create = await prisma.ref_leave_type_details.create({
                 data: {
                     name: data_validation.data.name,
                     code: data_validation.data.code,
@@ -49,11 +35,10 @@ export async function POST(request: NextRequest) {
                     is_active: data_validation.data.isActive,
                     max_duration: data_validation.data.maxDuration,
                     attachment_required: data_validation.data.attachmentRequired,
-                    is_applicable_to_all: is_applicable_for_all,
                     trans_leave_types: {
                         createMany: {
-                            data: employee_status_ids.map(status_id => ({
-                                employment_status_id: status_id,
+                            data: data.applicableToEmployeeTypes.map((status_id: string) => ({
+                                employment_status_id: Number(status_id),
                                 created_at: toGMT8().toISOString(),
                                 updated_at: toGMT8().toISOString(),
                             })),
@@ -61,6 +46,8 @@ export async function POST(request: NextRequest) {
                     }
                 }
             })
+            console.log("Created: ", create)
+
          }
 
         return NextResponse.json({message: "Leave type created successfully.",

@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
         } else {
             return NextResponse.json({
                 success: false,
-                message: "No records to add. Ensure that all leave credits and employee details are valid.",
+                message: "No records to create. Ensure that all leave credits and employee details are valid.",
             });
         }
 

@@ -16,7 +16,8 @@ import { EmploymentStatus } from "@/types/employeee/EmploymentStatusType";
 import {EmployeeLeaveCreditFormSetup} from "@/types/leaves/leave-credits-types";
 import {EmploymentStatusDetails} from "@/types/employment-status/employment-status";
 import { Accounts } from "@/types/employeee/AccountType";
-import {SignatoryPath} from "@/types/signatory/signatory-types";
+import {SignatoryPath, SignatoryRoles} from "@/types/signatory/signatory-types";
+import {JobTypes} from "@/types/signatory/job/job-types";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -212,6 +213,17 @@ export function useEmploymentStatusTypes() {
 }
 export function useSignatories() {
     return useSWR<SignatoryPath[]>('/api/admin/signatory', {
-        revalidateOnFocus: true, keepPreviousData: true
+        revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
+    })
+}
+
+export function useSignatoryRoles(){
+    return useSWR<SignatoryRoles[]>('/api/admin/signatory/roles', {
+        revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
+    })
+}
+export function useJobTypes(){
+    return useSWR<JobTypes[]>('/api/admin/jobs', {
+        revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
     })
 }

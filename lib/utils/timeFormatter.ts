@@ -11,7 +11,7 @@ export function calculateShiftLength(
     const start = clockIn && toGMT8(clockIn);
     let end = clockOut && toGMT8(clockOut);
 
-    // If the end time is before the start time, add one day to end
+    // If the end time is before the start time, create one day to end
     if (end && end.isBefore(start)) {
         end = end.add(1, "day");
     }

@@ -14,13 +14,13 @@ export async function GET() {
         });
 
         // Extract IDs
-        const signatoryPathIds = groupedSignatories.map(item => item.signatory_path_id);
+        // const signatoryPathIds = groupedSignatories.map(item => item.signatory_path_id);
         const jobIds = groupedSignatories.map(item => item.job_id);
 
         // Run both queries in parallel
         const [signatoryPaths, employees] = await Promise.all([
             prisma.ref_signatory_paths.findMany({
-                where: { id: { in: signatoryPathIds } },
+                // where: { id: { in: signatoryPathIds } },
                 select: {
                     id: true,
                     signatories_path: true,

@@ -1,6 +1,6 @@
 "use client"
 
-// npx shadcn-ui@latest add checkbox
+// npx shadcn-ui@latest create checkbox
 // npm  i react-use-measure
 import { Dispatch, ReactNode, SetStateAction, useState } from "react"
 import {
