@@ -20,7 +20,7 @@ import {
   ProcessDate,
 } from "@/types/payroll/payrollType";
 import axios from "axios";
-import { fetchAttendanceData } from "../../attendance-time/records/stage";
+import { fetchAttendanceData, getEmployeeSchedule } from "../../attendance-time/records/stage";
 
 export async function stageTable(
   dateInfo: ProcessDate,
@@ -40,7 +40,8 @@ export async function stageTable(
     // console.log(stage_one, stage_two);
     // const { cashToDisburse, cashToRepay, benefitsPlansData } = stage_two.data.result;
     const { payrolls, employees, dataPH } = stage_one;
-    const [stage_two, {attendanceLogs, batchSchedule, employeeSchedule, statusesByDate}] = await Promise.all([
+    // const [stage_two, {attendanceLogs, batchSchedule, employeeSchedule, statusesByDate}] = await Promise.all([
+    const [stage_two, {attendanceLogs, employeeSchedule, statusesByDate}] = await Promise.all([
       axios.post('/api/admin/payroll/payslip/get-unprocessed', { dateID: dateInfo.id, stageNumber: 2 }),
 
       fetchAttendanceData(
@@ -56,7 +57,7 @@ export async function stageTable(
     const { cashToDisburse, cashToRepay, benefitsPlansData } = convertToNumber({...stage_two.data.result});
     const employeeScheduleMap = new Map(employeeSchedule.map((es) => [es.employee_id!, es]));
     // Reuse batch schedule map for references below
-    const batchScheduleMap = new Map(batchSchedule.map((bs) => [bs.id, bs]));
+    // const batchScheduleMap = new Map(batchSchedule.map((bs) => [bs.id, bs]));
 
     // console.log("Preparing cash advances...");
     const cashDisburseMap = new Map(
@@ -125,9 +126,10 @@ export async function stageTable(
       employees.map(async (emp) => {
         // Define base variables for payroll calculations.
         const daySchedule = employeeScheduleMap.get(emp.id);
-        const timeSchedule = batchScheduleMap.get(daySchedule?.batch_id || 0);
+        const timeSchedule =  getEmployeeSchedule(employeeSchedule, emp.id, dateInfo.end_date)//batchScheduleMap.get(daySchedule?.batch_id || 0);
     
-        const ratePerHour =  40; //parseFloat(String(emp.ref_salary_grades.amount)) || 0.0;
+        // const ratePerHour = parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0;
+        const ratePerHour = 30; // Static rate/hr
         const baseVariables: BaseValueProp = {
           rate_p_hr: ratePerHour,
           total_shft_hr: 80,

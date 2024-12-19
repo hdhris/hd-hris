@@ -1,6 +1,6 @@
 import {
   UserEmployee,
-  UserReviewer,
+  MinorEmployee,
 } from "@/helper/include-emp-and-reviewr/include";
 import { ApprovalStatusType } from "../attendance-time/OvertimeType";
 
@@ -17,7 +17,7 @@ export interface LoanRequest {
   updated_at: string;
   deleted_at: string | null;
   trans_employees_trans_cash_advances_employee_idTotrans_employees: UserEmployee;
-  trans_employees_trans_cash_advances_approval_byTotrans_employees: UserReviewer;
+  trans_employees_trans_cash_advances_approval_byTotrans_employees: MinorEmployee;
   trans_cash_advance_disbursements: LoanDisbursement[];
 }
 

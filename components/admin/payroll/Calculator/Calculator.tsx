@@ -64,21 +64,6 @@ function PayheadCalculator({
         setInvalid(!isValidExpression);
     }, [isValidExpression, setInvalid]);
 
-    const handleButtonClick = useCallback(
-        (value: string) => {
-            if (value === "C") {
-                setInput("");
-            } else if (value === "←") {
-                handleBackspace();
-            } else {
-                const newVal =
-                    (isValidAdjacent(value) && isValidAdjacent(input.slice(-1))) || input === "" ? value : ` ${value}`;
-                setInput(input + newVal);
-            }
-        },
-        [input, setInput]
-    );
-
     const handleBackspace = useCallback(() => {
         let val = input;
         // const isLastCharNumber = (char: string) => /\d/.test(char);
@@ -101,6 +86,21 @@ function PayheadCalculator({
         }
         setInput(val);
     },[input, setInput]);
+    
+    const handleButtonClick = useCallback(
+        (value: string) => {
+            if (value === "C") {
+                setInput("");
+            } else if (value === "←") {
+                handleBackspace();
+            } else {
+                const newVal =
+                    (isValidAdjacent(value) && isValidAdjacent(input.slice(-1))) || input === "" ? value : ` ${value}`;
+                setInput(input + newVal);
+            }
+        },
+        [handleBackspace, input, setInput]
+    );
 
     return (
         <div className="flex gap-2">

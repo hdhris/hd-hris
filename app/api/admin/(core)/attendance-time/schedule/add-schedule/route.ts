@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import prisma from "@/prisma/prisma";
@@ -8,11 +7,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, clock_in, clock_out, is_active, break_min }  = body;
 
-    console.log(body);
-
-    // console.log(clock_in);
-     console.log("Clock In:", toGMT8(clock_in).toISOString());
-     console.log("Clock Out:", toGMT8(clock_out).toISOString());
+    // console.log(body);
     const batchSchedule = await prisma.ref_batch_schedules.create({
       data: {
         name: name,

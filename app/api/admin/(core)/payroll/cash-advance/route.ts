@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
                 ...emp_rev_include.employee_detail,
             },
             trans_employees_trans_cash_advances_approval_byTotrans_employees : {
-                ...emp_rev_include.reviewer_detail,
+                ...emp_rev_include.minor_detail,
             }
         }
     })

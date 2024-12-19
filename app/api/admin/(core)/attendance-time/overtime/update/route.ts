@@ -11,9 +11,7 @@ export async function POST(req: NextRequest) {
       where: {
         id : data.id,
       },
-      data : {
-        ...data,
-      },
+      data,
     })
     console.log(updated)
     return NextResponse.json({ status: 200 });

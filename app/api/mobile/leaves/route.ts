@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
             },
             include: {
                 trans_employees_trans_leaves_created_byTotrans_employees: {
-                    ...emp_rev_include.reviewer_detail,
+                    ...emp_rev_include.minor_detail,
                 },
                 trans_leave_types: {
                     include: {
