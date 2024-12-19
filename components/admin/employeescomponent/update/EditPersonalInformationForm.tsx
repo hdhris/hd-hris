@@ -17,15 +17,6 @@ const genderOptions = [
   { value: "F", label: "Female" },
 ];
 
-const prefixOptions = [
-  { value: "Mr.", label: "Mr." },
-  { value: "Ms.", label: "Ms." },
-  { value: "Mrs.", label: "Mrs." },
-  { value: "Dr.", label: "Dr." },
-  { value: "Prof.", label: "Prof." },
-  { value: "Hon.", label: "Hon." }
-];
-
 const suffixOptions = [
   { value: "Jr.", label: "Jr." },
   { value: "Sr.", label: "Sr." },
@@ -40,7 +31,30 @@ const suffixOptions = [
   { value: "IX", label: "IX" },
   { value: "X", label: "X" },
 ];
-//
+
+const prefixOptions = [
+  { value: "Mr.", label: "Mr." },
+  { value: "Ms.", label: "Ms." },
+  { value: "Mrs.", label: "Mrs." },
+  { value: "Dr.", label: "Dr." },
+  { value: "Prof.", label: "Prof." },
+  { value: "Hon.", label: "Hon." },
+  { value: "Rev.", label: "Rev." },
+  { value: "Capt.", label: "Capt." },
+  { value: "Lt.", label: "Lt." },
+  { value: "Maj.", label: "Maj." },
+  { value: "Col.", label: "Col." },
+  { value: "Gen.", label: "Gen." },
+  { value: "Engr.", label: "Engr." },
+  { value: "Arch.", label: "Arch." },
+  { value: "Sir", label: "Sir" },
+  { value: "Dame", label: "Dame" },
+  { value: "Lady", label: "Lady" },
+  { value: "Lord", label: "Lord" },
+  { value: "Mx.", label: "Mx." },
+  { value: "Master", label: "Master" },
+];
+
 const extensionOptions = [
   { value: "A.C.A.", label: "A.C.A." },
   { value: "A.C.C.", label: "A.C.C." },
@@ -62,7 +76,6 @@ const extensionOptions = [
   { value: "D.O.", label: "D.O." },
   { value: "D.V.M.", label: "D.V.M." },
   { value: "D.R.N.", label: "D.R.N." },
-  { value: "Dr.", label: "Dr." },
   { value: "Esq.", label: "Esq." },
   { value: "F.C.P.A.", label: "F.C.P.A." },
   { value: "F.R.C.S.", label: "F.R.C.S." },
@@ -98,11 +111,11 @@ const extensionOptions = [
   { value: "L.C.S.W.", label: "L.C.S.W." },
   { value: "M.P.H.", label: "M.P.H." },
   { value: "M.S.N.", label: "M.S.N." },
+  { value: "MIT", label: "MIT" },
   { value: "P.A.", label: "P.A." },
   { value: "R.N.C.", label: "R.N.C." },
   { value: "S.C.C.", label: "S.C.C." },
   { value: "T.E.", label: "T.E." },
-  { value: "LPT", label: "LPT" },
 ];
 
 const EditPersonalInformationForm: React.FC = () => {

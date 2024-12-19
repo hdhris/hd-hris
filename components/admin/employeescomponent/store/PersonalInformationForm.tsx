@@ -38,7 +38,21 @@ const prefixOptions = [
   { value: "Mrs.", label: "Mrs." },
   { value: "Dr.", label: "Dr." },
   { value: "Prof.", label: "Prof." },
-  { value: "Hon.", label: "Hon." }
+  { value: "Hon.", label: "Hon." },
+  { value: "Rev.", label: "Rev." },
+  { value: "Capt.", label: "Capt." },
+  { value: "Lt.", label: "Lt." },
+  { value: "Maj.", label: "Maj." },
+  { value: "Col.", label: "Col." },
+  { value: "Gen.", label: "Gen." },
+  { value: "Engr.", label: "Engr." },
+  { value: "Arch.", label: "Arch." },
+  { value: "Sir", label: "Sir" },
+  { value: "Dame", label: "Dame" },
+  { value: "Lady", label: "Lady" },
+  { value: "Lord", label: "Lord" },
+  { value: "Mx.", label: "Mx." },
+  { value: "Master", label: "Master" },
 ];
 
 const extensionOptions = [
@@ -62,7 +76,6 @@ const extensionOptions = [
   { value: "D.O.", label: "D.O." },
   { value: "D.V.M.", label: "D.V.M." },
   { value: "D.R.N.", label: "D.R.N." },
-  { value: "Dr.", label: "Dr." },
   { value: "Esq.", label: "Esq." },
   { value: "F.C.P.A.", label: "F.C.P.A." },
   { value: "F.R.C.S.", label: "F.R.C.S." },
@@ -98,6 +111,7 @@ const extensionOptions = [
   { value: "L.C.S.W.", label: "L.C.S.W." },
   { value: "M.P.H.", label: "M.P.H." },
   { value: "M.S.N.", label: "M.S.N." },
+  { value: "MIT", label: "MIT" },
   { value: "P.A.", label: "P.A." },
   { value: "R.N.C.", label: "R.N.C." },
   { value: "S.C.C.", label: "S.C.C." },
@@ -178,6 +192,7 @@ const PersonalInformationForm = () => {
       },
     },
   ];
+
   const formSEFields: FormInputProps[] = [
     {
       name: "prefix",
@@ -186,6 +201,7 @@ const PersonalInformationForm = () => {
       config: {
         placeholder: "Enter Prefix",
         options: prefixOptions,
+        allowsCustomValue: true,
       },
     },
     {
@@ -195,6 +211,7 @@ const PersonalInformationForm = () => {
       config: {
         placeholder: "Enter Suffix",
         options: suffixOptions,
+        allowsCustomValue: true,
       },
     },
     {
@@ -204,9 +221,11 @@ const PersonalInformationForm = () => {
       config: {
         placeholder: "Enter Extension",
         options: extensionOptions,
+        allowsCustomValue: true,
       },
     },
   ];
+
   const formGBFields: FormInputProps[] = [
     {
       name: "gender",
@@ -225,10 +244,12 @@ const PersonalInformationForm = () => {
       isRequired: true,
       config: {
         placeholder: "Select birthdate",
-        maxValue: parseAbsoluteToLocal(dayjs("2008-12-31").endOf('day').toISOString()),
+        maxValue: parseAbsoluteToLocal(
+          dayjs("2008-12-31").endOf("day").toISOString()
+        ),
         defaultValue: null,
         classNames: DateStyle,
-        validationState: "valid"
+        validationState: "valid",
       },
     },
   ];
@@ -266,7 +287,6 @@ const PersonalInformationForm = () => {
         placeholder: "Enter the employee's father's first name",
       },
     },
-
     {
       name: "fathers_middle_name",
       label: "Father's middle name",
@@ -341,7 +361,7 @@ const PersonalInformationForm = () => {
     },
   ];
 
- return (
+  return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -428,11 +448,13 @@ const PersonalInformationForm = () => {
       <div className="grid grid-cols-3 gap-4">
         <FormFields items={fathersBackground} />
       </div>
-    <Text className="text-medium font-semibold">{"Mother's maiden name"}</Text>
+      <Text className="text-medium font-semibold">
+        {"Mother's maiden name"}
+      </Text>
       <div className="grid grid-cols-3 gap-4">
         <FormFields items={mothersBackground} />
       </div>
-  <Text className="text-medium font-semibold">{"Guardian's name"}</Text>
+      <Text className="text-medium font-semibold">{"Guardian's name"}</Text>
       <div className="grid grid-cols-3 gap-4">
         <FormFields items={guardiansBackground} />
       </div>
