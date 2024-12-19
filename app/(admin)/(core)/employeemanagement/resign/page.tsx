@@ -202,7 +202,7 @@ const Page: React.FC = () => {
         case "type":
           return (
             <div>
-              <Chip color={status.color} size="sm" variant="flat">
+              <Chip color={status.color} size="md" variant="dot">
                 {status.type}
               </Chip>
             </div>
@@ -367,15 +367,13 @@ const Page: React.FC = () => {
         sortProps={sortProps}
         onView={
           selectedEmployee && (
-            <div className="max-w-[500px] overflow-y-auto">
-              <ViewEmployee
-                employee={selectedEmployee}
-                onClose={() => setSelectedEmployee(null)}
-                onEmployeeUpdated={handleEmployeeUpdated}
-                sortedEmployees={resignedTerminatedEmployees}
-                signatories={signatories}
-              />
-            </div>
+            <ViewEmployee
+              employee={selectedEmployee}
+              onClose={() => setSelectedEmployee(null)}
+              onEmployeeUpdated={handleEmployeeUpdated}
+              sortedEmployees={resignedTerminatedEmployees}
+              signatories={signatories}
+            />
           )
         }
       />

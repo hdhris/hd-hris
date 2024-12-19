@@ -14,6 +14,7 @@ import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
 import SearchFilter from "@/components/common/filter/SearchFilter";
 import { mutate } from "swr";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 interface Program {
   id: number;
@@ -27,7 +28,7 @@ interface Program {
   is_active: boolean;
   type: string;
   dim_training_participants: any[];
-  instructor_name:string
+  instructor_name: string;
 }
 
 export default function ProgramTable() {
@@ -57,9 +58,11 @@ export default function ProgramTable() {
             </div>
           );
         case "trainer":
-          return  (
-            <p className="text-small text-gray-500">{item.instructor_name || "No Trainer Assigned"}</p>
-          ) ;
+          return (
+            <p className="text-small text-gray-500">
+              {item.instructor_name || "No Trainer Assigned"}
+            </p>
+          );
         case "participants":
           return (
             <Chip color="primary" variant="bordered">
@@ -71,8 +74,8 @@ export default function ProgramTable() {
         case "dates":
           return (
             <div className="text-small">
-              <p>Start: {new Date(item.start_date).toLocaleDateString()}</p>
-              <p>End: {new Date(item.end_date).toLocaleDateString()}</p>
+              <p>Start: {toGMT8(item.start_date).format("MMM DD, YYYY")}</p>
+              <p>End: {toGMT8(item.end_date).format("MMM DD, YYYY")}</p>
             </div>
           );
         case "status":
@@ -126,7 +129,7 @@ export default function ProgramTable() {
           "/api/admin/trainings-and-seminars/empprograms/delete",
           { id }
         );
-        
+
         toast({
           description: "Program deleted successfully!",
           variant: "success",
