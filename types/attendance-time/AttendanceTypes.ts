@@ -1,4 +1,4 @@
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MinorEmployee, UserEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { ReactNode } from "react";
 
 export interface BatchSchedule {
@@ -16,7 +16,7 @@ export interface BatchSchedule {
 
 export interface Schedules {
   batch: BatchSchedule[];
-  emp_sched: EmployeeSchedule[];
+  employees: UserEmployee[];
 }
 
 export interface AttendanceLog {
@@ -43,6 +43,7 @@ export interface EmployeeSchedule {
   clock_out: string | null; // ISO timestamp or null
   break_min: number | null;
   ref_batch_schedules: BatchSchedule;
+  trans_employees: MinorEmployee;
 }
 
 export interface AttendanceData {

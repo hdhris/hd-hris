@@ -20,7 +20,7 @@ function Page() {
     { refreshInterval: 3000 }
   );
   // const [isLoading, setIsLoading] = useState(false);
-  const [processDate, setProcessDate] = useState<ProcessDate>();
+  const [processDate, setProcessDate] = useState<ProcessDate | false | undefined>();
   SetNavEndContent(() => (
     <DatePickerPayroll
       setProcessDate={setProcessDate}

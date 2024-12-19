@@ -74,7 +74,7 @@ IncidentDrawerProps) {
                 reported_by: userID,
             });
         }
-    }, [form]);
+    }, [form, userID]);
 
     useEffect(() => {
         if (!selected && userID) {

@@ -104,12 +104,12 @@ model dim_training_participants {
   id                    Int                     @id @default(autoincrement())
   program_id            Int?
   employee_id           Int?
-  enrollement_date      DateTime?               @db.Time(6)
   status                String?                 @db.VarChar(10)
   feedback              String?
   created_at            DateTime                @db.Timestamp(6)
   updated_at            DateTime                @db.Timestamp(6)
   terminated_at         DateTime?               @db.Timestamp(6)
+  enrollement_date      DateTime?               @db.Timestamptz(6)
   ref_training_programs ref_training_programs?  @relation(fields: [program_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_training_participants_ref_training_programs_1")
   trans_employees       trans_employees?        @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_training_participants_trans_employees_2")
   fact_training_records fact_training_records[]
@@ -320,8 +320,8 @@ model ref_training_programs {
   description               String?
   hour_duration             Int?
   location                  String?
-  start_date                DateTime?                   @db.Date
-  end_date                  DateTime?                   @db.Date
+  start_date                DateTime?                   @db.Timestamptz(6)
+  end_date                  DateTime?                   @db.Timestamptz(6)
   employee_instructor_id    Int?
   max_participants          Int?
   is_active                 Boolean?
@@ -787,19 +787,18 @@ model ref_benefits_contribution_table {
 }
 
 model ref_leave_type_details {
-  id                   Int                 @id(map: "ref_leave_types_pkey") @default(autoincrement())
-  code                 String              @unique
-  description          String
-  is_active            Boolean
-  max_duration         Decimal             @db.Decimal(10, 2)
-  name                 String
-  paid_leave           Boolean
-  carry_over           Boolean
-  attachment_required  Boolean             @default(false)
-  is_applicable_to_all Boolean             @default(false)
-  created_at           DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime            @default(now()) @db.Timestamptz(6)
-  trans_leave_types    trans_leave_types[]
+  id                  Int                 @id(map: "ref_leave_types_pkey") @default(autoincrement())
+  code                String              @unique
+  description         String
+  is_active           Boolean
+  max_duration        Decimal             @db.Decimal(10, 2)
+  name                String
+  paid_leave          Boolean
+  carry_over          Boolean
+  attachment_required Boolean             @default(false)
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime            @default(now()) @db.Timestamptz(6)
+  trans_leave_types   trans_leave_types[]
 }
 
 model ref_signatory_paths {
@@ -816,6 +815,7 @@ model ref_signatory_roles {
   signatory_role_name String
   created_at          DateTime            @default(now()) @db.Timestamptz(6)
   updated_at          DateTime            @default(now()) @db.Timestamptz(6)
+  deleted_at          DateTime?           @db.Timestamp(6)
   trans_signatories   trans_signatories[]
 }
 

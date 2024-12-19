@@ -8,6 +8,7 @@ import SearchFilter from "@/components/common/filter/SearchFilter";
 import { SearchItemsProps } from "@/components/common/filter/SearchItems";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import { toast } from "@/components/ui/use-toast";
+import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import showDialog from "@/lib/utils/confirmDialog";
 import { useQuery } from "@/services/queries";
@@ -23,27 +24,27 @@ import React, { useMemo, useState } from "react";
 
 const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
-const searchConfig: SearchItemsProps<EmployeeSchedule>[] = [
+const searchConfig: SearchItemsProps<UserEmployee>[] = [
   {
-    key: ["trans_employees", "last_name"],
+    key: "last_name",
     label: "Last Name",
   },
   {
-    key: ["trans_employees", "first_name"],
+    key: "first_name",
     label: "First Name",
   },
   {
-    key: ["trans_employees", "middle_name"],
+    key: "middle_name",
     label: "Middle Name",
   },
 ];
-const filterConfig: FilterItemsProps<EmployeeSchedule>[] = [
+const filterConfig: FilterItemsProps<UserEmployee>[] = [
   {
     filter: days.map((day) => ({
       label: capitalize(day),
-      value: (item: EmployeeSchedule) => item.days_json.includes(day),
+      value: (item: UserEmployee) => item.dim_schedules[0].days_json.includes(day),
     })),
-    key: "days_json",
+    key: ["dim_schedules","days_json"],
     sectionName: "Day of week",
     selectionMode: "multipleAND",
   },
@@ -53,7 +54,7 @@ function Page() {
   const [hoveredBatchId, setHoveredBatchId] = useState<number | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const { data, isLoading, mutate } = useQuery<Schedules>("/api/admin/attendance-time/schedule");
-  const [tableData, setTableData] = useState<EmployeeSchedule[]>();
+  const [tableData, setTableData] = useState<UserEmployee[]>();
   const [isVisible, setVisible] = useState(false);
   const [isPending, setPending] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<BatchSchedule | null>(
@@ -64,7 +65,7 @@ function Page() {
       <>
         <SearchFilter
           uniqueKey={'schedule-filter'}
-          items={data?.emp_sched || []}
+          items={data?.employees || []}
           filterConfig={filterConfig}
           searchConfig={searchConfig}
           setResults={setTableData}
@@ -189,8 +190,8 @@ function Page() {
                 color={cardGetRandomColor(index)}
                 isHovered={hoveredBatchId === item.id}
                 isSelected={
-                  data.emp_sched.find((emp) => emp.id === hoveredRowId)
-                    ?.batch_id === item.id
+                  data.employees.find((emp) => emp.dim_schedules[0].id === hoveredRowId)
+                    ?.dim_schedules[0].batch_id === item.id
                 }
                 setHoveredBatchId={setHoveredBatchId}
                 setSelectedBatch={setSelectedBatch}

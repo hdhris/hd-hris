@@ -62,7 +62,7 @@ function CashAdvanceForm({ isOpen, onClose, cashAdvance, mutate, onApproval}: Ca
                 status: "pending",
             });
         }
-    }, [cashAdvance, form.reset]);
+    }, [cashAdvance, form.reset, form]);
 
     async function onSubmit(value: z.infer<typeof cashAdvanceSchema>) {
         setIsSubmitting(true);

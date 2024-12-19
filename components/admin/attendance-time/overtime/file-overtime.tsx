@@ -45,7 +45,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
 
     const selectedEmployee = useMemo(() => {
         return employees?.find((item) => item.id === form.watch("employee_id"));
-    }, [employees, form.watch("employee_id")]);
+    }, [employees, form, form.watch("employee_id")]);
 
     useEffect(() => {
         if (selectedEmployee?.dim_schedules[0]?.ref_batch_schedules) {
@@ -63,7 +63,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
             form.setValue("clock_in", "17:00");
             form.setValue("clock_out", "18:00");
         }
-    }, [selectedEmployee]);
+    }, [selectedEmployee, form]);
 
     const haveExistingOvertime = useMemo(() => {
         return (date: Date): boolean => {
@@ -106,7 +106,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
             return true;
         }
         return false;
-    }, [form.watch("clock_in"), selectedEmployee, form.setError]);
+    }, [form, form.watch("clock_in"), selectedEmployee, form.setError]);
 
     const inValidClockOut = useMemo(() => {
         const clock_out = form.watch("clock_out");
@@ -135,7 +135,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
             return true;
         }
         return false;
-    }, [form.watch("clock_out"), form.watch("clock_in"), selectedEmployee, form.setError]);
+    }, [form, form.watch("clock_out"), form.watch("clock_in"), selectedEmployee, form.setError]);
 
     const resetFields = useCallback(() => {
         form.reset({

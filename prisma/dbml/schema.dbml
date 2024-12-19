@@ -82,12 +82,12 @@ Table dim_training_participants {
   id Int [pk, increment]
   program_id Int
   employee_id Int
-  enrollement_date DateTime
   status String
   feedback String
   created_at DateTime [not null]
   updated_at DateTime [not null]
   terminated_at DateTime
+  enrollement_date DateTime
   ref_training_programs ref_training_programs
   trans_employees trans_employees
   fact_training_records fact_training_records [not null]
@@ -733,7 +733,6 @@ Table ref_leave_type_details {
   paid_leave Boolean [not null]
   carry_over Boolean [not null]
   attachment_required Boolean [not null, default: false]
-  is_applicable_to_all Boolean [not null, default: false]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [default: `now()`, not null]
   trans_leave_types trans_leave_types [not null]
@@ -753,6 +752,7 @@ Table ref_signatory_roles {
   signatory_role_name String [not null]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [default: `now()`, not null]
+  deleted_at DateTime
   trans_signatories trans_signatories [not null]
 }
 

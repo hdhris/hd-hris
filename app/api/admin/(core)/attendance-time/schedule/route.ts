@@ -1,36 +1,29 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/prisma/prisma';
+import { NextResponse } from "next/server";
+import prisma from "@/prisma/prisma";
+import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 export async function GET() {
-  try {
-    const batchData = await prisma.ref_batch_schedules.findMany({
-      where : {
-        deleted_at : null
-      }
-    });
-    const employeeSchedule = await prisma.dim_schedules.findMany({
-      include:{
-        trans_employees:{
-          select: {
-            last_name: true,
-            first_name: true,
-            middle_name: true,
-          }
-        }
-      },
-      where: {
-        end_date: null,
-        trans_employees:{
-          deleted_at:null,
-        }
-      }
-    })
-    return NextResponse.json({ 
-      batch: batchData,
-      emp_sched: employeeSchedule,
-     });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
-  }
+    try {
+        const [batchData, employees] = await Promise.all([
+            prisma.ref_batch_schedules.findMany({
+                where: {
+                    deleted_at: null,
+                },
+            }),
+
+            prisma.trans_employees.findMany({
+                where: {
+                    deleted_at: null,
+                },
+                ...emp_rev_include.employee_detail,
+            }),
+        ]);
+        return NextResponse.json({
+            batch: batchData,
+            employees: employees,
+        });
+    } catch (error) {
+        return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
+    }
 }

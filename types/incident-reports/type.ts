@@ -1,4 +1,4 @@
-import { UserEmployee, UserReviewer } from "@/helper/include-emp-and-reviewr/include";
+import { MinorEmployee, UserEmployee } from "@/helper/include-emp-and-reviewr/include";
 
 export interface IncidentReport {
   id: number;
@@ -14,5 +14,5 @@ export interface IncidentReport {
   updated_at: string; // ISO date string
   deleted_at: string | null;
   trans_employees_dim_incident_reports_employee_idTotrans_employees: UserEmployee,
-  trans_employees_dim_incident_reports_reported_byTotrans_employees: UserReviewer,
+  trans_employees_dim_incident_reports_reported_byTotrans_employees: MinorEmployee,
 };

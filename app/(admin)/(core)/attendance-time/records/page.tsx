@@ -1,13 +1,12 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Calendar, Card, CardBody, CardHeader, Chip, cn, ScrollShadow, SortDescriptor } from "@nextui-org/react";
 import { parseDate } from "@internationalized/date";
 import {
     AttendanceLog,
     AttendanceData,
     LogStatus,
-    BatchSchedule,
-    EmployeeSchedule,
+    Schedules,
 } from "@/types/attendance-time/AttendanceTypes";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
@@ -29,23 +28,19 @@ export default function Page() {
         direction: "descending",
     });
     const [date, setDate] = useState(parseDate(toGMT8().format("YYYY-MM-DD")));
-    const [api, setApi] = useState(
+    const [datedApi, setDatedApi] = useState(
         `/api/admin/attendance-time/records/api?start=${toGMT8().format("YYYY-MM-DD")}&end=${toGMT8().format(
             "YYYY-MM-DD"
         )}`
     );
-    const [schedApi, setInfoApi] = useState("/api/admin/attendance-time/schedule");
-    const { data } = useQuery<{
-        batch: BatchSchedule[];
-        emp_sched: EmployeeSchedule[];
-    }>(schedApi);
+    const { data, mutate: mutateSchedule } = useQuery<Schedules>("/api/admin/attendance-time/schedule");
 
     const fetcher = async (url: string | null) => {
         const data = await fetchAttendanceData(String(url));
         return data;
     };
 
-    const { data: attendanceData, isLoading } = useSWR<AttendanceData>(api, fetcher);
+    const { data: attendanceData, isLoading } = useSWR<AttendanceData>(datedApi, fetcher);
     // const { data: attendanceData, isLoading } = useQuery<AttendanceData>(api);
 
     const [selectedLog, setSelectedLog] = useState<string>();
@@ -53,7 +48,7 @@ export default function Page() {
     const currentAttendanceInfo = useMemo(() => {
         const foundLog = attendanceData?.attendanceLogs.find((al) => al.id === Number(selectedLog));
         if (foundLog) {
-            const empSched = data?.emp_sched.find((es) => es.employee_id === foundLog?.employee_id);
+            const empSched = data?.employees.find(emp => emp.id === foundLog?.employee_id)?.dim_schedules[0];
             const batchSched = data?.batch.find((b) => b.id === empSched?.batch_id);
             const status = attendanceData?.statusesByDate[`${date}`][`${foundLog?.employee_id}`];
             return {
@@ -186,23 +181,23 @@ export default function Page() {
     return (
         <div className="flex flex-row gap-1 h-full">
             {/* <DataDisplay
-        defaultDisplay="table"
-        isLoading={isLoading}
-        onTableDisplay={{
-          config: config,
-          layout: "auto",
-          selectionMode: "single",
-          onRowAction: (key) => {
-            setSelectedKey(key as any);
-          },
-        }}
-        paginationProps={{
-          loop: true,
-          data_length: attendanceLog?.length,
-        }}
-        data={attendanceLog || []}
-        title="Attendance Logs"
-      /> */}
+                defaultDisplay="table"
+                isLoading={isLoading}
+                onTableDisplay={{
+                config: config,
+                layout: "auto",
+                selectionMode: "single",
+                onRowAction: (key) => {
+                    setSelectedKey(key as any);
+                },
+                }}
+                paginationProps={{
+                loop: true,
+                data_length: attendanceLog?.length,
+                }}
+                data={attendanceLog || []}
+                title="Attendance Logs"
+            /> */}
             <TableData
                 items={sortedItems}
                 title="Attendance Logs"
@@ -224,13 +219,13 @@ export default function Page() {
                     onChange={(value) => {
                         setSelectedLog(undefined);
                         setDate(value);
-                        setApi(
+                        setDatedApi(
                             (() => {
                                 const selectedDate = toGMT8(value.toString()).format("YYYY-MM-DD");
                                 return `/api/admin/attendance-time/records/api?start=${selectedDate}&end=${selectedDate}`;
                             })()
                         );
-                        setInfoApi("/api/admin/attendance-time/schedule");
+                        mutateSchedule();
                     }}
                 />
                 <Card shadow="none" className="border h-auto">

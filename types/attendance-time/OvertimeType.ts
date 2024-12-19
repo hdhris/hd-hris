@@ -1,5 +1,5 @@
 
-import { UserEmployee, UserReviewer } from "@/helper/include-emp-and-reviewr/include";
+import { UserEmployee, MinorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { Evaluations } from "../leaves/leave-evaluators-types";
 
 export type ApprovalStatusType = "pending" | "approved" | "rejected"; 
@@ -22,7 +22,7 @@ export interface OvertimeEntry {
   reason: string;
   deleted_at: string | null; // Nullable for deleted entries
   trans_employees_overtimes: UserEmployee; // Employee details
-  trans_employees_overtimes_createdBy: UserReviewer; // Approver details
+  trans_employees_overtimes_createdBy: MinorEmployee; // Approver details
   evaluators: Evaluations;
 };
 
