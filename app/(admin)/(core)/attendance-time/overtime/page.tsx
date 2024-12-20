@@ -43,7 +43,7 @@ function Page() {
                 }}
             />
             <ViewOvertime onClose={() => setViewOvertime(null)} overtime={viewOvertime} mutate={mutate} />
-            <FileOvertime isOpen={showFiling} onClose={() => setShowFiling(false)} />
+            <FileOvertime isOpen={showFiling} onClose={() => {setShowFiling(false); mutate();}} />
         </div>
     );
 }

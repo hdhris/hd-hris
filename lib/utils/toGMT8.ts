@@ -26,10 +26,10 @@ export function toGMT8(value?: string | Date): dayjs.Dayjs {
   if (dayjs(dateTimeString).isValid()) {
     return dayjs.utc(dateTimeString);
 
-  } else if (dayjs(dateTimeString, "hh:mm", true).isValid()) {
-    return dayjs.utc(dateTimeString, "hh:mm", true);
-  } else if (dayjs(dateTimeString, "hh:mm:ss", true).isValid()) {
-    return dayjs.utc(dateTimeString, "hh:mm:ss", true);
+  // } else if (dayjs(dateTimeString, "hh:mm", true).isValid()) {
+  //   return dayjs.utc(dateTimeString, "hh:mm", true);
+  // } else if (dayjs(dateTimeString, "hh:mm:ss", true).isValid()) {
+  //   return dayjs.utc(dateTimeString, "hh:mm:ss", true);
 
   } else if (dayjs(dateTimeString, "HH:mm", true).isValid()) {
     return dayjs.utc(dateTimeString, "HH:mm", true);

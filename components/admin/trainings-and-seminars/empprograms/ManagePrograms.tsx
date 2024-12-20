@@ -209,7 +209,7 @@ export default function ManagePrograms({
 
   const selectParticipant = useCallback(
     (id: number) => {
-      const currentEnrollmentDate = form.getValues("enrollement_date");
+      const currentPartipant = programData?.program?.dim_training_participants?.find(ptcp=> ptcp.employee_id===id);
 
       setSelectedParticipants((prev) => {
         const existingParticipant = prev.find((p) => p.employee_id === id);
@@ -230,7 +230,7 @@ export default function ManagePrograms({
           ...prev,
           {
             employee_id: id,
-            enrollement_date: currentEnrollmentDate,
+            enrollement_date: currentPartipant?.enrollement_date ?? dayjs().toISOString(),
             status: "pending",
             feedback: "",
           },
