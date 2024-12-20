@@ -123,75 +123,72 @@ const JobInformationForm: React.FC = () => {
     return acc;
   }, []);
   
+   const formBasicFields: FormInputProps[] = [
+      {
+        name: "department_id",
+        label: "Department",
+        type: "auto-complete",
+        isRequired: true,
+        config: {
+          placeholder: "Select Department",
+          options: departmentOptions,
+        },
+      },
+      {
+        name: "hired_at",
+        label: "Hired Date",
+        type: "date-picker",
+        isRequired: true,
+        config: {
+          placeholder: "Select hire date",
+          maxValue: parseAbsoluteToLocal(dayjs().endOf("day").toISOString()),
+          defaultValue: null,
+          classNames: DateStyle,
+          validationState: "valid",
+        },
+      },
+      {
+        name: "job_id",
+        label: "Job Position",
+        type: "auto-complete",
+        isRequired: true,
+        config: {
+          placeholder: "Select Job Position",
+          options: jobOptions,
+        },
+      },
+      {
+        name: "employement_status_id",
+        label: "Employment status",
+        type: "auto-complete",
+        isRequired: true,
+        config: {
+          placeholder: "Select employment status",
+          options: employmentstatusOptions,
+        },
+      },
+      {
+        name: "salary_grade_id",
+        label: "Salary Grade",
+        type: "auto-complete",
+        isRequired: true,
+        config: {
+          placeholder: "Select Salary Grade",
+          options: salaryGradeOptions,
+        },
+      },
+      {
+        name: "branch_id",
+        label: "Branch",
+        type: "auto-complete",
+        isRequired: true,
+        config: {
+          placeholder: "Select Branch",
+          options: branchOptions,
+        },
+      },
+    ];
   
-  const formBasicFields: FormInputProps[] = [
-    {
-      name: "department_id",
-      label: "Department",
-      type: "select",
-      isRequired: true,
-      config: {
-        placeholder: "Select Department",
-        options: departmentOptions,
-      },
-    },
-    {
-      name: "hired_at",
-      label: "Hired Date",
-      type: "date-picker",
-      isRequired: true,
-      config: {
-        placeholder: "Select hire date",
-        maxValue: parseAbsoluteToLocal(dayjs().endOf('day').toISOString()),
-        defaultValue: new Date().toISOString(),
-        classNames: DateStyle, 
-        showMonthAndYearPickers:true, 
-        validationState: "valid"
-        
-      },
-    },
-    {
-      name: "job_id",
-      label: "Job Position",
-      type: "select",
-      isRequired: true,
-      config: {
-        placeholder: "Select Job Position",
-        options: jobOptions,
-      },
-    },
-    {
-      name: "employement_status_id",
-      label: "Employment status",
-      type: "select",
-      isRequired: true,
-      config: {
-        placeholder: "Select employment status",
-        options: employmentstatusOptions,
-      },
-    },
- 
-    {
-      name: "salary_grade_id",
-      label: "Salary Grade",
-      type: "select",
-      isRequired: true,
-      config: {
-        placeholder: "Select Salary Grade",
-        options: salaryGradeOptions,
-      },
-    },
-    {
-      name: "branch_id",
-      label: "Branch",
-      type: "select",
-      isRequired: true,
-      config: {
-        placeholder: "Select Branch",
-        options: branchOptions,
-      },
-    },
-  ];
 
   return (
     <div className="space-y-6">

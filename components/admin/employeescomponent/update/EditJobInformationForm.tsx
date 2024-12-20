@@ -138,7 +138,7 @@ const EditJobInformationForm: React.FC = () => {
     {
       name: "department_id",
       label: "Department",
-      type: "select",
+      type: "auto-complete",
       isRequired: true,
       config: {
         placeholder: "Select Department",
@@ -161,7 +161,7 @@ const EditJobInformationForm: React.FC = () => {
     {
       name: "job_id",
       label: "Job Position",
-      type: "select",
+      type: "auto-complete",
       isRequired: true,
       config: {
         placeholder: "Select Job Position",
@@ -171,7 +171,7 @@ const EditJobInformationForm: React.FC = () => {
     {
       name: "employement_status_id",
       label: "Employment status",
-      type: "select",
+      type: "auto-complete",
       isRequired: true,
       config: {
         placeholder: "Select employment status",
@@ -181,7 +181,7 @@ const EditJobInformationForm: React.FC = () => {
     {
       name: "salary_grade_id",
       label: "Salary Grade",
-      type: "select",
+      type: "auto-complete",
       isRequired: true,
       config: {
         placeholder: "Select Salary Grade",
@@ -191,7 +191,7 @@ const EditJobInformationForm: React.FC = () => {
     {
       name: "branch_id",
       label: "Branch",
-      type: "select",
+      type: "auto-complete",
       isRequired: true,
       config: {
         placeholder: "Select Branch",
