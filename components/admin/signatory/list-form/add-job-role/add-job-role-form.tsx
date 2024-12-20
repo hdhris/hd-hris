@@ -53,7 +53,7 @@ export default function AddJobRoleForm({id, name, existingJobs, existingRoles}: 
 
     const roleTypes = useMemo(() => {
         if (signatory_roles) {
-            return signatory_roles.filter(item => existingRoles.every(roles => roles.id !== item.id))
+            return signatory_roles
         }
         return []
     }, [existingRoles, signatory_roles]);

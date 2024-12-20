@@ -1,4 +1,3 @@
 export interface UserPrivileges {
-    web_access?: boolean;
-    admin_panel?: boolean;
+    web_access: boolean;
 }
