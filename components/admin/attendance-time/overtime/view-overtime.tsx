@@ -66,7 +66,7 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                         key={"clock_out"}
                         icon={<TbClockX />}
                         label="Clock Out"
-                        value={toGMT8(overtime.clock_in).format("hh:mm a")}
+                        value={toGMT8(overtime.clock_out).format("hh:mm a")}
                     />
                     <hr key={2} />
                     <Item
