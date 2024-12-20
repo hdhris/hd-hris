@@ -213,20 +213,28 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         // Convert break times from minutes to hours
         // const breakHours = breakTimes / 60;
 
+        console.log("Start Time STR: ", startTimeStr)
+        console.log("End Time STR: ", endTimeStr)
         // Convert startTime and endTime strings to Date objects
-        const startTime = toGMT8(startTimeStr).utc(true).toDate();
-        const endTime = toGMT8(endTimeStr).utc(true).toDate();
-
+        const startTime = toGMT8(startTimeStr).tz("Asia/Manila", true).toDate();
+        const endTime = toGMT8(endTimeStr).tz("Asia/Manila", true).toDate();
+        console.log("Start Time: ", startTime)
+        console.log("End Time: ", endTime)
         // Normalize start and end dates to get rid of any time differences
         const start = normalizeDate(startTime);
         const end = normalizeDate(endTime);
+
+        console.log("Normalize Start: ", start)
+        console.log("Normalize End: ", end)
 
 
         // Calculate work duration (difference between clock-in and clock-out in minutes)
         const clock_in = new Date(`2024-12-10T${maxMinTime?.time_in}`);
         const clock_out = new Date(`2024-12-10T${maxMinTime?.time_out}`);
-        const workDuration = dayjs(clock_in).diff(dayjs(clock_out), 'minutes', true);
+        const workDuration = toGMT8(clock_in).diff(toGMT8(clock_out), 'minutes', true);
 
+        console.log("Clock In: ", maxMinTime?.time_in)
+        console.log("Clock Out: ", maxMinTime?.time_out)
         const startLeave = toGMT8(toGMT8(startTimeStr).format("HH:mm:ss"))
         const endLeave = toGMT8(toGMT8(endTimeStr).format("HH:mm:ss"))
         let leaveDif = Math.abs(startLeave.diff(endLeave, "minutes"))
@@ -276,6 +284,11 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             return leaveDif
         }
 
+
+        console.log("Working Days: ", workingDays)
+        console.log("Total Work Hours: ", totalWorkHours)
+        console.log("Leave Dif: ", leaveDif)
+
         // console.log("Per Hour: ", (totalWorkHours / 60), (leaveDif / 60))
         // Return the total work time adjusted for breaks
         return ((workingDays * totalWorkHours) + leaveDif);
@@ -301,10 +314,10 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         const minTime = maxMinTime?.time_in!; // e.g., "08:00"
         const maxTime = maxMinTime?.time_out!; // e.g., "17:00"
 
-        console.log("Start Time:", startTime);
-        console.log("End Time:", endTime);
-        console.log("Time In:", minTime);
-        console.log("Time Out:", maxTime);
+        // console.log("Start Time:", startTime);
+        // console.log("End Time:", endTime);
+        // console.log("Time In:", minTime);
+        // console.log("Time Out:", maxTime);
 
         // Convert to `dayjs` objects for reliable comparisons
         const startDayjs = dayjs(startTime, "HH:mm");
@@ -323,7 +336,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             form.setError("leave_date_range", {
                 message: `Please enter a valid time within the ${toGMT8(minTime).format("hh:mm A")} to ${toGMT8(maxTime).format("hh:mm A")} range.`,
             });
-            console.log("Error: Invalid time range");
+            // console.log("Error: Invalid time range");
             return; // Exit early on time validation failure
         }
 
@@ -334,12 +347,12 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             form.setError("leave_date_range", {
                 message: `Leave Days Exceeded ${pluralize(max, "day")}.`,
             });
-            console.log("Error: Exceeded leave days");
-            console.log("Error Max: ", max)
+            // console.log("Error: Exceeded leave days");
+            // console.log("Error Max: ", max)
             return; // Exit early on day validation failure
         }
 
-        console.log("Not Error Max: ", max)
+        // console.log("Not Error Max: ", max)
 
         // Clear errors if all validations pass
         form.clearErrors("leave_date_range");
@@ -431,7 +444,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             // Prepare the payload
 
 
-            console.log("Use Days: ", leaveDeduction / 60)
+            console.log("Use Days: ", leaveDeduction)
             const items = {
                 id: employee?.id, ...values,
                 leave_type_id: values.leave_type_id,
@@ -518,6 +531,8 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
                 minValue={today(getLocalTimeZone())}
                 isDateUnavailable={dateUnavailable}
                 onChange={onDateRangePicker}
+                color="default"
+                labelPlacement="outside"
             />)
         }
     }, {

@@ -6,7 +6,7 @@ import { sendEmail } from "@/lib/utils/sendEmail";
 import { employeeSchema, StatusUpdateInput, statusUpdateSchema } from "./types";
 import { parseJsonInput } from "./utils";
 import { getSession } from "next-auth/react"
-import { getSignatory } from "@/server/signatory"; 
+import { getSignatory } from "@/server/signatory";
 import { auth } from "@/auth";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 declare global {

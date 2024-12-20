@@ -1,9 +1,8 @@
 import {hasContentType} from "@/helper/content-type/content-type-check";
 import {NextRequest, NextResponse} from "next/server";
-import {z} from "zod";
 import prisma from "@/prisma/prisma";
 import {toGMT8} from "@/lib/utils/toGMT8";
-
+import {getPrismaErrorMessage} from "@/server/errors/server-errors";
 
 export async function POST(request: NextRequest) {
     try {
@@ -13,70 +12,28 @@ export async function POST(request: NextRequest) {
         // Parse request body
         const data = await request.json();
 
-        // const hasEmployeeAvail = await prisma.trans_leaves.groupBy({
-        //     by: ['type_id'],
-        //     where: {
-        //         employee_id: {
-        //             not: null
-        //         }
-        //     }, _count: {
-        //         type_id: true
-        //     }
-        // })
 
-        console.log("Deleted: ", data)
+        // Update leave type to mark as deleted
 
-        if(data.employee_status_id === "all"){
-            console.log("All")
-            await prisma.trans_leave_types.updateMany({
+        await Promise.all([
+            prisma.trans_leave_types.updateMany({
                 where: {
-                    leave_type_details_id: data.leave_type_id
+                    leave_type_details_id: data.leave_type_id, employment_status_id: {
+                        in: data.employee_status_id.map((id: { id: any; }) => id.id),
+                    },
+                }, data: {
+                    deleted_at: toGMT8().toISOString(),
                 },
-                data: {
-                    deleted_at: toGMT8().toISOString()
-                }
-            });
-        } else{
-            await prisma.trans_leave_types.update({
-                where: {
-                    leave_type_details_id_employment_status_id: {
-                        leave_type_details_id: data.leave_type_id,
-                        employment_status_id: data.employee_status_id
-                    }
-                },
-                data: {
-                    deleted_at: toGMT8().toISOString()
-                }
-            });
+            }),
+        ])
 
-        }
-        // Update the leave type to mark as deleted
-
-        // Return successful response
-        return NextResponse.json({
-            success: true,
-            message: "Leave type deleted successfully.",
-        });
+        // Return successful response (status should be 200 for success)
+        return NextResponse.json({success: true, message: "Leave type deleted successfully."}, {status: 200});
 
     } catch (error: any) {
-        console.log("Error: ", error);
-        let errorMessage;
-
-        // Handle Zod validation errors
-        if (error instanceof z.ZodError) {
-            errorMessage = error.errors.map(e => e.message).join(", ");
-        }
-        // Handle Prisma and other errors
-        else if (error.code === "P2025") {
-            errorMessage = "Leave type not found.";
-        } else {
-            errorMessage = "There was an issue with the server. Please try again later.";
-        }
-
-        // Return user-friendly error message
-        return NextResponse.json({
-            success: false,
-            message: errorMessage
-        }, { status: 400 });
+        // Handle errors and return a meaningful response with the correct status code
+        const errorMessage = getPrismaErrorMessage(error);
+        console.error("Prisma Error while deleting leave type: ", errorMessage);
+        return NextResponse.json({success: false, message: errorMessage}, {status: 500});
     }
 }

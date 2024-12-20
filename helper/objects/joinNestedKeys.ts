@@ -9,7 +9,10 @@ export function joinNestedKeys(keys: (any | any[])[]): string {
 }
 
 export type NestedKeys<T> = {
-    [K in keyof T]: T[K] extends Record<string, any>
-        ? K | [K, NestedKeys<T[K]>]
-        : K; // Return the key itself if it's not an object
-}[keyof T];
+    [K in keyof T]: T[K] extends (infer U)[] // If T[K] is an array
+      ? K | [K, NestedKeys<U>] // Include the key and traverse into the array's type
+      : T[K] extends Record<string, any> // If T[K] is an object
+      ? K | [K, NestedKeys<T[K]>] // Include the key and traverse into the object's type
+      : K; // Otherwise, just include the key itself
+  }[keyof T];
+  

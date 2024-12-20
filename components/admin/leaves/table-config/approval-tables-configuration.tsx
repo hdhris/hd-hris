@@ -30,7 +30,7 @@ const ApprovalColumns: ColumnsProps[] = [{
 }]
 
 export const approval_status_color_map: Record<string, BadgeProps["color"]> = {
-    approved: "success", rejected: "danger", pending: "warning", canceled: "danger"
+    approved: "success", rejected: "danger", pending: "warning", canceled: "danger",
 }
 export const TableConfigurations: TableConfigProps<LeaveRequest> = {
     columns: ApprovalColumns, rowCell: (item: LeaveRequest, columnKey: React.Key) => {
@@ -55,17 +55,17 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
                 <Typography>{item.leave_type.name}</Typography>
             </Case>
             <Case of="start_date">
-                <Typography>{toGMT8(item.leave_details.start_date).format("MMM DD, YYYY hh:mm a")}</Typography>
+                <Typography>{item.leave_details.start_date}</Typography>
             </Case>
             <Case of="end_date">
-                <Typography>{toGMT8(item.leave_details.end_date).format("MMM DD, YYYY hh:mm a")}</Typography>
+                <Typography>{item.leave_details.end_date}</Typography>
             </Case>
             <Case of="duration_of_leave">
                 <Typography>{item.leave_details.total_days}</Typography>
             </Case>
             <Case of="status">
                 <Status color={approval_status_color_map[item.leave_details.status.toLowerCase()]}>
-                    <Typography className="text-sm">{item.leave_details.status}</Typography>
+                    <Typography className="text-sm">{capitalize(item.leave_details.status)}</Typography>
                 </Status>
 
             </Case>

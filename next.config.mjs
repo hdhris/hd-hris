@@ -46,6 +46,10 @@ const nextConfig = {
         source: "/trainings-and-seminars",
         destination: "/trainings-and-seminars/empprograms",
         permanent: true,
+      },{
+        source: "/signatories",
+        destination: "/signatories/lists",
+        permanent: true,
       },
     ];
   },

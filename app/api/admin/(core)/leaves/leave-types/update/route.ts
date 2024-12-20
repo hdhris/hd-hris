@@ -11,13 +11,11 @@ export async function PATCH(request: NextRequest) {
 
         const data = await request.json();
 
-        console.log("Patch leave types:", data)
-
         const logger = new Logger(LogLevel.DEBUG);
         // logger.debug(data);
 
         // Validate data using schema
-        const data_validation = await LeaveTypeSchema.safeParseAsync(data);
+        const data_validation = await LeaveTypeSchema.omit({ applicableToEmployeeTypes: true }).safeParseAsync(data);
 
         if (!data_validation.success) {
             return NextResponse.json(
@@ -41,6 +39,7 @@ export async function PATCH(request: NextRequest) {
         // Check for duplicate code
         const duplicate = await prisma.ref_leave_type_details.findFirst({
             where: {
+                name: data_validation.data.name,
                 code: data_validation.data.code,
                 id: { not: data.id }, // Exclude the current record
             },
@@ -48,27 +47,11 @@ export async function PATCH(request: NextRequest) {
 
         if (duplicate) {
             return NextResponse.json(
-                { success: false, message: "Cannot have duplicate code. Try again." },
+                { success: false, message: "Cannot have duplicate name or code. Try again." },
                 { status: 409 }
             );
         }
 
-        // Determine applicable employee types
-        const is_applicable_for_all = data_validation.data.applicableToEmployeeTypes === "all";
-        let employee_status_ids = [];
-
-        if (is_applicable_for_all) {
-            const ids = await prisma.ref_employment_status.findMany({
-                where: { deleted_at: null },
-                select: { id: true },
-            });
-
-            employee_status_ids = ids.map((id) => id.id);
-        } else {
-            employee_status_ids.push(Number(data_validation.data.applicableToEmployeeTypes));
-        }
-
-        console.log("Ids: ", employee_status_ids);
         // Update the leave type details
         await prisma.ref_leave_type_details.update({
             where: { id: data.id },
@@ -81,10 +64,23 @@ export async function PATCH(request: NextRequest) {
                 is_active: data_validation.data.isActive,
                 max_duration: data_validation.data.maxDuration,
                 attachment_required: data_validation.data.attachmentRequired,
-                is_applicable_to_all: is_applicable_for_all,
                 updated_at: new Date(),
             },
         });
+
+        // const findLeaveType = await prisma.trans_leave_types.findMany({
+        //     where: {
+        //
+        //     }
+        // })
+        // if(employee_status_ids.length > 1){
+        //     await prisma.trans_leave_types.updateMany({
+        //         where:{
+        //
+        //         }
+        //     })
+        // }
+
 
         return NextResponse.json({
             success: true,
@@ -92,7 +88,6 @@ export async function PATCH(request: NextRequest) {
         });
     } catch (err) {
         console.error("Error: ", err);
-
         return NextResponse.json({ message: "Something went wrong." }, { status: 500 });
     }
 }

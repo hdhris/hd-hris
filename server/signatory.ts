@@ -32,6 +32,7 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
 
 
         const jobIds = signatories.map((job) => job.job_id);
+        // Filter signatories that apply to all employees, regardless of department
         const getIsApplyToAllSignatory = signatories
             .filter((item) => item.is_apply_to_all_signatory)
             .map((job) => job.job_id);
@@ -129,7 +130,7 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
                                     decision: {
                                         is_decided: is_auto_approved || null,
                                         rejectedReason: null,
-                                        decisionDate: is_auto_approved ? toGMT8().toDate() : null,
+                                        decisionDate: is_auto_approved ? toGMT8().toISOString() : null,
                                     },
                                     order_number: matchingSignatory.order_number,
                                 });

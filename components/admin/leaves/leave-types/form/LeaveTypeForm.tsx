@@ -1,8 +1,8 @@
 import {z} from "zod";
-import {useForm, useFormState} from "react-hook-form";
+import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
-import {cn} from "@nextui-org/react";
+import {cn, Select, SelectItem} from "@nextui-org/react";
 import React, {FC, ReactNode, useEffect, useMemo, useState} from "react";
 import Drawer from "@/components/common/Drawer";
 import {Form} from "@/components/ui/form";
@@ -36,11 +36,11 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
             name: "", code: "", description: "", carryOver: false, //Leave Duration
             // minDuration: 0,
             maxDuration: 0, //Additional Settings
-            paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: "",
+            paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: new Set([]),
         }
     })
     const employeeStatus = useMemo(() => {
-        if(employment_status) {
+        if (employment_status) {
             return employment_status.data
         }
         return []
@@ -54,31 +54,37 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                 name: data.name,
                 code: data.code,
                 description: data.description,
-                carryOver: data.carry_over,
-                // minDuration: data.min_duration,
+                carryOver: data.carry_over, // minDuration: data.min_duration,
                 maxDuration: data.max_duration,
                 paidLeave: data.paid_leave,
                 isActive: data.is_active,
                 attachmentRequired: data.attachment_required,
-                applicableToEmployeeTypes: String(data.applicable_to_employee_types.id)
+                applicableToEmployeeTypes: new Set(data.applicable_to_employee_types.map(item => String(item.id)))
             })
 
         }
+
     }, [data, form]);
 
 
     const onSubmit = async (values: z.infer<typeof LeaveTypeSchema>) => {
         setIsLoading(true)
+
+        console.log("Data Leave Types: ", values)
+        let emp_status = Array.from(values.applicableToEmployeeTypes)
         const items = {
-            id: data?.id, ...values,
+            id: data?.id, ...values, applicableToEmployeeTypes: emp_status
         }
+
+
+
 
         try {
             let rest
             if (data?.id) {
                 rest = await axiosInstance.patch("/api/admin/leaves/leave-types/update", items)
             } else {
-                rest = await axiosInstance.post("/api/admin/leaves/leave-types/create", values)
+                rest = await axiosInstance.post("/api/admin/leaves/leave-types/create", items)
             }
 
             if (rest.status === 200) {
@@ -91,7 +97,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                     name: "", code: "", description: "", carryOver: false, //Leave Duration
                     // minDuration: 0,
                     maxDuration: 0, //Additional Settings
-                    paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: ""
+                    paidLeave: false, isActive: false, attachmentRequired: false, applicableToEmployeeTypes: new Set([])
                 })
             }
         } catch (err) {
@@ -142,24 +148,23 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
 
     },]
 
-    const leaveDuration: FormInputProps[] = [
-    //     {
-    //     name: "minDuration",
-    //     type: "number",
-    //     label: "Minimum Duration (days)",
-    //     placeholder: "e.g., 4",
-    //     isRequired: true,
-    //     description: "Minimum duration of leave that can be taken.",
-    // },
-    //
+    const leaveDuration: FormInputProps[] = [//     {
+        //     name: "minDuration",
+        //     type: "number",
+        //     label: "Minimum Duration (days)",
+        //     placeholder: "e.g., 4",
+        //     isRequired: true,
+        //     description: "Minimum duration of leave that can be taken.",
+        // },
+        //
         {
-        name: "maxDuration",
-        type: "number",
-        label: "Maximum Duration (days)",
-        placeholder: "e.g., 8",
-        isRequired: true,
-        description: "Maximum duration of leave that can be taken.",
-    }]
+            name: "maxDuration",
+            type: "number",
+            label: "Maximum Duration (days)",
+            placeholder: "e.g., 8",
+            isRequired: true,
+            description: "Maximum duration of leave that can be taken.",
+        }]
     const additionalSettings: FormInputProps[] = [switchToggle({
         name: 'paidLeave', label: 'Paid Leave', description: " Is this a paid leave type?"
     }), switchToggle({
@@ -171,18 +176,36 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
         placeholder: "e.g., Regular, Probationary",
         isRequired: true,
         description: "Select the employee types this leave applies to.",
-        config: {
-            options: [
-                { value: "all", label: "All Employee Types" },
-                ...(Array.isArray(employeeStatus)
-                        ? employeeStatus.map((item) => ({
-                            value: String(item.id),
-                            label: item.name,
-                        }))
-                        : []
-                )
-            ]
+        Component: (field) => {
+            return (<Select selectionMode="multiple"
+                            aria-label="Selection"
+                            color="primary"
+                            variant="bordered"
+                            radius="sm"
+                            selectedKeys={form.getValues("applicableToEmployeeTypes").has("all")
+                                ? "all"
+                                : form.getValues("applicableToEmployeeTypes")}
+                            onSelectionChange={(keys) => {
+                                field.onChange(keys)
+                            }}>
+                    {Array.isArray(employeeStatus) ? (employeeStatus.map((item) => (<SelectItem key={item.id}>
+                                {item.name}
+                            </SelectItem>))) : (<></>)}
+                </Select>)
         }
+        // config: {
+        //     options: [
+        //         { value: "all", label: "All Employee Types" },
+        //         ...(Array.isArray(employeeStatus)
+        //                 ? employeeStatus.map((item) => ({
+        //                     value: String(item.id),
+        //                     label: item.name,
+        //                 }))
+        //                 : []
+        //         )
+        //     ],
+        //     selectionMode: "multiple"
+        // }
     }, switchToggle({
         name: 'carryOver', label: 'Carry Over', description: "Does this leave can be carried over to the next year?"
     }), switchToggle({
@@ -215,6 +238,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
                                    description='Configure options like whether the leave is paid, active, applicable to specific employee types, and if attachments (e.g., documents) are needed.'>
                             <FormFields items={additionalSettings}/>
                         </GroupForm>
+
                     </div>
                 </form>
             </Form>

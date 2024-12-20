@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -783,19 +787,18 @@ model ref_benefits_contribution_table {
 }
 
 model ref_leave_type_details {
-  id                   Int                 @id(map: "ref_leave_types_pkey") @default(autoincrement())
-  code                 String              @unique
-  description          String
-  is_active            Boolean
-  max_duration         Decimal             @db.Decimal(10, 2)
-  name                 String
-  paid_leave           Boolean
-  carry_over           Boolean
-  attachment_required  Boolean             @default(false)
-  is_applicable_to_all Boolean             @default(false)
-  created_at           DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime            @default(now()) @db.Timestamptz(6)
-  trans_leave_types    trans_leave_types[]
+  id                  Int                 @id(map: "ref_leave_types_pkey") @default(autoincrement())
+  code                String              @unique
+  description         String
+  is_active           Boolean
+  max_duration        Decimal             @db.Decimal(10, 2)
+  name                String
+  paid_leave          Boolean
+  carry_over          Boolean
+  attachment_required Boolean             @default(false)
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime            @default(now()) @db.Timestamptz(6)
+  trans_leave_types   trans_leave_types[]
 }
 
 model ref_signatory_paths {

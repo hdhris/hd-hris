@@ -54,7 +54,7 @@ export const emp_rev_include = {
             },
         },
     },
-    reviewer_detail: {
+    minor_detail: {
         select: {
             last_name: true,
             middle_name: true,
@@ -109,10 +109,11 @@ interface EmployeeSchedule {
   end_date: string | null; // ISO timestamp or null
   clock_in: string | null; // ISO timestamp or null
   clock_out: string | null; // ISO timestamp or null
+  break_min: number | null;
   ref_batch_schedules: BatchSchedule;
 }
 
-export interface UserReviewer {
+export interface MinorEmployee {
     first_name: string;
     middle_name: string;
     last_name: string;

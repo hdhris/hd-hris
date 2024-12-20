@@ -13,7 +13,7 @@ import Typography from "@/components/common/typography/Typography";
 import {getColor} from "@/helper/background-color-generator/generator";
 import {Chip} from "@nextui-org/chip";
 import {Button} from "@nextui-org/button";
-import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
+import {uniformChipStyle, uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {isEqual} from "lodash";
 import showDialog from "@/lib/utils/confirmDialog";
 import {axiosInstance} from "@/services/fetcher";
@@ -25,8 +25,9 @@ import EmployeesAvatar from "@/components/common/avatar/employees-avatar";
 import CardTable from "@/components/common/card-view/card-table";
 import {capitalize} from "@nextui-org/shared-utils";
 import {AxiosError} from "axios";
-import Head from 'next/head';
 import useDocumentTitle from "@/hooks/useDocumentTitle";
+import {IoMdInformationCircle} from 'react-icons/io';
+import {icon_size_sm} from "@/lib/utils";
 
 
 function LeaveTypeTable() {
@@ -35,17 +36,30 @@ function LeaveTypeTable() {
     const [rows, setRows] = useState<number>(5)
     const [leaveType, setLeaveType] = useState<LeaveType>()
     const [isOpen, setIsOpen] = useState<boolean>(false)
-    const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/leave-types", page, rows, {
+    const {data, isLoading, error} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/leave-types", page, rows, {
         refreshInterval: 3000
     });
     useDocumentTitle("Manage Leave Types")
     const leaveData = useMemo(() => {
         if (!data?.data) {
+            if(error){
+                if(error instanceof AxiosError){
+                    toast({
+                        title: "Error", description: error.response?.data.message, variant: "danger",
+                    })
+                } else{
+                    toast({
+                        title: "Error", description: error, variant: "danger",
+                    })
+                }
+                console.log("Error while fetching: ", error)
+
+            }
             return []
         } else {
             return data.data
         }
-    }, [data])
+    }, [data?.data, error, toast])
 
     const onOpenDrawer = useCallback(() => {
         setIsOpen(true)
@@ -206,7 +220,7 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => voi
         })
 
         const deletedIds = {
-            leave_type_id: props.id, employee_status_id: props.applicable_to_employee_types.id
+            leave_type_id: props.id, employee_status_id: props.applicable_to_employee_types
         }
 
         if (res === "yes") {
@@ -220,13 +234,13 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => voi
                 }
             } catch (error) {
                 console.log(error)
-                if (error instanceof Error) {
-                    toast({
-                        title: "Error", description: error.message, variant: "danger",
-                    })
-                } else if (error instanceof AxiosError) {
+                if (error instanceof AxiosError) {
                     toast({
                         title: "Error", description: error.response?.data.message, variant: "danger",
+                    })
+                } else {
+                    toast({
+                        title: "Error", description: "An unexpected error occurred", variant: "danger",
                     })
                 }
             }
@@ -241,15 +255,20 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => voi
 
     return (<>
         {!isObjectEmpty(props) && <CardView
+            className="max-w-[500px]"
             title="Leave Type"
             onDelete={() => handleLeaveTypeDelete(props.id)}
             onEdit={() => handleLeaveTypeEdit(!editOpen)}
             editProps={{
                 isDisabled: props.current_employees.length > 0
             }}
+            deleteProps={{
+                isLoading: loading,
+                isDisabled: props.current_employees.length > 0
+            }}
             onClose={onClose}
             header={<div
-                className="relative flex flex-col gap-2 h-32 bg-opacity-50 backdrop-blur-sm w-full">
+                className="flex flex-col gap-2 h-32 bg-opacity-50 backdrop-blur-sm w-full">
                 <div className="flex items-center gap-5 w-fit">
                     <Typography className="text-2xl font-bold">{props.name}</Typography>
                     <Chip style={{
@@ -262,7 +281,7 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => voi
                         {props.code}
                     </Chip>
                 </div>
-                <div className="absolute top-12 left-3 right-3 text-pretty break-words h-24">
+                <div className="text-pretty break-words h-24">
                     <Typography className="text-sm text-justify indent-5 h-[4rem]">
                         {props.description}
                     </Typography>
@@ -272,7 +291,11 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => voi
                 //     label: "Minimum Days", value: pluralize(props.min_duration, "day")
                 // },
                 {label: "Maximum Days", value: pluralize(props.max_duration, "day")}, {
-                    label: "Applicable for", value: capitalize(props.applicable_to_employee_types.name)
+                    label: "Applicable for",
+                    value:  <div className="flex flex-wrap gap-2">{props.applicable_to_employee_types.map(item => (
+                            <Chip key={item.id} {...uniformChipStyle(item.name)} variant="bordered"
+                                  className="rounded" size="sm">{capitalize(item.name)}</Chip>))}</div>
+
                 }, {
                     label: "Current Usage",
                     value: <EmployeesAvatar employees={curr_emp} handleEmployeePicture={handleEmployeePicture}/>
@@ -284,7 +307,11 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => voi
                     label: "Created At", value: props.created_at
                 }, {
                     label: "Updated At", value: props.updated_at
-                },]}/>} footer={<></>}/>}
+                },]}/>}
+            onDanger={
+                <div className="w-full">{props.current_employees.length > 0 && <Chip className="bg-[#338EF7] text-white min-w-full" radius="sm" startContent={<IoMdInformationCircle className={icon_size_sm}/>}>Note. This leave cannot be edited or deleted.</Chip>}</div>
+            }
+        />}
 
         <LeaveTypeForm
             isOpen={editOpen}

@@ -6,11 +6,14 @@ import {btnClass, icon_color} from "@/lib/utils";
 import ActiveLeaves from "@/components/admin/dashboard/ActiveLeaves";
 import {LuMaximize} from "react-icons/lu";
 import {cn} from "@nextui-org/react";
+import type {Metadata} from "next";
 
 
+export const metadata: Metadata = {
+    title: "Dashboard | HRiS",
+}
 async function Page() {
     return (<>
-
             <section className='grid grid-rows-[auto,1fr,auto, auto] gap-4 h-full'>
                 <div className='grid grid-cols-4 gap-4 w-full'>
                     <DashboardStats/>

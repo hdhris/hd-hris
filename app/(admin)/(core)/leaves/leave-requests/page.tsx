@@ -32,6 +32,7 @@ import Comments from "@/components/common/comments/comments";
 import {useUserInfo} from "@/lib/utils/getEmployeInfo";
 import {OvertimeEntry} from "@/types/attendance-time/OvertimeType";
 import AcceptReject from "@/components/actions/AcceptReject";
+import Evaluators from '@/components/common/evaluators/evaluators';
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -46,8 +47,7 @@ function Page() {
     const [selectedRequest, setSelectedRequest] = useState<LeaveRequest>()
     const [isReplySubmit, setIsReplySubmit] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
-    const [rejectReason, setRejectReason] = useState("");
-    const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
+    const {data, isLoading, mutate} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
     const currentUser = useUserInfo()
@@ -203,28 +203,6 @@ function Page() {
         setLoading(false)
     }
 
-    const getUserById = useMemo(() => {
-        return (id: number) => {
-            return signatories?.evaluators?.users.find((user) => Number(user.id) === id || user.employee_id === id);
-        };
-    }, [signatories]);
-
-    const currentEvaluatingOrderNumber = useMemo(() => {
-        let orderNumber = 0;
-        if (signatories?.evaluators?.evaluators?.length) {
-            const sortedEvaluators = signatories.evaluators.evaluators.sort((a, b) => a.order_number - b.order_number);
-
-            for (const item of sortedEvaluators) {
-                if (item.decision.is_decided === null) {
-                    orderNumber = item.order_number;
-                    break;
-                }
-            }
-        }
-        return orderNumber;
-    }, [signatories]);
-
-    const onUpdate = (approval: string)=> {}
 
     return (<DataDisplay
         isLoading={isLoading}
@@ -343,110 +321,35 @@ function Page() {
             <hr className="border border-default-400 space-y-2"/>
             <Section className="ms-0" title="Evaluator's Decision"
                      subtitle="Summary of evaluator's feedback and decisions"/>
-            {
-                signatories?.evaluators.evaluators.map((item, index) => {
-                    const isApproving =
-                        item.order_number === currentEvaluatingOrderNumber && Number(item.evaluated_by) === Number(currentUser?.id);
-
-
-                    return(
-                        <BorderCard key={index} heading={<Typography
-                            className="text-medium">{capitalize(getUserById(item.evaluated_by)?.role!)} Details</Typography>}>
-                            <div className="flex justify-between items-center">
-                                <User
-                                    className="justify-start p-2"
-                                    name={<Typography className="text-sm font-semibold">{getUserById(item.evaluated_by)?.name!}</Typography>}
-                                    description={<Typography className="text-sm font-semibold !text-default-400/75">
-                                        {getUserById(item.evaluated_by)?.position!}
-                                    </Typography>}
-                                    avatarProps={{
-                                        src: getUserById(item.evaluated_by)?.picture!, classNames: {base: '!size-6'}, isBordered: true,
-                                    }}
-                                />
-
-                                {isApproving ? (
-                                    <AcceptReject
-                                        onAccept={async () => onUpdate("approved")}
-                                        onReject={async () => onUpdate("rejected")}
-                                        isDisabled={{
-                                            accept: rejectReason != "",
-                                            reject: rejectReason === "",
-                                        }}
-                                    />
-                                ) : (
-                                    <Chip
-                                        size="sm"
-                                        variant="flat"
-                                        color={
-                                            item.decision.is_decided === null
-                                                ? "warning"
-                                                : !item.decision.is_decided
-                                                    ? "danger"
-                                                    : "success"
-                                        }
-                                    >
-                                        {item.decision.is_decided === null
-                                            ? "Pending"
-                                            : !item.decision.is_decided
-                                                ? "Rejected"
-                                                : "Approved"}
-                                    </Chip>
-                                )}
-                            </div>
-                            {isApproving && (
-                                <Textarea
-                                    placeholder="Reason for rejection"
-                                    value={rejectReason}
-                                    onValueChange={setRejectReason}
-                                />
-                            )}
-                        </BorderCard>
-                    )
-                })
-            }
-            {/*{signatories?.users?.filter(item => item.role.toLowerCase() !== "applicant").map(item => {*/}
-            {/*    return (<>*/}
-            {/*        <BorderCard key={item.id} heading={<Typography*/}
-            {/*        className="text-medium">{capitalize(item.role)} Details</Typography>}>*/}
-            {/*        <div className="flex justify-between items-center">*/}
-            {/*            <User*/}
-            {/*                className="justify-start p-2"*/}
-            {/*                name={<Typography className="text-sm font-semibold">{item?.name}</Typography>}*/}
-            {/*                description={<Typography className="text-sm font-semibold !text-default-400/75">*/}
-            {/*                    {item?.email}*/}
-            {/*                </Typography>}*/}
-            {/*                avatarProps={{*/}
-            {/*                    src: item?.picture, classNames: {base: '!size-6'}, isBordered: true,*/}
-            {/*                }}*/}
-            {/*            />*/}
-            {/*        </div>*/}
-            {/*    </BorderCard>*/}
-            {/*        /!*{<Chip startContent={<LuInfo/>}>This Leave Request is auto approved by the head.</Chip>}*!/*/}
-            {/*    </>)*/}
-            {/*})}*/}
-
-        </>} onDanger={<>
-            {/*<Section className="ms-0" title="Edit Leave"*/}
-            {/*         subtitle="Edit the leave request">*/}
-            {/*    <Button*/}
-            {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
-            {/*        startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>*/}
-            {/*</Section>*/}
-            {/*<hr className="border border-destructive/20"/>*/}
-            {/*<Section className="ms-0" title="Extend Leave"*/}
-            {/*         subtitle="Extend the leave request">*/}
-            {/*    <Button*/}
-            {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
-            {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
-            {/*</Section>*/}
-            {/*<hr className="border border-destructive/20"/>*/}
-            <Section className="ms-0" title="Cancel"
-                     subtitle="Cancel the leave request">
-                <Button
-                    isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
-                    startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
-            </Section>
-        </>}/>}
+            <Evaluators type="Leave Request" evaluation={selectedRequest.evaluators || []}
+                        selectedEmployee={selectedRequest}
+                        mutate={mutate}
+                        evaluatorsApi={'/api/admin/leaves/requests/evaluation-decision'}
+            />
+        </>}
+        //     onDanger={<>
+        //     {/*<Section className="ms-0" title="Edit Leave"*/}
+        //     {/*         subtitle="Edit the leave request">*/}
+        //     {/*    <Button*/}
+        //     {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
+        //     {/*        startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>*/}
+        //     {/*</Section>*/}
+        //     {/*<hr className="border border-destructive/20"/>*/}
+        //     {/*<Section className="ms-0" title="Extend Leave"*/}
+        //     {/*         subtitle="Extend the leave request">*/}
+        //     {/*    <Button*/}
+        //     {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
+        //     {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
+        //     {/*</Section>*/}
+        //     {/*<hr className="border border-destructive/20"/>*/}
+        //     {/*<Section className="ms-0" title="Cancel"*/}
+        //     {/*         subtitle="Cancel the leave request">*/}
+        //     {/*    <Button*/}
+        //     {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || capselectedRequest.leave_details.status === "Rejected"}*/}
+        //     {/*        startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>*/}
+        //     {/*</Section>*/}
+        // </>}
+        />}
     />)
 
 }

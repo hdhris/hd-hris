@@ -5,7 +5,7 @@ import {ControllerRenderProps, FieldValues, useFormContext} from "react-hook-for
 import InputStyle, {DateStyle} from "@/lib/custom/styles/InputStyle";
 import {SelectionProp} from "./types/SelectionProp";
 import {InputProps, TextAreaProps} from "@nextui-org/input";
-import {Select, SelectItem} from "@nextui-org/select";
+import {Select, SelectItem} from "@nextui-org/react";
 import {
     Autocomplete,
     AutocompleteItem,
@@ -33,16 +33,15 @@ import {
     cn
 } from "@nextui-org/react";
 import {Case, Default, Switch as SwitchCase} from "@/components/common/Switch";
-import {getLocalTimeZone, parseAbsoluteToLocal} from "@internationalized/date";
-import dayjs from "dayjs";
+import {getLocalTimeZone, parseAbsolute} from "@internationalized/date";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import {Radio} from "@nextui-org/radio";
 import {Key} from "@react-types/shared";
 import {Granularity} from "@react-types/datepicker";
 import {Input} from "@/components/ui/input";
-import {toGMT8} from "@/lib/utils/toGMT8";
 import FormSwitch from "@/components/ui/FormSwitch";
+import dayjs from "dayjs";
 
 // Load plugins
 dayjs.extend(utc);
@@ -241,14 +240,14 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 {...(item.config as DateInputProps)}
                                 id={item.name}
                                 size={size}
-                                value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
+                                value={field.value && dayjs(field.value).isValid() ? parseAbsolute(dayjs(field.value).toISOString(), "UTC") : null}
                                 granularity={(item.config as any)?.granularity as Granularity || "day"}
                                 aria-label={item.name}
                                 isDisabled={item.inputDisabled}
                                 autoFocus={item.isFocus}
                                 onChange={(value) => {
                                     if (value) {
-                                        field.onChange(toGMT8(value.toDate(getLocalTimeZone())).format('YYYY-MM-DD'))
+                                        field.onChange(dayjs(value.toDate(getLocalTimeZone())).format('YYYY-MM-DD'))
                                     }
                                 }}
                             />
@@ -262,7 +261,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 {...field}
                                 size={size}
                                 {...(item.config as DatePickerProps)}
-                                value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
+                                value={field.value && dayjs(field.value).isValid() ? parseAbsolute(dayjs(field.value).toISOString(),"UTC") : null}
                                 id={item.name}
                                 granularity={(item.config as any)?.granularity as Granularity || "day"}
                                 aria-label={item.name}
@@ -289,8 +288,8 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 value={field.value?.start && field.value?.end && dayjs(field.value?.start).isValid() && dayjs(field.value?.end).isValid() ? {
                                     // start: parseAbsoluteToLocal(dayjs(field.value?.start).toISOString()),
                                     // end: parseAbsoluteToLocal(dayjs(field.value?.end).toISOString()),
-                                    start: parseAbsoluteToLocal(dayjs(field.value?.start).toISOString()),
-                                    end: parseAbsoluteToLocal(dayjs(field.value?.end).toISOString()),
+                                    start: parseAbsolute(dayjs(field.value?.start).toISOString(),"UTC"),
+                                    end: parseAbsolute(dayjs(field.value?.end).toISOString(),"UTC"),
                                 } : null}
                                 granularity={(item.config as any)?.granularity as Granularity || "day"}
                                 isRequired
@@ -337,7 +336,6 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 selectedKeys={new Set<Key>([field.value as Key]) || "all"} // Cast field.value to Key
                                 {...field}
                                 {...(item.config as Omit<SelectProps, "label">)}
-
                             >
                                 {/*<Radio value="buenos-aires">Buenos Aires</Radio>*/}
                                 {(item.config as any)?.options?.map((option: GroupInputOptions) => (
@@ -365,7 +363,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                         </Case>
                         <Case of="time-input">
                             <TimeInput
-                                value={field.value && dayjs(field.value).isValid() ? parseAbsoluteToLocal(dayjs(field.value).toISOString()) : null}
+                                value={field.value && dayjs(field.value).isValid() ? parseAbsolute(dayjs(field.value).toISOString(),"UTC") : null}
                                 granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || "hour"}
                                 // granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || undefined}
                                 id={item.name}
@@ -377,7 +375,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 size={size}
                                 {...(item.config as TimeInputProps)}
                                 onChange={(value) => {
-                                    field.onChange(toGMT8(value.toString().split('[')[0]).toISOString());
+                                    field.onChange(dayjs(value.toString().split('[')[0]).toISOString());
                                 }}
                             />
                         </Case>

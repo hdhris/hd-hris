@@ -24,7 +24,7 @@ export const automateAddingLeaveType = async (id: string | number) => {
             A new leave type has been added to our system.
         </Text>
         <Text className="font-semibold text-gray-800 mb-4">New Leave Type Summary</Text>
-        <Text className="text-gray-800 mb-2">{JSON.stringify(is_applicable_to_all.filter(item => item.is_applicable_to_all).map(item => item.name.concat(" ")))}</Text>
+        {/*<Text className="text-gray-800 mb-2">{JSON.stringify(is_applicable_to_all.filter(item => item.is_applicable_to_all).map(item => item.name.concat(" ")))}</Text>*/}
         {/*<Text className="text-gray-800 mb-2">2. Review the details of the new leave type below.</Text>*/}
         {/*<Text className="text-gray-800 mb-4">3. Update your leave policies if applicable.</Text>*/}
         <Text className="text-gray-800 mt-6">
@@ -35,15 +35,15 @@ export const automateAddingLeaveType = async (id: string | number) => {
         </Text>
 
     </FlexibleEmailTemplate>)
-    for (const item of is_applicable_to_all) {
-        if (item.is_applicable_to_all) {
-
-            console.log("sending");
-            //TODO: this is for testing
-            await sendEmail({
-                to: "xerojohn7@gmail.com", subject: "Action Required: Review and Add New Leave Type", html: email
-            })
-        }
-    }
+    // for (const item of is_applicable_to_all) {
+    //     if (item.is_applicable_to_all) {
+    //
+    //         console.log("sending");
+    //         //TODO: this is for testing
+    //         await sendEmail({
+    //             to: "xerojohn7@gmail.com", subject: "Action Required: Review and Add New Leave Type", html: email
+    //         })
+    //     }
+    // }
 }
 

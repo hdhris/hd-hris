@@ -8,6 +8,7 @@ import {Section} from "@/components/common/typography/Typography";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 
 interface CardViewProps {
+    className?: string
     title?: string;
     header: ReactNode;
     body: ReactNode;
@@ -21,8 +22,8 @@ interface CardViewProps {
     id?: string
 }
 
-function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, onDanger, editProps, deleteProps}: CardViewProps) {
-    return (<div className="w-full space-y-4 rounded border border-default-400/20 overflow-hidden grid grid-rows-[auto_1fr] pb-6" id={id}>
+function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, onDanger, editProps, deleteProps, className}: CardViewProps) {
+    return (<div className={cn("relative w-full space-y-4 rounded border border-default-400/20 overflow-hidden grid grid-rows-[auto_1fr] pb-6", className)} id={id}>
         <div
             className="flex justify-between sticky top-0 bg-[#FAFAFA] z-10 px-4 py-2 border-b border-default-400/50">
             {header}
@@ -42,7 +43,7 @@ function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, o
                     {(onEdit || onDelete || onDanger) && <>
                         <Section className="ms-0 mt-4" title="Danger Zone"
                                  subtitle="Proceed with caution – irreversible actions ahead."/>
-                        <div className="border rounded border-destructive/20 mt-4 space-y-4 p-4">
+                        <div className="border rounded border-destructive/20 mt-4 space-y-4 p-4 w-full">
                             {onDanger}
                             {onEdit && <>
                                 <div className="ms-2">
@@ -63,6 +64,7 @@ function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, o
                             {onDelete && <div className="ms-2">
                                 <Section className="ms-0" title={`Delete ${title}`}
                                          subtitle="This action cannot be undone. Proceed with caution.">
+
                                     <Button {...uniformStyle({color: "danger"})}
                                             {...deleteProps}
                                             onClick={onDelete}

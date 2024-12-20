@@ -5,6 +5,7 @@ import {capitalize} from "@nextui-org/shared-utils";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import dayjs from "dayjs";
 import {Logger, LogLevel} from "@/lib/logger/Logger";
+import {getPrismaErrorMessage} from "@/server/errors/server-errors";
 
 export const dynamic = "force-dynamic";
 
@@ -111,10 +112,10 @@ export async function GET(request: Request) {
                 name: leaveType.name,
                 code: leaveType.code,
                 description: leaveType.description,
-                applicable_to_employee_types: {
-                    id: leaveType.is_applicable_to_all ? "all" : leaveType.trans_leave_types.find(item => item.ref_employment_status.id)?.ref_employment_status.id,
-                    name: leaveType.is_applicable_to_all ? "all" : leaveType.trans_leave_types.find(item => item.ref_employment_status.name)?.ref_employment_status.name || ""
-                },
+                applicable_to_employee_types: leaveType.trans_leave_types.map(item => ({
+                        id: item.ref_employment_status.id,
+                        name: item.ref_employment_status.name
+                    })),
                 attachment_required: leaveType.attachment_required,
                 created_at: dayjs(leaveType.created_at).format("YYYY-MM-DD"),
                 is_active: leaveType.is_active,
@@ -133,6 +134,6 @@ export async function GET(request: Request) {
 
     } catch (err) {
         console.error("Error: ", err);
-        return NextResponse.error();
+        return getPrismaErrorMessage(err);
     }
 }

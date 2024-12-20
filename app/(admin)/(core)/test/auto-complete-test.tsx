@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
 import { Form } from "@/components/ui/form";
 import { useQuery } from "@/services/queries";
@@ -12,7 +12,7 @@ function AutoCTest() {
 
     const { data, isLoading } = useQuery<
         {
-            job_id: number;
+            id: number;
             name: string;
         }[]
     >("/api/admin/utils/test");
@@ -27,36 +27,11 @@ function AutoCTest() {
         },
     });
 
-    const options = useMemo(() => {
-        if (data) {
-            return data?.map((item) => {
-                return {
-                    label: item.name,
-                    value: String(item.job_id),
-                };
-            });
-        }
-        return [];
-    }, [data]);
-
-    const fields: FormInputProps[] = useMemo(() => {
-        return [
-            {
-                name: "job_id",
-                type: "auto-complete",
-                config: {
-                    options: options,
-                    onValueChange: (value: React.Key) => form.setValue("job_id", Number(String(value))),
-                },
-            },
-        ];
-    }, [options]);
-
     const onSubmit = useCallback(
         async function (values: z.infer<typeof formScheme>) {
-            console.log(values);
+            // console.log(values, data);
             if (data) {
-                setJob(data.find((item) => item.job_id === values.job_id)?.name || "Not found");
+                setJob(data.find((item) => item.id === Number(values.job_id))?.name || "Not found");
             }
         },
         [data]
@@ -69,7 +44,22 @@ function AutoCTest() {
         <>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <FormFields items={fields} />
+                    <FormFields
+                        items={[
+                            {
+                                name: "job_id",
+                                type: "auto-complete",
+                                config: {
+                                    options: data?.map((item) => {
+                                        return {
+                                            label: item.name,
+                                            value: String(item.id),
+                                        };
+                                    }),
+                                },
+                            },
+                        ]}
+                    />
                     <Button type="submit" color="primary">
                         Set
                     </Button>

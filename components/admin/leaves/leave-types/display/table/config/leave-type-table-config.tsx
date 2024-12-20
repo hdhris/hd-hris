@@ -13,7 +13,6 @@ import {Chip} from "@nextui-org/chip";
 import uniqolor from "uniqolor";
 import {rgba} from "color2k";
 import {FilterProps} from "@/types/table/default_config";
-import {getColor} from "@/helper/background-color-generator/generator";
 import {uniformChipStyle} from "@/lib/custom/styles/SizeRadius";
 import {capitalize} from "@nextui-org/shared-utils";
 import {pluralize} from "@/helper/pluralize/pluralize";
@@ -59,16 +58,18 @@ export const LeaveTypeTableConfiguration: TableConfigProps<LeaveType> = {
                 <Typography>{pluralize(item.max_duration, "Day")}</Typography>
             </Case>
             <Case of="applicable_to_employee_types">
-                <Chip
-                    {...uniformChipStyle(item.applicable_to_employee_types.name)}
-                //     style={{
-                //     background: getColor(item.applicable_to_employee_types.name, 0.2),
-                //     borderColor: getColor(item.applicable_to_employee_types.name, 0.5),
-                //     color: getColor(item.applicable_to_employee_types.name)
-                // }}
-                    variant="bordered" className="rounded">
-                    {capitalize(item.applicable_to_employee_types.name)}
-                </Chip>
+                <div className="flex flex-wrap gap-2">
+                    {item.applicable_to_employee_types.map(((data, index) => (
+                        <Chip
+                            key={index}
+                            size="sm"
+                            {...uniformChipStyle(data.name)}
+                            variant="bordered" className="rounded">
+                            {capitalize(data.name)}
+                        </Chip>
+
+                    )))}
+                </div>
 
             </Case>
             <Case of="paid_leave">

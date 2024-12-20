@@ -3,6 +3,7 @@ import {
     AttendaceStatuses,
     AttendanceData,
     AttendanceLog,
+    EmployeeSchedule,
     InStatus,
     OutStatus,
 } from "@/types/attendance-time/AttendanceTypes";
@@ -25,7 +26,7 @@ type Dates = {
 async function attendanceData({
     attendanceLogs,
     employees,
-    batchSchedule,
+    // batchSchedule,
     employeeSchedule,
     startDate,
     endDate,
@@ -33,7 +34,7 @@ async function attendanceData({
     // Reuse employee schedule map for references below
     const employeeScheduleMap = new Map(employeeSchedule.map((es) => [es.employee_id!, es]));
     // Reuse batch schedule map for references below
-    const batchScheduleMap = new Map(batchSchedule.map((bs) => [bs.id, bs]));
+    // const batchScheduleMap = new Map(batchSchedule.map((bs) => [bs.id, bs]));
 
     /////////////////////////////////////////////////////////////////////
     // Organize and sort attendance logs into a record by date and employee
@@ -87,7 +88,8 @@ async function attendanceData({
                 employees.map(async (emp) => {
                     const employeeId = Number(emp.id);
                     const daySchedule = employeeScheduleMap.get(employeeId);
-                    const timeSchedule = batchScheduleMap.get(daySchedule?.batch_id || 0);
+                    // const timeSchedule = batchScheduleMap.get(daySchedule?.batch_id || 0);
+                    const timeSchedule = getEmployeeSchedule(employeeSchedule, employeeId, date); //batchScheduleMap.get(daySchedule?.batch_id || 0);
 
                     // Initialize a record for the employee incase if it is null
                     if (!statusesByDate[date][employeeId]) {
@@ -101,7 +103,6 @@ async function attendanceData({
                     if (!daySchedule || !timeSchedule) return;
 
                     const timeIn = toGMT8(timeSchedule.clock_in!).subtract(offset, "hours");
-                    // console.log("Fetched: ", timeSchedule.clock_in, "Offsetted: ", timeIn.toISOString());
                     const timeOut = toGMT8(timeSchedule.clock_out!).subtract(offset, "hours");
 
                     // If current day does not exists in employee's schedule
@@ -161,7 +162,9 @@ async function attendanceData({
                                         // Consider it as a PM time in
                                     } else {
                                         // Initialize as no break if the employee has not punched out at morning yet
+                                        // let stat: InStatus = "no break";
                                         let stat: InStatus = "no break";
+
                                         // If the employee has punched out at morning...
                                         if (statusesByDate[date][employeeId].amOut) {
                                             // Check if PM time-in has passed the break-mins schedule after AM time-out....
@@ -175,6 +178,15 @@ async function attendanceData({
                                                 ) > timeSchedule.break_min!
                                                     ? "late"
                                                     : "ontime"; // Otherwise, its closer to break-mins duration schedule
+                                        // If the employee has no punch outs at morning. The employee might be absent at morning
+                                        } else {
+                                            // "ONTIME" if time-in is 5 mins earlier than grace period
+                                            if (timestamp.hour() === 13 && timestamp.minute() <= gracePeriod) {
+                                                stat = "ontime";
+                                            // Otherwise, "Late"
+                                            } else {
+                                                stat = "late";
+                                            }
                                         }
                                         statusesByDate[date][employeeId].pmIn = {
                                             id: log.id,
@@ -236,7 +248,7 @@ async function attendanceData({
                     // Perform a validation if it is considered "ABSENT" or "NO BREAK"
 
                     // If not punched IN at morning, mark as absent
-                    if (statusesByDate[date][employeeId].amIn === null) {
+                    if (!statusesByDate[date][employeeId].amIn) {
                         statusesByDate[date][employeeId].amIn = {
                             id: null,
                             time: null,
@@ -246,7 +258,11 @@ async function attendanceData({
                     // If not punched OUT at morning...
                     if (!statusesByDate[date][employeeId].amOut) {
                         // Mark absent if not also punched OUT at afternoon
-                        if (statusesByDate[date][employeeId].pmOut?.time === null) {
+                        // or not also punched IN at morning
+                        if (
+                            !statusesByDate[date][employeeId].amIn?.time ||
+                            !statusesByDate[date][employeeId].pmOut?.time
+                        ) {
                             statusesByDate[date][employeeId].amOut = {
                                 id: null,
                                 time: null,
@@ -376,7 +392,43 @@ async function attendanceData({
         attendanceLogs,
         employees,
         statusesByDate,
-        batchSchedule,
+        // batchSchedule,
         employeeSchedule,
     };
 }
+
+export const getEmployeeSchedule = (employeeSchedule: EmployeeSchedule[], employeeId: number, logDate: string) => {
+    // Parse logDate with Day.js
+    const logDay = toGMT8(logDate);
+
+    // Try to find a schedule where logDay is within the range
+    const rangedDateSchedule = employeeSchedule.find((schedule) => {
+        // Check if the employee ID matches
+        if (schedule.employee_id !== employeeId) return false;
+        if (!schedule.end_date) return false;
+
+        // Parse startDate and endDate
+        const startDate = toGMT8(schedule.start_date.split("T")[0]);
+        const endDate = toGMT8(schedule.end_date.split("T")[0]);
+
+        // Check if logDay is within the date range
+        return logDay.isSameOrAfter(startDate) && logDay.isSameOrBefore(endDate);
+    });
+
+    // If no schedule found in range, check for open-ended schedules
+    if (!rangedDateSchedule) {
+        return (
+            employeeSchedule.find((schedule) => {
+                if (schedule.employee_id !== employeeId) return false;
+
+                const startDate = toGMT8(schedule.start_date.split("T")[0]);
+                const endDate = schedule.end_date;
+
+                // Check if logDay is after startDate and the schedule has no endDate
+                return logDay.isSameOrAfter(startDate) && !endDate;
+            }) || null
+        );
+    }
+
+    return rangedDateSchedule;
+};

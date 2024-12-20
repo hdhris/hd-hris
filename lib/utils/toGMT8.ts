@@ -2,6 +2,11 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import relativeTime from "dayjs/plugin/relativeTime";
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 dayjs.extend(utc);
 dayjs.extend(relativeTime);
@@ -21,10 +26,10 @@ export function toGMT8(value?: string | Date): dayjs.Dayjs {
   if (dayjs(dateTimeString).isValid()) {
     return dayjs.utc(dateTimeString);
 
-  } else if (dayjs(dateTimeString, "hh:mm", true).isValid()) {
-    return dayjs.utc(dateTimeString, "hh:mm", true);
-  } else if (dayjs(dateTimeString, "hh:mm:ss", true).isValid()) {
-    return dayjs.utc(dateTimeString, "hh:mm:ss", true);
+  // } else if (dayjs(dateTimeString, "hh:mm", true).isValid()) {
+  //   return dayjs.utc(dateTimeString, "hh:mm", true);
+  // } else if (dayjs(dateTimeString, "hh:mm:ss", true).isValid()) {
+  //   return dayjs.utc(dateTimeString, "hh:mm:ss", true);
 
   } else if (dayjs(dateTimeString, "HH:mm", true).isValid()) {
     return dayjs.utc(dateTimeString, "HH:mm", true);

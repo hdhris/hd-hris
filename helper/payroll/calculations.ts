@@ -93,7 +93,7 @@ export function calculateAllPayheads(
 import { advanceCalculator } from "../benefits-calculator/advance-calculator";
 import { basicCalculator } from "../benefits-calculator/basic-calculator";
 import { Decimal } from "@prisma/client/runtime/library";
-import { AttendaceStatuses, BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
+import { AttendaceStatuses, BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 
 // Type definition for benefit data
@@ -171,7 +171,7 @@ export class Benefit {
 export function getUndertimeTotal(
   logStatus: Record<string, AttendaceStatuses>,
   empID: number,
-  timeSchedule: BatchSchedule | null,
+  timeSchedule: EmployeeSchedule | null,
   startDate: string,
   endDate: string
 ): number {
@@ -179,8 +179,6 @@ export function getUndertimeTotal(
     console.log("No shift found for emp: ",empID);
     return 0;
   };
-  // const factShiftLength = toGMT8(timeSchedule.clock_out!).diff(toGMT8(timeSchedule.clock_in!), "minute") - timeSchedule.break_min!;
-  // console.log("Emp: ", empID, "ShiftLength: ", factShiftLength);
   const start = new Date(startDate);
   const end = new Date(endDate);
   let totalAmount = 0;
@@ -191,9 +189,6 @@ export function getUndertimeTotal(
     if (logStatus[dateString] && logStatus[dateString][empID]) {
       totalAmount += logStatus[dateString][empID]?.undertime! //|| factShiftLength;
     } 
-    // else {
-    //   totalAmount += factShiftLength;
-    // }
   }
 
   return totalAmount;

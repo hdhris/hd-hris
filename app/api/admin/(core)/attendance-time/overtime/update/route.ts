@@ -6,13 +6,12 @@ export async function POST(req: NextRequest) {
   try {
     // console.log(data);
     // return NextResponse.json({ status: 200 });
+
     const updated = await prisma.trans_overtimes.update({
       where: {
         id : data.id,
       },
-      data : {
-        ...data,
-      },
+      data,
     })
     console.log(updated)
     return NextResponse.json({ status: 200 });

@@ -15,7 +15,7 @@ export async function GET(request: Request) {
                 ...emp_rev_include.employee_detail,
             },
             trans_employees_dim_incident_reports_reported_byTotrans_employees: {
-                ...emp_rev_include.reviewer_detail,
+                ...emp_rev_include.minor_detail,
             },
             
         }
