@@ -129,11 +129,7 @@ export class Benefit {
     try {
       let contribution = 0;
 
-      if (
-        this.data.ref_benefits_contribution_table &&
-        this.data.ref_benefits_contribution_table.length > 0
-      ) {
-        const contributionTable = this.data.ref_benefits_contribution_table[0];
+      const contributionTable = this.data.ref_benefits_contribution_table![0];
 
         const rates = {
           minSalary: contributionTable.min_salary,
@@ -149,16 +145,17 @@ export class Benefit {
           wispThreshold: contributionTable.wisp_threshold,
         };
 
-        contribution = advanceCalculator(salary, rates).employeeShare + (advanceCalculator(salary, rates).wispEmployee ?? 0);
-      } else {
-        // const basic = basicCalculator(
-        //   salary,
-        //   this.data.employer_contribution,
-        //   this.data.employee_contribution
-        // );
-        // console.log("Name: ", this.data.name, " Basic Calc: ", basic)
-        // contribution = basic.employee_contribution //+ basic.employer_contribution;
-      }
+        if(!contributionTable.min_MSC){
+          const basic = basicCalculator(
+            salary,
+            contributionTable.employer_rate,
+            contributionTable.employee_rate,
+          );
+          console.log("Name: ", this.data.name, " Basic Calc: ", basic)
+          contribution = basic.employee_contribution //+ basic.employer_contribution;
+        } else {
+          contribution = advanceCalculator(salary, rates).employeeShare + (advanceCalculator(salary, rates).wispEmployee ?? 0);
+        }
 
       return contribution;
     } catch (error) {
