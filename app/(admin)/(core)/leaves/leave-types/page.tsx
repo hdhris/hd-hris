@@ -26,6 +26,8 @@ import CardTable from "@/components/common/card-view/card-table";
 import {capitalize} from "@nextui-org/shared-utils";
 import {AxiosError} from "axios";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
+import {IoMdInformationCircle} from 'react-icons/io';
+import {icon_size_sm} from "@/lib/utils";
 
 
 function LeaveTypeTable() {
@@ -34,17 +36,30 @@ function LeaveTypeTable() {
     const [rows, setRows] = useState<number>(5)
     const [leaveType, setLeaveType] = useState<LeaveType>()
     const [isOpen, setIsOpen] = useState<boolean>(false)
-    const {data, isLoading} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/leave-types", page, rows, {
+    const {data, isLoading, error} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/leave-types", page, rows, {
         refreshInterval: 3000
     });
     useDocumentTitle("Manage Leave Types")
     const leaveData = useMemo(() => {
         if (!data?.data) {
+            if(error){
+                if(error instanceof AxiosError){
+                    toast({
+                        title: "Error", description: error.response?.data.message, variant: "danger",
+                    })
+                } else{
+                    toast({
+                        title: "Error", description: error, variant: "danger",
+                    })
+                }
+                console.log("Error while fetching: ", error)
+
+            }
             return []
         } else {
             return data.data
         }
-    }, [data])
+    }, [data?.data, error, toast])
 
     const onOpenDrawer = useCallback(() => {
         setIsOpen(true)
@@ -205,7 +220,7 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => voi
         })
 
         const deletedIds = {
-            // leave_type_id: props.id, employee_status_id: props.applicable_to_employee_types.id
+            leave_type_id: props.id, employee_status_id: props.applicable_to_employee_types
         }
 
         if (res === "yes") {
@@ -219,13 +234,13 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => voi
                 }
             } catch (error) {
                 console.log(error)
-                if (error instanceof Error) {
-                    toast({
-                        title: "Error", description: error.message, variant: "danger",
-                    })
-                } else if (error instanceof AxiosError) {
+                if (error instanceof AxiosError) {
                     toast({
                         title: "Error", description: error.response?.data.message, variant: "danger",
+                    })
+                } else {
+                    toast({
+                        title: "Error", description: "An unexpected error occurred", variant: "danger",
                     })
                 }
             }
@@ -245,6 +260,10 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => voi
             onDelete={() => handleLeaveTypeDelete(props.id)}
             onEdit={() => handleLeaveTypeEdit(!editOpen)}
             editProps={{
+                isDisabled: props.current_employees.length > 0
+            }}
+            deleteProps={{
+                isLoading: loading,
                 isDisabled: props.current_employees.length > 0
             }}
             onClose={onClose}
@@ -288,7 +307,11 @@ const LeaveTypesDetails = ({onClose, ...props}: LeaveType & { onClose: () => voi
                     label: "Created At", value: props.created_at
                 }, {
                     label: "Updated At", value: props.updated_at
-                },]}/>} footer={<></>}/>}
+                },]}/>}
+            onDanger={
+                <div className="w-full">{props.current_employees.length > 0 && <Chip className="bg-[#338EF7] text-white min-w-full" radius="sm" startContent={<IoMdInformationCircle className={icon_size_sm}/>}>Note. This leave cannot be edited or deleted.</Chip>}</div>
+            }
+        />}
 
         <LeaveTypeForm
             isOpen={editOpen}

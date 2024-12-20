@@ -2,7 +2,6 @@ import {NextResponse} from "next/server";
 import prisma from "@/prisma/prisma";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {EmployeeLeaveCredits, LeaveCredits} from "@/types/leaves/leave-credits-types";
-import {capitalize} from "@nextui-org/shared-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -19,19 +18,23 @@ export async function GET(request: Request) {
                 year, deleted_at: null,
             }, distinct: ["employee_id"], orderBy: {updated_at: "desc"}, take: perPage, skip: (page - 1) * perPage,
         });
-
+        const employeeIds = leave_credits.map((credit) => credit.employee_id);
         // Total employees and years for metadata
-        const [total_items, years] = await Promise.all([prisma.dim_leave_balances.groupBy({
+        const [total_items, years, emp_info] = await Promise.all([prisma.dim_leave_balances.groupBy({
             by: ["employee_id"], where: {deleted_at: null},
         }), prisma.dim_leave_balances.groupBy({
             by: ["year"], where: {deleted_at: null},
-        }),]);
-
-        // Fetch employee information
-        const employeeIds = leave_credits.map((credit) => credit.employee_id);
-        const emp_info = await prisma.trans_employees.findMany({
+        }), prisma.trans_employees.findMany({
             where: {
-                id: {in: employeeIds}, deleted_at: null,
+                id: {in: employeeIds}, deleted_at: null, dim_leave_balances: {
+                    some: {
+                        trans_leave_types: {
+                            is: {
+                                deleted_at: null
+                            }
+                        }
+                    }
+                }
             }, select: {
                 id: true,
                 prefix: true,
@@ -52,6 +55,13 @@ export async function GET(request: Request) {
                     }
                 },
                 dim_leave_balances: {
+                    where: {
+                        trans_leave_types:{
+                            is: {
+                                deleted_at: null
+                            }
+                        }
+                    },
                     select: {
                         id: true,
                         allocated_days: true,
@@ -63,10 +73,10 @@ export async function GET(request: Request) {
                         deleted_at: true,
                         trans_leave_types: {
                             select:{
+                                id: true,
                                 ref_leave_type_details: {
-                                    select:{
-                                        id: true,
-                                        name: true
+                                    select: {
+                                        id: true, name: true
                                     }
                                 }
                             }
@@ -74,8 +84,31 @@ export async function GET(request: Request) {
                     },
                 }
             },
-        });
+        })]);
 
+
+        const leaveTypes = await prisma.dim_leave_balances.findMany({
+            where: {
+                employee_id: {in: employeeIds},
+                deleted_at: null,
+                trans_leave_types: {
+                    is: {
+                        deleted_at: null
+                    }
+                }
+            }, select: {
+                trans_leave_types: {
+                    select: {
+                        id: true,
+                        ref_leave_type_details: {
+                            select: {
+                                id: true, name: true
+                            }
+                        }
+                    },
+                }
+            },
+        })
         // Ensure the order of `leave` matches the reference order in the `data_id`
         const leaveOrder = leave_credits.map(id => id.employee_id); // This is your desired order of IDs for "leave" and "data_id"
 
@@ -90,7 +123,8 @@ export async function GET(request: Request) {
                     used_days: items.used_days.toNumber(),
                     created_at: items.created_at?.toLocaleTimeString()!,
                     updated_at: items.updated_at?.toLocaleTimeString()!,
-                    leave_type: items.trans_leave_types.ref_leave_type_details,
+                    // leave_type: leaveTypes.find(leaveType => leaveType.trans_leave_types.id === items.trans_leave_types.id)?.trans_leave_types.ref_leave_type_details!,
+                    leave_type: items.trans_leave_types.ref_leave_type_details
                 }));
 
                 return {

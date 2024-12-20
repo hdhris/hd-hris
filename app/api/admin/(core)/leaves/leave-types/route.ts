@@ -5,6 +5,7 @@ import {capitalize} from "@nextui-org/shared-utils";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import dayjs from "dayjs";
 import {Logger, LogLevel} from "@/lib/logger/Logger";
+import {getPrismaErrorMessage} from "@/server/errors/server-errors";
 
 export const dynamic = "force-dynamic";
 
@@ -133,6 +134,6 @@ export async function GET(request: Request) {
 
     } catch (err) {
         console.error("Error: ", err);
-        return NextResponse.error();
+        return getPrismaErrorMessage(err);
     }
 }
