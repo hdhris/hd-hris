@@ -26,6 +26,7 @@ import { DateStyle } from "@/lib/custom/styles/InputStyle";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { addUnavailability, getActiveUnavailability, isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
 import { useUserInfo } from "@/lib/utils/getEmployeInfo";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 // Define the schema
 const statusFormSchema = z.object({
@@ -195,54 +196,59 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     setActiveModal(type);
     let formData = {};
 
-    const today = dayjs().startOf('day').toISOString();
+    const today = toGMT8();
 
     switch (type) {
       case "suspend":
-        if (currentEmployee.suspension_json) {
-          const data = typeof currentEmployee.suspension_json === "string"
-            ? JSON.parse(currentEmployee.suspension_json)
-            : currentEmployee.suspension_json;
+        const suspension_json = getActiveUnavailability({entry: currentEmployee.suspension_json});
+        if (suspension_json) {
           formData = {
-            startDate: dayjs(data.startDate).format("YYYY-MM-DD"),
-            endDate: dayjs(data.endDate).format("YYYY-MM-DD"),
-            reason: data.reason || data.suspensionReason,
+            startDate: toGMT8(suspension_json.start_date).toISOString(),
+            endDate: toGMT8(suspension_json.end_date!).toISOString(),
+            reason: suspension_json.reason,
           };
         } else {
           formData = {
-            startDate: today,
+            startDate: today.toISOString(),
+            endDate: today.add(3,'days').toISOString(),
             reason: ""
           };
         }
         break;
       case "resign":
-        if (currentEmployee.resignation_json) {
-          const data = typeof currentEmployee.resignation_json === "string"
-            ? JSON.parse(currentEmployee.resignation_json)
-            : currentEmployee.resignation_json;
+        const resignation_json = getActiveUnavailability({entry: currentEmployee.resignation_json});
+        if (resignation_json) {
+          // const data = typeof currentEmployee.resignation_json === "string"
+          //   ? JSON.parse(currentEmployee.resignation_json)
+          //   : currentEmployee.resignation_json;
           formData = {
-            startDate: dayjs(data.resignationDate).format("YYYY-MM-DD"),
-            reason: data.reason || data.resignationReason,
+            startDate: toGMT8(resignation_json.start_date).toISOString(),
+            endDate: resignation_json.end_date ? toGMT8(resignation_json.end_date).toISOString() : null,
+            reason: resignation_json.reason,
           };
         } else {
           formData = {
-            startDate: today,
+            startDate: today.toISOString(),
+            endDate: null,
             reason: ""
           };
         }
         break;
       case "terminate":
-        if (currentEmployee.termination_json) {
-          const data = typeof currentEmployee.termination_json === "string"
-            ? JSON.parse(currentEmployee.termination_json)
-            : currentEmployee.termination_json;
+        const termination_json = getActiveUnavailability({entry: currentEmployee.termination_json});
+        if (termination_json) {
+          // const data = typeof currentEmployee.termination_json === "string"
+          //   ? JSON.parse(currentEmployee.termination_json)
+          //   : currentEmployee.termination_json;
           formData = {
-            startDate: dayjs(data.terminationDate).format("YYYY-MM-DD"),
-            reason: data.reason || data.terminationReason,
+            startDate: toGMT8(termination_json.start_date).toISOString(),
+            endDate: termination_json.end_date ? toGMT8(termination_json.end_date).toISOString() : null,
+            reason: termination_json.reason,
           };
         } else {
           formData = {
-            startDate: today,
+            startDate: today.toISOString(),
+            endDate: null,
             reason: ""
           };
         }
