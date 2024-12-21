@@ -37,15 +37,25 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     try {
         console.log(body);
-        const evaluators = await getSignatory("/leaves/leave-requests", body.employee_id, false);
+        const [evaluators,leave_type_audit] = await Promise.all([
+            getSignatory("/leaves/leave-requests", body.employee_id, false),
+            prisma.ref_leave_type_details.findFirst({
+                where: {
+                    id: body.id,
+                }
+            })
+        ])
+
         if(!evaluators){
             return NextResponse.json({ status: 400 });
         }
+
         const [leaveApplication, employeeInfo] = await Promise.all([
             prisma.trans_leaves.create({
                 data: {
                     ...body,
                     evaluators,
+                    leave_type_audit,
                     created_by: body.employee_id,
                     created_at: toGMT8().toISOString(),
                     updated_at: toGMT8().toISOString(),

@@ -472,6 +472,7 @@ Table trans_leaves {
   evaluators Json [not null]
   files Json
   total_days Decimal [not null]
+  leave_type_audit Json [not null, default: '{}']
   trans_employees_leaves trans_employees [not null]
   trans_employees_trans_leaves_created_byTotrans_employees trans_employees
   trans_leave_types trans_leave_types [not null]

@@ -1,4 +1,8 @@
 export interface UserPrivileges {
     web_access?: boolean;
-    admin_panel?: boolean;
+    modules: {
+        name: string,
+        path: string[]
+    }[]
+    // admin_panel?: boolean;
 }

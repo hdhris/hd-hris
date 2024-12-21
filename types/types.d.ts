@@ -8,8 +8,10 @@ declare module "next-auth" {
             id: string;
             employee_id: Key
             name: string
-            role: string; image: string
+            role: string; 
+            image: string;
             privilege: string;
+            modulePaths: string[];
             isDefaultAccount: boolean
         } & DefaultSession["user"];
 
@@ -22,6 +24,7 @@ declare module "next-auth" {
         role: string;
         image: string
         privilege: string;
+        modulePaths: string[];
         isDefaultAccount: boolean
     }
 
@@ -32,6 +35,7 @@ declare module "next-auth" {
         role: string;
         image: string
         privilege: string;
+        modulePaths: string[];
         isDefaultAccount: boolean
     }
 
@@ -42,6 +46,7 @@ declare module "next-auth" {
         role: string;
         image: string
         privilege: string;
+        modulePaths: string[];
         isDefaultAccount: boolean
     }
 }
@@ -54,6 +59,7 @@ declare module "next-auth/jwt" {
         role: string;
         image: string;
         privilege: string;
+        modulePaths: string[];
         isDefaultAccount: boolean
     }
 }

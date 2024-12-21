@@ -289,16 +289,18 @@ export function PRPayslipTable({
     // console.log(employeeRecords);
 
     const earningNames = new Map(payslipData?.earnings.map(earn=>[earn.id, earn.name]))
-    const deductionNames = new Map(payslipData?.deductions.map(deduct=>[deduct.id, deduct.name]))
-    Object.entries(employeeRecords).forEach(([payheadID, [type, amount]]) => {
-      if (type === "earning") {
-        const item: ListItem = { label: earningNames.get(Number(payheadID))!, number: amount };
-        earnings.push(item);
-      } else if (type === "deduction") {
-        const item: ListItem = { label: deductionNames.get(Number(payheadID))!, number: amount };
-        deductions.push(item);
-      }
-    });
+    const deductionNames = new Map(payslipData?.deductions.map(deduct=>[deduct.id, deduct.name]));
+    if(employeeRecords){
+      Object.entries(employeeRecords).forEach(([payheadID, [type, amount]]) => {
+        if (type === "earning") {
+          const item: ListItem = { label: earningNames.get(Number(payheadID))!, number: amount };
+          earnings.push(item);
+        } else if (type === "deduction") {
+          const item: ListItem = { label: deductionNames.get(Number(payheadID))!, number: amount };
+          deductions.push(item);
+        }
+      });
+    }
     setPayslip((() => {
       const employee = payslipData?.employees.find(emp => emp.id === empID)!;
     

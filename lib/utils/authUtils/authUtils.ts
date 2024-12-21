@@ -51,7 +51,8 @@ export const getUserData = async (username: string, password: string) => {
 // Process user role and return user data
     const privileges = access_control.sys_privileges;
     const accessibility = processJsonObject<UserPrivileges>(privileges?.accessibility);
-    const role = !accessibility?.web_access
+    const role = !accessibility?.web_access;
+    const modulePaths = accessibility?.modules.flatMap((module) => module.path);
 
     if (role) throw new Error('Only admin can login');
 
@@ -63,6 +64,7 @@ export const getUserData = async (username: string, password: string) => {
         image: auth.trans_users.image || '',
         email: auth.trans_users.email || '',
         privilege: privileges?.name || 'N/A',
+        modulePaths: modulePaths || [],
         isDefaultAccount: auth.username.toLowerCase() === 'admin'
     };
 }

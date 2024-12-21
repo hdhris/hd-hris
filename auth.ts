@@ -96,6 +96,8 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     }
 
                     console.log("Control: ", access_control);
+                    // Extract and flatten all paths
+                    const modulePaths = accessibility?.modules.flatMap((module) => module.path);
 
                     // console.time("UpsertUser");
 
@@ -160,6 +162,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     })
                     console.timeEnd("UpsertACL")
                     user.id = String(updatedUser.userId);
+                    user.modulePaths = modulePaths;
                     console.log("user id: ", user.id)
                     if (existingUser) {
                         user.email = existingUser.email;
@@ -204,6 +207,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     name: user.name,
                     email: user.email,
                     privilege: user.privilege,
+                    modulePaths: user.modulePaths,
                     isDefaultAccount: user.isDefaultAccount,
                 } as JWT;
             }
