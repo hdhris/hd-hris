@@ -6,19 +6,18 @@ import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import DataDisplay from "@/components/common/data-display/data-display";
 import {
-    approval_status_color_map,
-    FilterItems,
-    TableConfigurations
+    approval_status_color_map, FilterItems, TableConfigurations
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
 import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import {Chip, ScrollShadow, Textarea, User} from '@nextui-org/react';
+import {Chip, ScrollShadow} from '@nextui-org/react';
 import Typography, {Section} from "@/components/common/typography/Typography";
 import {capitalize} from "@nextui-org/shared-utils";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import CardTable from "@/components/common/card-view/card-table";
 import BorderCard from "@/components/common/BorderCard";
-import {LuBan, LuCalendarRange, LuInfo, LuPencil} from "react-icons/lu";
+import {LuBan, LuPencil} from "react-icons/lu";
+
 import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import CardView from "@/components/common/card-view/card-view";
@@ -30,10 +29,9 @@ import {v4 as uuidv4} from "uuid"
 import {isEqual} from "lodash";
 import Comments from "@/components/common/comments/comments";
 import {useUserInfo} from "@/lib/utils/getEmployeInfo";
-import {OvertimeEntry} from "@/types/attendance-time/OvertimeType";
-import AcceptReject from "@/components/actions/AcceptReject";
 import Evaluators from '@/components/common/evaluators/evaluators';
 import useDocumentTitle from "@/hooks/useDocumentTitle";
+import dayjs, {Dayjs} from "dayjs";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -48,6 +46,8 @@ function Page() {
     const [selectedRequest, setSelectedRequest] = useState<LeaveRequest>()
     const [isReplySubmit, setIsReplySubmit] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
+    const [today, setToday] = useState<Dayjs>(toGMT8())
+    const [leaveProgress, setLeaveProgress] = useState("")
     const {data, isLoading, mutate} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
@@ -134,21 +134,61 @@ function Page() {
         </>)
     })
 
+    useEffect(() => {
+        const updateDate = () => setToday(toGMT8());
+        updateDate(); // Set initial date
+        const interval = setInterval(updateDate, 60 * 1000); // Update every minute
 
-    // console.log("Signatories: ", signatories)
-    const startDate = toGMT8(selectedRequest?.leave_details.start_date);
-    const endDate = toGMT8(selectedRequest?.leave_details.end_date);
+        return () => clearInterval(interval); // Cleanup interval on component unmount
+    }, []);
 
-    const today = toGMT8();
     const leave_progress = useMemo(() => {
-        if (today.isBefore(startDate, 'day')) {
-            return "Not Started";
-        } else if (today.isAfter(endDate, 'day')) {
-            return "Finished";
-        } else {
-            return "On Going";
+        const startDate = toGMT8(toGMT8(selectedRequest?.leave_details.start_date).toDate());
+        const endDate = toGMT8(selectedRequest?.leave_details.end_date);
+        const isApprovedLeave = selectedRequest?.leave_details.status;
+        if (selectedRequest) {
+            if (today.isBefore(startDate)) { // No 'day' argument to include time in the comparison
+                console.log("Not Started");
+                return "Not Started";
+            } else if (today.isAfter(endDate, 'day')) {
+                console.log("Finished");
+                return "Finished";
+            } else if (isApprovedLeave) {
+                console.log("On Going");
+                return "On Going";
+            } else {
+                console.log("Not Yet Decided");
+                return "Not Yet Decided";
+            }
         }
-    }, [endDate, startDate, today])
+
+        return ""
+
+    }, [selectedRequest, today]);
+
+
+    // useEffect(() => {
+    //     const isApprovedLeave = selectedRequest?.leave_details.status;console.log()
+    //     if (selectedRequest) {
+    //         if (today.isBefore(startDate)) { // No 'day' argument to include time in the comparison
+    //             console.log("Not Started");
+    //             setLeaveProgress("Not Started");
+    //         } else if (today.isAfter(endDate, 'day')) {
+    //             console.log("Finished");
+    //             setLeaveProgress("Finished");
+    //         } else if (isApprovedLeave) {
+    //             console.log("On Going");
+    //             setLeaveProgress("On Going");
+    //         } else {
+    //             console.log("Not Yet Decided");
+    //             setLeaveProgress("Not Yet Decided");
+    //         }
+    //     }
+    //
+    //     setLeaveProgress("")
+    //
+    // }, [endDate, selectedRequest, startDate, today]);
+
 
     const handleOnReply = async (id: string, message: string) => {
 
@@ -273,7 +313,7 @@ function Page() {
                 label: "Duration Of Leave", value: selectedRequest.leave_details.total_days
             }, {
                 label: "Leave Progress Status", value: <Chip variant="flat"
-                                                             color={leave_progress === "Not Started" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
+                                                             color={leave_progress === "Not Started" || leave_progress === "Not Yet Decided" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
             }, {
                 label: "Created By", value: <>
                     <UserAvatarTooltip user={{
@@ -332,27 +372,27 @@ function Page() {
             />
         </>}
             onDanger={<>
-            <Section className="ms-0" title="Edit Leave"
-                     subtitle="Edit the leave request">
-                <Button
-                    isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected"}
-                    startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
-            </Section>
-            {/*<hr className="border border-destructive/20"/>*/}
-            {/*<Section className="ms-0" title="Extend Leave"*/}
-            {/*         subtitle="Extend the leave request">*/}
-            {/*    <Button*/}
-            {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
-            {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
-            {/*</Section>*/}
-            <hr className="border border-destructive/20"/>
-            <Section className="ms-0" title="Cancel"
-                     subtitle="Cancel the leave request">
-                <Button
-                    isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected"}
-                    startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
-            </Section>
-        </>}
+                <Section className="ms-0" title="Edit Leave"
+                         subtitle="Edit the leave request">
+                    <Button
+                        isDisabled={selectedRequest.leave_details.status !== "Pending"}
+                        startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
+                </Section>
+                {/*<hr className="border border-destructive/20"/>*/}
+                {/*<Section className="ms-0" title="Extend Leave"*/}
+                {/*         subtitle="Extend the leave request">*/}
+                {/*    <Button*/}
+                {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
+                {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
+                {/*</Section>*/}
+                <hr className="border border-destructive/20"/>
+                <Section className="ms-0" title="Cancel"
+                         subtitle="Cancel the leave request">
+                    <Button
+                        isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected"}
+                        startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
+                </Section>
+            </>}
         />}
     />)
 
