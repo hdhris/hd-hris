@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useEmployeesData } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip } from "@nextui-org/react";
@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import { useRouter } from "next/navigation";
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
+import { isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
 
 const EmptyState: React.FC = () => {
   return (
@@ -31,7 +32,15 @@ const EmptyState: React.FC = () => {
 };
 
 const Page: React.FC = () => {
-  const { data: employees, mutate, isLoading } = useEmployeesData();
+  const { data, mutate, isLoading } = useEmployeesData();
+
+  const employees = useMemo(()=>{
+    if(data){
+      return data.filter(employee => isEmployeeAvailable(employee));
+    }
+    return []
+  },[data]);
+  
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null
   );

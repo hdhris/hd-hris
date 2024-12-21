@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import { useSuspendedEmployees } from "@/services/queries";
-import { Employee } from "@/types/employeee/EmployeeType";
+import { Employee, EmployeeAll, Status, UnavaliableStatusJSON } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip, Button } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
 import Text from "@/components/Text";
@@ -11,6 +11,9 @@ import { toast } from "@/components/ui/use-toast";
 import showDialog from "@/lib/utils/confirmDialog";
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
+import { cancelUnavailability, getActiveUnavailability, isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
+import { useUserInfo } from "@/lib/utils/getEmployeInfo";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 const EmptyState: React.FC = () => {
   return (
@@ -32,7 +35,7 @@ const EmptyState: React.FC = () => {
 
 const Page: React.FC = () => {
   const {
-    data: suspendedEmployees,
+    data,
     mutate,
     isLoading,
   } = useSuspendedEmployees();
@@ -40,6 +43,7 @@ const Page: React.FC = () => {
     null
   );
   const [isActivating, setIsActivating] = useState<number | null>(null);
+  const userInfo = useUserInfo();
 
   const handleEmployeeUpdated = async () => {
     try {
@@ -49,20 +53,52 @@ const Page: React.FC = () => {
     }
   };
 
-  const handleActivate = async (employee: Employee) => {
+  const suspendedEmployees = useMemo(()=>{
+    if(data){
+      return data.filter(employee => !isEmployeeAvailable(employee,"suspension"));
+    }
+    return []
+  },[data]);
+
+  const handleActivate = async (
+    {
+      employee,
+      entry,
+      id,
+      status,
+    }:{
+      employee: EmployeeAll;
+      entry: UnavaliableStatusJSON[];
+      id: number;
+      status: Status;
+    }
+  ) => {
+    // console.log({
+    //   employee,
+    //   entry,
+    //   id,
+    //   status,
+    //   userInfo,
+    // })
+    // return
     try {
       const result = await showDialog({
         title: "Confirm Activation",
         message: `Are you sure you want to unsuspend ${employee.first_name} ${employee.last_name}?`,
       });
 
+      const updateData = cancelUnavailability({
+        entry: entry,
+        canceled_by: userInfo!,
+        date: toGMT8().toISOString(),
+        id,
+        reason: "",
+      })
       if (result === "yes") {
         setIsActivating(employee.id);
         const response = await axios.put(
           `/api/employeemanagement/employees?id=${employee.id}&type=status`,
-          {
-            status: "active",
-          }
+          { updateData, status }
         );
 
         if (response.status === 200) {
@@ -93,31 +129,31 @@ const Page: React.FC = () => {
     setSelectedEmployee(selected ?? null);
   };
 
-  type Signatory = {
-    id: string | number;
-    name: string;
-    picture?: string;
-    role?: string;
-  };
+  // type Signatory = {
+  //   id: string | number;
+  //   name: string;
+  //   picture?: string;
+  //   role?: string;
+  // };
 
   
-  const signatories = useMemo<Signatory[]>(() => {
-    if (!selectedEmployee?.suspension_json) return [];
+  // const signatories = useMemo<Signatory[]>(() => {
+  //   if (!selectedEmployee?.suspension_json) return [];
 
-    const suspensionData =
-      typeof selectedEmployee.suspension_json === "string"
-        ? JSON.parse(selectedEmployee.suspension_json)
-        : selectedEmployee.suspension_json;
+  //   const suspensionData =
+  //     typeof selectedEmployee.suspension_json === "string"
+  //       ? JSON.parse(selectedEmployee.suspension_json)
+  //       : selectedEmployee.suspension_json;
 
-    return (
-      suspensionData.signatories?.users?.map((user: any) => ({
-        id: user.id,
-        name: user.name,
-        picture: user.picture,
-        role: user.role,
-      })) || []
-    );
-  }, [selectedEmployee]);
+  //   return (
+  //     suspensionData.signatories?.users?.map((user: any) => ({
+  //       id: user.id,
+  //       name: user.name,
+  //       picture: user.picture,
+  //       role: user.role,
+  //     })) || []
+  //   );
+  // }, [selectedEmployee]);
 
   const TableConfigurations = {
     columns: [
@@ -133,11 +169,11 @@ const Page: React.FC = () => {
 
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
-      const suspensionData =
-        employee.suspension_json &&
-        (typeof employee.suspension_json === "string"
-          ? JSON.parse(employee.suspension_json)
-          : employee.suspension_json);
+      const suspensionData = getActiveUnavailability({entry: employee.suspension_json})!;
+        // employee.suspension_json &&
+        // (typeof employee.suspension_json === "string"
+        //   ? JSON.parse(employee.suspension_json)
+        //   : employee.suspension_json);
 
       switch (key) {
         case "name":
@@ -162,7 +198,7 @@ const Page: React.FC = () => {
           return (
             <div>
               {suspensionData
-                ? dayjs(suspensionData.startDate).format("MMM DD, YYYY")
+                ? dayjs(suspensionData.start_date).format("MMM DD, YYYY")
                 : "N/A"}
             </div>
           );
@@ -170,7 +206,7 @@ const Page: React.FC = () => {
           return (
             <div>
               {suspensionData
-                ? dayjs(suspensionData.endDate).format("MMM DD, YYYY")
+                ? dayjs(suspensionData.end_date).format("MMM DD, YYYY")
                 : "N/A"}
             </div>
           );
@@ -178,22 +214,22 @@ const Page: React.FC = () => {
           return (
             <div className="max-w-md truncate">
               {suspensionData
-                ? suspensionData.reason || suspensionData.suspensionReason
+                ? suspensionData.reason
                 : "N/A"}
             </div>
           );
 
         case "signatories":
-          const suspensionSignatories: Signatory[] =
-            suspensionData?.signatories?.users?.map((user: any) => ({
-              id: user.id,
-              name: user.name,
-              picture: user.picture,
-              role: user.role,
-            })) || [];
+          // const suspensionSignatories: Signatory[] =
+          //   suspensionData?.signatories?.users?.map((user: any) => ({
+          //     id: user.id,
+          //     name: user.name,
+          //     picture: user.picture,
+          //     role: user.role,
+          //   })) || [];
           return (
             <div className="flex items-center gap-2">
-              {suspensionSignatories.map((signatory) => (
+              {/* {suspensionSignatories.map((signatory) => (
                 <UserAvatarTooltip
                   key={signatory.id}
                   user={{
@@ -206,14 +242,14 @@ const Page: React.FC = () => {
                     isBordered: true,
                   }}
                 />
-              ))}
-              {suspensionData?.initiatedBy && (
+              ))} */}
+              {suspensionData?.initiated_by && (
                 <UserAvatarTooltip
-                  key={suspensionData.initiatedBy.id}
+                  key={suspensionData.initiated_by.id}
                   user={{
-                    name: suspensionData.initiatedBy.name,
-                    picture: suspensionData.initiatedBy.picture,
-                    id: suspensionData.initiatedBy.id,
+                    name: suspensionData.initiated_by.name,
+                    picture: suspensionData.initiated_by.picture,
+                    id: suspensionData.initiated_by.id,
                   }}
                   avatarProps={{
                     classNames: { base: "!size-9" },
@@ -232,7 +268,12 @@ const Page: React.FC = () => {
                 variant="flat"
                 color="success"
                 isLoading={isActivating === employee.id}
-                onPress={() => handleActivate(employee)}
+                onPress={() => handleActivate({
+                  employee,
+                  entry: employee.suspension_json,
+                  id: suspensionData.id,
+                  status: "suspended",
+                })}
               >
                 Unsuspend
               </Button>
@@ -297,6 +338,7 @@ const Page: React.FC = () => {
         defaultDisplay="table"
         title="Suspended Employees"
         data={suspendedEmployees}
+        // data={suspendedEmployees}
         filterProps={{
           filterItems: FilterItems,
         }}
@@ -321,7 +363,7 @@ const Page: React.FC = () => {
                 onClose={() => setSelectedEmployee(null)}
                 onEmployeeUpdated={handleEmployeeUpdated}
                 sortedEmployees={suspendedEmployees}
-                signatories={signatories}
+                // signatories={signatories}
               />
           
           )
