@@ -30,11 +30,28 @@ if (isMaintenanceMode === "true") {
 }
 export const metadata: Metadata = {
     title,
-    description: "WageWise is an online payslip system that helps businesses streamline payslip processes and improve performance.",
+    description: "HDHRiS: An online payslip system that helps businesses streamline payslip processes and improve performance.",
+    creator: 'France Jay D. Concepcion | John Rey E. Cuello | M. Nizam M. Datumanong',
     icons: {
-        icon: '/favicon.ico', apple: '/apple-touch-icon.png', shortcut: '/favicon.ico',
+        icon: '/favicon.ico',
+        apple: '/apple-touch-icon.png',
+        shortcut: '/favicon.ico',
     },
     manifest: '/site.webmanifest',
+    openGraph: {
+        title: "HDHRiS - Online Human Resource Information System",
+        description: "Streamline your payslip processes and improve business performance with HDHRiS.",
+        url: process.env.BASE_URL,
+        type: "website",
+        images: [
+            {
+                url: '/favicon.ico',
+                width: 1200,
+                height: 630,
+                alt: "HDHRiS Online Payslip System",
+            },
+        ],
+    },
 };
 
 

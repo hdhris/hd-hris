@@ -43,7 +43,7 @@ function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, o
                     {(onEdit || onDelete || onDanger) && <>
                         <Section className="ms-0 mt-4" title="Danger Zone"
                                  subtitle="Proceed with caution – irreversible actions ahead."/>
-                        <div className="border rounded border-destructive/20 mt-4 space-y-4 p-4">
+                        <div className="border rounded border-destructive/20 mt-4 space-y-4 p-4 w-full">
                             {onDanger}
                             {onEdit && <>
                                 <div className="ms-2">
@@ -64,6 +64,7 @@ function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, o
                             {onDelete && <div className="ms-2">
                                 <Section className="ms-0" title={`Delete ${title}`}
                                          subtitle="This action cannot be undone. Proceed with caution.">
+
                                     <Button {...uniformStyle({color: "danger"})}
                                             {...deleteProps}
                                             onClick={onDelete}

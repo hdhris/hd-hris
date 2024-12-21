@@ -15,8 +15,14 @@ export async function GET() {
             user_id: token_id?.user.id
         }, include: {
             sys_privileges: true, trans_users: true,
+            sec_devices: {
+                select: {
+                    is_logged_out: true
+                }
+            }
         }
-    }), await prisma.auth_credentials.findUnique({
+    }),
+        await prisma.auth_credentials.findUnique({
         where: {
             user_id: token_id?.user.id
         }
@@ -30,7 +36,8 @@ export async function GET() {
         image: user_data?.trans_users?.image || "",
         hasCredential,
         username: credential?.username || "",
-        privilege: user_data?.sys_privileges?.name || ""
+        privilege: user_data?.sys_privileges?.name || "",
+        isLoggedOut: user_data?.sec_devices.every(dev => dev.is_logged_out === true) || false
     }
 
 

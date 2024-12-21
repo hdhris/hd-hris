@@ -4,7 +4,6 @@ import { useSuspendedEmployees } from "@/services/queries";
 import { Employee } from "@/types/employeee/EmployeeType";
 import { Avatar, Chip, Button } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
-import BorderCard from "@/components/common/BorderCard";
 import Text from "@/components/Text";
 import dayjs from "dayjs";
 import axios from "axios";
@@ -101,7 +100,7 @@ const Page: React.FC = () => {
     role?: string;
   };
 
-  // Extract signatories for the selected employee
+  
   const signatories = useMemo<Signatory[]>(() => {
     if (!selectedEmployee?.suspension_json) return [];
 
@@ -110,7 +109,6 @@ const Page: React.FC = () => {
         ? JSON.parse(selectedEmployee.suspension_json)
         : selectedEmployee.suspension_json;
 
-    // Extract and transform signatories
     return (
       suspensionData.signatories?.users?.map((user: any) => ({
         id: user.id,
@@ -132,6 +130,7 @@ const Page: React.FC = () => {
       { uid: "signatories", name: "Suspended by", sortable: false },
       { uid: "actions", name: "Actions" },
     ],
+
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
       const suspensionData =

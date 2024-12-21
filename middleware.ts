@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@/auth";
+import {notFound} from "next/navigation";
 
 export default auth((req: any) => {
     const { pathname } = req.nextUrl;
@@ -19,6 +20,7 @@ export default auth((req: any) => {
     // Allow api access to mobile
     if (
         pathname.startsWith('/api/mobile')
+
     ) {
         return NextResponse.next();
     }
@@ -31,7 +33,7 @@ export default auth((req: any) => {
     // Redirect unauthenticated users to the login page (root)
     if (!req.auth) {
         if (pathname.startsWith('/auth') || pathname.startsWith('/api/auth') || pathname.startsWith('/auth/forgot')) {
-            return NextResponse.next(); // Allow access to login and forgot password routes
+            return NextResponse.next(); // Allow access to log in and forgot password routes
         }
         return NextResponse.redirect(new URL("/auth/login", req.nextUrl.origin));
     }

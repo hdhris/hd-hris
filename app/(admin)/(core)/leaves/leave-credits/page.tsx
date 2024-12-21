@@ -221,6 +221,7 @@ export default Page;
 const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (emp: EditCreditProp) => void }) => {
     const [percent, setPercent] = useState<number>(0)
 
+    console.log("Credits: ", employee)
     const maxLeaveCredit = (employee.leave_balance?.filter(balance => balance.allocated_days).reduce((a, b) => a + b.allocated_days, 0))!
     const remaining = employee.leave_balance?.filter(item => item.remaining_days)?.reduce((a, b) => a + b.remaining_days, 0)
     const edited: EditCreditProp = {
@@ -230,15 +231,17 @@ const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (e
         picture: employee.picture!,
         job: employee.job,
         employment_status: employee.employment_status,
-        leave_credits: employee.leave_balance?.map(item => ({
-            id: item.id,
-            leave_type_id: String(item.leave_type.id),
-            remaining_days: item.remaining_days,
-            allocated_days: item.allocated_days,
-            used_days: item.used_days,
-            carry_forward_days: item.carry_forward_days,
-            leave_type: item.leave_type
-        }))
+        leave_credits: employee.leave_balance?.map(item => {
+            return ({
+                id: item.id,
+                leave_type_id: String(item.leave_type.id) ?? "",
+                remaining_days: item.remaining_days,
+                allocated_days: item.allocated_days,
+                used_days: item.used_days,
+                carry_forward_days: item.carry_forward_days,
+                leave_type: item.leave_type
+            })
+        })
 
         // allocated_days: employee.leave_balance?.find(item => item.allocated_days)?.allocated_days!,
         // carry_forward_days: employee.leave_balance?.find(item => item.carry_forward_days)?.carry_forward_days!,

@@ -65,7 +65,7 @@ export const getUserData = async (username: string, password: string) => {
         email: auth.trans_users.email || '',
         privilege: privileges?.name || 'N/A',
         modulePaths: modulePaths || [],
-        isDefaultAccount: auth.username.toLowerCase() === 'admin'
+        isDefaultAccount: await encrypt.compare("password", auth.password!)
     };
 }
 

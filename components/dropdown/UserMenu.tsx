@@ -11,7 +11,7 @@ import {LuHeartHandshake, LuLifeBuoy, LuLogOut, LuShieldCheck, LuSliders, LuUser
 import Link from "next/link";
 import {Chip} from "@nextui-org/chip";
 import {PiCloudArrowDown} from "react-icons/pi";
-import {getSession} from "next-auth/react";
+import {getSession, signOut, useSession} from "next-auth/react";
 import {MdOutlinePrivacyTip} from "react-icons/md";
 import {IoApps} from "react-icons/io5";
 import {Button} from "@nextui-org/button";
@@ -19,6 +19,7 @@ import {Button} from "@nextui-org/button";
 import {logout} from "@/actions/authActions";
 import {useCredentials} from "@/hooks/Credentials";
 import {useUser} from "@/services/queries";
+import {useRouter} from "next/navigation";
 
 interface UserProfile {
     name: string;
@@ -31,6 +32,7 @@ export default function UserMenu() {
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const isCredentials = useCredentials();
     const {data} = useUser()
+    const router = useRouter()
 
     useEffect(() => {
         async function session() {
@@ -45,9 +47,17 @@ export default function UserMenu() {
                     name, email, pic, privilege
                 });
             }
+
+            console.log("Log in...")
+            if(data?.isLoggedOut){
+                console.log("Log out...")
+                await signOut()
+            }
         }
         session()
-    }, [data?.privilege, isCredentials]);
+
+        console.log("Data: ", data)
+    }, [data, data?.isLoggedOut, data?.privilege, isCredentials, router]);
 
 
     return (<Dropdown radius="sm">

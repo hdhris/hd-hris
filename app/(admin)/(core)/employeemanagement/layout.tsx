@@ -15,7 +15,7 @@ function RootLayout({children}: { children: React.ReactNode }) {
             },
             {
               key: "resign",
-              title: "Unemployment",
+              title: "Former Employees",
               path: "resign",
             },
             {
@@ -50,6 +50,5 @@ function RootLayout({children}: { children: React.ReactNode }) {
         </NavigationTabs>
     );
 }
-//
 
 export default RootLayout;

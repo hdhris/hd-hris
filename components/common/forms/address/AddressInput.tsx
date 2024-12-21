@@ -255,8 +255,8 @@ const AddressInput: React.FC = () => {
                     </FormLabel>}
                     labelPlacement="outside"
                     placeholder="Select Barangay"
-                    items={cities}
-                    isDisabled={cities.length === 0}
+                    items={barangays}
+                    isDisabled={barangays.length === 0}
                     color="primary"
                     variant="bordered"
                     radius="sm"

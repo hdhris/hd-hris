@@ -11,13 +11,11 @@ export async function PATCH(request: NextRequest) {
 
         const data = await request.json();
 
-        console.log("Patch leave types:", data)
-
         const logger = new Logger(LogLevel.DEBUG);
         // logger.debug(data);
 
         // Validate data using schema
-        const data_validation = await LeaveTypeSchema.safeParseAsync(data);
+        const data_validation = await LeaveTypeSchema.omit({ applicableToEmployeeTypes: true }).safeParseAsync(data);
 
         if (!data_validation.success) {
             return NextResponse.json(
@@ -90,7 +88,6 @@ export async function PATCH(request: NextRequest) {
         });
     } catch (err) {
         console.error("Error: ", err);
-
         return NextResponse.json({ message: "Something went wrong." }, { status: 500 });
     }
 }
