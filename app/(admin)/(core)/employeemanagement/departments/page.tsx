@@ -116,7 +116,7 @@ const Page: React.FC = () => {
   const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "departmentHead", name: "Department Head", sortable: false, width: "15%" }, 
+      { uid: "departmentHead", name: "Department In Charge", sortable: false, width: "15%" }, 
       { uid: "color", name: "Color", sortable: false },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
       { uid: "status", name: "Status", sortable: true },
