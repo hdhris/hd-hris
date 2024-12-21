@@ -79,24 +79,6 @@ export async function getAllEmployees(daysJson?: Record<string, boolean>) {
   const whereCondition = {
     AND: [
       { deleted_at: null },
-      {
-        OR: [
-          { resignation_json: { equals: Prisma.JsonNull } },
-          { resignation_json: { equals: Prisma.DbNull } },
-        ],
-      },
-      {
-        OR: [
-          { termination_json: { equals: Prisma.JsonNull } },
-          { termination_json: { equals: Prisma.DbNull } },
-        ],
-      },
-      {
-        OR: [
-          { suspension_json: { equals: Prisma.JsonNull } },
-          { suspension_json: { equals: Prisma.DbNull } },
-        ],
-      },
       daysJson
         ? {
             dim_schedules: {

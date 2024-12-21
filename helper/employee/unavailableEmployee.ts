@@ -24,19 +24,18 @@ const HistoryJSON = [
 
 type addUnavailabilityType = {
     entry: UnavaliableStatusJSON[];
-    start_date: Date;
-    end_date: Date;
+    start_date: string;
+    end_date: string | null;
     reason: string;
     initiated_by: UserEmployee;
 };
 export function addUnavailability({ entry, start_date, end_date, reason, initiated_by }: addUnavailabilityType) {
     const newId = entry.length > 0 ? Math.max(...entry.map((e) => e.id)) + 1 : 1;
     let newEntry = [
-        ...entry,
         {
             id: newId,
-            start_date: dayjs(start_date).toISOString(),
-            end_date: dayjs(end_date).toISOString(),
+            start_date: toGMT8(start_date).toISOString(),
+            end_date: end_date ? toGMT8(end_date).toISOString() : null,
             reason: reason,
             initiated_by: {
                 id: initiated_by.id,
@@ -49,6 +48,7 @@ export function addUnavailability({ entry, start_date, end_date, reason, initiat
             canceled_reason: null,
             canceled_by: null,
         },
+        ...entry,
     ];
 
     return newEntry;
@@ -57,7 +57,7 @@ export function addUnavailability({ entry, start_date, end_date, reason, initiat
 type CancelUnavailabilityType = {
     entry: UnavaliableStatusJSON[];
     id: number;
-    date: Date;
+    date: string;
     reason: string;
     canceled_by: UserEmployee
 };
@@ -72,7 +72,7 @@ export function cancelUnavailability({
         e.id === id
             ? {
                   ...e,
-                  canceled_at: dayjs(date).toISOString(),
+                  canceled_at: toGMT8(date).toISOString(),
                   canceled_reason: reason,
                   canceled_by: {
                     id: canceled_by.id,
@@ -85,6 +85,29 @@ export function cancelUnavailability({
     );
 }
 
+type GetActiveUnavailabilityType = {
+    entry: UnavaliableStatusJSON[];
+    currentDate?: string; // Optional: allows overriding the current date for testing
+};
+
+export function getActiveUnavailability({ entry, currentDate }: GetActiveUnavailabilityType): UnavaliableStatusJSON | null{
+    const today = toGMT8(currentDate);
+
+    const foundEntry = entry?.find((e) => {
+        const startDate = toGMT8(e.start_date);
+        const endDate = e.end_date ? toGMT8(e.end_date) : null;
+
+        // Check if the entry is active and not canceled
+        return (
+            startDate.isSameOrBefore(today) &&
+            (!endDate || endDate.isSameOrAfter(today)) &&
+            e.canceled_at === null
+        );
+    })
+
+    return foundEntry ?? null
+}
+
 export function isEmployeeAvailable(
     employee: EmployeeAll,
     find?: "suspension" | "resignation" | "termination"
@@ -94,8 +117,9 @@ export function isEmployeeAvailable(
     const isActive = (entry: UnavaliableStatusJSON): boolean => {
         const startDate = toGMT8(entry.start_date);
         const endDate = entry.end_date ? toGMT8(entry.end_date) : null;
+        const cancelDate = !!entry.canceled_at ? toGMT8(entry.canceled_at) : null;
 
-        return startDate.isSameOrBefore(today) && (!endDate || endDate.isSameOrAfter(today));
+        return cancelDate === null && startDate.isSameOrBefore(today) && (!endDate || endDate.isSameOrAfter(today));
     };
 
     const suspended = employee.suspension_json.some(isActive);

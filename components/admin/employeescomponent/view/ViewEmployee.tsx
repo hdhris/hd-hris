@@ -22,6 +22,7 @@ import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import dayjs from "dayjs";
 import { getSignatory } from "@/server/signatory";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
+import { isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
 
 interface ViewEmployeeProps {
   employee: Employee;
@@ -75,46 +76,46 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
   signatories: initialSignatories,
 }) => {
   const [employee, setEmployee] = useState<Employee>(initialEmployee);
-  const [signatories, setSignatories] = useState<{
-    users: Array<{
-      id: string | number;
-      name: string;
-      picture?: string;
-      role?: string;
-    }>;
-  } | null>(initialSignatories ? { users: initialSignatories } : null);
+  // const [signatories, setSignatories] = useState<{
+  //   users: Array<{
+  //     id: string | number;
+  //     name: string;
+  //     picture?: string;
+  //     role?: string;
+  //   }>;
+  // } | null>(initialSignatories ? { users: initialSignatories } : null);
 
-  useEffect(() => {
-    const fetchSignatories = async () => {
-      // Only fetch if no signatories were passed
-      if (!initialSignatories) {
-        const path = employee.suspension_json
-          ? "employee_suspension"
-          : employee.resignation_json
-          ? "employee_resignation"
-          : employee.termination_json
-          ? "employee_termination"
-          : null;
+  // useEffect(() => {
+  //   const fetchSignatories = async () => {
+  //     // Only fetch if no signatories were passed
+  //     if (!initialSignatories) {
+  //       const path = employee.suspension_json
+  //         ? "employee_suspension"
+  //         : employee.resignation_json
+  //         ? "employee_resignation"
+  //         : employee.termination_json
+  //         ? "employee_termination"
+  //         : null;
 
-        if (path) {
-          const result = await getSignatory(path, employee.id, false);
+  //       if (path) {
+  //         const result = await getSignatory(path, employee.id, false);
 
-          if (result) {
-            setSignatories({
-              users: result.users.map((user) => ({
-                id: user.id,
-                name: user.name,
-                picture: user.picture || undefined,
-                role: user.role || undefined,
-              })),
-            });
-          }
-        }
-      }
-    };
+  //         if (result) {
+  //           setSignatories({
+  //             users: result.users.map((user) => ({
+  //               id: user.id,
+  //               name: user.name,
+  //               picture: user.picture || undefined,
+  //               role: user.role || undefined,
+  //             })),
+  //           });
+  //         }
+  //       }
+  //     }
+  //   };
 
-    fetchSignatories();
-  }, [employee, initialSignatories]);
+  //   fetchSignatories();
+  // }, [employee, initialSignatories]);
 
   const infoMethods = useForm<EmployeeInfoFormData>({
     resolver: zodResolver(employeeInfoSchema),
@@ -184,14 +185,15 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
     await onEmployeeUpdated();
   };
 
-  const isActive =
-    !employee.suspension_json &&
-    !employee.resignation_json &&
-    !employee.termination_json;
+  // const isActive =
+  //   !employee.suspension_json &&
+  //   !employee.resignation_json &&
+  //   !employee.termination_json;
+  const isActive = isEmployeeAvailable(employee);
 
   const getStatusColor = (isActive: boolean) => {
     if (isActive) return "success";
-    if (employee.suspension_json) return "warning";
+    if (!isEmployeeAvailable(employee,"suspension")) return "warning";
     return "danger"; // for resigned or terminated
   };
 
@@ -212,11 +214,11 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
           <Chip size="md" color={getStatusColor(isActive)} variant="dot">
             {isActive
               ? "Active"
-              : employee.suspension_json
+              : !isEmployeeAvailable(employee,"suspension")
               ? "Suspended"
-              : employee.resignation_json
+              : !isEmployeeAvailable(employee,"resignation")
               ? "Resigned"
-              : employee.termination_json
+              : !isEmployeeAvailable(employee,"termination")
               ? "Terminated"
               : employee.status}
           </Chip>
@@ -288,7 +290,7 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
               },
             ]}
           />
-          {!isActive &&
+          {/* {!isActive &&
             signatories &&
             Array.isArray(signatories.users) &&
             signatories.users.length > 0 && (
@@ -318,7 +320,7 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
 
           <hr className="border border-default-400 space-y-2" />
         </div>

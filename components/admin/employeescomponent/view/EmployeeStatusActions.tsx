@@ -14,7 +14,7 @@ import {
 } from "@nextui-org/react";
 import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
 import Text from "@/components/Text";
-import { Employee, Status } from "@/types/employeee/EmployeeType";
+import { Employee, Status, UnavaliableStatusJSON } from "@/types/employeee/EmployeeType";
 import { UseFormReturn } from "react-hook-form";
 import { BiErrorCircle, BiEdit } from "react-icons/bi";
 import axios from "axios";
@@ -24,6 +24,8 @@ import { z } from "zod";
 import { parseAbsoluteToLocal } from "@internationalized/date";
 import { DateStyle } from "@/lib/custom/styles/InputStyle";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import { addUnavailability, getActiveUnavailability, isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
+import { useUserInfo } from "@/lib/utils/getEmployeInfo";
 
 // Define the schema
 const statusFormSchema = z.object({
@@ -47,11 +49,7 @@ type ModalType = "suspend" | "resign" | "terminate" | null;
 interface StatusInfo {
   type: string;
   modalType: ModalType;
-  data: {
-    startDate: string;
-    endDate?: string;
-    reason: string;
-  } | null;
+  data: UnavaliableStatusJSON[] | null;
   color: string;
 }
 
@@ -66,6 +64,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [isStatusUpdateSubmitting, setIsStatusUpdateSubmitting] = useState(false);
   const [currentEmployee, setCurrentEmployee] = useState<Employee>(employee);
+  const userInfo = useUserInfo();
 
   useEffect(() => {
     const updatedEmployee = sortedEmployees.find((e) => e.id === employee.id);
@@ -300,16 +299,23 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
           throw new Error("Invalid modal type");
       }
 
-      const updateData = {
-        status,
-        date: formData.startDate,
+      // const updateData = {
+      //   status,
+      //   date: formData.startDate,
+      //   reason: formData.reason,
+      //   ...(status === "suspended" && { endDate: formData.endDate }),
+      // };
+      const updateData = addUnavailability({
+        start_date: formData.startDate,
+        end_date: status === "suspended" ? formData.endDate! : null,
         reason: formData.reason,
-        ...(status === "suspended" && { endDate: formData.endDate }),
-      };
+        entry: status === "suspended" ? currentEmployee.suspension_json : status === "resigned" ? currentEmployee.resignation_json : currentEmployee.termination_json,
+        initiated_by: userInfo!,
+      })
 
       const response = await axios.put(
         `/api/employeemanagement/employees?id=${currentEmployee.id}&type=status`,
-        updateData
+        { updateData, status }
       );
 
       if (response.status === 200) {
@@ -340,47 +346,65 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
   const StatusDisplay = () => {
     const getStatusInfo = (): StatusInfo => {
       if (currentEmployee.suspension_json) {
-        const suspensionData = typeof currentEmployee.suspension_json === "string"
-          ? JSON.parse(currentEmployee.suspension_json)
-          : currentEmployee.suspension_json;
+        // const suspensionData = typeof currentEmployee.suspension_json === "string"
+        //   ? JSON.parse(currentEmployee.suspension_json)
+        //   : currentEmployee.suspension_json;
+        // return {
+        //   type: "Suspended",
+        //   modalType: "suspend",
+        //   data: {
+        //     : suspensionData.startDate,
+        //     endDate: suspensionData.endDate,
+        //     reason: suspensionData.reason || suspensionData.suspensionReason,
+        //   },
+        //   color: "warning" as const,
+        // };
         return {
           type: "Suspended",
           modalType: "suspend",
-          data: {
-            startDate: suspensionData.startDate,
-            endDate: suspensionData.endDate,
-            reason: suspensionData.reason || suspensionData.suspensionReason,
-          },
+          data: currentEmployee.suspension_json,
           color: "warning" as const,
         };
       }
       if (currentEmployee.resignation_json) {
-        const resignationData = typeof currentEmployee.resignation_json === "string"
-          ? JSON.parse(currentEmployee.resignation_json)
-          : currentEmployee.resignation_json;
+        // const resignationData = typeof currentEmployee.resignation_json === "string"
+        //   ? JSON.parse(currentEmployee.resignation_json)
+        //   : currentEmployee.resignation_json;
+        // return {
+        //   type: "Resigned",
+        //   modalType: "resign",
+        //   data: {
+        //     startDate: resignationData.resignationDate,
+        //     reason: resignationData.reason || resignationData.resignationReason,
+        //   },
+        //   color: "default" as const,
+        // };
         return {
           type: "Resigned",
           modalType: "resign",
-          data: {
-            startDate: resignationData.resignationDate,
-            reason: resignationData.reason || resignationData.resignationReason,
-          },
+          data: currentEmployee.resignation_json,
           color: "default" as const,
         };
       }
       if (currentEmployee.termination_json) {
-        const terminationData = typeof currentEmployee.termination_json === "string"
-          ? JSON.parse(currentEmployee.termination_json)
-          : currentEmployee.termination_json;
+        // const terminationData = typeof currentEmployee.termination_json === "string"
+        //   ? JSON.parse(currentEmployee.termination_json)
+        //   : currentEmployee.termination_json;
+        // return {
+        //   type: "Terminated",
+        //   modalType: "terminate",
+        //   data: {
+        //     startDate: terminationData.terminationDate,
+        //     reason: terminationData.reason || terminationData.terminationReason,
+        //   },
+        //   color: "danger" as const,
+        // };
         return {
-          type: "Terminated",
-          modalType: "terminate",
-          data: {
-            startDate: terminationData.terminationDate,
-            reason: terminationData.reason || terminationData.terminationReason,
-          },
-          color: "danger" as const,
-        };
+            type: "Terminated",
+            modalType: "terminate",
+            data: currentEmployee.termination_json,
+            color: "danger" as const,
+          };
       }
       return {
         type: "Active",
@@ -392,59 +416,61 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
 
     const status = getStatusInfo();
     
-   
-  return (
-    <div className="space-y-2 font-black">
-      <div className="space-y-2">
-        <div>
-          <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium">
-            {status.type === "Suspended"
-              ? "Start Date"
-              : status.type === "Resigned"
-              ? "Resignation Date"
-              : "Termination Date"}
-          </Text>
-          <Text className="text-sm text-gray-800 font-light">
-            {status.data ? formatDate(status.data.startDate) : "-"}
-          </Text>
-        </div>
-
-        {status.type === "Suspended" && (
-          <div>
-            <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium">
-              End Date
+  return <>
+    {status.data?.map(item=>(
+        <div className="space-y-2 font-black">
+      
+          <div className="space-y-2">
+            <div>
+              <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium">
+                {status.type === "Suspended"
+                  ? "Start Date"
+                  : status.type === "Resigned"
+                  ? "Resignation Date"
+                  : "Termination Date"}
+              </Text>
+              <Text className="text-sm text-gray-800 font-light">
+                {item ? formatDate(item.start_date) : "-"}
+              </Text>
+            </div>
+    
+            {status.type === "Suspended" && (
+              <div>
+                <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium">
+                  End Date
+                </Text>
+                <Text className="text-sm text-gray-800 font-light">
+                  {item?.end_date ? formatDate(item.end_date) : "-"}
+                </Text>
+              </div>
+            )}
+          </div>
+    
+          <div className="border rounded-xl p-4 bg-gray-50">
+            <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium mb-1">
+              Reason
             </Text>
             <Text className="text-sm text-gray-800 font-light">
-              {status.data?.endDate ? formatDate(status.data.endDate) : "-"}
+              {item?.reason || "-"}
             </Text>
+    
+            {item && (
+              <div className="flex justify-end mt-2">
+                <Button 
+                  size="md"
+                  color="primary"
+                  startContent={<BiEdit className="text-default-100" />}
+                  onPress={() => handleModalOpen(status.modalType)}
+                  isDisabled={isStatusUpdateSubmitting}
+                >
+                  Edit Details
+                </Button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-
-      <div className="border rounded-xl p-4 bg-gray-50">
-        <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium mb-1">
-          Reason
-        </Text>
-        <Text className="text-sm text-gray-800 font-light">
-          {status.data?.reason || "-"}
-        </Text>
-
-        {status.data && (
-          <div className="flex justify-end mt-2">
-            <Button 
-              size="md"
-              color="primary"
-              startContent={<BiEdit className="text-default-100" />}
-              onPress={() => handleModalOpen(status.modalType)}
-              isDisabled={isStatusUpdateSubmitting}
-            >
-              Edit Details
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+      ))}
+  </>
 }
 
   const getModalContent = () => {
@@ -473,9 +499,14 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
   };
 
   const modalContent = getModalContent();
-  const isActive = !currentEmployee.suspension_json &&
-    !currentEmployee.resignation_json &&
-    !currentEmployee.termination_json;
+  // const isActive =
+  //   !employee.resignation_json &&
+  //   !employee.termination_json;
+  //   !employee.suspension_json &&
+  const isActive = isEmployeeAvailable(employee);
+  const isSuspended = !isEmployeeAvailable(employee,"suspension");
+  const isResigned = !isEmployeeAvailable(employee,"resignation");
+  const isTerminated = !isEmployeeAvailable(employee,"termination");
 
   const Section = ({ children, title, subtitle, className }: any) => {
     return (

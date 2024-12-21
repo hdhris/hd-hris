@@ -210,10 +210,10 @@ export async function PUT(req: NextRequest) {
 
       case "status":
         try {
-          const validatedStatusData = statusUpdateSchema.parse(data);
+          // const validatedStatusData = statusUpdateSchema.parse(data);
           const statusResult = await updateEmployeeStatus(
             employeeId,
-            validatedStatusData
+            data
           );
           return NextResponse.json(statusResult);
         } catch (error) {
