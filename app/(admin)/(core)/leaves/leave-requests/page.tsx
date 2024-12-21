@@ -33,6 +33,7 @@ import {useUserInfo} from "@/lib/utils/getEmployeInfo";
 import {OvertimeEntry} from "@/types/attendance-time/OvertimeType";
 import AcceptReject from "@/components/actions/AcceptReject";
 import Evaluators from '@/components/common/evaluators/evaluators';
+import useDocumentTitle from "@/hooks/useDocumentTitle";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -50,6 +51,8 @@ function Page() {
     const {data, isLoading, mutate} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
+
+    useDocumentTitle("Leave Requests")
     const currentUser = useUserInfo()
     const {toast} = useToast()
     const allRequests = useMemo(() => {
@@ -233,6 +236,7 @@ function Page() {
         //     return (<BorderCard>{data.name}</BorderCard>)
         // }}
         onView={selectedRequest && <CardView
+            className="w-[400px]"
             onClose={() => setSelectedRequest(undefined)}
             header={<div className="flex flex-row items-center space-x-4 pb-2">
                 <UserMail
@@ -331,21 +335,21 @@ function Page() {
             <Section className="ms-0" title="Edit Leave"
                      subtitle="Edit the leave request">
                 <Button
-                    isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
+                    isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected"}
                     startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
             </Section>
-            <hr className="border border-destructive/20"/>
+            {/*<hr className="border border-destructive/20"/>*/}
             {/*<Section className="ms-0" title="Extend Leave"*/}
             {/*         subtitle="Extend the leave request">*/}
             {/*    <Button*/}
             {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
             {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
             {/*</Section>*/}
-            {/*<hr className="border border-destructive/20"/>*/}
+            <hr className="border border-destructive/20"/>
             <Section className="ms-0" title="Cancel"
                      subtitle="Cancel the leave request">
                 <Button
-                    isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}
+                    isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected"}
                     startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
             </Section>
         </>}

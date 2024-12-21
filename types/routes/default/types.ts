@@ -20,6 +20,7 @@ export interface UserProfile {
     display_name: string;
     image: string;
     privilege: string;
+    isLoggedOut: boolean
 }
 
 
