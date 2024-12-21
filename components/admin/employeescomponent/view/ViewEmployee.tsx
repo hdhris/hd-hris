@@ -22,6 +22,7 @@ import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import dayjs from "dayjs";
 import { getSignatory } from "@/server/signatory";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
+import { isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
 
 interface ViewEmployeeProps {
   employee: Employee;
@@ -184,10 +185,11 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
     await onEmployeeUpdated();
   };
 
-  const isActive =
-    !employee.suspension_json &&
-    !employee.resignation_json &&
-    !employee.termination_json;
+  // const isActive =
+  //   !employee.suspension_json &&
+  //   !employee.resignation_json &&
+  //   !employee.termination_json;
+  const isActive = isEmployeeAvailable(employee);
 
   const getStatusColor = (isActive: boolean) => {
     if (isActive) return "success";
@@ -212,11 +214,11 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
           <Chip size="md" color={getStatusColor(isActive)} variant="dot">
             {isActive
               ? "Active"
-              : employee.suspension_json
+              : isEmployeeAvailable(employee, "suspension")
               ? "Suspended"
-              : employee.resignation_json
+              : isEmployeeAvailable(employee, "resignation")
               ? "Resigned"
-              : employee.termination_json
+              : isEmployeeAvailable(employee, "termination")
               ? "Terminated"
               : employee.status}
           </Chip>
