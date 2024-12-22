@@ -97,7 +97,9 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
 
                     console.log("Control: ", access_control);
                     // Extract and flatten all paths
-                    const modulePaths = accessibility?.modules.flatMap((module) => module.path);
+                    const modulePaths = accessibility?.modules.flatMap((module) =>
+                        module.privileges.flatMap((privilege) => privilege.paths)
+                    );
 
                     // console.time("UpsertUser");
 
@@ -162,6 +164,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     })
                     console.timeEnd("UpsertACL")
                     user.id = String(updatedUser.userId);
+                    user.employee_id = Number(String(access_control.employee_id));
                     user.modulePaths = modulePaths;
                     console.log("user id: ", user.id)
                     if (existingUser) {

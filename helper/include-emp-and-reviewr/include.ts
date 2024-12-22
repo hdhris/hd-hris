@@ -56,6 +56,7 @@ export const emp_rev_include = {
     },
     minor_detail: {
         select: {
+            id: true,
             last_name: true,
             middle_name: true,
             first_name: true,
@@ -114,6 +115,7 @@ interface EmployeeSchedule {
 }
 
 export interface MinorEmployee {
+    id: number;
     first_name: string;
     middle_name: string;
     last_name: string;

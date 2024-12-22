@@ -293,8 +293,9 @@ Table sys_privileges {
   id Int [pk, increment]
   accessibility Json
   name String
-  created_at DateTime [not null]
-  updated_at DateTime [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  deleted_at DateTime
   acl_user_access_control acl_user_access_control [not null]
 }
 

@@ -175,7 +175,7 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         aria-label="Payroll Range"
                         value={rangeValue}
                         onChange={(value) => {
-                            setRangeValue(value);
+                            if(value) setRangeValue(value);
                             // console.log(value);
                         }}
                         {...uniformStyle({ color: "default" })}

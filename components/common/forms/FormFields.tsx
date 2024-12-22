@@ -375,7 +375,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                                 size={size}
                                 {...(item.config as TimeInputProps)}
                                 onChange={(value) => {
-                                    field.onChange(dayjs(value.toString().split('[')[0]).toISOString());
+                                    field.onChange(dayjs(value?.toString().split('[')[0]).toISOString());
                                 }}
                             />
                         </Case>

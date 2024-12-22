@@ -52,7 +52,9 @@ export const getUserData = async (username: string, password: string) => {
     const privileges = access_control.sys_privileges;
     const accessibility = processJsonObject<UserPrivileges>(privileges?.accessibility);
     const role = !accessibility?.web_access;
-    const modulePaths = accessibility?.modules.flatMap((module) => module.path);
+    const modulePaths = accessibility?.modules.flatMap((module) =>
+        module.privileges.flatMap((privilege) => privilege.paths)
+    );
 
     if (role) throw new Error('Only admin can login');
 
