@@ -17,23 +17,27 @@ export interface AccessRole {
     acl_user_access_control: AccessControl[];
 }
 
-export type ModuleNames =
-    | "Dashboard"
-    | "Employees"
-    | "Attendance and Time"
-    | "Benefits"
-    | "Incident"
-    | "Leaves"
-    | "Payroll"
-    | "Privileges"
-    | "Signatories"
-    | "Test"
-    | "Trainings and Seminars"
-    | "Performance Appraisal"
-    | "Reports"
-    | "APIs"
-    | "All"
-    | "Tests";
+export const ModuleNamesArray = [
+    "Dashboard",
+    "Employees",
+    "Attendance and Time",
+    "Benefits",
+    "Incident",
+    "Leaves",
+    "Payroll",
+    "Privileges",
+    "Signatories",
+    "Test",
+    "Trainings and Seminars",
+    "Performance Appraisal",
+    "Reports",
+    "APIs",
+    "All",
+    "Tests"
+] as const; // `as const` preserves the string literal types
+
+// The resulting type will be an array of literal types
+export type ModuleNames = typeof ModuleNamesArray[number];
 
 export const static_privilege: UserPrivileges = {
     web_access: true,
