@@ -41,6 +41,7 @@ function useFilter<T>(items: T[]) {
     const filteredItems = useMemo(() => {
         let filteredUsers: T[] = [...items]; // Start with the already searched items
 
+
         // If we have filters applied
         if (filter !== "all" && filter.size > 0) {
             // Apply custom filterConfig logic, if passed
@@ -50,9 +51,11 @@ function useFilter<T>(items: T[]) {
             // Default filter logic based on filter items and the value of each filter
             if (filter instanceof Set && filter.size > 0) {
                 Array.from(filter).forEach((ft) => {
+
                     filteredUsers = filteredUsers.filter((item) => {
                         // ft is in format 'key=value', so split and compare item fields
                         const [key, value] = ft.toString().split('=');
+                        console.log("filter items: ", valueOfObject(item, key))
                         return String(valueOfObject(item, key)) === value;
                     });
                 });
@@ -63,7 +66,8 @@ function useFilter<T>(items: T[]) {
         // console.log("Filtered Items: ", filteredUsers);
         return filteredUsers;
     }, [items, filter]);
-
+    console.log("Data Filtered: ", items)
+    console.log("Filtered: ", filteredItems)
     return {filteredItems, onFilterChange, filter};
 }
 

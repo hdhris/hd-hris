@@ -22,7 +22,7 @@ function BackupFrequency() {
         uid: 'weekly', name: 'weekly'
     }, {uid: 'monthly', name: 'Monthly'}];
 
-    let [value, setValue] = React.useState<TimeInputValue>(parseAbsoluteToLocal(new Date(dayjs().format('YYYY MM DD hh:mm A')).toISOString()));
+    let [value, setValue] = React.useState<TimeInputValue | null>(parseAbsoluteToLocal(new Date(dayjs().format('YYYY MM DD hh:mm A')).toISOString()));
 
 
     const handleOnSave = useCallback(async () => {

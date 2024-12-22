@@ -104,19 +104,19 @@ const config = {
               // background: "#FFFFFF", // or DEFAULT
               // foreground: "#11181C", // or 50 to 900 DEFAULT
               primary: {
-               700: "#0f172a",
+               600: "#0f172a",
               },
               secondary: {
-               800: "#7828c8"
+               700: "#7828c8"
               },
               success: {
-                800: "#17c964"
+                700: "#17c964"
               },
               danger: {
-                800: "#F31260"
+                600: "#F31260"
               },
               warning: {
-                800: "#f5a524"
+                700: "#f5a524"
               },
 
             }

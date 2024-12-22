@@ -56,6 +56,7 @@ function DataDisplayControl<T>({
 
     const displayMethods = [isTable, isGrid, isList].filter(item => item).length
 
+    console.log("Paginate: ", paginatedData)
     useEffect(() => {
         setDisplay(displaySearchParams as DisplayType)
     }, [displaySearchParams, setDisplay]);
