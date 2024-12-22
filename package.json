@@ -71,6 +71,7 @@
     "react-hook-form": "^7.51.4",
     "react-icons": "^5.2.0",
     "react-papaparse": "^4.4.0",
+    "react-to-print": "^3.0.2",
     "react-use-measure": "^2.1.1",
     "sharp": "^0.33.5",
     "sonner": "^1.4.41",
