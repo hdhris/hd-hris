@@ -54,6 +54,17 @@ export default auth((req: any) => {
         return NextResponse.next();
     }
 
+    // Validate user privileges against the stored paths
+    // const modulePaths: string[] = req.auth.user?.modulePaths || []; // Retrieve paths from auth
+    // const isAuthorized = modulePaths.some((allowedPath) =>
+    //     pathname.startsWith(allowedPath)
+    // );
+
+    // if (!isAuthorized) {
+    //     // Redirect unauthorized users to an "unauthorized" page
+    //     return NextResponse.redirect(new URL("/auth/unauthorized", req.nextUrl.origin));
+    // }
+
     // If user is authenticated and does not have a default account, allow access
     return NextResponse.next();
 });

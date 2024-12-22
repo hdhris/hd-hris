@@ -12,6 +12,7 @@ export function useUserInfo(): UserEmployee | undefined {
 
   useEffect(() => {
     const fetchUserInfo = async () => {
+      console.log("Found ID: ",id)
       if (id < 1) {
         setUserInfo(undefined);
         return;

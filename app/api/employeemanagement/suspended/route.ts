@@ -28,7 +28,6 @@ async function getSuspendedEmployeeById(id: number) {
   const employee = await prisma.trans_employees.findFirst({
     where: {
       id,
-      suspension_json: { not: Prisma.JsonNull },
     },
     include: {
       ref_departments: true,

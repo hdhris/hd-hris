@@ -1,6 +1,7 @@
 import prisma from "@/prisma/prisma";
 import { headers } from "next/headers";
 import { parse } from "next-useragent";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 export async function devices(user_id: string) {
     try {
@@ -49,7 +50,7 @@ export async function devices(user_id: string) {
             await prisma.sec_devices.create({
                 data: {
                     ip_address,
-                    created_at: new Date(),
+                    created_at: toGMT8().toISOString(),
                     updated_at: null,
                     country_code,
                     country_name,
@@ -72,7 +73,7 @@ export async function devices(user_id: string) {
                 data: {
                     is_logged_out: false,
                     ip_address,
-                    created_at: new Date(),
+                    created_at: toGMT8().toISOString(),
                     country_code,
                     country_name,
                     region,
@@ -81,7 +82,7 @@ export async function devices(user_id: string) {
                     platform,
                     os,
                     os_version,
-                    updated_at: new Date(),
+                    updated_at: toGMT8().toISOString(),
                     login_count: { increment: 1 },
                 },
             });

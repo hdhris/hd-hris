@@ -74,9 +74,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ id },{ status: 200 });
   } catch (error) {
-    console.error("Error processing POST request:", error);
+    console.log(error);
     return NextResponse.json(
-      { error: `Failed to post data: ${error instanceof Error ? error.message : String(error)}` },
+      { error: String(error) },
       { status: 500 }
     );
   }

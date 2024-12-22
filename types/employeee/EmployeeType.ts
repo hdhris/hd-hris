@@ -1,3 +1,5 @@
+import { Evaluations } from "../leaves/leave-evaluators-types";
+
 export type Status = "active" | "terminated" | "resigned" | "suspended";
 //
 export type EmployeeAll = {
@@ -33,9 +35,9 @@ export type EmployeeAll = {
   seniorHighStrand: string;
   universityCollege: string;
   course: string;
-  suspension_json?: string;
-  resignation_json?: string;
-  termination_json?: string;
+  suspension_json: UnavaliableStatusJSON[];
+  resignation_json: UnavaliableStatusJSON[];
+  termination_json: UnavaliableStatusJSON[];
   certificates: Array<{ name: string; url: string }>;
   masters: string;
   mastersCourse: string;
@@ -106,11 +108,34 @@ export type EmployeeEducationalBG = {
 
 // Certificates Type
 
+export type UnavaliableStatusJSON = {
+    id: number;
+    start_date: string;
+    end_date: string | null;
+    reason: string | null;
+    initiated_by: {
+        id: number;
+        name: string;
+        position: string;
+        picture: string;
+    };
+    evaluation: Evaluations;
+    canceled_at: string | null;
+    canceled_reason: string | null;
+    canceled_by: {
+        id: number;
+        name: string;
+        position: string;
+        picture: string;
+    } | null;
+};
+
 export type EmployeeSuspension = {
   suspensionReason: string;
   startDate: string;
   endDate: string;
 };
+
 export type FamilyBackground = {
   fathers_first_name?: string;
   fathers_middle_name?: string;
