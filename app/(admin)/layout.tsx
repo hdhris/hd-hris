@@ -15,7 +15,7 @@ import Notification from '@/components/functions/notifications/Notification'
 import {LiaUsersSolid} from "react-icons/lia";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
-import { useModulePath } from './(core)/privileges/privilege';
+import { useModulePath } from '../../hooks/privilege-hook';
 
 function RootLayout({children}: { children: ReactNode }) {
     // Use a function to lazily initialize the state

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@/auth";
-import {notFound} from "next/navigation";
-import { staticModulePaths } from './app/(admin)/(core)/privileges/privilege';
+import { staticModulePaths } from './hooks/privilege-hook';
 
 export default auth((req: any) => {
     const { pathname } = req.nextUrl;

@@ -17,7 +17,7 @@ interface ViewOvertimeProps {
     mutate: () => void;
 }
 
-const Item = ({
+export const ValueLabel = ({
     icon,
     label,
     value,
@@ -43,40 +43,41 @@ const Item = ({
         </div>
     );
 };
+
 function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
     return (
         <Drawer isDismissible isOpen={!!overtime} onClose={onClose} title={"Overtime Details"}>
             {overtime && (
                 <ScrollShadow className="space-y-4">
-                    <Item
+                    <ValueLabel
                         key={"date"}
                         icon={<FaRegCalendarAlt />}
                         label="Date"
                         value={toGMT8(overtime.date).format("MMMM DD, YYYY")}
                     />
                     <hr key={1} />
-                    <Item
+                    <ValueLabel
                         key={"clock_in"}
                         icon={<TbClockCheck />}
                         label="Clock In"
                         value={toGMT8(overtime.clock_in).format("hh:mm a")}
                     />
                     <hr />
-                    <Item
+                    <ValueLabel
                         key={"clock_out"}
                         icon={<TbClockX />}
                         label="Clock Out"
                         value={toGMT8(overtime.clock_out).format("hh:mm a")}
                     />
                     <hr key={2} />
-                    <Item
+                    <ValueLabel
                         key={"requested_min"}
                         icon={<TbClockUp />}
                         label="Requested Minutes"
                         value={`${overtime.requested_mins} minutes`}
                     />
                     <hr key={3} />
-                    <Item
+                    <ValueLabel
                         key={"created_by"}
                         icon={<FaRegUserCircle />}
                         label="Created By"
@@ -90,7 +91,7 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                         }
                     />
                     <hr key={4} />
-                    <Item
+                    <ValueLabel
                         key={"status"}
                         icon={<MdHowToVote />}
                         label="Status"
@@ -101,7 +102,7 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                         }
                     />
                     <hr key={5} />
-                    <Item
+                    <ValueLabel
                         key={"reason"}
                         icon={<MdOutlineMessage />}
                         label="Reason"
@@ -109,7 +110,7 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                         value={<Textarea value={overtime.reason} readOnly />}
                     />
                     <hr key={6} />
-                    <Item
+                    <ValueLabel
                         key={"evaluators"}
                         icon={<MdOutlineGroups2 />}
                         label="Evaluators"
