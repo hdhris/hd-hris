@@ -34,26 +34,53 @@ export const ModuleNamesArray = [
     "Performance Appraisal",
     "Reports",
     "Tests",
-] as const; // `as const` preserves the string literal types
-
-// The resulting type will be an array of literal types
+] as const;
 export type ModuleNames = (typeof ModuleNamesArray)[number];
+
+// Arrange accordingly
+export const PrivilegeNamesArray = [
+    "View Dashboard",
+    "View Employees",
+    "Read Attendance Logs",
+    "Read Schedules",
+    "Write Schedules",
+    "Read Overtimes",
+    "File Overtimes",
+    "Approve Overtimes",
+    "Read Holidays",
+    "Write Holidays",
+    "View Benefits",
+    "Read Incidents",
+    "File Incidents",
+    "Read Leaves",
+    "Read Earnings",
+    "Read Deductions",
+    "Write Earnings and Deductions",
+    "Read Privileges",
+    "Write Privileges",
+    "View Signatories",
+    "View Reports",
+    "View Trainings and Seminars",
+    "View Performance Appraisal",
+    "View Tests"
+] as const;
+export type PrivilegeNames = (typeof PrivilegeNamesArray)[number];
 
 export const static_privilege: UserPrivileges = {
     web_access: true,
     modules: [
         {
             name: "Dashboard",
-            privileges: [{ name: "View", paths: ["/dashboard"] }],
+            privileges: [{ name: "View Dashboard", paths: ["/dashboard"] }],
         },
         {
             name: "Employees",
-            privileges: [{ name: "View", paths: ["/employeemanagement"] }],
+            privileges: [{ name: "View Employees", paths: ["/employeemanagement"] }],
         },
         {
             name: "Attendance and Time",
             privileges: [
-                { name: "Read Logs", paths: ["/attendance-time/records", "/api/admin/attendance-time/records/"] },
+                { name: "Read Attendance Logs", paths: ["/attendance-time/records", "/api/admin/attendance-time/records/"] },
                 { name: "Read Schedules", paths: ["/attendance-time/schedule", "/api/admin/attendance-time/schedule"] },
                 {
                     name: "Write Schedules",
@@ -75,18 +102,18 @@ export const static_privilege: UserPrivileges = {
         },
         {
             name: "Benefits",
-            privileges: [{ name: "View", paths: ["/benefits"] }],
+            privileges: [{ name: "View Benefits", paths: ["/benefits"] }],
         },
         {
             name: "Incident",
             privileges: [
-                { name: "Read", paths: ["/incident", "/api/admin/incident/reports"] },
-                { name: "Write", paths: ["/api/admin/incident/update", "/api/admin/incident/create"] },
+                { name: "Read Incidents", paths: ["/incident", "/api/admin/incident/reports"] },
+                { name: "File Incidents", paths: ["/api/admin/incident/update", "/api/admin/incident/create"] },
             ],
         },
         {
             name: "Leaves",
-            privileges: [{ name: "View", paths: ["/leaves"] }],
+            privileges: [{ name: "Read Leaves", paths: ["/leaves"] }],
         },
         {
             name: "Payroll",
@@ -118,9 +145,9 @@ export const static_privilege: UserPrivileges = {
         {
             name: "Privileges",
             privileges: [
-                { name: "Read", paths: ["/privileges/accessibility", "/api/admin/privilege"] },
+                { name: "Read Privileges", paths: ["/privileges/accessibility", "/api/admin/privilege"] },
                 {
-                    name: "Write",
+                    name: "Write Privileges",
                     paths: [
                         "/api/admin/privilege/create-accessibility",
                         "/api/admin/privilege/update-accessibility",
@@ -131,23 +158,23 @@ export const static_privilege: UserPrivileges = {
         },
         {
             name: "Signatories",
-            privileges: [{ name: "View", paths: ["/signatories"] }],
+            privileges: [{ name: "View Signatories", paths: ["/signatories"] }],
         },
         {
             name: "Reports",
-            privileges: [{ name: "View", paths: ["/reports"] }],
+            privileges: [{ name: "View Reports", paths: ["/reports"] }],
         },
         {
             name: "Trainings and Seminars",
-            privileges: [{ name: "View", paths: ["/trainings-and-seminars"] }],
+            privileges: [{ name: "View Trainings and Seminars", paths: ["/trainings-and-seminars"] }],
         },
         {
             name: "Performance Appraisal",
-            privileges: [{ name: "View", paths: ["/performance"] }],
+            privileges: [{ name: "View Performance Appraisal", paths: ["/performance"] }],
         },
         {
             name: "Tests",
-            privileges: [{ name: "View", paths: ["/test"] }],
+            privileges: [{ name: "View Tests", paths: ["/test"] }],
         },
     ],
 };

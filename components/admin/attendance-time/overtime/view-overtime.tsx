@@ -10,6 +10,7 @@ import { MdHowToVote, MdOutlineGroups2, MdOutlineMessage } from "react-icons/md"
 import { TbClockCheck, TbClockUp, TbClockX } from "react-icons/tb";
 import CardTable from "@/components/common/card-view/card-table";
 import Evaluators from "@/components/common/evaluators/evaluators";
+import { useModulePath } from "@/hooks/privilege-hook";
 
 interface ViewOvertimeProps {
     overtime: OvertimeEntry | null;
@@ -45,6 +46,7 @@ export const ValueLabel = ({
 };
 
 function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
+    const { isPrivilegeAuthorized } = useModulePath();
     return (
         <Drawer isDismissible isOpen={!!overtime} onClose={onClose} title={"Overtime Details"}>
             {overtime && (
@@ -109,28 +111,32 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                         vertical
                         value={<Textarea value={overtime.reason} readOnly />}
                     />
-                    <hr key={6} />
-                    <ValueLabel
-                        key={"evaluators"}
-                        icon={<MdOutlineGroups2 />}
-                        label="Evaluators"
-                        vertical
-                        value={
-                            <div className="space-y-2">
-                                <Evaluators
-                                    type={"Overtime"}
-                                    evaluation={overtime.evaluators}
-                                    selectedEmployee={{
-                                        id: overtime.id,
-                                        name: overtime.trans_employees_overtimes.last_name,
-                                    }}
-                                    mutate={mutate}
-                                    onClose={onClose}
-                                    evaluatorsApi="/api/admin/attendance-time/overtime/update"
-                                />
-                            </div>
-                        }
-                    />
+                    {isPrivilegeAuthorized("Approve Overtimes") && (
+                        <>
+                            <hr key={6} />
+                            <ValueLabel
+                                key={"evaluators"}
+                                icon={<MdOutlineGroups2 />}
+                                label="Evaluators"
+                                vertical
+                                value={
+                                    <div className="space-y-2">
+                                        <Evaluators
+                                            type={"Overtime"}
+                                            evaluation={overtime.evaluators}
+                                            selectedEmployee={{
+                                                id: overtime.id,
+                                                name: overtime.trans_employees_overtimes.last_name,
+                                            }}
+                                            mutate={mutate}
+                                            onClose={onClose}
+                                            evaluatorsApi="/api/admin/attendance-time/overtime/update"
+                                        />
+                                    </div>
+                                }
+                            />
+                        </>
+                    )}
                 </ScrollShadow>
             )}
         </Drawer>
