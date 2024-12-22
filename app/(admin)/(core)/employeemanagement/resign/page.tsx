@@ -1,8 +1,23 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { useResignedTerminatedEmployees } from "@/services/queries";
-import { Employee } from "@/types/employeee/EmployeeType";
-import { Avatar, Chip, Button } from "@nextui-org/react";
+import { useformerEmployees } from "@/services/queries";
+import {
+  Employee,
+  EmployeeAll,
+  Status,
+  UnavaliableStatusJSON,
+} from "@/types/employeee/EmployeeType";
+import {
+  Avatar,
+  Chip,
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Textarea,
+} from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
 import Text from "@/components/Text";
 import dayjs from "dayjs";
@@ -11,6 +26,13 @@ import { toast } from "@/components/ui/use-toast";
 import showDialog from "@/lib/utils/confirmDialog";
 import ViewEmployee from "@/components/admin/employeescomponent/view/ViewEmployee";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
+import {
+  cancelUnavailability,
+  getActiveUnavailability,
+  isEmployeeAvailable,
+} from "@/helper/employee/unavailableEmployee";
+import { toGMT8 } from "@/lib/utils/toGMT8";
+import { useUserInfo } from "@/lib/utils/getEmployeInfo";
 
 const EmptyState: React.FC = () => {
   return (
@@ -31,45 +53,20 @@ const EmptyState: React.FC = () => {
 };
 
 const Page: React.FC = () => {
-  const {
-    data: resignedTerminatedEmployees,
-    mutate,
-    isLoading,
-  } = useResignedTerminatedEmployees();
+  const userInfo = useUserInfo();
+  const { data, mutate, isLoading } = useformerEmployees();
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null
   );
   const [isActivating, setIsActivating] = useState<number | null>(null);
-
-  type Signatory = {
-    id: string | number;
-    name: string;
-    picture?: string;
-    role?: string;
-  };
-
-  // Extract signatories for the selected employee
-  const signatories = useMemo<Signatory[]>(() => {
-    if (!selectedEmployee) return [];
-
-    const statusData = selectedEmployee.termination_json
-      ? typeof selectedEmployee.termination_json === "string"
-        ? JSON.parse(selectedEmployee.termination_json)
-        : selectedEmployee.termination_json
-      : typeof selectedEmployee.resignation_json === "string"
-      ? JSON.parse(selectedEmployee.resignation_json)
-      : selectedEmployee.resignation_json;
-
-    // Extract and transform signatories
-    return (
-      statusData?.signatories?.users?.map((user: any) => ({
-        id: user.id,
-        name: user.name,
-        picture: user.picture,
-        role: user.role,
-      })) || []
-    );
-  }, [selectedEmployee]);
+  const [reactivationReason, setReactivationReason] = useState("");
+  const [isReactivatingModalOpen, setIsReactivationModalOpen] = useState(false);
+  const [pendingActivation, setPendingActivation] = useState<{
+    employee: EmployeeAll;
+    entry: UnavaliableStatusJSON[];
+    id: number;
+    status: Status;
+  } | null>(null);
 
   const handleEmployeeUpdated = async () => {
     try {
@@ -79,83 +76,35 @@ const Page: React.FC = () => {
     }
   };
 
-  const handleActivate = async (employee: Employee) => {
-    try {
-      const result = await showDialog({
-        title: "Confirm Reactivation",
-        message: `Are you sure you want to reactivate ${employee.first_name} ${employee.last_name}?`,
-      });
-
-      if (result === "yes") {
-        setIsActivating(employee.id);
-        const response = await axios.put(
-          `/api/employeemanagement/employees?id=${employee.id}&type=status`,
-          {
-            status: "active",
-          }
-        );
-
-        if (response.status === 200) {
-          toast({
-            title: "Success",
-            description: "Employee reactivated successfully",
-            variant: "success",
-          });
-          await mutate();
-        }
-      }
-    } catch (error) {
-      console.error("Error reactivating employee:", error);
-      toast({
-        title: "Error",
-        description: "Failed to reactivate employee. Please try again.",
-        variant: "danger",
-      });
-    } finally {
-      setIsActivating(null);
+  const formerEmployees = useMemo(() => {
+    if (data) {
+      return data.filter(
+        (employee) =>
+          !isEmployeeAvailable(employee, "resignation") ||
+          !isEmployeeAvailable(employee, "termination")
+      );
     }
+    return [];
+  }, [data]);
+
+  const handleActivate = async ({
+    employee,
+    entry,
+    id,
+    status,
+  }: {
+    employee: EmployeeAll;
+    entry: UnavaliableStatusJSON[];
+    id: number;
+    status: Status;
+  }) => {
+    setPendingActivation({ employee, entry, id, status });
+    setIsReactivationModalOpen(true);
   };
 
   const handleOnSelected = (key: React.Key) => {
-    const selected = resignedTerminatedEmployees?.find(
-      (item) => item.id === Number(key)
-    );
+    const selected = formerEmployees?.find((item) => item.id === Number(key));
     setSelectedEmployee(selected ?? null);
-  };
-
-  const getEmployeeStatus = (employee: Employee) => {
-    if (employee.termination_json) {
-      const terminationData =
-        typeof employee.termination_json === "string"
-          ? JSON.parse(employee.termination_json)
-          : employee.termination_json;
-
-      return {
-        type: "Terminated",
-        date: terminationData.terminationDate,
-        reason: terminationData.reason || terminationData.terminationReason,
-        color: "danger" as const,
-      };
-    } else if (employee.resignation_json) {
-      const resignationData =
-        typeof employee.resignation_json === "string"
-          ? JSON.parse(employee.resignation_json)
-          : employee.resignation_json;
-
-      return {
-        type: "Resigned",
-        date: resignationData.resignationDate,
-        reason: resignationData.reason || resignationData.resignationReason,
-        color: "default" as const,
-      };
-    }
-
-    return {
-      type: "Unknown",
-      date: "",
-      reason: "N/A",
-      color: "default" as const,
-    };
   };
 
   const TableConfigurations = {
@@ -169,17 +118,12 @@ const Page: React.FC = () => {
       { uid: "signatories", name: "Approved By", sortable: false },
       { uid: "actions", name: "Actions" },
     ],
+
     rowCell: (employee: Employee, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
-      const statusData = employee.termination_json
-        ? typeof employee.termination_json === "string"
-          ? JSON.parse(employee.termination_json)
-          : employee.termination_json
-        : typeof employee.resignation_json === "string"
-        ? JSON.parse(employee.resignation_json)
-        : employee.resignation_json;
-      const status = getEmployeeStatus(employee);
-
+      const formerData =
+        getActiveUnavailability({ entry: employee.resignation_json })! ||
+        getActiveUnavailability({ entry: employee.termination_json })!;
       switch (key) {
         case "name":
           return (
@@ -202,56 +146,50 @@ const Page: React.FC = () => {
         case "type":
           return (
             <div>
-              <Chip color={status.color} size="md" variant="dot">
-                {status.type}
+              <Chip
+                color={
+                  formerData ===
+                  getActiveUnavailability({ entry: employee.termination_json })
+                    ? "danger"
+                    : "primary"
+                }
+                size="md"
+                variant="dot"
+              >
+                {formerData ===
+                getActiveUnavailability({ entry: employee.termination_json })
+                  ? "Terminated"
+                  : "Resigned"}
               </Chip>
             </div>
           );
         case "date":
           return (
             <div>
-              {status.date ? dayjs(status.date).format("MMM DD, YYYY") : "N/A"}
+              {formerData
+                ? toGMT8(formerData.start_date).format("MMM DD, YYYY")
+                : "N/A"}
             </div>
           );
         case "reason":
           return (
-            <div className={`max-w-md truncate`}>{status.reason || "N/A"}</div>
+            <div className="max-w-md truncate">
+              {formerData ? formerData.reason : "N/A"}
+            </div>
           );
-
         case "signatories":
-          const suspensionSignatories: Signatory[] =
-            statusData?.signatories?.users?.map((user: any) => ({
-              id: user.id,
-              name: user.name,
-              picture: user.picture,
-              role: user.role,
-            })) || [];
           return (
             <div className="flex items-center gap-2">
-              {suspensionSignatories.map((signatory) => (
+              {formerData?.initiated_by && (
                 <UserAvatarTooltip
-                  key={signatory.id}
+                  key={formerData.initiated_by.id}
                   user={{
-                    name: signatory.name,
-                    picture: signatory.picture,
-                    id: signatory.id,
+                    name: formerData.initiated_by.name,
+                    picture: formerData.initiated_by.picture,
+                    id: formerData.initiated_by.id,
                   }}
                   avatarProps={{
-                    classNames: { base: "!size-6" },
-                    isBordered: true,
-                  }}
-                />
-              ))}
-              {statusData?.initiatedBy && (
-                <UserAvatarTooltip
-                  key={statusData.initiatedBy.id}
-                  user={{
-                    name: statusData.initiatedBy.name,
-                    picture: statusData.initiatedBy.picture,
-                    id: statusData.initiatedBy.id,
-                  }}
-                  avatarProps={{
-                    classNames: { base: "!size-6" },
+                    classNames: { base: "!size-9" },
                     isBordered: true,
                   }}
                 />
@@ -266,9 +204,32 @@ const Page: React.FC = () => {
                 variant="flat"
                 color="success"
                 isLoading={isActivating === employee.id}
-                onPress={() => handleActivate(employee)}
+                onPress={() => {
+                  const activeResignation = getActiveUnavailability({
+                    entry: employee.resignation_json,
+                  });
+                  const activeTermination = getActiveUnavailability({
+                    entry: employee.termination_json,
+                  });
+
+                  if (activeResignation) {
+                    handleActivate({
+                      employee,
+                      entry: employee.resignation_json,
+                      id: activeResignation.id,
+                      status: "resigned",
+                    });
+                  } else if (activeTermination) {
+                    handleActivate({
+                      employee,
+                      entry: employee.termination_json,
+                      id: activeTermination.id,
+                      status: "terminated",
+                    });
+                  }
+                }}
               >
-                Reactivate
+                reactivate
               </Button>
             </div>
           );
@@ -281,11 +242,9 @@ const Page: React.FC = () => {
   const FilterItems = [
     {
       category: "Department",
-      filtered: resignedTerminatedEmployees?.length
+      filtered: formerEmployees?.length
         ? Array.from(
-            new Set(
-              resignedTerminatedEmployees.map((e) => e.ref_departments?.name)
-            )
+            new Set(formerEmployees.map((e) => e.ref_departments?.name))
           )
             .filter(Boolean)
             .map((dept) => ({
@@ -336,10 +295,7 @@ const Page: React.FC = () => {
     );
   }
 
-  if (
-    !resignedTerminatedEmployees ||
-    resignedTerminatedEmployees.length === 0
-  ) {
+  if (!formerEmployees || formerEmployees.length === 0) {
     return <EmptyState />;
   }
 
@@ -348,7 +304,7 @@ const Page: React.FC = () => {
       <DataDisplay
         defaultDisplay="table"
         title="Former Employees"
-        data={resignedTerminatedEmployees}
+        data={formerEmployees}
         filterProps={{
           filterItems: FilterItems,
         }}
@@ -359,7 +315,7 @@ const Page: React.FC = () => {
           onRowAction: handleOnSelected,
         }}
         paginationProps={{
-          data_length: resignedTerminatedEmployees.length,
+          data_length: formerEmployees.length,
         }}
         searchProps={{
           searchingItemKey: ["first_name", "last_name"],
@@ -371,12 +327,94 @@ const Page: React.FC = () => {
               employee={selectedEmployee}
               onClose={() => setSelectedEmployee(null)}
               onEmployeeUpdated={handleEmployeeUpdated}
-              sortedEmployees={resignedTerminatedEmployees}
-              signatories={signatories}
+              sortedEmployees={formerEmployees}
+              // signatories={signatories}
             />
           )
         }
       />
+
+      <Modal
+        isOpen={isReactivatingModalOpen}
+        onClose={() => {
+          setIsReactivationModalOpen(false);
+          setReactivationReason("");
+          setPendingActivation(null);
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>
+            Reactivate {pendingActivation?.employee.first_name}{" "}
+            {pendingActivation?.employee.last_name}
+          </ModalHeader>
+          <ModalBody>
+            <Textarea
+              label="Reason for Unsuspending"
+              placeholder="Enter reason"
+              value={reactivationReason}
+              onChange={(e) => setReactivationReason(e.target.value)}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="flat"
+              onPress={() => {
+                setIsReactivationModalOpen(false);
+                setReactivationReason("");
+                setPendingActivation(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              isLoading={isActivating === pendingActivation?.employee.id}
+              onPress={async () => {
+                if (!pendingActivation) return;
+                try {
+                  setIsActivating(pendingActivation.employee.id);
+                  const updateData = cancelUnavailability({
+                    entry: pendingActivation.entry,
+                    canceled_by: userInfo!,
+                    date: toGMT8().toISOString(),
+                    id: pendingActivation.id,
+                    reason: reactivationReason,
+                  });
+
+                  const response = await axios.put(
+                    `/api/employeemanagement/employees?id=${pendingActivation.employee.id}&type=status`,
+                    { updateData, status: pendingActivation.status }
+                  );
+
+                  if (response.status === 200) {
+                    toast({
+                      title: "Success",
+                      description: "Employee activated successfully",
+                      variant: "success",
+                    });
+                    await mutate();
+                  }
+                } catch (error) {
+                  console.error("Error activating employee:", error);
+                  toast({
+                    title: "Error",
+                    description:
+                      "Failed to activate employee. Please try again.",
+                    variant: "danger",
+                  });
+                } finally {
+                  setIsActivating(null);
+                  setIsReactivationModalOpen(false);
+                  setReactivationReason("");
+                  setPendingActivation(null);
+                }
+              }}
+            >
+              Confirm
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </section>
   );
 };
