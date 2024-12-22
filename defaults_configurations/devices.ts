@@ -71,6 +71,7 @@ export async function devices(user_id: string) {
             await prisma.sec_devices.update({
                 where: { id: existingDevice.id },
                 data: {
+                    is_logged_out: false,
                     ip_address,
                     created_at: toGMT8().toISOString(),
                     country_code,

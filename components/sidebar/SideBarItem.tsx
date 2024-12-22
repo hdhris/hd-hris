@@ -19,7 +19,7 @@ export default function SideBarItem({
                                       showLabel,
                                     }: SidebarItem) {
   const pathname = usePathname();
-  const isActive = pathname.includes(href);
+  const isActive = pathname.startsWith(href);
 
   const linkContent = (
       <Link

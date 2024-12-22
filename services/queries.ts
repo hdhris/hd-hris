@@ -18,6 +18,7 @@ import {EmploymentStatusDetails} from "@/types/employment-status/employment-stat
 import { Accounts } from "@/types/employeee/AccountType";
 import {SignatoryPath, SignatoryRoles} from "@/types/signatory/signatory-types";
 import {JobTypes} from "@/types/signatory/job/job-types";
+import {DepartmentName} from "@/types/departments/department-types";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -64,7 +65,7 @@ export function useIntegrations() {
 
 export function useUser() {
     return useSWR<UserProfile>('/api/admin/profile', fetcher, {
-        revalidateOnFocus: true
+        revalidateOnFocus: true, refreshInterval: 60000
     })
 }
 export function useLoginActivity() {
@@ -224,6 +225,11 @@ export function useSignatoryRoles(){
 }
 export function useJobTypes(){
     return useSWR<JobTypes[]>('/api/admin/jobs', {
+        revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
+    })
+}
+export function useDepartments(){
+    return useSWR<DepartmentName[]>('/api/admin/departments', {
         revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
     })
 }

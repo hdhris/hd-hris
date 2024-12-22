@@ -87,7 +87,7 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
             },
         });
 
-        return {
+        const data = {
             users: [...employeeDetails.map((employee) => ({
                 id: String(employee.id),
                 name: getEmpFullName(employee),
@@ -143,6 +143,8 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
                 .sort((a, b) => a.order_number - b.order_number), // Sort by order_number
             is_automatic_approved: is_auto_approved,
         }
+        console.log("Data: ", data)
+        return data;
     } catch (error) {
         console.log("Error: ", error)
         return null

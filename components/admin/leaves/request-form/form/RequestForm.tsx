@@ -294,7 +294,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         return ((workingDays * totalWorkHours) + leaveDif);
     }, [countAvailableDays, employeeIdSelected, maxMinTime?.time_in, maxMinTime?.time_out, user?.employees])
 
-    const onDateRangePicker = useCallback((value: RangeValue<DateValue>) => {
+    const onDateRangePicker = useCallback((value: RangeValue<DateValue> | null) => {
         const startDate = value?.start as ZonedDateTime;
         const endDate = value?.end as ZonedDateTime;
 

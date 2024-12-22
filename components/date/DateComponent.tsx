@@ -21,7 +21,7 @@ export default function DateComponent({ onClockShow }: Props) {
         const updateDate = () =>
             setDate(
                 dayjs()
-                    .format(`DD MMM YYYY ddd ${onClockShow ? "hh:mm A" : "hh:mm A"}`)
+                    .format(`DD MMM YYYY ddd hh:mm A`)
                     .split(" ")
             );
         updateDate(); // Set initial date

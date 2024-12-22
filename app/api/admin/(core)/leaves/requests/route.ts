@@ -79,6 +79,7 @@ export async function GET(request: Request) {
         //     status = "Rejected"
         // }
 
+        console.dir(items.evaluators, {depth: 4})
         return {
             id: items.id,
             employee_id: items.employee_id,

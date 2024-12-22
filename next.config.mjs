@@ -50,6 +50,10 @@ const nextConfig = {
         source: "/signatories",
         destination: "/signatories/lists",
         permanent: true,
+      },{
+        source: "/reports",
+        destination: "/reports/attendances-report",
+        permanent: true,
       },
     ];
   },

@@ -47,16 +47,11 @@ export default function UserMenu() {
                     name, email, pic, privilege
                 });
             }
-
-            console.log("Log in...")
             if(data?.isLoggedOut){
-                console.log("Log out...")
                 await signOut()
             }
         }
         session()
-
-        console.log("Data: ", data)
     }, [data, data?.isLoggedOut, data?.privilege, isCredentials, router]);
 
 
@@ -133,24 +128,24 @@ export default function UserMenu() {
                 >
                     <Typography className={text_icon}>Privacy Policy</Typography>
                 </DropdownItem>
-                <DropdownItem
-                    textValue="Data Backup"
-                    key="data_backup"
-                    as={Link}
-                    href='/backup'
-                    startContent={<PiCloudArrowDown className={cn("", icon_theme)}/>}
-                >
-                    <Typography className={text_icon}>Data Backup</Typography>
-                </DropdownItem>
-                <DropdownItem
-                    textValue="Apps"
-                    key="apps"
-                    as={Link}
-                    href='/apps'
-                    startContent={<IoApps className={cn("", icon_theme)}/>}
-                >
-                    <Typography className={text_icon}>Integrations</Typography>
-                </DropdownItem>
+                {/*<DropdownItem*/}
+                {/*    textValue="Data Backup"*/}
+                {/*    key="data_backup"*/}
+                {/*    as={Link}*/}
+                {/*    href='/backup'*/}
+                {/*    startContent={<PiCloudArrowDown className={cn("", icon_theme)}/>}*/}
+                {/*>*/}
+                {/*    <Typography className={text_icon}>Data Backup</Typography>*/}
+                {/*</DropdownItem>*/}
+                {/*<DropdownItem*/}
+                {/*    textValue="Apps"*/}
+                {/*    key="apps"*/}
+                {/*    as={Link}*/}
+                {/*    href='/apps'*/}
+                {/*    startContent={<IoApps className={cn("", icon_theme)}/>}*/}
+                {/*>*/}
+                {/*    <Typography className={text_icon}>Integrations</Typography>*/}
+                {/*</DropdownItem>*/}
                 <DropdownItem
                     textValue="Terms and Condition"
                     key="terms_and_condition"
