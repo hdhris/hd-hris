@@ -65,7 +65,7 @@ export function useIntegrations() {
 
 export function useUser() {
     return useSWR<UserProfile>('/api/admin/profile', fetcher, {
-        revalidateOnFocus: true, refreshInterval: 60000
+        refreshInterval: 10000
     })
 }
 export function useLoginActivity() {
