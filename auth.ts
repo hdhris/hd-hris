@@ -162,6 +162,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     })
                     console.timeEnd("UpsertACL")
                     user.id = String(updatedUser.userId);
+                    user.employee_id = Number(String(access_control.employee_id));
                     user.modulePaths = modulePaths;
                     console.log("user id: ", user.id)
                     if (existingUser) {
