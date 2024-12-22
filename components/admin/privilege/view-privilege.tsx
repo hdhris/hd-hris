@@ -31,7 +31,10 @@ function ViewPrivilege({ accessRole, onClose }: ViewPrivilegeProps) {
             title: "Update Accessibility",
             message: (
                 <div className="space-y-2">
-                    <p>Updating privileges will <span className="text-red-500">log out</span> all users currently associated with the affected privileges</p>
+                    <p>
+                        Updating privileges will <span className="text-red-500">log out</span> all users currently
+                        associated with the affected privileges
+                    </p>
                     <p>Are you sure you want to proceed?</p>
                 </div>
             ),
@@ -60,10 +63,48 @@ function ViewPrivilege({ accessRole, onClose }: ViewPrivilegeProps) {
                 variant: "danger",
             });
         }
-    }, [accessRole, manageAccessibility, onClose, mutate]);
+    }, [accessRole, manageAccessibility, onClose]);
+
+    const handleDelete = useCallback(async () => {
+        if (!accessRole) return;
+        const result = await showDialog({
+            title: "Delete Privilege",
+            message: "Are you sure you want to delete privilege?",
+            preferredAnswer: "no",
+        });
+        if (result != "yes") return;
+
+        try {
+            await axios.post("/api/admin/privilege/delete-accessibility", accessRole.id);
+            toast({
+                title: "Privilege deleted successfully",
+                variant: "default",
+            });
+
+            onClose();
+            mutate("/api/admin/privilege");
+        } catch (error) {
+            console.log(error);
+            toast({
+                title: "An error has occured",
+                variant: "danger",
+            });
+        }
+    }, [accessRole, onClose]);
 
     return (
-        <Drawer isOpen={!!accessRole} onClose={onClose} title={accessRole && `${accessRole?.name} Details`}>
+        <Drawer
+            isOpen={!!accessRole}
+            onClose={onClose}
+            title={accessRole && `${accessRole?.name} Details`}
+            footer={
+                accessRole?.acl_user_access_control.length === 0 && (
+                    <Button className="ms-auto" {...uniformStyle({ color: "danger" })} onPress={handleDelete}>
+                        Delete
+                    </Button>
+                )
+            }
+        >
             {accessRole && (
                 <div className="space-y-4">
                     <ValueLabel
