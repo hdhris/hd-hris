@@ -424,8 +424,8 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     
   return <>
     {status.data?.map(item=>(
-        <div className="space-y-2 font-black">
-      
+        // I'll add a key
+        <div key={item.id} className="space-y-2 font-black">
           <div className="space-y-2">
             <div>
               <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium">
