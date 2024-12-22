@@ -42,7 +42,7 @@ const employeeInfoSchema = z.object({
 
 const statusActionSchema = z.object({
   startDate: z.string().optional(),
-  endDate: z.string().optional(),
+  endDate: z.string().nullable(),
   reason: z.string().optional(),
 });
 type Signatory = {
@@ -133,7 +133,7 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
     resolver: zodResolver(statusActionSchema),
     defaultValues: {
       startDate: "",
-      endDate: "",
+      endDate: null,
       reason: "",
     },
   });
@@ -194,7 +194,8 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
   const getStatusColor = (isActive: boolean) => {
     if (isActive) return "success";
     if (!isEmployeeAvailable(employee,"suspension")) return "warning";
-    return "danger"; // for resigned or terminated
+    if (!isEmployeeAvailable(employee,"resignation")) return "primary";
+    return "danger";
   };
 
   return (
