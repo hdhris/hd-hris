@@ -77,7 +77,7 @@ function FilePrivilege({ isOpen, mutate, onClose }: ViewPrivilegeProps) {
                 });
             }
         },
-        [form, onClose, mutate]
+        [onClose, mutate]
     );
 
     return (

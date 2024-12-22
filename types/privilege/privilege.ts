@@ -17,6 +17,8 @@ export interface AccessRole {
     acl_user_access_control: AccessControl[];
 }
 
+type Privileges = UserPrivileges["modules"][0]["privileges"]
+
 export const ModuleNamesArray = [
     "Dashboard",
     "Employees",
@@ -31,21 +33,15 @@ export const ModuleNamesArray = [
     "Trainings and Seminars",
     "Performance Appraisal",
     "Reports",
-    "APIs",
-    "All",
-    "Tests"
+    "Tests",
 ] as const; // `as const` preserves the string literal types
 
 // The resulting type will be an array of literal types
-export type ModuleNames = typeof ModuleNamesArray[number];
+export type ModuleNames = (typeof ModuleNamesArray)[number];
 
 export const static_privilege: UserPrivileges = {
     web_access: true,
     modules: [
-        {
-            name: "All",
-            privileges: [{ name: "View", paths: ["/"] }],
-        },
         {
             name: "Dashboard",
             privileges: [{ name: "View", paths: ["/dashboard"] }],
@@ -56,7 +52,26 @@ export const static_privilege: UserPrivileges = {
         },
         {
             name: "Attendance and Time",
-            privileges: [{ name: "View", paths: ["/attendance-time"] }],
+            privileges: [
+                { name: "Read Logs", paths: ["/attendance-time/records", "/api/admin/attendance-time/records/"] },
+                { name: "Read Schedules", paths: ["/attendance-time/schedule", "/api/admin/attendance-time/schedule"] },
+                {
+                    name: "Write Schedules",
+                    paths: [
+                        "/api/admin/attendance-time/schedule/add-schedule",
+                        "/api/admin/attendance-time/schedule/edit-schedule",
+                        "/api/admin/attendance-time/schedule/delete-schedule",
+                    ],
+                },
+                { name: "Read Overtimes", paths: ["/attendance-time/overtime", "/api/admin/attendance-time/overtime"] },
+                { name: "File Overtimes", paths: ["/api/admin/attendance-time/overtime/file"] },
+                { name: "Approve Overtimes", paths: ["/api/admin/attendance-time/overtime/update"] },
+                { name: "Read Holidays", paths: ["/attendance-time/holidays", "/api/admin/attendance-time/holidays"] },
+                {
+                    name: "Write Holidays",
+                    paths: ["/api/admin/attendance-time/holidays/create", "/api/admin/attendance-time/holidays/delete"],
+                },
+            ],
         },
         {
             name: "Benefits",
@@ -64,7 +79,10 @@ export const static_privilege: UserPrivileges = {
         },
         {
             name: "Incident",
-            privileges: [{ name: "View", paths: ["/incident"] }],
+            privileges: [
+                { name: "Read", paths: ["/incident", "/api/admin/incident/reports"] },
+                { name: "Write", paths: ["/api/admin/incident/update", "/api/admin/incident/create"] },
+            ],
         },
         {
             name: "Leaves",
@@ -72,11 +90,44 @@ export const static_privilege: UserPrivileges = {
         },
         {
             name: "Payroll",
-            privileges: [{ name: "View", paths: ["/payroll"] }],
+            privileges: [
+                {
+                    name: "Read Earnings",
+                    paths: [
+                        "/payroll/earnings",
+                        "/api/admin/payroll/payhead?type=earning",
+                        "/payroll/earnings/manage",
+                        "/api/admin/payroll/payhead/read",
+                    ],
+                },
+                {
+                    name: "Read Deductions",
+                    paths: [
+                        "/payroll/deductions",
+                        "/api/admin/payroll/payhead?type=deduction",
+                        "/payroll/deductions/manage",
+                        "/api/admin/payroll/payhead/read",
+                    ],
+                },
+                {
+                    name: "Write Earnings and Deductions",
+                    paths: ["/api/admin/payroll/payhead/upsert-payhead", "/api/admin/payroll/payhead/delete"],
+                },
+            ],
         },
         {
             name: "Privileges",
-            privileges: [{ name: "View", paths: ["/privileges"] }],
+            privileges: [
+                { name: "Read", paths: ["/privileges/accessibility", "/api/admin/privilege"] },
+                {
+                    name: "Write",
+                    paths: [
+                        "/api/admin/privilege/create-accessibility",
+                        "/api/admin/privilege/update-accessibility",
+                        "/api/admin/privilege/delete-accessibility",
+                    ],
+                },
+            ],
         },
         {
             name: "Signatories",
@@ -93,10 +144,6 @@ export const static_privilege: UserPrivileges = {
         {
             name: "Performance Appraisal",
             privileges: [{ name: "View", paths: ["/performance"] }],
-        },
-        {
-            name: "APIs",
-            privileges: [{ name: "View", paths: ["/api"] }],
         },
         {
             name: "Tests",

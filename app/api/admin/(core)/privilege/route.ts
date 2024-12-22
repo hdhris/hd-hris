@@ -13,6 +13,9 @@ export async function GET(req: NextRequest) {
           acl_user_access_control: {
             select: {
               trans_employees: {
+                where: {
+                  deleted_at: null,
+                },
                 ...emp_rev_include.minor_detail,
               }
             }
