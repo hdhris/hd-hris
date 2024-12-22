@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@/auth";
 import {notFound} from "next/navigation";
+import { staticModulePaths } from './app/(admin)/(core)/privileges/privilege';
 
 export default auth((req: any) => {
     const { pathname } = req.nextUrl;
@@ -55,15 +56,19 @@ export default auth((req: any) => {
     }
 
     // Validate user privileges against the stored paths
-    // const modulePaths: string[] = req.auth.user?.modulePaths || []; // Retrieve paths from auth
-    // const isAuthorized = modulePaths.some((allowedPath) =>
-    //     pathname.startsWith(allowedPath)
-    // );
+    const modulePaths: string[] = req.auth.user?.modulePaths || []; // Retrieve paths from auth
 
-    // if (!isAuthorized) {
-    //     // Redirect unauthorized users to an "unauthorized" page
-    //     return NextResponse.redirect(new URL("/auth/unauthorized", req.nextUrl.origin));
-    // }
+    const shouldValidatePath = staticModulePaths.some((staticPath) => pathname.startsWith(staticPath));
+    const isAuthorized = modulePaths.some((allowedPath) =>
+        shouldValidatePath ? pathname.startsWith(allowedPath) : true
+    );
+
+    if (!isAuthorized) {
+        // Redirect unauthorized users to an "unauthorized" page
+        return NextResponse.redirect(new URL("/auth/unauthorized", req.nextUrl.origin));
+    } else {
+        console.log("Valid path");
+    }
 
     // If user is authenticated and does not have a default account, allow access
     return NextResponse.next();

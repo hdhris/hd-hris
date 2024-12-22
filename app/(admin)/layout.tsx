@@ -15,10 +15,12 @@ import Notification from '@/components/functions/notifications/Notification'
 import {LiaUsersSolid} from "react-icons/lia";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
+import { useModulePath } from './(core)/privileges/privilege';
 
 function RootLayout({children}: { children: ReactNode }) {
     // Use a function to lazily initialize the state
     const isClient = useIsClient();
+    const { isModuleAuthorized } = useModulePath();
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
         if (typeof window !== "undefined") {
             // Check localStorage for the initial value if on the client side
@@ -64,27 +66,27 @@ function RootLayout({children}: { children: ReactNode }) {
                     onClockShow={isSidebarOpen}
                     className={cn("transition-width z-40 group-hover:w-52", isSidebarOpen ? "w-52" : "w-16")}
                 >
-                    <SideBarItem label="Dashboard" href="/dashboard" icon={<RxDashboard/>} showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Employee Management" href="/employeemanagement" icon={<PiUsersThree/>}
-                                 showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Attendance & Time" href="/attendance-time" icon={<FiClock/>}
-                                 showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Leaves Application" href="/leaves" icon={<LuPlane/>}
-                                 showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Payroll" href="/payroll" icon={<LuTicket/>} showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Benefits" href="/benefits" icon={<LuHeartHandshake/>}
-                                 showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Performance Appraisal" href="/performance" icon={<LuBadgeCheck/>}
-                                 showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Privileges" href="/privileges" icon={<LuPersonStanding/>}
-                                 showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Incident Report" href="/incident/" icon={<LuFileWarning/>}
-                                 showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Training And Seminars" href="/trainings-and-seminars" icon={<LiaUsersSolid/>}
-                                 showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Signatories" href="/signatories" icon={<PiSignatureBold/>}
-                                 showLabel={isSidebarOpen}/>
-                    <SideBarItem label="Reports" href="/reports/" icon={<BiStats/>} showLabel={isSidebarOpen}/>
+                    {isModuleAuthorized('Dashboard') && <SideBarItem label="Dashboard" href="/dashboard" icon={<RxDashboard/>} showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Employees') && <SideBarItem label="Employee Management" href="/employeemanagement" icon={<PiUsersThree/>}
+                                 showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Attendance and Time') &&<SideBarItem label="Attendance & Time" href="/attendance-time" icon={<FiClock/>}
+                                 showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Leaves') && <SideBarItem label="Leaves Application" href="/leaves" icon={<LuPlane/>}
+                                 showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Payroll') && <SideBarItem label="Payroll" href="/payroll" icon={<LuTicket/>} showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Benefits') && <SideBarItem label="Benefits" href="/benefits" icon={<LuHeartHandshake/>}
+                                 showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Performance Appraisal') && <SideBarItem label="Performance Appraisal" href="/performance" icon={<LuBadgeCheck/>}
+                                 showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Privileges') && <SideBarItem label="Privileges" href="/privileges" icon={<LuPersonStanding/>}
+                                 showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Incident') && <SideBarItem label="Incident Report" href="/incident/" icon={<LuFileWarning/>}
+                                 showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Trainings and Seminars') &&<SideBarItem label="Training And Seminars" href="/trainings-and-seminars" icon={<LiaUsersSolid/>}
+                                 showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Signatories') &&<SideBarItem label="Signatories" href="/signatories" icon={<PiSignatureBold/>}
+                                 showLabel={isSidebarOpen}/>}
+                    {isModuleAuthorized('Reports') && <SideBarItem label="Reports" href="/reports/" icon={<BiStats/>} showLabel={isSidebarOpen}/>}
                 </SideBar>
 
             </div>
