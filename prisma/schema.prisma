@@ -341,8 +341,9 @@ model sys_privileges {
   id                      Int                       @id @default(autoincrement())
   accessibility           Json?
   name                    String?                   @db.VarChar(45)
-  created_at              DateTime                  @db.Timestamp(6)
-  updated_at              DateTime                  @db.Timestamp(6)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  deleted_at              DateTime?                 @db.Timestamptz(6)
   acl_user_access_control acl_user_access_control[]
 }
 

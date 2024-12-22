@@ -1,89 +1,10 @@
+import { ModuleNames, static_privilege } from "@/types/privilege/privilege";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-const static_privilege = {
-    modules: [
-        {
-            name: "All",
-            path: ["/"],
-        },
-        {
-            name: "Dashboard",
-            path: ["/dashboard"],
-        },
-        {
-            name: "Employees",
-            path: ["/employeemanagement"],
-        },
-        {
-            name: "Attendance and Time",
-            path: ["/attendance-time"],
-        },
-        {
-            name: "Benefits",
-            path: ["/benefits"],
-        },
-        {
-            name: "Incident",
-            path: ["/incident"],
-        },
-        {
-            name: "Leaves",
-            path: ["/leaves"],
-        },
-        {
-            name: "Payroll",
-            path: ["/payroll"],
-        },
-        {
-            name: "Privileges",
-            path: ["/privileges"],
-        },
-        {
-            name: "Signatories",
-            path: ["/signatories"],
-        },
-        {
-            name: "Reports",
-            path: ["/reports"],
-        },
-        {
-            name: "Trainings and Seminars",
-            path: ["/trainings-and-seminars"],
-        },
-        {
-            name: "Performance Appraisal",
-            path: ["/performance"],
-        },
-        {
-            name: "APIs",
-            path: ["/api"],
-        },
-        {
-            name: "Tests",
-            path: ["/test"],
-        },
-    ],
-    web_access: true,
-};
-
-type ModuleNames = 
-  "Dashboard" | 
-  "Employees" | 
-  "Attendance and Time" | 
-  "Benefits" | 
-  "Incident" | 
-  "Leaves" | 
-  "Payroll" | 
-  "Privileges" | 
-  "Signatories" | 
-  "Test" | 
-  "Trainings and Seminars" |
-  "Performance Appraisal" |
-  "Reports" |
-  "APIs";
-
-export const staticModulePaths = static_privilege?.modules.flatMap((module) => module.path);
+export const staticModulePaths = static_privilege?.modules.flatMap((module) =>
+    module.privileges.flatMap((privilege) => privilege.paths)
+);
 
 export function useModulePath() {
     const [allPaths, setAllPaths] = useState<string[]>([]);
@@ -95,22 +16,25 @@ export function useModulePath() {
         }
     }, [data]);
 
-    function isPathAuthorized(pathname: string) {
-        const shouldValidatePath = staticModulePaths.some((staticPath) => pathname.startsWith(staticPath));
-        return allPaths.some((allowedPath) =>
-            shouldValidatePath ? pathname.startsWith(allowedPath) : true
-        );
-    }
+    const isPathAuthorized = useMemo(()=>{
+        return (pathname: string)=> {
+            const shouldValidatePath = staticModulePaths.some((staticPath) => pathname.startsWith(staticPath));
+            return allPaths.some((allowedPath) => (shouldValidatePath ? pathname.startsWith(allowedPath) : true));
+        }
+    }, [staticModulePaths, allPaths])
 
-    function isModuleAuthorized(name: ModuleNames) {
-        const paths = static_privilege.modules.find(module => module.name === name)?.path;
-        return paths?.some(path => allPaths.includes(path));
-    }
+    const isModuleAuthorized = useMemo(()=>{
+        return (name: ModuleNames) => {
+            const paths = static_privilege.modules.find((module) => module.name === name)?.privileges.flatMap((privilege) => privilege.paths);
+            return paths?.some((path) => allPaths.includes(path));
+        }
+    }, [static_privilege, allPaths])
 
-    function getPathsByName(name: ModuleNames){
-        return static_privilege.modules.find(module => module.name === name)?.path;
-    }
-
+    const getPathsByName = useMemo(()=>{
+        return (name: ModuleNames) => {
+            return static_privilege.modules.find((module) => module.name === name)?.privileges.flatMap((privilege) => privilege.paths);
+        }
+    },[static_privilege]);
 
     return {
         allPaths,

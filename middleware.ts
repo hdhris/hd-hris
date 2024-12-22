@@ -57,7 +57,6 @@ export default auth((req: any) => {
 
     // Validate user privileges against the stored paths
     const modulePaths: string[] = req.auth.user?.modulePaths || []; // Retrieve paths from auth
-
     const shouldValidatePath = staticModulePaths.some((staticPath) => pathname.startsWith(staticPath));
     const isAuthorized = modulePaths.some((allowedPath) =>
         shouldValidatePath ? pathname.startsWith(allowedPath) : true
@@ -67,7 +66,7 @@ export default auth((req: any) => {
         // Redirect unauthorized users to an "unauthorized" page
         return NextResponse.redirect(new URL("/auth/unauthorized", req.nextUrl.origin));
     } else {
-        console.log("Valid path");
+        // console.log("Valid path");
     }
 
     // If user is authenticated and does not have a default account, allow access

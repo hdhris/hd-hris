@@ -97,7 +97,9 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
 
                     console.log("Control: ", access_control);
                     // Extract and flatten all paths
-                    const modulePaths = accessibility?.modules.flatMap((module) => module.path);
+                    const modulePaths = accessibility?.modules.flatMap((module) =>
+                        module.privileges.flatMap((privilege) => privilege.paths)
+                    );
 
                     // console.time("UpsertUser");
 
