@@ -5,20 +5,21 @@ import {Employee} from "@/types/employeee/EmployeeType";
 import {Signatory} from "@/types/audit/types";
 import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
 import {Department} from "@/types/employeee/DepartmentType";
-import {BatchSchedule, Schedules} from "@/types/attendance-time/AttendanceTypes";
+import {BatchSchedule} from "@/types/attendance-time/AttendanceTypes";
 import {Branch} from "@/types/employeee/BranchType";
 import {Payhead, PayheadAffected} from "@/types/payroll/payheadType";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import prisma from "@/prisma/prisma";
-import { JobPosition } from "@/types/employeee/JobType";
-import { SalaryGrade } from "@/types/employeee/SalaryType";
-import { EmploymentStatus } from "@/types/employeee/EmploymentStatusType";
+import {JobPosition} from "@/types/employeee/JobType";
+import {SalaryGrade} from "@/types/employeee/SalaryType";
+import {EmploymentStatus} from "@/types/employeee/EmploymentStatusType";
 import {EmployeeLeaveCreditFormSetup} from "@/types/leaves/leave-credits-types";
 import {EmploymentStatusDetails} from "@/types/employment-status/employment-status";
-import { Accounts } from "@/types/employeee/AccountType";
+import {Accounts} from "@/types/employeee/AccountType";
 import {SignatoryPath, SignatoryRoles} from "@/types/signatory/signatory-types";
 import {JobTypes} from "@/types/signatory/job/job-types";
 import {DepartmentName} from "@/types/departments/department-types";
+import {SystemNotification} from "@/types/notifications/notification-types";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -68,6 +69,7 @@ export function useUser() {
         refreshInterval: 10000
     })
 }
+
 export function useLoginActivity() {
     return useSWR<LoginActivity[]>('/api/admin/security', fetcher, {
         revalidateOnFocus: true
@@ -87,17 +89,15 @@ export function useEmployeesData() {
 }
 
 export function useEmployeeData(id: string | null) {
-    return useSWR<Employee & Accounts>(
-      id ? `/api/employeemanagement/employees?id=${id}` : null,
-      fetcher
-    );
-  }
+    return useSWR<Employee & Accounts>(id ? `/api/employeemanagement/employees?id=${id}` : null, fetcher);
+}
 
 export function useSuspendedEmployees() {
     return useSWR<Employee[]>('/api/employeemanagement/suspended', fetcher, {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
+
 export function useformerEmployees() {
     return useSWR<Employee[]>('/api/employeemanagement/resigned-terminated', fetcher, {
         // revalidateOnFocus: false, refreshInterval: 3000
@@ -108,7 +108,7 @@ export function usePrivilegesData() {
     return useSWR<Privilege[]>('/api/employeemanagement/privileges', fetcher, {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
-} 
+}
 
 export function useDepartmentsData() {
     return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {//
@@ -163,6 +163,7 @@ export function useNewPayhead() {
 type ArgumentsTuple = readonly [any, ...unknown[]];
 type Arguments = string | ArgumentsTuple | Record<any, any> | null | undefined | false;
 type Key = Arguments | (() => Arguments);
+
 ////////////////////////////////////////////////////////////////////////////////////////
 
 export function useQuery<T>(key: Key, options?: SWRConfiguration<T>) {
@@ -212,33 +213,34 @@ export function useEmploymentStatusTypes() {
         revalidateOnFocus: true, keepPreviousData: true
     })
 }
+
 export function useSignatories() {
     return useSWR<SignatoryPath[]>('/api/admin/signatory', {
         revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
     })
 }
 
-export function useSignatoryRoles(){
+export function useSignatoryRoles() {
     return useSWR<SignatoryRoles[]>('/api/admin/signatory/roles', {
         revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
     })
 }
-export function useJobTypes(){
+
+export function useJobTypes() {
     return useSWR<JobTypes[]>('/api/admin/jobs', {
         revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
     })
 }
-export function useDepartments(){
+
+export function useDepartments() {
     return useSWR<DepartmentName[]>('/api/admin/departments', {
         revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
     })
 }
 
 export function useNotification() {
-    return useSWR<Notification[]>('/api/admin/notification', {
-        keepPreviousData: true,
-        revalidateOnFocus: false, // Prevent revalidation on window focus
-        revalidateIfStale: false, // Don't revalidate if data isn't stale
-        compare: (currentData, newData) => JSON.stringify(currentData) === JSON.stringify(newData), // Only refresh if data has changed
+    return useSWR<SystemNotification>('/api/admin/notification', {
+        keepPreviousData: true, // Keep previous data while fetching new data
+        refreshInterval: 3000
     });
 }
