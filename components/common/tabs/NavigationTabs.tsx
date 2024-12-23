@@ -5,6 +5,7 @@ import {usePathname, useRouter} from "next/navigation";
 import { NavEndContext } from '@/contexts/common/tabs/NavigationContext';
 import { IoIosArrowRoundBack } from 'react-icons/io';
 import HelpReport from './HelpReport';
+import { useModulePath } from '@/hooks/privilege-hook';
 
 export interface TabItem {
     key: string;
@@ -19,18 +20,32 @@ export interface NavigationTabsProps {
 }
 
 function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
+    const { isPathAuthorized } = useModulePath();
     const [endContent, setEndContent] = React.useState(<div/>)
     const router = useRouter();
     const pathname = usePathname();
     const pathPart = pathname.split('/');
 
     // Determine the active tab based on the current pathname
-    const activeTab = tabs.find(tab => pathname.includes(tab.key))?.key || tabs[0].key;
-
+    
     const handleTabChange = (key: string) => {
         router.push(`/${basePath}/${key}`);
     };
 
+    const filteredtabs: TabItem[] = useMemo(() => {
+        return tabs.filter((tab) => isPathAuthorized(`/${basePath}/${tab.key}`));
+    }, [tabs, isPathAuthorized]);
+
+    if (!filteredtabs.length) {
+        return (
+            <Tabs>
+                <Tab isDisabled title={"Empty"} />
+            </Tabs>
+        );
+    }
+
+    const activeTab = filteredtabs.find(tab => pathname.includes(tab.key))?.key || tabs[0].key;
+    
     return (
         <div className="flex flex-col space-y-4 h-full">
             <div className='flex justify-between items-center'>
@@ -47,7 +62,7 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
                         selectedKey={activeTab}
                         onSelectionChange={(key) => handleTabChange(key as string)}
                     >
-                        {tabs.map(tab => (
+                        {filteredtabs.map(tab => (
                             <Tab key={tab.key} title={tab.title}/>
                         ))}
                     </Tabs>

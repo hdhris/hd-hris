@@ -5,7 +5,7 @@ import { UserPrivileges } from "@/types/JSON/user-privileges";
 import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import React, { useCallback, useState } from "react";
-import { ModuleNamesArray, static_privilege } from "@/types/privilege/privilege";
+import { ModuleNamesArray, PrivilegeNamesArray, static_privilege } from "@/types/privilege/privilege";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +27,7 @@ const formSchema = z.object({
                 name: z.enum(ModuleNamesArray),
                 privileges: z.array(
                     z.object({
-                        name: z.string(),
+                        name: z.enum(PrivilegeNamesArray),
                         paths: z.array(z.string()),
                     })
                 ),
@@ -77,7 +77,7 @@ function FilePrivilege({ isOpen, mutate, onClose }: ViewPrivilegeProps) {
                 });
             }
         },
-        [form, onClose, mutate]
+        [onClose, mutate]
     );
 
     return (

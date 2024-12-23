@@ -9,16 +9,22 @@ import FileOvertime from "@/components/admin/attendance-time/overtime/file-overt
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import { Button } from "@nextui-org/react";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import { useModulePath } from "@/hooks/privilege-hook";
 
 function Page() {
+    const { isPrivilegeAuthorized } = useModulePath();
     const [showFiling, setShowFiling] = useState(false);
     const [viewOvertime, setViewOvertime] = useState<OvertimeEntry | null>(null);
-    SetNavEndContent(() => (
-        <Button {...uniformStyle()} onClick={() => setShowFiling(true)}>
-            File Overtime
-        </Button>
-    ));
-    
+    SetNavEndContent(() =>
+        isPrivilegeAuthorized("File Overtimes") ? (
+            <Button {...uniformStyle()} onPress={() => setShowFiling(true)}>
+                File Overtime
+            </Button>
+        ) : (
+            <div />
+        )
+    );
+
     const {
         data: overtimes,
         isLoading,
@@ -43,7 +49,13 @@ function Page() {
                 }}
             />
             <ViewOvertime onClose={() => setViewOvertime(null)} overtime={viewOvertime} mutate={mutate} />
-            <FileOvertime isOpen={showFiling} onClose={() => {setShowFiling(false); mutate();}} />
+            <FileOvertime
+                isOpen={showFiling}
+                onClose={() => {
+                    setShowFiling(false);
+                    mutate();
+                }}
+            />
         </div>
     );
 }

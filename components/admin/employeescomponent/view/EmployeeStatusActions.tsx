@@ -416,16 +416,16 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
         color: "success"
       };
     };
-
+  
     const status = getStatusInfo();
-
+  
     const renderStatusSection = (
       data: UnavaliableStatusJSON[] | null,
       type: string,
       isCurrentStatus: boolean = false
     ) => {
       if (!data || data.length === 0) return null;
-
+    
       return (
         <div key={type}>
           {!isCurrentStatus && (
@@ -471,7 +471,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                       {item?.reason || "-"}
                     </Text>
                   </div>
-
+    
                   {item.initiated_by && (
                     <div className="flex items-center gap-2">
                       <Text className="text-xs text-gray-600">
@@ -506,13 +506,13 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                       </Button>
                     </div>
                   )}
-
+    
                   {item.canceled_at && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
                       <Text className="text-xs text-gray-600 tracking-wider uppercase font-medium mb-2">
                         {type === "Suspended" ? "Unsuspension Details" : "Reactivation Details"}
                       </Text>
-
+                      
                       <div className="space-y-2">
                         <div>
                           <Text className="text-xs text-gray-600">Date</Text>
@@ -520,14 +520,14 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
                             {formatDate(item.canceled_at)}
                           </Text>
                         </div>
-
+    
                         <div>
                           <Text className="text-xs text-gray-600">Reason</Text>
                           <Text className="text-sm text-gray-800 font-light">
                             {item.canceled_reason || "-"}
                           </Text>
                         </div>
-
+    
                         {item.canceled_by && (
                           <div className="flex items-center gap-2">
                             <Text className="text-xs text-gray-600">
@@ -556,7 +556,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
         </div>
       );
     };
-
+  
     return (
       <div className="space-y-6">
         {/* Current Status Section */}
@@ -567,21 +567,21 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
           </Chip>
           {status.type !== "Active" && renderStatusSection(status.data, status.type, true)}
         </div>
-
+  
         {/* History Sections */}
         <div className="space-y-6">
           {status.type !== "Terminated" && currentEmployee.termination_json?.length > 0 &&
             renderStatusSection(currentEmployee.termination_json, "Terminated")}
-
+          
           {status.type !== "Resigned" && currentEmployee.resignation_json?.length > 0 &&
             renderStatusSection(currentEmployee.resignation_json, "Resigned")}
-
+          
           {status.type !== "Suspended" && currentEmployee.suspension_json?.length > 0 &&
             renderStatusSection(currentEmployee.suspension_json, "Suspended")}
         </div>
       </div>
 
-
+      
     );
   };
   const getModalContent = () => {
