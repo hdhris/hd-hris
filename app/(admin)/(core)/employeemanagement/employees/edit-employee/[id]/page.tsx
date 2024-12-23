@@ -577,7 +577,7 @@ export default function EditEmployeePage({
                   <Button
                     type="button"
                     color="primary"
-                    onClick={() => handleTabChange("educational")}
+                    onPress={() => handleTabChange("educational")}
                     className="flex items-center gap-2"
                   >
                     Next
@@ -590,7 +590,7 @@ export default function EditEmployeePage({
                     <Button
                       type="button"
                       variant="bordered"
-                      onClick={() => handleTabChange("personal")}
+                      onPress={() => handleTabChange("personal")}
                       className="flex items-center gap-2"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -599,7 +599,7 @@ export default function EditEmployeePage({
                     <Button
                       type="button"
                       color="primary"
-                      onClick={() => handleTabChange("job")}
+                      onPress={() => handleTabChange("job")}
                       className="flex items-center gap-2"
                     >
                       Next
@@ -613,7 +613,7 @@ export default function EditEmployeePage({
                     <Button
                       type="button"
                       variant="bordered"
-                      onClick={() => handleTabChange("educational")}
+                      onPress={() => handleTabChange("educational")}
                       className="flex items-center gap-2"
                     >
                       <ChevronLeft className="w-4 h-4" />

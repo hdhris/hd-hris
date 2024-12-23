@@ -251,7 +251,7 @@ export default function ViewRecord({
                 <Button
                   color="danger"
                   variant="light"
-                  onClick={() => setIsEditing(false)}
+                  onPress={() => setIsEditing(false)}
                 >
                   Cancel
                 </Button>
@@ -268,7 +268,7 @@ export default function ViewRecord({
           <Button
             color="primary"
             variant="flat"
-            onClick={() => setIsEditing(true)}
+            onPress={() => setIsEditing(true)}
           >
             Edit Record
           </Button>

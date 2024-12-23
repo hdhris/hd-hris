@@ -50,14 +50,14 @@ function Page() {
         label: "New Password",
         type: isVisibleNew ? "text" : "password",
         endContent: (<Button key='new_password' variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
-                             onClick={handleNewPasswordVisibility}>
+                             onPress={handleNewPasswordVisibility}>
             {isVisibleNew ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
         </Button>)
     }, {
         name: "confirm_password", label: "Confirm Password", type: isVisibleConfirm ? "text" : "password",
 
         endContent: (<Button key='confirm_password' variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
-                             onClick={handleConfirmPasswordVisibility}>
+                             onPress={handleConfirmPasswordVisibility}>
             {isVisibleConfirm ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
         </Button>)
     }]

@@ -73,7 +73,7 @@ function Userlogin() {
         type: isVisible ? "text" : "password",
         startContent: <FaLock className={icon_color}/>,
         endContent: (<Button variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
-                             onClick={handlePasswordVisibility}>
+                             onPress={handlePasswordVisibility}>
             {isVisible ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
         </Button>)
     }];

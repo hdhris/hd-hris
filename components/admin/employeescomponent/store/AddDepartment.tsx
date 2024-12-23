@@ -101,7 +101,7 @@ const AddDepartment: React.FC<AddDepartmentProps> = ({ onDepartmentAdded }) => {
           <div 
             className="w-10 h-10 rounded-full border-2 border-gray-200 overflow-hidden cursor-pointer transition-all duration-200 hover:scale-110"
             style={{ backgroundColor: field.value }}
-            onClick={() => {
+            onPress={() => {
               const colorInput = document.querySelector(
                 `input[name="${field.name}"]`
               ) as HTMLInputElement | null;

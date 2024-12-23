@@ -74,7 +74,7 @@ export default function Home() {
                     rows={5}
                 />
             </div>
-            <Button onClick={generatePDF}>Generate PDF</Button>
+            <Button onPress={generatePDF}>Generate PDF</Button>
         </div>
     )
 }

@@ -160,7 +160,7 @@ function PayheadUI({ payhead_type }: { payhead_type: string }) {
                 <Button
                     {...uniformStyle()}
                     className=" w-fit"
-                    onClick={() => router.push(`/payroll/${payhead_type}s/manage`)}
+                    onPress={() => router.push(`/payroll/${payhead_type}s/manage`)}
                 >
                     Create {payhead_type}
                 </Button>

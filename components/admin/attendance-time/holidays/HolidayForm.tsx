@@ -226,7 +226,7 @@ function HolidayForm({
             <Button
 
               isLoading={isDeleting}
-              onClick={handleDelete}
+              onPress={handleDelete}
               {...uniformStyle({ color: "danger", variant: "light" })} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
             >
               Delete
@@ -300,7 +300,7 @@ function HolidayForm({
                             </p>
                             <button
                               className="text-tiny !m-0"
-                              onClick={() => {
+                              onPress={() => {
                                 if (deleteTrans === "") {
                                   // console.log("will delete");
                                   setDeleteTrans(String(transItem.id));

@@ -185,7 +185,7 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                     <Button
                         {...uniformStyle({ color: "success" })}
                         isIconOnly
-                        onClick={handleAddDate}
+                        onPress={handleAddDate}
                         isLoading={isLoading || isSubmitting}
                     >
                         <IoCheckmarkSharp className="size-5 text-white" />
@@ -194,7 +194,7 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         {...uniformStyle({ color: "danger", variant:"flat" })} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
                         isIconOnly
                         isLoading={isLoading || isSubmitting}
-                        onClick={() => setIsAdding(false)}
+                        onPress={() => setIsAdding(false)}
                     >
                         <IoCloseSharp className="size-5 text-danger-500" />
                     </Button>
@@ -205,7 +205,7 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         <Button
                             {...uniformStyle()}
                             className="bg-blue-500"
-                            onClick={handleDeploy}
+                            onPress={handleDeploy}
                             isLoading={isLoading || isSubmitting}
                         >
                             Deploy now
@@ -269,7 +269,7 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         {...uniformStyle({ color: "danger" })}
                         isIconOnly
                         isLoading={isLoading || isSubmitting}
-                        onClick={handleDeleteDate}
+                        onPress={handleDeleteDate}
                     >
                         <MdDelete size={15} />
                     </Button>
@@ -277,7 +277,7 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         {...uniformStyle()}
                         isIconOnly
                         isLoading={isLoading || isSubmitting}
-                        onClick={() => setIsAdding(true)}
+                        onPress={() => setIsAdding(true)}
                     >
                         <FaPlus />
                     </Button>

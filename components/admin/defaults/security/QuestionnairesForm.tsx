@@ -147,7 +147,7 @@ function QuestionnairesForm({isDisabled}: { isDisabled: boolean }) {
                             <FormFields items={QA}/>
                             <div className='flex justify-end gap-4'>
                                 {actionButton === "Update" &&
-                                    <Button size='sm' variant='light' onClick={onClearSelection}>Clear
+                                    <Button size='sm' variant='light' onPress={onClearSelection}>Clear
                                         Selection</Button>}
                                 <Button type='submit' size='sm' isDisabled={!isDirty || !isValid}
                                         radius='sm'>
@@ -177,7 +177,7 @@ function QuestionnairesForm({isDisabled}: { isDisabled: boolean }) {
                     <div className='flex gap-2 justify-end mt-2'>
                         <Button size='sm' radius='sm' variant='light' onPress={handleOnClose}>Cancel</Button>
                         <Button size='sm' radius='sm' color='primary' isLoading={loading} isDisabled={securityQuestions.length === 0}
-                                onClick={handleOnSave}>Apply</Button>
+                                onPress={handleOnSave}>Apply</Button>
                     </div>
                 </ModalFooter>
             </ModalContent>

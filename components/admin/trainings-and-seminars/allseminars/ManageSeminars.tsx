@@ -417,7 +417,7 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
                   "p-4 border-2 cursor-pointer hover:bg-gray-50",
                   participant ? "border-blue-500" : "border-gray-50"
                 )}
-                onClick={() => selectParticipant(item.id)}
+                onPress={() => selectParticipant(item.id)}
               >
                 <div className="flex flex-row gap-4">
                   <div className="flex-1">

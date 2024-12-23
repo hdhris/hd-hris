@@ -134,7 +134,7 @@ export default function PlanDetails({...props}: BenefitPlan) {
                     <div className="h-full overflow-hiden"> {/* Changed overflow from hidden to auto */}
                         <div className="flex justify-between items-center mb-2">
                             <Typography className="font-semibold text-medium">Enrolled Employees</Typography>
-                            <Button {...uniformStyle()} onClick={() => setIsOpenEnrollment(true)}>
+                            <Button {...uniformStyle()} onPress={() => setIsOpenEnrollment(true)}>
                                 Enroll Employee
                             </Button>
                         </div>
@@ -155,7 +155,7 @@ export default function PlanDetails({...props}: BenefitPlan) {
                                                 }}/>
                                             </ContextMenuTrigger>
                                             <ContextMenuContent className="rounded">
-                                                <ContextMenuItem onClick={async () => {
+                                                <ContextMenuItem onPress={async () => {
                                                     await handleTerminate(Number(users.key), props.id, users.name)
                                                 }}><Typography><span className="font-semibold">Terminate</span> {users.name}</Typography></ContextMenuItem>
                                                 <ContextMenuSeparator/>

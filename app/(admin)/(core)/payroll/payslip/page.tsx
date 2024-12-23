@@ -88,7 +88,7 @@ function Page() {
     SetNavEndContent(() => (
         <>
             <DatePickerPayroll setProcessDate={setProcessDate} onDeploy={deployNow} />{" "}
-            <Button isIconOnly isDisabled={payslip === null} {...uniformStyle()} onClick={handlePrint}>
+            <Button isIconOnly isDisabled={payslip === null} {...uniformStyle()} onPress={handlePrint}>
                 <LuPrinter className="size-5" />
             </Button>
         </>

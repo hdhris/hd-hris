@@ -477,7 +477,7 @@ const EducationalBackgroundForm = () => {
                 <Button
                   color="danger"
                   size="sm"
-                  onClick={() => handleRemove(index, "basic")}
+                  onPress={() => handleRemove(index, "basic")}
                 >
                   Remove
                 </Button>
@@ -539,7 +539,7 @@ const EducationalBackgroundForm = () => {
                     <Button
                       color="danger"
                       size="sm"
-                      onClick={() => handleRemove(index, "masters")}
+                      onPress={() => handleRemove(index, "masters")}
                     >
                       Remove
                     </Button>
@@ -603,7 +603,7 @@ const EducationalBackgroundForm = () => {
                     <Button
                       color="danger"
                       size="sm"
-                      onClick={() => handleRemove(index, "doctorate")}
+                      onPress={() => handleRemove(index, "doctorate")}
                     >
                       Remove
                     </Button>

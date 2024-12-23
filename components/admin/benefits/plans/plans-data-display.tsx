@@ -46,7 +46,7 @@ function PlansDataDisplay() {
 
     const navEndContent = useCallback(() => {
         return (<>
-            <Button {...uniformStyle()} onClick={onOpenDrawer}>
+            <Button {...uniformStyle()} onPress={onOpenDrawer}>
                 Add New Plan
             </Button>
             <BenefitPlanForm onOpen={setIsOpen} isOpen={isOpen}/>
@@ -146,7 +146,7 @@ function PlansDataDisplay() {
                                 <Typography
                                     className="text-sm mb-2 truncate break-normal">{plan.coverageDetails}</Typography>
                                 <div className="flex justify-between items-center mt-4">
-                                    <Button variant="bordered" size="sm" onClick={() => handlePlanSelection(key)}>
+                                    <Button variant="bordered" size="sm" onPress={() => handlePlanSelection(key)}>
                                         View Details
                                     </Button>
                                     {/*<Modal isOpen={isModalOpen} onOpenChange={onOpenChange} isDismissable={false}*/}

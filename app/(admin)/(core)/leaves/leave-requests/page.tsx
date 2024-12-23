@@ -127,7 +127,7 @@ function Page() {
 
     SetNavEndContent(() => {
         return (<>
-            <Button {...uniformStyle()} onClick={onOpenDrawer}>
+            <Button {...uniformStyle()} onPress={onOpenDrawer}>
                 File A Leave
             </Button>
             <RequestForm onOpen={setIsOpen} isOpen={isOpen}/>

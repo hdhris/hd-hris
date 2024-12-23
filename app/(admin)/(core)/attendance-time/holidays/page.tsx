@@ -66,7 +66,7 @@ function Page() {
         />
         <Button
           {...uniformStyle()}
-          onClick={() => {
+          onPress={() => {
             setSelectedItem(null);
             setOpen(true);
           }}

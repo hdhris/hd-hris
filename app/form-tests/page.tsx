@@ -169,8 +169,8 @@ function Page() {
 
             <div className="flex gap-4">
                 <Button type="submit">Submit</Button>
-                <Button onClick={handleClear}>Clear</Button>
-                <Button onClick={handlePopulate}>Populate</Button>
+                <Button onPress={handleClear}>Clear</Button>
+                <Button onPress={handlePopulate}>Populate</Button>
             </div>
 
         </form>

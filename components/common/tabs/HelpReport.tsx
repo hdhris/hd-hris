@@ -176,7 +176,7 @@ function HelpReport() {
           isIconOnly
           size="sm"
           variant="light"
-          onClick={() => setAdding(!adding)}
+          onPress={() => setAdding(!adding)}
           isDisabled={submitting}
         >
           {adding ? <IoIosClose size={20} /> : <IoIosAdd size={20} />}
@@ -186,7 +186,7 @@ function HelpReport() {
             isIconOnly
             size="sm"
             variant="light"
-            onClick={handleSubmitReport}
+            onPress={handleSubmitReport}
             isDisabled={submitting}
           >
             <IoIosCheckmark size={20} />
@@ -279,7 +279,7 @@ function HelpReport() {
                           isDisabled={adding || reportID != -1}
                           isLoading={reportID === report.id}
                           isIconOnly
-                          onClick={() => handleReviewed(report.id)}
+                          onPress={() => handleReviewed(report.id)}
                         >
                           <IoCheckmarkSharp className="size-5 text-success-500" />
                         </Button>

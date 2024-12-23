@@ -291,7 +291,7 @@ const RequestCard = () => {
                 isDisabled={items.length === 0}
                 radius="sm"
                 size="sm"
-                onClick={handleClear}
+                onPress={handleClear}
             >
                 Clear All
             </Button>
@@ -300,7 +300,7 @@ const RequestCard = () => {
                 radius="sm"
                 size="sm"
                 color="primary"
-                onClick={handleSubmit}
+                onPress={handleSubmit}
                 isLoading={isLoading}
             >
                 Submit

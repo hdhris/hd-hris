@@ -71,7 +71,7 @@ export const tableConfig: TableConfigProps<IncidentReport> = {
         //         isPending.id === item.id && isPending.method === "rejected"
         //       }
         //       {...uniformStyle({ color: "danger" })}
-        //       onClick={async () => {
+        //       onPress={async () => {
         //         const result = await onUpdate({
         //           ...item,
         //           approved_at: toGMT8().toISOString(),
