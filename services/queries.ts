@@ -233,3 +233,12 @@ export function useDepartments(){
         revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
     })
 }
+
+export function useNotification() {
+    return useSWR<Notification[]>('/api/admin/notification', {
+        keepPreviousData: true,
+        revalidateOnFocus: false, // Prevent revalidation on window focus
+        revalidateIfStale: false, // Don't revalidate if data isn't stale
+        compare: (currentData, newData) => JSON.stringify(currentData) === JSON.stringify(newData), // Only refresh if data has changed
+    });
+}

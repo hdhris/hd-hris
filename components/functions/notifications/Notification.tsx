@@ -21,7 +21,6 @@ import Link from "next/link";
 
 function Notification() {
     return (
-
         <Dropdown radius="sm" className="bg-white">
             <DropdownTrigger>
                 <span className="cursor-pointer">

@@ -5,13 +5,14 @@ import {cn} from '@nextui-org/react'
 import {Button} from "@nextui-org/button";
 import {ButtonProps} from "@nextui-org/react";
 import {LuPlus} from "react-icons/lu";
+import {PressEvent} from "@react-types/shared/src/events";
 
-interface AddProps extends ButtonProps {
+interface AddProps extends Omit<ButtonProps, "onClick"> {
     name: string;
     href?: string; // Make href optional
     className?: string;
     variant?: ButtonProps["variant"];
-    onClick?: (e: React.MouseEvent) => void; // Optional onClick handler
+    onClick?: (e: PressEvent) => void; // Optional onClick handler
 }
 
 function Add({ name, href, variant, className, onClick }: AddProps) {
@@ -24,7 +25,7 @@ function Add({ name, href, variant, className, onClick }: AddProps) {
             as={href ? Link : 'button'} // Conditionally render as Link or button
             href={href}
             className={cn("", btnClass, className)}
-            onClick={onClick} // Attach the onClick handler if provided
+            onPress={onClick} // Attach the onClick handler if provided
             startContent={<LuPlus className={icon_size_sm} />}
         >
             {name}

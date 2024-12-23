@@ -15,7 +15,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {
     <Add 
       variant="solid" 
       name="Add Employee" 
-      onPress={() => router.push("/employeemanagement/employees/add-employee")}
+      onClick={() => router.push("/employeemanagement/employees/add-employee")}
     />
   );
 };
