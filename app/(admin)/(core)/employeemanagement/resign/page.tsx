@@ -198,7 +198,7 @@ const Page: React.FC = () => {
           );
         case "actions":
           return (
-            <div onPress={(e) => e.stopPropagation()}>
+            <div onClick={(e) => e.stopPropagation()}>
               <Button
                 size="sm"
                 variant="flat"

@@ -12,7 +12,7 @@ import {RiEyeCloseLine, RiEyeLine} from "react-icons/ri";
 import {Button} from "@nextui-org/button";
 import {Form} from "@/components/ui/form";
 import {Chip} from "@nextui-org/chip";
-import {Checkbox, cn} from "@nextui-org/react";
+import {cn} from "@nextui-org/react";
 import {icon_color, text_truncated} from "@/lib/utils";
 import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
 import {LuXCircle} from "react-icons/lu";
@@ -21,7 +21,6 @@ import {login} from "@/actions/authActions";
 import {useRouter, useSearchParams} from "next/navigation";
 import {Divider} from "@nextui-org/divider";
 import OAthLogin from "@/components/login/OAthLogin";
-import SimpleAES from "@/lib/cryptography/3des";
 
 const loginSchema = z.object({
     username: z.string().min(1, {message: "Username is required."}),
@@ -60,8 +59,7 @@ function Userlogin() {
 
     }, [router, searchParams]);
 
-    const handlePasswordVisibility = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
+    const handlePasswordVisibility = () => {
         setIsVisible(!isVisible);
     }
 

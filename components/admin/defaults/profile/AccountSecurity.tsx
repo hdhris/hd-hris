@@ -38,18 +38,15 @@ function AccountSecurity() {
     const [isVisibleCurrent, setIsVisibleCurrent] = useState(false)
     const [isVisibleNew, setIsVisibleNew] = useState(false)
     const [isVisibleConfirm, setIsVisibleConfirm] = useState(false)
-    const handleCurrentPasswordVisibility = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
+    const handleCurrentPasswordVisibility = () => {
         setIsVisibleCurrent(!isVisibleCurrent);
     } //handlePasswordVisibility
 
-    const handleNewPasswordVisibility = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
+    const handleNewPasswordVisibility = () => {
         setIsVisibleNew(!isVisibleNew);
     } //handlePasswordVisibility
 
-    const handleConfirmPasswordVisibility = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
+    const handleConfirmPasswordVisibility = () => {
         setIsVisibleConfirm(!isVisibleConfirm);
     } //handlePasswordVisibility
 

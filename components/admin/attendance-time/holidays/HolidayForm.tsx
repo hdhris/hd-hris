@@ -300,7 +300,7 @@ function HolidayForm({
                             </p>
                             <button
                               className="text-tiny !m-0"
-                              onPress={() => {
+                              onClick={() => {
                                 if (deleteTrans === "") {
                                   // console.log("will delete");
                                   setDeleteTrans(String(transItem.id));

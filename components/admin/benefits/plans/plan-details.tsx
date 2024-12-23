@@ -155,7 +155,7 @@ export default function PlanDetails({...props}: BenefitPlan) {
                                                 }}/>
                                             </ContextMenuTrigger>
                                             <ContextMenuContent className="rounded">
-                                                <ContextMenuItem onPress={async () => {
+                                                <ContextMenuItem onClick={async () => {
                                                     await handleTerminate(Number(users.key), props.id, users.name)
                                                 }}><Typography><span className="font-semibold">Terminate</span> {users.name}</Typography></ContextMenuItem>
                                                 <ContextMenuSeparator/>

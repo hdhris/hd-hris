@@ -462,7 +462,7 @@ export default function AddEmployeePage() {
               color="primary"
               disabled={isSubmitting}
               onPress={async (e) => {
-                e.preventDefault();
+                //removing preventDefault
                 const isValid = await methods.trigger();
                 if (isValid) {
                   methods.handleSubmit(handleFormSubmit)();

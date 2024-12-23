@@ -34,13 +34,11 @@ function Page() {
     })
     const {isDirty, isValid} = useFormState(credential)
 
-    const handleNewPasswordVisibility = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
+    const handleNewPasswordVisibility = () => {
         setIsVisibleNew(!isVisibleNew);
     } //handlePasswordVisibility
 
-    const handleConfirmPasswordVisibility = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
+    const handleConfirmPasswordVisibility = () => {
         setIsVisibleConfirm(!isVisibleConfirm);
     } //handlePasswordVisibility
     const changeCredentialFields: FormInputProps[] = [{
@@ -113,7 +111,7 @@ function Page() {
             <CardBody>
                 {error && <Chip classNames={{
                     base: 'p-5 max-w-full'
-                }} variant='flat' startContent={<LuAlertCircle />} color='danger' radius="sm">{error}</Chip>}
+                }} variant='flat' startContent={<LuAlertCircle/>} color='danger' radius="sm">{error}</Chip>}
                 <Form {...credential}>
                     <form onSubmit={credential.handleSubmit(onSubmit)} className="space-y-4">
                         <div className="space-y-2">

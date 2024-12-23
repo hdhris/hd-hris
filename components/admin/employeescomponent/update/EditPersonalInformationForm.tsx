@@ -376,7 +376,7 @@ const EditPersonalInformationForm: React.FC = () => {
             <Avatar
               src={imagePreview}
               className="w-20 h-20 text-large cursor-pointer"
-              onPress={handleAvatarClick}
+              onClick={handleAvatarClick}
               showFallback
               fallback={
                 <LuUserCircle2 className="w-12 h-12 text-default-500" />

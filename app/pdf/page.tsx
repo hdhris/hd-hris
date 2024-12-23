@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from "@/components/ui/button"
+import { Button } from "@nextui-org/react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import PDFViewer from "@/components/common/pdf/PDFViewer";
