@@ -120,6 +120,10 @@ const NavContent = () => {
                     icon: "🔔",
 
                 });
+                new Notification("New Notification", {
+                    body: "You have " + unreadCount + " new notifications",
+                    icon: "/favicon.ico",
+                });
                 const audio = new Audio("/notification-sounds/Pikachu notification.mp3")
                 audio.load()
                 audio.muted = false
