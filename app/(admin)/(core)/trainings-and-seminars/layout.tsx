@@ -11,7 +11,7 @@ function RootLayout({ children }: { children: ReactNode }) {
       path: "empprograms",
     },
     {
-      key: "allseminars",
+      key: "allseminars", 
       title: "Seminar",
       path: "allseminars",
     },
@@ -20,6 +20,16 @@ function RootLayout({ children }: { children: ReactNode }) {
       title: "Enrolled Employees",
       path: "empenrolled",
     },
+    {
+      key: "schedules",
+      title: "Schedules", 
+      path: "schedules",
+    },
+    {
+      key: "records",
+      title: "Training Records",
+      path: "records", 
+    }
   ];
 
   return (

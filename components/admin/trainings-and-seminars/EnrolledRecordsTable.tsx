@@ -5,7 +5,7 @@ import { Avatar, Chip } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
 import Text from "@/components/Text";
 import dayjs from "dayjs";
-import { TrainingRecord } from "./types";
+import { EnrolledRecord } from "./types";
 import ViewRecord from "./empenrolled/ViewRecord";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 
@@ -14,28 +14,28 @@ const EmptyState: React.FC = () => {
     <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
       <div className="text-center space-y-3">
         <Text className="text-xl font-bold text-gray-700">
-          No Training Records Found
+          No Enrolled Records Found
         </Text>
         <Text className="text-gray-500">
-          There are no training records at the moment.
+          There are no Enrolled records at the moment.
         </Text>
         <Text className="text-sm text-gray-400">
-          Training records will appear here when they are created.
+          Enrolled employee records will appear here when they are created.
         </Text>
       </div>
     </div>
   );
 };
 
-export default function TrainingRecordsTable() {
+export default function EnrolledRecordsTable() {
   const {
     data: records = [],
     isLoading,
     mutate,
-  } = useQuery<TrainingRecord[]>(
+  } = useQuery<EnrolledRecord[]>(
     `/api/admin/trainings-and-seminars/empenrolled/list`
   );
-  const [selectedRecord, setSelectedRecord] = useState<TrainingRecord | null>(
+  const [selectedRecord, setSelectedRecord] = useState<EnrolledRecord | null>(
     null
   );
 
@@ -63,7 +63,7 @@ export default function TrainingRecordsTable() {
       { uid: "status", name: "Status", sortable: true },
     ],
     rowCell: (
-      record: TrainingRecord,
+      record: EnrolledRecord,
       columnKey: React.Key
     ): React.ReactElement => {
       const key = columnKey as string;
@@ -215,11 +215,11 @@ export default function TrainingRecordsTable() {
 
   const sortProps = {
     sortItems: [
-      { name: "Program", key: "ref_training_programs" as keyof TrainingRecord },
-      { name: "Status", key: "status" as keyof TrainingRecord },
+      { name: "Program", key: "ref_training_programs" as keyof EnrolledRecord },
+      { name: "Status", key: "status" as keyof EnrolledRecord },
       {
         name: "Enrollment Date",
-        key: "enrollement_date" as keyof TrainingRecord,
+        key: "enrollement_date" as keyof EnrolledRecord,
       },
     ],
   };

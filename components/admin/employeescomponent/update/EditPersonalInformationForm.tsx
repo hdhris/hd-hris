@@ -252,9 +252,10 @@ const EditPersonalInformationForm: React.FC = () => {
       config: {
         placeholder: "Select birthdate",
         maxValue: parseAbsoluteToLocal(dayjs("2008-12-31").endOf('day').toISOString()),
-        defaultValue: null,
-        classNames: DateStyle,
-        validationState: "valid"
+        showMonthAndYearPickers:true
+        // defaultValue: null,
+        // classNames: DateStyle,
+        // validationState: "valid"
       },
     },
   ];

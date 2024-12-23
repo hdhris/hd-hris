@@ -136,7 +136,7 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
     program?: FormValues & { dim_training_participants?: Participant[] };
     employees: Employee[];
   }>(
-    `/api/admin/trainings-and-programs/empprograms/read?id=${program_id}&type=programs`
+    `/api/admin/trainings-and-seminars/empprograms/read?id=${program_id}&type=training`
   );
 
   useEffect(() => {
@@ -240,11 +240,11 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
         const enrollement_date = values.enrollement_date;
 
         const response = await axios.post(
-          "/api/admin/trainings-and-programs/empprograms/upsert",
+          "/api/admin/trainings-and-seminars/empprograms/upsert",
           {
             data: {
               ...values,
-              type: "programs",
+              type: "training",
               dim_training_participants: selectedParticipants.map(
                 (participant) => ({
                   ...participant,
@@ -261,7 +261,7 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
             title: `program${program_id ? "updated" : "created"} successfully`,
             variant: "success",
           });
-          router.push("/trainings-and-programs/empprograms");
+          router.push("/trainings-and-seminars/empprograms");
         }
       } catch (error) {
         toast({ title: `${error}`, variant: "danger" });
@@ -309,8 +309,9 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
       isRequired: true,
       config: {
         placeholder: "Select start date",
-        classNames: DateStyle,
-        validationState: "valid",
+        // classNames: DateStyle,
+        // validationState: "valid",
+        showMonthAndYearPickers:true,
       },
     },
     {
@@ -323,8 +324,9 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
         minValue: form.watch("start_date")
           ? parseAbsoluteToLocal(dayjs(form.watch("start_date")).toISOString())
           : parseAbsoluteToLocal(dayjs().startOf("day").toISOString()),
-        classNames: DateStyle,
-        validationState: "valid",
+        // classNames: DateStyle,
+        // validationState: "valid",
+        showMonthAndYearPickers:true,
       },
     },
     {
@@ -341,9 +343,10 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
       isRequired: true,
       config: {
         placeholder: "Select enrollment date",
-        classNames: DateStyle,
-        validationState: "valid",
+        // classNames: DateStyle,
+        // validationState: "valid",
         maxValue: parseAbsoluteToLocal(toGMT8().toISOString()),
+        showMonthAndYearPickers:true,
       },
     },
     {

@@ -91,7 +91,6 @@ const formSchema = z
     }
   );
 
-
 type FormValues = z.infer<typeof formSchema>;
 
 // Utility function for date parsing
@@ -175,13 +174,11 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
     }
   }, [programData?.employees]);
 
-
-
   const selectParticipant = useCallback(
     (id: number) => {
       const currentEnrollmentDate = form.getValues("enrollement_date");
       const now = dayjs();
-      
+
       // Validate enrollment date
       if (dayjs(currentEnrollmentDate).isAfter(now)) {
         toast({
@@ -190,14 +187,14 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
         });
         return;
       }
-  
+
       setSelectedParticipants((prev) => {
         const existingParticipant = prev.find((p) => p.employee_id === id);
-  
+
         if (existingParticipant) {
           return prev.filter((p) => p.employee_id !== id);
         }
-  
+
         if (prev.length >= form.watch("max_participants")) {
           toast({
             title: "Maximum attendees reached",
@@ -205,13 +202,13 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
           });
           return prev;
         }
-  
+
         // All existing participants should have the same enrollment date
-        const updatedPrev = prev.map(p => ({
+        const updatedPrev = prev.map((p) => ({
           ...p,
-          enrollement_date: currentEnrollmentDate
+          enrollement_date: currentEnrollmentDate,
         }));
-  
+
         return [
           ...updatedPrev,
           {
@@ -258,7 +255,7 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
 
         if (response.data?.id) {
           toast({
-            title: `Seminar${seminar_id ? "updated" : "created"} successfully`,
+            title: `Seminar ${seminar_id ? "updated" : "created"} successfully`,
             variant: "success",
           });
           router.push("/trainings-and-seminars/allseminars");
@@ -308,9 +305,10 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
       type: "date-picker",
       isRequired: true,
       config: {
-        classNames: DateStyle,
-        validationState: "valid",
-        granularity: "day",
+        // classNames: DateStyle,
+        // validationState: "valid",
+        // granularity: "day",
+        showMonthAndYearPickers:true,
       },
     },
     {
@@ -322,9 +320,10 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
         minValue: form.watch("start_date")
           ? parseAbsoluteToLocal(dayjs(form.watch("start_date")).toISOString())
           : parseAbsoluteToLocal(dayjs().startOf("day").toISOString()),
-        classNames: DateStyle,
-        granularity: "day",
-        validationState: "valid",
+        // classNames: DateStyle,
+        // granularity: "day",
+        // validationState: "valid",
+        showMonthAndYearPickers:true,
       },
     },
     {
@@ -341,9 +340,10 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
       isRequired: true,
       config: {
         placeholder: "Select enrollment date",
-        classNames: DateStyle,
-        validationState: "valid",
+        // classNames: DateStyle,
+        // validationState: "valid",
         maxValue: parseAbsoluteToLocal(toGMT8().toISOString()),
+        showMonthAndYearPickers: true,
       },
     },
     {
@@ -366,7 +366,7 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
     <div className="h-full w-full flex gap-2">
       <div className="w-fit">
         <CardForm
-          label={`${seminar_id ? "Update" : "Create"} Program`}
+          label={`${seminar_id ? "Update" : "Create"} Seminars`}
           form={form}
           onSubmit={handleSubmit}
           className="w-[400px]"

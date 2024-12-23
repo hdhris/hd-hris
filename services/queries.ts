@@ -98,7 +98,7 @@ export function useSuspendedEmployees() {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
-export function useformerEmployees() {
+export function useFormerEmployees() {
     return useSWR<Employee[]>('/api/employeemanagement/resigned-terminated', fetcher, {
         // revalidateOnFocus: false, refreshInterval: 3000
     })

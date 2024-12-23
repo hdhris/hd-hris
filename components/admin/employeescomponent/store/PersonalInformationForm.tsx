@@ -247,6 +247,7 @@ const PersonalInformationForm = () => {
         maxValue: parseAbsoluteToLocal(
           dayjs("2008-12-31").endOf("day").toISOString()
         ),
+        showMonthAndYearPickers:true
         // defaultValue: null,
         // classNames: DateStyle,
         // validationState: "valid",

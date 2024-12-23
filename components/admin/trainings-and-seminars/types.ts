@@ -1,5 +1,5 @@
 // types.ts
-export interface TrainingRecord {
+export interface EnrolledRecord {
     id: number;
     employee_id: number;
     program_id: number;
