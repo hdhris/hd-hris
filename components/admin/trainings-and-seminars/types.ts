@@ -1,49 +1,64 @@
 // types.ts
 export interface EnrolledRecord {
-    id: number;
-    employee_id: number;
-    program_id: number;
-    enrollement_date: string;
-    status: string;
-    feedback: string | null;
-    instructor_name: string;
-    ref_training_programs: {
-        instructor_name: string;
-        name: string;
-        description: string;
-        type: string;
-        location: string;
-        start_date: string;
-        end_date: string;
-        hour_duration: number;
-        is_active: boolean;
-        trans_employees: {
-            first_name: string;
-            last_name: string;
-        };
+  id: number;
+  status: string;
+  feedback?: string;
+  instructor_name: string;
+  trans_employees: {
+    email: string;
+    first_name: string;
+    last_name: string;
+    picture?: string;
+    ref_departments?: {
+      name: string;
     };
-    trans_employees: {
-        picture: string;
-        email:string;
-        first_name: string;
-        last_name: string;
-        ref_departments: {
-            name: string;
-        };
-    };
+  };
+  ref_training_programs: {
+    name: string;
+    type: string;
+    location: string;
+    start_date: string;
+    end_date: string;
+    hour_duration: number;
+    is_active: boolean;
+  };
 }
 
-// Define searchable paths for type safety
-export type SearchableTrainingKeys = 
+export interface Schedule {
+  id: number;
+  program_id?: number;
+  location?: string;
+  session_timestamp?: string;
+  hour_duration?: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string;
+  ref_training_programs?: {
+    id: number;
+    name: string;
+    type: string;
+    instructor_name?: string;
+  };
+}
+
+// Update the searchable keys to match the exact nested structure
+export type NestedKeysRecord = 
   | "trans_employees.first_name" 
   | "trans_employees.last_name"
+  | "ref_training_programs.name";
+
+export type NestedKeysSchedule =
   | "ref_training_programs.name"
-  | "ref_training_programs.type"
-  | "status";
+  | "location";
+
+// Keep SearchableKeys for backward compatibility
+export type SearchableKeys = NestedKeysRecord | NestedKeysSchedule;
 
 // Define sortable paths
-export type SortableTrainingKeys = 
+export type SortableKeys = 
   | "ref_training_programs.name"
   | "ref_training_programs.start_date"
   | "status"
-  | "enrollement_date";
+  | "enrollment_date";
+
+
