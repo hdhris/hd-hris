@@ -54,7 +54,7 @@ function Page() {
 
     SetNavEndContent(() => (
         <Button
-            onClick={() => {
+            onPress={() => {
                 setSelectedLoan(null);
                 setshowAddCA(true);
             }}
@@ -188,9 +188,8 @@ function config(
                         <div className="flex gap-1 items-center">
                             <Button
                                 isIconOnly
-                                variant="flat"
-                                {...uniformStyle({ color: "danger" })}
-                                onClick={async () => {
+                                {...uniformStyle({ color: "danger",  variant: "flat"})} //  Fixed:  'variant' is specified more than once, so this usage will be overwritten.
+                                onPress={async () => {
                                     await onUpdate(item.id, "rejected");
                                 }}
                             >
@@ -200,7 +199,7 @@ function config(
                                 {...uniformStyle({ color: "success" })}
                                 startContent={<IoCheckmarkSharp className="size-5 text-white" />}
                                 className="text-white"
-                                onClick={async () => {
+                                onPress={async () => {
                                     await onUpdate(item.id, "approved");
                                 }}
                             >

@@ -147,7 +147,8 @@ export default function AddJobRoleForm({id, name, existingJobs, existingRoles}: 
     //     Add
     // </Button>
     return (<>
-        <Button {...uniformStyle()} variant="light" isIconOnly onClick={onOpen}><LuPlus
+        <Button {...uniformStyle({variant: "light"})} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
+                isIconOnly onClick={onOpen}><LuPlus
             className={icon_size_sm}/></Button>
         <Modal isOpen={isOpen} placement="top-center" onOpenChange={onOpenChange} isDismissable={false}>
             <ModalContent>
@@ -215,7 +216,8 @@ export default function AddJobRoleForm({id, name, existingJobs, existingRoles}: 
 
                     </ModalBody>
                     <ModalFooter>
-                        <Button {...uniformStyle({color: "danger"})} variant="light" onPress={onClose}>
+                        <Button {...uniformStyle({color: "danger", variant: "light"})} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
+                                onPress={onClose}>
                             Close
                         </Button>
                         <Button isLoading={loading} {...uniformStyle()} type="submit" form="add-signatory">

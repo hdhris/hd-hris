@@ -17,6 +17,7 @@ const config = {
       center: true,
       padding: "2rem",
       screens: {
+        print: {raw: "print"},
         "2xl": "1400px",
       },
     },

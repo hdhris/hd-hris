@@ -159,7 +159,7 @@ export default function SeminarTable() {
         <Button
           {...uniformStyle()}
           className="w-fit"
-          onClick={() =>
+          onPress={() =>
             router.push("/trainings-and-seminars/allseminars/manage")
           }
         >

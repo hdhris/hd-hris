@@ -201,7 +201,7 @@ const FileDropzone = React.forwardRef<HTMLInputElement, InputProps>(({
                                     variant="light"
                                     // type="button"
                                     // className="rounded-md p-1 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                    onClick={() => {
+                                    onPress={() => {
                                         void onChange?.(value.filter((_, index) => index !== i),);
                                     }}
                                 >

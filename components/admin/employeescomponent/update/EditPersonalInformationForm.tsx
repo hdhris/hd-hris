@@ -412,7 +412,7 @@ const EditPersonalInformationForm: React.FC = () => {
                     size="sm"
                     radius="md"
                     color="danger"
-                    onClick={handleRemovePhoto}
+                    onPress={handleRemovePhoto}
                   >
                     Remove
                   </Button>

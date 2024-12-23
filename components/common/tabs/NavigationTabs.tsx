@@ -51,7 +51,7 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
             <div className='flex justify-between items-center'>
                 <div className='flex gap-1 items-center'>
                     {pathPart.length > 3 &&
-                    <Button isIconOnly className='border-1 bg-white m-1' radius='md' size='sm' onClick={()=>{handleTabChange(pathPart[2])}}>
+                    <Button isIconOnly className='border-1 bg-white m-1' radius='md' size='sm' onPress={()=>{handleTabChange(pathPart[2])}}>
                         <IoIosArrowRoundBack size={20} />
                     </Button>
                     }

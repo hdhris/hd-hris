@@ -65,7 +65,7 @@ export function useIntegrations() {
 
 export function useUser() {
     return useSWR<UserProfile>('/api/admin/profile', fetcher, {
-        revalidateOnFocus: true, refreshInterval: 60000
+        refreshInterval: 10000
     })
 }
 export function useLoginActivity() {
@@ -232,4 +232,13 @@ export function useDepartments(){
     return useSWR<DepartmentName[]>('/api/admin/departments', {
         revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
     })
+}
+
+export function useNotification() {
+    return useSWR<Notification[]>('/api/admin/notification', {
+        keepPreviousData: true,
+        revalidateOnFocus: false, // Prevent revalidation on window focus
+        revalidateIfStale: false, // Don't revalidate if data isn't stale
+        compare: (currentData, newData) => JSON.stringify(currentData) === JSON.stringify(newData), // Only refresh if data has changed
+    });
 }

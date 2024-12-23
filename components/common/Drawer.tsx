@@ -64,7 +64,7 @@ const Drawer = ({
                                     <DialogTitle className="text-base self-center font-semibold leading-6 text-gray-900">
                                         {title && title}
                                     </DialogTitle>
-                                    <Button isIconOnly variant="light" onClick={() => onClose(false)}>
+                                    <Button isIconOnly variant="light" onPress={() => onClose(false)}>
                                         <LuX className="h-4 w-4" />
                                     </Button>
                                 </div>

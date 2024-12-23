@@ -147,10 +147,11 @@ export default function SignatoryForm() {
                                     "description": "Specifies the role of the person authorized to sign."
                                 }]}/>
                                 <div className="w-full flex justify-end mt-2 gap-2">
-                                    {editId && <Button {...uniformStyle({color: "default"})} onClick={() => {
+                                    {editId && <Button {...uniformStyle({color: "default", variant:"bordered"})} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
+                                                       onClick={() => {
                                         setEditId(undefined)
                                         form.reset({role: ""})
-                                    }} variant="bordered">
+                                    }}>
                                         Clear
                                     </Button>}
                                     <Button isLoading={loading} type="submit" {...uniformStyle()}>
@@ -167,11 +168,11 @@ export default function SignatoryForm() {
                             <ScrollShadow className="max-h-52">
                                 <CardTable data={signatoryRoles.map(item => ({
                                     label: capitalize(item.signatory_role_name), value: (<div>
-                                        <Button isIconOnly {...uniformStyle()} variant="light"
+                                        <Button isIconOnly {...uniformStyle({variant: "light"})} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
                                                 onClick={() => handleActions(item.id, "edit")}>
                                             <LuPencil/>
                                         </Button>
-                                        <Button isIconOnly {...uniformStyle({color: "danger"})} variant="light"
+                                        <Button isIconOnly {...uniformStyle({color: "danger", variant: "light"})} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
                                                 onClick={() => handleActions(item.id, "delete")}>
                                             <LuTrash2/>
                                         </Button>
@@ -183,7 +184,8 @@ export default function SignatoryForm() {
 
                     </ModalBody>
                     <ModalFooter>
-                        <Button {...uniformStyle({color: "danger"})} variant="light" onPress={onClose}>
+                        <Button {...uniformStyle({color: "danger", variant: "light"})} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
+                                 onPress={onClose}>
                             Close
                         </Button>
                         <Button {...uniformStyle()} onPress={onClose}>

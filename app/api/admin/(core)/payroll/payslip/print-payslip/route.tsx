@@ -60,8 +60,10 @@ const PayStub = ({ data }: { data: ViewPayslipType & { date: string } }) => {
     const deductionsList = deductions.list || [];
 
     return (
-        <Document>
-            <Page size={{ width: 300, height: "auto" }} style={styles.page}>
+        <Document
+            pageLayout="twoPageLeft"
+        >
+            <Page size="LETTER" style={styles.page}>
                 {/* Header */}
                 <View style={styles.header}>
                     <Text style={styles.title}>PAYSLIP</Text>

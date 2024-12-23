@@ -38,18 +38,15 @@ function AccountSecurity() {
     const [isVisibleCurrent, setIsVisibleCurrent] = useState(false)
     const [isVisibleNew, setIsVisibleNew] = useState(false)
     const [isVisibleConfirm, setIsVisibleConfirm] = useState(false)
-    const handleCurrentPasswordVisibility = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
+    const handleCurrentPasswordVisibility = () => {
         setIsVisibleCurrent(!isVisibleCurrent);
     } //handlePasswordVisibility
 
-    const handleNewPasswordVisibility = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
+    const handleNewPasswordVisibility = () => {
         setIsVisibleNew(!isVisibleNew);
     } //handlePasswordVisibility
 
-    const handleConfirmPasswordVisibility = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
+    const handleConfirmPasswordVisibility = () => {
         setIsVisibleConfirm(!isVisibleConfirm);
     } //handlePasswordVisibility
 
@@ -60,7 +57,7 @@ function AccountSecurity() {
         inputDisabled: isCredential,
         type: isVisibleCurrent ? "text" : "password",
         endContent: (<Button key='current_password' variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
-                             onClick={handleCurrentPasswordVisibility}>
+                             onPress={handleCurrentPasswordVisibility}>
             {isVisibleCurrent ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
         </Button>)
     }]
@@ -72,14 +69,14 @@ function AccountSecurity() {
             inputDisabled: isCredential,
             type: isVisibleNew ? "text" : "password",
             endContent: (<Button key='new_password' variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
-                                 onClick={handleNewPasswordVisibility}>
+                                 onPress={handleNewPasswordVisibility}>
                 {isVisibleNew ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
             </Button>)
         }, {
             name: "confirm_password", label: "Confirm Password", inputDisabled: isCredential, type: isVisibleConfirm ? "text" : "password",
             endContent: (
                 <Button key='confirm_password' variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2'
-                        onClick={handleConfirmPasswordVisibility}>
+                        onPress={handleConfirmPasswordVisibility}>
                     {isVisibleConfirm ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
                 </Button>)
         }]

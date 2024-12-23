@@ -63,7 +63,7 @@ function CardForm<T extends object>({
             </CardBody>
             <CardFooter className={cn("flex gap-2", classNames?.footer)}>
                 {startButton && (
-                    <Button variant="light" onClick={startButton.onClick}>
+                    <Button variant="light" onPress={startButton.onClick}>
                         {startButton.name}
                     </Button>
                 )}

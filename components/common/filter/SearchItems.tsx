@@ -63,11 +63,12 @@ function SearchItems<T>({
     <Input
       isDisabled={isLoading}
       placeholder={`Search by ${config.map((item) => item.label).filter((item) => item != "").join(", ")}`}
-      variant="bordered"
       value={searchValue}
       onValueChange={setSearchValue}
       className="max-w-64"
-      {...uniformStyle({ color: "default", radius: "md" })}
+      {...uniformStyle({ color: "default", radius: "md",
+      })}
+      variant="bordered"
     />
   );
 }

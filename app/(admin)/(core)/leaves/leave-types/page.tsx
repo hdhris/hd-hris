@@ -68,7 +68,7 @@ function LeaveTypeTable() {
     SetNavEndContent(() => {
 
         return (<>
-            <Button {...uniformStyle()} onClick={onOpenDrawer}>
+            <Button {...uniformStyle()} onPress={onOpenDrawer}>
                 Add Leave Type
             </Button>
             <LeaveTypeForm onOpen={setIsOpen} isOpen={isOpen}/>

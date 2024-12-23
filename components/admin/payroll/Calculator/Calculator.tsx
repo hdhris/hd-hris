@@ -133,7 +133,7 @@ function PayheadCalculator({
                                     radius="lg"
                                     isIconOnly
                                     key={index}
-                                    onClick={() => handleButtonClick(button)}
+                                    onPress={() => handleButtonClick(button)}
                                 >
                                     {button}
                                 </Button>
@@ -144,7 +144,7 @@ function PayheadCalculator({
                                     size="sm"
                                     radius="lg"
                                     key={`var-${index}`}
-                                    onClick={() => handleButtonClick(button)}
+                                    onPress={() => handleButtonClick(button)}
                                 >
                                     {button}
                                 </Button>
@@ -156,7 +156,7 @@ function PayheadCalculator({
                                         size="sm"
                                         radius="lg"
                                         key={`payhead-${index}`}
-                                        onClick={() => handleButtonClick(button)}
+                                        onPress={() => handleButtonClick(button)}
                                     >
                                         {button}
                                     </Button>

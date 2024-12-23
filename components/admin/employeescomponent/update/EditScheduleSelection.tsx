@@ -80,7 +80,7 @@ const EditScheduleSelection: React.FC = () => {
           <BatchCard
             key={schedule.id}
             item={schedule}
-            color={colorScheme}
+            // color={colorScheme} // Fixed: No color prop declaration.
             isHovered={hoveredBatchId === schedule.id}
             isSelected={selectedBatchId === schedule.id.toString()}
             setHoveredBatchId={setHoveredBatchId}

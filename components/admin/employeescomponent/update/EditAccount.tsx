@@ -233,7 +233,7 @@ const EditAccount: React.FC<EditAccountProps> = ({
         {!showResetPassword && !showCreateAccount && (
           <Button
             type="button"
-            onClick={handleShowForm}
+            onPress={handleShowForm}
             variant="bordered"
             isDisabled={isLoading}
           >
@@ -276,7 +276,7 @@ const EditAccount: React.FC<EditAccountProps> = ({
           <Button
             type="button"
             color="primary"
-            onClick={() => handlePrivilegeChange(getValues("privilege_id"))}
+            onPress={() => handlePrivilegeChange(getValues("privilege_id"))}
             isLoading={isPrivilegeUpdating}
           >
             Update Privilege
@@ -292,7 +292,7 @@ const EditAccount: React.FC<EditAccountProps> = ({
               type="button"
               variant="bordered"
               color="primary"
-              onClick={handleCancel}
+              onPress={handleCancel}
               isDisabled={isLoading}
             >
               Cancel
@@ -300,7 +300,7 @@ const EditAccount: React.FC<EditAccountProps> = ({
             <Button
               type="button"
               color="primary"
-              onClick={handleSubmit}
+              onPress={handleSubmit}
               isLoading={isLoading}
               isDisabled={isLoading || (showCreateAccount && !getValues("username"))}
             >

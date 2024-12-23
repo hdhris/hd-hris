@@ -75,7 +75,7 @@ function DropdownList({
               // shortcut="⌘N"
               description={item.description}
               startContent={item.icon}
-              onClick={() => {
+              onPress={() => {
                 item.onClick && item.onClick(item.id || item.key);
               }}
             >
