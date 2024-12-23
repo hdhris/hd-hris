@@ -120,15 +120,27 @@ const NavContent = () => {
                     icon: "🔔",
 
                 });
-                new Notification("New Notification", {
-                    body: "You have " + unreadCount + " new notifications",
-                    icon: "/favicon.ico",
-                });
                 const audio = new Audio("/notification-sounds/Pikachu notification.mp3")
                 audio.load()
-                audio.muted = false
                 audio.play()
+
+                if (Notification.permission === "granted") {
+                    if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+                        navigator.serviceWorker.ready.then(registration => {
+                            registration.showNotification("New Notification", {
+                                body: "Click to view notifications",
+                                icon: "/favicon.ico",
+                                silent: false,
+                            });
+                        }).catch(error => {
+                            console.error("Error with service worker registration:", error);
+                        });
+                    } else {
+                        console.error("Service worker is not ready or not available.");
+                    }
+                }
             }
+
 
         }
     }, [unreadCount, data]);
