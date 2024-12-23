@@ -6,7 +6,7 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import Text from "@/components/Text";
 import dayjs from "dayjs";
 import { TrainingRecord } from "./types";
-import ViewRecord from "./emprecords/ViewRecord";
+import ViewRecord from "./empenrolled/ViewRecord";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 
 const EmptyState: React.FC = () => {
@@ -33,7 +33,7 @@ export default function TrainingRecordsTable() {
     isLoading,
     mutate,
   } = useQuery<TrainingRecord[]>(
-    `/api/admin/trainings-and-seminars/emprecords/list`
+    `/api/admin/trainings-and-seminars/empenrolled/list`
   );
   const [selectedRecord, setSelectedRecord] = useState<TrainingRecord | null>(
     null

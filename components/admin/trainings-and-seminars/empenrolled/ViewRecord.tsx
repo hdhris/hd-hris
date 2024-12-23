@@ -54,7 +54,7 @@ export default function ViewRecord({
 
   const onSubmit = async (values: FormValues) => {
     try {
-      await axios.post("/api/admin/trainings-and-seminars/emprecords/update", {
+      await axios.post("/api/admin/trainings-and-seminars/empenrolled/update", {
         id: record.id,
         ...values,
       });

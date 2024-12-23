@@ -16,9 +16,9 @@ function RootLayout({ children }: { children: ReactNode }) {
       path: "allseminars",
     },
     {
-      key: "emprecords",
-      title: "Employee records",
-      path: "emprecords",
+      key: "empenrolled",
+      title: "Enrolled Employees",
+      path: "empenrolled",
     },
   ];
 

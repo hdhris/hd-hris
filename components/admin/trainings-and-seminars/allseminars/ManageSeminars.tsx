@@ -13,7 +13,7 @@ import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import SearchFilter from "@/components/common/filter/SearchFilter";
 import { useRouter } from "next/navigation";
-import { Spinner, cn } from "@nextui-org/react";
+import { Spinner, cn, datePicker } from "@nextui-org/react";
 import { DateStyle } from "@/lib/custom/styles/InputStyle";
 import { parseAbsoluteToLocal } from "@internationalized/date";
 import { toGMT8 } from "@/lib/utils/toGMT8";
@@ -64,17 +64,18 @@ const formSchema = z
     end_date: z.string(),
     enrollement_date: z.string().refine(
       (val) => {
-        const enrollement_dateDate = dayjs(val);
-        return enrollement_dateDate.isValid();
+        const enrollmentDate = dayjs(val);
+        const now = dayjs();
+        return enrollmentDate.isValid() && !enrollmentDate.isAfter(now);
       },
-      { message: "Invalid enrollement_date date" }
+      { message: "Enrollment date cannot be in the future" }
     ),
     instructor_name: z
       .string()
       .regex(/^[a-zA-Z\s]*$/, "The trainer name should be in proper name"),
     max_participants: z
       .number()
-      .min(1, { message: "Maximum participants must be at least 1." }),
+      .min(1, { message: "Maximum attendees must be at least 1." }),
     is_active: z.boolean(),
     type: z.string().default("seminars"),
   })
@@ -89,6 +90,7 @@ const formSchema = z
       path: ["end_date"],
     }
   );
+
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -173,57 +175,45 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
     }
   }, [programData?.employees]);
 
-  useEffect(() => {
-    const start = dayjs(form.watch("start_date"));
-    const end = dayjs(form.watch("end_date"));
 
-    if (start.isValid() && end.isValid()) {
-      if (end.isBefore(start)) {
-        form.setValue(
-          "end_date",
-          start.add(1, "hour").format("YYYY-MM-DDTHH:mm")
-        );
-      }
-      form.setValue(
-        "hour_duration",
-        Math.round(end.diff(start, "hour", true) * 100) / 100
-      );
-    }
-  }, [form.watch("start_date"), form.watch("end_date")]);
-
-  useEffect(() => {
-    const enrollmentDate = form.watch("enrollement_date");
-    if (enrollmentDate && selectedParticipants.length > 0) {
-      setSelectedParticipants((prevParticipants) =>
-        prevParticipants.map((participant) => ({
-          ...participant,
-          enrollement_date: enrollmentDate,
-        }))
-      );
-    }
-  }, [form.watch("enrollement_date")]);
 
   const selectParticipant = useCallback(
     (id: number) => {
       const currentEnrollmentDate = form.getValues("enrollement_date");
-
+      const now = dayjs();
+      
+      // Validate enrollment date
+      if (dayjs(currentEnrollmentDate).isAfter(now)) {
+        toast({
+          title: "Cannot enroll attendees with future dates",
+          variant: "warning",
+        });
+        return;
+      }
+  
       setSelectedParticipants((prev) => {
         const existingParticipant = prev.find((p) => p.employee_id === id);
-
+  
         if (existingParticipant) {
           return prev.filter((p) => p.employee_id !== id);
         }
-
+  
         if (prev.length >= form.watch("max_participants")) {
           toast({
-            title: "Maximum participants reached",
+            title: "Maximum attendees reached",
             variant: "warning",
           });
           return prev;
         }
-
+  
+        // All existing participants should have the same enrollment date
+        const updatedPrev = prev.map(p => ({
+          ...p,
+          enrollement_date: currentEnrollmentDate
+        }));
+  
         return [
-          ...prev,
+          ...updatedPrev,
           {
             employee_id: id,
             enrollement_date: currentEnrollmentDate,
@@ -241,7 +231,7 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
       try {
         if (selectedParticipants.length === 0) {
           toast({
-            title: "Please select at least one participant",
+            title: "Please select at least one attendees",
             variant: "warning",
           });
           return;
@@ -314,26 +304,26 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
     },
     {
       name: "start_date",
-      label: "Start Date & Time",
-      type: "datetime-local",
+      label: "Start Date",
+      type: "date-picker",
       isRequired: true,
       config: {
-        placeholder: "Select start date and time",
         classNames: DateStyle,
         validationState: "valid",
+        granularity: "day",
       },
     },
     {
       name: "end_date",
-      label: "End Date & Time",
-      type: "datetime-local",
+      label: "End Date",
+      type: "date-picker",
       isRequired: true,
       config: {
-        placeholder: "Select end date and time",
         minValue: form.watch("start_date")
           ? parseAbsoluteToLocal(dayjs(form.watch("start_date")).toISOString())
           : parseAbsoluteToLocal(dayjs().startOf("day").toISOString()),
         classNames: DateStyle,
+        granularity: "day",
         validationState: "valid",
       },
     },
@@ -342,23 +332,23 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
       label: "Duration (hours)",
       type: "number",
       isRequired: true,
-      inputDisabled: true,
-      description: "Automatically calculated",
+      description: "How many hours",
     },
     {
       name: "enrollement_date",
-      label: "Enrollment Date & Time",
-      type: "datetime-local",
+      label: "Enrollment Date",
+      type: "date-picker",
       isRequired: true,
       config: {
-        placeholder: "Select enrollement_date date and time",
+        placeholder: "Select enrollment date",
         classNames: DateStyle,
         validationState: "valid",
+        maxValue: parseAbsoluteToLocal(toGMT8().toISOString()),
       },
     },
     {
       name: "max_participants",
-      label: "Maximum Participants",
+      label: "Maximum Attendees",
       type: "number",
       isRequired: true,
     },
@@ -400,7 +390,7 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
               ]}
             />
             <p className="text-gray-500 font-semibold text-small">
-              {selectedParticipants.length} participants selected
+              {selectedParticipants.length} attendees selected
             </p>
           </div>
         </div>
