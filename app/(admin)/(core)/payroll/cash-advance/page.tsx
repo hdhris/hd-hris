@@ -188,8 +188,7 @@ function config(
                         <div className="flex gap-1 items-center">
                             <Button
                                 isIconOnly
-                                variant="flat"
-                                {...uniformStyle({ color: "danger" })}
+                                {...uniformStyle({ color: "danger",  variant: "flat"})} //  Fixed:  'variant' is specified more than once, so this usage will be overwritten.
                                 onClick={async () => {
                                     await onUpdate(item.id, "rejected");
                                 }}

@@ -273,12 +273,12 @@ function HelpReport() {
                           {...uniformStyle({
                             color: "success",
                             size: "sm",
-                          })}
+                            variant: "flat"
+                          })} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
                           className="shadow-md"
                           isDisabled={adding || reportID != -1}
                           isLoading={reportID === report.id}
                           isIconOnly
-                          variant="flat"
                           onClick={() => handleReviewed(report.id)}
                         >
                           <IoCheckmarkSharp className="size-5 text-success-500" />
