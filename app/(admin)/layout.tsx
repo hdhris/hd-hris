@@ -33,6 +33,7 @@ import {Chip} from "@nextui-org/chip";
 import {GiMagicBroom} from "react-icons/gi";
 import {isObjectEmpty} from "@/helper/objects/isObjectEmpty";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
+import {usePathname} from "next/navigation";
 
 
 function RootLayout({children}: { children: ReactNode }) {
@@ -135,13 +136,16 @@ function RootLayout({children}: { children: ReactNode }) {
 
 
 const NavContent = () => {
+    const pathname = usePathname();
     const {data, isLoading} = useNotification();
     const {isOpen, onOpenChange, onOpen} = useDisclosure();
     const currentData = useRef<SystemNotification | undefined>();
     const unreadCount = data?.notifications.filter((n) => !n.is_read).length ?? 0
 
     useEffect(() => {
-        onOpen()
+        if(pathname.startsWith("/dashboard")){
+            onOpen()
+        }
     }, [onOpen]);
 
     useEffect(() => {
@@ -250,7 +254,7 @@ const Welcome = ({data, isOpen, onOpenChange}: {data: SystemNotification, isOpen
                 </ModalBody>
                 <ModalFooter>
                     <Button onPress={onClose} {...uniformStyle()}>
-                        Ok
+                        OK
                     </Button>
                 </ModalFooter>
             </>)}
