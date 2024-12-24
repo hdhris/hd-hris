@@ -11,6 +11,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import {Toaster} from "@/components/ui/toaster";
 import localFont from 'next/font/local'
+import {Toaster as HotToaster} from "react-hot-toast";
 // import DbConnection from "@/components/DBConnection";
 // import PrelineScript from "@/components/preline/PrelineScript";
 // import Script from "next/script";
@@ -63,6 +64,7 @@ export default function RootLayout({
 
     return (<html lang="en">
     <body className={inter_local.className}>
+    <HotToaster />
     <Providers>
         <Debug/>
         <Switch expression={isMaintenanceMode!}>
@@ -80,7 +82,7 @@ export default function RootLayout({
     </Providers>
 
     {/*<DbConnection/>*/}
-    <Toaster />
+    <Toaster/>
     </body>
     </html>);
 }

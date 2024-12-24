@@ -76,7 +76,7 @@ function Page() {
     SetNavEndContent(() => {
 
         return (<>
-            <Button {...uniformStyle()} onClick={onOpenDrawer}>
+            <Button {...uniformStyle()} onPress={onOpenDrawer}>
                 Add Leave Credit
             </Button>
             <LeaveCreditForm onOpen={setIsOpen} isOpen={isOpen}/>
@@ -257,7 +257,7 @@ const LeaveCreditCard = ({onSelect, ...employee}: LeaveCredits & { onSelect?: (e
     }
 
     return (<Card className="border-1 w-full max-w-[270px]" isHoverable isPressable shadow="none"
-                  onClick={() => onSelect && onSelect(edited)}>
+                  onPress={() => onSelect && onSelect(edited)}>
         <CardHeader className="flex gap-4 border-b-2 border-b-divider/20">
             <Avatar src={employee.picture!} alt={employee.name} isBordered/>
             {/*<Avatar className="h-20 w-20">*/}

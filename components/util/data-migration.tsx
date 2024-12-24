@@ -24,7 +24,7 @@ function DataMigration({onExport, onImport, className, importProps, exportProps
             {onExport && (<>
                     <Button size="sm" radius="md" color="primary"
                             {...exportProps}
-                            onClick={() => setOnOpenExport(true)}><TbDatabaseExport
+                            onPress={() => setOnOpenExport(true)}><TbDatabaseExport
                         className={cn("text-white", icon_size_sm)}/>Export</Button>
                     <Drawer onClose={setOnOpenExport} isOpen={onOpenExport} {...onExport.drawerProps}>
                         <div>Exporting...</div>
@@ -33,7 +33,7 @@ function DataMigration({onExport, onImport, className, importProps, exportProps
 
             )}
             {onImport && (<><Button size="sm" radius="md" color="primary" {...importProps}
-                                    onClick={() => setOnOpenImport(true)}><TbDatabaseImport
+                                    onPress={() => setOnOpenImport(true)}><TbDatabaseImport
                     className={cn("text-white", icon_size_sm)}/>Import</Button>
                     <Drawer onClose={setOnOpenImport} isOpen={onOpenImport} {...onImport.drawerProps}>
                         <FileUpload/>

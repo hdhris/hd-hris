@@ -94,7 +94,7 @@ const ColumnOne: React.FC = () => {
             <Section title='Recovery Codes'
                      className={isNotAllowed}
                      subtitle='Generate and save backup codes to use if the primary 2FA method is unavailable.'>
-                <Button size='sm' variant='faded' isDisabled={!isOn} onClick={generatedCode}>Generate</Button>
+                <Button size='sm' variant='faded' isDisabled={!isOn} onPress={generatedCode}>Generate</Button>
             </Section>
             <div className={cn('ms-10 space-x-2', !isOn ? 'hidden' : '')}>
                 {codes && codes.map((code, index) => (<Chip key={index}>{code}</Chip>))}
@@ -220,12 +220,12 @@ const ColumnTwo: React.FC = () => {
                     </div>
                     <div className='flex gap-2'>
                         <Tooltip content='Sign out on this device'>
-                            <Button size='sm' variant='light' isIconOnly onClick={handleSignOut.bind(null, item.key)}>
+                            <Button size='sm' variant='light' isIconOnly onPress={handleSignOut.bind(null, item.key)}>
                                 <LuLogOut className={cn("text-default-400", icon_size_sm)}/>
                             </Button>
                         </Tooltip>
                         <Tooltip content='Delete' color='danger'>
-                            <Button size='sm' variant='light' isIconOnly onClick={handleDelete.bind(null, item.key)}>
+                            <Button size='sm' variant='light' isIconOnly onPress={handleDelete.bind(null, item.key)}>
                                 <LuTrash2 className={cn("text-danger-400", icon_size_sm)}/>
                             </Button>
                         </Tooltip>

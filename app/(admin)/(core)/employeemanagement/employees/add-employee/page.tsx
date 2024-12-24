@@ -448,7 +448,7 @@ export default function AddEmployeePage() {
           <Button
             type="button"
             variant="bordered"
-            onClick={handlePrevious}
+            onPress={handlePrevious}
             disabled={activeTab === "personal"}
             className="flex items-center gap-2"
           >
@@ -461,8 +461,8 @@ export default function AddEmployeePage() {
               type="submit"
               color="primary"
               disabled={isSubmitting}
-              onClick={async (e) => {
-                e.preventDefault();
+              onPress={async (e) => {
+                //removing preventDefault
                 const isValid = await methods.trigger();
                 if (isValid) {
                   methods.handleSubmit(handleFormSubmit)();
@@ -483,7 +483,7 @@ export default function AddEmployeePage() {
             <Button
               type="button"
               color="primary"
-              onClick={handleNext}
+              onPress={handleNext}
               className="flex items-center gap-2"
             >
               Next

@@ -19,8 +19,8 @@ function AcceptReject({onAccept, onReject, isDisabled}: AcceptRejectProps) {
     return (<div className="flex gap-1 items-center">
             <Button
                 isIconOnly
-                variant="light"
-                {...uniformStyle({color: "danger", radius: "full"})}
+
+                {...uniformStyle({color: "danger", radius: "full",  variant: "light"})} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
                 onClick={async () => {
                     setIsRejecting(true);
                     await onReject();
@@ -33,8 +33,8 @@ function AcceptReject({onAccept, onReject, isDisabled}: AcceptRejectProps) {
             </Button>
             <Button
                 isIconOnly
-                variant="light"
-                {...uniformStyle({color: "success", radius: "full"})}
+
+                {...uniformStyle({color: "success", radius: "full", variant: "light"})} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
                 onClick={async () => {
                     setIsAccepting(true);
                     await onAccept();

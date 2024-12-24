@@ -178,24 +178,23 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                             if(value) setRangeValue(value);
                             // console.log(value);
                         }}
-                        {...uniformStyle({ color: "default" })}
+                        {...uniformStyle({ color: "default" })} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
                         className="w-fit h-fit"
                         variant="bordered"
                     />
                     <Button
                         {...uniformStyle({ color: "success" })}
                         isIconOnly
-                        onClick={handleAddDate}
+                        onPress={handleAddDate}
                         isLoading={isLoading || isSubmitting}
                     >
                         <IoCheckmarkSharp className="size-5 text-white" />
                     </Button>
                     <Button
-                        variant="flat"
-                        {...uniformStyle({ color: "danger" })}
+                        {...uniformStyle({ color: "danger", variant:"flat" })} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
                         isIconOnly
                         isLoading={isLoading || isSubmitting}
-                        onClick={() => setIsAdding(false)}
+                        onPress={() => setIsAdding(false)}
                     >
                         <IoCloseSharp className="size-5 text-danger-500" />
                     </Button>
@@ -206,7 +205,7 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         <Button
                             {...uniformStyle()}
                             className="bg-blue-500"
-                            onClick={handleDeploy}
+                            onPress={handleDeploy}
                             isLoading={isLoading || isSubmitting}
                         >
                             Deploy now
@@ -223,7 +222,6 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                     )}
                     <Select
                         aria-label="Date Picker"
-                        variant="bordered"
                         // placeholder="Select an animal"
                         items={
                             payrollDates?.filter((item) => {
@@ -236,7 +234,10 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         disallowEmptySelection
                         selectedKeys={new Set([selectedDate])}
                         className="w-36"
-                        {...uniformStyle()}
+                        size="sm"
+                        radius="sm"
+                        color="primary"
+                        variant="bordered" //Fixed: incompatible usage.
                         onSelectionChange={handleDateChange}
                     >
                         {(item) => (
@@ -247,7 +248,6 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                     </Select>
                     <Select // select a year
                         aria-label="Year Picker"
-                        variant="bordered"
                         isLoading={isLoading}
                         items={
                             Array.from(new Set(payrollDates?.map((item) => toGMT8(item.start_date).year()))).map(
@@ -257,7 +257,10 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         disallowEmptySelection
                         selectedKeys={new Set([selectedYear])}
                         className="w-28"
-                        {...uniformStyle()}
+                        size="sm"
+                        radius="sm"
+                        color="primary"
+                        variant="bordered" //Fixed: incompatible usage.
                         onSelectionChange={handleYearChange}
                     >
                         {(item) => <SelectItem key={item.value}>{item.label}</SelectItem>}
@@ -266,7 +269,7 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         {...uniformStyle({ color: "danger" })}
                         isIconOnly
                         isLoading={isLoading || isSubmitting}
-                        onClick={handleDeleteDate}
+                        onPress={handleDeleteDate}
                     >
                         <MdDelete size={15} />
                     </Button>
@@ -274,7 +277,7 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         {...uniformStyle()}
                         isIconOnly
                         isLoading={isLoading || isSubmitting}
-                        onClick={() => setIsAdding(true)}
+                        onPress={() => setIsAdding(true)}
                     >
                         <FaPlus />
                     </Button>

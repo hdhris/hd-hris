@@ -23,7 +23,7 @@ function Page() {
   SetNavEndContent(() => {
     return (
       <>
-        <Button {...uniformStyle()} onClick={() => setOpen(true)}>
+        <Button {...uniformStyle()} onPress={() => setOpen(true)}>
           File incident
         </Button>
       </>

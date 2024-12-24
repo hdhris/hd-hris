@@ -13,7 +13,7 @@ function Page() {
     SetNavEndContent(() => {
 
         return (<>
-            <Button {...uniformStyle()} onClick={onOpenDrawer}>
+            <Button {...uniformStyle()} onPress={onOpenDrawer}>
                 Add Leave Credit
             </Button>
             <LeaveCreditForm onOpen={setIsOpen} isOpen={isOpen}/>

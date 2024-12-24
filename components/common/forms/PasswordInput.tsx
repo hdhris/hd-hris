@@ -27,7 +27,7 @@ export default function PasswordInput() {
             startContent={<FaLock className={icon_color}/>}
             endContent={
                 <Button variant="light" radius='sm' isIconOnly className='h-fit w-fit p-2' disableAnimation={true}
-                        onClick={toggleVisibility}>
+                        onPress={toggleVisibility}>
                     {isVisible ? <RiEyeLine className={icon_color}/> : <RiEyeCloseLine className={icon_color}/>}
                 </Button>
             }

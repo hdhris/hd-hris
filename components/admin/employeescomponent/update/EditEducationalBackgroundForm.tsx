@@ -517,7 +517,7 @@ useEffect(() => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => window.open(certificate, "_blank")}
+                    onPress={() => window.open(certificate, "_blank")}
                   >
                     View
                   </Button>
@@ -525,7 +525,7 @@ useEffect(() => {
                 <Button
                   color="danger"
                   size="sm"
-                  onClick={() => handleRemove(index, "basic")}
+                  onPress={() => handleRemove(index, "basic")}
                 >
                   Remove
                 </Button>
@@ -590,7 +590,7 @@ useEffect(() => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => window.open(certificate, "_blank")}
+                        onPress={() => window.open(certificate, "_blank")}
                       >
                         View
                       </Button>
@@ -598,7 +598,7 @@ useEffect(() => {
                     <Button
                       color="danger"
                       size="sm"
-                      onClick={() => handleRemove(index, "masters")}
+                      onPress={() => handleRemove(index, "masters")}
                     >
                       Remove
                     </Button>
@@ -665,7 +665,7 @@ useEffect(() => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => window.open(certificate, "_blank")}
+                        onPress={() => window.open(certificate, "_blank")}
                       >
                         View
                       </Button>
@@ -673,7 +673,7 @@ useEffect(() => {
                     <Button
                       color="danger"
                       size="sm"
-                      onClick={() => handleRemove(index, "doctorate")}
+                      onPress={() => handleRemove(index, "doctorate")}
                     >
                       Remove
                     </Button>

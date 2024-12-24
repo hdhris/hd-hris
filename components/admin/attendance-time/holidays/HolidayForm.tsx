@@ -224,10 +224,10 @@ function HolidayForm({
         <div className="ms-auto flex gap-2 items-center">
           {selectedItem?.id && typeof selectedItem.id === 'number' && (
             <Button
-              variant="light"
+
               isLoading={isDeleting}
-              onClick={handleDelete}
-              {...uniformStyle({ color: "danger" })}
+              onPress={handleDelete}
+              {...uniformStyle({ color: "danger", variant: "light" })} //Fixed: 'variant' is specified more than once, so this usage will be overwritten.
             >
               Delete
             </Button>

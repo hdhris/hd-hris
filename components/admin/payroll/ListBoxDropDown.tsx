@@ -159,7 +159,7 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
                             className="flex-1"
                             variant="light"
                             color="danger"
-                            onClick={() => {
+                            onPress={() => {
                                 if (Array.from(selectedKeys).length > 1) {
                                     saveLastKeyAndSetNewKeys(new Set([]));
                                 } else {
@@ -177,7 +177,7 @@ export function ListDropDown<T extends { id: string | number; name: string }>({
                             isDisabled={prevSelecteKeys.length === 0}
                             className="flex-1"
                             color="primary"
-                            onClick={() => {
+                            onPress={() => {
                                 if (prevSelecteKeys.length > 0) {
                                     setSelectedKeys(prevSelecteKeys.pop()!);
                                 }

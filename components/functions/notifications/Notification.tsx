@@ -1,225 +1,91 @@
 'use client'
-import React from 'react';
-import {
-    Badge,
-    Button,
-    cn,
-    Dropdown,
-    DropdownItem,
-    DropdownMenu,
-    DropdownSection,
-    DropdownTrigger, ScrollShadow, User
-} from "@nextui-org/react";
-import {IoIosNotifications} from "react-icons/io";
-import {icon_size, icon_size_sm, text_icon} from "@/lib/utils";
-import Typography from "@/components/common/typography/Typography"
-import {BsCheck2All} from "react-icons/bs";
-import {LuCheckCheck, LuSettings} from "react-icons/lu";
-import {getDateRequestedAgo, getRandomDateTime} from "@/lib/utils/dateFormatter";
-import Link from "next/link";
+import React, {useEffect, useRef, useState} from 'react';
+import {useNotification} from "@/services/queries";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {Bell, Check, Settings} from "lucide-react";
+import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
+import Loading from "@/components/spinner/Loading";
+import {formatTimeAgo} from "@/lib/utils/numberFormat";
+import {Badge, Button} from "@nextui-org/react";
+import {Chip} from "@nextui-org/chip";
+import {NotificationList} from "@/components/functions/notifications/received-notifications/received-notification";
+import {AnimatedList} from "@/components/ui/animated-list";
+import {ScrollArea} from "@/components/ui/scroll-area";
+import toast from "react-hot-toast";
+import {isEqual} from "lodash";
+import {SystemNotification} from "@/types/notifications/notification-types";
+import {HiOutlineBellSnooze} from "react-icons/hi2";
 
 
-function Notification() {
-    return (
+function InAppNotification({data, isLoading}: {data: SystemNotification, isLoading: boolean}) {
 
-        <Dropdown radius="sm" className="bg-white">
-            <DropdownTrigger>
-                <span className="cursor-pointer">
-                    <Badge content={10} color='danger' size="sm">
-                        <IoIosNotifications className={cn("text-primary", icon_size)}/>
-                    </Badge>
-                </span>
-            </DropdownTrigger>
-            <DropdownMenu variant="faded"
-                          className="h-96"
-                          aria-label="Dropdown menu with description"
-                          itemClasses={{
-                              base: [
-                                  "rounded",
-                                  "text-inactive-bar",
-                                  "transition-opacity",
-                                  "data-[hover=true]:text-white",
-                                  "data-[hover=true]:bg-primary/25",
-                                  "dark:data-[hover=true]:bg-default-50",
-                                  "data-[selectable=true]:focus:bg-default-50",
-                                  "data-[pressed=true]:opacity-70",
-                                  "data-[focus-visible=true]:ring-default-500",
-                              ],
-                          }}
-            >
-                <DropdownItem
-                    className="px-0 opacity-100 w-96
-                    cursor-default
-                    hover:!border-transparent
-                    data-[hover=true]:!bg-transparent
-                    "
-                    key="title"
-                >
-                    <div className="flex items-center justify-between px-2">
-                        <Typography className="font-semibold text-2xl text-inactive-bar">Notifications</Typography>
-                        <Link href="/" className="w-fit h-fit text-primary flex items-center gap-2"><LuCheckCheck className='text-primary'/>Mark all as read</Link>
+    const [isOpen, setIsOpen] = useState(false)
+
+    const unreadCount = data?.notifications.filter((n) => !n.is_read).length ?? 0
+
+    return (<Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+            <Button variant="light" isIconOnly size="sm">
+                <Badge content={""} color="danger" size="md" shape="circle">
+                    <Bell className="size-6"/>
+                </Badge>
+            </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-96 p-0">
+            <Card className="border-0 shadow-none">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="flex justify-between w-full">
+                        <div className="flex gap-2">
+                            <CardTitle className="text-lg font-semibold">Notifications</CardTitle>
+                            {unreadCount > 0 && <Chip className="text-xs" color="danger" size="sm">
+                                {unreadCount}
+                            </Chip>}
+                        </div>
+                        <Button variant="light" size="sm"
+                            // onClick={markAllAsRead}
+                        >
+                            <Check className="mr-2 h-4 w-4"/>
+                            Mark all as read
+                        </Button>
+
                     </div>
-                </DropdownItem>
-                <DropdownSection showDivider>
-                    <DropdownItem
-                        className="w-96"
-                        key="copy"
+
+                </CardHeader>
+                <CardContent className="p-0">
+                    {isLoading ? <Loading/> :
+
+                            <ScrollArea className="h-[300px] pr-4">
+                                {data?.count === 0 ?
+                                    <div className="h-[300px] w-full grid place-items-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <HiOutlineBellSnooze className="size-10 text-default-400"/>
+                                            <p className="text-medium text-muted-foreground">No notifications yet.</p>
+                                        </div>
+
+                                    </div> :  <AnimatedList>
+                                        {data?.notifications.map((notification) => (
+                                            <NotificationList key={notification.id} src={notification.from.picture}
+                                                              name={notification.title} is_unread={!notification.is_read}
+                                                              time={formatTimeAgo(notification.timestamp)}/>))}
+                                    </AnimatedList>
+                                }
+                        </ScrollArea>}
+                </CardContent>
+                <CardFooter className="p-2">
+                    <Button variant="light" size="sm"
+                        // onClick={openNotificationSettings}
                     >
-                        <User
-                            className="group w-full justify-start"
-                            name={
-                                <div className="flex items-center justify-between">
-                                    <Typography className={text_icon}>Subject</Typography>
-                                    <Typography className={cn("text-tiny font-normal opacity-75", text_icon)}>
-                                        {getDateRequestedAgo(
-                                            getRandomDateTime(
-                                                new Date("4/13/2024, 12:00:00 AM"),
-                                                new Date("5/13/2024, 12:00:52 PM")
-                                            ),
-                                            true
-                                        )}
-                                    </Typography>
-                                </div>
-                            }
-                            description="content hhjhdjkjdkkkdkldklkdlkdlddlkldklkdlkdlkdkdldhjdhjhdjdjdj"
-                            classNames={{
-                                wrapper: "w-full",
-                                name: "text-primary text-md font-semibold group-hover:hover-text w-full",
-                                description: "text-primary text-sm group-hover:hover-text w-72 truncate overflow-hidden text-ellipsis whitespace-nowrap",
-                            }}
-                            avatarProps={{
-                                size: "sm",
-                                src: "https://avatars.githubusercontent.com/u/30373425?v=4",
-                            }}
-                        />
-
-
-                    </DropdownItem>
-                </DropdownSection>
-                <DropdownSection showDivider>
-                    <DropdownItem
-                        className="w-96"
-                        key="copy"
+                       View all notifications
+                    </Button>
+                    <Button variant="light" size="sm" isIconOnly className="ml-auto mr-2"
+                        // onClick={openNotificationSettings}
                     >
-                        <User
-                            className="group w-full justify-start"
-                            name={
-                                <div className="flex items-center justify-between">
-                                    <Typography className={text_icon}>Subject</Typography>
-                                    <Typography className={cn("text-tiny font-normal opacity-75", text_icon)}>
-                                        {getDateRequestedAgo(
-                                            getRandomDateTime(
-                                                new Date("4/13/2024, 12:00:00 AM"),
-                                                new Date("5/13/2024, 12:00:52 PM")
-                                            ),
-                                            true
-                                        )}
-                                    </Typography>
-                                </div>
-                            }
-                            description="content hhjhdjkjdkkkdkldklkdlkdlddlkldklkdlkdlkdkdldhjdhjhdjdjdj"
-                            classNames={{
-                                wrapper: "w-full",
-                                name: "text-primary text-md font-semibold group-hover:hover-text w-full",
-                                description: "text-primary text-sm group-hover:hover-text w-72 truncate overflow-hidden text-ellipsis whitespace-nowrap",
-                            }}
-                            avatarProps={{
-                                size: "sm",
-                                src: "https://avatars.githubusercontent.com/u/30373425?v=4",
-                            }}
-                        />
-
-
-                    </DropdownItem>
-                </DropdownSection>
-                <DropdownSection showDivider>
-                    <DropdownItem
-                        className="w-96"
-                        key="copy"
-                    >
-                        <User
-                            className="group w-full justify-start"
-                            name={
-                                <div className="flex items-center justify-between">
-                                    <Typography className={text_icon}>Subject</Typography>
-                                    <Typography className={cn("text-tiny font-normal opacity-75", text_icon)}>
-                                        {getDateRequestedAgo(
-                                            getRandomDateTime(
-                                                new Date("4/13/2024, 12:00:00 AM"),
-                                                new Date("5/13/2024, 12:00:52 PM")
-                                            ),
-                                            true
-                                        )}
-                                    </Typography>
-                                </div>
-                            }
-                            description="content hhjhdjkjdkkkdkldklkdlkdlddlkldklkdlkdlkdkdldhjdhjhdjdjdj"
-                            classNames={{
-                                wrapper: "w-full",
-                                name: "text-primary text-md font-semibold group-hover:hover-text w-full",
-                                description: "text-primary text-sm group-hover:hover-text w-72 truncate overflow-hidden text-ellipsis whitespace-nowrap",
-                            }}
-                            avatarProps={{
-                                size: "sm",
-                                src: "https://avatars.githubusercontent.com/u/30373425?v=4",
-                            }}
-                        />
-
-
-                    </DropdownItem>
-                </DropdownSection>
-                <DropdownSection showDivider>
-                    <DropdownItem
-                        className="w-96"
-                        key="copy"
-                    >
-                        <User
-                            className="group w-full justify-start"
-                            name={
-                                <div className="flex items-center justify-between">
-                                    <Typography className={text_icon}>Subject</Typography>
-                                    <Typography className={cn("text-tiny font-normal opacity-75", text_icon)}>
-                                        {getDateRequestedAgo(
-                                            getRandomDateTime(
-                                                new Date("4/13/2024, 12:00:00 AM"),
-                                                new Date("5/13/2024, 12:00:52 PM")
-                                            ),
-                                            true
-                                        )}
-                                    </Typography>
-                                </div>
-                            }
-                            description="content hhjhdjkjdkkkdkldklkdlkdlddlkldklkdlkdlkdkdldhjdhjhdjdjdj"
-                            classNames={{
-                                wrapper: "w-full",
-                                name: "text-primary text-md font-semibold group-hover:hover-text w-full",
-                                description: "text-primary text-sm group-hover:hover-text w-72 truncate overflow-hidden text-ellipsis whitespace-nowrap",
-                            }}
-                            avatarProps={{
-                                size: "sm",
-                                src: "https://avatars.githubusercontent.com/u/30373425?v=4",
-                            }}
-                        />
-
-
-                    </DropdownItem>
-                </DropdownSection>
-                <DropdownItem
-                    className="px-0 opacity-100 w-96
-                    cursor-default
-                    hover:!border-transparent
-                    data-[hover=true]:!bg-transparent
-                    "
-                    key="title"
-                >
-                    <div className="flex items-center justify-between px-2">
-                        <Link href='/' className="w-fit h-fit text-primary underline">View all notifications</Link>
-                        <Link href='/' className="w-fit h-fit text-primary"><LuSettings /></Link>
-                    </div>
-                </DropdownItem>
-            </DropdownMenu>
-        </Dropdown>
-    );
+                        <Settings className="h-4 w-4"/>
+                    </Button>
+                </CardFooter>
+            </Card>
+        </PopoverContent>
+    </Popover>);
 }
 
-export default Notification;
+export default InAppNotification;

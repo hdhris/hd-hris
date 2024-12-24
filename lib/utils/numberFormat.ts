@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from 'date-fns'
 
-function formatTimeAgo(date: Date): string {
+function formatTimeAgo(date: Date | string): string {
   return formatDistanceToNow(date, { addSuffix: true })
 }
 

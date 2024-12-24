@@ -258,9 +258,9 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                             <DatePicker
                                 variant="bordered"
                                 radius="sm"
-                                classNames={DateStyle}
+                                // classNames={DateStyle}
                                 {...field}
-                                size={size}
+                                // size={size}
                                 {...(item.config as DatePickerProps)}
                                 value={field.value && dayjs(field.value).isValid() ? parseAbsolute(dayjs(field.value).toISOString(),"UTC") : null}
                                 id={item.name}

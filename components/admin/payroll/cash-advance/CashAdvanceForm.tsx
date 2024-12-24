@@ -150,14 +150,14 @@ function CashAdvanceForm({ isOpen, onClose, cashAdvance, mutate, onApproval}: Ca
                         <div className="flex gap-2 ms-auto">
                             <Button
                                 isLoading={isSubmitting}
-                                onClick={() => onApprovalBtn(cashAdvance?.id, "rejected")}
+                                onPress={() => onApprovalBtn(cashAdvance?.id, "rejected")}
                                 {...uniformStyle({ color: "danger" })}
                             >
                                 Reject
                             </Button>
                             <Button
                                 isLoading={isSubmitting}
-                                onClick={() => onApprovalBtn(cashAdvance?.id, "approved")}
+                                onPress={() => onApprovalBtn(cashAdvance?.id, "approved")}
                                 className="text-white"
                                 {...uniformStyle({ color: "success" })}
                             >

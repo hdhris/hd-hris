@@ -295,8 +295,8 @@ const SalaryData = () => {
                         subHeading={`Salary for ${btnFocusThisSem ? "this" : "last"} sem`}
                         classNames={{heading: "text-3xl"}}
                         endContent={<ButtonGroup radius="sm" variant="ghost">
-                            <Button color="primary" variant={btnFocusLastSem ? "flat" : "light"} onClick={handleBtnFocusLastSem}>Last Sem</Button>
-                            <Button color="primary" variant={btnFocusThisSem ? "flat" : "light"} onClick={handleBtnFocusThisSem}>This Sem</Button>
+                            <Button color="primary" variant={btnFocusLastSem ? "flat" : "light"} onPress={handleBtnFocusLastSem}>Last Sem</Button>
+                            <Button color="primary" variant={btnFocusThisSem ? "flat" : "light"} onPress={handleBtnFocusThisSem}>This Sem</Button>
                         </ButtonGroup>}>
         <AreaChart data={data} w="100%" h={500} style={options}/>
     </BorderCard>);

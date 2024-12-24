@@ -133,7 +133,7 @@ export default function ProfileForm() {
                                 Upload new picture
                             </Button>
                             <Button size='sm' radius='sm' isDisabled={uploadingProgress.status === 'Uploading'}
-                                    color='danger' onClick={handleRemovePhoto}>
+                                    color='danger' onPress={handleRemovePhoto}>
                                 Remove
                             </Button>
                         </div>

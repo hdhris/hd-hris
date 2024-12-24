@@ -1,7 +1,7 @@
 'use client'
-import React, {ReactNode, useEffect, useState} from 'react';
+import React, {ReactNode, useEffect, useMemo, useRef, useState} from 'react';
 import {cn, NavbarItem} from "@nextui-org/react";
-import {PiSignature, PiSignatureBold, PiUsersThree} from "react-icons/pi";
+import {PiSignatureBold, PiUsersThree} from "react-icons/pi";
 import {RxDashboard} from "react-icons/rx";
 import {FiClock} from "react-icons/fi";
 import {LuBadgeCheck, LuFileWarning, LuHeartHandshake, LuPersonStanding, LuPlane, LuTicket} from "react-icons/lu";
@@ -11,16 +11,21 @@ import SideBarItem from "@/components/sidebar/SideBarItem";
 import SideBar from "@/components/sidebar/SideBar";
 import NavBar from "@/components/navbar/NavBar";
 import UserMenu from "@/components/dropdown/UserMenu";
-import Notification from '@/components/functions/notifications/Notification'
+import InAppNotification from '@/components/functions/notifications/Notification'
 import {LiaUsersSolid} from "react-icons/lia";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
-import { useModulePath } from '../../hooks/privilege-hook';
+import {useModulePath} from '../../hooks/privilege-hook';
+import toast, {Toaster} from "react-hot-toast";
+import {useNotification} from "@/services/queries";
+import {SystemNotification} from "@/types/notifications/notification-types";
+import {isEqual} from "lodash";
 
 function RootLayout({children}: { children: ReactNode }) {
+
     // Use a function to lazily initialize the state
     const isClient = useIsClient();
-    const { isModuleAuthorized } = useModulePath();
+    const {isModuleAuthorized} = useModulePath();
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
         if (typeof window !== "undefined") {
             // Check localStorage for the initial value if on the client side
@@ -102,9 +107,30 @@ function RootLayout({children}: { children: ReactNode }) {
 
 
 const NavContent = () => {
+    const {data, isLoading} = useNotification();
+    const currentData = useRef<SystemNotification | null | undefined>(null);
+    const unreadCount = data?.notifications.filter((n) => !n.is_read).length ?? 0
+
+    useEffect(() => {
+        if (!isEqual(currentData.current, data)) {
+            currentData.current = data;
+            if(unreadCount > 0){
+                toast.success("You have " + unreadCount + " new notifications", {
+                    duration: 5000,
+                    icon: "🔔",
+
+                });
+                const audio = new Audio("/notification-sounds/Pikachu notification.mp3")
+                audio.load()
+                audio.play()
+            }
+
+
+        }
+    }, [unreadCount, data]);
     return (<NavbarItem className="flex gap-10 items-center justify-center mt-2">
         {/*<AuditSignatories/>*/}
-        <Notification/>
+        <InAppNotification data={data!} isLoading={isLoading}/>
         <UserMenu/>
     </NavbarItem>);
 };

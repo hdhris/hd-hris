@@ -67,7 +67,7 @@ function EnrollEmployeeForm({plan_id, onOpen, isOpen}: EnrollEmployeeProps) {
                         isOpen={isOpen}
                         onOpen={onOpen}
                         footer={<div className="w-full flex justify-end">
-                            <Button isLoading={isSubmitting} {...uniformStyle()} onClick={handleEnroll}>
+                            <Button isLoading={isSubmitting} {...uniformStyle()} onPress={handleEnroll}>
                                 Enroll
                             </Button>
                         </div>}

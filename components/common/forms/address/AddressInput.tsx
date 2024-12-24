@@ -5,6 +5,7 @@ import {Selection} from "./../FormFields";
 import {SelectionItems} from "@/components/common/forms/types/SelectionProp";
 import {Autocomplete, AutocompleteItem} from "@nextui-org/react";
 import {FormLabel} from "@/components/ui/form";
+import {upperCase} from "lodash";
 
 const AddressInput: React.FC = () => {
     const {control, setValue, getValues} = useFormContext();
@@ -130,6 +131,7 @@ const AddressInput: React.FC = () => {
             name="addr_region"
             defaultValue={selectedRegion}
             render={({field}) => (<Autocomplete
+                {...field}
                 name="addr_region"
                 disableSelectorIconRotation
                 defaultItems={regions}
@@ -162,17 +164,18 @@ const AddressInput: React.FC = () => {
             control={control}
             name="addr_province"
             defaultValue={selectedProvince}
-            render={({field}) => (<Autocomplete
+            render={({field}) => (
+                <Autocomplete
                     {...field}
                     disableSelectorIconRotation
-                    defaultItems={regions}
+                    defaultItems={provinces}
                     label={<FormLabel>
                         Province
                         <span className="text-destructive text-medium"> *</span>
                     </FormLabel>}
                     labelPlacement="outside"
                     placeholder="Select Province"
-                    items={provinces}
+                    // items={provinces}
                     isDisabled={provinces.length === 0}
                     color="primary"
                     variant="bordered"
@@ -187,7 +190,35 @@ const AddressInput: React.FC = () => {
                     }}
                 >
                     {(item) => <AutocompleteItem key={item.key}>{item.label}</AutocompleteItem>}
-                </Autocomplete>)}
+                </Autocomplete>
+
+                // <Autocomplete
+                //     name="addr_region"
+                //     disableSelectorIconRotation
+                //     defaultItems={provinces}
+                //     label={<FormLabel>
+                //         Region
+                //         <span className="text-destructive text-medium"> *</span>
+                //     </FormLabel>}
+                //     labelPlacement="outside"
+                //     placeholder="Select Region"
+                //     aria-label="Region"
+                //     color="primary"
+                //     variant="bordered"
+                //     radius="sm"
+                //     onSelectionChange={(e) => {
+                //         const regionKey = String(e);
+                //         setSelectedRegion(regionKey);
+                //         setValue("addr_province", regionKey);
+                //         field.onChange(regionKey);
+                //         setValue("addr_province", "", {shouldValidate: true});
+                //         setValue("addr_municipal", "", {shouldValidate: true});
+                //         setValue("addr_baranggay", "", {shouldValidate: true});
+                //     }}
+                // >
+                //     {(item) => <AutocompleteItem key={item.key}>{item.label}</AutocompleteItem>}
+                // </Autocomplete>
+            )}
         />
 
         {/* City/Municipality Selection */}
@@ -198,14 +229,14 @@ const AddressInput: React.FC = () => {
             render={({field}) => (<Autocomplete
                     {...field}
                     disableSelectorIconRotation
-                    defaultItems={regions}
+                    defaultItems={cities}
                     label={<FormLabel>
                         City/Municipality
                         <span className="text-destructive text-medium"> *</span>
                     </FormLabel>}
                     labelPlacement="outside"
                     placeholder="Select City/Municipality"
-                    items={cities}
+                    // items={cities}
                     isDisabled={cities.length === 0}
                     color="primary"
                     variant="bordered"
@@ -246,16 +277,17 @@ const AddressInput: React.FC = () => {
             defaultValue={selectedBarangay}
             render={({field}) => (
                 <Autocomplete
+                    {...field}
                     name="addr_baranggay"
                     disableSelectorIconRotation
-                    defaultItems={regions}
+                    defaultItems={barangays.map((item) => ({key: item.key, label: upperCase(item.label)}))}
                     label={<FormLabel>
                         Barangay
                         <span className="text-destructive text-medium"> *</span>
                     </FormLabel>}
                     labelPlacement="outside"
                     placeholder="Select Barangay"
-                    items={barangays}
+                    // items={barangays}
                     isDisabled={barangays.length === 0}
                     color="primary"
                     variant="bordered"

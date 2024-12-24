@@ -160,7 +160,7 @@ export default function ProgramTable() {
         <Button
           {...uniformStyle()}
           className="w-fit"
-          onClick={() =>
+          onPress={() =>
             router.push("/trainings-and-seminars/empprograms/manage")
           }
         >
