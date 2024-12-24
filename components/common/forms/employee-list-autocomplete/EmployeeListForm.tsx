@@ -49,6 +49,8 @@ function EmployeeListForm({employees, isLoading, onSelected}: EmployeeListForm) 
                             }
                             isClearable
                             isRequired
+                            isVirtualized
+                            itemHeight={60}
                             radius="sm"
                             placeholder="Select an Employee"
                             defaultItems={user}

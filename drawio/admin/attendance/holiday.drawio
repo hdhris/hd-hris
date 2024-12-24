@@ -1,0 +1,212 @@
+<mxfile host="65bd71144e">
+    <diagram id="IesqqhG2GaXuw48i1_r9" name="Page-1">
+        <mxGraphModel dx="2080" dy="1188" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="HUMAN RESOURCE MANAGER" style="swimlane;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1">
+                    <mxGeometry x="258" y="80" width="232" height="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="" style="ellipse;fillColor=strokeColor;" vertex="1" parent="2">
+                    <mxGeometry x="101" y="59" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="" style="ellipse;html=1;shape=endState;fillColor=strokeColor;" vertex="1" parent="2">
+                    <mxGeometry x="136" y="544" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="INPUT NAME" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="2">
+                    <mxGeometry x="56" y="158" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="2" source="14" target="18">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="INPUT DATE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="2">
+                    <mxGeometry x="56" y="334" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="SELECT HOLIDAY TYPE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="2">
+                    <mxGeometry x="56" y="422" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="SYSTEM" style="swimlane;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1">
+                    <mxGeometry x="491" y="80" width="379" height="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="DISPLAY HOLIDAY FORM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="3">
+                    <mxGeometry x="129.5" y="44" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="IS NAME BLANK?" style="rhombus;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="3">
+                    <mxGeometry x="149.5" y="213" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="YES" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="3">
+                    <mxGeometry x="103" y="227" width="42" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="NO" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="3">
+                    <mxGeometry x="229.5" y="227" width="36" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="DISPLAY &quot;HOLIDAY CREATED SUCCESFULLY&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="3">
+                    <mxGeometry x="116" y="419" width="147" height="66" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;rounded=0;" edge="1" parent="1" source="4" target="6">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="8">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="8" target="10">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="8">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="14">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="771" y="333"/>
+                            <mxPoint x="771" y="387"/>
+                            <mxPoint x="374" y="387"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="18" target="20">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="20" target="5">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="HUMAN RESOURCE MANAGER" style="swimlane;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1">
+                    <mxGeometry x="977" y="80" width="270" height="682" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="" style="ellipse;fillColor=strokeColor;" vertex="1" parent="23">
+                    <mxGeometry x="120" y="68" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" value="SELECT HOLIDAY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="23">
+                    <mxGeometry x="68" y="169" width="134" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="64" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="23" source="52" target="63">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="52" value="INPUT NAME" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="23">
+                    <mxGeometry x="81" y="389" width="108" height="54" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="" style="ellipse;html=1;shape=endState;fillColor=strokeColor;" vertex="1" parent="23">
+                    <mxGeometry x="120" y="609" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="63" value="SELECT HOLIDAY TYPE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="23">
+                    <mxGeometry x="75" y="490" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="SYSTEM" style="swimlane;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1">
+                    <mxGeometry x="1248" y="80" width="379" height="682" as="geometry"/>
+                </mxCell>
+                <mxCell id="44" value="DISPLAY HOLIDAY&lt;br&gt;LISTS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="30">
+                    <mxGeometry x="129.5" y="53" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="49" value="IS HOLIDAY&lt;br&gt;FROM GOOGLE?" style="rhombus;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="30">
+                    <mxGeometry x="126.5" y="218" width="126" height="126" as="geometry"/>
+                </mxCell>
+                <mxCell id="65" value="DISPLAY &quot;HOLIDAY EDITED SUCCESSFULLY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="30">
+                    <mxGeometry x="119" y="485" width="141" height="70.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="45" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="24" target="44">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="44" target="43">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="43" target="49">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="49" target="52">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1541" y="361"/>
+                            <mxPoint x="1541" y="438"/>
+                            <mxPoint x="1112" y="438"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="66" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="63" target="65">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="65" target="25">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="68" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="49" target="63">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1021" y="361"/>
+                            <mxPoint x="1021" y="600"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="69" value="NO" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="1337" y="335" width="36" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="70" value="YES" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="1499" y="333" width="42" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="82" value="HUMAN RESOURCE MANAGER" style="swimlane;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1">
+                    <mxGeometry x="1680" y="80" width="270" height="682" as="geometry"/>
+                </mxCell>
+                <mxCell id="83" value="" style="ellipse;fillColor=strokeColor;" vertex="1" parent="82">
+                    <mxGeometry x="120" y="68" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="84" value="SELECT HOLIDAY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="82">
+                    <mxGeometry x="68" y="169" width="134" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="87" value="" style="ellipse;html=1;shape=endState;fillColor=strokeColor;" vertex="1" parent="82">
+                    <mxGeometry x="120" y="609" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="95" value="CLICK DELETE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="82">
+                    <mxGeometry x="75" y="505.25" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="89" value="SYSTEM" style="swimlane;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1">
+                    <mxGeometry x="1951" y="80" width="379" height="682" as="geometry"/>
+                </mxCell>
+                <mxCell id="90" value="DISPLAY HOLIDAY&lt;br&gt;LISTS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="89">
+                    <mxGeometry x="129.5" y="53" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="101" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="89" source="91" target="100">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="91" value="IS HOLIDAY&lt;br&gt;FROM GOOGLE?" style="rhombus;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="89">
+                    <mxGeometry x="126.5" y="229" width="126" height="126" as="geometry"/>
+                </mxCell>
+                <mxCell id="92" value="DISPLAY &quot;HOLIDAY DELETED SUCCESSFULLY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="89">
+                    <mxGeometry x="119" y="500" width="141" height="70.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="100" value="DISPLAY DELETE BUTTON" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="89">
+                    <mxGeometry x="220" y="377" width="133" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="105" value="NO" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="89">
+                    <mxGeometry x="252.5" y="267" width="36" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="93" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="83" target="90">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="94" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="90" target="84">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="99" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="84" target="91">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="102" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="100" target="95">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="103" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="95" target="92">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="104" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="92" target="87">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="106" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="91" target="87">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1724" y="372"/>
+                            <mxPoint x="1724" y="704"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="107" value="YES" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="2032" y="347" width="42" height="26" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
