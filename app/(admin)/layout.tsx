@@ -32,6 +32,7 @@ import NumberFlow from "@number-flow/react";
 import {Chip} from "@nextui-org/chip";
 import {GiMagicBroom} from "react-icons/gi";
 import {isObjectEmpty} from "@/helper/objects/isObjectEmpty";
+import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 
 
 function RootLayout({children}: { children: ReactNode }) {
@@ -139,12 +140,15 @@ const NavContent = () => {
     const currentData = useRef<SystemNotification | undefined>();
     const unreadCount = data?.notifications.filter((n) => !n.is_read).length ?? 0
 
+    useEffect(() => {
+        onOpen()
+    }, [onOpen]);
 
     useEffect(() => {
         // Compare the previous and current data
         if (currentData.current === undefined) {
             currentData.current = data;
-            onOpen()
+            
         }
 
         if (!isEqual(currentData.current, data)) {
@@ -245,11 +249,8 @@ const Welcome = ({data, isOpen, onOpenChange}: {data: SystemNotification, isOpen
 
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="danger" variant="light" onPress={onClose}>
-                        Close
-                    </Button>
-                    <Button color="primary" onPress={onClose}>
-                        Action
+                    <Button onPress={onClose} {...uniformStyle()}>
+                        Ok
                     </Button>
                 </ModalFooter>
             </>)}
