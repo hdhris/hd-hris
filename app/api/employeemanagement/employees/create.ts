@@ -128,14 +128,31 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
 
         // Step 5: Create schedules if provided
         if (Array.isArray(schedules) && schedules.length > 0) {
-          await tx.dim_schedules.createMany({
-            data: schedules.map((schedule: any) => ({
+          const currentDate = new Date();
+          
+          // First, fetch the complete batch schedule details
+          const batchSchedule = await tx.ref_batch_schedules.findUnique({
+            where: {
+              id: Number(schedules[0].batch_id),
+              deleted_at: null
+            }
+          });
+        
+          // Create schedule with batch schedule details
+          await tx.dim_schedules.create({
+            data: {
               employee_id: newEmployee.id,
-              batch_id: Number(schedule.batch_id),
-              days_json: schedule.days_json,
-              created_at: new Date(),
-              updated_at: new Date(),
-            })),
+              batch_id: Number(schedules[0].batch_id),
+              days_json: schedules[0].days_json,
+              created_at: currentDate,
+              updated_at: currentDate,
+              start_date: currentDate,
+              end_date: null,
+              // Include time details from batch schedule
+              clock_in: batchSchedule?.clock_in || null,
+              clock_out: batchSchedule?.clock_out || null,
+              break_min: batchSchedule?.break_min || 0
+            }
           });
         }
 

@@ -5,7 +5,10 @@ import prisma from "@/prisma/prisma";
 import { Prisma } from "@prisma/client";
 import { getBaseEmployeeInclude } from "./utils";
 
-export async function getEmployeeById(id: number, daysJson?: Record<string, boolean>) {
+export async function getEmployeeById(
+  id: number,
+  daysJson?: Record<string, boolean>
+) {
   const employee = await prisma.trans_employees.findFirst({
     where: {
       id,
@@ -49,27 +52,30 @@ export async function getEmployeeById(id: number, daysJson?: Record<string, bool
   // Get privilege data directly from acl_user_access_control
   const privilegeData = await prisma.acl_user_access_control.findFirst({
     where: {
-      employee_id: id
+      employee_id: id,
+      sys_privileges: {deleted_at: null},
     },
     select: {
       privilege_id: true,
+
       sys_privileges: {
         select: {
           id: true,
-          name: true
-        }
-      }
-    }
+          name: true,
+        },
+      },
+    },
   });
 
   const employeeWithAccount = {
     ...employee,
     userAccount,
-    acl_user_access_control: privilegeData ? {
-      privilege_id: privilegeData.privilege_id.toString(), 
-      sys_privileges: privilegeData.sys_privileges
-    } : null
-  
+    acl_user_access_control: privilegeData
+      ? {
+          privilege_id: privilegeData.privilege_id.toString(),
+          sys_privileges: privilegeData.sys_privileges,
+        }
+      : null,
   };
 
   return employeeWithAccount;
@@ -95,10 +101,7 @@ export async function getAllEmployees(daysJson?: Record<string, boolean>) {
 
   const employees = await prisma.trans_employees.findMany({
     where: whereCondition,
-    orderBy: [
-      { updated_at: 'desc' },
-      { created_at: 'desc' }
-    ],
+    orderBy: [{ updated_at: "desc" }, { created_at: "desc" }],
     include: getBaseEmployeeInclude(),
   });
 

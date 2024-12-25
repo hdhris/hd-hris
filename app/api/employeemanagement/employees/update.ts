@@ -111,14 +111,53 @@ async function updateEmployee(id: number, employeeData: any) {
 
         // Step 5: Create schedules if provided
         if (Array.isArray(schedules) && schedules.length > 0) {
-          await tx.dim_schedules.createMany({
-            data: schedules.map((schedule: any) => ({
-              employee_id: updatedEmployee.id,
-              batch_id: Number(schedule.batch_id),
-              days_json: schedule.days_json,
-              created_at: new Date(),
-              updated_at: new Date(),
-            })),
+          const currentDate = new Date();
+        
+          // First, fetch the complete batch schedule details
+          const batchSchedule = await tx.ref_batch_schedules.findUnique({
+            where: {
+              id: Number(schedules[0].batch_id),
+              deleted_at: null
+            }
+          });
+        
+          // Check if employee has any existing schedule
+          const existingSchedule = await tx.dim_schedules.findFirst({
+            where: {
+              employee_id: id,
+              deleted_at: null
+            }
+          });
+        
+          if (existingSchedule) {
+            // If there's an existing schedule, end it
+            await tx.dim_schedules.updateMany({
+              where: {
+                employee_id: id,
+                end_date: null,
+                deleted_at: null
+              },
+              data: {
+                end_date: currentDate,
+                updated_at: currentDate
+              }
+            });
+          }
+        
+          // Create new schedule with batch schedule details
+          await tx.dim_schedules.create({
+            data: {
+              employee_id: id,
+              batch_id: Number(schedules[0].batch_id),
+              days_json: schedules[0].days_json,
+              created_at: currentDate,
+              updated_at: currentDate,
+              start_date: currentDate, // Always set start_date for new schedules
+              end_date: null,
+              clock_in: batchSchedule?.clock_in || null,
+              clock_out: batchSchedule?.clock_out || null,
+              break_min: batchSchedule?.break_min || 0
+            }
           });
         }
 

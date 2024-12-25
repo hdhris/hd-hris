@@ -19,6 +19,7 @@ import EditScheduleSelection from "@/components/admin/employeescomponent/update/
 import EditAccountForm from "@/components/admin/employeescomponent/update/EditAccount";
 import { mutate } from "swr";
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import ScheduleHistory from "@/components/admin/employeescomponent/update/ScheduleHistory";
 
 type EmployeeFields = keyof EmployeeFormData;
 
@@ -543,8 +544,11 @@ export default function EditEmployeePage({
                       <h3 className="text-lg font-medium my-2">
                         Work Schedule
                       </h3>
-                      <div className="space-y-2">
-                        <EditScheduleSelection />
+                      <div className="space-y-2 pb-6">
+                        <EditScheduleSelection employeeId={params.id} />
+                      </div>
+                      <div className="pt-2 border-t">
+                        <ScheduleHistory employeeId={params.id} />
                       </div>
                     </div>
                   </div>
