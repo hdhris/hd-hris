@@ -57,14 +57,14 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                         label="Date"
                         value={toGMT8(overtime.date).format("MMMM DD, YYYY")}
                     />
-                    <hr key={1} />
+                    <hr key={0} />
                     <ValueLabel
                         key={"clock_in"}
                         icon={<TbClockCheck />}
                         label="Clock In"
                         value={toGMT8(overtime.clock_in).format("hh:mm a")}
                     />
-                    <hr />
+                    <hr key={1}/>
                     <ValueLabel
                         key={"clock_out"}
                         icon={<TbClockX />}

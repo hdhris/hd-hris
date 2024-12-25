@@ -1,7 +1,7 @@
 "use client";
-import CashAdvanceForm from "@/components/admin/payroll/cash-advance/CashAdvanceForm";
+import ViewCashAdvance from "@/components/admin/payroll/cash-advance/ViewCashAdvance";
+import FileCashAdvance from "@/components/admin/payroll/cash-advance/FileCashAdvance";
 import UserMail from "@/components/common/avatar/user-info-mail";
-import Drawer from "@/components/common/Drawer";
 import { FilterItemsProps } from "@/components/common/filter/FilterItems";
 import SearchFilter from "@/components/common/filter/SearchFilter";
 import { SearchItemsProps } from "@/components/common/filter/SearchItems";
@@ -17,12 +17,10 @@ import { useQuery } from "@/services/queries";
 import { approvalStatusColorMap, ApprovalStatusType } from "@/types/attendance-time/OvertimeType";
 import { LoanRequest } from "@/types/payroll/cashAdvanceType";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
-import { Button, Chip, Tooltip, Avatar } from "@nextui-org/react";
+import { Button, Chip } from "@nextui-org/react";
 import axios from "axios";
+import { capitalize } from "lodash";
 import React, { useMemo, useState } from "react";
-import { FaCheckCircle } from "react-icons/fa";
-import { IoMdCloseCircle } from "react-icons/io";
-import { IoCloseSharp, IoCheckmarkSharp } from "react-icons/io5";
 
 function Page() {
     const { data, isLoading, mutate } = useQuery<LoanRequest[]>("/api/admin/payroll/cash-advance");
@@ -55,12 +53,11 @@ function Page() {
     SetNavEndContent(() => (
         <Button
             onPress={() => {
-                setSelectedLoan(null);
                 setshowAddCA(true);
             }}
             {...uniformStyle()}
         >
-            Add Advancement
+            File Advancement
         </Button>
     ));
 
@@ -87,15 +84,15 @@ function Page() {
                 classNames={{ td: "[&:nth-child(n):not(:nth-child(2))]:w-[160px]" }}
                 onRowAction={(key) => {
                     setSelectedLoan(loanMapByID?.get(Number(key)) || null);
-                    setshowAddCA(true);
                 }}
             />
-            <CashAdvanceForm
+            <ViewCashAdvance cashAdvance={selectedLoad} onClose={() => setSelectedLoan(null)} />
+            <FileCashAdvance
                 isOpen={showAddCA}
-                onClose={setshowAddCA}
-                cashAdvance={selectedLoad}
-                mutate={mutate}
-                onApproval={onApproval}
+                onClose={() => {
+                    mutate();
+                    setshowAddCA(false);
+                }}
             />
         </div>
     );
@@ -139,14 +136,14 @@ const filterConfig = [
     },
 ];
 
-function config(
-    onUpdate: (id: number, status: ApprovalStatusType) => void
-): TableConfigProps<LoanRequest> {
+function config(onUpdate: (id: number, status: ApprovalStatusType) => void): TableConfigProps<LoanRequest> {
     return {
         columns: [
             { uid: "request_date", name: "Request Date", sortable: true },
             { uid: "name", name: "Name", sortable: true },
             { uid: "amount_requested", name: "Requested", sortable: true },
+            { uid: "payment_method", name: "Payment Method", sortable: true },
+            { uid: "status", name: "Status", sortable: false },
             { uid: "amount_disbursed", name: "Disbursed", sortable: true },
             { uid: "amount_repaid", name: "Repaid", sortable: true },
             { uid: "action", name: "Action" },
@@ -166,6 +163,14 @@ function config(
                     return <p>{toGMT8(item.created_at).format("DD MMMM YYYY")}</p>;
                 case "amount_requested":
                     return <strong>{item.amount_requested}</strong>;
+                case "payment_method":
+                    return <p>{capitalize(item.payment_method)}</p>;
+                case "status":
+                    return (
+                        <Chip variant="flat" color={approvalStatusColorMap[item.status]}>
+                            {capitalize(item.status)}
+                        </Chip>
+                    );
                 case "amount_disbursed":
                     return item.trans_cash_advance_disbursements.length ? (
                         <p className="font-bold">{item.trans_cash_advance_disbursements[0]?.amount}</p>
@@ -183,65 +188,65 @@ function config(
                     ) : (
                         <p>N/A</p>
                     );
-                case "action":
-                    return item.status === "pending" ? (
-                        <div className="flex gap-1 items-center">
-                            <Button
-                                isIconOnly
-                                {...uniformStyle({ color: "danger",  variant: "flat"})} //  Fixed:  'variant' is specified more than once, so this usage will be overwritten.
-                                onPress={async () => {
-                                    await onUpdate(item.id, "rejected");
-                                }}
-                            >
-                                <IoCloseSharp className="size-5 text-danger-500" />
-                            </Button>
-                            <Button
-                                {...uniformStyle({ color: "success" })}
-                                startContent={<IoCheckmarkSharp className="size-5 text-white" />}
-                                className="text-white"
-                                onPress={async () => {
-                                    await onUpdate(item.id, "approved");
-                                }}
-                            >
-                                Approve
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className="flex justify-between w-36 items-center">
-                            <Chip
-                                startContent={
-                                    item.status === "approved" ? (
-                                        <FaCheckCircle size={18} />
-                                    ) : (
-                                        <IoMdCloseCircle size={18} />
-                                    )
-                                }
-                                variant="flat"
-                                color={approvalStatusColorMap[item.status]}
-                                className="capitalize"
-                            >
-                                {item.status}
-                            </Chip>
-                            {item.trans_employees_trans_cash_advances_approval_byTotrans_employees && (
-                                <Tooltip
-                                    className="pointer-events-auto"
-                                    content={getEmpFullName(
-                                        item.trans_employees_trans_cash_advances_approval_byTotrans_employees
-                                    )}
-                                >
-                                    <Avatar
-                                        isBordered
-                                        radius="full"
-                                        size="sm"
-                                        src={
-                                            item?.trans_employees_trans_cash_advances_approval_byTotrans_employees
-                                                ?.picture ?? ""
-                                        }
-                                    />
-                                </Tooltip>
-                            )}
-                        </div>
-                    );
+                // case "action":
+                //     return item.status === "pending" ? (
+                //         <div className="flex gap-1 items-center">
+                //             <Button
+                //                 isIconOnly
+                //                 {...uniformStyle({ color: "danger", variant: "flat" })} //  Fixed:  'variant' is specified more than once, so this usage will be overwritten.
+                //                 onPress={async () => {
+                //                     await onUpdate(item.id, "rejected");
+                //                 }}
+                //             >
+                //                 <IoCloseSharp className="size-5 text-danger-500" />
+                //             </Button>
+                //             <Button
+                //                 {...uniformStyle({ color: "success" })}
+                //                 startContent={<IoCheckmarkSharp className="size-5 text-white" />}
+                //                 className="text-white"
+                //                 onPress={async () => {
+                //                     await onUpdate(item.id, "approved");
+                //                 }}
+                //             >
+                //                 Approve
+                //             </Button>
+                //         </div>
+                //     ) : (
+                //         <div className="flex justify-between w-36 items-center">
+                //             <Chip
+                //                 startContent={
+                //                     item.status === "approved" ? (
+                //                         <FaCheckCircle size={18} />
+                //                     ) : (
+                //                         <IoMdCloseCircle size={18} />
+                //                     )
+                //                 }
+                //                 variant="flat"
+                //                 color={approvalStatusColorMap[item.status]}
+                //                 className="capitalize"
+                //             >
+                //                 {item.status}
+                //             </Chip>
+                //             {item.trans_employees_trans_cash_advances_approval_byTotrans_employees && (
+                //                 <Tooltip
+                //                     className="pointer-events-auto"
+                //                     content={getEmpFullName(
+                //                         item.trans_employees_trans_cash_advances_approval_byTotrans_employees
+                //                     )}
+                //                 >
+                //                     <Avatar
+                //                         isBordered
+                //                         radius="full"
+                //                         size="sm"
+                //                         src={
+                //                             item?.trans_employees_trans_cash_advances_approval_byTotrans_employees
+                //                                 ?.picture ?? ""
+                //                         }
+                //                     />
+                //                 </Tooltip>
+                //             )}
+                //         </div>
+                //     );
                 default:
                     return <></>;
             }

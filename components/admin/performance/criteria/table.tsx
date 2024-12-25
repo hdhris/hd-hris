@@ -32,7 +32,7 @@ const config: TableConfigProps<CriteriaDetail> = {
             case "type":
                 return (
                     <Chip color="primary" size="sm" variant="faded">
-                        {toUpper(item.ratings_json.type.replaceAll("-", " "))}
+                        {toUpper(item.type.replaceAll("-", " "))}
                     </Chip>
                 );
             case "status":

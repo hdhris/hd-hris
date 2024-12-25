@@ -29,18 +29,10 @@ export async function stageTable(
     employees: UserEmployee[];
     dataPH: PayslipPayhead[];
   },
-  // stage_two: {
-  //   cashToDisburse: CashToDisburse[];
-  //   cashToRepay: CashToRepay[];
-  //   benefitsPlansData: BenefitsPlanData[];
-  // },
   setStageMsg: (msg:string)=>void,
 ): Promise<PayslipData> {
   try {
-    // console.log(stage_one, stage_two);
-    // const { cashToDisburse, cashToRepay, benefitsPlansData } = stage_two.data.result;
     const { payrolls, employees, dataPH } = stage_one;
-    // const [stage_two, {attendanceLogs, batchSchedule, employeeSchedule, statusesByDate}] = await Promise.all([
     const [stage_two, {attendanceLogs, employeeSchedule, statusesByDate}] = await Promise.all([
       axios.post('/api/admin/payroll/payslip/get-unprocessed', { dateID: dateInfo.id, stageNumber: 2 }),
 
@@ -56,10 +48,7 @@ export async function stageTable(
     // Reuse employee schedule map for references below
     const { cashToDisburse, cashToRepay, benefitsPlansData } = convertToNumber({...stage_two.data.result});
     const employeeScheduleMap = new Map(employeeSchedule.map((es) => [es.employee_id!, es]));
-    // Reuse batch schedule map for references below
-    // const batchScheduleMap = new Map(batchSchedule.map((bs) => [bs.id, bs]));
 
-    // console.log("Preparing cash advances...");
     const cashDisburseMap = new Map(
       cashToDisburse.map((ctd) => [
         ctd.employee_id, // Key
@@ -89,7 +78,6 @@ export async function stageTable(
       ])
     );
 
-    // console.log("Preparing contributions...");
     const benefitDeductionMap = new Map(
         benefitsPlansData.map((bp) => [
         bp.ref_benefit_plans?.id,
@@ -121,7 +109,6 @@ export async function stageTable(
     );
 
     const amountRecordsMap = new Map(dataPH.map(dph=> [dph.id, new Map(dph.dim_payhead_specific_amounts.map(psa => [psa.employee_id, psa.amount]))]));
-    // console.log("Calculating some gross and deduction...");
     await Promise.all(
       employees.map(async (emp) => {
         // Define base variables for payroll calculations.
@@ -214,7 +201,6 @@ export async function stageTable(
     );
     
 
-    // return NextResponse.json(calculatedAmountList);
     // Insert calculated breakdowns into `trans_payhead_breakdowns` table.
     // console.log("Preparing breakdowns...");
     setStageMsg("Getting ready...");
