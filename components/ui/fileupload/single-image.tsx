@@ -53,7 +53,7 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
                 // in case an url is passed in, use it to display the image
                 return value;
             } else if (value) {
-                // in case a file is passed in, create a base64 url to display the image
+                // in case a file is passed in, upsert a base64 url to display the image
                 return URL.createObjectURL(value);
             }
             return null;

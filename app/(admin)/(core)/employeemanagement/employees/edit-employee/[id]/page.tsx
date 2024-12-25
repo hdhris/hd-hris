@@ -264,7 +264,7 @@ export default function EditEmployeePage({
           processCertificates(data.doctorateCertificates),
         ]);
 
-      // Prepare employee data - similar structure to create endpoint
+      // Prepare employee data - similar structure to upsert endpoint
       const employeeData = {
         // Basic Information
         prefix: data.prefix,
@@ -351,7 +351,7 @@ export default function EditEmployeePage({
         errorMessage = "Please check your internet connection and try again";
       } else if (axios.isAxiosError(error)) {
         errorMessage =
-          error.response?.data?.message || "Failed to create employee";
+          error.response?.data?.message || "Failed to upsert employee";
 
         if (error.code === "ECONNABORTED") {
           errorMessage = "Request timed out. Please try again";

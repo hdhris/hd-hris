@@ -4,6 +4,7 @@ import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {LeaveTypeForEmployee} from "@/types/leaves/LeaveTypes";
 import {Logger, LogLevel} from "@/lib/logger/Logger";
 import {Employee} from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
+
 export const dynamic = "force-dynamic";
 
 export async function GET() {
@@ -27,26 +28,22 @@ export async function GET() {
                 ref_departments: true, // Include department data
                 ref_employment_status: {
                     select: {
-                        id: true,
-                        name: true
+                        id: true, name: true
                     }
                 }
             },
         }), prisma.ref_leave_type_details.findMany({
             where: {
-                is_active: true,
-                trans_leave_types: {
+                is_active: true, trans_leave_types: {
                     some: {
                         deleted_at: null
                     }
                 }
             }, select: {
-                id: true,
-                name: true,
-                trans_leave_types: {
+                id: true, name: true, trans_leave_types: {
                     select: {
                         ref_employment_status: {
-                            select:{
+                            select: {
                                 name: true,
                             }
                         }
@@ -58,19 +55,20 @@ export async function GET() {
         ])
 
         // Format the employee data for a user-friendly response
-        const data: Employee[] = employees.filter(item => {
-            return item.resignation_json === null && item.termination_json === null
-        }).map((emp: any) => {
-            return {
-                id: emp.id,
-                name: getEmpFullName(emp), // Full name formatted from employee data
-                picture: emp.picture, department: emp.ref_departments?.name ?? "No department", // Default to "No department" if department name is missing
-                employment_status: emp.ref_employment_status
-            };
-        });
+        const data: Employee[] = employees
+                .filter(item => {
+                return Array.isArray(item.resignation_json) && item.resignation_json.length === 0  && Array.isArray(item.termination_json)  && item.termination_json.length === 0
+            })
+            .map((emp: any) => {
+                return {
+                    id: emp.id, name: getEmpFullName(emp), // Full name formatted from employee data
+                    picture: emp.picture, department: emp.ref_departments?.name ?? "No department", // Default to "No department" if department name is missing
+                    employment_status: emp.ref_employment_status
+                };
+            });
 
-        const leave_type_available: LeaveTypeForEmployee[] =  leave_types.map(item => {
-            return{
+        const leave_type_available: LeaveTypeForEmployee[] = leave_types.map(item => {
+            return {
                 id: item.id,
                 name: item.name,
                 applicable_to_employee_types: item.trans_leave_types.map(item => item.ref_employment_status.name)

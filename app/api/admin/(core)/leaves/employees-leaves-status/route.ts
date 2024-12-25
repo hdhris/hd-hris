@@ -79,7 +79,7 @@ export async function GET() {
     // console.log("Leave Balance: ", emp.find((emp) => emp.id)?.dim_leave_balances)
 
     const employees: EmployeeLeave[] = emp.filter(item => {
-        return item.resignation_json === null && item.termination_json === null
+         return Array.isArray(item.resignation_json) && item.resignation_json.length === 0  && Array.isArray(item.termination_json)  && item.termination_json.length === 0
     }).map((emp: any) => ({
         id: emp.id,
         name: getEmpFullName(emp),

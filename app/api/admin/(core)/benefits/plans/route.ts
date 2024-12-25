@@ -58,7 +58,7 @@ export async function GET(request: Request) {
             perPage,
             whereCondition: {deleted_at: null},
             include: {ref_benefits_contribution_table: true},
-            orderBy: {created_at: "asc"},
+            orderBy: {updated_at: "desc"},
         });
 
         // Fetch employee enrollments and employee details concurrently

@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Could not create leave. Duration is 0.",
+                    message: "Could not upsert leave. Duration is 0.",
                 },
                 { status: 400 }
             );

@@ -66,8 +66,6 @@ function useFilter<T>(items: T[]) {
         // console.log("Filtered Items: ", filteredUsers);
         return filteredUsers;
     }, [items, filter]);
-    console.log("Data Filtered: ", items)
-    console.log("Filtered: ", filteredItems)
     return {filteredItems, onFilterChange, filter};
 }
 

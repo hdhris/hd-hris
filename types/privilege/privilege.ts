@@ -96,7 +96,7 @@ export const static_privilege: UserPrivileges = {
                 { name: "Read Holidays", paths: ["/attendance-time/holidays", "/api/admin/attendance-time/holidays"] },
                 {
                     name: "Write Holidays",
-                    paths: ["/api/admin/attendance-time/holidays/create", "/api/admin/attendance-time/holidays/delete"],
+                    paths: ["/api/admin/attendance-time/holidays/upsert", "/api/admin/attendance-time/holidays/delete"],
                 },
             ],
         },
@@ -108,7 +108,7 @@ export const static_privilege: UserPrivileges = {
             name: "Incident",
             privileges: [
                 { name: "Read Incidents", paths: ["/incident", "/api/admin/incident/reports"] },
-                { name: "File Incidents", paths: ["/api/admin/incident/update", "/api/admin/incident/create"] },
+                { name: "File Incidents", paths: ["/api/admin/incident/update", "/api/admin/incident/upsert"] },
             ],
         },
         {
@@ -149,7 +149,7 @@ export const static_privilege: UserPrivileges = {
                 {
                     name: "Write Privileges",
                     paths: [
-                        "/api/admin/privilege/create-accessibility",
+                        "/api/admin/privilege/upsert-accessibility",
                         "/api/admin/privilege/update-accessibility",
                         "/api/admin/privilege/delete-accessibility",
                     ],

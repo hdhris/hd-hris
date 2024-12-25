@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     } catch (error) {
         console.log("Error: ", error);
         return NextResponse.json({
-            success: false, message: "Unable to create a comment. Try again.",
+            success: false, message: "Unable to upsert a comment. Try again.",
         }, {status: 500});
     }
 }

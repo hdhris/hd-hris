@@ -29,7 +29,7 @@ export async function updateEmployeeAccount(
         throw new Error("Employee not found");
       }
 
-      // Step 2: Find or create user
+      // Step 2: Find or upsert user
       let user = await tx.trans_users.findFirst({
         where: { email: employee.email },
       });

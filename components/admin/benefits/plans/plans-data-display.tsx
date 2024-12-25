@@ -17,16 +17,19 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
 import React, {Key, useCallback, useEffect, useMemo, useState} from 'react';
 import {BenefitPlan, BenefitPlanPaginated} from "@/types/benefits/plans/plansTypes";
-import BenefitPlanForm from "@/components/admin/benefits/plans/form/benefit-plan-form";
 import {BenefitTable} from "@/components/admin/benefits/plans/table-form-config/table-config";
 import {FilterItems} from "@/components/admin/leaves/table-config/approval-tables-configuration";
 import Typography, {boldSurroundedText, Section} from "@/components/common/typography/Typography";
 import {Alert} from "@nextui-org/alert";
 import PlanForm from "@/components/admin/benefits/plans/form/plan-form";
+import EditPlanForm from "@/components/admin/benefits/plans/form/edit-plan";
+import EnrollEmployeeForm from "@/components/admin/benefits/plans/form/enroll-employee-form";
+import {LuCircleFadingPlus} from "react-icons/lu";
 
 function PlansDataDisplay() {
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [onEditAndDelete, setOnEditAndDelete] = useState<boolean>(false)
+    const [isOpenEnrolled, setIsOpenEnrolled] = useState<boolean>(false)
     const [planModal, setPlanModal] = useState<BenefitPlan>()
     const {toast} = useToast()
     const onOpenDrawer = useCallback(() => {
@@ -153,29 +156,31 @@ function PlansDataDisplay() {
                 deleteProps={{
                     // isLoading: loading,
                     isDisabled: planModal.employees_avails?.length! > 0,
-                    children: <Alert color="danger" description={`Couldn't Delete Plan. There are ${planModal.employees_avails?.length} employees assigned to this plan.`}/>
+                    children: planModal.employees_avails?.length! > 0 && <Alert color="danger"
+                                                                                description={`Couldn't Delete Plan. There are ${planModal.employees_avails?.length} employees assigned to this plan.`}/>
                 }}
                 onClose={() => setPlanModal(undefined)}
                 body={<>
                     <div>
                         <Section title="Plan Rates" subtitle="Employee and employer rates based on salary."
                                  className="ms-0 mb-2"/>
-                        {planModal.benefitAdditionalDetails?.some(item => item.contributionType === "others") ? <CardTable
-                            data={[{
-                                label: "Salary Bracket",
-                                value: <div className="flex justify-between"><Typography className="font-semibold">Employee
-                                    Rate</Typography><Typography className="font-semibold">Employer Rate</Typography>
-                                </div>
-                            }, ...planModal.benefitAdditionalDetails?.sort((a, b) => a.minSalary! - b.minSalary!).map((item) => ({
-                                label: `${numberWithCommas(Number(item.minSalary)!)} - ${numberWithCommas(Number(item.maxSalary)!)}`,
-                                value: <div className="flex justify-between px-10">
-                                    <Typography>{item.employeeContribution}%</Typography><Typography>{item.employerContribution}%</Typography>
-                                </div>
-                            }))!]}
-                        /> : <CardTable
+                        {planModal.benefitAdditionalDetails?.some(item => item.contributionType === "others") ?
+                            <CardTable
                                 data={[{
                                     label: "Salary Bracket",
-                                    value: "Amount"
+                                    value: <div className="flex justify-between"><Typography className="font-semibold">Employee
+                                        Rate</Typography><Typography className="font-semibold">Employer
+                                        Rate</Typography>
+                                    </div>
+                                }, ...planModal.benefitAdditionalDetails?.sort((a, b) => a.minSalary! - b.minSalary!).map((item) => ({
+                                    label: `${numberWithCommas(Number(item.minSalary)!)} - ${numberWithCommas(Number(item.maxSalary)!)}`,
+                                    value: <div className="flex justify-between px-10">
+                                        <Typography>{item.employeeContribution}%</Typography><Typography>{item.employerContribution}%</Typography>
+                                    </div>
+                                }))!]}
+                            /> : <CardTable
+                                data={[{
+                                    label: "Salary Bracket", value: "Amount"
                                 }, ...planModal.benefitAdditionalDetails?.sort((a, b) => a.minSalary! - b.minSalary!).map((item) => ({
                                     label: `${numberWithCommas(Number(item.minSalary)!)} - ${numberWithCommas(Number(item.maxSalary)!)}`,
                                     value: item.actualContributionAmount
@@ -186,40 +191,24 @@ function PlansDataDisplay() {
                         <Section title="Additional Rates" subtitle="Additional employee and employer rates."
                                  className="ms-0 mb-2"/>
                         <CardTable
-                            data={planModal.benefitAdditionalDetails?.flatMap((item) => ([
-                                {
-                                    label: "Minimum MSC",
-                                    value: numberWithCommas(Number(item.minMSC)!),
-                                },
-                                {
-                                    label: "Maximum MSC",
-                                    value: numberWithCommas(Number(item.maxMSC)!),
-                                },
-                                {
-                                    label: "MSC Step",
-                                    value: numberWithCommas(Number(item.mscStep)!),
-                                },
-                                {
-                                    label: "EC Threshold",
-                                    value: numberWithCommas(Number(item.ecThreshold)!),
-                                },
-                                {
-                                    label: "Minimum EC",
-                                    value: `${item.ecLowRate ?? 0}`, // Assuming this is a percentage
-                                },
-                                {
-                                    label: "Maximum EC",
-                                    value: `${item.ecHighRate ?? 0}`, // Assuming this is a percentage
-                                },
-                                {
-                                    label: "WISP Threshold",
-                                    value: numberWithCommas(Number(item.wispThreshold)!),
-                                },
-                            ]))!}
+                            data={planModal.benefitAdditionalDetails?.flatMap((item) => ([{
+                                label: "Minimum MSC", value: numberWithCommas(Number(item.minMSC)!),
+                            }, {
+                                label: "Maximum MSC", value: numberWithCommas(Number(item.maxMSC)!),
+                            }, {
+                                label: "MSC Step", value: numberWithCommas(Number(item.mscStep)!),
+                            }, {
+                                label: "EC Threshold", value: numberWithCommas(Number(item.ecThreshold)!),
+                            }, {
+                                label: "Minimum EC", value: `${item.ecLowRate ?? 0}`, // Assuming this is a percentage
+                            }, {
+                                label: "Maximum EC", value: `${item.ecHighRate ?? 0}`, // Assuming this is a percentage
+                            }, {
+                                label: "WISP Threshold", value: numberWithCommas(Number(item.wispThreshold)!),
+                            },]))!}
                         />
 
-                    </div>
-                    }
+                    </div>}
                     <Divider className="my-2"/>
                     <div>
                         <Section title="Coverage Details" subtitle="Plan coverage details."
@@ -233,8 +222,7 @@ function PlansDataDisplay() {
                             />
                         </div>
                     </div>
-                </>
-                }
+                </>}
                 header={<div
                     className="flex flex-col gap-2 h-auto bg-pretty bg-opacity-50 backdrop-blur-sm w-full">
                     <div className="flex items-center gap-5 w-fit">
@@ -264,7 +252,17 @@ function PlansDataDisplay() {
                 // onDanger={
                 //     <div className="w-full">{props.current_employees.length > 0 && <Chip className="bg-[#338EF7] text-white min-w-full" radius="sm" startContent={<IoMdInformationCircle className={icon_size_sm}/>}>Note. This leave cannot be edited or deleted.</Chip>}</div>
                 // }
+
+                footer={<>
+                    <Section className="ms-0 mt-4 border-1 rounded p-4" title="Enroll Employee"
+                             subtitle="Enroll employee to this plan">
+                        <Button {...uniformStyle()} onPress={() => setIsOpenEnrolled(true)}>Enroll</Button>
+                    </Section>
+                    <Divider className="mt-4"/>
+                </>}
             />}
+
+
             // onListDisplay={(data) => {
             //     return (<BorderCard>{data.name}</BorderCard>)
             // }}
@@ -316,10 +314,9 @@ function PlansDataDisplay() {
             // }}
         />
 
-
-        {/*{planModal && <PlanDetails {...planModal!}/>}*/}
-        <PlanForm plan={planModal} title="Update Plan" description="Update an existing plan"
-                         onOpen={setOnEditAndDelete} isOpen={onEditAndDelete}/>
+        <EnrollEmployeeForm plan_id={planModal?.id!} isOpen={isOpenEnrolled} onOpen={setIsOpenEnrolled}/>
+        <EditPlanForm plan={planModal} title="Update Plan" description="Update an existing plan"
+                      onOpen={setOnEditAndDelete} isOpen={onEditAndDelete}/>
 
     </section>);
 }

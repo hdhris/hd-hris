@@ -6,6 +6,7 @@ import {useFieldArray, useForm} from "react-hook-form";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {
+    EditPlanFormOthersSchema,
     PlanFormFixedAmountSchema, PlanFormOthersSchema, PlanFormPercentageSchema, PlanFormSchema
 } from "@/helper/zodValidation/benefits/plans/plan-form-schema";
 import {Autocomplete, AutocompleteItem, Button, SharedSelection} from "@nextui-org/react";
@@ -24,7 +25,7 @@ interface BenefitPlanFormProps extends DrawerFormTypes {
     plan?: BenefitPlan
 }
 
-function PlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) {
+function EditPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) {
     const {mutate} = useSWRConfig()
     const [contributionType, setContributionType] = useState<"fixed" | "percentage" | "others">("fixed")
     const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -52,7 +53,7 @@ function PlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) 
             message: "Effective date must be less than  to Expiration date", path: ["expiration_date"]
         }) : PlanFormSchema.omit({
         min_salary: true, max_salary: true
-    }).merge(PlanFormOthersSchema).refine(data => new Date(data.effective_date) < new Date(data.expiration_date), {
+    }).merge(EditPlanFormOthersSchema).refine(data => new Date(data.effective_date) < new Date(data.expiration_date), {
         message: "Effective date must be less than to Expiration date", path: ["expiration_date"]
     })
     const form = useForm<z.infer<typeof plan_conditional_schema>>({
@@ -101,6 +102,7 @@ function PlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) 
 
             const tiers = contributionType === "others"
                 ? benefitDetails.map(item => ({
+                    id: item.id,
                     employer_contribution: item.employerContribution || 0,
                     employee_contribution: item.employeeContribution || 0,
                     min_salary: item.minSalary || 0,
@@ -311,13 +313,11 @@ function PlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) 
         let data: {}
 
         if(plan){
-
             // const benefit = plan.benefitAdditionalDetails?.filter()
             data = {
                 ...values,
                 id: plan.id,
                 deduction_id: plan.deduction_id,
-                contribution_table_id: plan.benefitAdditionalDetails?.map(id => id.id)
             }
         } else {
             data = {
@@ -397,6 +397,7 @@ function PlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) 
                             {...uniformStyle()}
                             type="button"
                             onPress={() => append({
+                                id: plan?.benefitAdditionalDetails?.reduce((acc, cur) => cur.id > acc ? cur.id : acc, 0)! + 1,
                                 employer_contribution: 0,
                                 employee_contribution: 0,
                                 max_salary: 0,
@@ -425,4 +426,4 @@ function PlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) 
     );
 }
 
-export default PlanForm;
+export default EditPlanForm;

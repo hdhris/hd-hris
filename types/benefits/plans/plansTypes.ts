@@ -22,7 +22,6 @@ export interface BenefitPlan {
     id: number;
     name: string;
     type: string;
-    eligibilityCriteria: string;
     coverageDetails: string;
     effectiveDate: string;
     expirationDate: string;
