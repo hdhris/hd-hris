@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 // Updated employmentstatus schema for validation
 const employmentstatusSchema = z.object({
   name: z.string().min(1).max(45),
+  appraisal_interval: z.number().int().min(1),
 });
 
 async function checkDuplicateName(name: string, excludeId?: number) {

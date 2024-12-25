@@ -25,6 +25,7 @@ interface EditEmploymentStatusProps {
 
 const EmploymentStatusSchema = z.object({
   name: z.string().min(1, "Salary grade name is required"),
+  appraisal_interval: z.coerce.number().int().min(1),
 });
 
 type SalaryGradeFormData = z.infer<typeof EmploymentStatusSchema>;
@@ -43,6 +44,7 @@ const EditSalaryGrade: React.FC<EditEmploymentStatusProps> = ({
     resolver: zodResolver(EmploymentStatusSchema),
     defaultValues: {
       name: "",
+      appraisal_interval: 4,
     },
     mode: "onChange",
   });
@@ -53,6 +55,7 @@ const EditSalaryGrade: React.FC<EditEmploymentStatusProps> = ({
       if (emp) {
         methods.reset({
           name: emp.name,
+          appraisal_interval: emp.appraisal_interval,
         });
       } else {
         toast({
@@ -72,6 +75,14 @@ const EditSalaryGrade: React.FC<EditEmploymentStatusProps> = ({
       placeholder: "Enter employment status name",
       isRequired: true,
       description: "Employment status should only contain letters.",
+    },
+    {
+      name: "appraisal_interval",
+      label: "Appraisal Interval",
+      type: "number",
+      placeholder: "Enter appraisal interval",
+      isRequired: true,
+      description: "Appraisal interval should be a number.",
     },
   ];
 

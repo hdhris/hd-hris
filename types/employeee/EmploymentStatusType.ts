@@ -1,6 +1,7 @@
 import { Decimal } from "@prisma/client/runtime/library";
 
 export type EmploymentStatus = {
+  appraisal_interval: number | undefined;
 id: number;
   name: string;
   employeeCount: number;
