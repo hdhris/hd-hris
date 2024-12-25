@@ -59,7 +59,7 @@ type CancelUnavailabilityType = {
     id: number;
     date: string;
     reason: string;
-    canceled_by: UserEmployee
+    canceled_by: UserEmployee;
 };
 export function cancelUnavailability({
     entry,
@@ -75,11 +75,11 @@ export function cancelUnavailability({
                   canceled_at: toGMT8(date).toISOString(),
                   canceled_reason: reason,
                   canceled_by: {
-                    id: canceled_by.id,
-                    name: `${canceled_by.last_name}, ${canceled_by.first_name} ${canceled_by.middle_name}`,
-                    position: canceled_by.ref_job_classes.name,
-                    picture: canceled_by.picture,
-                },
+                      id: canceled_by.id,
+                      name: `${canceled_by.last_name}, ${canceled_by.first_name} ${canceled_by.middle_name}`,
+                      position: canceled_by.ref_job_classes.name,
+                      picture: canceled_by.picture,
+                  },
               }
             : e
     );
@@ -90,7 +90,10 @@ type GetActiveUnavailabilityType = {
     currentDate?: string; // Optional: allows overriding the current date for testing
 };
 
-export function getActiveUnavailability({ entry, currentDate }: GetActiveUnavailabilityType): UnavaliableStatusJSON | null{
+export function getActiveUnavailability({
+    entry,
+    currentDate,
+}: GetActiveUnavailabilityType): UnavaliableStatusJSON | null {
     const today = toGMT8(currentDate);
 
     const foundEntry = entry?.find((e) => {
@@ -98,18 +101,18 @@ export function getActiveUnavailability({ entry, currentDate }: GetActiveUnavail
         const endDate = e.end_date ? toGMT8(e.end_date) : null;
 
         // Check if the entry is active and not canceled
-        return (
-            startDate.isSameOrBefore(today) &&
-            (!endDate || endDate.isSameOrAfter(today)) &&
-            e.canceled_at === null
-        );
-    })
+        return startDate.isSameOrBefore(today) && (!endDate || endDate.isSameOrAfter(today)) && e.canceled_at === null;
+    });
 
-    return foundEntry ?? null
+    return foundEntry ?? null;
 }
 
 export function isEmployeeAvailable(
-    employee: EmployeeAll,
+    employee: {
+        suspension_json: UnavaliableStatusJSON[];
+        resignation_json: UnavaliableStatusJSON[];
+        termination_json: UnavaliableStatusJSON[];
+    },
     find?: "suspension" | "resignation" | "termination"
 ): boolean {
     const today = toGMT8();

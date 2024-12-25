@@ -29,7 +29,7 @@ export default function Page() {
     });
     const [date, setDate] = useState(parseDate(toGMT8().format("YYYY-MM-DD")));
     const [datedApi, setDatedApi] = useState(
-        `/api/admin/attendance-time/records/api?start=${toGMT8().format("YYYY-MM-DD")}&end=${toGMT8().format(
+        `/api/admin/attendance-time/records?start=${toGMT8().format("YYYY-MM-DD")}&end=${toGMT8().format(
             "YYYY-MM-DD"
         )}`
     );
@@ -222,7 +222,7 @@ export default function Page() {
                         setDatedApi(
                             (() => {
                                 const selectedDate = toGMT8(value.toString()).format("YYYY-MM-DD");
-                                return `/api/admin/attendance-time/records/api?start=${selectedDate}&end=${selectedDate}`;
+                                return `/api/admin/attendance-time/records?start=${selectedDate}&end=${selectedDate}`;
                             })()
                         );
                         mutateSchedule();
