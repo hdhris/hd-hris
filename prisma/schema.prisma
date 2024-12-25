@@ -392,7 +392,7 @@ model trans_cash_advance_disbursements {
   cash_advance_id               Int?
   disbursed_at                  DateTime?                       @db.Timestamp(6)
   amount                        Decimal?                        @db.Decimal(10, 2)
-  payment_method                String?                         @db.VarChar(10)
+  payment_method                String                          @db.VarChar(10)
   repayment_status              String?                         @db.VarChar(10)
   created_at                    DateTime                        @db.Timestamp(6)
   updated_at                    DateTime                        @db.Timestamp(6)
@@ -428,15 +428,13 @@ model trans_cash_advances {
   amount_requested                                                 Decimal?                           @db.Decimal(10, 2)
   reason                                                           String?
   status                                                           String?                            @db.VarChar(10)
-  approval_by                                                      Int?
-  approval_at                                                      DateTime?                          @db.Timestamp(6)
-  comment                                                          String?
   created_at                                                       DateTime                           @db.Timestamp(6)
   updated_at                                                       DateTime                           @db.Timestamp(6)
   deleted_at                                                       DateTime?                          @db.Timestamp(6)
+  payment_method                                                   String                             @default("earning")
+  evaluators                                                       Json?
   trans_cash_advance_disbursements                                 trans_cash_advance_disbursements[]
   trans_employees_trans_cash_advances_employee_idTotrans_employees trans_employees?                   @relation("trans_cash_advances_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advances_trans_employees_1")
-  trans_employees_trans_cash_advances_approval_byTotrans_employees trans_employees?                   @relation("trans_cash_advances_approval_byTotrans_employees", fields: [approval_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advances_trans_employees_2")
 
   @@index([deleted_at])
 }
@@ -495,7 +493,6 @@ model trans_employees {
   sys_variables                                                          sys_variables?
   trans_attendance_details                                               trans_attendance_details[]
   trans_cash_advances_trans_cash_advances_employee_idTotrans_employees   trans_cash_advances[]          @relation("trans_cash_advances_employee_idTotrans_employees")
-  trans_cash_advances_trans_cash_advances_approval_byTotrans_employees   trans_cash_advances[]          @relation("trans_cash_advances_approval_byTotrans_employees")
   ref_departments                                                        ref_departments?               @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_department1")
   ref_job_classes                                                        ref_job_classes?               @relation(fields: [job_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_job_class1")
   ref_addresses_trans_employees_addr_regionToref_addresses               ref_addresses?                 @relation("trans_employees_addr_regionToref_addresses", fields: [addr_region], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses1")

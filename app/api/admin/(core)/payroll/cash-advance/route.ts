@@ -21,9 +21,6 @@ export async function GET(req: NextRequest) {
             trans_employees_trans_cash_advances_employee_idTotrans_employees : {
                 ...emp_rev_include.employee_detail,
             },
-            trans_employees_trans_cash_advances_approval_byTotrans_employees : {
-                ...emp_rev_include.minor_detail,
-            }
         }
     })
     return NextResponse.json(cash_advance);
