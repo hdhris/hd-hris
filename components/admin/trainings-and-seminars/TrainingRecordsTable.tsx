@@ -1,160 +1,195 @@
-// components/admin/trainings-and-seminars/TrainingRecordsTable.tsx
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@/services/queries";
-import { EnrolledRecord } from "./types";
+import { TrainingRecord } from "./types";
+import { Avatar, Button, Chip } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
-import { Chip } from "@nextui-org/react";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-import UserMail from "@/components/common/avatar/user-info-mail";
-import { getEmpFullName } from "@/lib/utils/nameFormatter";
+import ViewTrainingRecord from "./ViewTrainingRecord";
+import ManageRecord from "./ManageRecords";
+import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 
-export default function TrainingRecordsTable() {
-  const { data: records = [], isLoading } = useQuery<EnrolledRecord[]>(
+const TrainingRecordsTable: React.FC = () => {
+  const {
+    data: records = [],
+    isLoading,
+    mutate,
+  } = useQuery<TrainingRecord[]>(
     "/api/admin/trainings-and-seminars/records/list"
   );
+  const [selectedRecord, setSelectedRecord] = useState<TrainingRecord | null>(
+    null
+  );
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  const config = {
+  const handleRecordUpdated = async () => {
+    try {
+      await mutate();
+    } catch (error) {
+      console.error("Error updating record data:", error);
+    }
+  };
+
+  // Set the create button in the navigation
+  SetNavEndContent(() => (
+    <div className="flex items-center gap-4">
+      <Button color="primary" onPress={() => setIsCreateOpen(true)}>
+        Create Record
+      </Button>
+    </div>
+  ));
+
+  const handleOnSelected = (key: React.Key) => {
+    const selected = records?.find((item) => item.id === Number(key));
+    setSelectedRecord(selected ?? null);
+  };
+
+  const searchKeys: Array<keyof TrainingRecord> = [
+    "dim_training_participants",
+    "dim_training_schedules",
+  ];
+
+  const TableConfigurations = {
     columns: [
-      { uid: "employee", name: "Employee", sortable: true },
+      { uid: "participant", name: "Participant", sortable: true },
       { uid: "program", name: "Program", sortable: true },
-      { uid: "date", name: "Date", sortable: true },
-      { uid: "instructor", name: "Instructor", sortable: true },
-      { uid: "status", name: "Status", sortable: true },
-      { uid: "feedback", name: "Feedback", sortable: false },
+      { uid: "schedule", name: "Schedule", sortable: true },
+      { uid: "rating", name: "Rating", sortable: true },
     ],
-    rowCell: (record: EnrolledRecord, columnKey: React.Key) => {
-      const key = columnKey as string;
-      const defaultElement = <div>-</div>;
-
-      switch (key) {
-        case "employee":
+    rowCell: (record: TrainingRecord, columnKey: React.Key) => {
+      switch (columnKey) {
+        case "participant":
           return (
-            <UserMail
-              name={getEmpFullName(record.trans_employees)}
-              email={record.trans_employees.email}
-              picture={record.trans_employees.picture || ""} // Add default empty string
-              description={record.trans_employees.ref_departments?.name || "No Department"}
-            />
+            <div className="flex items-center gap-4">
+              <Avatar
+                src={
+                  record.dim_training_participants?.trans_employees?.picture ||
+                  ""
+                }
+                alt={`${
+                  record.dim_training_participants?.trans_employees
+                    ?.first_name || "N/A"
+                } ${
+                  record.dim_training_participants?.trans_employees
+                    ?.last_name || "N/A"
+                }`}
+              />
+              <div>
+                <p className="font-medium">
+                  {`${
+                    record.dim_training_participants?.trans_employees
+                      ?.first_name || "N/A"
+                  } ${
+                    record.dim_training_participants?.trans_employees
+                      ?.last_name || "N/A"
+                  }`}
+                </p>
+                <p className="text-small text-gray-500">
+                  {record.dim_training_participants?.trans_employees
+                    ?.ref_departments?.name || "N/A"}
+                </p>
+              </div>
+            </div>
           );
-
         case "program":
           return (
             <div>
-              <p className="font-medium">{record.ref_training_programs.name}</p>
-              <p className="text-small text-gray-500">
-                {record.ref_training_programs.location}
+              <p className="font-medium">
+                {record.dim_training_schedules?.ref_training_programs?.name ||
+                  "N/A"}
               </p>
-              <Chip
-                color={record.ref_training_programs.type === "programs" ? "primary" : "secondary"}
-                variant="flat"
-                size="sm"
-              >
-                {record.ref_training_programs.type}
+              <Chip color="primary" variant="flat" size="sm">
+                {record.dim_training_schedules?.ref_training_programs?.type ||
+                  "N/A"}
               </Chip>
             </div>
           );
-
-        case "date":
+        case "schedule":
           return (
-            <div className="text-small">
-              <p>Start: {toGMT8(record.ref_training_programs.start_date).format("MMM DD, YYYY")}</p>
-              <p>End: {toGMT8(record.ref_training_programs.end_date).format("MMM DD, YYYY")}</p>
-              <p className="text-gray-500">Duration: {record.ref_training_programs.hour_duration} hours</p>
-            </div>
+            <p>
+              {record.dim_training_schedules?.session_timestamp
+                ? toGMT8(
+                    record.dim_training_schedules.session_timestamp
+                  ).format("MMM DD, YYYY hh:mm A")
+                : "N/A"}
+            </p>
           );
-
-        case "instructor":
-          return <p>{record.instructor_name}</p>;
-
-        case "status":
-          return (
-            <div className="flex flex-col gap-1">
-              <Chip
-                color={getStatusColor(record.status)}
-                variant="flat"
-              >
-                {record.status}
-              </Chip>
-              <Chip
-                color={record.ref_training_programs.is_active ? "success" : "danger"}
-                size="sm"
-                variant="flat"
-              >
-                {record.ref_training_programs.is_active ? "Active" : "Inactive"}
-              </Chip>
-            </div>
+        case "rating":
+          return record.rating ? (
+            <Chip color="primary" variant="flat">
+              {record.rating}/5
+            </Chip>
+          ) : (
+            <Chip color="warning" variant="flat">
+              Not Rated
+            </Chip>
           );
-
-        case "feedback":
-          return (
-            <div className="max-w-xs truncate" title={record.feedback || ""}>
-              <p>{record.feedback || "No feedback"}</p>
-            </div>
-          );
-
         default:
-          return defaultElement;
+          return <div>-</div>;
       }
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "completed":
-        return "success";
-      case "ongoing":
-        return "primary";
-      case "enrolled":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
-
-  const filterItems = [
-    {
-      category: "Status",
-      filtered: ["enrolled", "ongoing", "completed"].map(status => ({
-        key: "status",
-        value: status,
-        name: status.charAt(0).toUpperCase() + status.slice(1),
-        uid: status,
-      })),
     },
+  };
+
+  const FilterItems = [
     {
       category: "Type",
-      filtered: ["programs", "seminars"].map(type => ({
-        key: "ref_training_programs.type",
-        value: type,
-        name: type.charAt(0).toUpperCase() + type.slice(1),
-        uid: type,
-      })),
-    }
+      filtered: Array.from(
+        new Set(
+          records.map(
+            (r) => r.dim_training_schedules?.ref_training_programs?.type
+          )
+        )
+      )
+        .filter(Boolean)
+        .map((type) => ({
+          key: "dim_training_schedules.ref_training_programs.type",
+          value: type || "",
+          name: type || "",
+          uid: type || "",
+        })),
+    },
   ];
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-[calc(100vh-150px)] overflow-hidden">
       <DataDisplay
         defaultDisplay="table"
         title="Training Records"
         data={records}
-        isLoading={isLoading}
         filterProps={{
-          filterItems,
+          filterItems: FilterItems,
         }}
+        isLoading={isLoading}
         onTableDisplay={{
-          config,
-          layout: "auto"
+          config: TableConfigurations,
+          className: "h-full overflow-auto",
+          layout: "auto",
+          onRowAction: handleOnSelected,
+        }}
+        paginationProps={{
+          data_length: records.length,
         }}
         searchProps={{
-          searchingItemKey: [
-            ["trans_employees", "first_name"],
-            ["trans_employees", "last_name"],
-            ["ref_training_programs", "name"]
-          ]
+          searchingItemKey: searchKeys,
         }}
+        onView={
+          selectedRecord && (
+            <ViewTrainingRecord
+              record={selectedRecord}
+              onClose={() => setSelectedRecord(null)}
+              onRecordUpdated={handleRecordUpdated}
+            />
+          )
+        }
+      />
+
+      <ManageRecord
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        onUpdated={handleRecordUpdated}
       />
     </div>
   );
-}
+};
+
+export default TrainingRecordsTable;

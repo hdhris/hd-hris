@@ -13,6 +13,7 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 import ManageSchedule from "./ManageSchedule";
 import axios from "axios";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
+import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 
 export default function ScheduleTable() {
   const {
@@ -22,6 +23,7 @@ export default function ScheduleTable() {
   } = useQuery<Schedule[]>("/api/admin/trainings-and-seminars/schedules/list");
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number>();
 
   const config: TableConfigProps<Schedule> = {
@@ -103,6 +105,16 @@ export default function ScheduleTable() {
       });
     }
   };
+  SetNavEndContent(() => (
+    <div className="flex items-center gap-4">
+      <Button
+        color="primary"
+        onPress={() => setIsCreateOpen(true)}
+      >
+        Create Schedule
+      </Button>
+    </div>
+  ));
 
   return (
     <div className="h-full flex flex-col">
@@ -115,15 +127,6 @@ export default function ScheduleTable() {
           items={schedules}
           setResults={setFilteredSchedules}
         />
-        <Button
-          color="primary"
-          onPress={() => {
-            setSelectedId(undefined);
-            setIsOpen(true);
-          }}
-        >
-          Create Schedule
-        </Button>
       </div>
 
       <TableData
@@ -134,9 +137,9 @@ export default function ScheduleTable() {
       />
 
       <ManageSchedule
-        isOpen={isOpen}
+        isOpen={isCreateOpen}
         onClose={() => {
-          setIsOpen(false);
+          setIsCreateOpen(false);
           setSelectedId(undefined);
         }}
         scheduleId={selectedId}

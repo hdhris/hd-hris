@@ -3,31 +3,30 @@ import prisma from "@/prisma/prisma";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id") ? Number(searchParams.get("id")) : null;
-
-    const programs = await prisma.ref_training_programs.findMany({
+    const schedules = await prisma.dim_training_schedules.findMany({
       where: {
         deleted_at: null,
-        is_active: true,
       },
-      select: {
-        id: true,
-        name: true,
-        type: true,
+      include: {
+        ref_training_programs: true,
       },
     });
 
-    if (id) {
-      const schedule = await prisma.dim_training_schedules.findUnique({
-        where: { id },
-      });
+    const participants = await prisma.dim_training_participants.findMany({
+      where: {
+        terminated_at: null,
+      },
+      include: {
+        trans_employees: {
+          include: {
+            ref_departments: true,
+          },
+        },
+      },
+    });
 
-      return NextResponse.json({ schedule, programs });
-    }
-
-    return NextResponse.json({ programs });
+    return NextResponse.json({ schedules, participants });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch schedules and participants" }, { status: 500 });
   }
 }

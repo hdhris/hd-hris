@@ -42,7 +42,7 @@ export default function SeminarTable() {
     columns: [
       { uid: "name", name: "Seminar Name", sortable: true },
       { uid: "presenter", name: "Presenter", sortable: true },
-      { uid: "attendees", name: "Attendees", sortable: true },
+      { uid: "attendees", name: "Participant", sortable: true },
       { uid: "duration", name: "Duration", sortable: true },
       { uid: "dates", name: "Schedule", sortable: true },
       { uid: "status", name: "Status", sortable: true },
@@ -106,16 +106,16 @@ export default function SeminarTable() {
     },
   };
 
-  const filterItems: FilterItemsProps<Seminar>[] = [
-    {
-      filter: [
-        { label: "Active", value: true },
-        { label: "Inactive", value: false },
-      ],
-      key: "is_active",
-      sectionName: "Status",
-    },
-  ];
+    const filterItems: FilterItemsProps<Seminar>[] = [
+      {
+        filter: [
+          { label: "Active", value: true },
+          { label: "Inactive", value: false },
+        ],
+        key: "is_active",
+        sectionName: "Status",
+      },
+    ];
 
   const handleDelete = async (id: number, name: string) => {
     try {
