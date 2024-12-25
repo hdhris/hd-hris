@@ -18,6 +18,7 @@ model dim_employee_benefits {
   terminated_at               DateTime?                     @db.Timestamp(6)
   coverage_amount             Decimal                       @db.Decimal(10, 2)
   contribution_amount         Decimal                       @db.Decimal(10, 2)
+  benefit_audit               Json?
   ref_benefit_plans           ref_benefit_plans             @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_employee_benefits_ref_benefit_plan_1")
   trans_employees             trans_employees               @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_employee_benefits_trans_employees_2")
   trans_benefit_contributions trans_benefit_contributions[]
@@ -143,17 +144,23 @@ model fact_evaluation_breakdowns {
 }
 
 model fact_performance_evaluations {
-  id                         Int                          @id @default(autoincrement())
-  employee_id                Int?
-  eval_date_from             DateTime?                    @db.Date
-  eval_date_to               DateTime?                    @db.Date
-  total_rating               Decimal?                     @db.Decimal(10, 2)
-  max_rate                   Decimal?                     @db.Decimal(10, 2)
-  created_at                 DateTime                     @db.Timestamp(6)
-  updated_at                 DateTime                     @db.Timestamp(6)
-  deleted_at                 DateTime?                    @db.Timestamp(6)
-  fact_evaluation_breakdowns fact_evaluation_breakdowns[]
-  trans_employees            trans_employees?             @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_performance_evaluations_trans_employees_1")
+  id                                                                         Int                          @id @default(autoincrement())
+  employee_id                                                                Int
+  start_date                                                                 DateTime                     @db.Date
+  end_date                                                                   DateTime                     @db.Date
+  total_rating                                                               Decimal                      @default(0) @db.Decimal(10, 2)
+  max_rate                                                                   Decimal                      @db.Decimal(10, 2)
+  created_at                                                                 DateTime                     @default(now()) @db.Timestamp(6)
+  updated_at                                                                 DateTime                     @default(now()) @db.Timestamp(6)
+  deleted_at                                                                 DateTime?                    @db.Timestamp(6)
+  evaluated_by                                                               Int?
+  criteria_json                                                              Json
+  ratings_json                                                               Json?
+  employment_status                                                          Int?
+  fact_evaluation_breakdowns                                                 fact_evaluation_breakdowns[]
+  ref_employment_status                                                      ref_employment_status?       @relation(fields: [employment_status], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  trans_employees_fact_performance_evaluations_evaluated_byTotrans_employees trans_employees?             @relation("fact_performance_evaluations_evaluated_byTotrans_employees", fields: [evaluated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  trans_employees                                                            trans_employees              @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_performance_evaluations_trans_employees_1")
 
   @@index([deleted_at])
 }
@@ -443,73 +450,74 @@ model trans_cash_advances {
 }
 
 model trans_employees {
-  id                                                                     Int                            @id @default(autoincrement())
-  branch_id                                                              Int?
-  picture                                                                String?
-  first_name                                                             String                         @db.VarChar(45)
-  last_name                                                              String                         @db.VarChar(45)
-  middle_name                                                            String?                        @db.VarChar(45)
-  suffix                                                                 String?                        @db.VarChar(10)
-  extension                                                              String?                        @db.VarChar(10)
-  email                                                                  String?                        @unique(map: "unique_email") @db.VarChar(45)
-  contact_no                                                             String?                        @db.VarChar(45)
-  birthdate                                                              DateTime?                      @db.Date
-  gender                                                                 String?                        @db.VarChar(10)
-  job_id                                                                 Int?
-  department_id                                                          Int?
-  addr_region                                                            Int?
-  addr_province                                                          Int?
-  addr_municipal                                                         Int?
-  addr_baranggay                                                         Int?
-  hired_at                                                               DateTime?                      @db.Timestamp(6)
-  created_at                                                             DateTime?                      @db.Timestamp(6)
-  updated_at                                                             DateTime?                      @db.Timestamp(6)
-  deleted_at                                                             DateTime?                      @db.Timestamp(6)
-  statutory_no_json                                                      Json?                          @db.Json
-  family_bg_json                                                         Json?                          @db.Json
-  educational_bg_json                                                    Json?                          @db.Json
-  civil_service_eligibility_json                                         Json?                          @db.Json
-  work_experience_json                                                   Json?                          @db.Json
-  voluntary_organizations_json                                           Json?                          @db.Json
-  training_programs_attended_json                                        Json?                          @db.Json
-  government_issued_id_json                                              Json?                          @db.Json
-  prefix                                                                 String?                        @db.VarChar(10)
-  suspension_json                                                        Json?                          @db.Json
-  resignation_json                                                       Json?                          @db.Json
-  termination_json                                                       Json?                          @db.Json
-  employement_status_id                                                  Int
-  salary_grade_id                                                        Int?
-  acl_user_access_control                                                acl_user_access_control?
-  dim_employee_benefits                                                  dim_employee_benefits[]
-  dim_incident_reports_dim_incident_reports_employee_idTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
-  dim_incident_reports_dim_incident_reports_reported_byTotrans_employees dim_incident_reports[]         @relation("dim_incident_reports_reported_byTotrans_employees")
-  dim_leave_balances                                                     dim_leave_balances[]
-  dim_payhead_affecteds                                                  dim_payhead_affecteds[]
-  dim_payhead_specific_amounts                                           dim_payhead_specific_amounts[]
-  dim_schedules                                                          dim_schedules[]
-  dim_training_participants                                              dim_training_participants[]
-  fact_performance_evaluations                                           fact_performance_evaluations[]
-  log_attendances                                                        log_attendances[]
-  ref_training_programs                                                  ref_training_programs[]
-  sys_help_report_sys_help_report_reporter_idTotrans_employees           sys_help_report[]              @relation("sys_help_report_reporter_idTotrans_employees")
-  sys_help_report_sys_help_report_reviewer_idTotrans_employees           sys_help_report[]              @relation("sys_help_report_reviewer_idTotrans_employees")
-  sys_variables                                                          sys_variables?
-  trans_attendance_details                                               trans_attendance_details[]
-  trans_cash_advances_trans_cash_advances_employee_idTotrans_employees   trans_cash_advances[]          @relation("trans_cash_advances_employee_idTotrans_employees")
-  ref_departments                                                        ref_departments?               @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_department1")
-  ref_job_classes                                                        ref_job_classes?               @relation(fields: [job_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_job_class1")
-  ref_addresses_trans_employees_addr_regionToref_addresses               ref_addresses?                 @relation("trans_employees_addr_regionToref_addresses", fields: [addr_region], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses1")
-  ref_addresses_trans_employees_addr_provinceToref_addresses             ref_addresses?                 @relation("trans_employees_addr_provinceToref_addresses", fields: [addr_province], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses2")
-  ref_addresses_trans_employees_addr_municipalToref_addresses            ref_addresses?                 @relation("trans_employees_addr_municipalToref_addresses", fields: [addr_municipal], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses3")
-  ref_addresses_trans_employees_addr_baranggayToref_addresses            ref_addresses?                 @relation("trans_employees_addr_baranggayToref_addresses", fields: [addr_baranggay], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses4")
-  ref_branches                                                           ref_branches?                  @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_branch_7")
-  ref_employment_status                                                  ref_employment_status          @relation(fields: [employement_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ref_salary_grades                                                      ref_salary_grades?             @relation(fields: [salary_grade_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  trans_leaves_trans_leaves_employee_idTotrans_employees                 trans_leaves[]                 @relation("trans_leaves_employee_idTotrans_employees")
-  trans_leaves_trans_leaves_created_byTotrans_employees                  trans_leaves[]                 @relation("trans_leaves_created_byTotrans_employees")
-  trans_overtimes_trans_overtimes_employee_idTotrans_employees           trans_overtimes[]              @relation("trans_overtimes_employee_idTotrans_employees")
-  trans_overtimes_trans_overtimes_created_byTotrans_employees            trans_overtimes[]              @relation("trans_overtimes_created_byTotrans_employees")
-  trans_payrolls                                                         trans_payrolls[]
+  id                                                                                      Int                            @id @default(autoincrement())
+  branch_id                                                                               Int?
+  picture                                                                                 String?
+  first_name                                                                              String                         @db.VarChar(45)
+  last_name                                                                               String                         @db.VarChar(45)
+  middle_name                                                                             String?                        @db.VarChar(45)
+  suffix                                                                                  String?                        @db.VarChar(10)
+  extension                                                                               String?                        @db.VarChar(10)
+  email                                                                                   String?                        @unique(map: "unique_email") @db.VarChar(45)
+  contact_no                                                                              String?                        @db.VarChar(45)
+  birthdate                                                                               DateTime?                      @db.Date
+  gender                                                                                  String?                        @db.VarChar(10)
+  job_id                                                                                  Int?
+  department_id                                                                           Int?
+  addr_region                                                                             Int?
+  addr_province                                                                           Int?
+  addr_municipal                                                                          Int?
+  addr_baranggay                                                                          Int?
+  hired_at                                                                                DateTime?                      @db.Timestamp(6)
+  created_at                                                                              DateTime?                      @db.Timestamp(6)
+  updated_at                                                                              DateTime?                      @db.Timestamp(6)
+  deleted_at                                                                              DateTime?                      @db.Timestamp(6)
+  statutory_no_json                                                                       Json?                          @db.Json
+  family_bg_json                                                                          Json?                          @db.Json
+  educational_bg_json                                                                     Json?                          @db.Json
+  civil_service_eligibility_json                                                          Json?                          @db.Json
+  work_experience_json                                                                    Json?                          @db.Json
+  voluntary_organizations_json                                                            Json?                          @db.Json
+  training_programs_attended_json                                                         Json?                          @db.Json
+  government_issued_id_json                                                               Json?                          @db.Json
+  prefix                                                                                  String?                        @db.VarChar(10)
+  suspension_json                                                                         Json?                          @db.Json
+  resignation_json                                                                        Json?                          @db.Json
+  termination_json                                                                        Json?                          @db.Json
+  employement_status_id                                                                   Int
+  salary_grade_id                                                                         Int?
+  acl_user_access_control                                                                 acl_user_access_control?
+  dim_employee_benefits                                                                   dim_employee_benefits[]
+  dim_incident_reports_dim_incident_reports_employee_idTotrans_employees                  dim_incident_reports[]         @relation("dim_incident_reports_employee_idTotrans_employees")
+  dim_incident_reports_dim_incident_reports_reported_byTotrans_employees                  dim_incident_reports[]         @relation("dim_incident_reports_reported_byTotrans_employees")
+  dim_leave_balances                                                                      dim_leave_balances[]
+  dim_payhead_affecteds                                                                   dim_payhead_affecteds[]
+  dim_payhead_specific_amounts                                                            dim_payhead_specific_amounts[]
+  dim_schedules                                                                           dim_schedules[]
+  dim_training_participants                                                               dim_training_participants[]
+  fact_performance_evaluations_fact_performance_evaluations_evaluated_byTotrans_employees fact_performance_evaluations[] @relation("fact_performance_evaluations_evaluated_byTotrans_employees")
+  fact_performance_evaluations                                                            fact_performance_evaluations[]
+  log_attendances                                                                         log_attendances[]
+  ref_training_programs                                                                   ref_training_programs[]
+  sys_help_report_sys_help_report_reporter_idTotrans_employees                            sys_help_report[]              @relation("sys_help_report_reporter_idTotrans_employees")
+  sys_help_report_sys_help_report_reviewer_idTotrans_employees                            sys_help_report[]              @relation("sys_help_report_reviewer_idTotrans_employees")
+  sys_variables                                                                           sys_variables?
+  trans_attendance_details                                                                trans_attendance_details[]
+  trans_cash_advances_trans_cash_advances_employee_idTotrans_employees                    trans_cash_advances[]          @relation("trans_cash_advances_employee_idTotrans_employees")
+  ref_departments                                                                         ref_departments?               @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_department1")
+  ref_job_classes                                                                         ref_job_classes?               @relation(fields: [job_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_job_class1")
+  ref_addresses_trans_employees_addr_regionToref_addresses                                ref_addresses?                 @relation("trans_employees_addr_regionToref_addresses", fields: [addr_region], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses1")
+  ref_addresses_trans_employees_addr_provinceToref_addresses                              ref_addresses?                 @relation("trans_employees_addr_provinceToref_addresses", fields: [addr_province], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses2")
+  ref_addresses_trans_employees_addr_municipalToref_addresses                             ref_addresses?                 @relation("trans_employees_addr_municipalToref_addresses", fields: [addr_municipal], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses3")
+  ref_addresses_trans_employees_addr_baranggayToref_addresses                             ref_addresses?                 @relation("trans_employees_addr_baranggayToref_addresses", fields: [addr_baranggay], references: [address_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_addresses4")
+  ref_branches                                                                            ref_branches?                  @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_employees_ref_branch_7")
+  ref_employment_status                                                                   ref_employment_status          @relation(fields: [employement_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_salary_grades                                                                       ref_salary_grades?             @relation(fields: [salary_grade_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  trans_leaves_trans_leaves_employee_idTotrans_employees                                  trans_leaves[]                 @relation("trans_leaves_employee_idTotrans_employees")
+  trans_leaves_trans_leaves_created_byTotrans_employees                                   trans_leaves[]                 @relation("trans_leaves_created_byTotrans_employees")
+  trans_overtimes_trans_overtimes_employee_idTotrans_employees                            trans_overtimes[]              @relation("trans_overtimes_employee_idTotrans_employees")
+  trans_overtimes_trans_overtimes_created_byTotrans_employees                             trans_overtimes[]              @relation("trans_overtimes_created_byTotrans_employees")
+  trans_payrolls                                                                          trans_payrolls[]
 
   @@index([deleted_at])
 }
@@ -742,13 +750,15 @@ model dim_payhead_specific_amounts {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ref_employment_status {
-  id                Int                 @id @default(autoincrement())
-  created_at        DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
-  deleted_at        DateTime?           @db.Timestamptz(6)
-  name              String
-  trans_employees   trans_employees[]
-  trans_leave_types trans_leave_types[]
+  id                           Int                            @id @default(autoincrement())
+  created_at                   DateTime                       @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime                       @default(now()) @db.Timestamptz(6)
+  deleted_at                   DateTime?                      @db.Timestamptz(6)
+  name                         String
+  appraisal_interval           Int?                           @default(4)
+  fact_performance_evaluations fact_performance_evaluations[]
+  trans_employees              trans_employees[]
+  trans_leave_types            trans_leave_types[]
 
   @@index([deleted_at])
 }
