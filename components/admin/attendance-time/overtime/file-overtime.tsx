@@ -9,7 +9,7 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DateValue, Spinner } from "@nextui-org/react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getLocalTimeZone, today } from "@internationalized/date";
@@ -59,7 +59,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                     return clock_in.isSameOrAfter(startSched) && clock_in.isSameOrAfter(endSched);
                 },
                 {
-                    message: `Clock-in must not preceed ${
+                    message: `Clock-in must be after ${
                         selectedEmployee?.last_name
                     }'s shift schedule (${startSched.format("hh:mm a")} - ${endSched.format("hh:mm a")})`,
                     path: ["clock_in"],
@@ -74,7 +74,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                     return clock_out.isAfter(startSched) && clock_out.isAfter(endSched);
                 },
                 {
-                    message: `Clock-out must not preceed ${
+                    message: `Clock-out must be after ${
                         selectedEmployee?.last_name
                     }'s shift schedule (${startSched.format("hh:mm a")} - ${endSched.format("hh:mm a")})`,
                     path: ["clock_out"],
@@ -88,7 +88,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                     return clock_out.isAfter(clock_in);
                 },
                 {
-                    message: "Clock-out must not preceed clock-in",
+                    message: "Clock-out must be after clock-in",
                     path: ["clock_out"],
                 }
             );

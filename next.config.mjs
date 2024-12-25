@@ -69,6 +69,8 @@ const nextConfig = {
         // matching all API routes
         source: "/api/:path*",
         headers: [
+          { key: "Permissions-Policy", value: "autoplay=*" },
+          { key: "Permissions-Policy", value: "cross-origin-isolated=*" },
           { key: "Access-Control-Allow-Credentials", value: "true" },
           { key: "Access-Control-Allow-Origin", value: "*" },
           {

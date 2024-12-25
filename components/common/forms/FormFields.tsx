@@ -169,6 +169,7 @@ const RenderFormItem: FC<FormInputOptions> = ({item, control, size}) => {
                     {item.Component ? (item.Component(field)) : (<SwitchCase expression={item.type}>
                         <Case of="auto-complete">
                             <Autocomplete
+                                isVirtualized
                                 disableSelectorIconRotation
                                 placeholder={item.placeholder}
                                 {...(item.config as AutocompleteProps)}
