@@ -10,7 +10,7 @@ import {
   SelectItem,
   Input,
 } from "@nextui-org/react";
-import { TrainingRecord } from "../types";
+import { EnrolledRecord } from "../types";
 import dayjs from "dayjs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,10 +30,10 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface ViewRecordProps {
-  record: TrainingRecord;
+  record: EnrolledRecord;
   onClose: () => void;
   onRecordUpdated: () => Promise<void>;
-  sortedRecords: TrainingRecord[];
+  sortedRecords: EnrolledRecord[];
 }
 
 export default function ViewRecord({
@@ -54,7 +54,7 @@ export default function ViewRecord({
 
   const onSubmit = async (values: FormValues) => {
     try {
-      await axios.post("/api/admin/trainings-and-seminars/emprecords/update", {
+      await axios.post("/api/admin/trainings-and-seminars/empenrolled/update", {
         id: record.id,
         ...values,
       });
@@ -100,7 +100,7 @@ export default function ViewRecord({
               </Typography>
             }
             picture={record.trans_employees?.picture || ""}
-            email={record.trans_employees?.email || "No Email"} // Use the email from trans_employees
+            email={record.trans_employees?.email || "No Email"} 
           />
           <Chip
             size="md"

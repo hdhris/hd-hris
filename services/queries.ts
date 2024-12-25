@@ -69,7 +69,6 @@ export function useUser() {
         refreshInterval: 10000
     })
 }
-
 export function useLoginActivity() {
     return useSWR<LoginActivity[]>('/api/admin/security', fetcher, {
         revalidateOnFocus: true
@@ -97,8 +96,7 @@ export function useSuspendedEmployees() {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
-
-export function useformerEmployees() {
+export function useFormerEmployees() {
     return useSWR<Employee[]>('/api/employeemanagement/resigned-terminated', fetcher, {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
@@ -108,7 +106,7 @@ export function usePrivilegesData() {
     return useSWR<Privilege[]>('/api/employeemanagement/privileges', fetcher, {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
-}
+} 
 
 export function useDepartmentsData() {
     return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {//
@@ -163,7 +161,6 @@ export function useNewPayhead() {
 type ArgumentsTuple = readonly [any, ...unknown[]];
 type Arguments = string | ArgumentsTuple | Record<any, any> | null | undefined | false;
 type Key = Arguments | (() => Arguments);
-
 ////////////////////////////////////////////////////////////////////////////////////////
 
 export function useQuery<T>(key: Key, options?: SWRConfiguration<T>) {
@@ -213,7 +210,6 @@ export function useEmploymentStatusTypes() {
         revalidateOnFocus: true, keepPreviousData: true
     })
 }
-
 export function useSignatories() {
     return useSWR<SignatoryPath[]>('/api/admin/signatory', {
         revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000

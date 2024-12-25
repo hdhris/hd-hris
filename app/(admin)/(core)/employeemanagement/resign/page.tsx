@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { useformerEmployees } from "@/services/queries";
+import { useFormerEmployees } from "@/services/queries";
 import {
   Employee,
   EmployeeAll,
@@ -54,7 +54,7 @@ const EmptyState: React.FC = () => {
 
 const Page: React.FC = () => {
   const userInfo = useUserInfo();
-  const { data, mutate, isLoading } = useformerEmployees();
+  const { data, mutate, isLoading } = useFormerEmployees();
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null
   );

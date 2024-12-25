@@ -460,6 +460,7 @@ export default function AddEmployeePage() {
             <Button
               type="submit"
               color="primary"
+              isLoading={isSubmitting}
               disabled={isSubmitting}
               onPress={async (e) => {
                 //removing preventDefault
