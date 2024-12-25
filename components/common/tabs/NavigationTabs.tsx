@@ -34,7 +34,7 @@ function NavigationTabs({tabs, basePath, children}: NavigationTabsProps) {
 
     const filteredtabs: TabItem[] = useMemo(() => {
         return tabs.filter((tab) => isPathAuthorized(`/${basePath}/${tab.key}`));
-    }, [tabs, isPathAuthorized]);
+    }, [tabs, basePath, isPathAuthorized]);
 
     if (!filteredtabs.length) {
         return (

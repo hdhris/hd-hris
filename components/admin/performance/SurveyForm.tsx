@@ -102,7 +102,7 @@ const RenderTableChoices = ({
             const totalScore = Object.values(newDtails).reduce((sum, score) => sum + score, 0);
             handleResponseChange(id, totalScore, newDtails);
         };
-    }, [predefinedRate]);
+    }, [predefinedRate, handleResponseChange, id]);
 
     const setRate = (value: number) => {
         const totalScore = value * weight;

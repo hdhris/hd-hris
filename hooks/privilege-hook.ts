@@ -7,14 +7,9 @@ export const staticModulePaths = static_privilege?.modules.flatMap((module) =>
 );
 
 export function useModulePath() {
-    const [allPaths, setAllPaths] = useState<string[]>([]);
     const { data } = useSession();
 
-    useEffect(() => {
-        if (data?.user?.modulePaths) {
-            setAllPaths(data?.user?.modulePaths);
-        }
-    }, [data]);
+    const allPaths = useMemo(() => data?.user?.modulePaths || [], [data]);
 
     const isPathAuthorized = useMemo(() => {
         return (pathname: string) => {
@@ -34,11 +29,11 @@ export function useModulePath() {
 
     const isPrivilegeAuthorized = useMemo(() => {
         return (name: PrivilegeNames) => {
-            const paths = static_privilege.modules.find((module) =>
-                module.privileges.some((privilege) => privilege.name === name)
-            )?.privileges.find((privilege) => privilege.name === name)?.paths;
-            
-            return paths?.some((path) => allPaths.includes(path))
+            const paths = static_privilege.modules
+                .find((module) => module.privileges.some((privilege) => privilege.name === name))
+                ?.privileges.find((privilege) => privilege.name === name)?.paths;
+
+            return paths?.some((path) => allPaths.includes(path));
         };
     }, [static_privilege, allPaths]);
 
