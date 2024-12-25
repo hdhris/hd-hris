@@ -15,8 +15,8 @@ interface CardViewProps {
     footer?: ReactNode;
     onDelete?: () => void;
     onEdit?: () => void;
-    editProps?: ButtonProps
-    deleteProps?: ButtonProps
+    editProps?: ButtonProps & {children?: ReactNode}
+    deleteProps?: ButtonProps & {children?: ReactNode}
     onClose?: () => void
     onDanger?: ReactNode
     id?: string
@@ -27,14 +27,13 @@ function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, o
         <div
             className="flex justify-between sticky top-0 bg-[#FAFAFA] z-10 px-4 py-2 border-b border-default-400/50">
             {header}
-            {onClose && <Button onClick={onClose} isIconOnly variant="light" size="sm">
+            {onClose && <Button onPress={onClose} isIconOnly variant="light" size="sm">
                 <LuX className={cn(icon_size_sm, icon_color)}/>
             </Button>}
         </div>
         <div className="h-full overflow-hidden">
-            <ScrollShadow size={20} className="h-full overflow-y-auto p-4">
-                <div className="m-4">
-
+            <ScrollShadow size={20} className="h-full overflow-y-auto py-2 px-4">
+                <div className="m-2">
                     <div className="h-fit flex flex-col gap-4 mb-4">
                         {body}
                     </div>
@@ -46,30 +45,32 @@ function CardView({header, body, footer, onDelete, onEdit, onClose, title, id, o
                         <div className="border rounded border-destructive/20 mt-4 space-y-4 p-4 w-full">
                             {onDanger}
                             {onEdit && <>
-                                <div className="ms-2">
+                                <div className="ms-2 space-y-2">
                                     <Section className="ms-0"
                                              title={`Edit ${title}`}
                                              subtitle={`Update or modify ${title?.toLowerCase()} details`}>
                                         <Button {...uniformStyle({
                                             size: "sm", color: "default"
                                         })} {...editProps}
-                                                onClick={onEdit}
+                                                onPress={onEdit}
                                                 startContent={<LuPencil/>}>
                                             Edit
                                         </Button>
                                     </Section>
+                                    {editProps?.children && editProps?.children}
                                 </div>
                             </>}
                             {onEdit && onDelete && <hr className="border border-destructive/20"/>}
-                            {onDelete && <div className="ms-2">
+                            {onDelete && <div className="ms-2 space-y-2">
                                 <Section className="ms-0" title={`Delete ${title}`}
                                          subtitle="This action cannot be undone. Proceed with caution.">
 
                                     <Button {...uniformStyle({color: "danger"})}
                                             {...deleteProps}
-                                            onClick={onDelete}
-                                            startContent={<LuTrash2/>}>Delete</Button></Section>
-
+                                            onPress={onDelete}
+                                            startContent={<LuTrash2/>}>Delete</Button>
+                                </Section>
+                                {deleteProps?.children && deleteProps?.children}
                             </div>}
                         </div>
                     </>}

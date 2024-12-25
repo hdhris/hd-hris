@@ -61,7 +61,7 @@ export const BenefitTable: TableConfigProps<BenefitPlan> = {
 
             </Case>
             <Case of="status">
-                <Chip color={item.isActive ? "success" : "danger"} variant="dot">{item.isActive ? "Active" : "Inactive"}</Chip>
+                <Chip className="border-none gap-1 text-default-600" color={item.isActive ? "success" : "danger"} variant="dot">{item.isActive ? "Active" : "Inactive"}</Chip>
             </Case>
         </Switch>)
     }, columns: benefitTableColumns

@@ -19,7 +19,7 @@
     "@headlessui/react": "^2.1.10",
     "@hookform/resolvers": "^3.3.4",
     "@internationalized/date": "^3.5.5",
-    "@nextui-org/react": "^2.6.8",
+    "@nextui-org/react": "^2.6.10",
     "@nextui-org/use-infinite-scroll": "^2.2.1",
     "@number-flow/react": "^0.4.4",
     "@phosphor-icons/react": "^2.1.7",

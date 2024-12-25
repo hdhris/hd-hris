@@ -75,3 +75,11 @@ export function Title({heading, subHeading, className, classNames, children}: Ti
         </div>
     );
 }
+
+interface TextWithBoldProps {
+    text: string;
+}
+
+export function boldSurroundedText(text: string): string {
+    return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Use <strong> for better semantics
+}
