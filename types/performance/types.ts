@@ -25,3 +25,28 @@ export interface CriteriaDetail {
     description: string;
     ratings_json: Rating[] | TableRating[];
 }
+
+export interface SurveyData {
+    [key: string]: {
+        total: number;
+        details: {
+            [key: string]: number;
+        };
+    };
+}
+
+export interface SurveyFormType {
+    id: number;
+    employee_id: number;
+    start_date: string;
+    end_date: string;
+    total_rating: string;
+    max_rate: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    evaluated_by: number;
+    criteria_json: CriteriaDetail[];
+    ratings_json: SurveyData;
+    employment_status: number;
+}

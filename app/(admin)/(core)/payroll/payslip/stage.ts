@@ -38,7 +38,7 @@ export async function stageTable(
 
       fetchAttendanceData(
         String(
-            `/api/admin/attendance-time/records/api?start=${toGMT8(dateInfo.start_date).format(
+            `/api/admin/attendance-time/records?start=${toGMT8(dateInfo.start_date).format(
                 "YYYY-MM-DD"
             )}&end=${toGMT8(dateInfo.end_date).format("YYYY-MM-DD")}`
         )

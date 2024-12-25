@@ -2,11 +2,7 @@ import PayheadUpsert from "@/components/admin/payroll/PayheadUpsert";
 import { awaitSearchParams } from "@/helper/params/searchParam";
 import React from "react";
 
-async function ManagePayhead({
-    searchParams,
-  }: {
-    searchParams: awaitSearchParams
-  }) {
+async function ManagePayhead({ searchParams }: { searchParams: awaitSearchParams }) {
     const payheadID = (await searchParams).id;
     // const payheadType = (await searchParams).type;
     return (

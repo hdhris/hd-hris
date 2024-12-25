@@ -15,3 +15,11 @@ export function objectExcludes<T extends object>(obj: T, keysToExclude: (keyof T
             return filteredObj;
         }, {} as Partial<T>);
 }
+
+export function isObjectEmpty(obj: object): boolean {
+    return Object.keys(obj).length === 0;
+}
+
+export function keyExists<T extends object>(obj: T, key: keyof T): boolean {
+    return key in obj;
+}

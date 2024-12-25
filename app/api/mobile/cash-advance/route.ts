@@ -14,9 +14,6 @@ export async function GET(req: NextRequest) {
                 employee_id: employee_id,
             },
             include: {
-                trans_employees_trans_cash_advances_approval_byTotrans_employees: {
-                    ...emp_rev_include.minor_detail,
-                },
                 trans_cash_advance_disbursements: {
                     where: { deleted_at: null },
                     include: {
