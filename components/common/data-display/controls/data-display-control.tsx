@@ -56,7 +56,6 @@ function DataDisplayControl<T>({
 
     const displayMethods = [isTable, isGrid, isList].filter(item => item).length
 
-    console.log("Paginate: ", paginatedData)
     useEffect(() => {
         setDisplay(displaySearchParams as DisplayType)
     }, [displaySearchParams, setDisplay]);
@@ -67,6 +66,7 @@ function DataDisplayControl<T>({
             // setRows()
         }
     }, [rowSelectionProps, rows]);
+
     const handleOnSearch = useCallback((value: string) => {
         onSearchChange(value);
         onPageChange(1); // Reset to page 1 when a new search is triggered
@@ -136,7 +136,7 @@ function DataDisplayControl<T>({
         </div>
             <div className="flex justify-between pb-3 items-center">
                 {title && <Typography className="text-medium font-semibold text-primary/50">
-                    <CountUp start={0} end={paginationProps?.data_length || 0} prefix="Total of " suffix={` ${title}`}/>
+                    <CountUp start={0} end={paginationProps?.data_length || values.length || 0} prefix="Total of " suffix={` ${title}`}/>
                     {/*{ title ? Total < CountUp start={0} end={values.length}/>}*/}
                     {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
                 </Typography>}
@@ -176,7 +176,7 @@ function DataDisplayControl<T>({
                     {selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}
                 </Typography>
                 {selectedKeys && (selectedKeys === "all" || selectedKeys.size > 1) && isSelectionDeleted && (
-                    <Button isIconOnly variant="light" onClick={() => handleDeleteSelection(selectedKeys)}>
+                    <Button isIconOnly variant="light" onPress={() => handleDeleteSelection(selectedKeys)}>
                         <LuTrash2 className={cn("text-danger", icon_size_sm)}/>
                     </Button>)}
             </div>
@@ -195,21 +195,21 @@ function DataDisplayControl<T>({
             <div className={cn("flex justify-end", className?.lower?.buttonClassname)}>
                 {displayMethods > 1 && (<ButtonGroup variant="light" color="primary" isIconOnly {...buttonGroupProps}>
                     {isTable && (<Tooltip content="Table">
-                        <Button onClick={() => handleOnDisplayChange("table")}
+                        <Button onPress={() => handleOnDisplayChange("table")}
                                 variant={display === "table" ? "flat" : "light"}>
                             <LuTable2 className={cn("text-slate-700", icon_size_sm)}/>
                         </Button>
                     </Tooltip>)}
 
                     {isGrid && (<Tooltip content="Grid">
-                        <Button onClick={() => handleOnDisplayChange("grid")}
+                        <Button onPress={() => handleOnDisplayChange("grid")}
                                 variant={display === "grid" ? "flat" : "light"}>
                             <LuLayoutGrid className={cn("text-slate-700", icon_size_sm)}/>
                         </Button>
                     </Tooltip>)}
 
                     {isList && (<Tooltip content="List">
-                        <Button onClick={() => handleOnDisplayChange("list")}
+                        <Button onPress={() => handleOnDisplayChange("list")}
                                 variant={display === "list" ? "flat" : "light"}>
                             <LuLayoutList className={cn("text-slate-700", icon_size_sm)}/>
                         </Button>

@@ -256,7 +256,9 @@ function Page() {
             filterItems: FilterItems
         }}
         onTableDisplay={{
-            config: TableConfigurations, layout: "auto", onRowAction: handleOnSelected
+            config: TableConfigurations,
+            layout: "auto",
+            onRowAction: handleOnSelected
         }}
         searchProps={{
             searchingItemKey: ["name"]

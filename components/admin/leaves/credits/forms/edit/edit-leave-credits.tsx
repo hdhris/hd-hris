@@ -35,7 +35,7 @@ function EditLeaveCredits({employee, isOpen, onOpen}: EditLeaveCreditsProps) {
             const employeeLeave = employee.leave_credits?.find(emp => emp.leave_type_id === item.leave_type_id);
 
             if (employeeLeave) {
-                // Compare allocated days with used days and create a custom error if the condition is violated
+                // Compare allocated days with used days and upsert a custom error if the condition is violated
                 if (item.allocated_days < employeeLeave.used_days) {
                     ctx.addIssue({
                         path: ['leave_credits', index, 'allocated_days'], // Specify the exact path of the error

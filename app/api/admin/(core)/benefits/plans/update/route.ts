@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
                 },
             });
 
-            // Update or create the benefits contribution table
+            // Update or upsert the benefits contribution table
             if (body.contribution_table) {
                 const existingContribution = await prisma.ref_benefits_contribution_table.findFirst({
                     where: { plan_id: updatedPlan.id },
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
                         },
                     });
                 } else {
-                    // If no advanced settings exist, create a new entry
+                    // If no advanced settings exist, upsert a new entry
                     await prisma.ref_benefits_contribution_table.create({
                         data: {
                             min_salary: Number(body.advance_setting.min_salary),

@@ -1,4 +1,3 @@
-// app/api/trainings-and-seminars/employee-records/list/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 

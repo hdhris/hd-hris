@@ -98,13 +98,13 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     },
     {
       name: "is_superior",
-      label: "Is Department Head",
+      label: "Department in charge",
       type: "switch",
       config: {
         defaultSelected: false,
       },
       description:
-        "Setting a job position as department head means it will oversee other positions in the department. Only one head position per department is allowed.",
+        "Setting a job position as department in charge means it will oversee other positions in the department. Only one in charge position per department is allowed.",
     },
     {
       name: "is_active",

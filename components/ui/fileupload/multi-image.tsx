@@ -62,7 +62,7 @@ const MultiImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
                         // in case an url is passed in, use it to display the image
                         return fileState.file;
                     } else {
-                        // in case a file is passed in, create a base64 url to display the image
+                        // in case a file is passed in, upsert a base64 url to display the image
                         return URL.createObjectURL(fileState.file);
                     }
                 });

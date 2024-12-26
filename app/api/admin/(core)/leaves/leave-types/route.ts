@@ -83,7 +83,7 @@ export async function GET(request: Request) {
                 if (employeeMap.has(typeId)) {
                     employeeMap.get(typeId)?.push(employeeId);
                 } else {
-                    // Otherwise, create a new array with the employee_id
+                    // Otherwise, upsert a new array with the employee_id
                     employeeMap.set(typeId, [employeeId]);
                 }
 

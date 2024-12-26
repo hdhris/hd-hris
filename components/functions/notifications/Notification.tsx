@@ -26,7 +26,7 @@ function InAppNotification({data, isLoading}: {data: SystemNotification, isLoadi
     return (<Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
             <Button variant="light" isIconOnly size="sm">
-                <Badge content={""} color="danger" size="md" shape="circle">
+                <Badge isInvisible={unreadCount === 0} content={""} color="danger" size="md" shape="circle">
                     <Bell className="size-6"/>
                 </Badge>
             </Button>

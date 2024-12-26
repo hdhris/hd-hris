@@ -155,7 +155,7 @@ const Page: React.FC = () => {
                     />
                   </div>
                 ) : (
-                  <span className="text-gray-400">No department head</span>
+                  <span className="text-gray-400">No department in charge</span>
                 )}
               </div>
             );

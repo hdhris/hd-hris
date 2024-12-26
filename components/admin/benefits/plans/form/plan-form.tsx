@@ -1,165 +1,428 @@
-'use client'
-import React, {useState} from 'react';
+"use client"
+import React, {useCallback, useEffect, useState} from 'react';
+import FormFields, {FormInputProps} from "@/components/common/forms/FormFields";
+import {Form} from "@/components/ui/form";
+import {useFieldArray, useForm} from "react-hook-form";
+import {z} from "zod";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {
+    PlanFormFixedAmountSchema, PlanFormOthersSchema, PlanFormPercentageSchema, PlanFormSchema
+} from "@/helper/zodValidation/benefits/plans/plan-form-schema";
+import {Autocomplete, AutocompleteItem, Button, SharedSelection} from "@nextui-org/react";
+import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
+import BorderCard from "@/components/common/BorderCard";
 import {DrawerFormTypes} from "@/types/drawer-form/drawer-form-types";
 import {BenefitPlan} from "@/types/benefits/plans/plansTypes";
 import FormDrawer from "@/components/common/forms/FormDrawer";
-import Typography from '@/components/common/typography/Typography';
-import {Input, Select, SelectItem} from "@nextui-org/react";
-import {Label} from "@/components/ui/label";
-import InputStyle from "@/lib/custom/styles/InputStyle";
-import {Form, FormLabel} from "@/components/ui/form";
-import {useForm} from "react-hook-form";
-import {z} from "zod";
-import {zodResolver} from "@hookform/resolvers/zod";
-
+import {axiosInstance} from "@/services/fetcher";
+import toast from "react-hot-toast";
+import {capitalize} from "@nextui-org/shared-utils";
+import {AxiosError} from "axios";
+import {useSWRConfig} from "swr";
 
 interface BenefitPlanFormProps extends DrawerFormTypes {
     plan?: BenefitPlan
 }
 
-type ContributionTier = {
-    contribution_limit_type: "fixed" | "below" | "above"
-    contribution_type: "fixed" | "percentage"
-    contribution_amount: number
-    employer_rate: number
-    employee_rate: number
-}
+function PlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) {
+    const {mutate} = useSWRConfig()
+    const [contributionType, setContributionType] = useState<"fixed" | "percentage" | "others">("fixed")
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const handleModalOpen = useCallback((value: boolean) => {
+        setIsModalOpen(value);
+        onOpen(value);
+    }, [onOpen]);
 
-function PlanForm({plan, ...rest}: BenefitPlanFormProps) {
-    const form = useForm<any>({
-        resolver: zodResolver(z.object({})), defaultValues: {}
-    })
-    const [tiers, setTiers] = useState<ContributionTier[]>([
-        {
-            contribution_limit_type: "fixed",
-            contribution_type: "fixed",
-            contribution_amount: 0,
-            employer_rate: 0,
-            employee_rate: 0
+    useEffect(() => {
+        if (isOpen !== isModalOpen) {
+            setIsModalOpen(isOpen);
         }
-    ])
+    }, [isModalOpen, isOpen]);
 
-    const addTier = () => {
-        setTiers([...tiers, {
-            contribution_limit_type: "fixed",
+    const plan_conditional_schema = contributionType === "fixed" ? PlanFormSchema.merge(PlanFormFixedAmountSchema)
+        .refine((data) => data.max_salary > data.min_salary, {
+            message: "Maximum salary must be greater than to Minimum salary", path: ["max_salary"],
+        }).refine(data => data.max_salary > data.fixed_amount, {message: "Maximum salary must be greater than to Fixed amount", path: ["fixed_amount"]}).refine(data => new Date(data.effective_date) < new Date(data.expiration_date), {
+            message: "Effective date must be less than to Expiration date", path: ["expiration_date"]
+        }) : contributionType === "percentage" ? PlanFormSchema.merge(PlanFormPercentageSchema)
+        .refine((data) => data.max_salary > data.min_salary, {
+            message: "Maximum salary must be greater than  to Minimum salary", path: ["max_salary"],
+        }).refine(data => new Date(data.effective_date) < new Date(data.expiration_date), {
+            message: "Effective date must be less than  to Expiration date", path: ["expiration_date"]
+        }) : PlanFormSchema.omit({
+        min_salary: true, max_salary: true
+    }).merge(PlanFormOthersSchema).refine(data => new Date(data.effective_date) < new Date(data.expiration_date), {
+        message: "Effective date must be less than to Expiration date", path: ["expiration_date"]
+    })
+    const form = useForm<z.infer<typeof plan_conditional_schema>>({
+        mode: "onChange",
+
+        resolver: zodResolver(plan_conditional_schema), defaultValues: {
+            name: "",
+            plan_type: "",
+            coverage_details: "",
+            description: "",
+            effective_date: "",
+            expiration_date: "",
+            is_active: true,
             contribution_type: "fixed",
-            contribution_amount: 0,
-            employer_rate: 0,
-            employee_rate: 0
-        }])
-    }
-
-    const removeTier = (index: number) => {
-        setTiers(tiers.filter((_, i) => i !== index))
-    }
-
-    const updateTier = (index: number, updatedTier: ContributionTier) => {
-        const newTiers = [...tiers];
-        newTiers[index] = updatedTier;
-        setTiers(newTiers);
-    }
-
-    const contribution_limit_type_selection: Option<ContributionTier["contribution_limit_type"]>[] = [
-        {
-            label: "Fixed", value: "fixed",
-        },{
-            label: "Below", value: "below",
-        },{
-            label: "Above", value: "above",
+            fixed_amount: 0,
+            percentage_amount: 0,
+            min_salary: 0,
+            max_salary: 0,
+            tiers: [{
+                employer_contribution: 0,
+                employee_contribution: 0,
+                min_salary: 0,
+                max_salary: 0,
+                minMSC: 0,
+                maxMSC: 0,
+                mscStep: 0,
+                ecThreshold: 0,
+                ecLowRate: 0,
+                ecHighRate: 0,
+                wispThreshold: 0,
+            }],
         },
-    ]
 
-    return (
-        <FormDrawer title="Add Benefit Plan" description="Add a new benefit plan" onOpen={rest.onOpen} isOpen={rest.isOpen} size="md">
+    });
+
+    useEffect(() => {
+        if (title && plan) {
+            const benefitDetails = plan.benefitAdditionalDetails || [];
+
+            const contributionType =
+                benefitDetails.map(item => item.contributionType)[0] as "fixed" | "percentage" | "others" || "others";
+
+            const actualContributionAmount = benefitDetails.map(item => item.actualContributionAmount)[0] || 0;
+            const minSalary = benefitDetails.map(item => item.minSalary)[0] || 0;
+            const maxSalary = benefitDetails.map(item => item.maxSalary)[0] || 0;
+
+            const tiers = contributionType === "others"
+                ? benefitDetails.map(item => ({
+                    employer_contribution: item.employerContribution || 0,
+                    employee_contribution: item.employeeContribution || 0,
+                    min_salary: item.minSalary || 0,
+                    max_salary: item.maxSalary || 0,
+                    minMSC: item.minMSC || 0,
+                    maxMSC: item.maxMSC || 0,
+                    mscStep: item.mscStep || 0,
+                    ecThreshold: item.ecThreshold || 0,
+                    ecLowRate: item.ecLowRate || 0,
+                    ecHighRate: item.ecHighRate || 0,
+                    wispThreshold: item.wispThreshold || 0,
+                }))
+                : null;
+
+            // console.log("Reset: ", plan)
+
+            setContributionType(contributionType);
+            form.reset({
+                name: plan.name || "",
+                plan_type: plan.type || "",
+                coverage_details: plan.coverageDetails || "",
+                description: plan.description || "",
+                effective_date: plan.effectiveDate,
+                expiration_date: plan.expirationDate,
+                is_active: plan.isActive,
+                contribution_type: contributionType,
+                fixed_amount: contributionType === "fixed" ? actualContributionAmount : 0,
+                percentage_amount: contributionType === "percentage" ? actualContributionAmount : 0,
+                min_salary: contributionType !== "others" ? minSalary : 0,
+                max_salary: contributionType !== "others" ? maxSalary : 0,
+                tiers: tiers || [],
+            });
+        }
+    }, [title, plan, form]);
+
+
+
+    const {fields, append, remove} = useFieldArray({
+        control: form.control, name: "tiers", // Matches the `tiers` array in the schema
+    });
+
+    console.log("Errors: ", form.formState.errors)
+
+    const basicInfoFields: FormInputProps[] = [{
+        name: 'name',
+        label: 'Name',
+        placeholder: "Health Plan",
+        description: "Enter the name of the benefit plan",
+        isRequired: true,
+        config: {
+            autoFocus: true
+        }
+    }, {
+        name: 'plan_type',
+        label: 'Plan Type',
+        placeholder: "Select a plan type",
+        description: "Select the type of benefit plan.",
+        isRequired: true,
+        Component: (field) => {
+            const options = [{value: "Health", label: "Health"}, {value: "Dental", label: "Dental"}, {
+                value: "Vision", label: "Vision"
+            }, {value: "Life", label: "Life"}, {value: "retirement", label: "Retirement"}, {
+                value: "Disability", label: "Disability"
+            }]
+            return (<Autocomplete
+                // selectedKey={field.value}
+                defaultInputValue={form.getValues("plan_type")}
+                aria-labelledby="Plan Type"
+                className="max-w-full"
+                defaultItems={options}
+                name="plan_type"
+                variant="bordered"
+                color="primary"
+                radius="sm"
+                onSelectionChange={(value) => {
+                    field.onChange(value);
+                    form.setValue("plan_type", String(value));
+                }}
+                onInputChange={(value) => {
+                    field.onChange(value);
+                    form.setValue("plan_type", String(value));
+                }}
+                allowsCustomValue
+            >
+                {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
+            </Autocomplete>)
+        }
+    }];
+
+    const plan_details: FormInputProps[] = [{
+        name: 'description',
+        label: 'Description',
+        placeholder: "Provide a brief description of the benefit plan",
+        type: "text-area",
+        config: {
+            maxLength: 150, maxRows: 3
+        },
+        isRequired: true
+
+    }, {
+        name: 'coverage_details',
+        label: 'Coverage Details',
+        placeholder: "Describe the coverage provided by this plan",
+        type: "text-area",
+        isRequired: true,
+        config: {
+            maxRows: 3,
+
+        }
+    }]
+
+    const effectiveDateFields: FormInputProps[] = [{
+        name: 'effective_date',
+        label: 'Effective Date',
+        placeholder: "Select an effective date",
+        type: "date-picker",
+        isRequired: true,
+        config: {
+            showMonthAndYearPickers: true
+        }
+    }, {
+        name: 'expiration_date',
+        label: 'Expiration Date',
+        placeholder: "Select an expiration date",
+        type: "date-picker",
+        isRequired: true,
+        config: {
+            showMonthAndYearPickers: true
+        }
+    }];
+
+    const additionalSettingsFields: FormInputProps[] = [{
+        name: "is_active", type: "switch", label: "Is Active", description: "Is this plan currently active?",
+    }, {
+        name: "contribution_type",
+        type: "select",
+        label: "Contribution Type",
+        description: "Select the contribution type for this plan.",
+        isRequired: true,
+        config: {
+            options: [{value: "fixed", label: "Fixed"}, {value: "percentage", label: "Percentage"}, {
+                value: "others", label: "Others"
+            }], disallowEmptySelection: true, onSelectionChange: (value: SharedSelection) => {
+                setContributionType(value.currentKey as "fixed" | "percentage" | "others")
+            }
+        }
+    }];
+
+    const salaryFields: FormInputProps[] = [{
+        name: 'min_salary',
+        label: 'Minimum Salary',
+        type: "number",
+        description: "Enter the minimum salary",
+        isRequired: true
+    }, {
+        name: 'max_salary',
+        label: 'Maximum Salary',
+        type: "number",
+        description: "Enter the maximum salary",
+        isRequired: true
+    },]
+
+    const planRatesFields: FormInputProps[] = [{
+        name: "employer_contribution",
+        label: "Employer Rate (%)",
+        type: "number",
+        description: "Enter the employer rate for this plan",
+        isRequired: true
+    }, {
+        name: "employee_contribution",
+        label: "Employee Rate (%)",
+        type: "number",
+        description: "Enter the employee rate for this plan",
+        isRequired: true
+    }, {
+        name: 'minMSC', label: 'Minimum MSC', type: "number", description: "Enter the minimum MSC",
+    }, {
+        name: 'maxMSC', label: 'Maximum MSC', type: "number", description: "Enter the maximum MSC"
+    }, {
+        name: 'mscStep', label: 'MSC Step', type: "number", description: "Enter the step value for MSC",
+    }, {
+        name: 'ecThreshold', label: 'EC Threshold', type: "number", description: "Enter the EC threshold",
+    }, {
+        name: 'ecLowRate', label: 'Minimum EC', type: "number", description: "Enter the low EC rate",
+    }, {
+        name: 'ecHighRate', label: 'Maximum EC', type: "number", description: "Enter the high EC rate",
+    }, {
+        name: 'wispThreshold', label: 'WISP Threshold', type: "number", description: "Enter the WISP threshold",
+    }];
+
+    const fixPlansFields: FormInputProps[] = [{
+        name: "fixed_amount",
+        label: "Amount (₱)",
+        type: "number",
+        description: "Enter the employee amount for this plan",
+        isRequired: true
+    }];
+    const percentagePlansFields: FormInputProps[] = [{
+        name: "percentage_amount",
+        label: "Percentage (%)",
+        type: "number",
+        description: "Enter the employee rate for this plan",
+        isRequired: true
+    }];
+
+    const onSubmit = async (values: z.infer<typeof plan_conditional_schema>) => {
+        setIsLoading(true)
+        let data: {}
+
+        if(plan){
+
+            // const benefit = plan.benefitAdditionalDetails?.filter()
+            data = {
+                ...values,
+                id: plan.id,
+                deduction_id: plan.deduction_id,
+                contribution_table_id: plan.benefitAdditionalDetails?.map(id => id.id)
+            }
+        } else {
+            data = {
+                ...values,
+            }
+        }
+        try {
+            const res = await axiosInstance.post("/api/admin/benefits/plans/upsert", data)
+            if(res.status === 200) {
+                toast.success(res.data.message)
+                handleModalOpen(false)
+                form.reset({
+                    plan_type: ""
+                })
+                await mutate("/api/admin/benefits/plans")
+            }
+
+        } catch (error) {
+            if(error instanceof AxiosError) {
+                toast.error(error.response?.data.message)
+            } else{
+                toast.error("Something went wrong")
+            }
+
+        } finally {
+            setIsLoading(false)
+        }
+    }
+    return (<FormDrawer
+            isLoading={isLoading}
+            title={title || "Add New Benefit Plan"}
+            size="md"
+            description={rest.description || "Enter the details for the new employee benefit plan."}
+            onOpen={handleModalOpen}
+            isOpen={isModalOpen}
+        >
+
             <Form {...form}>
-                <form>
-                    {
-                        tiers.map((tier, index) => (
-                            <div key={index} className="flex gap-2 border-b p-2">
-                                <div className="flex flex-col gap-2">
-                                    <FormLabel>Contribution Limit Type</FormLabel>
-                                    <div className="flex gap-2">
-                                        <Selection options={contribution_limit_type_selection} onChange={(value) =>  updateTier(index, {...tier, contribution_limit_type: value})}/>
-                                    </div>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="drawer-form">
+                    <div className="flex gap-4">
+                        <FormFields items={basicInfoFields} size="md"/>
+                    </div>
+                    <div className="flex gap-4">
+                        <FormFields items={plan_details} size="md"/>
+                    </div>
+                    <div className="flex gap-4">
+                        <FormFields items={effectiveDateFields} size="md"/>
+                    </div>
+                    <div className="flex gap-4 items-end">
+                        <FormFields items={additionalSettingsFields}/>
+                    </div>
+                    {form.watch("contribution_type") === "fixed" && <div className="flex gap-4">
+                        <FormFields items={[...salaryFields, ...fixPlansFields]}/>
+                    </div>}
+
+                    {form.watch("contribution_type") === "percentage" && <div className="flex gap-4">
+                        <FormFields items={[...salaryFields, ...percentagePlansFields]}/>
+                    </div>}
+                    {form.watch("contribution_type") === "others" && <>
+                        {fields.map((field, index) => {
+                            return (<BorderCard key={index} heading={<div className="flex justify-end">
+                                {fields.length > 1 && <Button {...uniformStyle({color: "danger"})} type="button"
+                                                              onPress={() => remove(index)}>Remove
+                                    Tier</Button>}
+                            </div>}>
+                                <div key={field.id} className="grid grid-cols-2 gap-4">
+                                    <FormFields
+                                        items={[...salaryFields, ...planRatesFields].map((rateField) => ({
+                                            ...rateField, name: `tiers.${index}.${rateField.name}`, // Matches keys in the schema (e.g., minSalary, maxMSC)
+                                        }))}
+                                    />
                                 </div>
-                                <div className="flex flex-col gap-2">
-                                    <Label>Amount</Label>
-                                    <div className="flex gap-2">
-                                        {/*<Selection options={contribution_limit_type_selection} onChange={(value) =>  updateTier(index, {...tier, contribution_limit_type: value})}/>*/}
-                                        <Input
-                                            type="number"
-                                            onValueChange={(value) => {
-                                                updateTier(index, {...tier, contribution_amount: Number(value)})
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <FormLabel>Contribution Type</FormLabel>
-                                    <div className="flex gap-2">
-                                        <input type="radio" name={`tier-${index}-contribution-type`} value="fixed"
-                                               checked={tier.contribution_type === "fixed"}
-                                               onChange={() => updateTier(index, {...tier, contribution_type: "fixed"})}/>
-                                        <label>Fixed</label>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <input type="radio" name={`tier-${index}-contribution-type`} value="percentage"
-                                               checked={tier.contribution_type === "percentage"}
-                                               onChange={() => updateTier(index, {...tier, contribution_type: "percentage"})}/>
-                                        <label>Percentage</label>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <FormLabel>Contribution Amount</FormLabel>
-                                    <input type="number" value={tier.contribution_amount} onChange={(e) => updateTier(index, {...tier, contribution_amount: Number(e.target.value)})}/>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <FormLabel>Employer Rate</FormLabel>
-                                    <input type="number" value={tier.employer_rate} onChange={(e) => updateTier(index, {...tier, employer_rate: Number(e.target.value)})}/>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <FormLabel>Employee Rate</FormLabel>
-                                    <input type="number" value={tier.employee_rate} onChange={(e) => updateTier(index, {...tier, employee_rate: Number(e.target.value)})}/>
-                                </div>
-                                <button onClick={() => removeTier(index)}>Remove</button>
-                            </div>
-                        ))
-                    }
-                    <button onClick={addTier}>Add Tier</button>
+                            </BorderCard>);
+                        })}
+
+                        <Button
+                            {...uniformStyle()}
+                            type="button"
+                            onPress={() => append({
+                                employer_contribution: 0,
+                                employee_contribution: 0,
+                                max_salary: 0,
+                                min_salary: 0,
+                                minMSC: 0,
+                                maxMSC: 0,
+                                mscStep: 0,
+                                ecThreshold: 0,
+                                ecLowRate: 0,
+                                ecHighRate: 0,
+                                wispThreshold: 0
+                            })}
+                        >
+                            Add Tier
+
+                        </Button>
+                    </>}
+                    {/*{form.watch("contribution_type") !== "others" ? <div className="grid grid-cols-3 gap-4">*/}
+                    {/*    <FormFields items={bracketFields}/>*/}
+                    {/*</div> : }*/}
+
                 </form>
             </Form>
-
         </FormDrawer>
+
     );
 }
 
 export default PlanForm;
-
-type Option<T> = {
-    value: T;
-    label: string;
-};
-
-type CustomSelectProps<T> = {
-    options: Option<T>[];
-    onChange?: (value: T) => void;
-};
-
-const Selection = <T,>({ options, onChange }: CustomSelectProps<T>) => {
-    return (
-        <Select
-            variant="bordered"
-            color="primary"
-            size="sm"
-            radius="sm"
-            labelPlacement="outside"
-            onChange={(e) => onChange && onChange(e.target.value as T)}
-        >
-            {options.map((option) => (
-                <SelectItem key={String(option.value)} value={option.value as any}>
-                    {option.label}
-                </SelectItem>
-            ))}
-        </Select>
-    );
-};

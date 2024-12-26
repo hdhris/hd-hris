@@ -92,6 +92,7 @@ import { basicCalculator } from "../benefits-calculator/basic-calculator";
 import { Decimal } from "@prisma/client/runtime/library";
 import { AttendaceStatuses, BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import {ContributionType} from "@/types/benefits/plans/plansTypes";
 
 // Type definition for benefit data
 export interface ContributionSetting {
@@ -110,6 +111,8 @@ export interface ContributionSetting {
         ec_low_rate: number;
         ec_high_rate: number;
         wisp_threshold: number;
+        actual_contribution_amount: number
+        contribution_type: ContributionType;
     }[];
 }
 
@@ -144,15 +147,22 @@ export class Benefit {
                         wispThreshold: table.wisp_threshold,
                     };
 
-                    if (!table.min_MSC) {
-                        const basic = basicCalculator(salary, table.employer_rate, table.employee_rate);
-                        // console.log("Name: ", this.data.name, " Basic Calc: ", basic);
-                        contribution = basic.employee_contribution; //+ basic.employer_contribution;
+                    if(table.contribution_type === "others"){
+                        if (!table.min_MSC) {
+                            const basic = basicCalculator(salary, table.employer_rate, table.employee_rate);
+                            // console.log("Name: ", this.data.name, " Basic Calc: ", basic);
+                            contribution = basic.employee_contribution; //+ basic.employer_contribution;
+                        } else {
+                            contribution =
+                                advanceCalculator(salary, rates).employeeShare +
+                                (advanceCalculator(salary, rates).wispEmployee ?? 0);
+                        }
+                    } else if(table.contribution_type === "percentage"){
+                        contribution = salary * (table.actual_contribution_amount / 100);
                     } else {
-                        contribution =
-                            advanceCalculator(salary, rates).employeeShare +
-                            (advanceCalculator(salary, rates).wispEmployee ?? 0);
+                        contribution = table.actual_contribution_amount
                     }
+
                 }
             });
 

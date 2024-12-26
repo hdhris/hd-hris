@@ -1,6 +1,8 @@
 import {EmployeeDetails} from "@/types/employeee/EmployeeType";
 
 export interface BenefitAdditionalDetails {
+    contributionType: string
+    actualContributionAmount: number
     id: number
     planId: number
     employerContribution: number;
@@ -20,17 +22,16 @@ export interface BenefitPlan {
     id: number;
     name: string;
     type: string;
-    eligibilityCriteria: string;
     coverageDetails: string;
     effectiveDate: string;
     expirationDate: string;
     description: string;
     isActive: boolean;
-    benefitAdditionalDetails?: BenefitAdditionalDetails;
+    benefitAdditionalDetails?: BenefitAdditionalDetails[];
     employees_avails?: EmployeeDetails[]
     createdAt: string;
     updatedAt: string;
-    deduction_id: number
+    deduction_id: number,
 }
 
 export interface BenefitPlanPaginated{
@@ -38,3 +39,5 @@ export interface BenefitPlanPaginated{
     totalItems: number,
     currentPage: number
 }
+
+export type ContributionType = "fixed" | "percentage" | "others"

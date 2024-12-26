@@ -44,7 +44,6 @@ export function usePagination<T>(data: T[], {rowsPerPage = 5, totalItems = 1}: P
         return data.slice(start, end);
     }, [data, page, rows]);
 
-    console.log("Paginated Data: ", data)
     const onPageChange = (newPage: number) => {
         if (newPage < 1 || newPage > totalPages) {
             return;

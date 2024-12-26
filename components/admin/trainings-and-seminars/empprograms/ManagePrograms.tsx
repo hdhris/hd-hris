@@ -64,10 +64,11 @@ const formSchema = z
     end_date: z.string(),
     enrollement_date: z.string().refine(
       (val) => {
-        const enrollement_dateDate = dayjs(val);
-        return enrollement_dateDate.isValid();
+        const enrollmentDate = dayjs(val);
+        const now = dayjs();
+        return enrollmentDate.isValid() && !enrollmentDate.isAfter(now);
       },
-      { message: "Invalid enrollement_date date" }
+      { message: "Enrollment date cannot be in the future" }
     ),
     instructor_name: z
       .string()
@@ -76,7 +77,7 @@ const formSchema = z
       .number()
       .min(1, { message: "Maximum participants must be at least 1." }),
     is_active: z.boolean(),
-    type: z.string().default("training"),
+    type: z.string().default("programs"),
   })
   .refine(
     (data) => {
@@ -90,6 +91,7 @@ const formSchema = z
     }
   );
 
+
 type FormValues = z.infer<typeof formSchema>;
 
 // Utility function for date parsing
@@ -102,11 +104,7 @@ const parseAndFormatDate = (dateString: string | undefined | null) => {
 };
 
 // Main Component
-export default function ManagePrograms({
-  program_id,
-}: {
-  program_id?: string;
-}) {
+export default function Manageprogram({ program_id }: { program_id?: string }) {
   const router = useRouter();
   const [selectedParticipants, setSelectedParticipants] = useState<
     Participant[]
@@ -125,7 +123,7 @@ export default function ManagePrograms({
     instructor_name: "",
     max_participants: 10,
     is_active: true,
-    type: "training",
+    type: "programs",
   };
 
   const form = useForm<FormValues>({
@@ -177,47 +175,29 @@ export default function ManagePrograms({
     }
   }, [programData?.employees]);
 
-  useEffect(() => {
-    const start = dayjs(form.watch("start_date"));
-    const end = dayjs(form.watch("end_date"));
 
-    if (start.isValid() && end.isValid()) {
-      if (end.isBefore(start)) {
-        form.setValue(
-          "end_date",
-          start.add(1, "hour").format("YYYY-MM-DDTHH:mm")
-        );
-      }
-      form.setValue(
-        "hour_duration",
-        Math.round(end.diff(start, "hour", true) * 100) / 100
-      );
-    }
-  }, [form.watch("start_date"), form.watch("end_date")]);
-
-  useEffect(() => {
-    const enrollmentDate = form.watch("enrollement_date");
-    if (enrollmentDate && selectedParticipants.length > 0) {
-      setSelectedParticipants((prevParticipants) =>
-        prevParticipants.map((participant) => ({
-          ...participant,
-          enrollement_date: enrollmentDate,
-        }))
-      );
-    }
-  }, [form.watch("enrollement_date")]);
 
   const selectParticipant = useCallback(
     (id: number) => {
-      const currentPartipant = programData?.program?.dim_training_participants?.find(ptcp=> ptcp.employee_id===id);
-
+      const currentEnrollmentDate = form.getValues("enrollement_date");
+      const now = dayjs();
+      
+      // Validate enrollment date
+      if (dayjs(currentEnrollmentDate).isAfter(now)) {
+        toast({
+          title: "Cannot enroll participants with future dates",
+          variant: "warning",
+        });
+        return;
+      }
+  
       setSelectedParticipants((prev) => {
         const existingParticipant = prev.find((p) => p.employee_id === id);
-
+  
         if (existingParticipant) {
           return prev.filter((p) => p.employee_id !== id);
         }
-
+  
         if (prev.length >= form.watch("max_participants")) {
           toast({
             title: "Maximum participants reached",
@@ -225,12 +205,18 @@ export default function ManagePrograms({
           });
           return prev;
         }
-
+  
+        // All existing participants should have the same enrollment date
+        const updatedPrev = prev.map(p => ({
+          ...p,
+          enrollement_date: currentEnrollmentDate
+        }));
+  
         return [
-          ...prev,
+          ...updatedPrev,
           {
             employee_id: id,
-            enrollement_date: currentPartipant?.enrollement_date ?? dayjs().toISOString(),
+            enrollement_date: currentEnrollmentDate,
             status: "pending",
             feedback: "",
           },
@@ -272,7 +258,7 @@ export default function ManagePrograms({
 
         if (response.data?.id) {
           toast({
-            title: `Program ${program_id ? "updated" : "created"} successfully`,
+            title: `program${program_id ? "updated" : "created"} successfully`,
             variant: "success",
           });
           router.push("/trainings-and-seminars/empprograms");
@@ -318,27 +304,29 @@ export default function ManagePrograms({
     },
     {
       name: "start_date",
-      label: "Start Date & Time",
-      type: "datetime-local",
+      label: "Start Date",
+      type: "date-picker",
       isRequired: true,
       config: {
-        placeholder: "Select start date and time",
-        classNames: DateStyle,
-        validationState: "valid",
+        placeholder: "Select start date",
+        // classNames: DateStyle,
+        // validationState: "valid",
+        showMonthAndYearPickers:true,
       },
     },
     {
       name: "end_date",
-      label: "End Date & Time",
-      type: "datetime-local",
+      label: "End Date",
+      type: "date-picker",
       isRequired: true,
       config: {
-        placeholder: "Select end date and time",
+        placeholder: "Select end date",
         minValue: form.watch("start_date")
           ? parseAbsoluteToLocal(dayjs(form.watch("start_date")).toISOString())
           : parseAbsoluteToLocal(dayjs().startOf("day").toISOString()),
-        classNames: DateStyle,
-        validationState: "valid",
+        // classNames: DateStyle,
+        // validationState: "valid",
+        showMonthAndYearPickers:true,
       },
     },
     {
@@ -346,18 +334,19 @@ export default function ManagePrograms({
       label: "Duration (hours)",
       type: "number",
       isRequired: true,
-      inputDisabled: true,
-      description: "Automatically calculated",
+      description: "How many hours",
     },
     {
       name: "enrollement_date",
-      label: "Enrollment Date & Time",
-      type: "datetime-local",
+      label: "Enrollment Date",
+      type: "date-picker",
       isRequired: true,
       config: {
-        placeholder: "Select enrollement_date date and time",
-        classNames: DateStyle,
-        validationState: "valid",
+        placeholder: "Select enrollment date",
+        // classNames: DateStyle,
+        // validationState: "valid",
+        maxValue: parseAbsoluteToLocal(toGMT8().toISOString()),
+        showMonthAndYearPickers:true,
       },
     },
     {

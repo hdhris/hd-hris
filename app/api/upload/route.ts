@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         if (e.code === "ENOENT") {
             await mkdir(uploadDir, { recursive: true });
         } else {
-            console.error("Error while trying to create directory when uploading a file\n", e);
+            console.error("Error while trying to upsert directory when uploading a file\n", e);
             return NextResponse.json({ error: "Error creating directory." }, { status: 500 });
         }
     }
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         const fileUrl = `${relativeUploadDir}/${filename}`;
 
         // Optionally save file information to the database
-        // const result = await prisma.file.create({
+        // const result = await prisma.file.upsert({
         //     data: {
         //         url: fileUrl,
         //         name: file.name,

@@ -8,12 +8,12 @@ import {getEmpFullName} from "@/lib/utils/nameFormatter";
 export async function GET(req: NextRequest) {
     try {
         const {searchParams} = new URL(req.url)
-        const {page, perPage} = paginateUrl(req.url)
         const plan_id = Number(searchParams.get("plan_id"))
 
         const enrolled_benefit = await prisma.dim_employee_benefits.findMany({
             where: {
-                terminated_at: null, plan_id: plan_id, ref_benefit_plans: {
+                terminated_at: null, plan_id: plan_id,
+                ref_benefit_plans: {
                     is: {
                         expiration_date: {
                             gt: new Date()
@@ -31,7 +31,8 @@ export async function GET(req: NextRequest) {
             where: {
                 id: {
                     notIn: enrolled_benefit.map(id => id.employee_id).filter(id => id !== null)
-                }, deleted_at: null
+                },
+                deleted_at: null
             }, select: {
                 id: true,
                 first_name: true,

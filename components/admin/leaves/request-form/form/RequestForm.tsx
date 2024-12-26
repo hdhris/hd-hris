@@ -458,7 +458,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             setIsSubmitting(true);
 
             // Decide between creating or updating the leave request
-            const endpoint = employee?.id ? "/api/admin/leaves/requests/update" : "/api/admin/leaves/requests/create";
+            const endpoint = employee?.id ? "/api/admin/leaves/requests/update" : "/api/admin/leaves/requests/upsert";
 
             const res = await axiosInstance.post(endpoint, items);
 
