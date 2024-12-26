@@ -155,7 +155,7 @@ function PlansDataDisplay() {
                     // isLoading: loading,
                     isDisabled: planModal.employees_avails?.length! > 0,
                     children: planModal.employees_avails?.length! > 0 && <Alert color="danger"
-                                                                                description={`Couldn't Delete Plan. There ${planModal.employees_avails?.length > 1 ? "are " : "is"} ${pluralize(planModal.employees_avails?.length, "employee")} assigned to this plan.`}/>
+                                                                                description={`Couldn't Delete Plan. There ${planModal.employees_avails?.length! > 1 ? "are " : "is"} ${pluralize(planModal.employees_avails?.length!, "employee")} assigned to this plan.`}/>
                 }}
                 onClose={() => setPlanModal(undefined)}
                 body={<>

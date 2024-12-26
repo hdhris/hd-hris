@@ -41,7 +41,6 @@ function EnrollEmployeeForm({plan_id, onOpen, isOpen}: EnrollEmployeeProps) {
 
 
     const handleEnroll = useCallback(async () => {
-        onClose(true)
         const values = {
             plan_id, employee_id,
             coverageAmount
@@ -62,7 +61,7 @@ function EnrollEmployeeForm({plan_id, onOpen, isOpen}: EnrollEmployeeProps) {
         } else {
             toast.error("Coverage amount is required.")
         }
-    }, [coverageAmount, employee_id, onClose, plan_id])
+    }, [coverageAmount, employee_id, plan_id])
     return (<><FormDrawer title="Enroll Employee"
                           size="md"
                           description="Provide the details for enrolling an employee in a new benefit plan."
@@ -134,14 +133,16 @@ function EnrollEmployeeForm({plan_id, onOpen, isOpen}: EnrollEmployeeProps) {
                 <ModalHeader className="flex flex-col gap-1">Add Coverage Amount</ModalHeader>
                 <ModalBody>
                     <Input
-                        {...uniformStyle({variant: "bordered", size: "md"})}
+                        color="primary"
+                        variant="bordered"
+                        size="md"
                         label={<Typography className="text-medium font-medium">Coverage Amount</Typography>}
                         labelPlacement="outside"
                         disableAnimation
                         placeholder="Enter the coverage amount for the employee"
                         type="number"
                         description={<Typography className="text-sm font-medium !text-default-400">Enter the coverage amount for the employee</Typography>}
-                        onValueChange={setCoverageAmount}
+                        onValueChange={(value) => setCoverageAmount(Number(value))}
                     />
                 </ModalBody>
                 <ModalFooter>

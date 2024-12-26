@@ -164,7 +164,7 @@ const DataDisplayTable = <T extends { id: string | number }, >({data, config, ..
     const onSelectionChange = useCallback((keys: Selection) => {
         if (props.selectionMode === "multiple") {
             setSelectedKeys(keys)
-            props.onSelectedKeysChange(keys)
+            props.onSelectedKeysChange && props.onSelectedKeysChange(keys)
         }
     }, [props, setSelectedKeys])
 

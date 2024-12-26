@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -19,6 +23,7 @@ model dim_employee_benefits {
   coverage_amount             Decimal                       @db.Decimal(10, 2)
   contribution_amount         Decimal                       @db.Decimal(10, 2)
   benefit_audit               Json?
+  coverage_amount_type        String?                       @default("")
   ref_benefit_plans           ref_benefit_plans             @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_employee_benefits_ref_benefit_plan_1")
   trans_employees             trans_employees               @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_employee_benefits_trans_employees_2")
   trans_benefit_contributions trans_benefit_contributions[]
