@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { toGMT8 } from "../../lib/utils/toGMT8";
 import { EmployeeAll, UnavaliableStatusJSON } from "../../types/employeee/EmployeeType";
-import { UserEmployee } from "../include-emp-and-reviewr/include";
+import { MajorEmployee } from "../include-emp-and-reviewr/include";
 
 const HistoryJSON = [
     {
@@ -27,7 +27,7 @@ type addUnavailabilityType = {
     start_date: string;
     end_date: string | null;
     reason: string;
-    initiated_by: UserEmployee;
+    initiated_by: MajorEmployee;
 };
 export function addUnavailability({ entry, start_date, end_date, reason, initiated_by }: addUnavailabilityType) {
     const newId = entry.length > 0 ? Math.max(...entry.map((e) => e.id)) + 1 : 1;
@@ -59,7 +59,7 @@ type CancelUnavailabilityType = {
     id: number;
     date: string;
     reason: string;
-    canceled_by: UserEmployee;
+    canceled_by: MajorEmployee;
 };
 export function cancelUnavailability({
     entry,

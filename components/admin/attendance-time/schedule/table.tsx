@@ -2,12 +2,12 @@ import { BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/Attenda
 import { getShortTime } from "./timeHelper";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { Card } from "@nextui-org/react";
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { getColor } from "@/helper/background-color-generator/generator";
 
 export function scheduleTable(
     days: string[],
-    employees: UserEmployee[],
+    employees: MajorEmployee[],
     batchData: BatchSchedule[],
     hoveredRowId: number | null,
     hoveredBatchId: number | null,

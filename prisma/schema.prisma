@@ -162,6 +162,8 @@ model fact_performance_evaluations {
   criteria_json                                                              Json
   ratings_json                                                               Json?
   employment_status                                                          Int?
+  status                                                                     String?                      @default("pending")
+  phase                                                                      String?                      @default("first")
   fact_evaluation_breakdowns                                                 fact_evaluation_breakdowns[]
   ref_employment_status                                                      ref_employment_status?       @relation(fields: [employment_status], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_employees_fact_performance_evaluations_evaluated_byTotrans_employees trans_employees?             @relation("fact_performance_evaluations_evaluated_byTotrans_employees", fields: [evaluated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)

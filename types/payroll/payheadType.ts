@@ -1,4 +1,4 @@
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 
 export interface AffectedJson {
     mandatory: number[] | "all";
@@ -43,7 +43,7 @@ export interface PayheadSpecificAmount {
 // Main return of the api
 export interface PayheadAffected {
     affected: EmployeeAffected[];
-    employees: UserEmployee[];
+    employees: MajorEmployee[];
     payhead: Payhead;
     employement_status: {
         id: number;

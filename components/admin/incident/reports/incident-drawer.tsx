@@ -4,7 +4,7 @@ import EmployeeListForm from "@/components/common/forms/employee-list-autocomple
 import FormFields from "@/components/common/forms/FormFields";
 import { Form } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
@@ -30,7 +30,7 @@ function IncidentDrawer({
 }: // isSubmitting,
 IncidentDrawerProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { data, isLoading } = useQuery<UserEmployee[]>("/api/admin/utils/get-employee-search");
+    const { data, isLoading } = useQuery<MajorEmployee[]>("/api/admin/utils/get-employee-search");
     const userID = useEmployeeId();
     const employees = useMemo(() => {
         if (data) {

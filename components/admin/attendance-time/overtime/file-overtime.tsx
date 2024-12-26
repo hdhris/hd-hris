@@ -2,7 +2,7 @@ import Drawer from "@/components/common/Drawer";
 import EmployeeListForm from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
 import FormFields from "@/components/common/forms/FormFields";
 import { Form } from "@/components/ui/form";
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { useUserInfo } from "@/lib/utils/getEmployeInfo";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
@@ -22,9 +22,9 @@ interface FileOvertimeProps {
 }
 function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
     const userInfo = useUserInfo();
-    const [selectedEmployee, setSelectedEmployee] = useState<UserEmployee>();
+    const [selectedEmployee, setSelectedEmployee] = useState<MajorEmployee>();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { data: employees, isLoading } = useQuery<UserEmployee[]>("/api/admin/utils/get-employee-search");
+    const { data: employees, isLoading } = useQuery<MajorEmployee[]>("/api/admin/utils/get-employee-search");
     const { data: existingOvertimes, isLoading: loadOvertimes } = useQuery<
         {
             employee_id: number;
@@ -109,27 +109,29 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
         mode: "onBlur",
     });
 
+    const { setValue, watch, reset, handleSubmit } = form;
+
     useEffect(() => {
-        setSelectedEmployee(employees?.find((item) => item.id === form.watch("employee_id")));
-    }, [employees, form, form.watch("employee_id")]);
+        setSelectedEmployee(employees?.find((item) => item.id === watch("employee_id")));
+    }, [employees, watch("employee_id")]);
 
     useEffect(() => {
         if (selectedEmployee?.dim_schedules[0]?.ref_batch_schedules) {
-            form.setValue(
+            setValue(
                 "clock_in",
                 toGMT8(selectedEmployee.dim_schedules[0].ref_batch_schedules.clock_out).format("HH:mm:ss")
             );
-            form.setValue(
+            setValue(
                 "clock_out",
                 toGMT8(selectedEmployee.dim_schedules[0].ref_batch_schedules.clock_out)
                     .add(1, "hours")
                     .format("HH:mm:ss")
             );
         } else {
-            form.setValue("clock_in", "17:00");
-            form.setValue("clock_out", "18:00");
+            setValue("clock_in", "17:00");
+            setValue("clock_out", "18:00");
         }
-    }, [selectedEmployee, form]);
+    }, [selectedEmployee]);
 
     const haveExistingOvertime = useMemo(() => {
         return (date: Date): boolean => {
@@ -176,7 +178,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                 variant: "success",
             });
             onClose();
-            form.reset(blankFields);
+            reset(blankFields);
         } catch (error) {
             toast({ title: `${error}`, variant: "danger" });
         }
@@ -192,13 +194,13 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
             isOpen={isOpen}
             onClose={() => {
                 onClose();
-                form.reset(blankFields);
+                reset(blankFields);
             }}
             title={"File Overtime Application"}
             isSubmitting={isSubmitting}
         >
             <Form {...form}>
-                <form id="drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form id="drawer-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <EmployeeListForm
                         employees={
                             employees?.map((emp) => {
@@ -213,7 +215,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                         }
                         isLoading={isLoading}
                         onSelected={(id) => {
-                            form.setValue("employee_id", !Number.isNaN(id) ? id : 0);
+                            setValue("employee_id", !Number.isNaN(id) ? id : 0);
                         }}
                     />
                     <FormFields
@@ -222,7 +224,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                                 name: "date",
                                 label: "Date",
                                 type: "date-picker",
-                                inputDisabled: !form.watch("employee_id"),
+                                inputDisabled: !watch("employee_id"),
                                 config: {
                                     minValue: today(getLocalTimeZone()),
                                     isDateUnavailable,
@@ -232,7 +234,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                                 name: "clock_in",
                                 label: "Clock In",
                                 type: "time",
-                                inputDisabled: !form.watch("employee_id"),
+                                inputDisabled: !watch("employee_id"),
                                 config: {
                                     // isInvalid: inValidClockIn,
                                 },
@@ -241,7 +243,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                                 name: "clock_out",
                                 label: "Clock Out",
                                 type: "time",
-                                inputDisabled: !form.watch("employee_id"),
+                                inputDisabled: !watch("employee_id"),
                                 config: {
                                     // isInvalid: inValidClockOut,
                                 },
@@ -250,13 +252,13 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                                 name: "is_auto_approved",
                                 label: "Auto Approved",
                                 type: "switch",
-                                inputDisabled: !form.watch("employee_id"),
+                                inputDisabled: !watch("employee_id"),
                             },
                             {
                                 name: "reason",
                                 label: "Reason",
                                 type: "text-area",
-                                inputDisabled: !form.watch("employee_id"),
+                                inputDisabled: !watch("employee_id"),
                             },
                         ]}
                     />

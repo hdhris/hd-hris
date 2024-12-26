@@ -1,4 +1,4 @@
-import { MinorEmployee, UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MinorEmployee, MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { ReactNode } from "react";
 
 export interface BatchSchedule {
@@ -16,7 +16,7 @@ export interface BatchSchedule {
 
 export interface Schedules {
   batch: BatchSchedule[];
-  employees: UserEmployee[];
+  employees: MajorEmployee[];
 }
 
 export interface AttendanceLog {
@@ -26,7 +26,7 @@ export interface AttendanceLog {
   status: number;
   punch: number;
   created_at: string; // ISO format string
-  // trans_employees: UserEmployee;
+  // trans_employees: MajorEmployee;
 }
 
 export interface EmployeeSchedule {
@@ -48,7 +48,7 @@ export interface EmployeeSchedule {
 
 export interface AttendanceData {
   attendanceLogs: AttendanceLog[]; // Renamed to plural to better reflect multiple logs
-  employees: UserEmployee[]; // List of employees involved in the logs
+  employees: MajorEmployee[]; // List of employees involved in the logs
   statusesByDate: Record<string, AttendaceStatuses>; // Attendance statuses organized by date
   // batchSchedule: BatchSchedule[]; // Array of batch schedules for the employees
   employeeSchedule: EmployeeSchedule[]; // Array of individual schedules for employees

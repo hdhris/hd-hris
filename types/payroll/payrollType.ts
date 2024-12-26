@@ -1,4 +1,4 @@
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { Payhead } from "./payheadType";
 import { VariableAmountProp } from "@/helper/payroll/calculations";
 
@@ -15,7 +15,7 @@ export interface ProcessDate {
 
 export interface PayrollTable {
   // pr_dates: PRDate[];
-  employees: UserEmployee[];
+  employees: MajorEmployee[];
 }
 
 
@@ -88,7 +88,7 @@ export type PayslipPayhead = Payhead & Benefit;
 export interface PayslipData {
   payrolls: Payroll[];
   breakdowns: Breakdown[];
-  employees: UserEmployee[];
+  employees: MajorEmployee[];
   earnings: PayslipPayhead[];
   deductions: PayslipPayhead[];
   calculatedAmountList:  {

@@ -1,3 +1,5 @@
+import { ApprovalStatusType } from "../attendance-time/OvertimeType";
+
 // Define the structure for the Rating object
 export interface Rating {
     rate: number;
@@ -32,8 +34,27 @@ export interface SurveyData {
         details: {
             [key: string]: number;
         };
+        comments: string;
     };
 }
+
+export const phaseArray = [
+    "first",
+    "second",
+    "third",
+    "fourth",
+    "fifth",
+    "sixth",
+    "seventh",
+    "eighth",
+    "ninth",
+    "tenth",
+    "eleventh",
+    "twelfth",
+] as const;
+
+// Reuse as a Type
+export type PhaseType = (typeof phaseArray)[number];
 
 export interface SurveyFormType {
     id: number;
@@ -46,7 +67,9 @@ export interface SurveyFormType {
     updated_at: string;
     deleted_at: string | null;
     evaluated_by: number;
+    status: ApprovalStatusType;
     criteria_json: CriteriaDetail[];
     ratings_json: SurveyData;
     employment_status: number;
+    phase: PhaseType;
 }

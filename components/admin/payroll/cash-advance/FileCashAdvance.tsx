@@ -3,7 +3,7 @@ import EmployeeListForm from "@/components/common/forms/employee-list-autocomple
 import FormFields from "@/components/common/forms/FormFields";
 import { Form } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { useQuery } from "@/services/queries";
 import { ApprovalStatusType } from "@/types/attendance-time/OvertimeType";
@@ -30,7 +30,7 @@ const cashAdvanceSchema = z.object({
 
 function FileCashAdvance({ isOpen, onClose }: CashAdvanceFormType) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { data: employees, isLoading } = useQuery<UserEmployee[]>("/api/admin/utils/get-employee-search");
+    const { data: employees, isLoading } = useQuery<MajorEmployee[]>("/api/admin/utils/get-employee-search");
 
     const defaultValues = {
         id: undefined,

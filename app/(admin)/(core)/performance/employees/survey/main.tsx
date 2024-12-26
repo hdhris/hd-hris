@@ -6,10 +6,10 @@ import { Card, ScrollShadow, Spinner } from "@nextui-org/react";
 import React, { useMemo } from "react";
 
 const sampleData: SurveyData = {
-    "1": { total: 4, details: {} },
-    "2": { total: 5, details: { "0": 2, "1": 1.5, "2": 1.5 } },
-    "3": { total: 5, details: {} },
-    "4": { total: 5, details: {} },
+    "1": { total: 4, details: {}, comments: "" },
+    "2": { total: 5, details: { "0": 2, "1": 1.5, "2": 1.5 }, comments: "" },
+    "3": { total: 5, details: {}, comments: "" },
+    "4": { total: 5, details: {}, comments: "" },
 };
 
 function SurveyPage({ id }: { id?: string }) {

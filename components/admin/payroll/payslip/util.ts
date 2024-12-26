@@ -1,7 +1,7 @@
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { PayslipPayhead } from "@/types/payroll/payrollType";
 
-export function isAffected(employee: UserEmployee, payhead: PayslipPayhead) {
+export function isAffected(employee: MajorEmployee, payhead: PayslipPayhead) {
   try{
     const mandatory = payhead.affected_json.mandatory;
     const department = payhead.affected_json.departments;
