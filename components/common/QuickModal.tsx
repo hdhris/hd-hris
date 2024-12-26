@@ -9,11 +9,16 @@ interface ModalProps {
     buttons: {
         onClose: {
             label: string;
-            onPress: ()=> void;
+            onPress?: ()=> void;
+            isLoading?: boolean;
+            isDisabled?: boolean;
         },
         onAction: {
+            isLoading?: boolean;
+            isDisabled?: boolean;
+            form?: string;
             label: string;
-            onPress: ()=> void;
+            onPress?: ()=> void;
         }
     }
     size?: "2xl" | "xs" | "sm" | "md" | "lg" | "xl" | "3xl" | "4xl" | "5xl" | "full" | undefined;
@@ -32,10 +37,10 @@ export default function QuickModal({title, isOpen, buttons, onClose, children, s
                             {children}
                         </ModalBody>
                         <ModalFooter>
-                            <Button color="danger" variant="light" onPress={buttons.onClose.onPress}>
+                            <Button color="danger" variant="light" onPress={buttons.onClose.onPress ?? onClose}>
                                 {buttons.onClose.label}
                             </Button>
-                            <Button color="primary" onPress={buttons.onAction.onPress}>
+                            <Button form={buttons.onAction.form} color="primary" onPress={buttons.onAction.onPress}>
                                 {buttons.onAction.label}
                             </Button>
                         </ModalFooter>

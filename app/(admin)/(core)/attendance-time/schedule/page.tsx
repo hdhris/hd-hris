@@ -7,7 +7,7 @@ import SearchFilter from "@/components/common/filter/SearchFilter";
 import { SearchItemsProps } from "@/components/common/filter/SearchItems";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import { toast } from "@/components/ui/use-toast";
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import showDialog from "@/lib/utils/confirmDialog";
 import { useQuery } from "@/services/queries";
@@ -19,7 +19,7 @@ import React, { useMemo, useState } from "react";
 
 const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
-const searchConfig: SearchItemsProps<UserEmployee>[] = [
+const searchConfig: SearchItemsProps<MajorEmployee>[] = [
     {
         key: "last_name",
         label: "Last Name",
@@ -33,11 +33,11 @@ const searchConfig: SearchItemsProps<UserEmployee>[] = [
         label: "Middle Name",
     },
 ];
-const filterConfig: FilterItemsProps<UserEmployee>[] = [
+const filterConfig: FilterItemsProps<MajorEmployee>[] = [
     {
         filter: days.map((day) => ({
             label: capitalize(day),
-            value: (item: UserEmployee) => item.dim_schedules[0].days_json.includes(day),
+            value: (item: MajorEmployee) => item.dim_schedules[0].days_json.includes(day),
         })),
         key: ["dim_schedules", "days_json"],
         sectionName: "Day of week",
@@ -49,7 +49,7 @@ function Page() {
     const [hoveredBatchId, setHoveredBatchId] = useState<number | null>(null);
     const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
     const { data, isLoading, mutate } = useQuery<Schedules>("/api/admin/attendance-time/schedule");
-    const [tableData, setTableData] = useState<UserEmployee[]>();
+    const [tableData, setTableData] = useState<MajorEmployee[]>();
     const [isVisible, setVisible] = useState(false);
     const [isPending, setPending] = useState(false);
     const [selectedBatch, setSelectedBatch] = useState<BatchSchedule | null>(null);

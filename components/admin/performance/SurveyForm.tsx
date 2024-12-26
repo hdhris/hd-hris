@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Card, Button, Radio, RadioGroup } from "@nextui-org/react";
+import { Card, Button, Radio, RadioGroup, Textarea } from "@nextui-org/react";
 import { CriteriaDetail, Rating, TableRating } from "@/types/performance/types";
 import Typography from "@/components/common/typography/Typography";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
@@ -9,29 +9,30 @@ import { isObjectEmpty } from "@/helper/objects/filterObject";
 
 interface SurveyFormProps {
     criteriaDetails: CriteriaDetail[];
-    predefinedResponses?: Record<number, { total: number; details: Record<number, number> }>; // Optional pre-filled data
+    predefinedResponses?: Record<number, { total: number; details: Record<number, number>, comments: string }>; // Optional pre-filled data
 }
 
 export default function SurveyForm({ criteriaDetails, predefinedResponses = {} }: SurveyFormProps) {
     const [responses, setResponses] =
-        useState<Record<number, { total: number; details: Record<number, number> }>>(predefinedResponses);
+        useState<Record<number, { total: number; details: Record<number, number>; comments: string }>>(predefinedResponses);
 
     // Initialize responses properly from predefined data if available
     useEffect(() => {
         if (predefinedResponses && !isObjectEmpty(predefinedResponses)) {
             Object.keys(predefinedResponses).forEach((criteriaID) => {
-                const { total, details } = predefinedResponses[parseInt(criteriaID)];
-                handleResponseChange(parseInt(criteriaID), total, details);
+                const { total, details, comments } = predefinedResponses[parseInt(criteriaID)];
+                handleResponseChange(parseInt(criteriaID), total, details, comments);
             });
         }
     }, [predefinedResponses]);
 
-    const handleResponseChange = (criteriaID: number, value: number, details: Record<number, number>) => {
+    const handleResponseChange = (criteriaID: number, value: number, details: Record<number, number>, comments: string ) => {
         setResponses((prev) => ({
             ...prev,
             [criteriaID]: {
                 total: value,
                 details, // Include nested details if available.
+                comments,
             },
         }));
     };
@@ -81,7 +82,7 @@ const RenderTableChoices = ({
     isChild,
     predefinedRate,
 }: {
-    predefinedRate?: { total: number; details?: Record<number, number> } | null;
+    predefinedRate?: { total: number; details?: Record<number, number>; comments: string } | null;
     id: number;
     name: string;
     description: string;
@@ -89,7 +90,7 @@ const RenderTableChoices = ({
     ratings: Rating[] | TableRating[];
     type: "multiple-choices" | "table";
     isChild?: boolean;
-    handleResponseChange: (id: number, value: number, details: Record<number, number>) => void;
+    handleResponseChange: (id: number, value: number, details: Record<number, number>, comments: string) => void;
 }) => {
     const handleChildResponseChange = useMemo(() => {
         return (criteriaID: number, value: number) => {
@@ -100,14 +101,18 @@ const RenderTableChoices = ({
                 [criteriaID]: value,
             };
             const totalScore = Object.values(newDtails).reduce((sum, score) => sum + score, 0);
-            handleResponseChange(id, totalScore, newDtails);
+            handleResponseChange(id, totalScore, newDtails, "");
         };
     }, [predefinedRate, handleResponseChange, id]);
 
     const setRate = (value: number) => {
         const totalScore = value * weight;
-        handleResponseChange(id, totalScore, {});
+        handleResponseChange(id, totalScore, {}, predefinedRate?.comments ?? "");
     };
+
+    const setComment = (value: string) => {
+        handleResponseChange(id, predefinedRate?.total ?? 0, {}, value);
+    }
 
     return (
         <>
@@ -143,6 +148,7 @@ const RenderTableChoices = ({
                                     predefinedRate?.details
                                         ? {
                                               total: predefinedRate.details[index],
+                                              comments: "",
                                           }
                                         : undefined
                                 }
@@ -151,6 +157,12 @@ const RenderTableChoices = ({
                     ))
                 )}
             </div>
+            {!isChild && <Textarea
+                className="mt-2"
+                placeholder="Comments"
+                value={predefinedRate?.comments}
+                onValueChange={setComment}
+            />}
         </>
     );
 };

@@ -1,5 +1,5 @@
 import { isAffected } from "@/components/admin/payroll/payslip/util";
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { tryParse } from "@/helper/objects/jsonParserType";
 import {
   BaseValueProp,
@@ -26,7 +26,7 @@ export async function stageTable(
   dateInfo: ProcessDate,
   stage_one: {
     payrolls: Payroll[];
-    employees: UserEmployee[];
+    employees: MajorEmployee[];
     dataPH: PayslipPayhead[];
   },
   setStageMsg: (msg:string)=>void,

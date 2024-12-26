@@ -12,7 +12,7 @@ import PayheadCalculator from "./Calculator/Calculator";
 import { Spinner, Input, cn } from "@nextui-org/react";
 import { capitalize } from "lodash";
 import { ListDropDown } from "./ListBoxDropDown";
-import { UserEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import axios from "axios";
@@ -28,7 +28,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
     const router = useRouter();
     const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
     const [amountRecords, setAmountRecords] = useState<Map<number, number>>(new Map());
-    const [filteredEmployees, setFilteredEmployees] = useState<UserEmployee[]>([]);
+    const [filteredEmployees, setFilteredEmployees] = useState<MajorEmployee[]>([]);
     const [isInvalid, setIsInvalid] = useState(false);
     const strictLevel = useMemo(()=>{
         // 0: No restriction
@@ -418,7 +418,7 @@ function PayheadUpsert({ payhead_id, payhead_type }: { payhead_id?: string; payh
                     </p>
                 </div>
                 <div className="min-w-[750px] space-y-1 h-fit">
-                    {[...allAffectedEmployees.values()].map((item: UserEmployee) => (
+                    {[...allAffectedEmployees.values()].map((item: MajorEmployee) => (
                         <div
                             key={item.id}
                             className={cn(
