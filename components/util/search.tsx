@@ -12,7 +12,6 @@ function Search<T>({value, onChange, searchingItemKey, ...rest}: SearchProps<T>)
         {...rest}
         variant="bordered"
         radius="md"
-        size="sm"
         className={cn("w-[250px] xl:w-[400px]", rest.className)}
         placeholder={Array.isArray(searchingItemKey) && searchingItemKey.length > 0 ? `Search by ${searchingItemKey
             .map((item) => {

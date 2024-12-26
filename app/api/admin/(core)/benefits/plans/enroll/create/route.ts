@@ -4,6 +4,7 @@ import prisma from "@/prisma/prisma"
 import { JsonValue } from "@prisma/client/runtime/library";
 import {Benefit, ContributionSetting} from "@/helper/payroll/calculations";
 import {ContributionType} from "@/types/benefits/plans/plansTypes";
+import {getPrismaErrorMessage} from "@/server/errors/server-errors";
 
 export async function POST(req: NextRequest) {
     try {
@@ -151,6 +152,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({status: 200})
     } catch (err) {
         console.log("Error creating: ", err)
-        return NextResponse.json({err: err})
+        return getPrismaErrorMessage(err)
     }
 }

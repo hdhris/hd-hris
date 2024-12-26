@@ -1,25 +1,26 @@
+import prisma from "@/prisma/prisma";
 import fetcher from "@/services/fetcher";
 import useSWR, {SWRConfiguration} from "swr";
-import {ApiResponse} from "@/types/dashboard/reportStat";
-import {Employee} from "@/types/employeee/EmployeeType";
 import {Signatory} from "@/types/audit/types";
-import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
-import {Department} from "@/types/employeee/DepartmentType";
-import {BatchSchedule} from "@/types/attendance-time/AttendanceTypes";
 import {Branch} from "@/types/employeee/BranchType";
-import {Payhead, PayheadAffected} from "@/types/payroll/payheadType";
-import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
-import prisma from "@/prisma/prisma";
 import {JobPosition} from "@/types/employeee/JobType";
+import {Accounts} from "@/types/employeee/AccountType";
+import {Employee} from "@/types/employeee/EmployeeType";
 import {SalaryGrade} from "@/types/employeee/SalaryType";
+import {JobTypes} from "@/types/signatory/job/job-types";
+import {ApiResponse} from "@/types/dashboard/reportStat";
+import {Department} from "@/types/employeee/DepartmentType";
+import {DepartmentName} from "@/types/departments/department-types";
+import {Payhead, PayheadAffected} from "@/types/payroll/payheadType";
+import {BatchSchedule} from "@/types/attendance-time/AttendanceTypes";
 import {EmploymentStatus} from "@/types/employeee/EmploymentStatusType";
+import {SystemNotification} from "@/types/notifications/notification-types";
+import {SignatoryPath, SignatoryRoles} from "@/types/signatory/signatory-types";
 import {EmployeeLeaveCreditFormSetup} from "@/types/leaves/leave-credits-types";
 import {EmploymentStatusDetails} from "@/types/employment-status/employment-status";
-import {Accounts} from "@/types/employeee/AccountType";
-import {SignatoryPath, SignatoryRoles} from "@/types/signatory/signatory-types";
-import {JobTypes} from "@/types/signatory/job/job-types";
-import {DepartmentName} from "@/types/departments/department-types";
-import {SystemNotification} from "@/types/notifications/notification-types";
+import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
+import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
+import {EmployeeEnrollmentSelection, PaginatedEmployeeBenefitDetails} from "@/types/benefits/membership/membership-types";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -69,6 +70,7 @@ export function useUser() {
         refreshInterval: 10000
     })
 }
+
 export function useLoginActivity() {
     return useSWR<LoginActivity[]>('/api/admin/security', fetcher, {
         revalidateOnFocus: true
@@ -96,6 +98,7 @@ export function useSuspendedEmployees() {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
 }
+
 export function useFormerEmployees() {
     return useSWR<Employee[]>('/api/employeemanagement/resigned-terminated', fetcher, {
         // revalidateOnFocus: false, refreshInterval: 3000
@@ -106,7 +109,7 @@ export function usePrivilegesData() {
     return useSWR<Privilege[]>('/api/employeemanagement/privileges', fetcher, {
         // revalidateOnFocus: false, refreshInterval: 3000
     })
-} 
+}
 
 export function useDepartmentsData() {
     return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {//
@@ -161,6 +164,7 @@ export function useNewPayhead() {
 type ArgumentsTuple = readonly [any, ...unknown[]];
 type Arguments = string | ArgumentsTuple | Record<any, any> | null | undefined | false;
 type Key = Arguments | (() => Arguments);
+
 ////////////////////////////////////////////////////////////////////////////////////////
 
 export function useQuery<T>(key: Key, options?: SWRConfiguration<T>) {
@@ -210,6 +214,7 @@ export function useEmploymentStatusTypes() {
         revalidateOnFocus: true, keepPreviousData: true
     })
 }
+
 export function useSignatories() {
     return useSWR<SignatoryPath[]>('/api/admin/signatory', {
         revalidateOnFocus: true, keepPreviousData: true, refreshInterval: 3000
@@ -239,4 +244,17 @@ export function useNotification() {
         keepPreviousData: true, // Keep previous data while fetching new data
         refreshInterval: 3000
     });
+}
+
+
+export function useBenefitMembership({page, rows}: { page: number, rows: number }) {
+    return usePaginateQuery<PaginatedEmployeeBenefitDetails>("/api/admin/benefits/membership", page, rows, {
+        refreshInterval: 3000
+    });
+}
+
+export function useNotEnrolledEmployees() {
+    return useSWR<EmployeeEnrollmentSelection>("/api/admin/benefits/plans/not-enrolled", fetcher, {
+        keepPreviousData: true, revalidateOnFocus: true,
+    })
 }

@@ -125,7 +125,7 @@ const RenderDisplay = <T extends { id: string | number }>({
         <Case of="grid">
             <ScrollShadow className="flex-1 px-2 pb-2 max-w-full" size={10}>
                 <div
-                    className="h-full grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5">
+                    className="h-full grid grid-cols-[repeat(auto-fit,minmax(100%,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5">
                     {newData.length > 0 ? <RenderList
                         // onClick={(key) => console.log("Key: ", key)}
                         items={newData}
@@ -147,7 +147,7 @@ const RenderDisplay = <T extends { id: string | number }>({
                             items={newData}
                             map={(item, key) => (<>
                                 {onListDisplay ? onListDisplay(item, key) :
-                                    <p>No grid display available</p>}
+                                    <p>No list display available</p>}
                             </>)}
                         />
                     </div>

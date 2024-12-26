@@ -41,3 +41,5 @@ export interface BenefitPlanPaginated{
 }
 
 export type ContributionType = "fixed" | "percentage" | "others"
+
+

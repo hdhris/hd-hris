@@ -2,6 +2,7 @@
 import {ReactNode, useEffect, useRef, useState} from "react";
 import {Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalProps,} from "@nextui-org/react";
 import ReactDOM from "react-dom/client";
+import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 
 interface showDialogProps extends Omit<ModalProps, "title"> {
     title: ReactNode;
@@ -73,15 +74,17 @@ const showDialog = async ({
                             Cancel
                         </Button>)}
                         <Button
-                            color="danger"
-                            variant={prefAnswer == "no" ? "solid" : "light"}
+                            {...uniformStyle({
+                                color: "danger",
+                                variant: prefAnswer == "no" ? "solid" : "light"
+                            })}
                             ref={prefAnswer == "no" ? buttonRef : null}
                             onPress={handleNo}
                         >
                             No
                         </Button>
                         <Button
-                            color="primary"
+                            {...uniformStyle()}
                             variant={prefAnswer == "yes" ? "solid" : "light"}
                             ref={prefAnswer == "yes" ? buttonRef : null}
                             onPress={handleYes}

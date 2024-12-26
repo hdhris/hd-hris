@@ -78,7 +78,6 @@ export function getPrismaErrorMessage(error: any){
             message: `An unexpected error occurred: ${error.message || "No additional details available."}`
         }, {status: 500});
     } else if(error instanceof PrismaClientUnknownRequestError){
-
         console.log("Error PrismaClientUnknownRequestError: ", error)
         return NextResponse.json({
             success: false,

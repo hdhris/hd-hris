@@ -7,7 +7,7 @@ import {Divider} from "@nextui-org/divider";
 import {axiosInstance} from "@/services/fetcher";
 import showDialog from "@/lib/utils/confirmDialog";
 import {useToast} from '@/components/ui/use-toast';
-import {usePaginateQuery} from "@/services/queries";
+import {useBenefitMembership, usePaginateQuery} from "@/services/queries";
 import {numberWithCommas} from "@/lib/utils/numberFormat";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import CardView from "@/components/common/card-view/card-view";
@@ -43,15 +43,19 @@ function PlansDataDisplay() {
     const {data, isLoading} = usePaginateQuery<BenefitPlanPaginated>("/api/admin/benefits/plans", page, rows, {
         refreshInterval: 3000
     });
+
+    const {data: members} = useBenefitMembership({page, rows});
+
     const benefitPlans = useMemo(() => {
         if (data) {
             if (planModal) {
                 setPlanModal((prevState) => data.data.find(item => item.id === prevState?.id))
             }
             return data.data
+
         }
         return []
-    }, [data, planModal])
+    }, [data, members, planModal])
 
     const navEndContent = useCallback(() => {
         return (<>
@@ -117,7 +121,7 @@ function PlansDataDisplay() {
             isLoading={isLoading}
             defaultDisplay="table"
             data={benefitPlans}
-            title="Leave Requests"
+            title="Benefit Plans"
             filterProps={{
                 filterItems: FilterItems
             }}
@@ -254,13 +258,13 @@ function PlansDataDisplay() {
                 //     <div className="w-full">{props.current_employees.length > 0 && <Chip className="bg-[#338EF7] text-white min-w-full" radius="sm" startContent={<IoMdInformationCircle className={icon_size_sm}/>}>Note. This leave cannot be edited or deleted.</Chip>}</div>
                 // }
 
-                footer={<>
-                    <Section className="ms-0 mt-4 border-1 rounded p-4" title="Enroll Employee"
-                             subtitle="Enroll employee to this plan">
-                        <Button {...uniformStyle()} onPress={() => setIsOpenEnrolled(true)}>Enroll</Button>
-                    </Section>
-                    <Divider className="mt-4"/>
-                </>}
+                // footer={<>
+                //     <Section className="ms-0 mt-4 border-1 rounded p-4" title="Enroll Employee"
+                //              subtitle="Enroll employee to this plan">
+                //         <Button {...uniformStyle()} onPress={() => setIsOpenEnrolled(true)}>Enroll</Button>
+                //     </Section>
+                //     <Divider className="mt-4"/>
+                // </>}
             />}
 
 
@@ -315,7 +319,7 @@ function PlansDataDisplay() {
             // }}
         />
 
-        <EnrollEmployeeForm plan_id={planModal?.id!} isOpen={isOpenEnrolled} onOpen={setIsOpenEnrolled}/>
+        {/*<EnrollEmployeeForm plan_id={planModal?.id!} isOpen={isOpenEnrolled} onOpen={setIsOpenEnrolled}/>*/}
         <EditPlanForm plan={planModal} title="Update Plan" description="Update an existing plan"
                       onOpen={setOnEditAndDelete} isOpen={onEditAndDelete}/>
 
