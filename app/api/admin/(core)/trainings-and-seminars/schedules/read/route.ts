@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 
-export async function GET(req: NextRequest) {
+export const dynamic = "force-dynamic";
+
+export async function GET() {
   try {
     const schedules = await prisma.dim_training_schedules.findMany({
       where: {
