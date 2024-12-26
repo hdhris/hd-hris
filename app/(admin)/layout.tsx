@@ -202,7 +202,7 @@ const Welcome = ({data, isOpen, onOpenChange}: {data: SystemNotification, isOpen
                     </Typography>
                     <div className="rounded bg-default-400/20 p-4">
                         <Typography
-                            className="text-xl font-semibold">{"Good " + getTimeOfDay() + ", " + currentUser.data?.user?.name}</Typography>
+                            className="text-xl font-semibold">{"Good " + getTimeOfDay() + ", " + currentUser.data?.user?.name || ""}</Typography>
                     </div>
 
                     <Typography className="font-semibold">
