@@ -8,7 +8,6 @@ import {getEmpFullName} from "@/lib/utils/nameFormatter";
 export async function GET(req: NextRequest) {
     try {
         const {searchParams} = new URL(req.url)
-        const {page, perPage} = paginateUrl(req.url)
         const plan_id = Number(searchParams.get("plan_id"))
 
         const enrolled_benefit = await prisma.dim_employee_benefits.findMany({

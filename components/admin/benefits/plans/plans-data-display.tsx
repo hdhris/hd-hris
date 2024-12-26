@@ -24,7 +24,7 @@ import {Alert} from "@nextui-org/alert";
 import PlanForm from "@/components/admin/benefits/plans/form/plan-form";
 import EditPlanForm from "@/components/admin/benefits/plans/form/edit-plan";
 import EnrollEmployeeForm from "@/components/admin/benefits/plans/form/enroll-employee-form";
-import {LuCircleFadingPlus} from "react-icons/lu";
+import {pluralize} from "@/helper/pluralize/pluralize";
 
 function PlansDataDisplay() {
     const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -73,8 +73,6 @@ function PlansDataDisplay() {
 
     const handlePlanSelection = (id: Key) => {
         setPlanModal(benefitPlans.find(item => item.id === Number(id)))
-        console.log("Plan Selected: ", benefitPlans.find(item => item.id === Number(id)))
-
     }
     const handleEditPlan = useCallback((id: Key) => {
         // alert("Key: " + id)
@@ -157,7 +155,7 @@ function PlansDataDisplay() {
                     // isLoading: loading,
                     isDisabled: planModal.employees_avails?.length! > 0,
                     children: planModal.employees_avails?.length! > 0 && <Alert color="danger"
-                                                                                description={`Couldn't Delete Plan. There are ${planModal.employees_avails?.length} employees assigned to this plan.`}/>
+                                                                                description={`Couldn't Delete Plan. There ${planModal.employees_avails?.length > 1 ? "are " : "is"} ${pluralize(planModal.employees_avails?.length, "employee")} assigned to this plan.`}/>
                 }}
                 onClose={() => setPlanModal(undefined)}
                 body={<>
