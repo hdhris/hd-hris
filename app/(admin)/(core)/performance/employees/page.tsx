@@ -133,7 +133,7 @@ function Page() {
     };
 
     return (
-        <div>
+        <div className="h-full w-full flex">
             <TableData items={employees || []} config={config} onRowAction={surveyEmployee} />
             <Drawer isOpen={!!selectedEmployee} onClose={() => setSelectedEmployee(null)}>
                 {selectedEmployee && (
@@ -183,6 +183,7 @@ function Page() {
                             {selectedEmployee.evaluation_history.length > 0 &&
                                 selectedEmployee.evaluation_history.map((evaluation) => (
                                     <RowItem
+                                        key={evaluation.id}
                                         isPressable
                                         color={evaluation.status === "pending" ? "warning" : undefined}
                                         title={`${capitalize(evaluation.phase)} phase evaluation as ${
@@ -217,7 +218,7 @@ function Page() {
                 onClose={() => setIsCreatingAppraisal(false)}
             >
                 <Form {...form}>
-                    <form id="create-survey">
+                    <form id="create-survey" className="space-y-4">
                         <FormFields<z.infer<typeof formSchema>>
                             items={[
                                 {

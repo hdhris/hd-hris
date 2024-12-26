@@ -158,15 +158,18 @@ model fact_performance_evaluations {
   created_at                                                                 DateTime                     @default(now()) @db.Timestamp(6)
   updated_at                                                                 DateTime                     @default(now()) @db.Timestamp(6)
   deleted_at                                                                 DateTime?                    @db.Timestamp(6)
-  evaluated_by                                                               Int?
+  evaluated_by                                                               Int
   criteria_json                                                              Json
-  ratings_json                                                               Json?
-  employment_status                                                          Int?
-  status                                                                     String?                      @default("pending")
-  phase                                                                      String?                      @default("first")
+  ratings_json                                                               Json
+  employment_status                                                          Int
+  status                                                                     String                       @default("pending")
+  phase                                                                      String                       @default("first")
+  compentencies_json                                                         Json                         @default("[]")
+  development_plan_json                                                      Json                         @default("[]")
+  evaluator                                                                  Json                         @default("{}")
   fact_evaluation_breakdowns                                                 fact_evaluation_breakdowns[]
-  ref_employment_status                                                      ref_employment_status?       @relation(fields: [employment_status], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  trans_employees_fact_performance_evaluations_evaluated_byTotrans_employees trans_employees?             @relation("fact_performance_evaluations_evaluated_byTotrans_employees", fields: [evaluated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_employment_status                                                      ref_employment_status        @relation(fields: [employment_status], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  trans_employees_fact_performance_evaluations_evaluated_byTotrans_employees trans_employees              @relation("fact_performance_evaluations_evaluated_byTotrans_employees", fields: [evaluated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_employees                                                            trans_employees              @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fact_performance_evaluations_trans_employees_1")
 
   @@index([deleted_at])

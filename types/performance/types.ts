@@ -1,4 +1,5 @@
 import { ApprovalStatusType } from "../attendance-time/OvertimeType";
+import { Evaluations } from "../leaves/leave-evaluators-types";
 
 // Define the structure for the Rating object
 export interface Rating {
@@ -71,5 +72,18 @@ export interface SurveyFormType {
     criteria_json: CriteriaDetail[];
     ratings_json: SurveyData;
     employment_status: number;
+    evaluator: Evaluations;
     phase: PhaseType;
+    compentencies_json: Compentencies[];
+    development_plan_json: {
+        id: number,
+        comment: string;
+    }[];
+}
+
+export interface Compentencies {
+    id: number;
+    criteria: string;
+    rating: string;
+    remarks: string;
 }

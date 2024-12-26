@@ -1,20 +1,26 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, Button, Radio, RadioGroup, Textarea } from "@nextui-org/react";
 import { CriteriaDetail, Rating, TableRating } from "@/types/performance/types";
 import Typography from "@/components/common/typography/Typography";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { isObjectEmpty } from "@/helper/objects/filterObject";
+import { asyncQueue } from "@/hooks/asyncQueue";
+import axios from "axios";
+import { toast } from "@/components/ui/use-toast";
 
 interface SurveyFormProps {
+    id: number;
     criteriaDetails: CriteriaDetail[];
-    predefinedResponses?: Record<number, { total: number; details: Record<number, number>, comments: string }>; // Optional pre-filled data
+    predefinedResponses?: Record<number, { total: number; details: Record<number, number>; comments: string }>; // Optional pre-filled data
 }
 
-export default function SurveyForm({ criteriaDetails, predefinedResponses = {} }: SurveyFormProps) {
+export default function SurveyForm({ id, criteriaDetails, predefinedResponses = {} }: SurveyFormProps) {
     const [responses, setResponses] =
-        useState<Record<number, { total: number; details: Record<number, number>; comments: string }>>(predefinedResponses);
+        useState<Record<number, { total: number; details: Record<number, number>; comments: string }>>(
+            predefinedResponses
+        );
 
     // Initialize responses properly from predefined data if available
     useEffect(() => {
@@ -26,7 +32,12 @@ export default function SurveyForm({ criteriaDetails, predefinedResponses = {} }
         }
     }, [predefinedResponses]);
 
-    const handleResponseChange = (criteriaID: number, value: number, details: Record<number, number>, comments: string ) => {
+    const handleResponseChange = (
+        criteriaID: number,
+        value: number,
+        details: Record<number, number>,
+        comments: string
+    ) => {
         setResponses((prev) => ({
             ...prev,
             [criteriaID]: {
@@ -46,6 +57,26 @@ export default function SurveyForm({ criteriaDetails, predefinedResponses = {} }
         console.log("Total overall scroe:", totalScore / criteriaDetails.length);
     };
 
+    const { pushToQueue } = asyncQueue<typeof responses>(async (value?: typeof responses) => {
+        try {
+            await axios.post("/api/admin/performance/employees/update/part_1", {
+                id: id,
+                ratings_json: value,
+            });
+        } catch (error) {
+            toast({
+                description: "An error has occured on saving changes",
+                variant: "danger",
+            });
+        }
+    });
+
+    useEffect(() => {
+        if (!isObjectEmpty(responses)) {
+            pushToQueue(responses);
+        }
+    }, [responses]);
+
     return (
         <div>
             <form id="form" onSubmit={handleSubmit}>
@@ -64,9 +95,9 @@ export default function SurveyForm({ criteriaDetails, predefinedResponses = {} }
                     </Card>
                 ))}
             </form>
-            <Button {...uniformStyle({ radius: "md" })} form="form" type="submit" color="primary" className="ms-auto">
+            {/* <Button {...uniformStyle({ radius: "md" })} form="form" type="submit" color="primary" className="ms-auto">
                 Submit Survey
-            </Button>
+            </Button> */}
         </div>
     );
 }
@@ -111,8 +142,10 @@ const RenderTableChoices = ({
     };
 
     const setComment = (value: string) => {
-        handleResponseChange(id, predefinedRate?.total ?? 0, {}, value);
-    }
+        const oldTotal = predefinedRate?.total ?? 0;
+        const oldDetails = predefinedRate?.details || {};
+        handleResponseChange(id, oldTotal, oldDetails, value);
+    };
 
     return (
         <>
@@ -157,12 +190,14 @@ const RenderTableChoices = ({
                     ))
                 )}
             </div>
-            {!isChild && <Textarea
-                className="mt-2"
-                placeholder="Comments"
-                value={predefinedRate?.comments}
-                onValueChange={setComment}
-            />}
+            {!isChild && (
+                <Textarea
+                    className="mt-2"
+                    placeholder="Comments"
+                    value={predefinedRate?.comments}
+                    onValueChange={setComment}
+                />
+            )}
         </>
     );
 };
@@ -178,7 +213,9 @@ const RenderChoices = ({
 }) => (
     <RadioGroup
         orientation="vertical"
-        onValueChange={(value) => setRate(Number(value))}
+        onValueChange={(value) => {
+            setRate(Number(value));
+        }}
         defaultValue={String(predefinedValue)} // Set the initial value
     >
         {ratings.map((rating) => (
