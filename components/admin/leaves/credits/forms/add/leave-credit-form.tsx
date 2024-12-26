@@ -200,7 +200,7 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
                         <FormFields
                             items={formFields.map(field => ({
                                 ...field,
-                                name: `leave_credits.${index}.${field.name}`,
+                                name: `leave_credits.${index}.${String(field.name)}`,
                             }))}
                         />
                     </div>

@@ -386,7 +386,7 @@ function PlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) 
                                 <div key={field.id} className="grid grid-cols-2 gap-4">
                                     <FormFields
                                         items={[...salaryFields, ...planRatesFields].map((rateField) => ({
-                                            ...rateField, name: `tiers.${index}.${rateField.name}`, // Matches keys in the schema (e.g., minSalary, maxMSC)
+                                            ...rateField, name: `tiers.${index}.${String(rateField.name)}`, // Matches keys in the schema (e.g., minSalary, maxMSC)
                                         }))}
                                     />
                                 </div>

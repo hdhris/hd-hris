@@ -181,8 +181,9 @@ function Page() {
                                 />
                             )}
                             {selectedEmployee.evaluation_history.length > 0 &&
-                                selectedEmployee.evaluation_history.map((evaluation) => (
+                                selectedEmployee.evaluation_history.map((evaluation, index) => (
                                     <RowItem
+                                        key={index} //Fixed: Missing key
                                         isPressable
                                         color={evaluation.status === "pending" ? "warning" : undefined}
                                         title={`${capitalize(evaluation.phase)} phase evaluation as ${

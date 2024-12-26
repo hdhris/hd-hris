@@ -189,7 +189,7 @@ function EditLeaveCredits({employee, isOpen, onOpen}: EditLeaveCreditsProps) {
                         <div className="flex gap-4">
                             <FormFields
                                 items={formFields.map((field) => ({
-                                    ...field, name: `leave_credits.${index}.${field.name}`,
+                                    ...field, name: `leave_credits.${index}.${String(field.name)}`,
                                 }))}
                             />
                         </div>
