@@ -5,6 +5,7 @@ import { JsonValue } from "@prisma/client/runtime/library";
 import {Benefit, ContributionSetting} from "@/helper/payroll/calculations";
 import {ContributionType} from "@/types/benefits/plans/plansTypes";
 import {getPrismaErrorMessage} from "@/server/errors/server-errors";
+import {toGMT8} from "@/lib/utils/toGMT8";
 
 export async function POST(req: NextRequest) {
     try {
@@ -111,9 +112,9 @@ export async function POST(req: NextRequest) {
         const contribution = data.employee_id.map((employeeId: any) => ({
                     employee_id: employeeId,
                     plan_id: data.plan_id,
-                    enrollment_date: new Date(),
-                    created_at: new Date(),
-                    updated_at: new Date(),
+                    enrollment_date: toGMT8().toISOString(),
+                    created_at: toGMT8().toISOString(),
+                    updated_at: toGMT8().toISOString(),
                     coverage_amount_type: data.coverageType,
                     coverage_amount: data.coverageAmount, // Replace with actual value
                     contribution_amount: Number(uniqueContributions.find(item => item.employee_id === employeeId)?.contribution?.toFixed(2)), // Replace with actual value

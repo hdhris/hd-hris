@@ -3,13 +3,15 @@ import prisma from "@/prisma/prisma";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {EmployeeLeave, EmployeeLeavesStatus, LeaveType} from "@/types/leaves/LeaveRequestTypes";
 import {toDecimals} from "@/helper/numbers/toDecimals";
+import {employee_validation} from "@/server/employee-details-map/employee-details-map";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
     const [emp, leaveTypes] = await Promise.all([prisma.trans_employees.findMany({
         where: {
-            deleted_at: null, dim_leave_balances: {
+            ...employee_validation,
+            dim_leave_balances: {
                 some: {
                     remaining_days: {
                         gt: 0
@@ -78,9 +80,7 @@ export async function GET() {
 
     // console.log("Leave Balance: ", emp.find((emp) => emp.id)?.dim_leave_balances)
 
-    const employees: EmployeeLeave[] = emp.filter(item => {
-         return Array.isArray(item.resignation_json) && item.resignation_json.length === 0  && Array.isArray(item.termination_json)  && item.termination_json.length === 0
-    }).map((emp: any) => ({
+    const employees: EmployeeLeave[] = emp.map((emp: any) => ({
         id: emp.id,
         name: getEmpFullName(emp),
         picture: emp.picture,

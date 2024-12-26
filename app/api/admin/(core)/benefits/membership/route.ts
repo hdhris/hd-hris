@@ -100,9 +100,16 @@ export async function GET(request: Request) {
 
         const contributions = await prisma.ref_benefits_contribution_table.findMany({
             where: {
-                OR: employeeMemberships.map((item) => ({
+                OR: employeeMemberships.map((item) => {
+                    if(item.id == 29){
+
+                        // console.dir(item, {depth: 3})
+                        console.log("Id: ", item.dim_employee_benefits.map((benefit) => benefit.ref_benefit_plans.id))
+                        console.log("Result: ", 100 <= 14000 || 1000 >= 14000)
+                    }
+                    return({
                     AND: [{min_salary: {lte: employeeSalaryMap[item.id] || 0}}, {max_salary: {gte: employeeSalaryMap[item.id] || 0}}, {plan_id: {in: item.dim_employee_benefits.map((benefit) => benefit.ref_benefit_plans.id)}},],
-                })),
+                })}),
             }, select: {
                 id: true,
                 plan_id: true,
@@ -114,8 +121,10 @@ export async function GET(request: Request) {
             },
         });
 
+        // console.log("Contribution: ", employeeMemberships.filter(item => item.id === 29))
         const membershipWithContributions: EmployeeBenefitDetails[] = employeeMemberships.map((employee) => {
             const benefitsWithContributions: EmployeeBenefit[] = employee.dim_employee_benefits.map((benefit) => {
+
                 const relatedContributions: Contribution = contributions.filter((contribution) => contribution.plan_id === benefit.ref_benefit_plans.id && contribution.min_salary?.toNumber()! <= (employeeSalaryMap[employee.id] || 0) && contribution.max_salary?.toNumber()! >= (employeeSalaryMap[employee.id] || 0)).map(contribution => {
                     return {
                         id: contribution.id!,
@@ -159,6 +168,7 @@ export async function GET(request: Request) {
             };
         });
 
+        // console.log("Test: ", employeeMemberships.map((item) => item.dim_employee_benefits.map((benefit) => benefit.ref_benefit_plans.id)))
         return NextResponse.json({membership: membershipWithContributions, total: distinctEmployeeCount.length}, {status: 200});
     } catch (err) {
         console.error(err);
