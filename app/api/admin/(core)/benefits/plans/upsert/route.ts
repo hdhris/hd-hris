@@ -29,8 +29,10 @@ export async function POST(req: NextRequest) {
         await prisma.$transaction(async (transactionPrisma) => {
             let contribution =
                 body.contribution_type !== "others"
-                    ? [
+                    ?
+                    [
                         {
+                            // id: body.plan[0].id ?? null,
                             contribution_type: body.contribution_type,
                             actual_contribution_amount:
                                 body.contribution_type === "fixed"
@@ -40,7 +42,7 @@ export async function POST(req: NextRequest) {
                                     : body.contribution_type === "percentage"
                                         ? isNaN(body.percentage_amount)
                                             ? null
-                                            : Number(body.percentage_amount) / 100
+                                            : Number(body.percentage_amount)
                                         : null,
                             min_salary: Number(body.min_salary),
                             max_salary: Number(body.max_salary),
@@ -48,7 +50,17 @@ export async function POST(req: NextRequest) {
                     ]
                     : body.tiers;
 
+
             if (body.id) {
+                console.log("updating...")
+                if(body.contribution_type !== "others") {
+                    contribution = contribution.map((item: any) => {
+                        return{
+                            id: body.contribution_table_id[0],
+                            ...item
+                        }
+                    });
+                }
                 contribution = contribution.map((item: any) => ({
                     ...item,
                     updated_at: toGMT8().toISOString(),
@@ -76,8 +88,6 @@ export async function POST(req: NextRequest) {
                         updated_at: toGMT8().toISOString(),
                     },
                 });
-
-                console.log("Contribution: ", contribution)
                 for (const item of contribution) {
                     await transactionPrisma.ref_benefits_contribution_table.update({
                         where: { id: item.id },
@@ -99,7 +109,12 @@ export async function POST(req: NextRequest) {
                         },
                     });
                 }
-            } else {
+            }
+
+            else {
+                console.log("Creating...")
+                console.log("Plan: ", body.plan)
+                console.log("Contribution: ", contribution)
                 const createdDeduction = await transactionPrisma.ref_payheads.create({
                     data: {
                         name: body.name,

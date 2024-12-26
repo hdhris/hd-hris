@@ -136,7 +136,7 @@ function DataDisplayControl<T>({
         </div>
             <div className="flex justify-between pb-3 items-center">
                 {title && <Typography className="text-medium font-semibold text-primary/50">
-                    <CountUp start={0} end={paginationProps?.data_length || 0} prefix="Total of " suffix={` ${title}`}/>
+                    <CountUp start={0} end={paginationProps?.data_length || values.length || 0} prefix="Total of " suffix={` ${title}`}/>
                     {/*{ title ? Total < CountUp start={0} end={values.length}/>}*/}
                     {/*{selectedKeys ? (selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${values.length} selected`) : ''}*/}
                 </Typography>}

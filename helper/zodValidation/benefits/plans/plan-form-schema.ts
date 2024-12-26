@@ -25,7 +25,7 @@ export const PlanFormFixedAmountSchema = z.object({
 
 // Percentage Schema
 export const PlanFormPercentageSchema = z.object({
-    percentage_amount: z.number({required_error: "Maximum salary is required", invalid_type_error: "Minimum salary must be a number."}).min(0, {message: "Percentage must be a positive number."}),
+    percentage_amount: z.number({required_error: "Percentage is required", invalid_type_error: "Percentage must be a number."}).min(0, {message: "Percentage must be a positive number."}),
 });
 
 // Others Schema

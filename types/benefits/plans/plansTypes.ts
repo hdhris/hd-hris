@@ -39,3 +39,5 @@ export interface BenefitPlanPaginated{
     totalItems: number,
     currentPage: number
 }
+
+export type ContributionType = "fixed" | "percentage" | "others"

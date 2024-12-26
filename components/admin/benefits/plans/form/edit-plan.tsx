@@ -312,18 +312,21 @@ function EditPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormPro
         setIsLoading(true)
         let data: {}
 
+
         if(plan){
             // const benefit = plan.benefitAdditionalDetails?.filter()
             data = {
                 ...values,
                 id: plan.id,
                 deduction_id: plan.deduction_id,
+                contribution_table_id: plan.benefitAdditionalDetails?.map(id => id.id)
             }
         } else {
             data = {
                 ...values,
             }
         }
+        console.log("Data: ", values)
         try {
             const res = await axiosInstance.post("/api/admin/benefits/plans/upsert", data)
             if(res.status === 200) {

@@ -115,7 +115,7 @@ function PlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormProps) 
                 }))
                 : null;
 
-            console.log("Reset: ", plan)
+            // console.log("Reset: ", plan)
 
             setContributionType(contributionType);
             form.reset({

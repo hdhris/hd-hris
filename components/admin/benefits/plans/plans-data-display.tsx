@@ -25,6 +25,7 @@ import PlanForm from "@/components/admin/benefits/plans/form/plan-form";
 import EditPlanForm from "@/components/admin/benefits/plans/form/edit-plan";
 import EnrollEmployeeForm from "@/components/admin/benefits/plans/form/enroll-employee-form";
 import {pluralize} from "@/helper/pluralize/pluralize";
+import {capitalize} from "@nextui-org/shared-utils";
 
 function PlansDataDisplay() {
     const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -161,7 +162,9 @@ function PlansDataDisplay() {
                 body={<>
                     <div>
                         <Section title="Plan Rates" subtitle="Employee and employer rates based on salary."
-                                 className="ms-0 mb-2"/>
+                                 className="ms-0 mb-2">
+                            <Chip className="rounded">{capitalize(planModal?.benefitAdditionalDetails?.find(item => item.contributionType)?.contributionType || "")}</Chip>
+                        </Section>
                         {planModal.benefitAdditionalDetails?.some(item => item.contributionType === "others") ?
                             <CardTable
                                 data={[{
