@@ -24,6 +24,7 @@ const EmploymentStatusSchema = z.object({
     .string()
     .min(1, "Position name is required")
     .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
+    appraisal_interval: z.coerce.number().int().min(1),
 });
 
 type EmploymentStatusFormData = z.infer<typeof EmploymentStatusSchema>;
@@ -37,6 +38,7 @@ const AddEmploymentStatus: React.FC<AddEmploymentStatusProps> = ({ onEmploymentS
     resolver: zodResolver(EmploymentStatusSchema),
     defaultValues: {
       name: "",
+      appraisal_interval: 4,
     },
     mode: "onChange",
   });
@@ -49,6 +51,14 @@ const AddEmploymentStatus: React.FC<AddEmploymentStatusProps> = ({ onEmploymentS
       placeholder: "Enter employment status name",
       isRequired: true,
       description: "Employment status should only contain letters.",
+    },
+    {
+      name: "appraisal_interval",
+      label: "Appraisal Interval",
+      type: "number",
+      placeholder: "Enter appraisal interval",
+      isRequired: true,
+      description: "Appraisal interval should be a number.",
     },
   ];
 
