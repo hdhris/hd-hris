@@ -44,11 +44,11 @@ export async function GET(req: NextRequest) {
 
         const earnings: PayrollEarningsReport[] = payheads.filter((p) => p.type === "earning")
             .map(item => ({
-                id: item.id, type: item.type ?? "", name: item.name ?? ""
+                payhead_id: item.id, type: item.type ?? "", name: item.name ?? ""
             }));
         const deductions: PayrollDeductionReport[] = payheads.filter((p) => p.type === "deduction")
             .map(item => ({
-                id: item.id, type: item.type ?? "", name: item.name ?? ""
+                payhead_id: item.id, type: item.type ?? "", name: item.name ?? ""
             }));
 
         const emp: EmployeePayroll[] = employees.map(item => ({
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
 
         const payroll_reports: PayrollReports = {
             employees: emp, payroll: payrolls.map(payroll => ({
-                id: payroll.id,
+                payroll_id: payroll.id,
                 employee_id: payroll.employee_id,
                 gross_total_amount: payroll.gross_total_amount?.toNumber() || 0,
                 deduction_total_amount: payroll.deduction_total_amount?.toNumber() || 0,
@@ -73,23 +73,27 @@ export async function GET(req: NextRequest) {
                 id: breakdown.id
             })),
             deductions: deductions.map(deduction => ({
-                id: deduction.id,
+                payhead_id: deduction.payhead_id,
                 name: deduction.name,
                 type: deduction.type,
             })),
             earnings: earnings.map(earnings => ({
-                id: earnings.id,
+                payhead_id: earnings.payhead_id,
                 name: earnings.name,
                 type: earnings.type,
             }))
         }
 
         const date_id = Object.groupBy(payroll_reports.payroll, (payroll) => payroll["date_id"])
-        const filteredData = Object.values(date_id)
-            .flatMap(item => item)
-            .filter(dataItem => payroll_reports.breakdown.some(breakdown => breakdown.payroll_id === dataItem?.id));
+        // const filteredData = Object.values(date_id)
+        //     .flatMap(item => item)
+        //     .filter(dataItem =>
+        //         if(payroll_reports.breakdown.some(breakdown => breakdown.payroll_id === dataItem?.id)){
+        //
+        //         }
+        //     )
 
-        return NextResponse.json({payroll_reports, filteredData}, {status: 200});
+        return NextResponse.json({payroll_reports}, {status: 200});
 
     } catch (error) {
         return NextResponse.json({error: error}, {status: 500});
