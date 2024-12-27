@@ -2,7 +2,9 @@
 import PartThreeForm from "@/components/admin/performance/PartThreeForm";
 import CriteriaList from "@/components/admin/performance/PartTwoForm";
 import SurveyForm from "@/components/admin/performance/SurveyForm";
+import Evaluators from "@/components/common/evaluators/evaluators";
 import { MinorEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { isObjectEmpty } from "@/helper/objects/filterObject";
 import { getEmpFullName, getFullAddress } from "@/lib/utils/nameFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
@@ -41,6 +43,7 @@ function SurveyPage({ id }: { id?: string }) {
             </div>
         );
     };
+
 
     return (
         <ScrollShadow className="py-4 h-full w-full">
@@ -88,7 +91,9 @@ function SurveyPage({ id }: { id?: string }) {
                                         <td className="border border-gray-300 px-4 py-2 text-small">5</td>
                                     </tr>
                                     <tr>
-                                        <td className="border border-gray-300 px-4 py-2 text-small">FULLY SATISFACTORY</td>
+                                        <td className="border border-gray-300 px-4 py-2 text-small">
+                                            FULLY SATISFACTORY
+                                        </td>
                                         <td className="border border-gray-300 px-4 py-2 text-small">4</td>
                                     </tr>
                                     <tr>
@@ -96,7 +101,9 @@ function SurveyPage({ id }: { id?: string }) {
                                         <td className="border border-gray-300 px-4 py-2 text-small">3</td>
                                     </tr>
                                     <tr>
-                                        <td className="border border-gray-300 px-4 py-2 text-small">NEEDS IMPROVEMENT</td>
+                                        <td className="border border-gray-300 px-4 py-2 text-small">
+                                            NEEDS IMPROVEMENT
+                                        </td>
                                         <td className="border border-gray-300 px-4 py-2 text-small">2</td>
                                     </tr>
                                     <tr>
@@ -114,17 +121,76 @@ function SurveyPage({ id }: { id?: string }) {
                         />
                     </>
                 ) : page === 2 ? (
-                    <CriteriaList
-                        isUneditable={isUneditable}
-                        id={survey?.id}
-                        predefinedCompentencies={survey.compentencies_json}
-                    />
+                    <>
+                        <SurverContainer className="space-y-4">
+                            <h1 className="font-semibold text-center text-xl">
+                                PART 2: GUIDE TO PERFORMANCE APPRAISAL
+                            </h1>
+                            <p className="text-gray-500 text-sm mb-2">
+                                The purpose of this form is to measure the actual results produces by the individual
+                                employee and other additional assignment undertaken during the rating period.
+                            </p>
+                            <p className="text-gray-500 text-sm mb-2">
+                                The work rating factors are the principal job requirements of skills and knowledge that
+                                have been determined by the Manager or Supervisor as defined in the employee's job
+                                description and/or individual Action Plan based on AIP/MAP of the immediate superior or
+                                the employee.
+                            </p>
+                            <p className="text-gray-500 text-sm mb-2">
+                                Rating by indicating the corresvx»nding box, the numerical rating that corresponds to
+                                the description below
+                            </p>
+                            <p className="text-gray-500 text-sm mb-2">
+                                {"5.\tMeets all perfomance standards all the time."}
+                            </p>
+                            <p className="text-gray-500 text-sm mb-2">
+                                {"4.\tMeets all the performance standards most of the time. Some improvement possible."}
+                            </p>
+                            <p className="text-gray-500 text-sm mb-2">
+                                {
+                                    "3.\tSatisfactorily meets some of the performance standards most of the time. Requires some improvements."
+                                }
+                            </p>
+                            <p className="text-gray-500 text-sm mb-2">
+                                {
+                                    "2.\tMeets some of the perrformance standards some of the time. Major improvements needed."
+                                }
+                            </p>
+                            <p className="text-gray-500 text-sm mb-2">
+                                {
+                                    "1.\tDoes not meet any of the performance standards. Improvement possibilities Unlikely."
+                                }
+                            </p>
+                        </SurverContainer>
+                        <CriteriaList
+                            isUneditable={isUneditable}
+                            id={survey?.id}
+                            predefinedCompentencies={survey.compentencies_json}
+                        />
+                    </>
                 ) : page === 3 ? (
-                    <PartThreeForm
-                        isUneditable={isUneditable}
-                        id={survey?.id}
-                        predefinedDevPlan={survey.development_plan_json}
-                    />
+                    <>
+                        <SurverContainer className="space-y-4">
+                            <h1 className="font-semibold text-center text-xl">PART 3: EMPLOYEE DEVELOPMENT PLAN</h1>
+                        </SurverContainer>
+                        <PartThreeForm
+                            isUneditable={isUneditable}
+                            id={survey?.id}
+                            predefinedDevPlan={survey.development_plan_json}
+                        />
+                        {!isObjectEmpty(survey.evaluator) && <SurverContainer className="space-y-4">
+                            <Evaluators
+                                evaluation={survey.evaluator}
+                                evaluatorsApi=""
+                                mutate={()=>{}}
+                                selectedEmployee={{
+                                    id: survey.id,
+                                    name: survey.trans_employees.last_name
+                                }}
+                                type="Appraisal"
+                            />
+                        </SurverContainer>}
+                    </>
                 ) : (
                     <div />
                 )}

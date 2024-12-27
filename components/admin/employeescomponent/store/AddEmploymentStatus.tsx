@@ -22,9 +22,9 @@ interface AddEmploymentStatusProps {
 const EmploymentStatusSchema = z.object({
     name: z
     .string()
-    .min(1, "Position name is required")
+    .min(1, "Employement status name is required")
     .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
-    appraisal_interval: z.coerce.number().int().min(1),
+    appraisal_interval: z.coerce.number().int().min(1).max(12),
 });
 
 type EmploymentStatusFormData = z.infer<typeof EmploymentStatusSchema>;

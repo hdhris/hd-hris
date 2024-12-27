@@ -24,8 +24,8 @@ interface EditEmploymentStatusProps {
 }
 
 const EmploymentStatusSchema = z.object({
-  name: z.string().min(1, "Salary grade name is required"),
-  appraisal_interval: z.coerce.number().int().min(1),
+  name: z.string().min(1, "Employement status name is required"),
+  appraisal_interval: z.coerce.number().int().min(1).max(12),
 });
 
 type SalaryGradeFormData = z.infer<typeof EmploymentStatusSchema>;
