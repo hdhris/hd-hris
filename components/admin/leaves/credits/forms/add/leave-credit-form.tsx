@@ -59,6 +59,7 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
         if (data) {
             setEmployeeState(data.employees);
             setLeaveTypes(data.leave_types);
+            console.log("Leave Employees: ", data.employees)
         }
     }, [data]);
 
@@ -81,21 +82,23 @@ function LeaveCreditForm({ onOpen, isOpen }: LeaveCreditFormProps) {
 
         const { apply_for, employee_id, leave_credits } = data;
 
+
         // console.log("Emp: ", employeeState.find(item => item.id === employee_id)?.employment_status.id)
         const payload =
                 apply_for === 'specific_employee'
                     ? { employee_id: [employee_id],
-                    apply_for: employeeState?.find(item => item.id === employee_id)?.employment_status!.id,
+                    apply_for: employeeState?.find(item => Number(item.id) === Number(employee_id))?.employment_status!.id,
                         leave_credits }
                     : {
                         employee_id: employeeState
-                            .filter(emp => emp.employment_status!.name === apply_for)
+                            .filter(emp => emp.employment_status!.name.toLowerCase() === apply_for.toLowerCase())
                             .map(emp => emp.id),
                         apply_for: employeeState
-                            .find(emp => emp.employment_status!.name === apply_for)?.employment_status!.id,
+                            .find(emp => emp.employment_status!.name.toLowerCase() === apply_for.toLowerCase())?.employment_status!.id,
                         leave_credits,
                     };
 
+        console.log("Payload ", payload)
 
         if(payload.employee_id.length <= 0) {
             toast({

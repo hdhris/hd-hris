@@ -35,7 +35,7 @@ const nextConfig = {
       },{
         source: "/benefits",
         // destination: "/benefits/membership",
-        destination: "/benefits/plans",
+        destination: "/benefits/membership",
         permanent: true,
       },{
         source: "/performance",
