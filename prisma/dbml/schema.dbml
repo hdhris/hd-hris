@@ -703,6 +703,7 @@ Table ref_employment_status {
   deleted_at DateTime
   name String [not null]
   appraisal_interval Int [default: 4]
+  superior_id Int
   fact_performance_evaluations fact_performance_evaluations [not null]
   trans_employees trans_employees [not null]
   trans_leave_types trans_leave_types [not null]
