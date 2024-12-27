@@ -187,8 +187,8 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         // Normalize start and end dates
         let currentDate = normalizeDate(new Date(startDate.year - 1 , startDate.month, startDate.day));
         const endDateCopy = normalizeDate(new Date(endDate.year - 1, endDate.month, endDate.day));
-        // console.log("currentDate: ", currentDate)
-        // console.log("endDateCopy: ", endDateCopy)
+        console.log("currentDate: ", currentDate)
+        console.log("endDateCopy: ", endDateCopy)
         // Loop through each day from startDate to endDate
         while (currentDate <= endDateCopy) {
             // Check if the current date is available using the dateUnavailable function
@@ -203,7 +203,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
 
         }
 
-        // console.log("Available Days: ", availableDaysCount)
+        console.log("Available Days: ", availableDaysCount)
         return availableDaysCount - 1;
     }, [dateUnavailable]);
 
@@ -219,19 +219,19 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         // Convert break times from minutes to hours
         // const breakHours = breakTimes / 60;
         //
-        // console.log("Start Time STR: ", startTimeStr)
-        // console.log("End Time STR: ", endTimeStr)
+        console.log("Start Time STR: ", startTimeStr)
+        console.log("End Time STR: ", endTimeStr)
         // Convert startTime and endTime strings to Date objects
         const startTime = toGMT8(startTimeStr).tz("Asia/Manila", true).toDate();
         const endTime = toGMT8(endTimeStr).tz("Asia/Manila", true).toDate();
-        // console.log("Start Time: ", startTime)
-        // console.log("End Time: ", endTime)
+        console.log("Start Time: ", startTime)
+        console.log("End Time: ", endTime)
         // Normalize start and end dates to get rid of any time differences
         const start = normalizeDate(startTime);
         const end = normalizeDate(endTime);
 
-        // console.log("Normalize Start: ", start)
-        // console.log("Normalize End: ", end)
+        console.log("Normalize Start: ", start)
+        console.log("Normalize End: ", end)
 
 
         // Calculate work duration (difference between clock-in and clock-out in minutes)
@@ -261,17 +261,17 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         // const totalDuration = endTime.getTime() - startTime.getTime();
         // let totalMinutes = totalDuration / (1000 * 60);
 
-        // console.log("Start Hours:", startUserTime.format('HH:mm'));  // Display in HH:mm format
-        // console.log("End Hours:", endUserTime.format('HH:mm'));
-        //
-        // console.log("Break Times (in hours):", breakTimes);
-        // console.log("Total Work Hours (before break adjustment):", totalWorkHours);
-        // console.log("Working Days: ", workingDays);
-        // // console.log("Work Duration: ", workDuration);
-        // // console.log("Total Minutes: ", totalMinutes)
-        // console.log("Passes through 12:00 PM to 1:00 PM?:", passesLunchBreak);
-        // console.log("Start Leave: ", startLeave)
-        // console.log("End Leave: ", endLeave)
+        console.log("Start Hours:", startUserTime.format('HH:mm'));  // Display in HH:mm format
+        console.log("End Hours:", endUserTime.format('HH:mm'));
+
+        console.log("Break Times (in hours):", breakTimes);
+        console.log("Total Work Hours (before break adjustment):", totalWorkHours);
+        console.log("Working Days: ", workingDays);
+        // console.log("Work Duration: ", workDuration);
+        // console.log("Total Minutes: ", totalMinutes)
+        console.log("Passes through 12:00 PM to 1:00 PM?:", passesLunchBreak);
+        console.log("Start Leave: ", startLeave)
+        console.log("End Leave: ", endLeave)
         // // Deduct break time if the leave period passes through the lunch break
         //
         // console.log("Before Different: ", leaveDif)
@@ -293,9 +293,9 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         }
 
 
-        // console.log("Working Days: ", workingDays)
-        // console.log("Total Work Hours: ", totalWorkHours)
-        // console.log("Leave Dif: ", leaveDif)
+        console.log("Working Days: ", workingDays)
+        console.log("Total Work Hours: ", totalWorkHours)
+        console.log("Leave Dif: ", leaveDif)
 
         // console.log("Per Hour: ", (totalWorkHours / 60), (leaveDif / 60))
         // Return the total work time adjusted for breaks
