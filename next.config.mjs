@@ -21,7 +21,7 @@ const nextConfig = {
       },
       {
         source: "/incident",
-        destination: "/incident/payroll",
+        destination: "/incident/reports",
         permanent: true,
       },
       {
@@ -57,8 +57,8 @@ const nextConfig = {
         destination: "/signatories/lists",
         permanent: true,
       },{
-        source: "/payroll",
-        destination: "/payroll/attendances-report",
+        source: "/reports",
+        destination: "/reports/attendances-report",
         permanent: true,
       },
     ];
@@ -80,7 +80,7 @@ const nextConfig = {
           {
             key: "Access-Control-Allow-Headers",
             value:
-              "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+                "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
           },
         ],
       },

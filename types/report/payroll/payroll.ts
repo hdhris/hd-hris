@@ -38,4 +38,5 @@ export interface PayrollReports {
     breakdown: PayrollBreakdownReport[]
     earnings: PayrollEarningsReport[]
     deductions: PayrollDeductionReport[]
+    combined_payhead: PayrollEarningsReport[]
 }

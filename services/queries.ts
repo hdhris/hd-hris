@@ -266,3 +266,19 @@ export function usePayrollReport(id: number) {
         keepPreviousData: true, revalidateOnFocus: true,
     })
 }
+
+type PayrollReportResponse = {
+    id: number;
+    date: string;
+};
+
+export function usePayrollReportDate() {
+    return useSWR<PayrollReportResponse[]>(
+        "/api/admin/reports/payroll/get-deployed-payroll-date",
+        fetcher,
+        {
+            keepPreviousData: true,
+            revalidateOnFocus: true,
+        }
+    );
+}

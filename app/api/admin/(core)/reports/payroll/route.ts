@@ -81,10 +81,38 @@ export async function GET(req: NextRequest) {
                 payhead_id: earnings.payhead_id,
                 name: earnings.name,
                 type: earnings.type,
-            }))
+            })),
+           combined_payhead: [...earnings, ...deductions].sort((a, b) => b.type.localeCompare(a.type))
         }
 
-        const date_id = Object.groupBy(payroll_reports.payroll, (payroll) => payroll["date_id"])
+        const allEmployeePayroll = payroll_reports.payroll.map(payroll => {
+            // Find the employee based on the employee_id in the payroll
+            const employee = payroll_reports.employees.find(emp => emp.id === payroll.employee_id);
+
+            // Get the breakdowns associated with the payroll_id
+            const payrollBreakdowns = payroll_reports.breakdown.filter(breakdown => breakdown.payroll_id === payroll.payroll_id);
+
+            // Get the earnings associated with the payroll
+            const payrollEarnings = payroll_reports.earnings.filter(earning => payroll_reports.breakdown.filter(breakdown => earning.payhead_id === breakdown.payhead_id));
+
+            // Get the deductions associated with the payroll
+            const payrollDeductions = payroll_reports.deductions.filter(deduction => payroll_reports.breakdown.filter(breakdown => deduction.payhead_id === breakdown.payhead_id));
+
+            return {
+                payroll_id: payroll.payroll_id,
+                employee_id: payroll.employee_id,
+                gross_total_amount: payroll.gross_total_amount,
+                deduction_total_amount: payroll.deduction_total_amount,
+                date_id: payroll.date_id,
+                employee, // Including employee details
+                breakdowns: payrollBreakdowns, // Including breakdown details
+                earnings: payrollEarnings, // Including earnings details
+                deductions: payrollDeductions, // Including deductions details
+            };
+        });
+
+        // console.log(allEmployeePayroll);
+
         // const filteredData = Object.values(date_id)
         //     .flatMap(item => item)
         //     .filter(dataItem =>
@@ -93,7 +121,10 @@ export async function GET(req: NextRequest) {
         //         }
         //     )
 
-        return NextResponse.json({payroll_reports}, {status: 200});
+
+        // console.log(combined_payhead);
+
+        return NextResponse.json(payroll_reports, {status: 200});
 
     } catch (error) {
         return NextResponse.json({error: error}, {status: 500});
