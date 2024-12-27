@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
         hasContentType(req);
 
         const data = await req.json();
-        console.log("Comment: ", data);
+        // console.log("Comment: ", data);
 
         // Retrieve the evaluation data
         const evaluation = await prisma.trans_leaves.findUnique({

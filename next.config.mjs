@@ -21,7 +21,7 @@ const nextConfig = {
       },
       {
         source: "/incident",
-        destination: "/incident/reports",
+        destination: "/incident/payroll",
         permanent: true,
       },
       {
@@ -57,8 +57,8 @@ const nextConfig = {
         destination: "/signatories/lists",
         permanent: true,
       },{
-        source: "/reports",
-        destination: "/reports/attendances-report",
+        source: "/payroll",
+        destination: "/payroll/attendances-report",
         permanent: true,
       },
     ];

@@ -29,6 +29,7 @@ const LeaveTypeForm = ({title, description, data, onOpen, isOpen}: LeaveTypeForm
     const {toast} = useToast()
     const {data: employment_status} = useEmploymentStatus()
 
+    // console.log("Data Received: ", data)
     const logger = new Logger(LogLevel.DEBUG)
     const form = useForm<z.infer<typeof LeaveTypeSchema>>({
         resolver: zodResolver(LeaveTypeSchema), defaultValues: {

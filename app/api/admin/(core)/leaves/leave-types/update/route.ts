@@ -11,6 +11,7 @@ export async function PATCH(request: NextRequest) {
 
         const data = await request.json();
 
+        console.log("Data: ", data)
         const logger = new Logger(LogLevel.DEBUG);
         // logger.debug(data);
 
@@ -52,7 +53,82 @@ export async function PATCH(request: NextRequest) {
             );
         }
 
-        // Update the leave type details
+        // Fetch existing leave type records for the given leave type details ID
+        // Fetch existing leave type records for the given leave type details ID
+        const leaveTypeIds = await prisma.trans_leave_types.findMany({
+            where: {
+                leave_type_details_id: data.id,
+            },
+        });
+
+        // Extract existing employment status IDs from the leave type records
+        const existingEmploymentStatusIds = leaveTypeIds.map((record) => record.employment_status_id);
+
+        // Handle removals: Find IDs in `existingEmploymentStatusIds` but not in `applicableToEmployeeTypes`
+        const toBeRemoved = existingEmploymentStatusIds.filter(
+            (id) => !data.applicableToEmployeeTypes.includes(id.toString())
+        );
+
+        for (const employeeTypeId of toBeRemoved) {
+            console.log("Remove: ", employeeTypeId);
+            await prisma.trans_leave_types.updateMany({
+                where: {
+                    leave_type_details_id: data.id,
+                    employment_status_id: employeeTypeId,
+                },
+                data: {
+                    deleted_at: toGMT8().toISOString(), // Set deleted_at to current time
+                },
+            });
+        }
+
+        // Loop through applicable employee types for additions or updates
+        for (const employeeTypeId of data.applicableToEmployeeTypes) {
+            if (existingEmploymentStatusIds.includes(parseInt(employeeTypeId))) {
+                console.log("Update: ", employeeTypeId);
+                // If already present, update `deleted_at` to null
+                await prisma.trans_leave_types.updateMany({
+                    where: {
+                        leave_type_details_id: data.id,
+                        employment_status_id: parseInt(employeeTypeId),
+                    },
+                    data: {
+                        deleted_at: null,
+                        updated_at: toGMT8().toISOString(), // Ensure updated_at reflects changes
+                    },
+                });
+            } else {
+                console.log("Create: ", employeeTypeId);
+                // If not present, add new leave type record
+                await prisma.trans_leave_types.create({
+                    data: {
+                        leave_type_details_id: data.id,
+                        employment_status_id: parseInt(employeeTypeId),
+                        created_at: toGMT8().toISOString(),
+                        updated_at: toGMT8().toISOString(),
+                        deleted_at: null,
+                    },
+                });
+            }
+        }
+
+        // console.log("Leave Type: ", leave_type_ids)
+
+        // for (const leaveTypeId of leave_type_ids) {
+        //     await prisma.trans_leave_types.upsert({
+        //         where: {
+        //             id: leaveTypeId
+        //         },
+        //         update: {
+        //             leave_type_details_id: data.id
+        //         },
+        //         create: {
+        //             leave_type_details_id: data.id
+        //         }
+        //     })
+        // }
+
+// Update the leave type details
         await prisma.ref_leave_type_details.update({
             where: { id: data.id },
             data: {
@@ -65,8 +141,22 @@ export async function PATCH(request: NextRequest) {
                 max_duration: data_validation.data.maxDuration,
                 attachment_required: data_validation.data.attachmentRequired,
                 updated_at: new Date(),
+                // trans_leave_types: {
+                //     connectOrCreate: leave_type_ids.map((id) => ({
+                //         where: {
+                //             // Use the correct unique identifier or composite key alias
+                //             id: id
+                //         },
+                //         // create: {
+                //         //     leave_type_details_id: data.id!,
+                //         //     employment_status_id: parseInt(employeeTypeId, 10), // Parse as integer
+                //         // },
+                //     })),
+                // },
             },
         });
+
+
 
         // const findLeaveType = await prisma.trans_leave_types.findMany({
         //     where: {

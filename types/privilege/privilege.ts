@@ -107,7 +107,7 @@ export const static_privilege: UserPrivileges = {
         {
             name: "Incident",
             privileges: [
-                { name: "Read Incidents", paths: ["/incident", "/api/admin/incident/reports"] },
+                { name: "Read Incidents", paths: ["/incident", "/api/admin/incident/payroll"] },
                 { name: "File Incidents", paths: ["/api/admin/incident/update", "/api/admin/incident/upsert"] },
             ],
         },
@@ -162,7 +162,7 @@ export const static_privilege: UserPrivileges = {
         },
         {
             name: "Reports",
-            privileges: [{ name: "View Reports", paths: ["/reports"] }],
+            privileges: [{ name: "View Reports", paths: ["/payroll"] }],
         },
         {
             name: "Trainings and Seminars",

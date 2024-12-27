@@ -21,6 +21,7 @@ import {EmploymentStatusDetails} from "@/types/employment-status/employment-stat
 import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/routes/default/types";
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import {EmployeeEnrollmentSelection, PaginatedEmployeeBenefitDetails} from "@/types/benefits/membership/membership-types";
+import {PayrollReports} from "@/types/report/payroll/payroll";
 
 export function useDashboard() {
     return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
@@ -257,6 +258,11 @@ export function useBenefitMembership({page, rows}: { page: number, rows: number 
 
 export function useNotEnrolledEmployees() {
     return useSWR<EmployeeEnrollmentSelection>("/api/admin/benefits/plans/not-enrolled", fetcher, {
+        keepPreviousData: true, revalidateOnFocus: true,
+    })
+}
+export function usePayrollReport(id: number) {
+    return useSWR<PayrollReports>("/api/admin/reports/payroll?date=" + id, fetcher, {
         keepPreviousData: true, revalidateOnFocus: true,
     })
 }

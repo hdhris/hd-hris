@@ -17,7 +17,6 @@ import UserMail from "@/components/common/avatar/user-info-mail";
 import CardTable from "@/components/common/card-view/card-table";
 import BorderCard from "@/components/common/BorderCard";
 import {LuBan, LuPencil} from "react-icons/lu";
-
 import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import CardView from "@/components/common/card-view/card-view";
@@ -32,6 +31,8 @@ import {useUserInfo} from "@/lib/utils/getEmployeInfo";
 import Evaluators from '@/components/common/evaluators/evaluators';
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import {Dayjs} from "dayjs";
+import toast from "react-hot-toast"
+import {AxiosError} from "axios";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -48,13 +49,14 @@ function Page() {
     const [loading, setLoading] = useState<boolean>(false)
     const [today, setToday] = useState<Dayjs>(toGMT8())
     // const [leaveProgress, setLeaveProgress] = useState("")
+    const [isCancelling, setIsCancelling] = useState<boolean>(false)
     const {data, isLoading, mutate} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
 
     useDocumentTitle("Leave Requests")
     const currentUser = useUserInfo()
-    const {toast} = useToast()
+    // const {toast} = useToast()
     const allRequests = useMemo(() => {
         if (data) return data.data.map((item) => {
             const created_by = {
@@ -167,6 +169,19 @@ function Page() {
     }, [selectedRequest, today]);
 
 
+    const handleCancel = useCallback(async (id: number) => {
+        setIsCancelling(true)
+            try{
+                const res = await axiosInstance.post("/api/admin/leaves/requests/cancel", selectedRequest)
+                if(res.status === 200){
+                    toast.success(res.data.message)
+                }
+            } catch (error){
+                if(error instanceof AxiosError){
+                    toast.error(error?.response?.data.message || "")
+                }
+            }
+    }, [])
     // useEffect(() => {
     //     const isApprovedLeave = selectedRequest?.leave_details.status;console.log()
     //     if (selectedRequest) {
@@ -202,16 +217,12 @@ function Page() {
         try {
             const res = await axiosInstance.post("/api/admin/leaves/requests/reply", submitReply)
             if (res.status !== 200) {
-                toast({
-                    title: "Error", description: "Could not comment at this time. Try again later.", variant: "danger"
-                })
+                toast.error("Could not comment at this time. Try again later.")
                 return
             }
         } catch (error) {
             console.log("Error: ", error)
-            toast({
-                title: "Error", description: "Server error. Try again later", variant: "danger"
-            })
+            toast.error("Server error. Try again later")
         }
         setIsReplySubmit(false)
     }
@@ -232,16 +243,12 @@ function Page() {
         try {
             const res = await axiosInstance.post("/api/admin/leaves/requests/comment", userComment)
             if (res.status !== 200) {
-                toast({
-                    title: "Error", description: "Could not comment at this time. Try again later.", variant: "danger"
-                })
+                toast.error("Could not comment at this time. Try again later.")
                 return
             }
         } catch (error) {
             console.log("Error: ", error)
-            toast({
-                title: "Error", description: "Server error. Try again later", variant: "danger"
-            })
+            toast.error("Server error. Try again later")
         }
         setLoading(false)
     }
@@ -390,7 +397,7 @@ function Page() {
                          subtitle="Cancel the leave request">
                     <Button
                         isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected"}
-                        startContent={<LuBan/>} {...uniformStyle({color: "danger"})}>Cancel</Button>
+                        startContent={<LuBan/>} {...uniformStyle({color: "danger"})} onPress={() => handleCancel(selectedRequest?.id)}>Cancel</Button>
                 </Section>
             </>}
         />}

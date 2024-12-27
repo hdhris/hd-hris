@@ -3,7 +3,9 @@ import RecruitmentReport from "@/components/admin/reports/recruitment/recruitmen
 
 function Page() {
     return (
-        <div><RecruitmentReport/></div>
+        <div className="h-full">
+            <RecruitmentReport/>
+        </div>
     );
 }
 

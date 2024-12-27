@@ -3,7 +3,7 @@ import PerformanceReport from "@/components/admin/reports/performance/performanc
 
 function Page() {
     return (
-        <div><PerformanceReport/></div>
+        <div className="h-full"><PerformanceReport/></div>
     );
 }
 
