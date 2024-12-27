@@ -9,6 +9,7 @@ import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 import {UserPrivileges} from "@/types/JSON/user-privileges";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {devices} from "@/defaults_configurations/devices";
+import { isEmployeeAvailable } from "./helper/employee/unavailableEmployee";
 
 export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
     providers: [Credentials({
@@ -52,7 +53,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     const googleAuth = results[0];
                     const existingUser = results[1];
 
-                    if (!googleAuth) {
+                    if (!googleAuth || !isEmployeeAvailable(googleAuth as any)) {
                         console.error("Unauthorized login attempt.");
                         // // console.timeEnd("GoogleAuthCheck");
                         return false;

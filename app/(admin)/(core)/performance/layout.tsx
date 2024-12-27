@@ -4,16 +4,16 @@ import NavigationTabs, { TabItem } from "@/components/common/tabs/NavigationTabs
 
 function RootLayout({ children }: { children: ReactNode }) {
     const tabs: TabItem[] = [
+        // {
+        //     key: "criteria",
+        //     title: "Criteria",
+        //     path: "criteria",
+        // },
         {
-            key: "criteria",
-            title: "Criteria",
-            path: "criteria",
+            key: "employees",
+            title: "Employees",
+            path: "employees",
         },
-        {
-          key: "employees",
-          title: "Employees",
-          path: "employees",
-      },
     ];
 
     return (

@@ -6,7 +6,7 @@ import QuickModal from "@/components/common/QuickModal";
 import TableData from "@/components/tabledata/TableData";
 import { Form } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
-import { MinorEmployee, MajorEmployee, BasicEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { BasicEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { useEmployeeId } from "@/hooks/employeeIdHook";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
@@ -16,33 +16,35 @@ import { phaseArray } from "@/types/performance/types";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getLocalTimeZone, parseAbsolute } from "@internationalized/date";
-import { Avatar, Card, cn, ScrollShadow } from "@nextui-org/react";
+import { Avatar, Card, Chip, cn, ScrollShadow } from "@nextui-org/react";
 import axios from "axios";
 import { capitalize } from "lodash";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { HiDocumentPlus } from "react-icons/hi2";
 import { IoMdClock } from "react-icons/io";
 import { RiFileHistoryFill } from "react-icons/ri";
 import { z } from "zod";
 
-function Page() {
-    const router = useRouter();
-    const { data: employees } = useQuery<BasicEmployee[]>("/api/admin/performance/employees");
-    const [selectedEmployee, setSelectedEmployee] = useState<{
-        evaluation_history: {
-            start_date: string;
-            end_date: string;
-            phase: string;
-            id: number;
-            status: ApprovalStatusType | null;
-        }[];
-        employee: BasicEmployee;
-        next_interval: number;
+type EmployeeAppraisalRecord = {
+    evaluation_history: {
         start_date: string;
         end_date: string;
-    } | null>(null);
+        phase: string;
+        id: number;
+        status: ApprovalStatusType | null;
+    }[];
+    employee: BasicEmployee;
+    next_interval: number;
+    start_date: string;
+    end_date: string;
+};
+
+function Page() {
+    const router = useRouter();
+    const { data: employees } = useQuery<EmployeeAppraisalRecord[]>("/api/admin/performance/employees");
+    const [selectedEmployee, setSelectedEmployee] = useState<EmployeeAppraisalRecord | null>(null);
     const [isCreatingAppraisal, setIsCreatingAppraisal] = useState(false);
     const userID = useEmployeeId();
 
@@ -63,17 +65,21 @@ function Page() {
 
     const { reset, watch, handleSubmit } = form;
 
-    async function surveyEmployee(id: React.Key) {
-        try {
-            const result = (await axios.get(`/api/admin/performance/employees/file?employee_id=${String(id)}`)).data;
-            setSelectedEmployee(result);
-        } catch (error) {
-            toast({
-                title: String(error),
-                variant: "danger",
-            });
-        }
-    }
+    const getEmployee = useMemo(() => {
+        return new Map(employees?.map((emp) => [emp.employee.id, emp]));
+    }, [employees]);
+
+    // async function surveyEmployee(id: React.Key) {
+    //     try {
+    //         const result = (await axios.get(`/api/admin/performance/employees/file?employee_id=${String(id)}`)).data;
+    //         setSelectedEmployee(result);
+    //     } catch (error) {
+    //         toast({
+    //             title: String(error),
+    //             variant: "danger",
+    //         });
+    //     }
+    // }
 
     async function onSubmit(value: z.infer<typeof formSchema>) {
         try {
@@ -133,7 +139,16 @@ function Page() {
 
     return (
         <div className="h-full w-full flex">
-            <TableData items={employees || []} config={config} onRowAction={surveyEmployee} />
+            <TableData
+                items={
+                    employees?.map((emp) => ({
+                        ...emp,
+                        id: emp.employee.id,
+                    })) || []
+                }
+                config={config}
+                onRowAction={(key) => setSelectedEmployee(getEmployee.get(Number(key)) ?? null)}
+            />
             <Drawer isOpen={!!selectedEmployee} onClose={() => setSelectedEmployee(null)}>
                 {selectedEmployee && (
                     <div className="h-full space-y-4">
@@ -184,7 +199,11 @@ function Page() {
                                     <RowItem
                                         key={evaluation.id}
                                         isPressable
-                                        color={(evaluation.status === null || evaluation.status === "pending") ? "warning" : undefined}
+                                        color={
+                                            evaluation.status === null || evaluation.status === "pending"
+                                                ? "warning"
+                                                : undefined
+                                        }
                                         title={`${capitalize(evaluation.phase)} phase evaluation as ${
                                             selectedEmployee.employee.ref_employment_status.name
                                         } in ${toGMT8(evaluation.start_date).year()}`}
@@ -284,15 +303,39 @@ function Page() {
 
 export default Page;
 
-const config: TableConfigProps<MinorEmployee> = {
-    columns: [{ uid: "name", name: "Name", sortable: true }],
+const config: TableConfigProps<EmployeeAppraisalRecord> = {
+    columns: [
+        { uid: "name", name: "Name", sortable: false },
+        { uid: "status", name: "Employment Status", sortable: false },
+        { uid: "next", name: "Next Appraisal", sortable: false },
+    ],
     rowCell: (item, columnKey) => {
         switch (columnKey) {
             case "name":
                 return (
                     <div>
-                        <UserMail name={getEmpFullName(item)} picture={item.picture} email={item.email} />
+                        <UserMail
+                            name={getEmpFullName(item.employee)}
+                            picture={item.employee.picture}
+                            email={item.employee.email}
+                        />
                     </div>
+                );
+            case "status":
+                return <p>{capitalize(item.employee.ref_employment_status.name)}</p>;
+            case "next":
+                return (
+                    <p>
+                        {item.next_interval <= 0 ? (
+                            <Chip color="success" variant="flat">
+                                Evaluate Now
+                            </Chip>
+                        ) : (
+                            <Chip color="danger" variant="flat">
+                                In {item.next_interval} months
+                            </Chip>
+                        )}
+                    </p>
                 );
             default:
                 return <></>;
