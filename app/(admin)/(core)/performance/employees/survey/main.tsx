@@ -3,6 +3,7 @@ import PartThreeForm from "@/components/admin/performance/PartThreeForm";
 import CriteriaList from "@/components/admin/performance/PartTwoForm";
 import SurveyForm from "@/components/admin/performance/SurveyForm";
 import Evaluators from "@/components/common/evaluators/evaluators";
+import { toast } from "@/components/ui/use-toast";
 import { MinorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { isObjectEmpty } from "@/helper/objects/filterObject";
 import { getEmpFullName, getFullAddress } from "@/lib/utils/nameFormatter";
@@ -10,6 +11,7 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
 import { SurveyFormType, SurveyData } from "@/types/performance/types";
 import { Button, Card, cn, ScrollShadow, Spinner } from "@nextui-org/react";
+import axios from "axios";
 import { capitalize } from "lodash";
 import React, { useMemo, useState } from "react";
 
@@ -44,6 +46,19 @@ function SurveyPage({ id }: { id?: string }) {
         );
     };
 
+    async function handleSubmit() {
+        try {
+            await axios.post("/api/admin/performance/employees/update/submit", {
+                id: survey?.id,
+                employee_id: survey?.trans_employees.id,
+            });
+        } catch (error) {
+            toast({
+                description: "An error has occured on saving changes",
+                variant: "danger",
+            });
+        }
+    }
 
     return (
         <ScrollShadow className="py-4 h-full w-full">
@@ -131,10 +146,9 @@ function SurveyPage({ id }: { id?: string }) {
                                 employee and other additional assignment undertaken during the rating period.
                             </p>
                             <p className="text-gray-500 text-sm mb-2">
-                                The work rating factors are the principal job requirements of skills and knowledge that
-                                have been determined by the Manager or Supervisor as defined in the employee's job
-                                description and/or individual Action Plan based on AIP/MAP of the immediate superior or
-                                the employee.
+                                {
+                                    "The work rating factors are the principal job requirements of skills and knowledge that have been determined by the Manager or Supervisor as defined in the employee's job description and/or individual Action Plan based on AIP/MAP of the immediate superior or the employee."
+                                }
                             </p>
                             <p className="text-gray-500 text-sm mb-2">
                                 Rating by indicating the corresvx»nding box, the numerical rating that corresponds to
@@ -178,18 +192,20 @@ function SurveyPage({ id }: { id?: string }) {
                             id={survey?.id}
                             predefinedDevPlan={survey.development_plan_json}
                         />
-                        {!isObjectEmpty(survey.evaluator) && <SurverContainer className="space-y-4">
-                            <Evaluators
-                                evaluation={survey.evaluator}
-                                evaluatorsApi=""
-                                mutate={()=>{}}
-                                selectedEmployee={{
-                                    id: survey.id,
-                                    name: survey.trans_employees.last_name
-                                }}
-                                type="Appraisal"
-                            />
-                        </SurverContainer>}
+                        {!isObjectEmpty(survey.evaluator) && (
+                            <SurverContainer className="space-y-4">
+                                <Evaluators
+                                    evaluation={survey.evaluator}
+                                    evaluatorsApi=""
+                                    mutate={() => {}}
+                                    selectedEmployee={{
+                                        id: survey.id,
+                                        name: survey.trans_employees.last_name,
+                                    }}
+                                    type="Appraisal"
+                                />
+                            </SurverContainer>
+                        )}
                     </>
                 ) : (
                     <div />
@@ -201,7 +217,7 @@ function SurveyPage({ id }: { id?: string }) {
                             Next
                         </Button>
                     )}
-                    {page === 3 && <Button color="primary">Submit</Button>}
+                    {page === 3 && <Button onPress={handleSubmit} color="primary">Submit</Button>}
                 </div>
             </div>
         </ScrollShadow>
