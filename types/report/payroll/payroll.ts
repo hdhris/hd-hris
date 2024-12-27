@@ -6,7 +6,7 @@ export interface EmployeePayroll{
 }
 
 export interface PayrollsReport{
-    id: number
+    payroll_id: number
     employee_id: number,
     gross_total_amount: number | null
     deduction_total_amount: number | null
@@ -21,13 +21,13 @@ export interface PayrollBreakdownReport{
 }
 
 export interface PayrollEarningsReport {
-    id: number
+    payhead_id: number
     name: string
     type: string
 }
 
 export interface PayrollDeductionReport{
-    id: number
+    payhead_id: number
     name: string
     type: string
 }
