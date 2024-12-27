@@ -31,7 +31,7 @@ import Comments from "@/components/common/comments/comments";
 import {useUserInfo} from "@/lib/utils/getEmployeInfo";
 import Evaluators from '@/components/common/evaluators/evaluators';
 import useDocumentTitle from "@/hooks/useDocumentTitle";
-import dayjs, {Dayjs} from "dayjs";
+import {Dayjs} from "dayjs";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -47,7 +47,7 @@ function Page() {
     const [isReplySubmit, setIsReplySubmit] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
     const [today, setToday] = useState<Dayjs>(toGMT8())
-    const [leaveProgress, setLeaveProgress] = useState("")
+    // const [leaveProgress, setLeaveProgress] = useState("")
     const {data, isLoading, mutate} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
         refreshInterval: 3000
     });
@@ -256,9 +256,7 @@ function Page() {
             filterItems: FilterItems
         }}
         onTableDisplay={{
-            config: TableConfigurations,
-            layout: "auto",
-            onRowAction: handleOnSelected
+            config: TableConfigurations, layout: "auto", onRowAction: handleOnSelected
         }}
         searchProps={{
             searchingItemKey: ["name"]
