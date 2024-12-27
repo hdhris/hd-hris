@@ -1,3 +1,4 @@
+import { BasicEmployee, MinorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { ApprovalStatusType } from "../attendance-time/OvertimeType";
 import { Evaluations } from "../leaves/leave-evaluators-types";
 
@@ -76,9 +77,12 @@ export interface SurveyFormType {
     phase: PhaseType;
     compentencies_json: Compentencies[];
     development_plan_json: {
-        id: number,
-        comment: string;
+        id: number;
+        label: string;
+        value: string;
     }[];
+    trans_employees: BasicEmployee;
+    trans_employees_fact_performance_evaluations_evaluated_byTotrans_employees: MinorEmployee;
 }
 
 export interface Compentencies {

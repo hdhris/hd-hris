@@ -1,4 +1,5 @@
 "use client";
+import PartThreeForm from "@/components/admin/performance/PartThreeForm";
 import CriteriaList from "@/components/admin/performance/PartTwoForm";
 import SurveyForm from "@/components/admin/performance/SurveyForm";
 import { useQuery } from "@/services/queries";
@@ -14,7 +15,7 @@ const sampleData: SurveyData = {
 };
 
 function SurveyPage({ id }: { id?: string }) {
-    const [page, setPage] = useState(2);
+    const [page, setPage] = useState(3);
     const { data: survey, isLoading } = useQuery<SurveyFormType>(
         id ? `/api/admin/performance/employees/view?id=${id}` : null
     );
@@ -40,17 +41,21 @@ function SurveyPage({ id }: { id?: string }) {
                             predefinedResponses={survey?.ratings_json}
                         />
                     </>
+                ) : page === 2 ? (
+                    <CriteriaList id={survey?.id} predefinedCompentencies={survey.compentencies_json} />
+                ) : page === 3 ? (
+                    <PartThreeForm id={survey?.id} predefinedDevPlan={survey.development_plan_json}/>
                 ) : (
-                    page === 2 && (
-                        <>
-                            <CriteriaList id={survey?.id} predefinedCompentencies={survey.compentencies_json}/>
-                        </>
-                    )
+                    <div />
                 )}
                 <div className="space-x-2 flex flex-row justify-end">
-                    {page!=1 && <Button onPress={()=> setPage(page-1)}>Back</Button>}
-                    {page!=2 && <Button color="primary" onPress={()=> setPage(page+1)}>Next</Button>}
-                    {page==2 && <Button color="primary">Submit</Button>}
+                    {page != 1 && <Button onPress={() => setPage(page - 1)}>Back</Button>}
+                    {page != 3 && (
+                        <Button color="primary" onPress={() => setPage(page + 1)}>
+                            Next
+                        </Button>
+                    )}
+                    {page === 3 && <Button color="primary">Submit</Button>}
                 </div>
             </div>
         </ScrollShadow>
