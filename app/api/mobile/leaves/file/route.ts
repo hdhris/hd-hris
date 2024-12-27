@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         console.log(body);
         const [evaluators,leave_type_audit] = await Promise.all([
             getSignatory({
-                path:"/leaves/leave-requests", applicant_id: body.employee_id, is_auto_approved: false}),
+                path:"/leaves/leave-requests", applicant_id: body.employee_id}),
             prisma.ref_leave_type_details.findFirst({
                 where: {
                     id: body.id,
