@@ -1,101 +1,261 @@
-"use client"
-import React, {useMemo} from 'react';
+"use client";
+import React, {useMemo, useRef, useState} from 'react';
+import {usePayrollReport, usePayrollReportDate} from "@/services/queries";
+import {
+    EmployeePayroll,
+    PayrollBreakdownReport, PayrollDeductionReport,
+    PayrollEarningsReport,
+    PayrollsReport
+} from '@/types/report/payroll/payroll';
+import BorderCard from "@/components/common/BorderCard";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
-import ReportControls from "@/components/admin/reports/reports-controls/report-controls";
-import ReportTable from "@/components/admin/reports/reports-controls/report-table";
-import {usePayrollReport} from "@/services/queries";
-import {Alert} from "@nextui-org/alert";
-import {getKeyValue, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@nextui-org/react";
+import {Autocomplete, cn, Select, SelectItem} from "@nextui-org/react";
+import NoData from "@/components/common/no-data/NoData";
+import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
+import {LuPrinter} from "react-icons/lu";
+import {Button} from "@nextui-org/button";
+import {useReactToPrint} from "react-to-print";
+import {toGMT8} from "@/lib/utils/toGMT8";
 
 function PayrollReport() {
+    const {data: payroll_date, isLoading: payroll_date_is_loading, error} = usePayrollReportDate()
+    const [date_id, setDate_id] = useState<number>()
+    // Memoize data to prevent unnecessary re-rendering
 
-    const {data, isLoading} = usePayrollReport(4)
-    const report = useMemo(() => {
-        if(data) return data
-    }, [data]);
-    // SetNavEndContent(() => {
-    //     return <ReportControls/>
-    // })
-    return (<div className="h-full">
+    const contentRef = useRef<HTMLDivElement>(null);
 
-        <></>
-        {/*<Table*/}
-        {/*    isHeaderSticky*/}
-        {/*    aria-label="Reports Table"*/}
-        {/*    // sortDescriptor={list.sortDescriptor}*/}
-        {/*    // onSortChange={list.sort}*/}
-        {/*    // topContent={*/}
-        {/*    //     key[0] !== "undefined" && <Alert description={key[0]}/>*/}
-        {/*    //*/}
-        {/*    // }*/}
-        {/*    // bottomContent={*/}
-        {/*    //     hasMore ? (*/}
-        {/*    //         <div className="flex w-full justify-center">*/}
-        {/*    //             <Spinner ref={loaderRef} color="primary"/>*/}
-        {/*    //         </div>*/}
-        {/*    //     ) : null*/}
-        {/*    // }*/}
-        {/*    classNames={{*/}
-        {/*        th: ["bg-white", "text-default-500", "border", "border-divider"],*/}
-        {/*        td: ["text-default-500", "border", "border-divider", "w-96"],*/}
-        {/*        base: "h-full",*/}
-        {/*        emptyWrapper: "h-full",*/}
-        {/*        loadingWrapper: "h-full",*/}
-        {/*        wrapper: `pt-0 px-4 pb-4 bg-transparent rounded-none shadow-noneh-full`,*/}
-        {/*    }}*/}
-        {/*>*/}
-        {/*    /!*<TableHeader columns={columns.columns}>*!/*/}
-        {/*    /!*    {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn*!/*/}
-        {/*    /!*        key={column.uid}*!/*/}
-        {/*    /!*        align={column.uid === "actions" ? "center" : "start"}*!/*/}
-        {/*    /!*        allowsSorting={column.sortable}*!/*/}
-        {/*    /!*        maxWidth={100}*!/*/}
-        {/*    /!*    >*!/*/}
-        {/*    /!*        {column.name.toUpperCase()}*!/*/}
-        {/*    /!*    </TableColumn>)}*!/*/}
-        {/*    /!*</TableHeader>*!/*/}
-        {/*    /!*<TableBody*!/*/}
-        {/*    /!*    isLoading={isLoading}*!/*/}
-        {/*    /!*    items={}*!/*/}
-        {/*    /!*    loadingContent={<Spinner color="danger"/>}*!/*/}
-        {/*    /!*>*!/*/}
-        {/*    /!*    {(item: T) => (*!/*/}
-        {/*    /!*        <TableRow className="w-fit">*!/*/}
-        {/*    /!*            {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}*!/*/}
-        {/*    /!*        </TableRow>*!/*/}
-        {/*    /!*    )}*!/*/}
-        {/*    /!*</TableBody>*!/*/}
-        {/*</Table>*/}
+    const reactToPrintFn = useReactToPrint({
+        contentRef,
+        documentTitle: `Payroll Report ${toGMT8().format("YYYYMMDDhh:mm:ss")}`,
+        onAfterPrint: () => console.log('Print finished'),
+    });
 
-        {/*/!*<ReportTable endpoint="http://localhost:3000/api/admin/reports/payroll?date=4" columns={{*!/*/}
-        {/*/!*    columns: [*!/*/}
-        {/*/!*        {*!/*/}
-        {/*/!*            uid: "id",*!/*/}
-        {/*/!*            name: "ID",*!/*/}
-        {/*/!*            sortable: true*!/*/}
-        {/*/!*        },{*!/*/}
-        {/*/!*            uid: "employee",*!/*/}
-        {/*/!*            name: "Name",*!/*/}
-        {/*/!*            sortable: true,*!/*/}
-        {/*/!*        },{*!/*/}
-        {/*/!*            uid: "department",*!/*/}
-        {/*/!*            name: "Department",*!/*/}
-        {/*/!*            sortable: true,*!/*/}
-        {/*/!*        },{*!/*/}
-        {/*/!*            uid: "timestamp",*!/*/}
-        {/*/!*            name: "Timestamp"*!/*/}
-        {/*/!*        },{*!/*/}
-        {/*/!*            uid: "status",*!/*/}
-        {/*/!*            name: "Status",*!/*/}
-        {/*/!*        },{*!/*/}
-        {/*/!*            uid: "punch",*!/*/}
-        {/*/!*            name: "Punch",*!/*/}
-        {/*/!*        }*!/*/}
-        {/*/!*    ]*!/*/}
-        {/*/!*}}/>*!/*/}
+    const printStyles = `
+    @page {
+        size: Legal landscape;  /* Ensures the content is printed in landscape orientation */
+        margin: 20mm; /* Adjust margin if needed */
+    }
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.5;
+        margin: 0;
+    }
+    .print-container {
+        width: 100%;
+        overflow: hidden;
+    }
+    .print-container * {
+        box-sizing: border-box;
+    }
+    /* Adjust the scaling if needed */
+    @media print {
+        .print-container {
+            page-break-before: always;
+            transform: scale(0.9);  /* Scale down the content to fit */
+            transform-origin: top left;
+            width: 100%;
+        }
+    }
+`;
+
+    const { data: report, isLoading } = usePayrollReport(date_id!);
+    const data = useMemo(() => {
+        if (report) {
+            console.log(report)
+            return {
+                employees: report.employees || [],
+                payroll: report.payroll || [],
+                breakdown: report.breakdown || [],
+                earnings: report.earnings || [],
+                deductions: report.deductions || [],
+                combined_payhead: report.combined_payhead || []
+            };
+        }
+        return null
+    }, [report]);
+
+    const payroll_date_deployed = useMemo(() => {
+        if (payroll_date) {
+            console.log(payroll_date)
+            return payroll_date
+        }
+    }, [payroll_date]);
 
 
-    </div>);
+    SetNavEndContent(() => {
+        return(
+            <div className="flex gap-2">
+            <Select
+                isLoading={payroll_date_is_loading}
+                className="w-64"
+                items={payroll_date_deployed || []}
+                variant="bordered"
+                size="sm"
+                color="primary"
+                aria-label="Date"
+                placeholder="Select payroll date"
+                onSelectionChange={(value) => setDate_id(Number(value.currentKey))}
+            >
+                {(item) => <SelectItem key={item.id}>{item.date}</SelectItem>}
+            </Select>
+                <Button isIconOnly isDisabled={data?.employees.length === 0} {...uniformStyle()} onPress={() => reactToPrintFn?.()}>
+                    <LuPrinter className="size-5" />
+                </Button>
+            </div>
+        )
+    })
+
+
+    // Function to calculate total earnings
+    const calculateEarnings = (breakdowns: PayrollBreakdownReport[]) => {
+        return breakdowns
+            .filter(b => data?.earnings.some(earn => earn.payhead_id === b.payhead_id))
+            .reduce((sum, b) => sum + b.amount, 0);
+    };
+
+    // Function to calculate total deductions
+    const calculateDeductions = (breakdowns: PayrollBreakdownReport[]) => {
+        return breakdowns
+            .filter(b => data?.deductions.some(deduc => deduc.payhead_id === b.payhead_id))
+            .reduce((sum, b) => sum + b.amount, 0);
+    };
+
+    // Process payroll data to include earnings, deductions, and net pay
+    const processedData = data?.payroll.map(payroll => {
+        const employee = data.employees.find(e => e.id === payroll.employee_id);
+        const breakdowns = data.breakdown.filter(b => b.payroll_id === payroll.payroll_id);
+        const earnings = calculateEarnings(breakdowns);
+        const deductions = calculateDeductions(breakdowns);
+        const netPay = earnings - deductions;
+
+        return {
+            ...employee,
+            earnings,
+            deductions,
+            netPay,
+            breakdowns
+        };
+    });
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    return (
+        <BorderCard className="h-full overflow-auto">
+            <style>{printStyles}</style>
+            <div className={cn("overflow-x-auto", "print-container")} ref={contentRef}>
+
+                {data?.employees?.length! > 0 ?
+                    <table className="w-full border-collapse min-w-[800px]">
+                        <thead className="bg-gray-100">
+                        <tr>
+                            <th className="p-3 text-left border text-sm">Employee Name</th>
+                            <th className="p-3 text-left border text-sm">Department</th>
+                            <th className="p-3 text-left border text-sm">Position</th>
+                            {data?.earnings.map((item, index) => (
+                                <th key={index} className="p-3 text-right border text-sm">{item.name}</th>
+                            ))}
+                            <th className="p-3 text-right border text-sm">Gross Pay</th>
+                            {data?.deductions.map((item, index) => (
+                                <th key={index} className="p-3 text-right border text-sm">{item.name}</th>
+                            ))}
+                            <th className="p-3 text-right border text-sm">Deductions</th>
+                            <th className="p-3 text-right border text-sm">Net Pay</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {processedData?.map((employee) => (
+                            <tr key={employee.id} className="hover:bg-gray-50">
+                                <td className="p-3 border text-sm">{employee.name}</td>
+                                <td className="p-3 border text-sm">{employee.department}</td>
+                                <td className="p-3 border text-sm">{employee.job}</td>
+
+                                {/* Earnings columns */}
+                                {data?.earnings.map((earnItem) => {
+                                    const breakdown = employee.breakdowns.find(
+                                        item => item.payhead_id === earnItem.payhead_id
+                                    );
+                                    return (
+                                        <td key={earnItem.payhead_id} className="p-3 text-right border text-sm">
+                                            ₱{breakdown?.amount?.toLocaleString(undefined, {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        }) ?? 0}
+                                        </td>
+                                    );
+                                })}
+
+                                <td className="p-3 text-right border text-sm">
+                                    ₱{employee.earnings.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                })}
+                                </td>
+
+                                {/* Deductions columns */}
+                                {data?.deductions.map((deducItem) => {
+                                    const breakdown = employee.breakdowns.find(
+                                        item => item.payhead_id === deducItem.payhead_id
+                                    );
+                                    return (
+                                        <td key={deducItem.payhead_id} className="p-3 text-right border text-sm">
+                                            ₱{breakdown?.amount?.toLocaleString(undefined, {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        }) ?? 0}
+                                        </td>
+                                    );
+                                })}
+
+                                <td className="p-3 text-right border text-sm">
+                                    ₱{employee.deductions.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                })}
+                                </td>
+
+                                <td className="p-3 text-right border text-sm">
+                                    ₱{employee.netPay.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                })}
+                                </td>
+                            </tr>
+                        ))}
+
+                        {/*/!* Totals Row *!/*/}
+                        {/*<tr className="bg-gray-100 font-bold text-sm">*/}
+                        {/*    <td colSpan={3} className="p-3 border text-right">Total:</td>*/}
+
+                        {/*    /!* Earnings totals *!/*/}
+                        {/*    <td className="p-3 text-right border text-sm">*/}
+                        {/*        ₱{processedData?.reduce((sum, emp) => sum + emp.earnings, 0).toLocaleString(undefined, {*/}
+                        {/*        minimumFractionDigits: 2, maximumFractionDigits: 2*/}
+                        {/*    })}*/}
+                        {/*    </td>*/}
+
+                        {/*    /!* Deductions totals *!/*/}
+                        {/*    <td className="p-3 text-right border text-sm">*/}
+                        {/*        ₱{processedData?.reduce((sum, emp) => sum + emp.deductions, 0).toLocaleString(undefined, {*/}
+                        {/*        minimumFractionDigits: 2, maximumFractionDigits: 2*/}
+                        {/*    })}*/}
+                        {/*    </td>*/}
+
+                        {/*    /!* Net pay totals *!/*/}
+                        {/*    <td className="p-3 text-right border text-sm">*/}
+                        {/*        ₱{processedData?.reduce((sum, emp) => sum + emp.netPay, 0).toLocaleString(undefined, {*/}
+                        {/*        minimumFractionDigits: 2, maximumFractionDigits: 2*/}
+                        {/*    })}*/}
+                        {/*    </td>*/}
+                        {/*</tr>*/}
+                        </tbody>
+                    </table> : <NoData/>}
+            </div>
+
+        </BorderCard>
+
+    );
 }
 
 export default PayrollReport;

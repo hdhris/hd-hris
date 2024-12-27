@@ -378,28 +378,28 @@ function Page() {
                         evaluatorsApi={'/api/admin/leaves/requests/evaluation-decision'}
             />
         </>}
-            onDanger={<>
-                <Section className="ms-0" title="Edit Leave"
-                         subtitle="Edit the leave request">
-                    <Button
-                        isDisabled={selectedRequest.leave_details.status !== "Pending"}
-                        startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
-                </Section>
-                {/*<hr className="border border-destructive/20"/>*/}
-                {/*<Section className="ms-0" title="Extend Leave"*/}
-                {/*         subtitle="Extend the leave request">*/}
-                {/*    <Button*/}
-                {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
-                {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
-                {/*</Section>*/}
-                <hr className="border border-destructive/20"/>
-                <Section className="ms-0" title="Cancel"
-                         subtitle="Cancel the leave request">
-                    <Button
-                        isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected"}
-                        startContent={<LuBan/>} {...uniformStyle({color: "danger"})} onPress={() => handleCancel(selectedRequest?.id)}>Cancel</Button>
-                </Section>
-            </>}
+            // onDanger={<>
+            //     <Section className="ms-0" title="Edit Leave"
+            //              subtitle="Edit the leave request">
+            //         <Button
+            //             isDisabled={selectedRequest.leave_details.status !== "Pending"}
+            //             startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
+            //     </Section>
+            //     {/*<hr className="border border-destructive/20"/>*/}
+            //     {/*<Section className="ms-0" title="Extend Leave"*/}
+            //     {/*         subtitle="Extend the leave request">*/}
+            //     {/*    <Button*/}
+            //     {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
+            //     {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
+            //     {/*</Section>*/}
+            //     <hr className="border border-destructive/20"/>
+            //     <Section className="ms-0" title="Cancel"
+            //              subtitle="Cancel the leave request">
+            //         <Button
+            //             isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected"}
+            //             startContent={<LuBan/>} {...uniformStyle({color: "danger"})} onPress={() => handleCancel(selectedRequest?.id)}>Cancel</Button>
+            //     </Section>
+            // </>}
         />}
     />)
 
