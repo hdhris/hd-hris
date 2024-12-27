@@ -1,8 +1,9 @@
 import prisma from "@/prisma/prisma";
 import {employee_basic_details} from "@/server/employee-details-map/employee-details-map";
 import {toGMT8} from "@/lib/utils/toGMT8";
-import {Evaluator} from "@/types/leaves/leave-evaluators-types";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
+import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
+import { Evaluations } from "@/types/leaves/leave-evaluators-types";
 
 export const getSignatory = async (path: string, applicant_id: number, is_auto_approved: boolean) => {
     try {
@@ -28,7 +29,7 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
                     }
                 }
             }
-        })])
+        })]);
 
 
         const jobIds = signatories.map((job) => job.job_id);
@@ -149,4 +150,178 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
         console.log("Error: ", error)
         return null
     }
+}
+
+
+type getSignatoriesType = {
+    path: string;
+    applicant_id: number;
+    include_applicant?: boolean;
+    is_auto_approved?: boolean;
+};
+export const getSignatories = async ({ path, applicant_id, include_applicant, is_auto_approved }: getSignatoriesType) => {
+    const signatories = (await prisma.trans_signatories.findMany({
+        where: {
+            ref_signatory_paths: {
+                signatories_path: path,
+            },
+            deleted_at: null,
+        },
+        select: {
+            job_id: true,
+            order_number: true,
+            is_apply_to_all_signatory: true,
+            ref_signatory_roles: {
+                select: {
+                    signatory_role_name: true,
+                }
+            }
+        },
+    })).sort((a,b)=> a.order_number - b.order_number); // Sort Ascending
+
+    const [foundUsers, applicant] = await Promise.all([
+        Promise.all(
+            signatories.map(sign => 
+                prisma.trans_employees.findFirst({
+                    where: {
+                        job_id: sign.job_id,
+                        ...(sign.is_apply_to_all_signatory ? {} : {
+                            ref_departments: {
+                                trans_employees: {
+                                    some: { id: applicant_id },
+                                }
+                            }
+                        })
+                    },
+                    select: emp_rev_include.minor_detail.select,
+                })
+            )
+        ),
+        prisma.trans_employees.findFirst({
+            where: { id: applicant_id },
+            select: emp_rev_include.minor_detail.select,
+        }),
+    ]);
+
+    const is_applicant_in_signatory = foundUsers.some(user => user?.id === applicant_id);
+
+    let users:User[]  = [{
+        id: applicant!.id,
+        department: applicant!.ref_departments?.name ?? "",
+        email: applicant!.email ?? "",
+        name: getEmpFullName(applicant),
+        position: applicant!.ref_job_classes?.name ?? "",
+        role: "applicant",
+        employee_id: applicant?.id,
+        picture: applicant!.picture ?? "",
+    }];
+    
+    let foundApplicantInSignatoryFlag = false;
+    foundUsers.filter(user => !!user).forEach(user => {
+        if(is_applicant_in_signatory && !foundApplicantInSignatoryFlag){
+            if(user.id != applicant_id){
+                return;
+            }
+            foundApplicantInSignatoryFlag = true;
+            return;
+        }
+        users.push({
+            id: user.id,
+            department: user.ref_departments?.name ?? "",
+            email: user.email ?? "",
+            name: getEmpFullName(user),
+            position: user.ref_job_classes?.name ?? "",
+            role: signatories.find(sign=> sign.job_id === user.ref_job_classes?.id)?.ref_signatory_roles?.signatory_role_name ?? ""
+        })
+    })
+
+    const roleCount = new Map<string, number>();
+    let duplicateRole: string | undefined;
+
+    for (const item of signatories) {
+        const roleName = item.ref_signatory_roles.signatory_role_name;
+        const count = (roleCount.get(roleName) || 0) + 1;
+        roleCount.set(roleName, count);
+        if (count > 1) {
+            duplicateRole = roleName;
+            break; // Stop as soon as we find a duplicate
+        }
+    }
+
+    let evaluators :Evaluator[]= include_applicant ? [{
+        decision: {
+            decisionDate: null,
+            is_decided: null,
+            rejectedReason: null,
+        },
+        evaluated_by: applicant_id,
+        order_number: 0,
+        role: "Applicant"
+    }]:[]
+
+    foundApplicantInSignatoryFlag = false; // Refresh flag for evaluators
+    for (const sign of signatories) {
+        const user = foundUsers.find(user => user?.ref_job_classes?.id === sign.job_id);
+        if (!user) {
+            continue;
+        }
+        if (!include_applicant && user.id === applicant?.id){
+            continue;
+        }
+
+        if (is_applicant_in_signatory && !foundApplicantInSignatoryFlag) {
+            if (user.id !== applicant_id) {
+                continue;
+            }
+            foundApplicantInSignatoryFlag = true;
+        }
+
+        evaluators.push({
+            decision: {
+                decisionDate: null,
+                is_decided: null,
+                rejectedReason: null,
+            },
+            evaluated_by: user.id,
+            role: sign.ref_signatory_roles.signatory_role_name,
+            order_number: sign.order_number,
+        });
+
+        if (sign.ref_signatory_roles.signatory_role_name === duplicateRole) {
+            break;
+        }
+    }
+
+    const evaluator_json:Evaluations = {
+        users,
+        comments: [],
+        evaluators,
+        is_automatic_approved: is_auto_approved ?? false,
+    }
+
+    console.log(evaluator_json);
+
+    return evaluator_json;
+};
+
+type User = {
+    id: number;
+    name: string;
+    role: string;
+    email: string;
+    picture?: string; // Optional as some users may not have a picture
+    employee_id?: number; // Optional to account for missing data
+    position: string
+    department: string
+}
+
+interface Evaluator {
+    role: string;
+    decision: {
+        is_decided: boolean | null;
+        decisionDate: string | null;
+        rejectedReason: string | null;
+    };
+    evaluated_by: number; // Reference to a user (employee_id)
+    order_number: number;
 }

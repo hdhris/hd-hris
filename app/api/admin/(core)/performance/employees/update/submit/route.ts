@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-import { getSignatory } from "@/server/signatory";
+import { getSignatories, getSignatory } from "@/server/signatory";
 
 export async function POST(req: NextRequest) {
     const { id, employee_id } = await req.json();
 
-    const evaluators = await getSignatory("/performance/employees/survey", employee_id, false);
+    const evaluators = await getSignatories({
+        path: "/performance/employees/survey",
+        applicant_id: employee_id,
+    });
     if (!evaluators) {
         return NextResponse.json({ status: 400 });
     }
+    return NextResponse.json({ status: 400 });
 
     try {
         await prisma.fact_performance_evaluations.update({
