@@ -52,6 +52,11 @@ function SurveyPage({ id }: { id?: string }) {
                 id: survey?.id,
                 employee_id: survey?.trans_employees.id,
             });
+            toast({
+                description: "Performance Appraisal Submitted!",
+                variant: "success",
+            });
+            window.location.reload();
         } catch (error) {
             toast({
                 description: "An error has occured on saving changes",
@@ -217,7 +222,7 @@ function SurveyPage({ id }: { id?: string }) {
                             Next
                         </Button>
                     )}
-                    {page === 3 && <Button onPress={handleSubmit} color="primary">Submit</Button>}
+                    {page === 3 && !isUneditable && <Button onPress={handleSubmit} color="primary">Submit</Button>}
                 </div>
             </div>
         </ScrollShadow>
