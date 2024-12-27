@@ -9,14 +9,17 @@ import { isObjectEmpty } from "@/helper/objects/filterObject";
 import { asyncQueue } from "@/hooks/asyncQueue";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
+import { ApprovalStatusType } from "@/types/attendance-time/OvertimeType";
+import { SurverContainer } from "@/app/(admin)/(core)/performance/employees/survey/main";
 
 interface SurveyFormProps {
     id: number;
     criteriaDetails: CriteriaDetail[];
+    isUneditable: boolean;
     predefinedResponses?: Record<number, { total: number; details: Record<number, number>; comments: string }>; // Optional pre-filled data
 }
 
-export default function SurveyForm({ id, criteriaDetails, predefinedResponses = {} }: SurveyFormProps) {
+export default function SurveyForm({ id, criteriaDetails, isUneditable, predefinedResponses = {} }: SurveyFormProps) {
     const [responses, setResponses] =
         useState<Record<number, { total: number; details: Record<number, number>; comments: string }>>(
             predefinedResponses
@@ -81,8 +84,9 @@ export default function SurveyForm({ id, criteriaDetails, predefinedResponses = 
         <div>
             <form id="form" onSubmit={handleSubmit}>
                 {criteriaDetails.map((criteriaDetail) => (
-                    <Card key={criteriaDetail.id} shadow="sm" className="border p-8 mb-4">
+                    <SurverContainer key={criteriaDetail.id}>
                         <RenderTableChoices
+                            isUneditable={isUneditable}
                             id={criteriaDetail.id}
                             name={criteriaDetail.name}
                             description={criteriaDetail.description}
@@ -92,7 +96,7 @@ export default function SurveyForm({ id, criteriaDetails, predefinedResponses = 
                             handleResponseChange={handleResponseChange}
                             predefinedRate={responses[criteriaDetail.id]} // Pass predefined responses
                         />
-                    </Card>
+                    </SurverContainer>
                 ))}
             </form>
             {/* <Button {...uniformStyle({ radius: "md" })} form="form" type="submit" color="primary" className="ms-auto">
@@ -112,7 +116,9 @@ const RenderTableChoices = ({
     handleResponseChange,
     isChild,
     predefinedRate,
+    isUneditable,
 }: {
+    isUneditable: boolean;
     predefinedRate?: { total: number; details?: Record<number, number>; comments: string } | null;
     id: number;
     name: string;
@@ -161,6 +167,7 @@ const RenderTableChoices = ({
             <div className="ms-4 space-y-4">
                 {type === "multiple-choices" ? (
                     <RenderChoices
+                        isUneditable={isUneditable}
                         predefinedValue={predefinedRate?.total ? Math.round(predefinedRate.total / weight) : undefined}
                         ratings={ratings as Rating[]}
                         setRate={setRate}
@@ -169,6 +176,7 @@ const RenderTableChoices = ({
                     (ratings as TableRating[]).map((criteria, index) => (
                         <div key={index}>
                             <RenderTableChoices
+                                isUneditable={isUneditable}
                                 id={index}
                                 isChild
                                 description=""
@@ -192,6 +200,7 @@ const RenderTableChoices = ({
             </div>
             {!isChild && (
                 <Textarea
+                    isDisabled={isUneditable}
                     className="mt-2"
                     placeholder="Comments"
                     value={predefinedRate?.comments}
@@ -206,12 +215,15 @@ const RenderChoices = ({
     setRate,
     ratings,
     predefinedValue,
+    isUneditable,
 }: {
+    isUneditable: boolean;
     setRate: (value: number) => void;
     predefinedValue?: number;
     ratings: Rating[];
 }) => (
     <RadioGroup
+        isDisabled={isUneditable}
         orientation="vertical"
         onValueChange={(value) => {
             setRate(Number(value));

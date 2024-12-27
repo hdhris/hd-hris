@@ -12,6 +12,18 @@ const minor_detail = {
     suffix: true,
     extension: true,
     contact_no: true,
+    ref_departments: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
+    ref_job_classes: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
 };
 
 const basic_detail = {
@@ -34,22 +46,14 @@ const basic_detail = {
             appraisal_interval: true,
         },
     },
-    ref_departments: {
-        select: {
-            id: true,
-            name: true,
-        },
-    },
     ref_branches: {
         select: {
             id: true,
             name: true,
-        },
-    },
-    ref_job_classes: {
-        select: {
-            id: true,
-            name: true,
+            addr_region: true,
+            addr_province: true,
+            addr_municipal: true,
+            addr_baranggay: true,
         },
     },
 };
@@ -95,9 +99,22 @@ export interface MinorEmployee {
     last_name: string;
     picture: string;
     email: string;
+    prefix: string;
+    suffix: string;
+    extension: string;
+    contact_no: string;
+    ref_departments: {
+        id: number;
+        name: string;
+    };
+    ref_job_classes: {
+        id: number;
+        name: string;
+    };
 }
 
 export type BasicEmployee = MinorEmployee & {
+    hired_at: string;
     suspension_json: UnavaliableStatusJSON;
     termination_json: UnavaliableStatusJSON;
     resignation_json: UnavaliableStatusJSON;
@@ -111,17 +128,13 @@ export type BasicEmployee = MinorEmployee & {
         name: string;
         appraisal_interval: number;
     };
-    ref_departments: {
-        id: number;
-        name: string;
-    };
     ref_branches: {
         id: number;
         name: string;
-    };
-    ref_job_classes: {
-        id: number;
-        name: string;
+        addr_region: number;
+        addr_province: number;
+        addr_municipal: number;
+        addr_baranggay: number;
     };
 };
 

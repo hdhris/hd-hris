@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -11,6 +12,14 @@ export async function GET(req: NextRequest) {
             where: {
                 id,
             },
+            include: {
+                trans_employees: {
+                    ...emp_rev_include.basic_detail,
+                },
+                trans_employees_fact_performance_evaluations_evaluated_byTotrans_employees: {
+                    ...emp_rev_include.minor_detail,
+                }
+            }
         });
         return NextResponse.json(surver_form, { status: 200 });
     } catch (error) {

@@ -21,6 +21,7 @@ import {
 } from "@/types/payroll/payrollType";
 import axios from "axios";
 import { fetchAttendanceData, getEmployeeSchedule } from "../../attendance-time/records/stage";
+import { ContributionType } from "@/types/benefits/plans/plansTypes";
 
 export async function stageTable(
   dateInfo: ProcessDate,
@@ -91,7 +92,7 @@ export async function stageTable(
           acc[employeeId] = [];
         }
         acc[employeeId].push(
-          ref_benefit_plans as unknown as ContributionSetting
+          ref_benefit_plans as ContributionSetting
         );
         return acc;
       },
@@ -275,11 +276,13 @@ interface ContributionAdvanceSetting {
   ec_low_rate: number;
   ec_high_rate: number;
   wisp_threshold: number;
-}
+  actual_contribution_amount: number
+  contribution_type: ContributionType;
+}[]
 
 function convertToNumber(data: PayrollData): PayrollData {
   return {
-    cashToDisburse: data.cashToDisburse.map((item: any) => ({
+    cashToDisburse: data.cashToDisburse.map((item) => ({
       ...item,
       amount_requested: Number(item.amount_requested),
     })),
@@ -288,19 +291,13 @@ function convertToNumber(data: PayrollData): PayrollData {
       amount: Number(item.amount),
       trans_cash_advances: { ...item.trans_cash_advances },
     })),
-    benefitsPlansData: data.benefitsPlansData.map((plan: any) => ({
+    benefitsPlansData: data.benefitsPlansData.map((plan) => ({
       trans_employees: { ...plan.trans_employees },
       ref_benefit_plans: {
         ...plan.ref_benefit_plans,
-        employee_contribution: Number(
-          plan.ref_benefit_plans.employee_contribution
-        ),
-        employer_contribution: Number(
-          plan.ref_benefit_plans.employer_contribution
-        ),
         ref_benefits_contribution_advance_settings:
           plan.ref_benefit_plans.ref_benefits_contribution_table.map(
-            (setting: any) => ({
+            (setting) => ({
               ...setting,
               min_salary: Number(setting.min_salary),
               max_salary: Number(setting.max_salary),
@@ -311,6 +308,7 @@ function convertToNumber(data: PayrollData): PayrollData {
               ec_low_rate: Number(setting.ec_low_rate),
               ec_high_rate: Number(setting.ec_high_rate),
               wisp_threshold: Number(setting.wisp_threshold),
+              actual_contribution_amount: Number(setting.actual_contribution_amount),
             })
           ),
       },
