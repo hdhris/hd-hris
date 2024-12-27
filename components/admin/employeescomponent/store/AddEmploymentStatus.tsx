@@ -23,7 +23,7 @@ interface AddEmploymentStatusProps {
 const EmploymentStatusSchema = z.object({
     name: z
     .string()
-    .min(1, "Position name is required")
+    .min(1, "Employement status name is required")
     .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
     superior_id: z
     .string()
@@ -94,7 +94,7 @@ const AddEmploymentStatus: React.FC<AddEmploymentStatusProps> = ({ onEmploymentS
       const fullData = {
         ...data,
         superior_id: data.superior_id ? parseInt(data.superior_id) : null,
-        
+
       };
 
       const response = await axios.post<EmploymentStatus>(

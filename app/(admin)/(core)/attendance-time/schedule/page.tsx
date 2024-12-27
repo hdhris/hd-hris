@@ -172,7 +172,7 @@ function Page() {
                                 isHovered={hoveredBatchId === item.id}
                                 isSelected={
                                     data.employees.find((emp) => emp.id === hoveredRowId)
-                                        ?.dim_schedules[0].batch_id === item.id
+                                        ?.dim_schedules?.[0]?.batch_id === item.id
                                 }
                                 setHoveredBatchId={setHoveredBatchId}
                                 setSelectedBatch={setSelectedBatch}
