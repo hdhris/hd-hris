@@ -134,7 +134,7 @@ Table fact_performance_evaluations {
   criteria_json Json [not null]
   ratings_json Json [not null]
   employment_status Int [not null]
-  status String [not null, default: 'pending']
+  status String
   phase String [not null, default: 'first']
   compentencies_json Json [not null, default: '[]']
   development_plan_json Json [not null, default: '[]']

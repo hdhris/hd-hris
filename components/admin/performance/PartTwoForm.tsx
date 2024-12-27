@@ -7,17 +7,20 @@ import { Compentencies } from "@/types/performance/types";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import { asyncQueue } from "@/hooks/asyncQueue";
+import { ApprovalStatusType } from "@/types/attendance-time/OvertimeType";
+import { SurverContainer } from "@/app/(admin)/(core)/performance/employees/survey/main";
 
 export default function CriteriaList({
     id,
     predefinedCompentencies = [],
+    isUneditable,
 }: {
+    isUneditable: boolean;
     id: number;
     predefinedCompentencies: Compentencies[];
 }) {
     const [criteriaList, setCriteriaList] = useState<Compentencies[]>(predefinedCompentencies);
     // const [submittedList, setSubmittedList] = useState<Compentencies[]>([]);
-
     useEffect(() => {
         if (criteriaList.length === 0) addRow();
     }, [criteriaList]);
@@ -58,7 +61,7 @@ export default function CriteriaList({
     // };
 
     return (
-        <Card shadow="sm" className="border p-8 mb-4">
+        <SurverContainer>
             <div className="grid grid-cols-3 gap-4">
                 <p>Criteria</p>
                 <p>Rating</p>
@@ -67,12 +70,14 @@ export default function CriteriaList({
             {criteriaList.map((item) => (
                 <div key={item.id} className="grid grid-cols-3 gap-4 mt-4">
                     <Input
+                        isDisabled={isUneditable}
                         id={`criteria-${item.id}`}
                         value={item.criteria}
                         onChange={(e) => updateCriteria(item.id, "criteria", e.target.value)}
                         placeholder="Enter criteria"
                     />
                     <RadioGroup
+                        isDisabled={isUneditable}
                         value={item.rating}
                         onValueChange={(value) => updateCriteria(item.id, "rating", value)}
                         className="flex"
@@ -93,15 +98,15 @@ export default function CriteriaList({
                             onValueChange={(value) => updateCriteria(item.id, "remarks", value)}
                             placeholder="Enter remarks"
                         />
-                        <Button isIconOnly variant="light" onPress={() => removeRow(item.id)}>
+                        {!isUneditable && <Button isIconOnly variant="light" onPress={() => removeRow(item.id)}>
                             <IoIosClose size={30} />
-                        </Button>
+                        </Button>}
                     </div>
                 </div>
             ))}
-            <Button variant="light" className="mx-auto mt-8" onPress={addRow}>
+            {!isUneditable && <Button variant="light" className="mx-auto mt-8" onPress={addRow}>
                 Add Row
-            </Button>
-        </Card>
+            </Button>}
+        </SurverContainer>
     );
 }

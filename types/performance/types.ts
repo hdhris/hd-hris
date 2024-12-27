@@ -69,7 +69,7 @@ export interface SurveyFormType {
     updated_at: string;
     deleted_at: string | null;
     evaluated_by: number;
-    status: ApprovalStatusType;
+    status: ApprovalStatusType | null;
     criteria_json: CriteriaDetail[];
     ratings_json: SurveyData;
     employment_status: number;

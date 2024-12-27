@@ -24,7 +24,6 @@ import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { HiDocumentPlus } from "react-icons/hi2";
 import { IoMdClock } from "react-icons/io";
-import { MdHistoryToggleOff } from "react-icons/md";
 import { RiFileHistoryFill } from "react-icons/ri";
 import { z } from "zod";
 
@@ -37,7 +36,7 @@ function Page() {
             end_date: string;
             phase: string;
             id: number;
-            status: ApprovalStatusType;
+            status: ApprovalStatusType | null;
         }[];
         employee: BasicEmployee;
         next_interval: number;
@@ -185,7 +184,7 @@ function Page() {
                                     <RowItem
                                         key={evaluation.id}
                                         isPressable
-                                        color={evaluation.status === "pending" ? "warning" : undefined}
+                                        color={(evaluation.status === null || evaluation.status === "pending") ? "warning" : undefined}
                                         title={`${capitalize(evaluation.phase)} phase evaluation as ${
                                             selectedEmployee.employee.ref_employment_status.name
                                         } in ${toGMT8(evaluation.start_date).year()}`}

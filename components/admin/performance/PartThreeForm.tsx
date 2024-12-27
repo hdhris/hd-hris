@@ -1,7 +1,9 @@
+import { SurverContainer } from "@/app/(admin)/(core)/performance/employees/survey/main";
 import BulletedTextArea from "@/components/common/BulletedTextArea";
 import Typography from "@/components/common/typography/Typography";
 import { toast } from "@/components/ui/use-toast";
 import { asyncQueue } from "@/hooks/asyncQueue";
+import { ApprovalStatusType } from "@/types/attendance-time/OvertimeType";
 import { Card } from "@nextui-org/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -27,7 +29,9 @@ const defaultValues = [
 function PartThreeForm({
     id,
     predefinedDevPlan = [],
+    isUneditable,
 }: {
+    isUneditable: boolean;
     id: number;
     predefinedDevPlan: {
         id: number;
@@ -83,10 +87,10 @@ function PartThreeForm({
     return (
         <div className="space-y-4">
             {values.map((item) => (
-                <Card shadow="sm" className="border p-8">
+                <SurverContainer key={item.id}>
                     <Typography className="mb-2">{item.label}</Typography>
-                    <BulletedTextArea value={item.value} onValueChange={(value) => handleChange(item.id, value)} />
-                </Card>
+                    <BulletedTextArea isDisabled={isUneditable} value={item.value} onValueChange={(value) => handleChange(item.id, value)} />
+                </SurverContainer>
             ))}
         </div>
     );

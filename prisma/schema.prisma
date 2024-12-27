@@ -162,7 +162,7 @@ model fact_performance_evaluations {
   criteria_json                                                              Json
   ratings_json                                                               Json
   employment_status                                                          Int
-  status                                                                     String                       @default("pending")
+  status                                                                     String?
   phase                                                                      String                       @default("first")
   compentencies_json                                                         Json                         @default("[]")
   development_plan_json                                                      Json                         @default("[]")

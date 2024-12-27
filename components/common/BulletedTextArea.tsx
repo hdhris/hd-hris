@@ -4,6 +4,7 @@ import React, { useState, useCallback } from "react";
 import { Textarea } from "@nextui-org/react";
 
 interface BulletedTextAreaProps {
+    isDisabled?: boolean;
     value?: string;
     onValueChange?: (value: string) => void;
     classNames?: {
@@ -13,6 +14,7 @@ interface BulletedTextAreaProps {
 }
 
 export default function BulletedTextArea({
+    isDisabled,
     value: initialValue = "• ",
     onValueChange,
     classNames,
@@ -60,6 +62,7 @@ export default function BulletedTextArea({
 
     return (
         <Textarea
+            isDisabled={isDisabled}
             value={content}
             onValueChange={handleChange}
             onKeyDown={handleKeyDown}
