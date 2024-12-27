@@ -6,7 +6,10 @@ export async function GET(req: NextRequest) {
     try{
         const { searchParams } = new URL(req.url);
         const path = Number(searchParams.get("id"));
-        const signatory = await getSignatory("/leaves/leave-requests", path, true)
+        const signatory = await getSignatory({
+            path: "/leaves/leave-requests",
+            applicant_id: path
+        })
         return NextResponse.json(signatory)
     }catch (err){
         console.log("Error: ", err)

@@ -58,10 +58,11 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const signatory = await getSignatory(
-            "/leaves/leave-requests",
-            validate.data.employee_id,
-            true
+        const signatory = await getSignatory({
+                path: "/leaves/leave-requests",
+                applicant_id: validate.data.employee_id,
+                is_auto_approved: true
+            }
         );
 
         console.log("Signatory: ", signatory)

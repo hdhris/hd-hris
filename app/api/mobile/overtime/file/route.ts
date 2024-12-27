@@ -40,7 +40,10 @@ export async function POST(req: NextRequest) {
     try {
         console.log(body);
         // return NextResponse.json({ status: 200 });
-        const evaluators = await getSignatory("/overtime/requests", body.employee_id, false);
+        const evaluators = await getSignatory({
+            path: "/overtime/requests",
+            applicant_id: body.employee_id,
+            is_auto_approved: false});
         if(!evaluators){
             return NextResponse.json({ status: 400 });
         }
