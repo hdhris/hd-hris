@@ -45,6 +45,7 @@ export async function stageTable(
         )
     )
     ])
+    console.log(dataPH);
     setStageMsg("Performing calculations...");
     // Reuse employee schedule map for references below
     const { cashToDisburse, cashToRepay, benefitsPlansData } = convertToNumber({...stage_two.data.result});
@@ -158,7 +159,7 @@ export async function stageTable(
           .filter((ph) => {
             return (
                 (String(ph.calculation) === ""
-                    ? String(ph.calculation) === "" && !!amountRecordsMap.get(ph.id)?.get(emp.id)
+                    ? (!!amountRecordsMap.get(ph.id)?.get(emp.id) || ph.is_overwritable)
                     : true) &&
                 isAffected(tryParse(emp), tryParse(ph)) &&
                 (ph.calculation === static_formula.cash_advance_disbursement ? cashDisburseMap.has(emp.id) : true) &&
@@ -184,7 +185,7 @@ export async function stageTable(
             variable: String(ph.variable),
             formula: (() => {
               const amountRecord = amountRecordsMap.get(ph.id)?.get(emp.id);
-              return String(amountRecord ?? ph.calculation);
+              return String(amountRecord ?? ph.calculation!=""? ph.calculation : "0");
             })(),
           }));
     

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
         include_applicant: true,
     });
     if (!evaluators) {
-        return NextResponse.json({ status: 400 });
+        return NextResponse.json({status: false, message: "Signatories incomplete" },{ status: 400 });
     }
 
     try {
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
                 evaluator: evaluators as any,
             },
         });
-        return NextResponse.json({ status: 200 });
+        return NextResponse.json({status: true },{ status: 200 });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: String(error) }, { status: 500 });

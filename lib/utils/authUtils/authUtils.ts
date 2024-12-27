@@ -4,10 +4,10 @@ import {LoginValidation} from '@/helper/zodValidation/LoginValidation';
 
 import {processJsonObject} from "@/lib/utils/parser/JsonObject";
 import SimpleAES from "@/lib/cryptography/3des";
-import dayjs from "dayjs";
 import {calculateRemainingDays} from "@/lib/utils/dateFormatter";
 import {UserPrivileges} from "@/types/JSON/user-privileges";
 import {toGMT8} from "@/lib/utils/toGMT8";
+import { isEmployeeAvailable } from '@/helper/employee/unavailableEmployee';
 
 
 export const getUserData = async (username: string, password: string) => {
@@ -32,11 +32,18 @@ export const getUserData = async (username: string, password: string) => {
         where: {
             user_id: auth.trans_users.id
         }, include: {
-            sys_privileges: true
+            sys_privileges: true,
+            trans_employees: {
+                select: {
+                    suspension_json: true,
+                    termination_json: true,
+                    resignation_json: true,
+                }
+            }
         }
     })
 
-    if (!access_control) return {error: {message: "You are not authorized"}}
+    if (!access_control || !isEmployeeAvailable(access_control.trans_employees as any)) return {error: {message: "You are not authorized"}}
     if (access_control.banned_til) {
         const isBanned = toGMT8(access_control?.banned_til).isAfter(new Date())
         if (isBanned) {
@@ -48,7 +55,7 @@ export const getUserData = async (username: string, password: string) => {
         }
     }
 
-// Process user role and return user data
+    // Process user role and return user data
     const privileges = access_control.sys_privileges;
     const accessibility = processJsonObject<UserPrivileges>(privileges?.accessibility);
     const role = !accessibility?.web_access;
