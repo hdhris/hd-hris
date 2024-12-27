@@ -766,6 +766,7 @@ model ref_employment_status {
   deleted_at                   DateTime?                      @db.Timestamptz(6)
   name                         String
   appraisal_interval           Int?                           @default(4)
+  superior_id                  Int?
   fact_performance_evaluations fact_performance_evaluations[]
   trans_employees              trans_employees[]
   trans_leave_types            trans_leave_types[]

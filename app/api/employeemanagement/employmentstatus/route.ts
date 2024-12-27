@@ -8,6 +8,7 @@ const prisma = new PrismaClient();
 const employmentstatusSchema = z.object({
   name: z.string().min(1).max(45),
   appraisal_interval: z.number().int().min(1),
+  superior_id: z.number().optional().nullable(),
 });
 
 async function checkDuplicateName(name: string, excludeId?: number) {
@@ -110,6 +111,8 @@ export async function POST(req: Request) {
     const employmentstatus = await prisma.ref_employment_status.create({
       data: {
         name: validatedData.name,
+        appraisal_interval: validatedData.appraisal_interval,
+        superior_id: validatedData.superior_id,
       },
     });
 
