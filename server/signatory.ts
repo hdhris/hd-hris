@@ -295,6 +295,19 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
             break;
         }
     }
+    
+    if(evaluators.length===0){
+        evaluators.push({
+            decision: {
+                decisionDate: toGMT8().toISOString(),
+                is_decided: true,
+                rejectedReason: null,
+            },
+            evaluated_by: applicant_id,
+            role: signatories?.[signatories.length-1]?.ref_signatory_roles?.signatory_role_name ?? "Applicant",
+            order_number: 0,
+        })
+    }
 
     const evaluator_json:Evaluations = {
         users,

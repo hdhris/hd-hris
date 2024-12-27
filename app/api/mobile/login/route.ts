@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
         }
       });
 
+      console.log(user);
       return NextResponse.json(user);
     }
     return NextResponse.json(false);
