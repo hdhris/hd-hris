@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
                 id,
             },
             data: {
+                status: "pending",
                 evaluator: evaluators as any,
             },
         });
