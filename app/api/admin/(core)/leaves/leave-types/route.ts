@@ -21,27 +21,35 @@ export async function GET(request: Request) {
         // Fetch employee counts and employee details concurrently
         const [data, total_items, employeeCountData, employees] = await Promise.all([
             prisma.ref_leave_type_details.findMany({
-            where: {
-                trans_leave_types: {
-                    some: {
-                        deleted_at: null
-                    }
+                where: {
+                    trans_leave_types: {
+                        some: {
+                            deleted_at: null, // Only include records where deleted_at is null
+                        },
+                    },
                 },
-            }, include: {
-                trans_leave_types: {
-                    include: {
-                        ref_employment_status: {
-                            select: {
-                                id: true, name: true
-                            }
-                        }
-                    }
+                include: {
+                    trans_leave_types: {
+                        where: {
+                            deleted_at: null, // Ensure only non-deleted records are included in the nested query
+                        },
+                        include: {
+                            ref_employment_status: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                },
+                            },
+                        },
+                    },
                 },
-            }, orderBy: {
-                updated_at: "desc"
-            }, take: perPage, skip: (page - 1) * perPage
-        }),
-            prisma.ref_leave_type_details.count({
+                orderBy: {
+                    updated_at: "desc", // Sort by updated_at in descending order
+                },
+                take: perPage, // Limit the number of results per page
+                skip: (page - 1) * perPage, // Skip records for pagination
+            }),
+        prisma.ref_leave_type_details.count({
                 where: {
                     trans_leave_types: {
                         some: {

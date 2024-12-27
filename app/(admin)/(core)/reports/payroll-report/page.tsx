@@ -3,7 +3,7 @@ import PayrollReport from "@/components/admin/reports/payroll/payroll-report";
 
 function Page() {
     return (
-        <div><PayrollReport/></div>
+        <div className="h-full"><PayrollReport/></div>
     );
 }
 

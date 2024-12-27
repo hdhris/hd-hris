@@ -170,6 +170,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         // Map the day of the week to the corresponding day string (mon, tue, ...)
         const dayString = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayOfWeek];
 
+        // console.log("Days: ", uniqueDaysJson)
         // Check if the current day is in the allowed days
         return uniqueDaysJson.includes(dayString)
     }, [employeeIdSelected, user?.employees])
@@ -184,20 +185,25 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         let availableDaysCount = 0;
 
         // Normalize start and end dates
-        let currentDate = normalizeDate(new Date(startDate.year, startDate.month, startDate.day));
-        const endDateCopy = normalizeDate(new Date(endDate.year, endDate.month, endDate.day));
-
+        let currentDate = normalizeDate(new Date(startDate.year - 1 , startDate.month, startDate.day));
+        const endDateCopy = normalizeDate(new Date(endDate.year - 1, endDate.month, endDate.day));
+        console.log("currentDate: ", currentDate)
+        console.log("endDateCopy: ", endDateCopy)
         // Loop through each day from startDate to endDate
         while (currentDate <= endDateCopy) {
             // Check if the current date is available using the dateUnavailable function
             if (!dateUnavailable(new CalendarDate(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate()))) {
                 availableDaysCount++;
+
             }
 
             // Move to the next day
+
             currentDate.setDate(currentDate.getDate() + 1);
+
         }
 
+        console.log("Available Days: ", availableDaysCount)
         return availableDaysCount - 1;
     }, [dateUnavailable]);
 
@@ -212,7 +218,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
 
         // Convert break times from minutes to hours
         // const breakHours = breakTimes / 60;
-
+        //
         console.log("Start Time STR: ", startTimeStr)
         console.log("End Time STR: ", endTimeStr)
         // Convert startTime and endTime strings to Date objects
@@ -233,8 +239,8 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         const clock_out = new Date(`2024-12-10T${maxMinTime?.time_out}`);
         const workDuration = toGMT8(clock_in).diff(toGMT8(clock_out), 'minutes', true);
 
-        console.log("Clock In: ", maxMinTime?.time_in)
-        console.log("Clock Out: ", maxMinTime?.time_out)
+        // console.log("Clock In: ", maxMinTime?.time_in)
+        // console.log("Clock Out: ", maxMinTime?.time_out)
         const startLeave = toGMT8(toGMT8(startTimeStr).format("HH:mm:ss"))
         const endLeave = toGMT8(toGMT8(endTimeStr).format("HH:mm:ss"))
         let leaveDif = Math.abs(startLeave.diff(endLeave, "minutes"))
@@ -255,17 +261,17 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         // const totalDuration = endTime.getTime() - startTime.getTime();
         // let totalMinutes = totalDuration / (1000 * 60);
 
-        // console.log("Start Hours:", startUserTime.format('HH:mm'));  // Display in HH:mm format
-        // console.log("End Hours:", endUserTime.format('HH:mm'));
-        //
-        // console.log("Break Times (in hours):", breakTimes);
-        // console.log("Total Work Hours (before break adjustment):", totalWorkHours);
-        // console.log("Working Days: ", workingDays);
-        // // console.log("Work Duration: ", workDuration);
-        // // console.log("Total Minutes: ", totalMinutes)
-        // console.log("Passes through 12:00 PM to 1:00 PM?:", passesLunchBreak);
-        // console.log("Start Leave: ", startLeave)
-        // console.log("End Leave: ", endLeave)
+        console.log("Start Hours:", startUserTime.format('HH:mm'));  // Display in HH:mm format
+        console.log("End Hours:", endUserTime.format('HH:mm'));
+
+        console.log("Break Times (in hours):", breakTimes);
+        console.log("Total Work Hours (before break adjustment):", totalWorkHours);
+        console.log("Working Days: ", workingDays);
+        // console.log("Work Duration: ", workDuration);
+        // console.log("Total Minutes: ", totalMinutes)
+        console.log("Passes through 12:00 PM to 1:00 PM?:", passesLunchBreak);
+        console.log("Start Leave: ", startLeave)
+        console.log("End Leave: ", endLeave)
         // // Deduct break time if the leave period passes through the lunch break
         //
         // console.log("Before Different: ", leaveDif)
@@ -280,7 +286,9 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
 
         // console.log("Total Work Hours (after lunch break deduction):", totalWorkHours);
         // console.log("Total Work Minutes (after lunch break deduction):", totalMinutes);
-        if(workingDays === 0) {
+        if(workingDays < 0) {
+            // console.log("workingDays is zero...")
+            // console.log("workingDays: ", workingDays)
             return leaveDif
         }
 
@@ -458,8 +466,9 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             setIsSubmitting(true);
 
             // Decide between creating or updating the leave request
-            const endpoint = employee?.id ? "/api/admin/leaves/requests/update" : "/api/admin/leaves/requests/upsert";
+            const endpoint = employee?.id ? "/api/admin/leaves/requests/update" : "/api/admin/leaves/requests/create";
 
+            console.log("End Point: ", endpoint)
             const res = await axiosInstance.post(endpoint, items);
 
             if (res.status === 200) {

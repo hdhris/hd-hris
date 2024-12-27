@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { toGMT8 } from '@/lib/utils/toGMT8';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ["error"],
+});
 
-// Updated job schema for validation
 const jobSchema = z.object({
   name: z.string().min(1).max(45),
   is_active: z.boolean().default(true),
@@ -13,7 +15,7 @@ const jobSchema = z.object({
   max_employees: z.number().optional().nullable(),
   max_department_instances: z.number().optional().nullable(),
 });
-//check if name exist
+
 async function checkDuplicateName(name: string, excludeId?: number) {
   const existingJob = await prisma.ref_job_classes.findFirst({
     where: {
@@ -28,7 +30,87 @@ async function checkDuplicateName(name: string, excludeId?: number) {
   return existingJob;
 }
 
-// Error handling function
+async function getActiveEmployeeCount(jobId: number, departmentId?: number) {
+  return await prisma.trans_employees.count({
+    where: {
+      job_id: jobId,
+      deleted_at: null,
+      AND: [
+        {
+          OR: [
+            
+            { resignation_json: { equals: [] } }
+          ]
+        },
+        {
+          OR: [
+           
+            { termination_json: { equals: [] } }
+          ]
+        }
+      ],
+      ...(departmentId && { department_id: departmentId })
+    }
+  });
+}
+
+async function getJobById(id: number) {
+  return await prisma.ref_job_classes.findFirstOrThrow({
+    where: {
+      id,
+      deleted_at: null,
+    },
+    include: {
+      trans_employees: {
+        where: {
+          deleted_at: null,
+          AND: [
+            {
+              OR: [
+             
+                { resignation_json: { equals: [] } }
+              ]
+            },
+            {
+              OR: [
+               
+                { termination_json: { equals: [] } }
+              ]
+            }
+          ]
+        }
+      }
+    },
+  });
+}
+
+async function getAllJobs() {
+  return await prisma.ref_job_classes.findMany({
+    where: { deleted_at: null },
+    include: {
+      trans_employees: {
+        where: {
+          deleted_at: null,
+          AND: [
+            {
+              OR: [
+               
+                { resignation_json: { equals: [] } }
+              ]
+            },
+            {
+              OR: [
+                
+                { termination_json: { equals: [] } }
+              ]
+            }
+          ]
+        }
+      }
+    },
+  });
+}
+
 function handleError(error: unknown, operation: string) {
   console.error(`Error during ${operation} operation:`, error);
   if (error instanceof z.ZodError) {
@@ -43,7 +125,6 @@ function handleError(error: unknown, operation: string) {
   return NextResponse.json({ error: `Failed to ${operation} job` }, { status: 500 });
 }
 
-// GET - Fetch all job classes or a single job by ID
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
@@ -61,56 +142,24 @@ export async function GET(req: Request) {
   }
 }
 
-async function getJobById(id: number) {
-  const job = await prisma.ref_job_classes.findFirstOrThrow({
-    where: {
-      id,
-      deleted_at: null,
-    },
-    include: {
-  
-      trans_employees: true,
-    },
-  });
-  
-  return job;
-}
-
-async function getAllJobs() {
-  return await prisma.ref_job_classes.findMany({
-    where: { deleted_at: null },
-    include: {
-   
-      trans_employees: true,
-    },
-  });
-}
-
-// POST - Create a new job class
 export async function POST(req: Request) {
   try {
     const data = await req.json();
     const validatedData = jobSchema.parse(data);
     
-    //call
     const existingJob = await checkDuplicateName(validatedData.name);
-if (existingJob) {
-  return NextResponse.json(
-    { error: 'A job position with this name already exists' },
-    { status: 400 }
-  );
-}
+    if (existingJob) {
+      return NextResponse.json(
+        { error: 'A job position with this name already exists' },
+        { status: 400 }
+      );
+    }
+
     const job = await prisma.ref_job_classes.create({
       data: {
-        name: validatedData.name,
-        // pay_rate: validatedData.pay_rate,
-        is_active: validatedData.is_active,
-        superior_id: validatedData.superior_id,
-        max_employees: validatedData.max_employees,
-        max_department_instances: validatedData.max_department_instances,
-        is_superior: validatedData.is_superior,
-        created_at: new Date(),
-        updated_at: new Date(),
+        ...validatedData,
+        created_at: toGMT8().toISOString(),
+        updated_at: toGMT8().toISOString(),
       },
     });
 
@@ -120,7 +169,6 @@ if (existingJob) {
   }
 }
 
-// PUT - Update an existing job class
 export async function PUT(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
@@ -131,7 +179,7 @@ export async function PUT(req: Request) {
   try {
     const data = await req.json();
     const validatedData = jobSchema.partial().parse(data);
-    //call
+
     if (validatedData.name) {
       const existingJob = await checkDuplicateName(validatedData.name, parseInt(id));
       if (existingJob) {
@@ -141,11 +189,23 @@ export async function PUT(req: Request) {
         );
       }
     }
+
+    // Check employee limits if updating max_employees
+    if (validatedData.max_employees !== undefined) {
+      const currentActiveCount = await getActiveEmployeeCount(parseInt(id));
+      if (validatedData.max_employees !== null && currentActiveCount > validatedData.max_employees) {
+        return NextResponse.json(
+          { error: 'Cannot set employee limit lower than current active employee count' },
+          { status: 400 }
+        );
+      }
+    }
+
     const job = await prisma.ref_job_classes.update({
       where: { id: parseInt(id) },
       data: {
         ...validatedData,
-        updated_at: new Date(),
+        updated_at: toGMT8().toISOString(),
       },
     });
 
@@ -154,39 +214,38 @@ export async function PUT(req: Request) {
     return handleError(error, 'update');
   }
 }
-//
-// DELETE - Soft delete a job class
+
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
 
   try {
     if (!id) {
-      // return NextResponse.json({ error: 'Job ID is required' }, { status: 400 });
       throw new Error('Job ID is required');
     }
-    const jobclass = await prisma.ref_job_classes.findFirst({
-      where: { id: parseInt(id), trans_employees:{none:{}}}
-    });
-    
-    if (!jobclass){
+
+    // Check for active employees before deletion
+    const activeCount = await getActiveEmployeeCount(parseInt(id));
+    if (activeCount > 0) {
       return NextResponse.json({
         success: false,
-        message: 'Cannot delete job that has registered employees'
-      }, {status: 400})
+        message: 'Cannot delete job position that has active employees'
+      }, { status: 400 });
     }
 
-    await prisma.ref_job_classes.update({
-      where: { id: jobclass.id},
+    const job = await prisma.ref_job_classes.update({
+      where: { id: parseInt(id) },
       data: { 
-        deleted_at: new Date(),
-        updated_at: new Date(),
+        deleted_at: toGMT8().toISOString(),
+        updated_at: toGMT8().toISOString(),
       },
     });
 
-    return NextResponse.json({ message: 'Job marked as deleted', jobclass });
+    return NextResponse.json({ 
+      message: 'Job position deleted successfully',
+      job 
+    });
   } catch (error) {
-    console.log(error);
-    return NextResponse.json({ message: error },{ status: 400 });
+    return handleError(error, 'delete');
   }
 }

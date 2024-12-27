@@ -26,9 +26,10 @@ import {RangeValue} from "@react-types/shared";
 import {useDateFormatter} from "@react-aria/i18n";
 
 interface ReportControlsProps {
-    allowMaxDate?: boolean
+    allowMaxDate?: boolean,
+    isDateRange?: boolean
 }
-function ReportControls({allowMaxDate}: ReportControlsProps) {
+function ReportControls({allowMaxDate, isDateRange = true, }: ReportControlsProps) {
     const { setIsGenerated, updateValue, value: prevValue } = useControl();
     const [dateRange, setDateRange] = useState<RangeValue<DateValue>>({
         start: today(getLocalTimeZone()),

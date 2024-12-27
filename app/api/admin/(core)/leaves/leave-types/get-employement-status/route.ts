@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import {capitalize} from "@nextui-org/shared-utils";
 
+export const dynamic = "force-dynamic"
 export async function GET() {
     try {
         const employment_status = await prisma.ref_employment_status.findMany({

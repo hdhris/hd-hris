@@ -35,7 +35,7 @@ export default function ReportTable<T>({endpoint, columns, groupByKey}: ReportTa
             const res = await fetch(
                 cursor ||
                 `${endpoint}?search=${value.department}&start=${value.date.start}&end=${value.date.end}`,
-                // `/api/admin/reports/attendance-logs?search=${value.department}&start=${value.date.start}&end=${value.date.end}`,
+                // `/api/admin/payroll/attendance-logs?search=${value.department}&start=${value.date.start}&end=${value.date.end}`,
                 { signal }
             );
             const json = await res.json();

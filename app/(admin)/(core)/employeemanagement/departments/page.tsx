@@ -6,6 +6,7 @@ import { TableActionButton } from "@/components/actions/ActionButton";
 import { toast } from "@/components/ui/use-toast";
 import AddDepartment from "@/components/admin/employeescomponent/store/AddDepartment";
 import EditDepartment from "@/components/admin/employeescomponent/update/EditDepartment";
+import ViewDepartment from "@/components/admin/employeescomponent/view/ViewDepartment";
 import axios, { AxiosError } from "axios";
 import { Chip } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
@@ -13,15 +14,15 @@ import BorderCard from "@/components/common/BorderCard";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import showDialog from "@/lib/utils/confirmDialog";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
+import { isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
 
 const Page: React.FC = () => {
   const { data: departments, error, mutate } = useDepartmentsData();
   const { data: employees = [] } = useEmployeesData();
   const [sortedDepartments, setSortedDepartments] = useState<Department[]>([]);
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<
-    number | null
-  >(null);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
 
   useEffect(() => {
     if (departments) {
@@ -35,23 +36,27 @@ const Page: React.FC = () => {
     }
   }, [departments, employees]);
 
-  const findDepartmentHead = (departmentId: number) => {
+   // Utility function to find department head
+   const findDepartmentHead = (departmentId: number) => {
     return employees.find(
       (employee) =>
         Number(employee.department_id) === departmentId &&
-        employee.ref_job_classes?.is_superior === true
+        employee.ref_job_classes?.is_superior === true &&
+        isEmployeeAvailable(employee)
     );
   };
-
+  
+  // Count active employees in a department
   const countDepartmentEmployees = (departmentId: number): number => {
     return employees.filter(
-      (employee) => Number(employee.department_id) === departmentId
+      (employee) =>
+        Number(employee.department_id) === departmentId &&
+        isEmployeeAvailable(employee)
     ).length;
   };
 
-  const sortDepartmentsByRecentActivity = (
-    departments: Department[]
-  ): Department[] => {
+
+  const sortDepartmentsByRecentActivity = (departments: Department[]): Department[] => {
     return [...departments].sort((a, b) => {
       const dateA = new Date(a.updated_at).getTime();
       const dateB = new Date(b.updated_at).getTime();
@@ -64,6 +69,11 @@ const Page: React.FC = () => {
       <AddDepartment onDepartmentAdded={handleDepartmentUpdated} />
     </div>
   ));
+
+  const handleOnSelected = (key: React.Key) => {
+    const selected = sortedDepartments?.find((item) => item.id === Number(key));
+    setSelectedDepartment(selected ?? null);
+  };
 
   const handleEdit = async (department: Department) => {
     setSelectedDepartmentId(department.id);
@@ -116,16 +126,13 @@ const Page: React.FC = () => {
   const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "departmentHead", name: "Department In Charge", sortable: false, width: "15%" }, 
+      { uid: "departmentHead", name: "Department In Charge", sortable: false, width: "15%" },
       { uid: "color", name: "Color", sortable: false },
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
       { uid: "status", name: "Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
-    rowCell: (
-      department: Department,
-      columnKey: React.Key
-    ): React.ReactElement => {
+    rowCell: (department: Department, columnKey: React.Key): React.ReactElement => {
       const key = columnKey as string;
       const cellClasses = "cursor-pointer capitalize";
       const departmentHead = findDepartmentHead(department.id);
@@ -133,32 +140,32 @@ const Page: React.FC = () => {
       switch (key) {
         case "name":
           return (
-            <div className={cellClasses} >
+            <div className={cellClasses}>
               <span>{department.name}</span>
             </div>
           );
-          case "departmentHead":
-            return (
-              <div>
-                {departmentHead ? (
-                  <div className="pl-8">
-                    <UserAvatarTooltip
-                      user={{
-                        name: `${departmentHead.first_name} ${departmentHead.last_name}`, 
-                        picture: departmentHead.picture || "",
-                        id: departmentHead.id,
-                      }}
-                      avatarProps={{
-                        classNames: { base: "!size-9" },
-                        isBordered: true, 
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <span className="text-gray-400">No department in charge</span>
-                )}
-              </div>
-            );
+        case "departmentHead":
+          return (
+            <div>
+              {departmentHead ? (
+                <div className="pl-8">
+                  <UserAvatarTooltip
+                    user={{
+                      name: `${departmentHead.first_name} ${departmentHead.last_name}`,
+                      picture: departmentHead.picture || "",
+                      id: departmentHead.id,
+                    }}
+                    avatarProps={{
+                      classNames: { base: "!size-9" },
+                      isBordered: true,
+                    }}
+                  />
+                </div>
+              ) : (
+                <span className="text-gray-400">No department in charge</span>
+              )}
+            </div>
+          );
         case "color":
           return (
             <div className={cellClasses}>
@@ -222,7 +229,7 @@ const Page: React.FC = () => {
   ];
 
   return (
-    <div className="h-[calc(100vh-150px)] overflow-hidden">
+    <section className="w-full h-full flex gap-4">
       <DataDisplay
         defaultDisplay="table"
         title="Departments"
@@ -233,13 +240,27 @@ const Page: React.FC = () => {
         isLoading={!departments && !error}
         onTableDisplay={{
           config: TableConfigurations,
-          className: "h-full overflow-auto",
+          className: "h-full overflow-auto cursor-pointer",
           layout: "auto",
+          onRowAction: handleOnSelected,
         }}
         searchProps={{
           searchingItemKey: ["name"],
         }}
         sortProps={sortProps}
+        paginationProps={{
+          data_length: departments?.length,
+        }}
+        onView={
+          selectedDepartment && (
+            <ViewDepartment
+              department={selectedDepartment}
+              onClose={() => setSelectedDepartment(null)}
+              onDepartmentUpdated={handleDepartmentUpdated}
+              employees={employees}
+            />
+          )
+        }
         onListDisplay={(department) => (
           <div className="w-full">
             <BorderCard className="p-4">
@@ -288,9 +309,6 @@ const Page: React.FC = () => {
             </BorderCard>
           </div>
         )}
-        paginationProps={{
-          data_length: departments?.length,
-        }}
       />
 
       {selectedDepartmentId !== null && (
@@ -301,7 +319,7 @@ const Page: React.FC = () => {
           onDepartmentUpdated={handleDepartmentUpdated}
         />
       )}
-    </div>
+    </section>
   );
 };
 

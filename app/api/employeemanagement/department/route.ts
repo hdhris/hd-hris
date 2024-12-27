@@ -100,6 +100,25 @@ async function getDepartmentById(id: number) {
   const department = await prisma.ref_departments.findFirst({
     where: { id, deleted_at: null },
     include: {
+      trans_employees: {
+        where: {
+          deleted_at: null,
+          AND: [
+            {
+              OR: [
+             
+                { resignation_json: { equals: [] } }
+              ]
+            },
+            {
+              OR: [
+               
+                { termination_json: { equals: [] } }
+              ]
+            }
+          ]
+        }
+      },
       _count: {
         select: { trans_employees: true },
       },
@@ -121,6 +140,25 @@ async function getAllDepartments() {
   const departments = await prisma.ref_departments.findMany({
     where: { deleted_at: null },
     include: {
+      trans_employees: {
+        where: {
+          deleted_at: null,
+          AND: [
+            {
+              OR: [
+               
+                { resignation_json: { equals: [] } }
+              ]
+            },
+            {
+              OR: [
+                
+                { termination_json: { equals: [] } }
+              ]
+            }
+          ]
+        }
+      },
       _count: {
         select: { trans_employees: true },
       },

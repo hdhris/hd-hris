@@ -78,6 +78,7 @@ function PlansDataDisplay() {
     SetNavEndContent(navEndContent)
 
 
+
     useEffect(() => {
         const id = selectedMember?.id
         if (!isEqual(members?.membership, selectedMember)) {
@@ -87,6 +88,8 @@ function PlansDataDisplay() {
 
     const handleEmployeeSelection = (id: Key) => {
         setSelectedMember(members?.membership.find(item => item.id === Number(id)))
+
+
     }
 
 
@@ -183,7 +186,28 @@ function PlansDataDisplay() {
                         title="You Benefit Plan Details"
                         subtitle="Comprehensive information about your benefits"
                     >
-                        <Button startContent={<LuPlus/>} {...uniformStyle()} onPress={onOpenModal}>Add Plan</Button>
+                        <Button startContent={<LuPlus/>} {...uniformStyle()} onPress={() => {
+                            onOpenModal()
+                            console.log("Benefit: ", benefitsSelection)
+                            console.log("Selected Em: ", selectedMember)
+                            // const filteredPlan = benefitsSelection?.benefits.filter(plan => {
+                            //     // Exclude benefits already active for the employee
+                            //     const isNotActive = selectedMember?.employee_benefits.every(selectedBenefit =>
+                            //         selectedBenefit.benefit_plans.id !== plan.id || capitalize(selectedBenefit.status) !== "Active"
+                            //     );
+                            //
+                            //     // Check if the employee's salary grade falls within any contribution breakdown range
+                            //     const isInSalaryRange = plan.contribution_breakdown.some(cb =>
+                            //         selectedMember?.salary_grade! >= cb.min_salary && selectedMember?.salary_grade! <= cb.max_salary
+                            //     );
+                            //
+                            //     // Return plans that meet both criteria
+                            //     return isNotActive && isInSalaryRange;
+                            // });
+
+
+                            // console.log("Filtered: ", filteredPlan)
+                        }}>Add Plan</Button>
                     </Section>
                     {selectedMember.employee_benefits.map(member => {
 
@@ -252,7 +276,20 @@ function PlansDataDisplay() {
                         radius="sm"
                         color="primary"
                         variant="bordered"
-                        defaultItems={benefitsSelection?.benefits.filter(item => selectedMember?.employee_benefits.some(id => id.benefit_plans.id !== item.id)) || []}
+                        defaultItems={benefitsSelection?.benefits.filter(plan => {
+                            // Exclude benefits already active for the employee
+                            const isNotActive = selectedMember?.employee_benefits.every(selectedBenefit =>
+                                selectedBenefit.benefit_plans.id !== plan.id || capitalize(selectedBenefit.status) !== "Active"
+                            );
+
+                            // Check if the employee's salary grade falls within any contribution breakdown range
+                            const isInSalaryRange = plan.contribution_breakdown.some(cb =>
+                                selectedMember?.salary_grade! >= cb.min_salary && selectedMember?.salary_grade! <= cb.max_salary
+                            );
+
+                            // Return plans that meet both criteria
+                            return isNotActive && isInSalaryRange;
+                        })}
                         label={<Typography className="font-semibold">Select Benefit Plan <span
                             className="text-danger-500">*</span></Typography>}
                         labelPlacement="outside"
@@ -261,6 +298,32 @@ function PlansDataDisplay() {
                         onSelectionChange={(value) => {
                             if(value) {
                                 setSelectedPlan(Number(value))
+
+                                // const activeBenefitIds = new Set(
+                                //     selectedMember?.employee_benefits
+                                //         .filter(eb => eb.status === "Active" || eb.status === "Terminated")
+                                //         .map(eb => eb.benefit_plans.id)
+                                // );
+                                //
+                                // const ben = benefitsSelection?.benefits.filter(benefit => {
+                                //     // Exclude already used benefits
+                                //     if (activeBenefitIds.has(benefit.id)) {
+                                //         return false;
+                                //     }
+                                //
+                                //     // Check salary range
+                                //     return benefit.
+                                //     contribution_breakdown.some(cb =>
+                                //         selectedMember?.salary_grade! >= cb.min_salary && selectedMember?.salary_grade! <= cb.max_salary
+                                //     );
+                                // });
+
+                                const employee_salary = selectedMember?.salary_grade!
+                                // console.log("Benefit Id: ", ben)
+                                // console.log("Benefit: ", benefitsSelection)
+                                // console.log("Selected Em: ", selectedMember)
+                                // const benefits = benefitsSelection?.benefits.filter(item => item.contribution_breakdown.some(range => employee_salary >= range.min_salary && employee_salary <= range.max_salary))
+                                // console.log("Test: ", benefitsSelection?.benefits.filter(item => selectedMember?.employee_benefits.some(id => id.benefit_plans.id !== item.id)))
                             }
                         }}
                     >

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
+import {PayrollDeductionReport, PayrollEarningsReport} from "@/types/report/payroll/payroll";
 
 export const dynamic = "force-dynamic";
 
@@ -50,8 +51,9 @@ export async function GET(req: NextRequest) {
       }),
     ])
 
-    const earnings = payheads.filter((p) => p.type === "earning");
-    const deductions = payheads.filter((p) => p.type === "deduction");
+    const earnings = payheads.filter((p) => p.type === "earning")
+
+    const deductions = payheads.filter((p) => p.type === "deduction")
 
     return NextResponse.json(
       {

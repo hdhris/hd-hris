@@ -7,4 +7,5 @@ id: number;
   employeeCount: number;
   created_at: string;
   updated_at: string;
+  superior_id: number | null;
   };

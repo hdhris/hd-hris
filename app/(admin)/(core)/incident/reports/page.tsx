@@ -17,7 +17,7 @@ function Page() {
   const [open, setOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<IncidentReport | null>(null);
   const { data, isLoading } = useQuery<IncidentReport[]>(
-    "/api/admin/incident/reports",
+    "/api/admin/incident/payroll",
     { refreshInterval: 5000 }
   );
   SetNavEndContent(() => {

@@ -8,7 +8,11 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     // console.log(data);
     try {
-        const evaluators = await getSignatory("/payroll/cash-advance", data.employee_id, data.is_auto_approved ?? false);
+        const evaluators = await getSignatory({
+            path: "/payroll/cash-advance",
+            applicant_id: data.employee_id,
+            is_auto_approved: data.is_auto_approved ?? false
+        });
         if (!evaluators) {
             return NextResponse.json({ status: 400 });
         }
