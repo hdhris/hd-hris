@@ -1,6 +1,13 @@
+// components/admin/employeescomponent/view/ViewDepartment.tsx
 "use client";
 import React, { useEffect, useState } from "react";
-import { Card, CardBody, ScrollShadow, Chip, Divider } from "@nextui-org/react";
+import { 
+  Card, 
+  CardBody, 
+  ScrollShadow, 
+  Chip, 
+  Divider 
+} from "@nextui-org/react";
 import { Department } from "@/types/employeee/DepartmentType";
 import { Employee } from "@/types/employeee/EmployeeType";
 import Typography from "@/components/common/typography/Typography";
@@ -8,6 +15,8 @@ import CardView from "@/components/common/card-view/card-view";
 import dayjs from "dayjs";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import OrganizationalChart from "./organizational-chart";
+import { isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
+
 
 interface Position {
   id: string | number;
@@ -116,7 +125,8 @@ const ViewDepartment: React.FC<ViewDepartmentProps> = ({
     return employees.find(
       (employee) =>
         Number(employee.department_id) === department.id &&
-        employee.ref_job_classes?.is_superior === true
+        employee.ref_job_classes?.is_superior === true &&
+        isEmployeeAvailable(employee)
     );
   };
 
@@ -124,7 +134,9 @@ const ViewDepartment: React.FC<ViewDepartmentProps> = ({
 
   const countDepartmentEmployees = () => {
     return employees.filter(
-      (employee) => Number(employee.department_id) === department.id
+      (employee) =>
+        Number(employee.department_id) === department.id &&
+        isEmployeeAvailable(employee)
     ).length;
   };
 
@@ -142,7 +154,9 @@ const ViewDepartment: React.FC<ViewDepartmentProps> = ({
               {department.name.charAt(0)}
             </div>
             <div className="space-y-1">
-              <Typography className="text-xl font-bold">{department.name}</Typography>
+              <Typography className="text-xl font-bold">
+                {department.name}
+              </Typography>
               <Chip
                 size="sm"
                 color={department.is_active ? "success" : "danger"}
@@ -154,8 +168,12 @@ const ViewDepartment: React.FC<ViewDepartmentProps> = ({
             </div>
           </div>
           <div className="text-right space-y-1">
-            <Typography className="text-sm text-gray-500">Total Employees</Typography>
-            <Typography className="text-2xl font-bold">{countDepartmentEmployees()}</Typography>
+            <Typography className="text-sm text-gray-500">
+              Total Employees
+            </Typography>
+            <Typography className="text-2xl font-bold">
+              {countDepartmentEmployees()}
+            </Typography>
           </div>
         </div>
       }
@@ -166,7 +184,9 @@ const ViewDepartment: React.FC<ViewDepartmentProps> = ({
               <CardBody className="p-4">
                 <div className="grid grid-cols-1 gap-4">
                   <div className="bg-gray-50/50 p-4 rounded-lg">
-                    <Typography className="text-sm font-medium text-gray-500 mb-3">Department Head</Typography>
+                    <Typography className="text-sm font-medium text-gray-500 mb-3">
+                      Department Head
+                    </Typography>
                     {departmentHead ? (
                       <div className="flex items-center gap-3">
                         <UserAvatarTooltip
@@ -181,16 +201,24 @@ const ViewDepartment: React.FC<ViewDepartmentProps> = ({
                           }}
                         />
                         <div className="space-y-0.5">
-                          <Typography className="text-sm font-semibold">{`${departmentHead.first_name} ${departmentHead.last_name}`}</Typography>
-                          <Typography className="text-xs text-gray-500">{departmentHead.ref_job_classes?.name || 'Department Head'}</Typography>
+                          <Typography className="text-sm font-semibold">
+                            {`${departmentHead.first_name} ${departmentHead.last_name}`}
+                          </Typography>
+                          <Typography className="text-xs text-gray-500">
+                            {departmentHead.ref_job_classes?.name || 'Department Head'}
+                          </Typography>
                         </div>
                       </div>
                     ) : (
-                      <Typography className="text-sm text-gray-700">No department head assigned</Typography>
+                      <Typography className="text-sm text-gray-700">
+                        No department head assigned
+                      </Typography>
                     )}
                   </div>
                   <div className="bg-gray-50/50 p-4 rounded-lg">
-                    <Typography className="text-sm font-medium text-gray-500 mb-3">Created At</Typography>
+                    <Typography className="text-sm font-medium text-gray-500 mb-3">
+                      Created At
+                    </Typography>
                     <Typography className="text-sm font-semibold text-gray-700">
                       {department.created_at
                         ? dayjs(department.created_at).format("MMMM D, YYYY")
@@ -198,7 +226,9 @@ const ViewDepartment: React.FC<ViewDepartmentProps> = ({
                     </Typography>
                   </div>
                   <div className="bg-gray-50/50 p-4 rounded-lg">
-                    <Typography className="text-sm font-medium text-gray-500 mb-3">Last Updated</Typography>
+                    <Typography className="text-sm font-medium text-gray-500 mb-3">
+                      Last Updated
+                    </Typography>
                     <Typography className="text-sm font-semibold text-gray-700">
                       {department.updated_at
                         ? dayjs(department.updated_at).format("MMMM D, YYYY")

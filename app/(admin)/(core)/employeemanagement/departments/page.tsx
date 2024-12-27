@@ -14,6 +14,7 @@ import BorderCard from "@/components/common/BorderCard";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import showDialog from "@/lib/utils/confirmDialog";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
+import { isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
 
 const Page: React.FC = () => {
   const { data: departments, error, mutate } = useDepartmentsData();
@@ -35,19 +36,25 @@ const Page: React.FC = () => {
     }
   }, [departments, employees]);
 
-  const findDepartmentHead = (departmentId: number) => {
+   // Utility function to find department head
+   const findDepartmentHead = (departmentId: number) => {
     return employees.find(
       (employee) =>
         Number(employee.department_id) === departmentId &&
-        employee.ref_job_classes?.is_superior === true
+        employee.ref_job_classes?.is_superior === true &&
+        isEmployeeAvailable(employee)
     );
   };
-
+  
+  // Count active employees in a department
   const countDepartmentEmployees = (departmentId: number): number => {
     return employees.filter(
-      (employee) => Number(employee.department_id) === departmentId
+      (employee) =>
+        Number(employee.department_id) === departmentId &&
+        isEmployeeAvailable(employee)
     ).length;
   };
+
 
   const sortDepartmentsByRecentActivity = (departments: Department[]): Department[] => {
     return [...departments].sort((a, b) => {

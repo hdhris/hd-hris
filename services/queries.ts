@@ -113,7 +113,9 @@ export function usePrivilegesData() {
 
 export function useDepartmentsData() {
     return useSWR<Department[]>('/api/employeemanagement/department', fetcher, {//
-        // revalidateOnFocus: false, refreshInterval: 3000
+       
+        revalidateOnFocus: true,
+        refreshInterval: 5000, // Refresh every 5 seconds
     })
 }
 
