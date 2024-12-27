@@ -9,11 +9,11 @@ export async function POST(req: NextRequest) {
     const evaluators = await getSignatories({
         path: "/performance/employees/survey",
         applicant_id: employee_id,
+        include_applicant: true,
     });
     if (!evaluators) {
         return NextResponse.json({ status: 400 });
     }
-    return NextResponse.json({ status: 400 });
 
     try {
         await prisma.fact_performance_evaluations.update({
