@@ -1,4 +1,3 @@
-// app/admin/departments/page.tsx
 "use client";
 import React, { useEffect, useState } from "react";
 import { useDepartmentsData, useEmployeesData } from "@/services/queries";
@@ -16,20 +15,29 @@ import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import showDialog from "@/lib/utils/confirmDialog";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import { isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
-// import { isEmployeeAvailable } from "@/lib/utils/employeeUtils"; // Adjust import path
 
-
-const DepartmentsPage: React.FC = () => {
+const Page: React.FC = () => {
   const { data: departments, error, mutate } = useDepartmentsData();
   const { data: employees = [] } = useEmployeesData();
-  
   const [sortedDepartments, setSortedDepartments] = useState<Department[]>([]);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
 
-  // Utility function to find department head
-  const findDepartmentHead = (departmentId: number) => {
+  useEffect(() => {
+    if (departments) {
+      const sorted = sortDepartmentsByRecentActivity(departments);
+      setSortedDepartments(
+        sorted.map((dept) => ({
+          ...dept,
+          employeeCount: countDepartmentEmployees(dept.id),
+        }))
+      );
+    }
+  }, [departments, employees]);
+
+   // Utility function to find department head
+   const findDepartmentHead = (departmentId: number) => {
     return employees.find(
       (employee) =>
         Number(employee.department_id) === departmentId &&
@@ -47,7 +55,7 @@ const DepartmentsPage: React.FC = () => {
     ).length;
   };
 
-  // Sort departments by most recently updated
+
   const sortDepartmentsByRecentActivity = (departments: Department[]): Department[] => {
     return [...departments].sort((a, b) => {
       const dateA = new Date(a.updated_at).getTime();
@@ -56,38 +64,33 @@ const DepartmentsPage: React.FC = () => {
     });
   };
 
-  // Update departments when data changes
-  useEffect(() => {
-    if (departments) {
-      const sorted = sortDepartmentsByRecentActivity(departments);
-      setSortedDepartments(
-        sorted.map((dept) => ({
-          ...dept,
-          employeeCount: countDepartmentEmployees(dept.id),
-        }))
-      );
-    }
-  }, [departments, employees]);
+  SetNavEndContent(() => (
+    <div className="flex items-center gap-4">
+      <AddDepartment onDepartmentAdded={handleDepartmentUpdated} />
+    </div>
+  ));
 
-  // Department edit handler
+  const handleOnSelected = (key: React.Key) => {
+    const selected = sortedDepartments?.find((item) => item.id === Number(key));
+    setSelectedDepartment(selected ?? null);
+  };
+
   const handleEdit = async (department: Department) => {
     setSelectedDepartmentId(department.id);
     setIsEditModalOpen(true);
   };
 
-  // Department delete handler
   const handleDelete = async (id: number, name: string) => {
     try {
       const result = await showDialog({
         title: "Confirm Delete",
-        message: `Are you sure you want to delete '${name}' department?`,
+        message: `Are you sure you want to delete '${name}' ?`,
       });
-
       if (result === "yes") {
         await axios.delete(`/api/employeemanagement/department?id=${id}`);
         toast({
-          title: "Department Deleted",
-          description: "Department successfully removed from the system.",
+          title: "Deleted",
+          description: "Department deleted successfully!",
           variant: "warning",
         });
         await mutate();
@@ -103,7 +106,6 @@ const DepartmentsPage: React.FC = () => {
     }
   };
 
-  // Department update handler
   const handleDepartmentUpdated = async () => {
     try {
       const updatedData = await mutate();
@@ -117,85 +119,114 @@ const DepartmentsPage: React.FC = () => {
         );
       }
     } catch (error) {
-      console.error("Department update error:", error);
-      toast({
-        title: "Update Failed",
-        description: "Unable to refresh department data",
-        variant: "danger",
-      });
+      console.error("Error updating department data:", error);
     }
   };
 
-  // Table configurations
   const TableConfigurations = {
     columns: [
       { uid: "name", name: "Name", sortable: true },
-      { uid: "departmentHead", name: "Department Head", sortable: false },
+      { uid: "departmentHead", name: "Department In Charge", sortable: false, width: "15%" },
       { uid: "color", name: "Color", sortable: false },
-      { uid: "employeeCount", name: "Employees", sortable: true },
+      { uid: "employeeCount", name: "No. of Employees", sortable: true },
       { uid: "status", name: "Status", sortable: true },
       { uid: "actions", name: "Actions" },
     ],
-    rowCell: (department: Department, columnKey: React.Key) => {
+    rowCell: (department: Department, columnKey: React.Key): React.ReactElement => {
+      const key = columnKey as string;
+      const cellClasses = "cursor-pointer capitalize";
       const departmentHead = findDepartmentHead(department.id);
 
-      switch (columnKey) {
+      switch (key) {
         case "name":
-          return <div className="capitalize">{department.name}</div>;
-        
-        case "departmentHead":
-          return departmentHead ? (
-            <UserAvatarTooltip
-              user={{
-                name: `${departmentHead.first_name} ${departmentHead.last_name}`,
-                picture: departmentHead.picture || "",
-                id: departmentHead.id,
-              }}
-              avatarProps={{
-                classNames: { base: "!size-9" },
-                isBordered: true,
-              }}
-            />
-          ) : (
-            <span className="text-gray-400">Unassigned</span>
+          return (
+            <div className={cellClasses}>
+              <span>{department.name}</span>
+            </div>
           );
-        
+        case "departmentHead":
+          return (
+            <div>
+              {departmentHead ? (
+                <div className="pl-8">
+                  <UserAvatarTooltip
+                    user={{
+                      name: `${departmentHead.first_name} ${departmentHead.last_name}`,
+                      picture: departmentHead.picture || "",
+                      id: departmentHead.id,
+                    }}
+                    avatarProps={{
+                      classNames: { base: "!size-9" },
+                      isBordered: true,
+                    }}
+                  />
+                </div>
+              ) : (
+                <span className="text-gray-400">No department in charge</span>
+              )}
+            </div>
+          );
         case "color":
           return (
-            <div 
-              className="w-6 h-6 rounded-full" 
-              style={{ backgroundColor: department.color || "gray" }}
-            />
+            <div className={cellClasses}>
+              <div className="flex items-center">
+                <div
+                  className="w-6 h-6 rounded-full mr-2"
+                  style={{ backgroundColor: department.color || "gray" }}
+                ></div>
+              </div>
+            </div>
           );
-        
         case "employeeCount":
-          return <span className="font-bold">{department.employeeCount}</span>;
-        
+          return (
+            <div className="pl-8">
+              <span className="font-extrabold">{department.employeeCount}</span>
+            </div>
+          );
         case "status":
           return (
-            <Chip
-              color={department.is_active ? "success" : "danger"}
-              variant="dot"
-              size="sm"
-            >
-              {department.is_active ? "Active" : "Inactive"}
-            </Chip>
+            <div className={cellClasses}>
+              <Chip
+                className="capitalize"
+                color={department.is_active ? "success" : "danger"}
+                size="md"
+                variant="dot"
+              >
+                {department.is_active ? "Active" : "Inactive"}
+              </Chip>
+            </div>
           );
-        
         case "actions":
           return (
             <TableActionButton
-              name={department.name || "Unknown"}
+              name={department.name ?? "Unknown"}
               onEdit={() => handleEdit(department)}
               onDelete={() => handleDelete(department.id, department.name)}
             />
           );
-        
         default:
           return <div>-</div>;
       }
     },
   };
+
+  const sortProps = {
+    sortItems: [
+      { name: "Name", key: "name" as keyof Department },
+      { name: "Created", key: "created_at" as keyof Department },
+      { name: "Updated", key: "updated_at" as keyof Department },
+    ],
+  };
+
+  const FilterItems = [
+    {
+      category: "Status",
+      filtered: [
+        { key: "is_active", value: true, name: "Active", uid: "active" },
+        { key: "is_active", value: false, name: "Inactive", uid: "inactive" },
+      ],
+    },
+  ];
 
   return (
     <section className="w-full h-full flex gap-4">
@@ -203,15 +234,22 @@ const DepartmentsPage: React.FC = () => {
         defaultDisplay="table"
         title="Departments"
         data={sortedDepartments}
+        filterProps={{
+          filterItems: FilterItems,
+        }}
         isLoading={!departments && !error}
         onTableDisplay={{
           config: TableConfigurations,
-          className: "h-full overflow-auto",
+          className: "h-full overflow-auto cursor-pointer",
           layout: "auto",
-          onRowAction: (key) => {
-            const selected = sortedDepartments?.find((item) => item.id === Number(key));
-            setSelectedDepartment(selected ?? null);
-          },
+          onRowAction: handleOnSelected,
+        }}
+        searchProps={{
+          searchingItemKey: ["name"],
+        }}
+        sortProps={sortProps}
+        paginationProps={{
+          data_length: departments?.length,
         }}
         onView={
           selectedDepartment && (
@@ -223,6 +261,54 @@ const DepartmentsPage: React.FC = () => {
             />
           )
         }
+        onListDisplay={(department) => (
+          <div className="w-full">
+            <BorderCard className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{department.name}</span>
+                    {(() => {
+                      const departmentHead = findDepartmentHead(department.id);
+                      return (
+                        departmentHead && (
+                          <UserAvatarTooltip
+                            user={{
+                              name: `${departmentHead.first_name} ${departmentHead.last_name}`,
+                              picture: departmentHead.picture || "",
+                              id: departmentHead.id,
+                            }}
+                            avatarProps={{
+                              classNames: { base: "!size-6" },
+                              isBordered: true,
+                            }}
+                          />
+                        )
+                      );
+                    })()}
+                  </div>
+                  <div className="flex items-center mt-1">
+                    <div
+                      className="w-4 h-4 rounded-full mr-2"
+                      style={{ backgroundColor: department.color || "gray" }}
+                    ></div>
+                    <span className="text-sm text-gray-500">
+                      {department.employeeCount} employees
+                    </span>
+                  </div>
+                </div>
+                <Chip
+                  className="capitalize"
+                  color={department.is_active ? "success" : "danger"}
+                  size="sm"
+                  variant="flat"
+                >
+                  {department.is_active ? "Active" : "Inactive"}
+                </Chip>
+              </div>
+            </BorderCard>
+          </div>
+        )}
       />
 
       {selectedDepartmentId !== null && (
@@ -237,4 +323,4 @@ const DepartmentsPage: React.FC = () => {
   );
 };
 
-export default DepartmentsPage;
+export default Page;
