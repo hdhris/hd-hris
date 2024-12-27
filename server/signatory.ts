@@ -12,11 +12,15 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
                     signatories_path: path
                 }, deleted_at: null
             }, include: {
-                ref_signatory_paths: true, ref_signatory_roles: true, ref_job_classes: true
+                ref_signatory_paths: true,
+                ref_signatory_roles: true,
+                ref_job_classes: true
             },
-        }), prisma.trans_employees.findUnique({
+        }),
+            prisma.trans_employees.findUnique({
             where: {
-                id: applicant_id, deleted_at: null
+                id: applicant_id,
+                deleted_at: null
             }, select: {
                 ...employee_basic_details, ref_departments: {
                     select: {
@@ -61,7 +65,7 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
         const isAutoApproved = is_auto_approved ? [{job_id: {in: getIsApplyToAllSignatory}}] : [{id: {in: employeeIds}}, {job_id: {in: getIsApplyToAllSignatory}}]
         const employeeDetails = await prisma.trans_employees.findMany({
             where: {
-                OR: isAutoApproved,
+                AND: isAutoApproved,
             }, select: {
                 ...employee_basic_details, ref_departments: {
                     select: {
@@ -144,7 +148,7 @@ export const getSignatory = async (path: string, applicant_id: number, is_auto_a
             is_automatic_approved: is_auto_approved,
         }
         console.log("Data: ", data)
-        return data;
+        return data
     } catch (error) {
         console.log("Error: ", error)
         return null
