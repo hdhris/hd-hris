@@ -60,7 +60,7 @@ export type EmployeeAll = {
   contact_no: string;
   picture: string;
   deleted_at: string;
-  ref_job_classes: { name: string; is_superior: boolean;}; // Add this line
+  ref_job_classes: { id: number; name: string; is_superior: boolean; superior_id: number;}; // Add this line
   ref_departments: { name: string }; // Add this line
   ref_employment_status: {name: string};
   ref_addresses_trans_employees_addr_regionToref_addresses: { address_name: string, address_code: number},
