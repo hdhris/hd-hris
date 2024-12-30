@@ -42,9 +42,9 @@ export async function GET(req: NextRequest) {
                         id: { in: employeeIDsFromLogs },
                     },
                     start_date: {
-                        gte: isoStartDate,
+                        lte: isoStartDate,
                     },
-                    OR: [{ end_date: { lte: isoStartDate } }, { end_date: null }],
+                    OR: [{ end_date: { gte: isoEndDate } }, { end_date: null }],
                 },
             }),
 

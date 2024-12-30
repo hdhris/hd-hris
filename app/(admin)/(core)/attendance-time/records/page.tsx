@@ -108,6 +108,7 @@ export default function Page() {
                 return null;
             }
             const employee = attendanceData?.employees.find((ar) => ar.id === item.employee_id)!;
+            // console.log(attendanceData);
             const record = attendanceData?.statusesByDate[`${date}`][`${item.employee_id}`];
             let logStatus = null;
             const foundKey = findStatusKeyById(record || null, item.id);
@@ -297,11 +298,11 @@ export default function Page() {
                                 <p className="flex justify-between items-center text-sm ms-2">
                                     Shift:{" "}
                                     <span>
-                                        {currentAttendanceInfo.status?.shift
+                                        {currentAttendanceInfo.status?.renderedShift
                                             ? calculateShiftLength(
                                                   null,
                                                   null,
-                                                  currentAttendanceInfo.status?.shift,
+                                                  currentAttendanceInfo.status?.renderedShift,
                                                   true
                                               )
                                             : "UNRECORDED"}
@@ -310,11 +311,11 @@ export default function Page() {
                                 <p className="flex justify-between items-center text-sm ms-2">
                                     Overtime:{" "}
                                     <span>
-                                        {currentAttendanceInfo.status?.overtime
+                                        {currentAttendanceInfo.status?.renderedOvertime
                                             ? calculateShiftLength(
                                                   null,
                                                   null,
-                                                  currentAttendanceInfo.status?.overtime,
+                                                  currentAttendanceInfo.status?.renderedOvertime,
                                                   true
                                               )
                                             : "0"}
@@ -323,11 +324,11 @@ export default function Page() {
                                 <p className="flex justify-between items-center text-sm ms-2">
                                     Undertime:{" "}
                                     <span>
-                                        {currentAttendanceInfo.status?.undertime
+                                        {currentAttendanceInfo.status?.renderedUndertime
                                             ? calculateShiftLength(
                                                   null,
                                                   null,
-                                                  currentAttendanceInfo.status?.undertime,
+                                                  currentAttendanceInfo.status?.renderedUndertime,
                                                   true
                                               )
                                             : "0"}

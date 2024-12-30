@@ -17,9 +17,9 @@ export default auth((req: any) => {
         return NextResponse.next();
     }
 
-    // Allow api access to mobile
     if (
-        pathname.startsWith('/api/mobile')
+        pathname.startsWith('/api/mobile') // Allow api access to mobile
+        || pathname.startsWith('/api/zkteco') // Allow api access to zkteco
 
     ) {
         return NextResponse.next();

@@ -8,6 +8,7 @@ import {
     OutStatus,
 } from "@/types/attendance-time/AttendanceTypes";
 import { min } from "lodash";
+import { getAttendanceStatus } from "./new-stage";
 
 export async function fetchAttendanceData(url: string): Promise<AttendanceData> {
     // const response = await fetch(`/api/attendance?start=${start}&end=${end}`);
@@ -26,13 +27,22 @@ type Dates = {
 async function attendanceData({
     attendanceLogs,
     employees,
-    // batchSchedule,
     employeeSchedule,
     startDate,
     endDate,
 }: Omit<AttendanceData, "statusesByDate"> & Dates): Promise<AttendanceData> {
     // Reuse employee schedule map for references below
-    const employeeScheduleMap = new Map(employeeSchedule.map((es) => [es.employee_id!, es]));
+    const employeeScheduleMap = employeeSchedule.reduce((acc, schedule) => {
+        const { employee_id } = schedule;
+        // If the employee_id does not exist in the accumulator, initialize it with an empty array
+        if (!acc[employee_id]) {
+            acc[employee_id] = [];
+        }
+        // Add the schedule to the array of the respective employee_id
+        acc[employee_id].push(schedule);
+        return acc;
+    }, {} as Record<number, EmployeeSchedule[]>);
+
     // Reuse batch schedule map for references below
     // const batchScheduleMap = new Map(batchSchedule.map((bs) => [bs.id, bs]));
 
@@ -86,303 +96,12 @@ async function attendanceData({
             const logsByEmployee = organizedLogsByDate[date];
             await Promise.all(
                 employees.map(async (emp) => {
-                    const employeeId = Number(emp.id);
-                    const daySchedule = employeeScheduleMap.get(employeeId);
-                    // const timeSchedule = batchScheduleMap.get(daySchedule?.batch_id || 0);
-                    const timeSchedule = getEmployeeSchedule(employeeSchedule, employeeId, date); //batchScheduleMap.get(daySchedule?.batch_id || 0);
-
-                    // Initialize a record for the employee incase if it is null
-                    if (!statusesByDate[date][employeeId]) {
-                        statusesByDate[date][employeeId] = {};
-                    }
-
-                    // Get days of shifts
-                    const daysArray = employeeScheduleMap.get(Number(emp.id))?.days_json;
-
-                    // Skip if current employee has invalid schedule
-                    if (!daySchedule || !timeSchedule) return;
-
-                    const timeIn = toGMT8(timeSchedule.clock_in!).subtract(offset, "hours");
-                    const timeOut = toGMT8(timeSchedule.clock_out!).subtract(offset, "hours");
-
-                    // If current day does not exists in employee's schedule
-                    // Consider the employee's holiday
-                    const dayName = toGMT8(date).format("ddd").toLowerCase();
-                    if (!daysArray?.includes(dayName)) {
-                        statusesByDate[date][employeeId] = {
-                            amIn: {
-                                id: null,
-                                status: "no work",
-                                time: null,
-                            },
-                            amOut: {
-                                id: null,
-                                status: "no work",
-                                time: null,
-                            },
-                            pmIn: {
-                                id: null,
-                                status: "no work",
-                                time: null,
-                            },
-                            pmOut: {
-                                id: null,
-                                status: "no work",
-                                time: null,
-                            },
-                            overtime: 0,
-                            shift: 0,
-                            undertime: 0,
-                        };
-                        return;
-                    }
-
-                    if (logsByEmployee) {
-                        const logs = logsByEmployee[emp.id];
-                        if (logs) {
-                            // For each entry log of the employee
-                            logs.forEach((log) => {
-                                // Convert the timestamp of the log to dayjs(toGMT8)
-                                const timestamp = toGMT8(log.timestamp).subtract(offset, "hours");
-
-                                // For punched IN logs or "Morning/Afternoon entry"
-                                if (log.punch === 0) {
-                                    // If time-in is 4hrs closer to clock-in schedule...
-                                    // Consider it as an AM time in
-                                    if (timestamp.hour() - timeIn.hour() < 4) {
-                                        // "LATE" if time-in is 5mins later than clock-in schedule...
-                                        const stat: InStatus =
-                                            timestamp.minute() - timeIn.minute() > gracePeriod ? "late" : "ontime";
-                                        statusesByDate[date][employeeId].amIn = {
-                                            id: log.id, // Record the log ID for later reference
-                                            time: timestamp.format("HH:mm:ss"),
-                                            status: stat, // Record the status label for later reference
-                                        };
-                                        // If time-in is 4hrs further from clock-in schedule...
-                                        // Consider it as a PM time in
-                                    } else {
-                                        // Initialize as no break if the employee has not punched out at morning yet
-                                        // let stat: InStatus = "no break";
-                                        let stat: InStatus = "no break";
-
-                                        // If the employee has punched out at morning...
-                                        if (statusesByDate[date][employeeId].amOut) {
-                                            // Check if PM time-in has passed the break-mins schedule after AM time-out....
-                                            stat =
-                                                timestamp.diff(
-                                                    toGMT8(statusesByDate[date][employeeId].amOut.time!).subtract(
-                                                        offset,
-                                                        "hours"
-                                                    ),
-                                                    "minute"
-                                                ) > timeSchedule.break_min!
-                                                    ? "late"
-                                                    : "ontime"; // Otherwise, its closer to break-mins duration schedule
-                                        // If the employee has no punch outs at morning. The employee might be absent at morning
-                                        } else {
-                                            // "ONTIME" if time-in is 5 mins earlier than grace period
-                                            if (timestamp.hour() === 13 && timestamp.minute() <= gracePeriod) {
-                                                stat = "ontime";
-                                            // Otherwise, "Late"
-                                            } else {
-                                                stat = "late";
-                                            }
-                                        }
-                                        statusesByDate[date][employeeId].pmIn = {
-                                            id: log.id,
-                                            time: timestamp.format("HH:mm:ss"),
-                                            status: stat,
-                                        };
-                                    }
-
-                                    // For punched OUT logs or "Morning/Afternoon exit"
-                                } else {
-                                    // If time-out is 4hrs earlier than clock-out schedule...
-                                    // Consider it as an AM time out
-                                    if (timeOut.hour() - timestamp.hour() > 4) {
-                                        // Initialize as "LUNCH" if the employee has not punched in at afternoon yet
-                                        let stat: OutStatus = "lunch";
-                                        // Prepare to check if AM time-out is today and if PM time-in doesn't exist
-                                        const today = toGMT8().subtract(offset, "hours").startOf("day");
-                                        const logDate = timestamp.startOf("day");
-                                        // If not today, its history
-                                        if (!logDate.isSame(today, "day")) {
-                                            // If employee has not punched in at afternoon...
-                                            // considered it as "EARLY OUT"
-                                            if (!statusesByDate[date][employeeId].pmIn) stat = "early-out";
-                                        }
-                                        statusesByDate[date][employeeId].amOut = {
-                                            id: log.id,
-                                            time: timestamp.format("HH:mm:ss"),
-                                            status: stat,
-                                        };
-
-                                        // If time-out is 4hrs closer to clock-out schedule...
-                                        // Consider it as a PM time out
-                                    } else {
-                                        // Overtime if time-out is 5mins later than clock-out schedule
-                                        // Temporary variable to match dates between clock-out and time-out date
-                                        const tempTimeOut = timeOut
-                                            .year(timestamp.year())
-                                            .month(timestamp.month())
-                                            .date(timestamp.date());
-                                        const stat: OutStatus =
-                                            timestamp.minute() - tempTimeOut.minute() > gracePeriod
-                                                ? "overtime"
-                                                : timestamp.minute() - tempTimeOut.minute() < -gracePeriod
-                                                ? "early-out" // Early if time-out is 5mins earlier than clock-out schedule
-                                                : "ontime"; // Otherwise, its closer to clock out schedule
-                                        statusesByDate[date][employeeId].pmOut = {
-                                            id: log.id,
-                                            time: timestamp.format("HH:mm:ss"),
-                                            status: stat,
-                                        };
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    // After iteration of existing logs, there maybe
-                    // some attendance category (e.g AM-in, AM-out, PM-in, and PM-out) is left unstated.
-                    // Perform a validation if it is considered "ABSENT" or "NO BREAK"
-
-                    // If not punched IN at morning, mark as absent
-                    if (!statusesByDate[date][employeeId].amIn) {
-                        statusesByDate[date][employeeId].amIn = {
-                            id: null,
-                            time: null,
-                            status: "absent",
-                        };
-                    }
-                    // If not punched OUT at morning...
-                    if (!statusesByDate[date][employeeId].amOut) {
-                        // Mark absent if not also punched OUT at afternoon
-                        // or not also punched IN at morning
-                        if (
-                            !statusesByDate[date][employeeId].amIn?.time ||
-                            !statusesByDate[date][employeeId].pmOut?.time
-                        ) {
-                            statusesByDate[date][employeeId].amOut = {
-                                id: null,
-                                time: null,
-                                status: "absent",
-                            };
-
-                            // Mark no break if employee had eventually punched OUT at afternoon
-                        } else {
-                            statusesByDate[date][employeeId].amOut = {
-                                id: null,
-                                time: null,
-                                status: "no break",
-                            };
-                        }
-                    }
-                    // If not punched IN at afternoon...
-                    if (!statusesByDate[date][employeeId].pmIn) {
-                        // Mark absent if not also punched IN at morning
-                        if (!statusesByDate[date][employeeId].amIn?.time) {
-                            statusesByDate[date][employeeId].pmIn = {
-                                id: null,
-                                time: null,
-                                status: "absent",
-                            };
-
-                            // Mark no break if employee had actually punched IN at morning
-                        } else {
-                            statusesByDate[date][employeeId].pmIn = {
-                                id: null,
-                                time: null,
-                                status: "no break",
-                            };
-                        }
-                    }
-                    // If not punched OUT at afternoon, mark as absent
-                    if (!statusesByDate[date][employeeId].pmOut) {
-                        statusesByDate[date][employeeId].pmOut = {
-                            id: null,
-                            time: null,
-                            status: "absent",
-                        };
-                    }
-                    // Get the minutes rendered from overall log entry
-                    // Ignore entry such as:
-                    // MORNING: punch OUT but no punch IN
-                    // AFTERNOON: punch OUT but no punch IN
-                    const shiftLength = ((): number => {
-                        // Initializing morning and afternoon duration
-                        let morning = 0;
-                        let afternoon = 0;
-                        // If time-in and time-out for morning is valid
-                        if (
-                            statusesByDate[date][employeeId].amIn?.time &&
-                            statusesByDate[date][employeeId].amOut.time
-                        ) {
-                            morning = toGMT8(statusesByDate[date][employeeId].amOut.time)
-                                .subtract(offset, "h")
-                                .diff(
-                                    toGMT8(statusesByDate[date][employeeId].amIn.time).subtract(offset, "h"),
-                                    "minute"
-                                );
-                        }
-                        // If time-in and time-out for afternoon is valid
-                        if (
-                            statusesByDate[date][employeeId].pmIn?.time &&
-                            statusesByDate[date][employeeId].pmOut.time
-                        ) {
-                            afternoon = toGMT8(statusesByDate[date][employeeId].pmOut.time)
-                                .subtract(offset, "h")
-                                .diff(
-                                    toGMT8(statusesByDate[date][employeeId].pmIn.time).subtract(offset, "h"),
-                                    "minute"
-                                );
-                        }
-
-                        // For special cases with employees who took no breaks
-                        // such as when an employee had punched IN at morning
-                        // but never punched OUT at morning and never punched IN
-                        // at afternoon but had punched OUT at afternoon
-                        //    amIN:  time-in
-                        //    amOUT: x
-                        //    pmIN:  x
-                        //    pmOUT: time-out
-                        // this can be considered as valid, but lunch break still won't
-                        // be added with rendered work minutes (unless applied for overtime)
-                        if (
-                            statusesByDate[date][employeeId].amIn?.time &&
-                            !statusesByDate[date][employeeId].amOut?.time &&
-                            !statusesByDate[date][employeeId].pmIn?.time &&
-                            statusesByDate[date][employeeId].pmOut?.time
-                        ) {
-                            afternoon = toGMT8(statusesByDate[date][employeeId].pmOut.time)
-                                .subtract(offset, "h")
-                                .diff(
-                                    toGMT8(statusesByDate[date][employeeId].amIn.time).subtract(offset, "h"),
-                                    "minute"
-                                );
-                        }
-                        // Return the combined shift length
-                        return morning + afternoon;
-                    })();
-
-                    // Get the actual shift length of an employee
-                    const factShiftLength =
-                        toGMT8(timeSchedule?.clock_out!)
-                            .subtract(offset, "h")
-                            .diff(toGMT8(timeSchedule?.clock_in!).subtract(offset, "h"), "minute") -
-                        timeSchedule?.break_min!;
-
-                    // Rendered shift lenght must never exceed actaul shift length
-                    statusesByDate[date][employeeId].shift = min([shiftLength, factShiftLength]);
-
-                    // Instead, record the overtime length for employee's log record
-                    statusesByDate[date][employeeId].overtime =
-                        shiftLength > factShiftLength ? shiftLength - factShiftLength : 0;
-                    // Also record the undertime length for employee's log record
-                    statusesByDate[date][employeeId].undertime =
-                        shiftLength < factShiftLength ? factShiftLength - shiftLength : 0;
-
-                    // Calculate shift length, overtime, and undertime
+                    statusesByDate[date][emp.id] = await getAttendanceStatus({
+                        date,
+                        rate_per_minute: 0,
+                        logs: logsByEmployee[emp.id],
+                        schedules: employeeScheduleMap[emp.id],
+                    });
                 })
             );
         })
@@ -396,39 +115,3 @@ async function attendanceData({
         employeeSchedule,
     };
 }
-
-export const getEmployeeSchedule = (employeeSchedule: EmployeeSchedule[], employeeId: number, logDate: string) => {
-    // Parse logDate with Day.js
-    const logDay = toGMT8(logDate);
-
-    // Try to find a schedule where logDay is within the range
-    const rangedDateSchedule = employeeSchedule.find((schedule) => {
-        // Check if the employee ID matches
-        if (schedule.employee_id !== employeeId) return false;
-        if (!schedule.end_date) return false;
-
-        // Parse startDate and endDate
-        const startDate = toGMT8(schedule.start_date.split("T")[0]);
-        const endDate = toGMT8(schedule.end_date.split("T")[0]);
-
-        // Check if logDay is within the date range
-        return logDay.isSameOrAfter(startDate) && logDay.isSameOrBefore(endDate);
-    });
-
-    // If no schedule found in range, check for open-ended schedules
-    if (!rangedDateSchedule) {
-        return (
-            employeeSchedule.find((schedule) => {
-                if (schedule.employee_id !== employeeId) return false;
-
-                const startDate = toGMT8(schedule.start_date.split("T")[0]);
-                const endDate = schedule.end_date;
-
-                // Check if logDay is after startDate and the schedule has no endDate
-                return logDay.isSameOrAfter(startDate) && !endDate;
-            }) || null
-        );
-    }
-
-    return rangedDateSchedule;
-};

@@ -196,8 +196,9 @@ model log_attendances {
   employee_id     Int
   timestamp       DateTime        @db.Timestamp(6)
   status          Int?
-  created_at      DateTime?       @db.Timestamp(6)
+  created_at      DateTime?       @default(now()) @db.Timestamp(6)
   punch           Int?
+  unique_id       String          @unique
   trans_employees trans_employees @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_attendance_employees1")
 }
 
@@ -364,9 +365,8 @@ model sys_privileges {
 }
 
 model sys_variables {
-  id              Int              @id @default(autoincrement())
   employee_id     Int?             @unique(map: "employee_id")
-  key             String?          @db.VarChar(45)
+  key             String           @id @unique @db.VarChar(45)
   data            Json?            @db.Json
   created_at      DateTime         @db.Timestamp(6)
   updated_at      DateTime?        @db.Timestamp(6)

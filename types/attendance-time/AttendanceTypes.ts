@@ -21,6 +21,7 @@ export interface Schedules {
 
 export interface AttendanceLog {
   id: number;
+  unique_id: string;
   employee_id: number;
   timestamp: string; // ISO format string
   status: number;
@@ -39,9 +40,9 @@ export interface EmployeeSchedule {
   deleted_at: string | null; // ISO timestamp or null
   start_date: string; // ISO timestamp
   end_date: string | null; // ISO timestamp or null
-  clock_in: string | null; // ISO timestamp or null
-  clock_out: string | null; // ISO timestamp or null
-  break_min: number | null;
+  clock_in: string; // ISO timestamp or null
+  clock_out: string; // ISO timestamp or null
+  break_min: number;
   ref_batch_schedules: BatchSchedule;
   trans_employees: MinorEmployee;
 }
@@ -54,7 +55,7 @@ export interface AttendanceData {
   employeeSchedule: EmployeeSchedule[]; // Array of individual schedules for employees
 }
 
-export type InStatus = "absent" | "late" | "ontime" | "no break" | "no work";
+export type InStatus = "absent" | "late" | "ontime" | "no break" | "no work" | "on leave";
 export type OutStatus =
   | "absent"
   | "early-out"
@@ -62,7 +63,8 @@ export type OutStatus =
   | "ontime"
   | "lunch"
   | "no break"
-  | "no work";
+  | "no work"
+  | "on leave";
 
 export type punchIN = {
   id: number | null;
@@ -75,14 +77,29 @@ export type punchOUT = {
   status: OutStatus;
 };
 
+// export type LogStatus = {
+//   amIn?: punchIN;
+//   amOut?: punchOUT;
+//   pmIn?: punchIN;
+//   pmOut?: punchOUT;
+//   shift?: number;
+//   overtime?: number;
+//   undertime?: number;
+// };
+
 export type LogStatus = {
   amIn?: punchIN;
   amOut?: punchOUT;
   pmIn?: punchIN;
   pmOut?: punchOUT;
-  shift?: number;
-  overtime?: number;
-  undertime?: number;
+  renderedShift: number;
+  paidShift: number;
+  renderedOvertime: number;
+  paidOvertime: number;
+  renderedUndertime: number;
+  deductedUndertime: number;
+  renderedLeave: number;
+  paidLeave: number;
 };
 
 export type AttendaceStatuses = { [employeeID: string]: LogStatus };

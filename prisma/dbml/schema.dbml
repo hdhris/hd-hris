@@ -164,8 +164,9 @@ Table log_attendances {
   employee_id Int [not null]
   timestamp DateTime [not null]
   status Int
-  created_at DateTime
+  created_at DateTime [default: `now()`]
   punch Int
+  unique_id String [unique, not null]
   trans_employees trans_employees [not null]
 }
 
@@ -316,9 +317,8 @@ Table sys_privileges {
 }
 
 Table sys_variables {
-  id Int [pk, increment]
   employee_id Int [unique]
-  key String
+  key String [pk]
   data Json
   created_at DateTime [not null]
   updated_at DateTime

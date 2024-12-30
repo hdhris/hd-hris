@@ -145,7 +145,7 @@ const NavContent = () => {
     const unreadCount = data?.notifications.filter((n) => !n.is_read).length ?? 0
 
     const session = useSession()
-    console.log("session: ", session)
+    // console.log("session: ", session)
     useEffect(() => {
         if(pathname.startsWith("/dashboard")){
             onOpen()
