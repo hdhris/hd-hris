@@ -265,6 +265,10 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
 
     foundApplicantInSignatoryFlag = false; // Refresh flag for evaluators
     for (const sign of signatories) {
+
+        if(is_auto_approved && sign.ref_signatory_roles.signatory_role_name.toLowerCase() != 'approver'){
+            continue;
+        }
         const user = foundUsers.find(user => user?.ref_job_classes?.id === sign.job_id);
         if (!user) {
             continue;
@@ -282,9 +286,9 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
 
         evaluators.push({
             decision: {
-                decisionDate: null,
-                is_decided: null,
-                rejectedReason: null,
+                decisionDate: is_auto_approved ? toGMT8().toISOString() : null,
+                is_decided: is_auto_approved ?? null,
+                rejectedReason: is_auto_approved ? 'Automatically approved' : null,
             },
             evaluated_by: user.id,
             role: sign.ref_signatory_roles.signatory_role_name,
@@ -299,9 +303,9 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
     if(evaluators.length===0){
         evaluators.push({
             decision: {
-                decisionDate: toGMT8().toISOString(),
-                is_decided: true,
-                rejectedReason: null,
+                decisionDate: is_auto_approved ? toGMT8().toISOString() : null,
+                is_decided: is_auto_approved ?? null,
+                rejectedReason: is_auto_approved ? 'Auto approved' : null,
             },
             evaluated_by: applicant_id,
             role: signatories?.[signatories.length-1]?.ref_signatory_roles?.signatory_role_name ?? "Applicant",
@@ -316,7 +320,7 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
         is_automatic_approved: is_auto_approved ?? false,
     }
 
-    console.log(evaluator_json);
+    // console.log(evaluator_json);
 
     return evaluator_json;
 };

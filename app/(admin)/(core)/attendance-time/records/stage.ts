@@ -17,7 +17,9 @@ export async function fetchAttendanceData(url: string): Promise<AttendanceData> 
     const startDate = params.get("start");
     const endDate = params.get("end");
     const data = await response.json();
-    return await attendanceData({ ...data, startDate, endDate });
+    const result = await attendanceData({ ...data, startDate, endDate });
+    console.log({result})
+    return result;
 }
 
 type Dates = {
@@ -48,7 +50,7 @@ async function attendanceData({
 
     /////////////////////////////////////////////////////////////////////
     // Organize and sort attendance logs into a record by date and employee
-    const organizedLogsByDate = attendanceLogs.reduce((acc, log) => {
+    const organizedLogsByDate = [...attendanceLogs].reduce((acc, log) => {
         const logDate = toGMT8(log.timestamp).format("YYYY-MM-DD");
         const empId = log.employee_id;
         if (!acc[logDate]) acc[logDate] = {};
@@ -96,12 +98,16 @@ async function attendanceData({
             const logsByEmployee = organizedLogsByDate[date];
             await Promise.all(
                 employees.map(async (emp) => {
-                    statusesByDate[date][emp.id] = await getAttendanceStatus({
-                        date,
-                        rate_per_minute: 0,
-                        logs: logsByEmployee[emp.id],
-                        schedules: employeeScheduleMap[emp.id],
-                    });
+                    try{
+                        statusesByDate[date][emp.id] = await getAttendanceStatus({
+                            date,
+                            rate_per_minute: 0,
+                            logs: logsByEmployee[emp.id],
+                            schedules: employeeScheduleMap[emp.id],
+                        });
+                    } catch(error) {
+                        console.log(error);
+                    }
                 })
             );
         })

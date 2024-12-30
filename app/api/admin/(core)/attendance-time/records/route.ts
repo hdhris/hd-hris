@@ -48,19 +48,6 @@ export async function GET(req: NextRequest) {
                 },
             }),
 
-            // Batch schedule
-            // prisma.ref_batch_schedules.findMany({
-            //     where: {
-            //         dim_schedules: {
-            //             some: {
-            //                 trans_employees: {
-            //                     id: { in: employeeIDsFromLogs },
-            //                 },
-            //             },
-            //         },
-            //     },
-            // }),
-
             // Fetch employee details for reference
             prisma.trans_employees.findMany({
                 where: {

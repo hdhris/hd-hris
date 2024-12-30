@@ -103,9 +103,9 @@ function RootLayout({children}: { children: ReactNode }) {
                     {isModuleAuthorized('Benefits') &&
                         <SideBarItem label="Benefits" href="/benefits" icon={<LuHeartHandshake/>}
                                      showLabel={isSidebarOpen}/>}
-                    {isModuleAuthorized('Performance Appraisal') &&
+                    {/* {isModuleAuthorized('Performance Appraisal') &&
                         <SideBarItem label="Performance Appraisal" href="/performance" icon={<LuBadgeCheck/>}
-                                     showLabel={isSidebarOpen}/>}
+                                     showLabel={isSidebarOpen}/>} */}
                     {isModuleAuthorized('Privileges') &&
                         <SideBarItem label="Privileges" href="/privileges" icon={<LuPersonStanding/>}
                                      showLabel={isSidebarOpen}/>}

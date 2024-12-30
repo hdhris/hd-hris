@@ -77,6 +77,26 @@ export default function Page() {
         return null;
     }, [currentAttendanceInfo]);
 
+    const sortedItems = React.useMemo(() => {
+        if (attendanceData?.attendanceLogs) {
+            const items = attendanceData?.attendanceLogs.sort((a, b) => {
+                let aItem = null;
+                let bItem = null;
+                if (sortDescriptor.column === "timestamp") {
+                    aItem = toGMT8(a.timestamp);
+                    bItem = toGMT8(b.timestamp);
+                } else if (sortDescriptor.column === "name") {
+                    aItem = getEmpFullName(attendanceData?.employees.find((ar) => ar.id === a.employee_id)!);
+                    bItem = getEmpFullName(attendanceData?.employees.find((ar) => ar.id === b.employee_id)!);
+                }
+                const cmp = aItem && bItem ? (bItem > aItem ? -1 : bItem < aItem ? 1 : 0) : 0;
+                return sortDescriptor.direction === "descending" ? -cmp : cmp;
+            });
+            return items;
+        }
+        return [];
+    }, [sortDescriptor, attendanceData]);
+
     const config: TableConfigProps<AttendanceLog> = {
         columns: [
             { uid: "id", name: "ID", sortable: true },
@@ -159,46 +179,8 @@ export default function Page() {
         },
     };
 
-    const sortedItems = React.useMemo(() => {
-        if (attendanceData?.attendanceLogs) {
-            const items = [...attendanceData?.attendanceLogs].sort((a, b) => {
-                let aItem = null;
-                let bItem = null;
-                if (sortDescriptor.column === "timestamp") {
-                    aItem = toGMT8(a.timestamp);
-                    bItem = toGMT8(b.timestamp);
-                } else if (sortDescriptor.column === "name") {
-                    aItem = getEmpFullName(attendanceData?.employees.find((ar) => ar.id === a.employee_id)!);
-                    bItem = getEmpFullName(attendanceData?.employees.find((ar) => ar.id === b.employee_id)!);
-                }
-                const cmp = aItem && bItem ? (bItem > aItem ? -1 : bItem < aItem ? 1 : 0) : 0;
-                return sortDescriptor.direction === "descending" ? -cmp : cmp;
-            });
-            return items;
-        }
-        return [];
-    }, [sortDescriptor, attendanceData]);
-
     return (
         <div className="flex flex-row gap-1 h-full">
-            {/* <DataDisplay
-                defaultDisplay="table"
-                isLoading={isLoading}
-                onTableDisplay={{
-                config: config,
-                layout: "auto",
-                selectionMode: "single",
-                onRowAction: (key) => {
-                    setSelectedKey(key as any);
-                },
-                }}
-                paginationProps={{
-                loop: true,
-                data_length: attendanceLog?.length,
-                }}
-                data={attendanceLog || []}
-                title="Attendance Logs"
-            /> */}
             <TableData
                 items={sortedItems}
                 title="Attendance Logs"
@@ -207,6 +189,7 @@ export default function Page() {
                 sortDescriptor={sortDescriptor}
                 onSortChange={setSortDescriptor}
                 selectionMode="single"
+                disallowEmptySelection
                 selectedKeys={new Set([selectedLog || ""])}
                 onSelectionChange={(key) => setSelectedLog(String(Array.from(key)[0]))}
             />

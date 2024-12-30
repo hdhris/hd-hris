@@ -32,7 +32,7 @@ export async function getAttendanceStatus({
     rate_per_minute: number;
 }): Promise<LogStatus> {
     const schedule = getAccurateEmployeeSchedule(schedules, date);
-    console.log({ schedules, schedule });
+    // console.log({ schedules, schedule });
     // Skip if current employee has invalid schedule
     if (!schedule)
         return {
@@ -81,8 +81,8 @@ export async function getAttendanceStatus({
     let renderedShift = 0;
     let renderedUndertime = 0;
 
-    const scheduleTimeIn = toGMT8(schedule.clock_in).subtract(offset, "hours");
-    const scheduleTimeOut = toGMT8(schedule.clock_out).subtract(offset, "hours");
+    const scheduleTimeIn = toGMT8(schedule.clock_in).subtract(offset, "hours").year(currentDay.year()).month(currentDay.month()).date(currentDay.date());
+    const scheduleTimeOut = toGMT8(schedule.clock_out).subtract(offset, "hours").year(currentDay.year()).month(currentDay.month()).date(currentDay.date());
 
     if (!dayNames?.includes(currentDay.format("ddd").toLowerCase())) {
         amIn = {
@@ -123,7 +123,7 @@ export async function getAttendanceStatus({
                                 timestamp.minute() - scheduleTimeIn.minute() > gracePeriod ? "late" : "ontime";
                             amIn = {
                                 id: log.id, // Record the log ID for later reference
-                                time: timestamp.format("HH:mm:ss"),
+                                time: timestamp.toISOString(),
                                 status: stat, // Record the status label for later reference
                             };
                             // If time-in is 4hrs further from clock-in schedule...
@@ -153,7 +153,7 @@ export async function getAttendanceStatus({
                             }
                             pmIn = {
                                 id: log.id,
-                                time: timestamp.format("HH:mm:ss"),
+                                time: timestamp.toISOString(),
                                 status: stat,
                             };
                         }
@@ -176,7 +176,7 @@ export async function getAttendanceStatus({
                             }
                             amOut = {
                                 id: log.id,
-                                time: timestamp.format("HH:mm:ss"),
+                                time: timestamp.toISOString(),
                                 status: stat,
                             };
 
@@ -189,134 +189,137 @@ export async function getAttendanceStatus({
                                 .year(timestamp.year())
                                 .month(timestamp.month())
                                 .date(timestamp.date());
+                            // console.log("Temp: ",tempTimeOut.toISOString())
+                            // console.log("TimS: ",timestamp.toISOString())
+                            // console.log("Compare:", timestamp.diff(tempTimeOut, 'minutes'))
                             const stat: OutStatus =
-                                timestamp.minute() - tempTimeOut.minute() > gracePeriod
+                                timestamp.diff(tempTimeOut, "minutes") > gracePeriod
                                     ? "overtime"
-                                    : timestamp.minute() - tempTimeOut.minute() < -gracePeriod
+                                    : timestamp.diff(tempTimeOut, "minutes") < -gracePeriod
                                     ? "early-out" // Early if time-out is 5mins earlier than clock-out schedule
                                     : "ontime"; // Otherwise, its closer to clock out schedule
                             pmOut = {
                                 id: log.id,
-                                time: timestamp.format("HH:mm:ss"),
+                                time: timestamp.toISOString(),
                                 status: stat,
                             };
                         }
                     }
-
-                    // After iteration of existing logs, there maybe
-                    // some attendance category (e.g AM-in, AM-out, PM-in, and PM-out) is left unstated.
-                    // Perform a validation if it is considered "ABSENT" or "NO BREAK"
-
-                    // If not punched IN at morning, mark as absent
-                    if (!amIn) {
-                        amIn = {
-                            id: null,
-                            time: null,
-                            status: "absent",
-                        };
-                    }
-                    // If not punched OUT at morning...
-                    if (!amOut) {
-                        // Mark absent if not also punched OUT at afternoon
-                        // or not also punched IN at morning
-                        if (!amIn?.time || !pmOut?.time) {
-                            amOut = {
-                                id: null,
-                                time: null,
-                                status: "absent",
-                            };
-
-                            // Mark no break if employee had eventually punched OUT at afternoon
-                        } else {
-                            amOut = {
-                                id: null,
-                                time: null,
-                                status: "no break",
-                            };
-                        }
-                    }
-                    // If not punched IN at afternoon...
-                    if (!pmIn) {
-                        // Mark absent if not also punched IN at morning
-                        if (!amIn?.time) {
-                            pmIn = {
-                                id: null,
-                                time: null,
-                                status: "absent",
-                            };
-
-                            // Mark no break if employee had actually punched IN at morning
-                        } else {
-                            pmIn = {
-                                id: null,
-                                time: null,
-                                status: "no break",
-                            };
-                        }
-                    }
-                    // If not punched OUT at afternoon, mark as absent
-                    if (!pmOut) {
-                        pmOut = {
-                            id: null,
-                            time: null,
-                            status: "absent",
-                        };
-                    }
-                    // Get the minutes rendered from overall log entry
-                    // Ignore entry such as:
-                    // MORNING: punch OUT but no punch IN
-                    // AFTERNOON: punch OUT but no punch IN
-                    const shiftLength = ((): number => {
-                        // Initializing morning and afternoon duration
-                        let morning = 0;
-                        let afternoon = 0;
-                        // If time-in and time-out for morning is valid
-                        if (amIn?.time && amOut.time) {
-                            morning = toGMT8(amOut.time)
-                                .subtract(offset, "h")
-                                .diff(toGMT8(amIn.time).subtract(offset, "h"), "minute");
-                        }
-                        // If time-in and time-out for afternoon is valid
-                        if (pmIn?.time && pmOut.time) {
-                            afternoon = toGMT8(pmOut.time)
-                                .subtract(offset, "h")
-                                .diff(toGMT8(pmIn.time).subtract(offset, "h"), "minute");
-                        }
-
-                        // For special cases with employees who took no breaks
-                        // such as when an employee had punched IN at morning
-                        // but never punched OUT at morning and never punched IN
-                        // at afternoon but had punched OUT at afternoon
-                        //    amIN:  time-in
-                        //    amOUT: x
-                        //    pmIN:  x
-                        //    pmOUT: time-out
-                        // this can be considered as valid, but lunch break still won't
-                        // be added with rendered work minutes (unless applied for overtime)
-                        if (amIn?.time && !amOut?.time && !pmIn?.time && pmOut?.time) {
-                            afternoon = toGMT8(pmOut.time)
-                                .subtract(offset, "h")
-                                .diff(toGMT8(amIn.time).subtract(offset, "h"), "minute");
-                        }
-                        // Return the combined shift length
-                        return morning + afternoon;
-                    })();
-
-                    // Get the actual shift length of an employee
-                    const factShiftLength =
-                        toGMT8(schedule.clock_out)
-                            .subtract(offset, "h")
-                            .diff(toGMT8(schedule.clock_in).subtract(offset, "h"), "minute") - schedule.break_min;
-
-                    // Rendered shift lenght must never exceed actaul shift length
-                    renderedShift = Math.min(shiftLength, factShiftLength);
-                    // Instead, record the overtime length for employee's log record
-                    renderedOvertime = shiftLength > factShiftLength ? shiftLength - factShiftLength : 0;
-                    // Also record the undertime length for employee's log record
-                    renderedUndertime = shiftLength < factShiftLength ? factShiftLength - shiftLength : 0;
                 });
             }
         }
+
+        // After iteration of existing logs, there maybe
+        // some attendance category (e.g AM-in, AM-out, PM-in, and PM-out) is left unstated.
+        // Perform a validation if it is considered "ABSENT" or "NO BREAK"
+
+        // If not punched IN at morning, mark as absent
+        if (!amIn.time) {
+            amIn = {
+                id: null,
+                time: null,
+                status: "absent",
+            };
+        }
+        // If not punched OUT at morning...
+        if (!amOut.time) {
+            // Mark absent if not also punched OUT at afternoon
+            // or not also punched IN at morning
+            if (!amIn?.time || !pmOut?.time) {
+                amOut = {
+                    id: null,
+                    time: null,
+                    status: "absent",
+                };
+
+                // Mark no break if employee had eventually punched OUT at afternoon
+            } else {
+                amOut = {
+                    id: null,
+                    time: null,
+                    status: "no break",
+                };
+            }
+        }
+        // If not punched IN at afternoon...
+        if (!pmIn.time) {
+            // Mark absent if not also punched IN at morning
+            if (!amIn?.time) {
+                pmIn = {
+                    id: null,
+                    time: null,
+                    status: "absent",
+                };
+
+                // Mark no break if employee had actually punched IN at morning
+            } else {
+                pmIn = {
+                    id: null,
+                    time: null,
+                    status: "no break",
+                };
+            }
+        }
+        // If not punched OUT at afternoon, mark as absent
+        if (!pmOut.time) {
+            pmOut = {
+                id: null,
+                time: null,
+                status: "absent",
+            };
+        }
+        // Get the minutes rendered from overall log entry
+        // Ignore entry such as:
+        // MORNING: punch OUT but no punch IN
+        // AFTERNOON: punch OUT but no punch IN
+        const shiftLength = ((): number => {
+            // Initializing morning and afternoon duration
+            let morning = 0;
+            let afternoon = 0;
+            // If time-in and time-out for morning is valid
+            if (amIn?.time && amOut.time) {
+                morning = toGMT8(amOut.time)
+                    .subtract(offset, "h")
+                    .diff(toGMT8(amIn.time).subtract(offset, "h"), "minute");
+            }
+            // If time-in and time-out for afternoon is valid
+            if (pmIn?.time && pmOut.time) {
+                afternoon = toGMT8(pmOut.time)
+                    .subtract(offset, "h")
+                    .diff(toGMT8(pmIn.time).subtract(offset, "h"), "minute");
+            }
+
+            // For special cases with employees who took no breaks
+            // such as when an employee had punched IN at morning
+            // but never punched OUT at morning and never punched IN
+            // at afternoon but had punched OUT at afternoon
+            //    amIN:  time-in
+            //    amOUT: x
+            //    pmIN:  x
+            //    pmOUT: time-out
+            // this can be considered as valid, but lunch break still won't
+            // be added with rendered work minutes (unless applied for overtime)
+            if (amIn?.time && !amOut?.time && !pmIn?.time && pmOut?.time) {
+                afternoon = toGMT8(pmOut.time)
+                    .subtract(offset, "h")
+                    .diff(toGMT8(amIn.time).subtract(offset, "h"), "minute");
+            }
+            // Return the combined shift length
+            return morning + afternoon;
+        })();
+
+        // Get the actual shift length of an employee
+        const factShiftLength = scheduleTimeOut.diff(scheduleTimeIn, "minute") - schedule.break_min;
+
+        console.log({ emp: schedule.employee_id, shiftLength, factShiftLength });
+        // Rendered shift lenght must never exceed actaul shift length
+        renderedShift = Math.min(shiftLength, factShiftLength);
+        // Instead, record the overtime length for employee's log record
+        // renderedOvertime = shiftLength > factShiftLength ? shiftLength - factShiftLength : 0;
+        console.log({ emp: schedule.employee_id, pmOut: toGMT8(pmOut.time!).toISOString(), scheOut: scheduleTimeOut.toISOString() })
+        renderedOvertime = pmOut.time ? toGMT8(pmOut.time).diff(scheduleTimeOut,'minutes') : 0;
+        // Also record the undertime length for employee's log record
+        renderedUndertime = shiftLength < factShiftLength ? factShiftLength - shiftLength : 0;
 
         if (onLeave) {
             const startTimestamp = toGMT8(onLeave.start_timestamp).subtract(offset, "h");
