@@ -13,6 +13,9 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const startDate = searchParams.get("start");
         const endDate = searchParams.get("end");
+        const empID = searchParams.get("employee_id");
+
+        const is_single_date = startDate === endDate;
 
         //////////////////////////////////
         // Prepare and get attendance logs
@@ -24,6 +27,7 @@ export async function GET(req: NextRequest) {
                     gte: isoStartDate,
                     lt: isoEndDate, // Matches records within the range
                 },
+                ...(empID ? { employee_id: Number(empID) } : {}),
             },
             // orderBy: {
             //     timestamp: "desc",
@@ -34,32 +38,16 @@ export async function GET(req: NextRequest) {
 
         ///////////////////////////////////////////////////////////////
         // Prepare batch schedule and employee schedule info
-        const [employeeSchedule, employees] = await Promise.all([ //batchSchedule, employees] = await Promise.all([
+        const [employeeSchedule, employees] = await Promise.all([
+            // batchSchedule, employees] = await Promise.all([
             // Employee schedule
             prisma.dim_schedules.findMany({
                 where: {
-                    trans_employees: {
-                        id: { in: employeeIDsFromLogs },
-                    },
-                    start_date: {
-                        gte: isoStartDate,
-                    },
-                    OR: [{ end_date: { lte: isoStartDate } }, { end_date: null }],
+                    employee_id: { in: employeeIDsFromLogs },
+                    start_date: is_single_date ? { lte: isoStartDate } : { gte: isoStartDate },
+                    OR: [{ end_date: is_single_date ? { gte: isoEndDate } : { lte: isoEndDate } }, { end_date: null }],
                 },
             }),
-
-            // Batch schedule
-            // prisma.ref_batch_schedules.findMany({
-            //     where: {
-            //         dim_schedules: {
-            //             some: {
-            //                 trans_employees: {
-            //                     id: { in: employeeIDsFromLogs },
-            //                 },
-            //             },
-            //         },
-            //     },
-            // }),
 
             // Fetch employee details for reference
             prisma.trans_employees.findMany({
@@ -77,7 +65,7 @@ export async function GET(req: NextRequest) {
             employeeSchedule,
         });
     } catch (error) {
-        console.error("Error fetching attendances:", error);
+        console.error(error);
         return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
     }
 }

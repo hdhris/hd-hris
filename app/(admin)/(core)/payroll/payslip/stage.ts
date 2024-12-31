@@ -20,8 +20,9 @@ import {
   ProcessDate,
 } from "@/types/payroll/payrollType";
 import axios from "axios";
-import { fetchAttendanceData, getEmployeeSchedule } from "../../attendance-time/records/stage";
+import { fetchAttendanceData } from "../../attendance-time/records/stage";
 import { ContributionType } from "@/types/benefits/plans/plansTypes";
+import { EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
 
 export async function stageTable(
   dateInfo: ProcessDate,
@@ -49,7 +50,19 @@ export async function stageTable(
     setStageMsg("Performing calculations...");
     // Reuse employee schedule map for references below
     const { cashToDisburse, cashToRepay, benefitsPlansData } = convertToNumber({...stage_two.data.result});
-    const employeeScheduleMap = new Map(employeeSchedule.map((es) => [es.employee_id!, es]));
+    const employeeScheduleMap = employeeSchedule.reduce((acc, schedule) => {
+        const { employee_id } = schedule;
+
+        // If the employee_id does not exist in the accumulator, initialize it with an empty array
+        if (!acc[employee_id]) {
+            acc[employee_id] = [];
+        }
+
+        // Add the schedule to the array of the respective employee_id
+        acc[employee_id].push(schedule);
+
+        return acc;
+    }, {} as Record<number, EmployeeSchedule[]>);
 
     const cashDisburseMap = new Map(
       cashToDisburse.map((ctd) => [
@@ -99,6 +112,7 @@ export async function stageTable(
       },
       {} as Record<number, ContributionSetting[]>
     );
+    
 
     // Calculate amounts and generate breakdowns in chunks
     // Initializes `calculatedAmountList` to store payhead amounts for each employee.
@@ -114,8 +128,8 @@ export async function stageTable(
     await Promise.all(
       employees.map(async (emp) => {
         // Define base variables for payroll calculations.
-        const daySchedule = employeeScheduleMap.get(emp.id);
-        const timeSchedule =  getEmployeeSchedule(employeeSchedule, emp.id, dateInfo.end_date)//batchScheduleMap.get(daySchedule?.batch_id || 0);
+        const schedules = employeeScheduleMap[emp.id];
+        const timeSchedule =  0;
     
         // const ratePerHour = parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0;
         const ratePerHour = 30; // Static rate/hr

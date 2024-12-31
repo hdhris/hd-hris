@@ -6,7 +6,6 @@ import {
     AttendanceLog,
     AttendanceData,
     LogStatus,
-    Schedules,
 } from "@/types/attendance-time/AttendanceTypes";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
@@ -33,7 +32,7 @@ export default function Page() {
             "YYYY-MM-DD"
         )}`
     );
-    const { data, mutate: mutateSchedule } = useQuery<Schedules>("/api/admin/attendance-time/schedule");
+    // const { data, mutate: mutateSchedule } = useQuery<Schedules>("/api/admin/attendance-time/schedule");
 
     const fetcher = async (url: string | null) => {
         const data = await fetchAttendanceData(String(url));
@@ -48,34 +47,50 @@ export default function Page() {
     const currentAttendanceInfo = useMemo(() => {
         const foundLog = attendanceData?.attendanceLogs.find((al) => al.id === Number(selectedLog));
         if (foundLog) {
-            const empSched = data?.employees.find(emp => emp.id === foundLog?.employee_id)?.dim_schedules[0];
-            const batchSched = data?.batch.find((b) => b.id === empSched?.batch_id);
             const status = attendanceData?.statusesByDate[`${date}`][`${foundLog?.employee_id}`];
             return {
                 log_info: foundLog,
-                employee_schedule: empSched,
-                batchmate_schedule: batchSched,
                 status: status,
             };
         }
-    }, [attendanceData, selectedLog, data, date]);
+    }, [attendanceData, selectedLog, date]);
 
     const clockSchedule = useMemo(() => {
         const info = currentAttendanceInfo;
-        if (info?.batchmate_schedule && info?.employee_schedule) {
+        if (info?.status) {
             return (
                 <>
                     <Chip variant="flat" color="success">
-                        {toGMT8(info?.batchmate_schedule?.clock_in).format("hh:mm a")}
+                        {toGMT8(info?.status?.clockIn).format("hh:mm a")}
                     </Chip>
                     <Chip variant="flat" color="warning">
-                        {toGMT8(info?.batchmate_schedule?.clock_out).format("hh:mm a")}
+                        {toGMT8(info?.status?.clockOut).format("hh:mm a")}
                     </Chip>
                 </>
             );
         }
         return null;
     }, [currentAttendanceInfo]);
+
+    const sortedItems = React.useMemo(() => {
+        if (attendanceData?.attendanceLogs) {
+            const items = attendanceData?.attendanceLogs.sort((a, b) => {
+                let aItem = null;
+                let bItem = null;
+                if (sortDescriptor.column === "timestamp") {
+                    aItem = toGMT8(a.timestamp);
+                    bItem = toGMT8(b.timestamp);
+                } else if (sortDescriptor.column === "name") {
+                    aItem = getEmpFullName(attendanceData?.employees.find((ar) => ar.id === a.employee_id)!);
+                    bItem = getEmpFullName(attendanceData?.employees.find((ar) => ar.id === b.employee_id)!);
+                }
+                const cmp = aItem && bItem ? (bItem > aItem ? -1 : bItem < aItem ? 1 : 0) : 0;
+                return sortDescriptor.direction === "descending" ? -cmp : cmp;
+            });
+            return items;
+        }
+        return [];
+    }, [sortDescriptor, attendanceData]);
 
     const config: TableConfigProps<AttendanceLog> = {
         columns: [
@@ -108,6 +123,7 @@ export default function Page() {
                 return null;
             }
             const employee = attendanceData?.employees.find((ar) => ar.id === item.employee_id)!;
+            // console.log(attendanceData);
             const record = attendanceData?.statusesByDate[`${date}`][`${item.employee_id}`];
             let logStatus = null;
             const foundKey = findStatusKeyById(record || null, item.id);
@@ -158,46 +174,8 @@ export default function Page() {
         },
     };
 
-    const sortedItems = React.useMemo(() => {
-        if (attendanceData?.attendanceLogs) {
-            const items = [...attendanceData?.attendanceLogs].sort((a, b) => {
-                let aItem = null;
-                let bItem = null;
-                if (sortDescriptor.column === "timestamp") {
-                    aItem = toGMT8(a.timestamp);
-                    bItem = toGMT8(b.timestamp);
-                } else if (sortDescriptor.column === "name") {
-                    aItem = getEmpFullName(attendanceData?.employees.find((ar) => ar.id === a.employee_id)!);
-                    bItem = getEmpFullName(attendanceData?.employees.find((ar) => ar.id === b.employee_id)!);
-                }
-                const cmp = aItem && bItem ? (bItem > aItem ? -1 : bItem < aItem ? 1 : 0) : 0;
-                return sortDescriptor.direction === "descending" ? -cmp : cmp;
-            });
-            return items;
-        }
-        return [];
-    }, [sortDescriptor, attendanceData]);
-
     return (
         <div className="flex flex-row gap-1 h-full">
-            {/* <DataDisplay
-                defaultDisplay="table"
-                isLoading={isLoading}
-                onTableDisplay={{
-                config: config,
-                layout: "auto",
-                selectionMode: "single",
-                onRowAction: (key) => {
-                    setSelectedKey(key as any);
-                },
-                }}
-                paginationProps={{
-                loop: true,
-                data_length: attendanceLog?.length,
-                }}
-                data={attendanceLog || []}
-                title="Attendance Logs"
-            /> */}
             <TableData
                 items={sortedItems}
                 title="Attendance Logs"
@@ -206,6 +184,7 @@ export default function Page() {
                 sortDescriptor={sortDescriptor}
                 onSortChange={setSortDescriptor}
                 selectionMode="single"
+                disallowEmptySelection
                 selectedKeys={new Set([selectedLog || ""])}
                 onSelectionChange={(key) => setSelectedLog(String(Array.from(key)[0]))}
             />
@@ -225,7 +204,6 @@ export default function Page() {
                                 return `/api/admin/attendance-time/records?start=${selectedDate}&end=${selectedDate}`;
                             })()
                         );
-                        mutateSchedule();
                     }}
                 />
                 <Card shadow="none" className="border h-auto">
@@ -297,11 +275,11 @@ export default function Page() {
                                 <p className="flex justify-between items-center text-sm ms-2">
                                     Shift:{" "}
                                     <span>
-                                        {currentAttendanceInfo.status?.shift
+                                        {currentAttendanceInfo.status?.renderedShift
                                             ? calculateShiftLength(
                                                   null,
                                                   null,
-                                                  currentAttendanceInfo.status?.shift,
+                                                  currentAttendanceInfo.status?.renderedShift,
                                                   true
                                               )
                                             : "UNRECORDED"}
@@ -310,11 +288,11 @@ export default function Page() {
                                 <p className="flex justify-between items-center text-sm ms-2">
                                     Overtime:{" "}
                                     <span>
-                                        {currentAttendanceInfo.status?.overtime
+                                        {currentAttendanceInfo.status?.renderedOvertime
                                             ? calculateShiftLength(
                                                   null,
                                                   null,
-                                                  currentAttendanceInfo.status?.overtime,
+                                                  currentAttendanceInfo.status?.renderedOvertime,
                                                   true
                                               )
                                             : "0"}
@@ -323,11 +301,11 @@ export default function Page() {
                                 <p className="flex justify-between items-center text-sm ms-2">
                                     Undertime:{" "}
                                     <span>
-                                        {currentAttendanceInfo.status?.undertime
+                                        {currentAttendanceInfo.status?.renderedUndertime
                                             ? calculateShiftLength(
                                                   null,
                                                   null,
-                                                  currentAttendanceInfo.status?.undertime,
+                                                  currentAttendanceInfo.status?.renderedUndertime,
                                                   true
                                               )
                                             : "0"}

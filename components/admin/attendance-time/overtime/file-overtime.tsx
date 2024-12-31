@@ -9,98 +9,93 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DateValue, Spinner } from "@nextui-org/react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { getLocalTimeZone, today } from "@internationalized/date";
+import { getLocalTimeZone, parseAbsolute, today } from "@internationalized/date";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
+import { fetchAttendanceData } from "@/app/(admin)/(core)/attendance-time/records/stage";
+import { FileDropzone, FileState } from "@/components/ui/fileupload/file";
+import { useEdgeStore } from "@/lib/edgestore/edgestore";
 
 interface FileOvertimeProps {
     isOpen: boolean;
     onClose: () => void;
 }
 function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
+    const { edgestore } = useEdgeStore();
     const userInfo = useUserInfo();
     const [selectedEmployee, setSelectedEmployee] = useState<MajorEmployee>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { data: employees, isLoading } = useQuery<MajorEmployee[]>("/api/admin/utils/get-employee-search");
-    const { data: existingOvertimes, isLoading: loadOvertimes } = useQuery<
+    const [documentAttachments, setDocumentAttachments] = useState<FileState[]>([]);
+    const [availableOvertimes, setAvailableOvertimes] = useState<
         {
-            employee_id: number;
-            clock_in: string;
-            clock_out: string;
-            date: string;
+            id?: number | null;
+            timestamp?: string | null;
+            minutes: number;
+            amount: number;
         }[]
-    >("/api/admin/attendance-time/overtime/file");
+    >([]);
 
-    const startSched = useMemo(() => {
-        return toGMT8(toGMT8(selectedEmployee?.dim_schedules[0]?.ref_batch_schedules?.clock_in).format("HH:mm:ss"));
-    }, [selectedEmployee]);
-    const endSched = useMemo(() => {
-        return toGMT8(toGMT8(selectedEmployee?.dim_schedules[0]?.ref_batch_schedules?.clock_out).format("HH:mm:ss"));
-    }, [selectedEmployee]);
+    const findLog = useMemo(() => {
+        return (date: DateValue | null) => {
+            if (!date || availableOvertimes.length === 0) return;
+            const tempDate = toGMT8(date.toDate(getLocalTimeZone())).toISOString();
+            const foundLog = availableOvertimes.find((overtime) => {
+                const timestamp = toGMT8(overtime?.timestamp?.replace(" ", "T").split("T")[0]);
+                const currentDate = toGMT8(tempDate.replace(" ", "T").split("T")[0]);
+                return timestamp.isSame(currentDate);
+            });
+            if (foundLog) setValue("requested_mins", foundLog.minutes);
 
-    const formSchema = useMemo(() => {
-        console.log(selectedEmployee);
-        return z
-            .object({
-                reason: z.string({ message: "Reason is required." }),
-                clock_in: z.string().min(1, { message: "Clock In time is required." }),
-                clock_out: z.string().min(1, { message: "Clock Out time is required." }),
-                employee_id: z.number(),
-                date: z.string(),
-                is_auto_approved: z.boolean(),
-            })
-            .refine(
-                (data) => {
-                    if (!selectedEmployee) return true;
-                    const clock_in = toGMT8(data.clock_in);
-                    return clock_in.isSameOrAfter(startSched) && clock_in.isSameOrAfter(endSched);
-                },
-                {
-                    message: `Clock-in must be after ${
-                        selectedEmployee?.last_name
-                    }'s shift schedule (${startSched.format("hh:mm a")} - ${endSched.format("hh:mm a")})`,
-                    path: ["clock_in"],
-                }
-            )
-            .refine(
-                (data) => {
-                    if (!selectedEmployee) return true;
-                    const clock_out = toGMT8(data.clock_out);
-                    // console.log({start: startSched.toISOString(), end: endSched.toISOString(), clock: clock_out.toISOString()})
-                    // console.log(clock_out.isAfter(startSched) && clock_out.isAfter(endSched));
-                    return clock_out.isAfter(startSched) && clock_out.isAfter(endSched);
-                },
-                {
-                    message: `Clock-out must be after ${
-                        selectedEmployee?.last_name
-                    }'s shift schedule (${startSched.format("hh:mm a")} - ${endSched.format("hh:mm a")})`,
-                    path: ["clock_out"],
-                }
-            )
-            .refine(
-                (data) => {
-                    const clock_in = toGMT8(data.clock_in);
-                    const clock_out = toGMT8(data.clock_out);
+            return foundLog;
+        };
+    }, [availableOvertimes]);
 
-                    return clock_out.isAfter(clock_in);
-                },
-                {
-                    message: "Clock-out must be after clock-in",
-                    path: ["clock_out"],
+    const formSchema = z
+        .object({
+            reason: z.string().min(1, "Reason is required."),
+            employee_id: z.number().min(1, "Please select an employee"),
+            timestamp: z.string(),
+            log_id: z.number().min(1, "No valid log is referenced"),
+            files: z.array(z.string()),
+            is_auto_approved: z.boolean(),
+            requested_mins: z.number(),
+        })
+        .refine(
+            (data) => {
+                const renderedMins = availableOvertimes.find(item => item.id === data.log_id)?.minutes;
+                if(!renderedMins) return false;
+                return data.requested_mins <= renderedMins;
+            },
+            {
+                message: "Duration must not exceed rendered overtime",
+                path: ["requested_mins"],
+            }
+        )
+        .refine(
+            (data) => {
+                if(data.is_auto_approved){
+                    return data.files.length > 0;
                 }
-            );
-    }, [selectedEmployee, startSched, endSched]);
+                return true;
+            },
+            {
+                message: "Attachment is required for auto approval",
+                path: ["is_auto_approved"],
+            }
+        )
 
     const blankFields = {
         reason: "",
-        clock_in: "17:00",
-        clock_out: "18:00",
-        date: "",
         employee_id: undefined,
         is_auto_approved: false,
+        log_id: undefined,
+        timestamp: undefined,
+        files: [],
+        requested_mins: 0,
     };
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -112,67 +107,93 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
     const { setValue, watch, reset, handleSubmit } = form;
 
     useEffect(() => {
-        setSelectedEmployee(employees?.find((item) => item.id === watch("employee_id")));
-    }, [employees, watch("employee_id")]);
-
-    useEffect(() => {
-        if (selectedEmployee?.dim_schedules[0]?.ref_batch_schedules) {
-            setValue(
-                "clock_in",
-                toGMT8(selectedEmployee.dim_schedules[0].ref_batch_schedules.clock_out).format("HH:mm:ss")
-            );
-            setValue(
-                "clock_out",
-                toGMT8(selectedEmployee.dim_schedules[0].ref_batch_schedules.clock_out)
-                    .add(1, "hours")
-                    .format("HH:mm:ss")
-            );
-        } else {
-            setValue("clock_in", "17:00");
-            setValue("clock_out", "18:00");
+        if (selectedEmployee) {
+            async function doFetch() {
+                const data = await fetchAttendanceData(
+                    `/api/admin/attendance-time/records?start=${toGMT8()
+                        .subtract(1, "months")
+                        .format("YYYY-MM-DD")}&end=${toGMT8().format("YYYY-MM-DD")}&employee_id=${selectedEmployee!.id}`
+                );
+                const reshaped = Object.entries(data.statusesByDate)
+                    .filter(([, employees]) => Object.values(employees).some((status) => status.renderedOvertime > 0))
+                    .flatMap(([, employees]) =>
+                        Object.entries(employees)
+                            .filter(([, status]) => status.renderedOvertime > 0)
+                            .map(([, status]) => ({
+                                id: status.pmOut?.id,
+                                timestamp: toGMT8(String(status.pmOut?.time)).subtract(status.renderedOvertime, 'minutes').toISOString(),
+                                minutes: status.renderedOvertime,
+                                amount: status.paidOvertime,
+                            }))
+                    );
+                setAvailableOvertimes(reshaped);
+            }
+            doFetch();
         }
     }, [selectedEmployee]);
 
-    const haveExistingOvertime = useMemo(() => {
-        return (date: Date): boolean => {
-            if (!existingOvertimes || !selectedEmployee) return false;
-            const currentDate = toGMT8(date);
-            // return false;
-            return existingOvertimes
-                .filter((ot) => ot.employee_id === selectedEmployee.id)
-                .some((overtime) => {
-                    const overtimeDate = toGMT8(overtime.date);
-                    return currentDate.isSame(overtimeDate, "dates");
-                });
-        };
-    }, [selectedEmployee, existingOvertimes]);
+    useEffect(() => {
+        setSelectedEmployee(employees?.find((item) => item.id === watch("employee_id")));
+    }, [employees, watch("employee_id")]);
 
     const isDateUnavailable = useMemo(() => {
         return (date: DateValue) => {
-            const currentDate = date.toDate(getLocalTimeZone());
-            if (selectedEmployee) {
-                const dayOfWeek = currentDate.toLocaleDateString("en-US", { weekday: "short" }).toLowerCase();
-                return (
-                    haveExistingOvertime(currentDate) ||
-                    !selectedEmployee.dim_schedules?.[0]?.days_json?.includes(dayOfWeek)
-                );
-            }
-            return false;
+            if (availableOvertimes.length === 0) return true;
+            const tempDate = toGMT8(date.toDate(getLocalTimeZone())).toISOString();
+            return !availableOvertimes.some((overtime) => {
+                const timestamp = toGMT8(overtime?.timestamp?.replace(" ", "T").split("T")[0]);
+                const currentDate = toGMT8(tempDate.replace(" ", "T").split("T")[0]);
+                return timestamp.isSame(currentDate);
+            });
         };
-    }, [selectedEmployee, haveExistingOvertime]);
+    }, [availableOvertimes]);
+
+    function updateFileProgress(key: string, progress: FileState["progress"]) {
+        setDocumentAttachments((fileStates) => {
+            const newFileStates = structuredClone(fileStates);
+            const fileState = newFileStates.find((fileState) => fileState.key === key);
+            if (fileState) {
+                fileState.progress = progress;
+            }
+            return newFileStates;
+        });
+    }
+
+    const fileUpload = useCallback(
+        async (addedFiles: FileState[]) => {
+            setDocumentAttachments([...documentAttachments, ...addedFiles]);
+            await Promise.all(
+                addedFiles.map(async (addedFileState) => {
+                    try {
+                        const res = await edgestore.publicFiles.upload({
+                            file: addedFileState.file,
+                            onProgressChange: async (progress) => {
+                                updateFileProgress(addedFileState.key, progress);
+                                if (progress === 100) {
+                                    // wait 1 second to set it to complete
+                                    // so that the user can see the progress bar at 100%
+                                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                                    updateFileProgress(addedFileState.key, "COMPLETE");
+                                }
+                            },
+                        });
+                        setValue("files", [...watch("files"), res.url]);
+                    } catch (err) {
+                        updateFileProgress(addedFileState.key, "ERROR");
+                    }
+                })
+            );
+        },
+        [documentAttachments, edgestore.publicFiles, watch("files")]
+    );
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true);
         try {
-            values["clock_in"] = toGMT8(values.clock_in).toISOString();
-            values["clock_out"] = toGMT8(values.clock_out).toISOString();
-            values["date"] = toGMT8(values.date).toISOString();
-            await axios.post("/api/admin/attendance-time/overtime/file",
-                {
-                    ...values,
-                    created_by: userInfo?.id,
-                }
-            );
+            await axios.post("/api/admin/attendance-time/overtime/file", {
+                ...values,
+                created_by: userInfo?.id,
+            });
             toast({
                 title: "Request has been filed successfully!",
                 variant: "success",
@@ -183,10 +204,6 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
             toast({ title: `${error}`, variant: "danger" });
         }
         setIsSubmitting(false);
-    }
-
-    if (loadOvertimes) {
-        return <Spinner className="h-full w-full" color="primary" content="Loading" />;
     }
 
     return (
@@ -222,43 +239,70 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                         items={[
                             {
                                 name: "date",
-                                label: "Date",
+                                label: "Log Date",
                                 type: "date-picker",
                                 inputDisabled: !watch("employee_id"),
                                 config: {
-                                    minValue: today(getLocalTimeZone()),
+                                    minValue: parseAbsolute(
+                                        toGMT8().subtract(1, "months").toISOString(),
+                                        getLocalTimeZone()
+                                    ),
+                                    isClearable: true,
                                     isDateUnavailable,
+                                    onChange: (value: DateValue | null) => {
+                                        setValue("date" as any, value);
+                                        const log = findLog(value);
+                                        if(log){
+                                            setValue("log_id", log.id ?? 0);
+                                            setValue("timestamp", String(log.timestamp));
+                                        }
+                                    },
                                 },
                             },
                             {
-                                name: "clock_in",
-                                label: "Clock In",
-                                type: "time",
-                                inputDisabled: !watch("employee_id"),
-                                config: {
-                                    // isInvalid: inValidClockIn,
-                                },
-                            },
-                            {
-                                name: "clock_out",
-                                label: "Clock Out",
-                                type: "time",
-                                inputDisabled: !watch("employee_id"),
-                                config: {
-                                    // isInvalid: inValidClockOut,
-                                },
-                            },
-                            {
-                                name: "is_auto_approved",
-                                label: "Auto Approved",
-                                type: "switch",
-                                inputDisabled: !watch("employee_id"),
+                                name: "requested_mins",
+                                label: "Requesting Duration",
+                                type: "number",
+                                inputDisabled: !watch("log_id"),
                             },
                             {
                                 name: "reason",
                                 label: "Reason",
                                 type: "text-area",
-                                inputDisabled: !watch("employee_id"),
+                                inputDisabled: !watch("log_id"),
+                            },
+                            {
+                                name: "is_auto_approved",
+                                label: "Auto Approved",
+                                type: "switch",
+                                config: {
+                                    isDisabled: !watch("log_id"),
+                                },
+                            },
+                            {
+                                name: "files",
+                                label: "Attachments",
+                                type: "text",
+                                inputDisabled: !watch("log_id"),
+                                Component: ({ onChange }) => (
+                                    <FileDropzone
+                                        onChange={setDocumentAttachments}
+                                        value={documentAttachments}
+                                        onFilesAdded={fileUpload}
+                                        dropzoneOptions={{
+                                            accept: {
+                                                "application/pdf": [".pdf"],
+                                                "application/msword": [".doc"],
+                                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                                                    [".docx"],
+                                                "image/jpeg": [".jpg", ".jpeg"],
+                                                "image/png": [".png"],
+                                                "image/webp": [".webp"],
+                                            },
+                                            maxSize: 5 * 1024 * 1024, // 5MB limit
+                                        }}
+                                    />
+                                ),
                             },
                         ]}
                     />

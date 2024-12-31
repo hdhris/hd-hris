@@ -164,9 +164,11 @@ Table log_attendances {
   employee_id Int [not null]
   timestamp DateTime [not null]
   status Int
-  created_at DateTime
+  created_at DateTime [default: `now()`]
   punch Int
+  unique_id String [unique, not null]
   trans_employees trans_employees [not null]
+  trans_overtimes trans_overtimes [not null]
 }
 
 Table ref_addresses {
@@ -316,9 +318,8 @@ Table sys_privileges {
 }
 
 Table sys_variables {
-  id Int [pk, increment]
   employee_id Int [unique]
-  key String
+  key String [pk]
   data Json
   created_at DateTime [not null]
   updated_at DateTime
@@ -499,16 +500,17 @@ Table trans_overtimes {
   created_at DateTime [not null]
   updated_at DateTime [not null]
   id Int [pk, increment]
-  date DateTime
-  clock_in DateTime
-  clock_out DateTime
-  requested_mins Int
+  requested_mins Int [not null]
   reason String
   deleted_at DateTime
-  evaluators Json
+  evaluators Json [not null]
   created_by Int
+  log_id Int [not null]
+  files Json [not null]
+  timestamp DateTime [not null]
   trans_employees_overtimes trans_employees
   trans_employees_overtimes_createdBy trans_employees
+  log_attendances log_attendances [not null]
 }
 
 Table trans_payhead_breakdowns {
@@ -933,6 +935,8 @@ Ref: trans_leaves.leave_type_id > trans_leave_types.id [delete: No Action]
 Ref: trans_overtimes.employee_id > trans_employees.id [delete: No Action]
 
 Ref: trans_overtimes.created_by > trans_employees.id [delete: No Action]
+
+Ref: trans_overtimes.log_id > log_attendances.id [delete: Cascade]
 
 Ref: trans_payhead_breakdowns.payhead_id > ref_payheads.id [delete: No Action]
 
