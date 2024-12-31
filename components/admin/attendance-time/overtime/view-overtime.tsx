@@ -55,21 +55,21 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                         key={"date"}
                         icon={<FaRegCalendarAlt />}
                         label="Date"
-                        value={toGMT8(overtime.date).format("MMMM DD, YYYY")}
+                        value={toGMT8(overtime.timestamp).format("MMMM DD, YYYY")}
                     />
                     <hr key={0} />
                     <ValueLabel
                         key={"clock_in"}
                         icon={<TbClockCheck />}
                         label="Clock In"
-                        value={toGMT8(overtime.clock_in).format("hh:mm a")}
+                        value={toGMT8(overtime.timestamp).format("hh:mm a")}
                     />
                     <hr key={1}/>
                     <ValueLabel
                         key={"clock_out"}
                         icon={<TbClockX />}
                         label="Clock Out"
-                        value={toGMT8(overtime.clock_out).format("hh:mm a")}
+                        value={toGMT8(overtime.timestamp).add(overtime.requested_mins, 'minutes').format("hh:mm a")}
                     />
                     <hr key={2} />
                     <ValueLabel
@@ -82,13 +82,13 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
                     <ValueLabel
                         key={"created_by"}
                         icon={<FaRegUserCircle />}
-                        label="Created By"
+                        label="Filed By"
                         value={
                             <Tooltip
                                 className="pointer-events-auto"
-                                content={getEmpFullName(overtime.trans_employees_overtimes)}
+                                content={getEmpFullName(overtime.trans_employees_overtimes_createdBy)}
                             >
-                                <Avatar size="sm" src={overtime.trans_employees_overtimes.picture} />
+                                <Avatar size="sm" src={overtime.trans_employees_overtimes_createdBy.picture} />
                             </Tooltip>
                         }
                     />

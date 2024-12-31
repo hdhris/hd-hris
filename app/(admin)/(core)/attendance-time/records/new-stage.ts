@@ -32,10 +32,29 @@ export async function getAttendanceStatus({
     rate_per_minute: number;
 }): Promise<LogStatus> {
     const schedule = getAccurateEmployeeSchedule(schedules, date);
-    // console.log({ schedules, schedule });
     // Skip if current employee has invalid schedule
     if (!schedule)
         return {
+            amIn: {
+                id: null,
+                status: "unscheduled",
+                time: null,
+            },
+            amOut: {
+                id: null,
+                status: "unscheduled",
+                time: null,
+            },
+            pmIn: {
+                id: null,
+                status: "unscheduled",
+                time: null,
+            },
+            pmOut: {
+                id: null,
+                status: "unscheduled",
+                time: null,
+            },
             renderedShift: 0,
             renderedUndertime: 0,
             renderedLeave: 0,
@@ -189,9 +208,6 @@ export async function getAttendanceStatus({
                                 .year(timestamp.year())
                                 .month(timestamp.month())
                                 .date(timestamp.date());
-                            // console.log("Temp: ",tempTimeOut.toISOString())
-                            // console.log("TimS: ",timestamp.toISOString())
-                            // console.log("Compare:", timestamp.diff(tempTimeOut, 'minutes'))
                             const stat: OutStatus =
                                 timestamp.diff(tempTimeOut, "minutes") > gracePeriod
                                     ? "overtime"
@@ -311,12 +327,10 @@ export async function getAttendanceStatus({
         // Get the actual shift length of an employee
         const factShiftLength = scheduleTimeOut.diff(scheduleTimeIn, "minute") - schedule.break_min;
 
-        console.log({ emp: schedule.employee_id, shiftLength, factShiftLength });
         // Rendered shift lenght must never exceed actaul shift length
         renderedShift = Math.min(shiftLength, factShiftLength);
         // Instead, record the overtime length for employee's log record
         // renderedOvertime = shiftLength > factShiftLength ? shiftLength - factShiftLength : 0;
-        console.log({ emp: schedule.employee_id, pmOut: toGMT8(pmOut.time!).toISOString(), scheOut: scheduleTimeOut.toISOString() })
         renderedOvertime = pmOut.time ? toGMT8(pmOut.time).diff(scheduleTimeOut,'minutes') : 0;
         // Also record the undertime length for employee's log record
         renderedUndertime = shiftLength < factShiftLength ? factShiftLength - shiftLength : 0;
@@ -362,6 +376,8 @@ export async function getAttendanceStatus({
         amOut,
         pmIn,
         pmOut,
+        clockIn: schedule.clock_in,
+        clockOut: schedule.clock_out,
         renderedShift,
         renderedUndertime,
         renderedLeave,

@@ -39,19 +39,19 @@ export function overtimePageConfigTable(): TableConfigProps<OvertimeEntry> {
                         />
                     );
                 case "overtime_date":
-                    return <p>{toGMT8(item.date).format("DD MMMM YYYY")}</p>;
+                    return <p>{toGMT8(item.timestamp).format("DD MMMM YYYY")}</p>;
                 case "clock_in":
-                    return <strong>{toGMT8(item.clock_in).format("hh:mm a")}</strong>;
+                    return <strong>{toGMT8(item.timestamp).format("hh:mm a")}</strong>;
                 case "clock_out":
-                    return <strong>{toGMT8(item.clock_out).format("hh:mm a")}</strong>;
-                case "duration":
-                    return <p>{calculateShiftLength(item.clock_in, item.clock_out, 0, true)}</p>;
+                    return <strong>{toGMT8(item.timestamp).add(item.requested_mins, 'minutes').format("hh:mm a")}</strong>;
                 case "status":
                     return (
                         <Chip variant="flat" color={approvalStatusColorMap[item.status]}>
                             {capitalize(item.status)}
                         </Chip>
                     );
+                case "duration":
+                    return <p>{item.requested_mins} minutes</p>;
                 case "evaluators":
                     return (
                         <AvatarGroup isBordered>

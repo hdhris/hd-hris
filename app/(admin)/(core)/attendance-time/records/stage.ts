@@ -18,7 +18,6 @@ export async function fetchAttendanceData(url: string): Promise<AttendanceData> 
     const endDate = params.get("end");
     const data = await response.json();
     const result = await attendanceData({ ...data, startDate, endDate });
-    console.log({result})
     return result;
 }
 
@@ -96,6 +95,7 @@ async function attendanceData({
             // Initialize statuses for each date(s)
             statusesByDate[date] = {};
             const logsByEmployee = organizedLogsByDate[date];
+            if(!logsByEmployee) return
             await Promise.all(
                 employees.map(async (emp) => {
                     try{

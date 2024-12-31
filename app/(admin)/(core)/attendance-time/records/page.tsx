@@ -6,7 +6,6 @@ import {
     AttendanceLog,
     AttendanceData,
     LogStatus,
-    Schedules,
 } from "@/types/attendance-time/AttendanceTypes";
 import TableData from "@/components/tabledata/TableData";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
@@ -33,7 +32,7 @@ export default function Page() {
             "YYYY-MM-DD"
         )}`
     );
-    const { data, mutate: mutateSchedule } = useQuery<Schedules>("/api/admin/attendance-time/schedule");
+    // const { data, mutate: mutateSchedule } = useQuery<Schedules>("/api/admin/attendance-time/schedule");
 
     const fetcher = async (url: string | null) => {
         const data = await fetchAttendanceData(String(url));
@@ -48,28 +47,24 @@ export default function Page() {
     const currentAttendanceInfo = useMemo(() => {
         const foundLog = attendanceData?.attendanceLogs.find((al) => al.id === Number(selectedLog));
         if (foundLog) {
-            const empSched = data?.employees.find(emp => emp.id === foundLog?.employee_id)?.dim_schedules[0];
-            const batchSched = data?.batch.find((b) => b.id === empSched?.batch_id);
             const status = attendanceData?.statusesByDate[`${date}`][`${foundLog?.employee_id}`];
             return {
                 log_info: foundLog,
-                employee_schedule: empSched,
-                batchmate_schedule: batchSched,
                 status: status,
             };
         }
-    }, [attendanceData, selectedLog, data, date]);
+    }, [attendanceData, selectedLog, date]);
 
     const clockSchedule = useMemo(() => {
         const info = currentAttendanceInfo;
-        if (info?.batchmate_schedule && info?.employee_schedule) {
+        if (info?.status) {
             return (
                 <>
                     <Chip variant="flat" color="success">
-                        {toGMT8(info?.batchmate_schedule?.clock_in).format("hh:mm a")}
+                        {toGMT8(info?.status?.clockIn).format("hh:mm a")}
                     </Chip>
                     <Chip variant="flat" color="warning">
-                        {toGMT8(info?.batchmate_schedule?.clock_out).format("hh:mm a")}
+                        {toGMT8(info?.status?.clockOut).format("hh:mm a")}
                     </Chip>
                 </>
             );
@@ -209,7 +204,6 @@ export default function Page() {
                                 return `/api/admin/attendance-time/records?start=${selectedDate}&end=${selectedDate}`;
                             })()
                         );
-                        mutateSchedule();
                     }}
                 />
                 <Card shadow="none" className="border h-auto">

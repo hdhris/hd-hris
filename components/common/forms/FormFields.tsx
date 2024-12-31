@@ -42,6 +42,7 @@ import { Granularity } from "@react-types/datepicker";
 import { Input } from "@/components/ui/input";
 import FormSwitch from "@/components/ui/FormSwitch";
 import dayjs from "dayjs";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 
 // Load plugins
 dayjs.extend(utc);
@@ -231,19 +232,15 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             radius="sm"
                                             classNames={DateStyle}
                                             {...field}
-                                            {...(item.config as DateInputProps)}
                                             id={item.name as string}
                                             size={size}
-                                            value={field.value && dayjs(field.value).isValid() ? parseAbsolute(dayjs(field.value).toISOString(), "UTC") : null}
                                             granularity={(item.config as any)?.granularity as Granularity || "day"}
                                             aria-label={item.name as string}
                                             isDisabled={item.inputDisabled}
                                             autoFocus={item.isFocus}
-                                            onChange={(value) => {
-                                                if (value) {
-                                                    field.onChange(dayjs(value.toDate(getLocalTimeZone())).format('YYYY-MM-DD'))
-                                                }
-                                            }}
+                                            // value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), "UTC") : null}
+                                            // onChange={(value) => value && field.onChange(toGMT8(value.toDate("UTC")).toISOString())}
+                                            {...(item.config as DateInputProps)}
                                         />
                                     </Case>
                                     <Case of="date-picker">
@@ -251,19 +248,15 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             variant="bordered"
                                             radius="sm"
                                             {...field}
-                                            {...(item.config as DatePickerProps)}
-                                            value={field.value && dayjs(field.value).isValid() ? parseAbsolute(dayjs(field.value).toISOString(), "UTC") : null}
                                             id={item.name as string}
                                             granularity={(item.config as any)?.granularity as Granularity || "day"}
                                             aria-label={item.name as string}
                                             isDisabled={item.inputDisabled}
                                             autoFocus={item.isFocus}
                                             className={cn("w-full", (item.config as any)?.className)}
-                                            onChange={(value) => {
-                                                if (value) {
-                                                    field.onChange(dayjs(value.toDate(getLocalTimeZone())).toISOString())
-                                                }
-                                            }}
+                                            // value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), "UTC") : null}
+                                            // onChange={(value) => value && field.onChange(toGMT8(value?.toDate("UTC")).toISOString())}
+                                            {...(item.config as DatePickerProps)}
                                         />
                                     </Case>
                                     <Case of="date-range-picker">
@@ -275,19 +268,15 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             variant="bordered"
                                             radius="sm"
                                             size={size}
-                                            {...(item.config as DateRangePickerProps)}
-                                            value={field.value?.start && field.value?.end && dayjs(field.value?.start).isValid() && dayjs(field.value?.end).isValid() ? {
-                                                start: parseAbsolute(dayjs(field.value?.start).toISOString(), "UTC"),
-                                                end: parseAbsolute(dayjs(field.value?.end).toISOString(), "UTC"),
-                                            } : null}
                                             granularity={(item.config as any)?.granularity as Granularity || "day"}
                                             isRequired
                                             hideTimeZone={(item.config as any)?.hideTimeZone as boolean}
-                                            onChange={(value) => {
-                                                field.onChange({
-                                                    start: value?.start.toString(), end: value?.end.toString(),
-                                                })
-                                            }}
+                                            // value={field.value?.start && field.value?.end && toGMT8(field.value?.start).isValid() && toGMT8(field.value?.end).isValid() ? {
+                                            //     start: parseAbsolute(toGMT8(field.value?.start).toISOString(), "UTC"),
+                                            //     end: parseAbsolute(toGMT8(field.value?.end).toISOString(), "UTC"),
+                                            // } : null}
+                                            // onChange={(value) => value && field.onChange({ start: value?.start.toString(), end: value?.end.toString() })}
+                                            {...(item.config as DateRangePickerProps)}
                                         />
                                     </Case>
                                     <Case of="radio-group">
@@ -348,7 +337,7 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                     </Case>
                                     <Case of="time-input">
                                         <TimeInput
-                                            value={field.value && dayjs(field.value).isValid() ? parseAbsolute(dayjs(field.value).toISOString(), "UTC") : null}
+                                            value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), "UTC") : null}
                                             granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || "hour"}
                                             id={item.name as string}
                                             aria-label={item.name as string}
@@ -358,9 +347,7 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             radius="sm"
                                             size={size}
                                             {...(item.config as TimeInputProps)}
-                                            onChange={(value) => {
-                                                field.onChange(dayjs(value?.toString().split('[')[0]).toISOString());
-                                            }}
+                                            onChange={(value) => field.onChange(toGMT8(value?.toString().split('[')[0]).toISOString())}
                                         />
                                     </Case>
                                     <Case of="text-area">

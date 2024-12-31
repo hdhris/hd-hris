@@ -10,20 +10,21 @@ export const approvalStatusColorMap: Record<string, "danger" | "success" | "warn
 };
 
 export interface OvertimeEntry {
+  id: number;
   employee_id: number;
+  created_by: number;
   status: ApprovalStatusType;
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
-  id: number;
-  date: string; // ISO date string
-  clock_in: string; // ISO date string
-  clock_out: string; // ISO date string
   requested_mins: number;
   reason: string;
   deleted_at: string | null; // Nullable for deleted entries
   trans_employees_overtimes: MajorEmployee; // Employee details
   trans_employees_overtimes_createdBy: MinorEmployee; // Approver details
   evaluators: Evaluations;
+  log_id: number;
+  files: string[] | null,
+  timestamp: string;
 };
 
 export interface OvertimeResponse {

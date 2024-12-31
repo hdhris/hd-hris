@@ -216,28 +216,30 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
         name: getEmpFullName(applicant),
         position: applicant!.ref_job_classes?.name ?? "",
         role: "applicant",
-        employee_id: applicant?.id,
         picture: applicant!.picture ?? "",
     }];
     
     let foundApplicantInSignatoryFlag = false;
-    foundUsers.filter(user => !!user).forEach(user => {
+    foundUsers.forEach(user => {
+        if(!user) return null
         if(is_applicant_in_signatory && !foundApplicantInSignatoryFlag){
             if(user.id != applicant_id){
                 return;
             }
             foundApplicantInSignatoryFlag = true;
-            return;
+        } else {
+            users.push({
+                id: user.id,
+                department: user.ref_departments?.name ?? "",
+                email: user.email ?? "",
+                name: getEmpFullName(user),
+                position: user.ref_job_classes?.name ?? "",
+                role: signatories.find(sign=> sign.job_id === user.ref_job_classes?.id)?.ref_signatory_roles?.signatory_role_name ?? "",
+                picture: user.picture ?? "",
+            })
         }
-        users.push({
-            id: user.id,
-            department: user.ref_departments?.name ?? "",
-            email: user.email ?? "",
-            name: getEmpFullName(user),
-            position: user.ref_job_classes?.name ?? "",
-            role: signatories.find(sign=> sign.job_id === user.ref_job_classes?.id)?.ref_signatory_roles?.signatory_role_name ?? ""
-        })
     })
+    console.log("All users:", users);
 
     const roleCount = new Map<string, number>();
     let duplicateRole: string | undefined;
@@ -247,12 +249,12 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
         const count = (roleCount.get(roleName) || 0) + 1;
         roleCount.set(roleName, count);
         if (count > 1) {
-            duplicateRole = roleName;
+            duplicateRole = roleName.toLowerCase();
             break; // Stop as soon as we find a duplicate
         }
     }
 
-    let evaluators :Evaluator[]= include_applicant ? [{
+    let evaluators :Evaluator[] = include_applicant ? [{
         decision: {
             decisionDate: null,
             is_decided: null,
@@ -267,35 +269,45 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
     for (const sign of signatories) {
 
         if(is_auto_approved && sign.ref_signatory_roles.signatory_role_name.toLowerCase() != 'approver'){
+            console.log("Not Approver", sign.ref_signatory_roles.signatory_role_name);
             continue;
         }
         const user = foundUsers.find(user => user?.ref_job_classes?.id === sign.job_id);
         if (!user) {
+            console.log("No user found", sign.ref_signatory_roles.signatory_role_name);
             continue;
         }
-        if (!include_applicant && user.id === applicant?.id){
+
+        if (!include_applicant && !is_applicant_in_signatory && user.id === applicant_id){
+            console.log("Not Included", sign.ref_signatory_roles.signatory_role_name);
             continue;
         }
 
         if (is_applicant_in_signatory && !foundApplicantInSignatoryFlag) {
             if (user.id !== applicant_id) {
+                console.log("Not user", sign.ref_signatory_roles.signatory_role_name);
                 continue;
             }
+            console.log("Found Applicant", sign.ref_signatory_roles.signatory_role_name);
             foundApplicantInSignatoryFlag = true;
         }
 
         evaluators.push({
             decision: {
                 decisionDate: is_auto_approved ? toGMT8().toISOString() : null,
-                is_decided: is_auto_approved ?? null,
+                is_decided: is_auto_approved ? true : null,
                 rejectedReason: is_auto_approved ? 'Automatically approved' : null,
             },
             evaluated_by: user.id,
-            role: sign.ref_signatory_roles.signatory_role_name,
+            role: is_applicant_in_signatory && user.id === applicant_id ? "Applicant" : sign.ref_signatory_roles.signatory_role_name,
             order_number: sign.order_number,
         });
 
-        if (sign.ref_signatory_roles.signatory_role_name === duplicateRole) {
+        if (evaluators.some(ev => {
+            return ev.role.toLowerCase() === duplicateRole
+        })) {
+            console.log("Two roles", duplicateRole);
+
             break;
         }
     }
@@ -304,8 +316,8 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
         evaluators.push({
             decision: {
                 decisionDate: is_auto_approved ? toGMT8().toISOString() : null,
-                is_decided: is_auto_approved ?? null,
-                rejectedReason: is_auto_approved ? 'Auto approved' : null,
+                is_decided: is_auto_approved ? true : null,
+                rejectedReason: is_auto_approved ? 'Automatically approved' : null,
             },
             evaluated_by: applicant_id,
             role: signatories?.[signatories.length-1]?.ref_signatory_roles?.signatory_role_name ?? "Applicant",
@@ -320,7 +332,7 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
         is_automatic_approved: is_auto_approved ?? false,
     }
 
-    // console.log(evaluator_json);
+    console.log(evaluator_json);
 
     return evaluator_json;
 };
