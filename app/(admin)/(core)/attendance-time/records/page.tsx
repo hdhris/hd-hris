@@ -17,6 +17,7 @@ import { toUpper } from "lodash";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import useSWR from "swr";
 import { fetchAttendanceData } from "./stage";
+import { formatCurrency } from "@/lib/utils/numberFormat";
 
 const modeType = ["Password", "Fingerprint", "Card", "Face ID", "Other"];
 const punchType = ["IN", "OUT"];
@@ -299,9 +300,13 @@ export default function Page() {
                                     </span>
                                 </p>
                                 <p className="flex justify-between items-center text-sm ms-2">
+                                    Paid Overtime:{" "}
+                                    <span>{formatCurrency(String(currentAttendanceInfo.status?.paidOvertime))}</span>
+                                </p>
+                                <p className="flex justify-between items-center text-sm ms-2">
                                     Undertime:{" "}
                                     <span>
-                                        {currentAttendanceInfo.status?.renderedUndertime
+                                         {currentAttendanceInfo.status?.renderedUndertime
                                             ? calculateShiftLength(
                                                   null,
                                                   null,

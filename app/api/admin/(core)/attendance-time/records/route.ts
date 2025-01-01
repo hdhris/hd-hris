@@ -38,8 +38,7 @@ export async function GET(req: NextRequest) {
 
         ///////////////////////////////////////////////////////////////
         // Prepare batch schedule and employee schedule info
-        const [employeeSchedule, employees] = await Promise.all([
-            // batchSchedule, employees] = await Promise.all([
+        const [employeeSchedule, employees, overtimes] = await Promise.all([
             // Employee schedule
             prisma.dim_schedules.findMany({
                 where: {
@@ -56,13 +55,21 @@ export async function GET(req: NextRequest) {
                 },
                 ...emp_rev_include.employee_detail,
             }),
+
+            // Fetch overtimes
+            prisma.trans_overtimes.findMany({
+                where: {
+                    log_id: { in: attendanceLogs.map(item => item.id) },
+                    status: "approved",
+                }
+            })
         ]);
 
         return NextResponse.json({
             attendanceLogs,
             employees,
-            // batchSchedule,
             employeeSchedule,
+            overtimes,
         });
     } catch (error) {
         console.error(error);
