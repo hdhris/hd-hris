@@ -14,10 +14,10 @@ export interface BatchSchedule {
     deleted_at: string | null;
 }
 
-export interface Schedules {
-    batch: BatchSchedule[];
-    employees: MajorEmployee[];
-}
+// export interface Schedules {
+//     batch: BatchSchedule[];
+//     employees: MajorEmployee[];
+// }
 
 export interface AttendanceLog {
     id: number;

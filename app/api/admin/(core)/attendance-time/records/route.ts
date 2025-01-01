@@ -59,11 +59,8 @@ export async function GET(req: NextRequest) {
             // Fetch overtimes
             prisma.trans_overtimes.findMany({
                 where: {
-                    log_id: { in: attendanceLogs.map(item => item.id) }
-                },
-                select: {
-                    id: true,
-                    requested_mins: true,
+                    log_id: { in: attendanceLogs.map(item => item.id) },
+                    status: "approved",
                 }
             })
         ]);

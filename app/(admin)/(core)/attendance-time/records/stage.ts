@@ -9,6 +9,7 @@ import {
 } from "@/types/attendance-time/AttendanceTypes";
 import { min } from "lodash";
 import { getAttendanceStatus } from "./new-stage";
+import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
 
 export async function fetchAttendanceData(url: string): Promise<AttendanceData> {
     // const response = await fetch(`/api/attendance?start=${start}&end=${end}`);
@@ -29,9 +30,10 @@ async function attendanceData({
     attendanceLogs,
     employees,
     employeeSchedule,
+    overtimes,
     startDate,
     endDate,
-}: Omit<AttendanceData, "statusesByDate"> & Dates): Promise<AttendanceData> {
+}: Omit<AttendanceData, "statusesByDate"> & Dates & { overtimes: OvertimeEntry[] }): Promise<AttendanceData> {
     // Reuse employee schedule map for references below
     const employeeScheduleMap = employeeSchedule.reduce((acc, schedule) => {
         const { employee_id } = schedule;
@@ -43,6 +45,16 @@ async function attendanceData({
         acc[employee_id].push(schedule);
         return acc;
     }, {} as Record<number, EmployeeSchedule[]>);
+
+    const overtimeDateMap = overtimes.reduce((acc, overtime) => {
+        const { timestamp, employee_id } = overtime;
+        const splitTimestamp = toGMT8(timestamp).format("YYYY-MM-DD");
+        if (!acc[splitTimestamp]){
+            acc[splitTimestamp] = {};
+        }
+        acc[splitTimestamp][employee_id] = overtime;
+        return acc;
+    }, {} as Record<string, Record<number, OvertimeEntry>>)
 
     // Reuse batch schedule map for references below
     // const batchScheduleMap = new Map(batchSchedule.map((bs) => [bs.id, bs]));
@@ -95,17 +107,20 @@ async function attendanceData({
             // Initialize statuses for each date(s)
             statusesByDate[date] = {};
             const logsByEmployee = organizedLogsByDate[date];
-            if(!logsByEmployee) return
+            const overtimes = overtimeDateMap[date];
+            if (!logsByEmployee) return;
             await Promise.all(
                 employees.map(async (emp) => {
-                    try{
+                    try {
+                        const overtime = overtimes[emp.id];
                         statusesByDate[date][emp.id] = await getAttendanceStatus({
                             date,
-                            rate_per_minute: 0,
+                            rate_per_minute: 0.75,
                             logs: logsByEmployee[emp.id],
                             schedules: employeeScheduleMap[emp.id],
+                            overtime: overtime,
                         });
-                    } catch(error) {
+                    } catch (error) {
                         console.log(error);
                     }
                 })

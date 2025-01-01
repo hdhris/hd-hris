@@ -23,8 +23,9 @@ export async function getAttendanceStatus({
         end_timestamp: string;
     };
     overtime?: {
-        start_time: string;
-        end_time: string;
+        id: number;
+        requested_mins: number;
+        timestamp: string;
     };
     date: string;
     schedules: EmployeeSchedule[];
@@ -385,7 +386,7 @@ export async function getAttendanceStatus({
         paidShift: renderedShift * rate_per_minute,
         deductedUndertime: renderedUndertime * rate_per_minute,
         paidLeave: renderedLeave * rate_per_minute,
-        paidOvertime: renderedOvertime * rate_per_minute,
+        paidOvertime: overtime ? overtime.requested_mins * rate_per_minute : 0,
     };
 }
 
