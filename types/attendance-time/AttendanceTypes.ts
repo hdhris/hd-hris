@@ -65,24 +65,41 @@ export function determineAttendance({
     amOut?: punchOUT;
     pmIn?: punchIN;
     pmOut?: punchOUT;
-}): string {
+}): "Whole Day" | "Morning only" | "Afternoon only" | "Absent" | "On Leave" | "No Work" | "Unscheduled" {
     const validInStatuses: InStatus[] = ["ontime", "late", "no break"];
-    const validOutStatuses: OutStatus[] = ["ontime", "overtime", "early-out"];
+    const validOutStatuses: OutStatus[] = ["ontime", "overtime", "early-out", "lunch", "no break"];
 
     // Collect punch-ins and punch-outs, filter undefined values
-    const punchIns = [amIn, pmIn].filter((punch): punch is punchIN => punch !== undefined);
-    const punchOuts = [amOut, pmOut].filter((punch): punch is punchOUT => punch !== undefined);
+    const morningPunches = [amIn, amOut].filter((punch): punch is punchIN => punch !== undefined);
+    const afternoonPunches = [pmIn, pmOut].filter((punch): punch is punchOUT => punch !== undefined);
 
+    if(morningPunches.some(item => item.status === "no work") && afternoonPunches.some(item => item.status === "no work")){
+        return "No Work";
+    } else if (afternoonPunches.some(item => item.status === "no work")){
+        return "Morning only";
+    } else if (morningPunches.some(item => item.status === "no work")){
+        return "Afternoon only";
+    }
+
+    if(morningPunches.some(item => item.status === "unscheduled") || afternoonPunches.some(item => item.status === "unscheduled")){
+        return "Unscheduled"
+    }
+
+    if(morningPunches.some(item => item.status === "on leave") || afternoonPunches.some(item => item.status === "on leave")){
+        return "On Leave"
+    }
+
+    
     // Check if any punch-in or punch-out has a valid status
-    const hasValidIn = punchIns.some((punchIn) => validInStatuses.includes(punchIn.status));
-    const hasValidOut = punchOuts.some((punchOut) => validOutStatuses.includes(punchOut.status));
+    const fullMorning = validInStatuses.some((status) => amIn?.status === status) && validOutStatuses.some((status) => amOut?.status === status);
+    const fullAfternoon = validInStatuses.some((status) => pmIn?.status === status) && validOutStatuses.some((status) => pmOut?.status === status);
 
     // Determine attendance
-    if (hasValidIn && hasValidOut) {
-        return "Whole day";
-    } else if (hasValidIn) {
+    if (fullMorning && fullAfternoon) {
+        return "Whole Day";
+    } else if (fullMorning) {
         return "Morning only";
-    } else if (hasValidOut) {
+    } else if (fullAfternoon) {
         return "Afternoon only";
     } else {
         return "Absent";
