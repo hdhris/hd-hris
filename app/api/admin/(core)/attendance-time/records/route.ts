@@ -3,6 +3,7 @@ import prisma from "@/prisma/prisma";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
 import { AttendanceLog } from "@/types/attendance-time/AttendanceTypes";
+import { parseBoolean } from "@/lib/utils/parser/parseClass";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export async function GET(req: NextRequest) {
         const startDate = searchParams.get("start");
         const endDate = searchParams.get("end");
         const empID = searchParams.get("employee_id");
+        const allEmployee = parseBoolean(searchParams.get("all_employee"));
 
         const is_single_date = startDate === endDate;
 
@@ -42,7 +44,11 @@ export async function GET(req: NextRequest) {
             // Employee schedule
             prisma.dim_schedules.findMany({
                 where: {
-                    employee_id: { in: employeeIDsFromLogs },
+                    ...(!allEmployee
+                        ? {
+                              employee_id: { in: employeeIDsFromLogs },
+                          }
+                        : {}),
                     start_date: is_single_date ? { lte: isoStartDate } : { gte: isoStartDate },
                     OR: [{ end_date: is_single_date ? { gte: isoEndDate } : { lte: isoEndDate } }, { end_date: null }],
                 },
@@ -51,7 +57,11 @@ export async function GET(req: NextRequest) {
             // Fetch employee details for reference
             prisma.trans_employees.findMany({
                 where: {
-                    id: { in: employeeIDsFromLogs },
+                    ...(!allEmployee
+                        ? {
+                              id: { in: employeeIDsFromLogs },
+                          }
+                        : {}),
                 },
                 ...emp_rev_include.employee_detail,
             }),
@@ -59,12 +69,13 @@ export async function GET(req: NextRequest) {
             // Fetch overtimes
             prisma.trans_overtimes.findMany({
                 where: {
-                    log_id: { in: attendanceLogs.map(item => item.id) },
+                    log_id: { in: attendanceLogs.map((item) => item.id) },
                     status: "approved",
-                }
-            })
+                },
+            }),
         ]);
 
+        console.log({ count: employees.length });
         return NextResponse.json({
             attendanceLogs,
             employees,

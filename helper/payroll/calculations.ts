@@ -193,7 +193,7 @@ export function getUndertimeTotal(
         const dateString = current.toISOString().split("T")[0]; // Convert to "YYYY-MM-DD" format
 
         if (logStatus[dateString] && logStatus[dateString][empID]) {
-            totalAmount += logStatus[dateString][empID]?.undertime!; //|| factShiftLength;
+            totalAmount += logStatus[dateString][empID]?.renderedUndertime!; //|| factShiftLength;
         }
     }
 

@@ -14,10 +14,10 @@ export interface BatchSchedule {
     deleted_at: string | null;
 }
 
-// export interface Schedules {
-//     batch: BatchSchedule[];
-//     employees: MajorEmployee[];
-// }
+export interface Schedules {
+    batch: BatchSchedule[];
+    employees: MajorEmployee[];
+}
 
 export interface AttendanceLog {
     id: number;
@@ -54,6 +54,41 @@ export interface AttendanceData {
     // batchSchedule: BatchSchedule[]; // Array of batch schedules for the employees
     employeeSchedule: EmployeeSchedule[]; // Array of individual schedules for employees
 }
+
+export function determineAttendance({
+    amIn,
+    pmIn,
+    amOut,
+    pmOut,
+}: {
+    amIn?: punchIN;
+    amOut?: punchOUT;
+    pmIn?: punchIN;
+    pmOut?: punchOUT;
+}): string {
+    const validInStatuses: InStatus[] = ["ontime", "late", "no break"];
+    const validOutStatuses: OutStatus[] = ["ontime", "overtime", "early-out"];
+
+    // Collect punch-ins and punch-outs, filter undefined values
+    const punchIns = [amIn, pmIn].filter((punch): punch is punchIN => punch !== undefined);
+    const punchOuts = [amOut, pmOut].filter((punch): punch is punchOUT => punch !== undefined);
+
+    // Check if any punch-in or punch-out has a valid status
+    const hasValidIn = punchIns.some((punchIn) => validInStatuses.includes(punchIn.status));
+    const hasValidOut = punchOuts.some((punchOut) => validOutStatuses.includes(punchOut.status));
+
+    // Determine attendance
+    if (hasValidIn && hasValidOut) {
+        return "Whole day";
+    } else if (hasValidIn) {
+        return "Morning only";
+    } else if (hasValidOut) {
+        return "Afternoon only";
+    } else {
+        return "Absent";
+    }
+}
+
 
 export type InStatus = "unscheduled" | "absent" | "late" | "ontime" | "no break" | "no work" | "on leave";
 export type OutStatus =

@@ -28,11 +28,11 @@ export async function getAttendanceStatus({
         timestamp: string;
     };
     date: string;
-    schedules: EmployeeSchedule[];
+    schedules: EmployeeSchedule[] | null | undefined;
     logs?: AttendanceLog[];
     rate_per_minute: number;
 }): Promise<LogStatus> {
-    const schedule = getAccurateEmployeeSchedule(schedules, date);
+    const schedule = getAccurateEmployeeSchedule({logDate: date, employeeSchedules: schedules ?? []});
     // Skip if current employee has invalid schedule
     if (!schedule)
         return {
@@ -101,8 +101,16 @@ export async function getAttendanceStatus({
     let renderedShift = 0;
     let renderedUndertime = 0;
 
-    const scheduleTimeIn = toGMT8(schedule.clock_in).subtract(offset, "hours").year(currentDay.year()).month(currentDay.month()).date(currentDay.date());
-    const scheduleTimeOut = toGMT8(schedule.clock_out).subtract(offset, "hours").year(currentDay.year()).month(currentDay.month()).date(currentDay.date());
+    const scheduleTimeIn = toGMT8(schedule.clock_in)
+        .subtract(offset, "hours")
+        .year(currentDay.year())
+        .month(currentDay.month())
+        .date(currentDay.date());
+    const scheduleTimeOut = toGMT8(schedule.clock_out)
+        .subtract(offset, "hours")
+        .year(currentDay.year())
+        .month(currentDay.month())
+        .date(currentDay.date());
 
     if (!dayNames?.includes(currentDay.format("ddd").toLowerCase())) {
         amIn = {
@@ -332,7 +340,7 @@ export async function getAttendanceStatus({
         renderedShift = Math.min(shiftLength, factShiftLength);
         // Instead, record the overtime length for employee's log record
         // renderedOvertime = shiftLength > factShiftLength ? shiftLength - factShiftLength : 0;
-        renderedOvertime = pmOut.time ? toGMT8(pmOut.time).diff(scheduleTimeOut,'minutes') : 0;
+        renderedOvertime = pmOut.time ? toGMT8(pmOut.time).diff(scheduleTimeOut, "minutes") : 0;
         // Also record the undertime length for employee's log record
         renderedUndertime = shiftLength < factShiftLength ? factShiftLength - shiftLength : 0;
 
@@ -390,12 +398,18 @@ export async function getAttendanceStatus({
     };
 }
 
-export const getAccurateEmployeeSchedule = (employeeSchedules: EmployeeSchedule[], logDate: string) => {
+export const getAccurateEmployeeSchedule = ({
+    logDate,
+    employeeSchedules,
+}: {
+    logDate: string;
+    employeeSchedules: EmployeeSchedule[];
+}) => {
     // Parse logDate with Day.js
     const logDay = toGMT8(logDate);
 
     // Try to find a schedule where logDay is within the range
-    const rangedDateSchedule = employeeSchedules.find((schedule) => {
+    const rangedDateSchedule = employeeSchedules?.find((schedule) => {
         if (!schedule.end_date) return false;
 
         // Parse startDate and endDate
@@ -409,7 +423,7 @@ export const getAccurateEmployeeSchedule = (employeeSchedules: EmployeeSchedule[
     // If no schedule found in range, check for open-ended schedules
     if (!rangedDateSchedule) {
         return (
-            employeeSchedules.find((schedule) => {
+            employeeSchedules?.find((schedule) => {
                 const startDate = toGMT8(schedule.start_date.split("T")[0]);
                 const endDate = schedule.end_date;
 

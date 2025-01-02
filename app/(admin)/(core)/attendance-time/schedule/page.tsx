@@ -11,7 +11,7 @@ import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import showDialog from "@/lib/utils/confirmDialog";
 import { useQuery } from "@/services/queries";
-import { BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
+import { BatchSchedule, EmployeeSchedule, Schedules } from "@/types/attendance-time/AttendanceTypes";
 import { Button, Spinner } from "@nextui-org/react";
 import axios from "axios";
 import { capitalize } from "lodash";
@@ -48,10 +48,7 @@ const filterConfig: FilterItemsProps<MajorEmployee>[] = [
 function Page() {
     const [hoveredBatchId, setHoveredBatchId] = useState<number | null>(null);
     const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
-    const { data, isLoading, mutate } = useQuery<{
-        batch: BatchSchedule[];
-        employees: MajorEmployee[];
-    }>("/api/admin/attendance-time/schedule");
+    const { data, isLoading, mutate } = useQuery<Schedules>("/api/admin/attendance-time/schedule");
     const [tableData, setTableData] = useState<MajorEmployee[]>();
     const [isVisible, setVisible] = useState(false);
     const [isPending, setPending] = useState(false);

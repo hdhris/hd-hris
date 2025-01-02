@@ -108,17 +108,17 @@ async function attendanceData({
             statusesByDate[date] = {};
             const logsByEmployee = organizedLogsByDate[date];
             const overtimes = overtimeDateMap[date];
-            if (!logsByEmployee) return;
             await Promise.all(
                 employees.map(async (emp) => {
                     try {
-                        const overtime = overtimes[emp.id];
+                        // const employeeLogs = logsByEmployee[emp.id] ?? [];
+                        // const overtime = overtimes[emp.id] ?? undefined;
                         statusesByDate[date][emp.id] = await getAttendanceStatus({
                             date,
                             rate_per_minute: 0.75,
-                            logs: logsByEmployee[emp.id],
                             schedules: employeeScheduleMap[emp.id],
-                            overtime: overtime,
+                            logs: logsByEmployee ? logsByEmployee[emp.id] ?? [] : [],
+                            overtime: overtimes ? overtimes[emp.id] ?? undefined : undefined,
                         });
                     } catch (error) {
                         console.log(error);

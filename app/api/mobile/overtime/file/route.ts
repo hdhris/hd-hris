@@ -18,15 +18,15 @@ export async function GET(req: NextRequest) {
                 status: {
                     not: "rejected",
                 },
-                date: {
-                    gte: toGMT8().toISOString(),
-                },
+                // date: {
+                //     gte: toGMT8().toISOString(),
+                // },
             },
-            select: {
-                clock_in: true,
-                clock_out: true,
-                date: true,
-            },
+            // select: {
+            //     clock_in: true,
+            //     clock_out: true,
+            //     date: true,
+            // },
         });
         return NextResponse.json(overtimes);
     } catch (error) {
