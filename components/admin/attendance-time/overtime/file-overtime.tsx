@@ -115,7 +115,7 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                         .format("YYYY-MM-DD")}&end=${toGMT8().format("YYYY-MM-DD")}&employee_id=${selectedEmployee!.id}`
                 );
                 const reshaped = Object.entries(data.statusesByDate)
-                    .filter(([, employees]) => Object.values(employees).some((status) => status.renderedOvertime > 0))
+                    .filter(([, employees]) => Object.values(employees).some((status) => status.renderedOvertime > 0 && status.paidOvertime === 0))
                     .flatMap(([, employees]) =>
                         Object.entries(employees)
                             .filter(([, status]) => status.renderedOvertime > 0)

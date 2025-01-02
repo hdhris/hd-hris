@@ -11,6 +11,7 @@ import { TbClockCheck, TbClockUp, TbClockX } from "react-icons/tb";
 import CardTable from "@/components/common/card-view/card-table";
 import Evaluators from "@/components/common/evaluators/evaluators";
 import { useModulePath } from "@/hooks/privilege-hook";
+import { EmployeeHeader } from "@/components/common/minor-items/components";
 
 interface ViewOvertimeProps {
     overtime: OvertimeEntry | null;
@@ -51,13 +52,17 @@ function ViewOvertime({ overtime, onClose, mutate }: ViewOvertimeProps) {
         <Drawer isDismissible isOpen={!!overtime} onClose={onClose} title={"Overtime Details"}>
             {overtime && (
                 <ScrollShadow className="space-y-4">
+                    <EmployeeHeader
+                        employee={overtime.trans_employees_overtimes}
+                    />
+                    <hr key={0} />
                     <ValueLabel
                         key={"date"}
                         icon={<FaRegCalendarAlt />}
                         label="Date"
                         value={toGMT8(overtime.timestamp).format("MMMM DD, YYYY")}
                     />
-                    <hr key={0} />
+                    <hr key={9} />
                     <ValueLabel
                         key={"clock_in"}
                         icon={<TbClockCheck />}

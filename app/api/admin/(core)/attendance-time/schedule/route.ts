@@ -16,7 +16,7 @@ export async function GET() {
                 where: {
                     deleted_at: null,
                 },
-                ...emp_rev_include.minor_detail,
+                ...emp_rev_include.employee_detail,
             }),
         ]);
         return NextResponse.json({

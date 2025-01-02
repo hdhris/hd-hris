@@ -158,7 +158,6 @@ export async function getAttendanceStatus({
                             // Consider it as a PM time in
                         } else {
                             // Initialize as no break if the employee has not punched out at morning yet
-                            // let stat: InStatus = "no break";
                             let stat: InStatus = "no break";
 
                             // If the employee has punched out at morning...
@@ -186,7 +185,7 @@ export async function getAttendanceStatus({
                             };
                         }
 
-                        // For punched OUT logs or "Morning/Afternoon exit"
+                    // For punched OUT logs or "Morning/Afternoon exit"
                     } else {
                         // If time-out is 4hrs earlier than clock-out schedule...
                         // Consider it as an AM time out
@@ -257,7 +256,7 @@ export async function getAttendanceStatus({
                     status: "absent",
                 };
 
-                // Mark no break if employee had eventually punched OUT at afternoon
+            // Mark no break if employee had eventually punched OUT at afternoon
             } else {
                 amOut = {
                     id: null,
@@ -268,8 +267,11 @@ export async function getAttendanceStatus({
         }
         // If not punched IN at afternoon...
         if (!pmIn.time) {
-            // Mark absent if not also punched IN at morning
-            if (!amIn?.time) {
+            // {Mark absent if not also punched IN at morning}
+            // if (!amIn?.time) {
+
+            // Mark absent if not also punched OUT at morning
+            if (!pmOut?.time) {
                 pmIn = {
                     id: null,
                     time: null,
