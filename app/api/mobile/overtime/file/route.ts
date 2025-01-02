@@ -11,24 +11,25 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const employee_id = Number(searchParams.get("employee_id"));
     try {
-        const overtimes = await prisma.trans_overtimes.findMany({
-            where: {
-                employee_id,
-                deleted_at: null,
-                status: {
-                    not: "rejected",
-                },
-                date: {
-                    gte: toGMT8().toISOString(),
-                },
-            },
-            select: {
-                clock_in: true,
-                clock_out: true,
-                date: true,
-            },
-        });
-        return NextResponse.json(overtimes);
+        // const overtimes = await prisma.trans_overtimes.findMany({
+        //     where: {
+        //         employee_id,
+        //         deleted_at: null,
+        //         status: {
+        //             not: "rejected",
+        //         },
+        //         date: {
+        //             gte: toGMT8().toISOString(),
+        //         },
+        //     },
+        //     select: {
+        //         clock_in: true,
+        //         clock_out: true,
+        //         date: true,
+        //     },
+        // });
+        // return NextResponse.json(overtimes);
+        return NextResponse.json("Hello");
     } catch (error) {
         console.log(error);
         return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
