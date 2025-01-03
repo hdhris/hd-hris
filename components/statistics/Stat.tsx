@@ -23,8 +23,8 @@ export function Stat({data, className}: { data: StatProps[], className?: string 
     return (<>
         {data && data.map((item, index) => (<BorderCard key={index} heading=""
                                                         className={cn(`flex items-center`, className)}>
-            <div className="flex flex-col">
-                <div className="flex flex-col">
+            <div className="flex flex-col w-full">
+                <div className="flex flex-col w-full">
                     <Typography as={'h2'}
                                 className="text-lg font-semibold text-gray-400 dark:text-gray-500">{item.title}</Typography>
                 </div>
@@ -47,13 +47,15 @@ export function Stat({data, className}: { data: StatProps[], className?: string 
 
                 </div>
 
-                <Divider className='w-36 my-2'/>
+                <Divider className='w-48 my-2'/>
                 {item.footer}
             </div>
             {/*<div className="flex-grow"></div>*/}
 
-            <div className="w-fit h-fit self-start">
-                {item.chart && item.chart}
+            <div className="w-full h-full">
+                <div className="flex justify-end">
+                    {item.chart && item.chart}
+                </div>
             </div>
         </BorderCard>))}
     </>);

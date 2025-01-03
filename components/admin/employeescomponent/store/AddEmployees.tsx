@@ -5,7 +5,7 @@ import Add from "@/components/common/button/Add";
 import { useRouter } from "next/navigation";
 
 interface AddEmployeeProps {
-  onEmployeeAdded: () => void;
+  onEmployeeAdded?: () => void;
 }
 
 const AddEmployee: React.FC<AddEmployeeProps> = ({ onEmployeeAdded }) => {

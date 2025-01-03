@@ -1,8 +1,8 @@
 'use client'
-import {PiUsersThree} from "react-icons/pi";
+import {PiUsersThree, PiUsersThreeLight} from "react-icons/pi";
 import {TbCurrencyPeso} from "react-icons/tb";
 import {FiLogOut} from "react-icons/fi";
-import {LuCalendarX2} from "react-icons/lu";
+import {LuCalendarDays, LuCalendarX2, LuPlane, LuTicket} from "react-icons/lu";
 import {Stat, StatProps} from "@/components/statistics/Stat";
 import React, {useCallback, useEffect} from "react";
 import BarChart, {BarChartProps} from "@/components/common/charts/Bar";
@@ -69,11 +69,10 @@ const DashboardStats = () => {
         value: <CountUp start={0} end={data?.emp!} formattingFn={(value) => compactNumber(value)}/>, // value: '500',
         title: "Employees",
         status: "increased",
-        footer: <AddEmployees onEmployeeAdded={function (): void {
-            throw new Error("Function not implemented.");
-        } } />,
+        footer: <AddEmployees />,
         percent: 3.6,
-        chart: <BarChart data={employeesStat.data}/>
+        // chart: <BarChart data={employeesStat.data}/>
+        chart: <PiUsersThreeLight  className="size-10 text-default-400/60"/>
     }, {
         icon: <FiLogOut className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.leaves!} formattingFn={(value) => compactNumber(value)}/>, // value: '20',
@@ -81,15 +80,16 @@ const DashboardStats = () => {
         status: "decreased",
         percent: 10,
         footer: <Typography className="text-medium">Common: <span className="text-medium font-semibold">Sick Leave</span></Typography>,
-        chart: <AreaChart data={leavesStat} showTooltip={false}/>
+        chart: <LuPlane className="size-10 text-default-400/60"/>
     }, {
         icon: <LuCalendarX2 className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.absences!} formattingFn={(value) => compactNumber(value)}/>, // value: '10',
-        title: "Absences",
+        title: "Attendance Rate (%)",
         status: "increased",
         percent: 3.6,
         footer: "Late",
-        chart: <AreaChart data={absencesStat} showTooltip={false}/>
+        // chart: <PiUsersThreeLight />
+        chart: <LuCalendarDays className="size-10 text-default-400/60"/>
     }, {
         icon: <TbCurrencyPeso className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.salary!} formattingFn={(value) => String(value + "%")}/>, // value: '200000',
@@ -97,7 +97,7 @@ const DashboardStats = () => {
         status: "decreased",
         percent: 5,
         footer: "₱152k/₱220k",
-        chart: <AreaChart data={salaryStat} showTooltip={false}/>
+        chart: <LuTicket className="size-10 text-default-400/60"/>
     }]
     return (<Stat data={dashboardData}/>)
 }
@@ -107,21 +107,21 @@ const LeaveData = () => {
     const data = {
         leave_stats: [
             {name: "1", count: getRandomInt(1, 200)}, {
-            name: "2", count: getRandomInt(1, 200)
-        }, {name: "3", count: getRandomInt(1, 200)},
+                name: "2", count: getRandomInt(1, 200)
+            }, {name: "3", count: getRandomInt(1, 200)},
             {name: "4", count: getRandomInt(1, 200)}, {
-            name: "5", count: getRandomInt(1, 200)
-        },{name: "1", count: getRandomInt(1, 200)}, {
-            name: "2", count: getRandomInt(1, 200)
-        }, {name: "3", count: getRandomInt(1, 200)},
+                name: "5", count: getRandomInt(1, 200)
+            },{name: "1", count: getRandomInt(1, 200)}, {
+                name: "2", count: getRandomInt(1, 200)
+            }, {name: "3", count: getRandomInt(1, 200)},
             {name: "4", count: getRandomInt(1, 200)}, {
-            name: "5", count: getRandomInt(1, 200)
-        },{name: "1", count: getRandomInt(1, 200)}, {
-            name: "2", count: getRandomInt(1, 200)
-        }, {name: "3", count: getRandomInt(1, 200)},
+                name: "5", count: getRandomInt(1, 200)
+            },{name: "1", count: getRandomInt(1, 200)}, {
+                name: "2", count: getRandomInt(1, 200)
+            }, {name: "3", count: getRandomInt(1, 200)},
             {name: "4", count: getRandomInt(1, 200)}, {
-            name: "5", count: getRandomInt(1, 200)
-        },
+                name: "5", count: getRandomInt(1, 200)
+            },
         ]
     }
     const leaveData = data.leave_stats.map(({name, count}) => ({
