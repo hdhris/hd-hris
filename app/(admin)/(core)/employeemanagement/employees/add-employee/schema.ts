@@ -70,9 +70,9 @@ export const employeeSchema = z.object({
   }, "Age cannot be over 100 years")
   .refine((date) => {
     const birthDate = dayjs(date);
-    const minAge = dayjs('2006-12-31');
+    const minAge = dayjs().subtract(18, 'years');
     return birthDate.isBefore(minAge) || birthDate.isSame(minAge);
-  }, "Employee must be at least 18 years old"),
+  }, "Employee should be 18 years old"),
   
   addr_region: z.string().min(1, "Region is required"),
   addr_province: z.string().min(1, "Province is required"),
