@@ -93,7 +93,7 @@ const DashboardStats = () => {
         icon: <FiLogOut className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.leaves!} formattingFn={(value) => compactNumber(value)}/>, // value: '20',
         title: "Pending Leave Requests",
-        status: "decreased",
+        status: "decrement",
         percent: "10",
         footer: <Typography className="text-medium">Common: <span className="text-medium font-semibold">Sick Leave</span></Typography>,
         chart: <LuPlane className="size-10 text-default-400/60"/>
@@ -101,7 +101,7 @@ const DashboardStats = () => {
         icon: <LuCalendarX2 className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.absences!} formattingFn={(value) => compactNumber(value)}/>, // value: '10',
         title: "Attendance Rate (%)",
-        status: "increased",
+        status: "increment",
         percent: "3.6",
         footer: "Late",
         // chart: <PiUsersThreeLight />
@@ -110,7 +110,7 @@ const DashboardStats = () => {
         icon: <TbCurrencyPeso className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.salary!} formattingFn={(value) => String(value + "%")}/>, // value: '200000',
         title: "Active Payroll Records",
-        status: "decreased",
+        status: "decrement",
         percent: "5",
         footer: "₱152k/₱220k",
         chart: <LuTicket className="size-10 text-default-400/60"/>
