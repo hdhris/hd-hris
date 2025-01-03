@@ -62,7 +62,7 @@ function Page() {
     const [focusedEmployee, setFocusedEmployee] = useState<number | null>(null);
     const [focusedPayhead, setFocusedPayhead] = useState<number | null>(null);
     const [payslip, setPayslip] = useState<ViewPayslipType | null>(null);
-    const [allpayslip, setAllPayslip] = useState<ViewPayslipType[]>([]);
+    const [allPayslip, setAllPayslip] = useState<ViewPayslipType[]>([]);
     const [processDate, setProcessDate] = useState<ProcessDate | false | undefined>();
     const [toBeDeployed, setTobeDeployed] = useState<unknown>();
     const userInfo = useUserInfo();
@@ -86,10 +86,20 @@ function Page() {
         };
         await generatePDF("/api/admin/payroll/payslip/print-payslip", data);
     };
+    const handlePrintAll = async () => {
+        const data = allPayslip.map((payslip) => ({
+            date: `${toGMT8(!!processDate ? processDate?.start_date : "").format("MMMM D")}-${toGMT8(!!processDate ? processDate?.end_date : "").format("D, YYYY")}`,
+            ...payslip,
+        }));
+    
+        await generatePDF("/api/admin/payroll/payslip/print-all-payslip", data);
+    };
+    
     SetNavEndContent(() => (
         <>
             <DatePickerPayroll setProcessDate={setProcessDate} onDeploy={deployNow} />{" "}
-            <Button isIconOnly isDisabled={payslip === null} {...uniformStyle()} onPress={handlePrint}>
+            {/* <Button isIconOnly isDisabled={payslip === null} {...uniformStyle()} onPress={handlePrint}> */}
+            <Button isIconOnly isDisabled={allPayslip.length===0} {...uniformStyle()} onPress={handlePrintAll}>
                 <LuPrinter className="size-5" />
             </Button>
         </>
