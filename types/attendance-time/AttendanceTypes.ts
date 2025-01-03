@@ -65,7 +65,16 @@ export function determineAttendance({
     amOut?: punchOUT;
     pmIn?: punchIN;
     pmOut?: punchOUT;
-}): "Whole Day" | "Morning only" | "Afternoon only" | "Absent" | "On Leave" | "No Work" | "Unscheduled" {
+}):
+    | "Whole Day"
+    | "Morning only"
+    | "Afternoon only"
+    | "Absent"
+    | "On Leave"
+    | "No Work"
+    | "Unscheduled"
+    | "Unhired"
+    | "Suspended" {
     const validInStatuses: InStatus[] = ["ontime", "late", "no break"];
     const validOutStatuses: OutStatus[] = ["ontime", "overtime", "early-out", "lunch", "no break"];
 
@@ -73,26 +82,52 @@ export function determineAttendance({
     const morningPunches = [amIn, amOut].filter((punch): punch is punchIN => punch !== undefined);
     const afternoonPunches = [pmIn, pmOut].filter((punch): punch is punchOUT => punch !== undefined);
 
-    if(morningPunches.some(item => item.status === "no work") && afternoonPunches.some(item => item.status === "no work")){
+    if (
+        morningPunches.some((item) => item.status === "no work") &&
+        afternoonPunches.some((item) => item.status === "no work")
+    ) {
         return "No Work";
-    } else if (afternoonPunches.some(item => item.status === "no work")){
+    } else if (afternoonPunches.some((item) => item.status === "no work")) {
         return "Morning only";
-    } else if (morningPunches.some(item => item.status === "no work")){
+    } else if (morningPunches.some((item) => item.status === "no work")) {
         return "Afternoon only";
     }
 
-    if(morningPunches.some(item => item.status === "unscheduled") || afternoonPunches.some(item => item.status === "unscheduled")){
-        return "Unscheduled"
+    if (
+        morningPunches.some((item) => item.status === "unscheduled") ||
+        afternoonPunches.some((item) => item.status === "unscheduled")
+    ) {
+        return "Unscheduled";
     }
 
-    if(morningPunches.some(item => item.status === "on leave") || afternoonPunches.some(item => item.status === "on leave")){
-        return "On Leave"
+    if (
+        morningPunches.some((item) => item.status === "unhired") ||
+        afternoonPunches.some((item) => item.status === "unhired")
+    ) {
+        return "Unhired";
     }
 
-    
+    if (
+        morningPunches.some((item) => item.status === "suspended") ||
+        afternoonPunches.some((item) => item.status === "suspended")
+    ) {
+        return "Suspended";
+    }
+
+    if (
+        morningPunches.some((item) => item.status === "on leave") ||
+        afternoonPunches.some((item) => item.status === "on leave")
+    ) {
+        return "On Leave";
+    }
+
     // Check if any punch-in or punch-out has a valid status
-    const fullMorning = validInStatuses.some((status) => amIn?.status === status) && validOutStatuses.some((status) => amOut?.status === status);
-    const fullAfternoon = validInStatuses.some((status) => pmIn?.status === status) && validOutStatuses.some((status) => pmOut?.status === status);
+    const fullMorning =
+        validInStatuses.some((status) => amIn?.status === status) &&
+        validOutStatuses.some((status) => amOut?.status === status);
+    const fullAfternoon =
+        validInStatuses.some((status) => pmIn?.status === status) &&
+        validOutStatuses.some((status) => pmOut?.status === status);
 
     // Determine attendance
     if (fullMorning && fullAfternoon) {
@@ -106,9 +141,20 @@ export function determineAttendance({
     }
 }
 
-
-export type InStatus = "unscheduled" | "absent" | "late" | "ontime" | "no break" | "no work" | "on leave";
+export type InStatus =
+    | "suspended"
+    | "unhired"
+    | "unscheduled"
+    | "absent"
+    | "late"
+    | "ontime"
+    | "no break"
+    | "no work"
+    | "on leave";
+    
 export type OutStatus =
+    | "suspended"
+    | "unhired"
     | "unscheduled"
     | "absent"
     | "early-out"
