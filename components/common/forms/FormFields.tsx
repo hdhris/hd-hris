@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, ReactNode } from "react";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ControllerRenderProps, FieldValues, useFormContext } from "react-hook-form";
+import { Controller, ControllerRenderProps, FieldValues, useFormContext } from "react-hook-form";
 import InputStyle, { DateStyle } from "@/lib/custom/styles/InputStyle";
 import { SelectionProp } from "./types/SelectionProp";
 import { InputProps, TextAreaProps } from "@nextui-org/input";
@@ -148,7 +148,7 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
     const timezone = getLocalTimeZone(); //"UTC";
     if (!isVisible) return null; // If the field is not visible, return null
     return (
-        <FormField
+        <Controller
             control={control}
             name={item.name as string}
             render={({ field }) => {
@@ -255,25 +255,25 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             aria-label={item.name as string}
                                             isDisabled={item.inputDisabled}
                                             autoFocus={item.isFocus}
-                                            value={
-                                                field.value
-                                                    ? typeof field.value === "string" || field.value instanceof Date
-                                                        ? parseAbsolute(toGMT8(field.value).toISOString(), timezone)
-                                                        : field.value
-                                                    : parseAbsolute(new Date().toISOString(), timezone)
-                                            }
-                                            onChange={(value) => {
-                                                if (!field.onChange) return;
-                                                if (typeof field.value === "string") {
-                                                    field.onChange(value?.toDate(timezone).toISOString());
-                                                } else if (field.value instanceof Date) {
-                                                    field.onChange(value?.toDate(timezone));
-                                                } else {
-                                                    field.onChange(value);
-                                                }
-                                            }}
-                                            // value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), timezone) : null}
-                                            // onChange={(value) => value && field.onChange(toGMT8(value.toDate(timezone)).toISOString())}
+                                            // value={
+                                            //     field.value
+                                            //         ? typeof field.value === "string" || field.value instanceof Date
+                                            //             ? parseAbsolute(toGMT8(field.value).toISOString(), timezone)
+                                            //             : field.value
+                                            //         : null
+                                            // }
+                                            // onChange={(value) => {
+                                            //     if (!field.onChange) return;
+                                            //     if (typeof field.value === "string") {
+                                            //         field.onChange(value?.toDate(timezone).toISOString());
+                                            //     } else if (field.value instanceof Date) {
+                                            //         field.onChange(value?.toDate(timezone));
+                                            //     } else {
+                                            //         field.onChange(value);
+                                            //     }
+                                            // }}
+                                            value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), timezone) : null}
+                                            onChange={(value) => value && field.onChange(toGMT8(value.toDate(timezone)).toISOString())}
                                             {...(item.config as DateInputProps)}
                                         />
                                     </Case>
@@ -288,25 +288,25 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             isDisabled={item.inputDisabled}
                                             autoFocus={item.isFocus}
                                             className={cn("w-full", (item.config as any)?.className)}
-                                            value={
-                                                field.value
-                                                    ? typeof field.value === "string" || field.value instanceof Date
-                                                        ? parseAbsolute(toGMT8(field.value).toISOString(), timezone)
-                                                        : field.value
-                                                    : parseAbsolute(new Date().toISOString(), timezone)
-                                            }
-                                            onChange={(value) => {
-                                                if (!field.onChange) return;
-                                                if (typeof field.value === "string") {
-                                                    field.onChange(value?.toDate(timezone).toISOString());
-                                                } else if (field.value instanceof Date) {
-                                                    field.onChange(value?.toDate(timezone));
-                                                } else {
-                                                    field.onChange(value);
-                                                }
-                                            }}
-                                            // value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), timezone) : null}
-                                            // onChange={(value) => value && field.onChange(toGMT8(value?.toDate(timezone)).toISOString())}
+                                            // value={
+                                            //     field.value
+                                            //         ? typeof field.value === "string" || field.value instanceof Date
+                                            //             ? parseAbsolute(toGMT8(field.value).toISOString(), timezone)
+                                            //             : field.value
+                                            //         : null
+                                            // }
+                                            // onChange={(value) => {
+                                            //     if (!field.onChange) return;
+                                            //     if (typeof field.value === "string") {
+                                            //         field.onChange(value?.toDate(timezone).toISOString());
+                                            //     } else if (field.value instanceof Date) {
+                                            //         field.onChange(value?.toDate(timezone));
+                                            //     } else {
+                                            //         field.onChange(value);
+                                            //     }
+                                            // }}
+                                            value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), timezone) : null}
+                                            onChange={(value) => value && field.onChange(toGMT8(value?.toDate(timezone)).toISOString())}
                                             {...(item.config as DatePickerProps)}
                                         />
                                     </Case>
@@ -337,10 +337,7 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                                               timezone
                                                           ),
                                                       }
-                                                    : {
-                                                          start: parseAbsolute(new Date().toISOString(), timezone),
-                                                          end: parseAbsolute(new Date().toISOString(), timezone),
-                                                      }
+                                                    : null
                                             }
                                             onChange={(value) =>
                                                 value &&
