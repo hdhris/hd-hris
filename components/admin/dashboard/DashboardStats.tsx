@@ -22,14 +22,15 @@ import {topDepartmentList, topEmployeeList} from "@/sampleData/admin/dashboard/T
 import BorderCard from "@/components/common/BorderCard";
 import {Button} from "@nextui-org/button";
 import AddEmployees from "@/components/admin/employeescomponent/store/AddEmployees";
+import PayrollGraph from "@/components/admin/dashboard/payroll-graph/payroll-graph";
 
+const ApexChart = dynamic(() => import("react-apexcharts"), {ssr: false});
 
 const DashboardStats = () => {
     // const {data} = useDashboard()
     const data = {
         emp: 500, salary: 72, leaves: 20, absences: 10
     }
-
 
     const stat_data = {
         emp_data: [
@@ -64,7 +65,8 @@ const DashboardStats = () => {
         value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
         color: "#FFBB28"
     }]
-    const dashboardData: StatProps[] = [{
+    const dashboardData: StatProps[] = [
+        {
         icon: <PiUsersThree className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.emp!} formattingFn={(value) => compactNumber(value)}/>, // value: '500',
         title: "Employees",
@@ -276,18 +278,66 @@ const SalaryData = () => {
         }
     };
 
-    const data: AreaChartProps[] = [{
+    const data = [{
         name: "Deductions",
-        value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
+        value: [{
+            x: "Jan", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "Feb", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "Mar", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "Apr", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "May", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "Jun", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "Jul", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "Aug", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "Sep", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "Oct", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "Nov", y: getRandomInt(50000, 1000000)
+        }, {
+            x: "Dec", y: getRandomInt(50000, 1000000)
+        }],
         color: "#FE5B6E"
     },
         {
             name: "Earnings",
-            value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
+            value: [{
+                x: "Jan", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "Feb", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "Mar", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "Apr", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "May", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "Jun", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "Jul", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "Aug", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "Sep", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "Oct", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "Nov", y: getRandomInt(50000, 1000000)
+            }, {
+                x: "Dec", y: getRandomInt(50000, 1000000)
+            }],
             color: "#00C49F"
         }]
 
-    const totalSalary = data.reduce((a, b) => a + b.value.reduce((a, b) => a + b, 0), 0);
+    const totalSalary = data.reduce((a, b) => a + b.value.reduce((a, b) => a + b.y, 0), 0);
     // const memoizedData = React.useMemo(() => data, []);
     return (<BorderCard className='space-y-4 h-full col-span-3'
                         heading={<CountUp start={0} end={totalSalary}
@@ -298,7 +348,9 @@ const SalaryData = () => {
                             <Button color="primary" variant={btnFocusLastSem ? "flat" : "light"} onPress={handleBtnFocusLastSem}>Last Sem</Button>
                             <Button color="primary" variant={btnFocusThisSem ? "flat" : "light"} onPress={handleBtnFocusThisSem}>This Sem</Button>
                         </ButtonGroup>}>
-        <AreaChart data={data} w="100%" h={500} style={options}/>
+        {/*<AreaChart data={data} w="100%" h={500} style={options}/>*/}
+        {/*<ApexChart type="bar" series={data.flatMap(item => item.value)} height="100%" width="100%" style={barOptions}/>*/}
+        <PayrollGraph/>
     </BorderCard>);
 }
 const SalaryByDepartment = () => {
