@@ -62,6 +62,7 @@ function Page() {
     const [focusedEmployee, setFocusedEmployee] = useState<number | null>(null);
     const [focusedPayhead, setFocusedPayhead] = useState<number | null>(null);
     const [payslip, setPayslip] = useState<ViewPayslipType | null>(null);
+    const [allpayslip, setAllPayslip] = useState<ViewPayslipType[]>([]);
     const [processDate, setProcessDate] = useState<ProcessDate | false | undefined>();
     const [toBeDeployed, setTobeDeployed] = useState<unknown>();
     const userInfo = useUserInfo();
@@ -113,6 +114,7 @@ function Page() {
                 <PRPayslipTable
                     processDate={processDate}
                     setPayslip={setPayslip}
+                    setAllPayslip={setAllPayslip}
                     setTobeDeployed={setTobeDeployed}
                     // setFocusedEmployee={setFocusedEmployee}
                     // setFocusedPayhead={setFocusedPayhead}

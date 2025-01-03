@@ -49,8 +49,26 @@ export async function GET(req: NextRequest) {
                               employee_id: { in: employeeIDsFromLogs },
                           }
                         : {}),
-                    start_date: is_single_date ? { lte: isoStartDate } : { gte: isoStartDate },
-                    OR: [{ end_date: is_single_date ? { gte: isoEndDate } : { lte: isoEndDate } }, { end_date: null }],
+                    // start_date: is_single_date ? { lte: isoStartDate } : { gte: isoStartDate },
+                    // OR: [{ end_date: is_single_date ? { gte: isoEndDate } : { lte: isoEndDate } }, { end_date: null }],
+                    OR:[
+                        // Starts within the range
+                        {
+                            start_date: { gte: isoStartDate, lte: isoEndDate },
+                        },
+                        // Ends within the range
+                        {
+                            end_date: { gte: isoStartDate, lte: isoEndDate },
+                        },
+                        // Spans the range
+                        {
+                            start_date: { lte: isoStartDate },
+                            end_date: { gte: isoEndDate },
+                        },
+                        {
+                            end_date: null,
+                        }
+                    ],
                 },
             }),
 
