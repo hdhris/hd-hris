@@ -93,7 +93,7 @@ const DashboardStats = () => {
     }, {
         icon: <TbCurrencyPeso className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.salary!} formattingFn={(value) => String(value + "%")}/>, // value: '200000',
-        title: "Salary Breakdown",
+        title: "Active Payroll Records",
         status: "decreased",
         percent: 5,
         footer: "₱152k/₱220k",
