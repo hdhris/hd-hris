@@ -138,9 +138,7 @@ function Page() {
       <HolidayForm
         onUpdate={mutate}
         isOpen={open}
-        onClose={() => {
-          setOpen(false);
-        }}
+        onClose={()=>setOpen(false)}
         selectedItem={selectedItem}
         transHolidays={data?.transHolidays || []}
       />

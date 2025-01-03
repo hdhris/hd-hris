@@ -1,11 +1,11 @@
-import dayjs from "dayjs";
 import { toGMT8 } from "../../lib/utils/toGMT8";
 import { EmployeeAll, UnavaliableStatusJSON } from "../../types/employeee/EmployeeType";
 import { MajorEmployee } from "../include-emp-and-reviewr/include";
 
-const HistoryJSON = [
+const HistoryJSON: UnavaliableStatusJSON[] = [
     {
         id: 1,
+        incident_id: 1,
         start_date: "2024-12-20",
         end_date: "2024-01-01",
         reason: "",
@@ -23,17 +23,19 @@ const HistoryJSON = [
 ];
 
 type addUnavailabilityType = {
+    incident_id?: number;
     entry: UnavaliableStatusJSON[];
     start_date: string;
     end_date: string | null;
     reason: string;
     initiated_by: MajorEmployee;
 };
-export function addUnavailability({ entry, start_date, end_date, reason, initiated_by }: addUnavailabilityType) {
+export function addUnavailability({ entry, incident_id, start_date, end_date, reason, initiated_by }: addUnavailabilityType) {
     const newId = entry.length > 0 ? Math.max(...entry.map((e) => e.id)) + 1 : 1;
-    let newEntry = [
+    let newEntry: UnavaliableStatusJSON[] = [
         {
             id: newId,
+            incident_id,
             start_date: toGMT8(start_date).toISOString(),
             end_date: end_date ? toGMT8(end_date).toISOString() : null,
             reason: reason,
@@ -92,16 +94,20 @@ type GetActiveUnavailabilityType = {
 
 export function getActiveUnavailability({
     entry,
+}: GetActiveUnavailabilityType): UnavaliableStatusJSON | null {
+    const foundEntry = entry?.find((e) => e.canceled_at === null);
+    return foundEntry ?? null;
+}
+
+export function getExpiredUnavailability({
+    entry,
     currentDate,
 }: GetActiveUnavailabilityType): UnavaliableStatusJSON | null {
     const today = toGMT8(currentDate);
 
     const foundEntry = entry?.find((e) => {
-        const startDate = toGMT8(e.start_date);
         const endDate = e.end_date ? toGMT8(e.end_date) : null;
-
-        // Check if the entry is active and not canceled
-        return startDate.isSameOrBefore(today) && (!endDate || endDate.isSameOrAfter(today)) && e.canceled_at === null;
+        return !endDate || endDate.isSameOrBefore(today);
     });
 
     return foundEntry ?? null;
@@ -118,11 +124,12 @@ export function isEmployeeAvailable(
     const today = toGMT8();
 
     const isActive = (entry: UnavaliableStatusJSON): boolean => {
-        const startDate = toGMT8(entry.start_date);
-        const endDate = entry.end_date ? toGMT8(entry.end_date) : null;
-        const cancelDate = !!entry.canceled_at ? toGMT8(entry.canceled_at) : null;
+        // const startDate = toGMT8(entry.start_date);
+        // const endDate = entry.end_date ? toGMT8(entry.end_date) : null;
+        // const cancelDate = !!entry.canceled_at ? toGMT8(entry.canceled_at) : null;
 
-        return cancelDate === null && startDate.isSameOrBefore(today) && (!endDate || endDate.isSameOrAfter(today));
+        // return cancelDate === null && startDate.isSameOrBefore(today) && (!endDate || endDate.isSameOrAfter(today));
+        return entry.canceled_at === null;
     };
 
     const suspended = employee.suspension_json.some(isActive);
