@@ -273,7 +273,7 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             //     }
                                             // }}
                                             value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), timezone) : null}
-                                            onChange={(value) => value && field.onChange(toGMT8(value.toDate(timezone)).toISOString())}
+                                            onChange={(value) => value && field.onChange && field.onChange(value?.toDate(timezone).toISOString())}
                                             {...(item.config as DateInputProps)}
                                         />
                                     </Case>
@@ -306,7 +306,7 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             //     }
                                             // }}
                                             value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), timezone) : null}
-                                            onChange={(value) => value && field.onChange(toGMT8(value?.toDate(timezone)).toISOString())}
+                                            onChange={(value) => value && field.onChange && field.onChange(value?.toDate(timezone).toISOString())}
                                             {...(item.config as DatePickerProps)}
                                         />
                                     </Case>
@@ -340,7 +340,7 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                                     : null
                                             }
                                             onChange={(value) =>
-                                                value &&
+                                                value && field.onChange &&
                                                 field.onChange({
                                                     start: value?.start.toString(),
                                                     end: value?.end.toString(),
