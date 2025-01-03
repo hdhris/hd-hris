@@ -2,30 +2,30 @@ import React, {createContext, useState, useContext, ReactNode, useEffect} from '
 import dayjs from "dayjs";
 
 type DashboardContextType = {
-    startDate: string | null;
-    endDate: string | null;
-    setStartDate: (date: string | null) => void;
-    setEndDate: (date: string | null) => void;
+    startYear: number;
+    startSem: string | null;
+    // setStartDate: (date: string | null) => void;
+    // setEndDate: (date: string | null) => void;
 };
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 interface DashboardProviderProps {
     children: ReactNode;
-    initialStartDate?: string | null;
-    initialEndDate?: string | null;
+    year?: number;
+    sem?: string | null;
 }
 
-export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, initialStartDate = null, initialEndDate = null }) => {
-    const [startDate, setStartDate] = useState<string | null>(null);
-    const [endDate, setEndDate] = useState<string | null>(null);
+export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, year = new Date().getFullYear(), sem = null }) => {
+    const [startYear, setStartYear] = useState<number>(new Date().getFullYear());
+    const [startSem, setStartSem] = useState<string | null>(null);
 
     useEffect(() => {
-        setStartDate(initialStartDate);
-        setEndDate(initialEndDate);
-    }, [initialEndDate, initialStartDate]);
+        setStartYear(year!);
+        setStartSem(sem);
+    }, [sem, year]);
     return (
-        <DashboardContext.Provider value={{ startDate, endDate, setStartDate, setEndDate }}>
+        <DashboardContext.Provider value={{ startYear, startSem}}>
             {children}
         </DashboardContext.Provider>
     );

@@ -4,7 +4,7 @@ import {TbCurrencyPeso} from "react-icons/tb";
 import {FiLogOut} from "react-icons/fi";
 import {LuCalendarDays, LuCalendarX2, LuPlane, LuTicket} from "react-icons/lu";
 import {Stat, StatProps} from "@/components/statistics/Stat";
-import React, {useCallback, useEffect} from "react";
+import React, {useCallback, useEffect, useMemo} from "react";
 import BarChart, {BarChartProps} from "@/components/common/charts/Bar";
 import RadialChart from "@/components/common/charts/Radial";
 import {compactNumber, getRandomInt, numberWithCommas} from "@/lib/utils/numberFormat";
@@ -31,12 +31,17 @@ import {months} from "@/lib/utils/dateFormatter";
 const ApexChart = dynamic(() => import("react-apexcharts"), {ssr: false});
 
 const DashboardStats = () => {
-    const {startDate, endDate} = useDashboardDate()
-    const startMonth = toGMT8(startDate!).get("month") || 0;
-    const endMonth = toGMT8(endDate!).get("month") || 0;
+    const {startYear, startSem} = useDashboardDate()
+    const {data: dash} = useDashboard({year: startYear, sem: startSem!});
+    
+    const dashboard_data = useMemo(() => {
+        if(!dash){
+            return null;
+        }
 
-    const salaryMonth = months.slice(startMonth, endMonth);
-    const {data: dash} = useDashboard({start: startDate!, end: endDate!})
+        console.log("dashed: ", dash)
+        return dash
+    }, [dash])
     const data = {
         emp: 500, salary: 72, leaves: 20, absences: 10
     }
@@ -77,11 +82,11 @@ const DashboardStats = () => {
     const dashboardData: StatProps[] = [
         {
         icon: <PiUsersThree className={cn("", icon_color, icon_size)}/>,
-        value: <CountUp start={0} end={data?.emp!} formattingFn={(value) => compactNumber(value)}/>, // value: '500',
+        value: <CountUp start={0} end={dashboard_data?.employeesData?.employee_length! || 0} formattingFn={(value) => compactNumber(value)}/>, // value: '500',
         title: "New Hired Employees",
-        status: "increased",
+        status: dashboard_data?.employeesData?.status! || "",
         footer: <AddEmployees />,
-        percent: 3.6,
+        percent: dashboard_data?.employeesData?.percentageChange! || "",
         // chart: <BarChart data={employeesStat.data}/>
         chart: <PiUsersThreeLight  className="size-10 text-default-400/60"/>
     }, {
@@ -89,7 +94,7 @@ const DashboardStats = () => {
         value: <CountUp start={0} end={data?.leaves!} formattingFn={(value) => compactNumber(value)}/>, // value: '20',
         title: "Pending Leave Requests",
         status: "decreased",
-        percent: 10,
+        percent: "10",
         footer: <Typography className="text-medium">Common: <span className="text-medium font-semibold">Sick Leave</span></Typography>,
         chart: <LuPlane className="size-10 text-default-400/60"/>
     }, {
@@ -97,7 +102,7 @@ const DashboardStats = () => {
         value: <CountUp start={0} end={data?.absences!} formattingFn={(value) => compactNumber(value)}/>, // value: '10',
         title: "Attendance Rate (%)",
         status: "increased",
-        percent: 3.6,
+        percent: "3.6",
         footer: "Late",
         // chart: <PiUsersThreeLight />
         chart: <LuCalendarDays className="size-10 text-default-400/60"/>
@@ -106,7 +111,7 @@ const DashboardStats = () => {
         value: <CountUp start={0} end={data?.salary!} formattingFn={(value) => String(value + "%")}/>, // value: '200000',
         title: "Active Payroll Records",
         status: "decreased",
-        percent: 5,
+        percent: "5",
         footer: "₱152k/₱220k",
         chart: <LuTicket className="size-10 text-default-400/60"/>
     }]

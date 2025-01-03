@@ -22,9 +22,10 @@ import {BackupEntry, Integrations, LoginActivity, UserProfile} from "@/types/rou
 import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leaves/LeaveRequestTypes";
 import {EmployeeEnrollmentSelection, PaginatedEmployeeBenefitDetails} from "@/types/benefits/membership/membership-types";
 import {PayrollReports} from "@/types/report/payroll/payroll";
+import {DashboardDate} from "@/types/dashboard/stats-types";
 
-export function useDashboard({start, end}: {start: string, end: string}) {
-    return useSWR<ApiResponse>(`/api/admin/dashboard?start=${start}&end=${end}`, fetcher, {
+export function useDashboard({year, sem}: {year: number, sem: string}) {
+    return useSWR<DashboardDate>(`/api/admin/dashboard?year=${year}&sem=${sem}`, fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }

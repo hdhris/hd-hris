@@ -18,59 +18,34 @@ import dayjs from "dayjs";
 function Page() {
     const todayMonth = dayjs().month(); // Assuming `toGMT8().month()` gives a 0-based index
     const semester = todayMonth < 6;
-
     const [btnFocus1stSem, setBtnFocus1stSem] = useState(semester);
     const [btnFocus2ndSem, setBtnFocus2ndSem] = useState(!semester);
-
+    const [sem, setSem] = useState<string>(semester ? "1" : "2")
     const currentYear = new Date().getFullYear();
     const yearRange = Array.from({length: currentYear - 2020 + 1}, (_, i) => currentYear - i); // Adjust range as needed
     const [year, setYear] = useState<number>(currentYear);
-    const [firstSemesterMonths, setFirstSemesterMonths] = useState<string[]>(months.slice(0, 6).map((month) => getMonthAsDayjs(month, year)))
-    const [secondSemesterMonths, setSecondSemesterMonths] = useState<string[]>(months.slice(6).map((month) => getMonthAsDayjs(month, year)))
-    const [startDate, setStartDate] = useState<string>(semester ? firstSemesterMonths[0] : secondSemesterMonths[0]);
-    const [endDate, setEndDate] = useState<string>(semester ? firstSemesterMonths[firstSemesterMonths.length - 1] : secondSemesterMonths[secondSemesterMonths.length - 1]);
-
+    
     const handleBtnFocus2ndSem = useCallback(() => {
         setBtnFocus2ndSem(true);
         setBtnFocus1stSem(false);
-        setStartDate(secondSemesterMonths[0]);
-        setEndDate(secondSemesterMonths[secondSemesterMonths.length - 1]);
-    }, [secondSemesterMonths]);
+        setSem("1")
+    }, []);
 
     const handleBtnFocus1stSem = useCallback(() => {
         setBtnFocus2ndSem(false);
         setBtnFocus1stSem(true);
-        setStartDate(firstSemesterMonths[0]);
-        setEndDate(firstSemesterMonths[firstSemesterMonths.length - 1]);
-    }, [firstSemesterMonths]);
+        setSem("2")
+    }, []);
 
 
     const handleYearChange = useCallback((key: SharedSelection) => {
         const selectedYear = Number(Array.from(key)[0]);
         setYear(selectedYear);
-
-        const updatedFirstSemesterMonths = months
-            .slice(0, 6)
-            .map((month) => getMonthAsDayjs(month, selectedYear));
-        const updatedSecondSemesterMonths = months
-            .slice(6)
-            .map((month) => getMonthAsDayjs(month, selectedYear));
-
-        setFirstSemesterMonths(updatedFirstSemesterMonths);
-        setSecondSemesterMonths(updatedSecondSemesterMonths);
-
-        if (btnFocus1stSem) {
-            setStartDate(updatedFirstSemesterMonths[0]);
-            setEndDate(updatedFirstSemesterMonths[updatedFirstSemesterMonths.length - 1]);
-        } else {
-            setStartDate(updatedSecondSemesterMonths[0]);
-            setEndDate(updatedSecondSemesterMonths[updatedSecondSemesterMonths.length - 1]);
-        }
-    }, [btnFocus1stSem]);
+    }, []);
 
     useDocumentTitle("Dashboard | HRiS");
     return (<div className="h-full overflow-hidden">
-            <DashboardProvider initialStartDate={startDate} initialEndDate={endDate}>
+            <DashboardProvider year={year} sem={sem}>
                 <ScrollShadow className="overflow-y-auto h-full p-2">
                     <div className="flex items-center justify-end mb-4 gap-4">
                         <ButtonGroup radius="sm" variant="ghost" size="sm">
