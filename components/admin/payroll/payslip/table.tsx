@@ -328,7 +328,9 @@ export function PRPayslipTable({
       const payslips: ViewPayslipType[] = [];
 
       if (!isLoading && payslipData?.employees) {
-          payslipData?.employees.forEach((employee) => {
+          payslipData?.employees
+          .sort((a,b) => a.last_name.localeCompare(b.last_name))
+          .forEach((employee) => {
               type ListItem = { label: string; number: string };
               const employeeRecords = records[employee.id];
               const earnings: ListItem[] = [];
