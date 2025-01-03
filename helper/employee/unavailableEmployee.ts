@@ -171,7 +171,9 @@ export function isEmployeeAvailable({
 
 const listAllEmployee = [] as EmployeeAll[];
 
-// listAllEmployee.filter((employee) => isEmployeeAvailable(employee)); // Employee Tab
-// listAllEmployee.filter((employee) => isEmployeeAvailable(employee, "suspension")); // Suspend Tab
-// listAllEmployee.filter((employee) => isEmployeeAvailable(employee, "resignation")); // Resing Tab
-// listAllEmployee.filter((employee) => isEmployeeAvailable(employee, "termination")); // Termination Tab
+listAllEmployee.filter((employee) => isEmployeeAvailable({employee})); // Employee Tab
+listAllEmployee.filter((employee) => isEmployeeAvailable({employee, find:["suspension"]})); // Suspend Tab
+listAllEmployee.filter((employee) => isEmployeeAvailable({employee, find:["resignation"]})); // Resing Tab
+listAllEmployee.filter((employee) => isEmployeeAvailable({employee, find:["termination"]})); // Termination Tab
+listAllEmployee.filter((employee) => isEmployeeAvailable({employee, find:["termination", "resignation"]})); // Termination and Resignation
+listAllEmployee.filter((employee) => isEmployeeAvailable({employee, find:["termination"], date: "2024-01-31"})); // If Terminated at specific date
