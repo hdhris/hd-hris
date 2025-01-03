@@ -124,7 +124,7 @@ function PayrollGraph() {
                 show: true,
                 style: {
                     fontFamily: "Inter, sans-serif",
-                    cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+                    cssClass: 'text-sm font-bold fill-gray-500 dark:fill-gray-400'
                 }
             },
             axisBorder: {
@@ -140,9 +140,7 @@ function PayrollGraph() {
                 show: true,
                 style: {
                     fontFamily: "Inter, sans-serif",
-                    cssClass: 'text-xs fill-gray-500 dark:fill-gray-400',
-                    fontSize: "10px",
-                    fontWeight: "bold"
+                    cssClass: 'text-sm font-bold fill-gray-500 dark:fill-gray-400'
                 },
                 formatter: (value) => { return `${numberWithCommas(value)}` },
             }
