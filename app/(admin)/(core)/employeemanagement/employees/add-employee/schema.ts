@@ -70,9 +70,9 @@ export const employeeSchema = z.object({
   }, "Age cannot be over 100 years")
   .refine((date) => {
     const birthDate = dayjs(date);
-    const minAge = dayjs('2008-12-31');
+    const minAge = dayjs('2006-12-31');
     return birthDate.isBefore(minAge) || birthDate.isSame(minAge);
-  }, "Employee must be at least 15 years old"),
+  }, "Employee must be at least 18 years old"),
   
   addr_region: z.string().min(1, "Region is required"),
   addr_province: z.string().min(1, "Province is required"),
@@ -198,11 +198,6 @@ export const employeeSchema = z.object({
   // Employment details
   hired_at: z.string()
   .min(1, "Hire date is required")
-  .refine((date) => {
-    const hireDate = dayjs(date);
-    const currentDate = dayjs().endOf('day');
-    return hireDate.isSame(currentDate, 'day') || hireDate.isBefore(currentDate);
-  }, "Hire date cannot be in the future")
   .refine((date) => {
     const hireDate = dayjs(date);
     const minimumHireDate = dayjs('1970-01-01');
