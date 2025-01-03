@@ -434,9 +434,9 @@ Table trans_employees {
   training_programs_attended_json Json
   government_issued_id_json Json
   prefix String
-  suspension_json Json
-  resignation_json Json
-  termination_json Json
+  suspension_json Json [not null]
+  resignation_json Json [not null]
+  termination_json Json [not null]
   employement_status_id Int [not null]
   salary_grade_id Int
   acl_user_access_control acl_user_access_control
