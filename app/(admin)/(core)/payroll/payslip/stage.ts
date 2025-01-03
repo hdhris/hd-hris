@@ -6,7 +6,7 @@ import {
   Benefit,
   calculateAllPayheads,
   ContributionSetting,
-  getUndertimeTotal,
+  getAttendanceTotal,
   static_formula,
   VariableAmountProp,
   VariableFormulaProp,
@@ -42,11 +42,11 @@ export async function stageTable(
         String(
             `/api/admin/attendance-time/records?start=${toGMT8(dateInfo.start_date).format(
                 "YYYY-MM-DD"
-            )}&end=${toGMT8(dateInfo.end_date).format("YYYY-MM-DD")}`
+            )}&end=${toGMT8(dateInfo.end_date).format("YYYY-MM-DD")}&all_employee=true`
         )
     )
     ])
-    console.log(dataPH);
+    // console.log(dataPH);
     setStageMsg("Performing calculations...");
     // Reuse employee schedule map for references below
     const { cashToDisburse, cashToRepay, benefitsPlansData } = convertToNumber({...stage_two.data.result});
@@ -133,20 +133,23 @@ export async function stageTable(
     
         // const ratePerHour = parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0;
         const ratePerHour = 30; // Static rate/hr
+        const { deductedUndertime, paidLeaves, paidOvertimes } = getAttendanceTotal({
+                                      logStatus: statusesByDate,
+                                      employeeID: emp.id,
+                                      startDate: dateInfo.start_date,
+                                      endDate: dateInfo.end_date,
+                                  });
+        // console.log({ emp: emp.id, deductedUndertime, paidLeaves, paidOvertimes })
         const baseVariables: BaseValueProp = {
-          rate_p_hr: ratePerHour,
-          total_shft_hr: 80,
-          basic_salary: Number(String(emp?.ref_salary_grades?.amount || 0.00)),
-          payroll_days: payrollDays,
-          [static_formula.cash_advance_disbursement]: cashDisburseMap.get(emp.id) ?? 0,
-          [static_formula.cash_advance_repayment]: cashRepayMap.get(emp.id!) ?? 0,
-          [static_formula.tardiness]: getUndertimeTotal(
-            statusesByDate,
-            emp.id,
-            timeSchedule || null,
-            dateInfo.start_date,
-            dateInfo.end_date
-          ) * (ratePerHour / 60),
+            rate_p_hr: ratePerHour,
+            total_shft_hr: 80,
+            basic_salary: Number(String(emp?.ref_salary_grades?.amount || 0.0)),
+            payroll_days: payrollDays,
+            [static_formula.cash_advance_disbursement]: cashDisburseMap.get(emp.id) ?? 0,
+            [static_formula.cash_advance_repayment]: cashRepayMap.get(emp.id!) ?? 0,
+            [static_formula.tardiness]: deductedUndertime,
+            [static_formula.overtimes]: paidOvertimes,
+            [static_formula.leaves]: paidLeaves,
         };
     
         // Filter applicable payheads for calculation based on employee and payhead data.
@@ -176,6 +179,8 @@ export async function stageTable(
                     ? (!!amountRecordsMap.get(ph.id)?.get(emp.id) || ph.is_overwritable)
                     : true) &&
                 isAffected(tryParse(emp), tryParse(ph)) &&
+                (ph.calculation === static_formula.leaves ? paidLeaves > 0 : true) &&
+                (ph.calculation === static_formula.overtimes ? paidOvertimes > 0 : true) &&
                 (ph.calculation === static_formula.cash_advance_disbursement ? cashDisburseMap.has(emp.id) : true) &&
                 (ph.calculation === static_formula.cash_advance_repayment ? cashRepayMap.has(emp.id) : true) &&
                 ph.calculation != static_formula.benefit_contribution // Benefits already calculated, ignore.

@@ -66,7 +66,7 @@ export default function Page() {
 
     const currentEmployeeAttendanceInfo = useMemo(() => {
         if (!selectedEmployee || currentTab != "by-employees") return null;
-        console.log({ attendanceData });
+        // console.log({ attendanceData });
         const foundLog = attendanceData?.attendanceLogs.find((al) => al.employee_id === selectedEmployee.id);
         const status = attendanceData?.statusesByDate[`${date}`][`${selectedEmployee.id}`];
         console.log({

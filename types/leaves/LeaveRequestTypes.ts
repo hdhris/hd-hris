@@ -119,7 +119,7 @@ export interface EmployeeLeave {
     dim_schedules: DimSchedule[];
 }
 
-interface LeaveApplication {
+export interface LeaveApplication {
     employee_id: number;
     start_date: string; // ISO 8601 date string
     end_date: string; // ISO 8601 date string

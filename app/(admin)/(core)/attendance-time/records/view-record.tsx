@@ -1,18 +1,19 @@
 import { ValueLabel } from "@/components/admin/attendance-time/overtime/view-overtime";
 import Drawer from "@/components/common/Drawer";
 import { EmployeeHeader } from "@/components/common/minor-items/components";
+import { getColor } from "@/helper/background-color-generator/generator";
 import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { formatCurrency } from "@/lib/utils/numberFormat";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { AttendanceLog, LogStatus } from "@/types/attendance-time/AttendanceTypes";
 import { Chip, ScrollShadow } from "@nextui-org/react";
-import { toUpper } from "lodash";
+import { capitalize, toUpper } from "lodash";
 import React from "react";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { LiaUserClockSolid } from "react-icons/lia";
 import { MdOutlineAccessTime, MdOutlineMoreTime } from "react-icons/md";
-import { TbClockCheck, TbClockUp, TbClockX } from "react-icons/tb";
+import { TbClockCheck, TbClockShield, TbClockUp, TbClockX } from "react-icons/tb";
 
 interface ViewRecordProps {
     attendanceInfo: {
@@ -28,6 +29,20 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
             {!!attendanceInfo && (
                 <ScrollShadow className="space-y-4">
                     <EmployeeHeader employee={attendanceInfo?.employee!} />
+                    <div className="mx-auto flex justify-center items-center gap-2">
+                        {["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+                            // .filter((day) => attendanceInfo.status?.dayNames?.includes(day))
+                            .map((day, index) => (
+                                <Chip
+                                    key={index}
+                                    radius="sm"
+                                    variant={attendanceInfo.status?.dayNames?.includes(day) ? "solid" : "flat"}
+                                    className="p-0"
+                                >
+                                    {capitalize(day)}
+                                </Chip>
+                            ))}
+                    </div>
                     <ValueLabel
                         label="Time Schedule"
                         icon={<LiaUserClockSolid />}
@@ -144,6 +159,22 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
                             </div>
                         }
                         icon={<TbClockX />}
+                    />
+                    <hr />
+                    <ValueLabel
+                        label="Leave"
+                        value={
+                            <div className="flex flex-row gap-2">
+                                <p>
+                                    {attendanceInfo?.status?.renderedLeave
+                                        ? calculateShiftLength(null, null, attendanceInfo?.status?.renderedLeave, true)
+                                        : "0"}
+                                </p>
+                                <div className="h-5 w-[1px] bg-gray-300" />
+                                <p>{formatCurrency(String(attendanceInfo?.status?.paidLeave))}</p>
+                            </div>
+                        }
+                        icon={<TbClockShield />}
                     />
                     {/* <p>{JSON.stringify(attendanceInfo.status)}</p> */}
                 </ScrollShadow>
