@@ -10,6 +10,7 @@ import {
 import { min } from "lodash";
 import { getAttendanceStatus } from "./new-stage";
 import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
+import { LeaveApplication, LeaveRequestTypes } from "@/types/leaves/LeaveRequestTypes";
 
 export async function fetchAttendanceData(url: string): Promise<AttendanceData> {
     // const response = await fetch(`/api/attendance?start=${start}&end=${end}`);
@@ -26,14 +27,20 @@ type Dates = {
     startDate: string;
     endDate: string;
 };
+type LeaveEntry = LeaveApplication & { trans_leave_types: { ref_leave_type_details: { paid_leave: boolean } } };
 async function attendanceData({
     attendanceLogs,
     employees,
     employeeSchedule,
     overtimes,
+    leaves,
     startDate,
     endDate,
-}: Omit<AttendanceData, "statusesByDate"> & Dates & { overtimes: OvertimeEntry[] }): Promise<AttendanceData> {
+}: Omit<AttendanceData, "statusesByDate"> &
+    Dates & {
+        overtimes: OvertimeEntry[];
+        leaves: LeaveEntry[];
+    }): Promise<AttendanceData> {
     // Reuse employee schedule map for references below
     const employeeScheduleMap = employeeSchedule.reduce((acc, schedule) => {
         const { employee_id } = schedule;
@@ -49,12 +56,27 @@ async function attendanceData({
     const overtimeDateMap = overtimes.reduce((acc, overtime) => {
         const { timestamp, employee_id } = overtime;
         const splitTimestamp = toGMT8(timestamp).format("YYYY-MM-DD");
-        if (!acc[splitTimestamp]){
+        if (!acc[splitTimestamp]) {
             acc[splitTimestamp] = {};
         }
         acc[splitTimestamp][employee_id] = overtime;
         return acc;
-    }, {} as Record<string, Record<number, OvertimeEntry>>)
+    }, {} as Record<string, Record<number, OvertimeEntry>>);
+
+    const leaveDateMap = leaves.reduce((acc, leave) => {
+        const { start_date, end_date, employee_id } = leave;
+        const start = new Date(start_date);
+        const end = new Date(end_date);
+        for (let current = start; current <= end; current.setDate(current.getDate() + 1)) {
+            const splitTimestamp = toGMT8(current).format("YYYY-MM-DD");
+            if (!acc[splitTimestamp]) {
+                acc[splitTimestamp] = {};
+            }
+            acc[splitTimestamp][employee_id] = leave;
+        }
+
+        return acc;
+    }, {} as Record<string, Record<number, LeaveEntry>>);
 
     // Reuse batch schedule map for references below
     // const batchScheduleMap = new Map(batchSchedule.map((bs) => [bs.id, bs]));
@@ -107,7 +129,8 @@ async function attendanceData({
             // Initialize statuses for each date(s)
             statusesByDate[date] = {};
             const logsByEmployee = organizedLogsByDate[date];
-            const overtimes = overtimeDateMap[date];
+            const overtimesByEmploye = overtimeDateMap[date];
+            const leavetimesByEmployee = leaveDateMap[date];
             await Promise.all(
                 employees.map(async (emp) => {
                     try {
@@ -118,7 +141,8 @@ async function attendanceData({
                             rate_per_minute: 0.75,
                             schedules: employeeScheduleMap[emp.id],
                             logs: logsByEmployee ? logsByEmployee[emp.id] ?? [] : [],
-                            overtime: overtimes ? overtimes[emp.id] ?? undefined : undefined,
+                            overtime: overtimesByEmploye ? overtimesByEmploye[emp.id] ?? undefined : undefined,
+                            leave: leavetimesByEmployee ? leavetimesByEmployee[emp.id] ?? undefined : undefined
                         });
                     } catch (error) {
                         console.log(error);

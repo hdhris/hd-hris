@@ -14,13 +14,18 @@ export async function getAttendanceStatus({
     schedules,
     logs,
     rate_per_minute,
-    onLeave,
+    leave,
     overtime,
 }: {
-    onLeave?: {
+    leave?: {
         id: number;
-        start_timestamp: string;
-        end_timestamp: string;
+        start_date: string;
+        end_date: string;
+        trans_leave_types: {
+            ref_leave_type_details: {
+                paid_leave: boolean;
+            };
+        };
     };
     overtime?: {
         id: number;
@@ -32,7 +37,7 @@ export async function getAttendanceStatus({
     logs?: AttendanceLog[];
     rate_per_minute: number;
 }): Promise<LogStatus> {
-    const schedule = getAccurateEmployeeSchedule({logDate: date, employeeSchedules: schedules ?? []});
+    const schedule = getAccurateEmployeeSchedule({ logDate: date, employeeSchedules: schedules ?? [] });
     // Skip if current employee has invalid schedule
     if (!schedule)
         return {
@@ -69,7 +74,8 @@ export async function getAttendanceStatus({
     const offset = 0; // Time offset for GMT+8
     const gracePeriod = 5; // 5 min grace period
     const organizedLogs = logs?.sort((a, b) => toGMT8(a.timestamp).diff(toGMT8(b.timestamp)));
-    const currentDay = toGMT8(date);
+    const currentDay = toGMT8(toGMT8(date).format("YYYY-MM-DD"));
+    const today = toGMT8().subtract(offset, "hours").startOf("day");
     const dayNames = schedule?.days_json;
 
     let amIn: punchIN = {
@@ -158,7 +164,6 @@ export async function getAttendanceStatus({
                             // Consider it as a PM time in
                         } else {
                             // Initialize as no break if the employee has not punched out at morning yet
-                            // let stat: InStatus = "no break";
                             let stat: InStatus = "no break";
 
                             // If the employee has punched out at morning...
@@ -194,13 +199,12 @@ export async function getAttendanceStatus({
                             // Initialize as "LUNCH" if the employee has not punched in at afternoon yet
                             let stat: OutStatus = "lunch";
                             // Prepare to check if AM time-out is today and if PM time-in doesn't exist
-                            const today = toGMT8().subtract(offset, "hours").startOf("day");
                             const logDate = timestamp.startOf("day");
                             // If not today, its history
                             if (!logDate.isSame(today, "day")) {
                                 // If employee has not punched in at afternoon...
                                 // considered it as "EARLY OUT"
-                                if (!pmIn) stat = "early-out";
+                                // if (!pmIn.time) stat = "early-out";
                             }
                             amOut = {
                                 id: log.id,
@@ -265,11 +269,30 @@ export async function getAttendanceStatus({
                     status: "no break",
                 };
             }
+        } else {
+            // Revalidate punch OUT at morning...
+            if (amIn.time) {
+                // If not today, its history
+                const logDate = toGMT8(amIn.time).startOf("day");
+                if (!logDate.isSame(today, "day")) {
+                    // If employee has not punched in at afternoon...
+                    // considered it as "EARLY OUT"
+                    if (!pmIn.time) {
+                        amOut = {
+                            ...amOut,
+                            status: "early-out",
+                        };
+                    }
+                }
+            }
         }
         // If not punched IN at afternoon...
         if (!pmIn.time) {
-            // Mark absent if not also punched IN at morning
-            if (!amIn?.time) {
+            // {Mark absent if not also punched IN at morning}
+            // if (!amIn?.time) {
+
+            // Mark absent if not also punched OUT at morning
+            if (!pmOut?.time) {
                 pmIn = {
                     id: null,
                     time: null,
@@ -344,41 +367,139 @@ export async function getAttendanceStatus({
         // Also record the undertime length for employee's log record
         renderedUndertime = shiftLength < factShiftLength ? factShiftLength - shiftLength : 0;
 
-        if (onLeave) {
-            const startTimestamp = toGMT8(onLeave.start_timestamp).subtract(offset, "h");
-            const endTimestamp = toGMT8(onLeave.end_timestamp).subtract(offset, "h");
+        if (!!leave) {
+            const start = toGMT8(toGMT8(leave.start_date).format("YYYY-MM-DD")).toDate();
+            const end = toGMT8(toGMT8(leave.end_date).format("YYYY-MM-DD")).toDate();
 
-            if (startTimestamp.hour() < 12) {
+            let leaveIN = "";
+            let leaveOUT = "";
+            for (let current = start; current <= end; current.setDate(current.getDate() + 1)) {
+                const le_in = toGMT8(leave.start_date)
+                    .subtract(offset, "hours")
+                    .year(currentDay.year())
+                    .month(currentDay.month())
+                    .date(currentDay.date())
+                    .toISOString();
+                const le_out = toGMT8(leave.end_date)
+                    .year(currentDay.year())
+                    .month(currentDay.month())
+                    .date(currentDay.date())
+                    .toISOString();
+
+                if (current.getTime() === start.getTime() && current.getTime() === end.getTime()) {
+                    leaveIN = le_in;
+                    leaveOUT = le_out;
+                } else if (current.getTime() === start.getTime()) {
+                    leaveIN = le_in;
+                    leaveOUT = scheduleTimeOut.toISOString();
+                } else if (current.getTime() === end.getTime()) {
+                    leaveIN = scheduleTimeIn.toISOString();
+                    leaveOUT = le_out;
+                } else {
+                    leaveIN = scheduleTimeIn.toISOString();
+                    leaveOUT = scheduleTimeOut.toISOString();
+                }
+
+                if (current.getTime() === currentDay.toDate().getTime()) break;
+            }
+
+            const leaveTimeIn = toGMT8(leaveIN);
+            const leaveTimeOut = toGMT8(leaveOUT);
+            if (leaveTimeIn.hour() < 12) {
                 amIn = {
-                    id: onLeave.id,
+                    id: leave.id,
                     status: "on leave",
-                    time: onLeave.start_timestamp,
+                    time: leaveTimeIn.toISOString(),
                 };
             } else {
                 pmIn = {
-                    id: onLeave.id,
+                    id: leave.id,
                     status: "on leave",
-                    time: onLeave.start_timestamp,
+                    time: leaveTimeIn.toISOString(),
                 };
             }
 
-            if (endTimestamp.hour() < 13) {
+            if (leaveTimeOut.hour() < 13) {
                 amOut = {
-                    id: onLeave.id,
+                    id: leave.id,
                     status: "on leave",
-                    time: onLeave.end_timestamp,
+                    time: leaveTimeOut.toISOString(),
                 };
             } else {
                 pmOut = {
-                    id: onLeave.id,
+                    id: leave.id,
                     status: "on leave",
-                    time: onLeave.end_timestamp,
+                    time: leaveTimeOut.toISOString(),
                 };
             }
 
-            renderedLeave = Math.abs(endTimestamp.diff(startTimestamp, "minutes"));
+            if (amOut.status != "on leave") {
+                if (amIn.status === "on leave") {
+                    amOut = {
+                        id: leave.id,
+                        status: "on leave",
+                        time: null,
+                    };
+                }
+            }
+            if (pmIn.status != "on leave") {
+                if (amOut.status === "on leave") {
+                    pmIn = {
+                        id: leave.id,
+                        status: "on leave",
+                        time: null,
+                    };
+                }
+            }
+
+            // Get the minutes rendered from overall log entry
+            // Ignore entry such as:
+            // MORNING: punch OUT but no punch IN
+            // AFTERNOON: punch OUT but no punch IN
+            const leaveLength = ((): number => {
+                // Initializing morning and afternoon duration
+                let morning = 0;
+                let afternoon = 0;
+                // If time-in and time-out for morning is valid
+                if (amIn?.time && amOut.time && amIn.status === "on leave" && amOut.status === "on leave") {
+                    morning = toGMT8(amOut.time)
+                        .subtract(offset, "h")
+                        .diff(toGMT8(amIn.time).subtract(offset, "h"), "minute");
+                }
+                // If time-in and time-out for afternoon is valid
+                if (pmIn?.time && pmOut.time && pmIn.status === "on leave" && pmOut.status === "on leave") {
+                    afternoon = toGMT8(pmOut.time)
+                        .subtract(offset, "h")
+                        .diff(toGMT8(pmIn.time).subtract(offset, "h"), "minute");
+                }
+
+                // For special cases with employees who took no breaks
+                // such as when an employee had punched IN at morning
+                // but never punched OUT at morning and never punched IN
+                // at afternoon but had punched OUT at afternoon
+                //    amIN:  time-in
+                //    amOUT: x
+                //    pmIN:  x
+                //    pmOUT: time-out
+                // this can be considered as valid, but lunch break still won't
+                // be added with rendered work minutes (unless applied for overtime)
+                if (amIn?.time && amIn.status === "on leave" && !amOut?.time && !pmIn?.time && pmOut?.time  && pmOut.status === "on leave") {
+                    afternoon = toGMT8(pmOut.time)
+                        .subtract(offset, "h")
+                        .diff(toGMT8(amIn.time).subtract(offset, "h"), "minute");
+                }
+                // Return the combined shift length
+                return morning + afternoon;
+            })();
+
+            // Rendered shift lenght must never exceed actaul shift length
+            renderedLeave = Math.min(leaveLength, factShiftLength);
         }
     }
+
+    const leave_rate = leave?.trans_leave_types.ref_leave_type_details.paid_leave ? rate_per_minute : 0;
+    renderedUndertime = renderedUndertime - (leave_rate > 0 ? renderedLeave : 0);
+
 
     return {
         amIn,
@@ -387,13 +508,14 @@ export async function getAttendanceStatus({
         pmOut,
         clockIn: schedule.clock_in,
         clockOut: schedule.clock_out,
+        dayNames,
         renderedShift,
         renderedUndertime,
         renderedLeave,
         renderedOvertime,
         paidShift: renderedShift * rate_per_minute,
         deductedUndertime: renderedUndertime * rate_per_minute,
-        paidLeave: renderedLeave * rate_per_minute,
+        paidLeave: renderedLeave * leave_rate,
         paidOvertime: overtime ? overtime.requested_mins * rate_per_minute : 0,
     };
 }

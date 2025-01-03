@@ -25,6 +25,7 @@ interface PRPayslipTableType {
   // setFocusedEmployee: (id: number | null) => void;
   // setFocusedPayhead: (id: number | null) => void;
   setPayslip: (item: ViewPayslipType | null) => void;
+  setAllPayslip: (item: ViewPayslipType[]) => void;
   setTobeDeployed: (item: unknown) => void;
 }
 export function PRPayslipTable({
@@ -33,6 +34,7 @@ export function PRPayslipTable({
   // setFocusedPayhead,
   setTobeDeployed,
   setPayslip,
+  setAllPayslip,
 }: PRPayslipTableType) {
   // const cacheKey = "unpushedPayrollBatch";
   // const cachedUnpushed = loadFromSession<batchDataType>(cacheKey);
@@ -320,7 +322,52 @@ export function PRPayslipTable({
         net: getEmployeePayheadSum(employee.id, "earning") - getEmployeePayheadSum(employee.id, "deduction"),
       }
     })()); 
-  },[setPayslip,records,payslipData, isLoading])
+  },[setPayslip,records,payslipData, isLoading]);
+
+  useEffect(() => {
+      const payslips: ViewPayslipType[] = [];
+
+      if (!isLoading && payslipData?.employees) {
+          payslipData?.employees.forEach((employee) => {
+              type ListItem = { label: string; number: string };
+              const employeeRecords = records[employee.id];
+              const earnings: ListItem[] = [];
+              const deductions: ListItem[] = [];
+              // console.log(employeeRecords);
+
+              const earningNames = new Map(payslipData?.earnings.map((earn) => [earn.id, earn.name]));
+              const deductionNames = new Map(payslipData?.deductions.map((deduct) => [deduct.id, deduct.name]));
+              if (employeeRecords) {
+                  Object.entries(employeeRecords).forEach(([payheadID, [type, amount]]) => {
+                      if (type === "earning") {
+                          const item: ListItem = { label: earningNames.get(Number(payheadID))!, number: amount };
+                          earnings.push(item);
+                      } else if (type === "deduction") {
+                          const item: ListItem = { label: deductionNames.get(Number(payheadID))!, number: amount };
+                          deductions.push(item);
+                      }
+                  });
+              }
+
+              payslips.push({
+                  data: {
+                      name: getEmpFullName(employee),
+                      role: employee.ref_job_classes.name,
+                  },
+                  earnings: {
+                      total: getEmployeePayheadSum(employee.id, "earning"),
+                      list: earnings,
+                  },
+                  deductions: {
+                      total: getEmployeePayheadSum(employee.id, "deduction"),
+                      list: deductions,
+                  },
+                  net: getEmployeePayheadSum(employee.id, "earning") - getEmployeePayheadSum(employee.id, "deduction"),
+              });
+          });
+      }
+      setAllPayslip(payslips);
+  }, [records, payslipData, isLoading, setAllPayslip]);
 
   // Initial loaders
   const [onDialog, setDialog] = useState(false);

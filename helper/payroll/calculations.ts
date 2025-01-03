@@ -5,6 +5,8 @@ export const static_formula = {
     cash_advance_disbursement: "get_disbursement",
     cash_advance_repayment: "get_repayment",
     tardiness: "get_tardiness",
+    leaves: "get_leaves",
+    overtimes: "get_overtimes",
     benefit_contribution: "get_contribution",
 };
 
@@ -92,7 +94,7 @@ import { basicCalculator } from "../benefits-calculator/basic-calculator";
 import { Decimal } from "@prisma/client/runtime/library";
 import { AttendaceStatuses, BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-import {ContributionType} from "@/types/benefits/plans/plansTypes";
+import { ContributionType } from "@/types/benefits/plans/plansTypes";
 
 // Type definition for benefit data
 export interface ContributionSetting {
@@ -111,7 +113,7 @@ export interface ContributionSetting {
         ec_low_rate: number;
         ec_high_rate: number;
         wisp_threshold: number;
-        actual_contribution_amount: number
+        actual_contribution_amount: number;
         contribution_type: ContributionType;
     }[];
 }
@@ -147,7 +149,7 @@ export class Benefit {
                         wispThreshold: table.wisp_threshold,
                     };
 
-                    if(table.contribution_type === "others"){
+                    if (table.contribution_type === "others") {
                         if (!table.min_MSC) {
                             const basic = basicCalculator(salary, table.employer_rate, table.employee_rate);
                             // console.log("Name: ", this.data.name, " Basic Calc: ", basic);
@@ -157,12 +159,11 @@ export class Benefit {
                                 advanceCalculator(salary, rates).employeeShare +
                                 (advanceCalculator(salary, rates).wispEmployee ?? 0);
                         }
-                    } else if(table.contribution_type === "percentage"){
+                    } else if (table.contribution_type === "percentage") {
                         contribution = salary * (table.actual_contribution_amount / 100);
                     } else {
-                        contribution = table.actual_contribution_amount
+                        contribution = table.actual_contribution_amount;
                     }
-
                 }
             });
 
@@ -177,14 +178,9 @@ export class Benefit {
 export function getUndertimeTotal(
     logStatus: Record<string, AttendaceStatuses>,
     empID: number,
-    timeSchedule: EmployeeSchedule | null,
     startDate: string,
     endDate: string
 ): number {
-    if (!timeSchedule) {
-        console.log("No shift found for emp: ", empID);
-        return 0;
-    }
     const start = new Date(startDate);
     const end = new Date(endDate);
     let totalAmount = 0;
@@ -198,4 +194,41 @@ export function getUndertimeTotal(
     }
 
     return totalAmount;
+}
+
+export function getAttendanceTotal({
+    logStatus,
+    employeeID,
+    startDate,
+    endDate,
+}: {
+    logStatus: Record<string, AttendaceStatuses>;
+    employeeID: number;
+    startDate: string;
+    endDate: string;
+}) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    let deductedUndertime = 0;
+    let paidOvertimes = 0;
+    let paidLeaves = 0;
+
+    for (let current = new Date(start); current <= end; current.setDate(current.getDate() + 1)) {
+        const dateString = current.toISOString().split("T")[0];
+        const logByDate = logStatus[dateString];
+        if(employeeID === 5){
+            console.log({dateString, log: logByDate[employeeID]})
+        }
+        if (logByDate && logByDate[employeeID]) {
+            deductedUndertime += logByDate[employeeID].deductedUndertime ?? 0;
+            paidOvertimes += logByDate[employeeID].paidOvertime ?? 0;
+            paidLeaves += logByDate[employeeID].paidLeave ?? 0;
+        }
+    }
+
+    return {
+        deductedUndertime,
+        paidOvertimes,
+        paidLeaves,
+    };
 }

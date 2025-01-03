@@ -1,7 +1,9 @@
 import { formatDistanceToNow } from 'date-fns'
+import {toGMT8} from "@/lib/utils/toGMT8";
 
 function formatTimeAgo(date: Date | string): string {
-  return formatDistanceToNow(date, { addSuffix: true })
+    const gmt8Date = toGMT8(date)
+  return gmt8Date.from(toGMT8())
 }
 
 

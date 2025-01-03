@@ -1,6 +1,7 @@
 import UserMail from "@/components/common/avatar/user-info-mail";
 import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
+import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { AttendanceData, AttendanceLog, determineAttendance, LogStatus } from "@/types/attendance-time/AttendanceTypes";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
@@ -94,7 +95,10 @@ export const attLogRecordConfig = (date: CalendarDate, attendanceData?: Attendan
     } as TableConfigProps<AttendanceLog>;
 };
 
-export const attEmployeeConfig = (date: CalendarDate, attendanceData?: AttendanceData): TableConfigProps<MajorEmployee> => {
+export const attEmployeeConfig = (
+    date: CalendarDate,
+    attendanceData?: AttendanceData
+): TableConfigProps<MajorEmployee> => {
     return {
         columns: [
             { uid: "id", name: "ID", sortable: true },
@@ -119,6 +123,7 @@ export const attEmployeeConfig = (date: CalendarDate, attendanceData?: Attendanc
             // const employee = attendanceData?.employees.find((ar) => ar.id === item.employee_id)!;
             // console.log(attendanceData);
             const record = attendanceData?.statusesByDate[`${date}`][`${item.id}`];
+            const dayStatus = record ? determineAttendance(record) : "Unrecorded";
             // let logStatus = null;
             // const foundKey = findStatusKeyById(record || null, item.id);
             // if (record && foundKey) {
@@ -129,20 +134,41 @@ export const attEmployeeConfig = (date: CalendarDate, attendanceData?: Attendanc
                 case "id":
                     return <>{item.id}</>;
                 case "name":
-                    return (
-                        <UserMail name={getEmpFullName(item)} picture={item.picture} email={item.email} />
-                    );
+                    return <UserMail name={getEmpFullName(item)} picture={item.picture} email={item.email} />;
                 case "status":
                     return (
-                        <strong>
-                            {record ? determineAttendance(record) : "Unrecorded"}
-                        </strong>
+                        <Chip
+                            className={cn("capitalize", dayStatus === "On Leave" ? "text-purple-500 bg-purple-100" : "")}
+                            color={
+                                dayStatus === "Whole Day"
+                                    ? "success"
+                                    : dayStatus === "Morning only"
+                                    ? "warning"
+                                    : dayStatus === "Afternoon only"
+                                    ? "warning"
+                                    : dayStatus === "Absent"
+                                    ? "danger"
+                                    : // : dayStatus === "On Leave"
+                                      // ? "primary"
+                                      "default"
+                            }
+                            size="sm"
+                            variant="flat"
+                        >
+                            {dayStatus}
+                        </Chip>
                     );
                 case "duration":
-                    return <>{record?.renderedShift}</>;
+                    return (
+                        <>
+                            {record?.renderedShift
+                                ? calculateShiftLength(null, null, record.renderedShift, true)
+                                : "UNRECORDED"}
+                        </>
+                    );
                 default:
                     return <></>;
             }
         },
-    }
+    };
 };
