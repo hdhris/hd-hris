@@ -1,7 +1,7 @@
-'use client';
+"use client";
 import React, { FC, ReactNode } from "react";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ControllerRenderProps, FieldValues, useFormContext } from "react-hook-form";
+import { Controller, ControllerRenderProps, FieldValues, useFormContext } from "react-hook-form";
 import InputStyle, { DateStyle } from "@/lib/custom/styles/InputStyle";
 import { SelectionProp } from "./types/SelectionProp";
 import { InputProps, TextAreaProps } from "@nextui-org/input";
@@ -30,12 +30,12 @@ import {
     Textarea,
     TimeInput,
     TimeInputProps,
-    cn
+    cn,
 } from "@nextui-org/react";
 import { Case, Default, Switch as SwitchCase } from "@/components/common/Switch";
 import { getLocalTimeZone, parseAbsolute } from "@internationalized/date";
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { Radio } from "@nextui-org/radio";
 import { Key } from "@react-types/shared";
 import { Granularity } from "@react-types/datepicker";
@@ -95,17 +95,17 @@ interface InputOptions {
         defaultValue?: string[]; // defaultValue is now part of the custom options
         options?: GroupInputOptions[]; // options is also part of the custom options
     };
-    "date-input"?: Omit<DateInputProps, "label">,
-    "date-picker"?: Omit<DatePickerProps, "label">
-    "date-range-picker"?: Omit<DateRangePickerProps, "label">
+    "date-input"?: Omit<DateInputProps, "label">;
+    "date-picker"?: Omit<DatePickerProps, "label">;
+    "date-range-picker"?: Omit<DateRangePickerProps, "label">;
     "radio-group"?: RadioGroupProps & {
         defaultValue?: string[]; // defaultValue is now part of the custom options
         options?: GroupInputOptions[]; // options is also part of the custom options
     };
-    select?: Omit<SelectProps, "label">,
-    "switch": SwitchProps,
-    "time-input": Omit<TimeInputProps, "label">
-    "text-area": Omit<TextAreaProps, "label">
+    select?: Omit<SelectProps, "label">;
+    switch: SwitchProps;
+    "time-input": Omit<TimeInputProps, "label">;
+    "text-area": Omit<TextAreaProps, "label">;
 }
 
 // Define InputVariant, dynamically applying input-specific options or generic string-based props
@@ -133,35 +133,43 @@ export interface FormInputProps<T = any> {
 
 interface FormsControlProps<T> {
     items: FormInputProps<T>[];
-    size?: InputProps['size'];
+    size?: InputProps["size"];
 }
 
 interface FormInputOptions<T> {
-    item: FormInputProps<T>,
-    control: any,
-    size: InputProps['size']
+    item: FormInputProps<T>;
+    control: any;
+    size: InputProps["size"];
 }
 
 const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
     // Determine if the field is visible
     const isVisible = typeof item.isVisible === "function" ? item.isVisible() : item.isVisible !== false;
-
+    const timezone = getLocalTimeZone(); //"UTC";
     if (!isVisible) return null; // If the field is not visible, return null
     return (
-        <FormField
+        <Controller
             control={control}
             name={item.name as string}
             render={({ field }) => {
                 return (
                     <FormItem className="w-full">
-                        {item.label && item.type !== "checkbox" && item.type !== "group-checkbox" && item.type !== "switch" && (
-                            <FormLabel htmlFor={item.name as string} className={cn(item.inputClassName, item.inputDisabled ? "text-default-400/75" : "")}>
-                                {item.label}
-                            </FormLabel>
-                        )}
+                        {item.label &&
+                            item.type !== "checkbox" &&
+                            item.type !== "group-checkbox" &&
+                            item.type !== "switch" && (
+                                <FormLabel
+                                    htmlFor={item.name as string}
+                                    className={cn(item.inputClassName, item.inputDisabled ? "text-default-400/75" : "")}
+                                >
+                                    {item.label}
+                                </FormLabel>
+                            )}
                         {item.isRequired && <span className="ml-2 inline text-destructive text-medium"> *</span>}
                         <FormControl className="space-y-2 w-full">
-                            {item.Component ? (item.Component(field)) : (
+                            {item.Component ? (
+                                item.Component(field)
+                            ) : (
                                 <SwitchCase expression={item.type}>
                                     <Case of="auto-complete">
                                         <Autocomplete
@@ -185,11 +193,17 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                         >
                                             {(item.config as any)?.options?.map((option: GroupInputOptions) => {
                                                 return (
-                                                    <AutocompleteItem textValue={option.label} key={option.value}
-                                                        {...((item.config as any)?.autocompleteItem as Omit<AutocompleteItemProps, "key">)}
+                                                    <AutocompleteItem
+                                                        textValue={option.label}
+                                                        key={option.value}
+                                                        {...((item.config as any)?.autocompleteItem as Omit<
+                                                            AutocompleteItemProps,
+                                                            "key"
+                                                        >)}
                                                     >
                                                         <p>{option.label}</p>
-                                                    </AutocompleteItem>)
+                                                    </AutocompleteItem>
+                                                );
                                             })}
                                         </Autocomplete>
                                     </Case>
@@ -219,11 +233,14 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             {...field}
                                         >
                                             {(item.config as any)?.options?.map((option: GroupInputOptions) => (
-                                                <Checkbox key={option.value} value={option.value}
+                                                <Checkbox
+                                                    key={option.value}
+                                                    value={option.value}
                                                     {...((item.config as any)?.checkboxes as CheckboxProps)}
                                                 >
                                                     {option.label}
-                                                </Checkbox>))}
+                                                </Checkbox>
+                                            ))}
                                         </CheckboxGroup>
                                     </Case>
                                     <Case of="date-input">
@@ -234,12 +251,29 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             {...field}
                                             id={item.name as string}
                                             size={size}
-                                            granularity={(item.config as any)?.granularity as Granularity || "day"}
+                                            granularity={((item.config as any)?.granularity as Granularity) || "day"}
                                             aria-label={item.name as string}
                                             isDisabled={item.inputDisabled}
                                             autoFocus={item.isFocus}
-                                            // value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), "UTC") : null}
-                                            // onChange={(value) => value && field.onChange(toGMT8(value.toDate("UTC")).toISOString())}
+                                            // value={
+                                            //     field.value
+                                            //         ? typeof field.value === "string" || field.value instanceof Date
+                                            //             ? parseAbsolute(toGMT8(field.value).toISOString(), timezone)
+                                            //             : field.value
+                                            //         : null
+                                            // }
+                                            // onChange={(value) => {
+                                            //     if (!field.onChange) return;
+                                            //     if (typeof field.value === "string") {
+                                            //         field.onChange(value?.toDate(timezone).toISOString());
+                                            //     } else if (field.value instanceof Date) {
+                                            //         field.onChange(value?.toDate(timezone));
+                                            //     } else {
+                                            //         field.onChange(value);
+                                            //     }
+                                            // }}
+                                            value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), timezone) : null}
+                                            onChange={(value) => value && field.onChange && field.onChange(value?.toDate(timezone).toISOString())}
                                             {...(item.config as DateInputProps)}
                                         />
                                     </Case>
@@ -249,13 +283,30 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             radius="sm"
                                             {...field}
                                             id={item.name as string}
-                                            granularity={(item.config as any)?.granularity as Granularity || "day"}
+                                            granularity={((item.config as any)?.granularity as Granularity) || "day"}
                                             aria-label={item.name as string}
                                             isDisabled={item.inputDisabled}
                                             autoFocus={item.isFocus}
                                             className={cn("w-full", (item.config as any)?.className)}
-                                            // value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), "UTC") : null}
-                                            // onChange={(value) => value && field.onChange(toGMT8(value?.toDate("UTC")).toISOString())}
+                                            // value={
+                                            //     field.value
+                                            //         ? typeof field.value === "string" || field.value instanceof Date
+                                            //             ? parseAbsolute(toGMT8(field.value).toISOString(), timezone)
+                                            //             : field.value
+                                            //         : null
+                                            // }
+                                            // onChange={(value) => {
+                                            //     if (!field.onChange) return;
+                                            //     if (typeof field.value === "string") {
+                                            //         field.onChange(value?.toDate(timezone).toISOString());
+                                            //     } else if (field.value instanceof Date) {
+                                            //         field.onChange(value?.toDate(timezone));
+                                            //     } else {
+                                            //         field.onChange(value);
+                                            //     }
+                                            // }}
+                                            value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), timezone) : null}
+                                            onChange={(value) => value && field.onChange && field.onChange(value?.toDate(timezone).toISOString())}
                                             {...(item.config as DatePickerProps)}
                                         />
                                     </Case>
@@ -268,14 +319,33 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             variant="bordered"
                                             radius="sm"
                                             size={size}
-                                            granularity={(item.config as any)?.granularity as Granularity || "day"}
+                                            granularity={((item.config as any)?.granularity as Granularity) || "day"}
                                             isRequired
                                             hideTimeZone={(item.config as any)?.hideTimeZone as boolean}
-                                            // value={field.value?.start && field.value?.end && toGMT8(field.value?.start).isValid() && toGMT8(field.value?.end).isValid() ? {
-                                            //     start: parseAbsolute(toGMT8(field.value?.start).toISOString(), "UTC"),
-                                            //     end: parseAbsolute(toGMT8(field.value?.end).toISOString(), "UTC"),
-                                            // } : null}
-                                            // onChange={(value) => value && field.onChange({ start: value?.start.toString(), end: value?.end.toString() })}
+                                            value={
+                                                field.value?.start &&
+                                                field.value?.end &&
+                                                toGMT8(field.value?.start).isValid() &&
+                                                toGMT8(field.value?.end).isValid()
+                                                    ? {
+                                                          start: parseAbsolute(
+                                                              toGMT8(field.value?.start).toISOString(),
+                                                              timezone
+                                                          ),
+                                                          end: parseAbsolute(
+                                                              toGMT8(field.value?.end).toISOString(),
+                                                              timezone
+                                                          ),
+                                                      }
+                                                    : null
+                                            }
+                                            onChange={(value) =>
+                                                value && field.onChange &&
+                                                field.onChange({
+                                                    start: value?.start.toString(),
+                                                    end: value?.end.toString(),
+                                                })
+                                            }
                                             {...(item.config as DateRangePickerProps)}
                                         />
                                     </Case>
@@ -290,11 +360,14 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             {...(item.config as RadioGroupProps)}
                                         >
                                             {(item.config as any)?.options?.map((option: GroupInputOptions) => (
-                                                <Radio key={option.value} value={option.value}
+                                                <Radio
+                                                    key={option.value}
+                                                    value={option.value}
                                                     {...((item.config as any)?.radios as Omit<RadioProps, "value">)}
                                                 >
                                                     {option.label}
-                                                </Radio>))}
+                                                </Radio>
+                                            ))}
                                         </RadioGroup>
                                     </Case>
                                     <Case of="select">
@@ -313,11 +386,13 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             {...(item.config as Omit<SelectProps, "label">)}
                                         >
                                             {(item.config as any)?.options?.map((option: GroupInputOptions) => (
-                                                <SelectItem key={option.value}
+                                                <SelectItem
+                                                    key={option.value}
                                                     {...((item.config as any)?.selected as SelectedItems)}
                                                 >
                                                     {option.label}
-                                                </SelectItem>))}
+                                                </SelectItem>
+                                            ))}
                                         </Select>
                                     </Case>
                                     <Case of="switch">
@@ -337,8 +412,15 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                     </Case>
                                     <Case of="time-input">
                                         <TimeInput
-                                            value={field.value && toGMT8(field.value).isValid() ? parseAbsolute(toGMT8(field.value).toISOString(), "UTC") : null}
-                                            granularity={(item.config as any)?.granularity as 'hour' | 'minute' | 'second' || "hour"}
+                                            value={
+                                                field.value && toGMT8(field.value).isValid()
+                                                    ? parseAbsolute(toGMT8(field.value).toISOString(), timezone)
+                                                    : null
+                                            }
+                                            granularity={
+                                                ((item.config as any)?.granularity as "hour" | "minute" | "second") ||
+                                                "hour"
+                                            }
                                             id={item.name as string}
                                             aria-label={item.name as string}
                                             isDisabled={item.inputDisabled}
@@ -347,7 +429,9 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             radius="sm"
                                             size={size}
                                             {...(item.config as TimeInputProps)}
-                                            onChange={(value) => field.onChange(toGMT8(value?.toString().split('[')[0]).toISOString())}
+                                            onChange={(value) =>
+                                                field.onChange(toGMT8(value?.toString().split("[")[0]).toISOString())
+                                            }
                                         />
                                     </Case>
                                     <Case of="text-area">
@@ -379,12 +463,20 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             classNames={InputStyle}
                                             endContent={item.endContent}
                                             startContent={item.startContent}
-                                            onFocus={(e) => e.target.addEventListener("wheel", function (e) { e.preventDefault() }, { passive: false })}
+                                            onFocus={(e) =>
+                                                e.target.addEventListener(
+                                                    "wheel",
+                                                    function (e) {
+                                                        e.preventDefault();
+                                                    },
+                                                    { passive: false }
+                                                )
+                                            }
                                             onValueChange={(value) => {
                                                 if (item.type === "number") {
                                                     const numericValue = Number(value);
-                                                    if (!isNaN(numericValue) || value === '') {
-                                                        field.onChange(value === '' ? null : numericValue);
+                                                    if (!isNaN(numericValue) || value === "") {
+                                                        field.onChange(value === "" ? null : numericValue);
                                                     }
                                                 } else {
                                                     field.onChange(value);
@@ -438,7 +530,7 @@ export const Selection = <T,>({
                             aria-label="Selection"
                             color="primary"
                             variant="bordered"
-                            selectedKeys={selectedKeys ? selectedKeys : (field.value ? [String(field.value)] : [])}
+                            selectedKeys={selectedKeys ? selectedKeys : field.value ? [String(field.value)] : []}
                             disabledKeys={disableKeys}
                             onOpenChange={onOpenChange}
                             onChange={(e) => {
@@ -448,7 +540,8 @@ export const Selection = <T,>({
                                 }
                             }}
                             classNames={{
-                                trigger: "rounded", popoverContent: "rounded",
+                                trigger: "rounded",
+                                popoverContent: "rounded",
                             }}
                             radius="sm"
                             placeholder={placeholder}
@@ -480,5 +573,11 @@ export const Selection = <T,>({
 
 export default function FormFields<T>({ items, size }: FormsControlProps<T>) {
     const { control } = useFormContext();
-    return <>{items.map((item, index) => <RenderFormItem key={index} item={item} control={control} size={size} />)}</>;
+    return (
+        <>
+            {items.map((item, index) => (
+                <RenderFormItem key={index} item={item} control={control} size={size} />
+            ))}
+        </>
+    );
 }

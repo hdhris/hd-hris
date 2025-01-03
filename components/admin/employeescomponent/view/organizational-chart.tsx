@@ -28,7 +28,7 @@ const OrganizationalChart: React.FC<OrganizationalChartProps> = ({
   const renderPositionBox = (position: Position) => {
     // Filter out employees who are not available
     const activeEmployees = position.employees.filter(
-      (employee) => isEmployeeAvailable(employee)
+      (employee) => isEmployeeAvailable({employee})
     );
 
     return (

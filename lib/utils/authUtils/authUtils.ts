@@ -38,12 +38,13 @@ export const getUserData = async (username: string, password: string) => {
                     suspension_json: true,
                     termination_json: true,
                     resignation_json: true,
+                    hired_at: true,
                 }
             }
         }
     })
 
-    if (!access_control || !isEmployeeAvailable(access_control.trans_employees as any)) return {error: {message: "You are not authorized"}}
+    if (!access_control || !isEmployeeAvailable({employee: access_control.trans_employees!})) return {error: {message: "You are not authorized"}}
     if (access_control.banned_til) {
         const isBanned = toGMT8(access_control?.banned_til).isAfter(new Date())
         if (isBanned) {

@@ -138,13 +138,12 @@ function Page() {
                 {payslipPages.map((page, pageIndex) => (
                     <div
                         className="payslip-card even:border-t-2 border-dashed p-4 break-inside-avoid grid grid-cols-2 gap-4 w-full h-fit"
-                        // className="print:break-after-auto grid grid-cols-2 gap-4 w-full h-fit"
                         key={`page-${pageIndex}`}
                     >
                         {page.map((payslip, index) => (
                             <div className="payslip-card even:border-l-2 border-dashed p-4" key={`card-${index}`}>
                                 <div className="flex flex-col items-center">
-                                    <strong className="text-[10pt]">PAYSLIP</strong>
+                                    <strong className="text-[8pt]">PAYSLIP</strong>
                                     <p className="text-gray-500 text-[8pt]">
                                         {new Date(processDate.start_date).toLocaleDateString()} -{" "}
                                         {new Date(processDate.end_date).toLocaleDateString()}
@@ -153,33 +152,33 @@ function Page() {
                                     <p className="text-small text-gray-500 font-semibold text-[8pt]">{payslip.data.role}</p>
                                 </div>
                                 <div className="mt-4">
-                                    <h3 className="font-semibold text-[10pt]">Earnings</h3>
+                                    <h3 className="font-semibold text-[8pt]">Earnings</h3>
                                     {payslip.earnings.list.map((item, idx) => (
                                         <div key={`earn-${idx}`} className="flex justify-between">
                                             <span className="text-[8pt]">{item.label}:</span>
-                                            <span className="text-[10pt]">{numberWithCommas(Number(item.number))}</span>
+                                            <span className="text-[8pt]">{numberWithCommas(Number(item.number))}</span>
                                         </div>
                                     ))}
-                                    <div className="font-bold text-[10pt]">Total: {payslip.earnings.total.toFixed(2)}</div>
+                                    <div className="font-bold text-[8pt] flex justify-between">Total: <span>{numberWithCommas(payslip.earnings.total)}</span></div>
                                 </div>
                                 <div className="mt-4">
-                                    <h3 className="font-semibold text-[10pt]">Deductions</h3>
+                                    <h3 className="font-semibold text-[8pt]">Deductions</h3>
                                     {payslip.deductions.list.map((item, idx) => (
                                         <div key={`deduct-${idx}`} className="flex justify-between">
                                             <span className="text-[8pt]">{item.label}:</span>
-                                            <span className="text-[10pt]">{numberWithCommas(Number(item.number))}</span>
+                                            <span className="text-[8pt]">{numberWithCommas(Number(item.number))}</span>
                                         </div>
                                     ))}
-                                    <div className="font-bold text-[10pt]">Total: {payslip.deductions.total.toFixed(2)}</div>
+                                    <div className="font-bold text-[8pt] flex justify-between">Total: <span>{numberWithCommas(payslip.deductions.total)}</span></div>
                                 </div>
-                                <div className="mt-4 font-bold text-[10pt]">Net Pay: ₱ {payslip.net.toFixed(2)}</div>
+                                <div className="mt-4 font-bold text-[8pt] flex justify-between border-t-2">Net Pay: <span>₱{numberWithCommas(payslip.net)}</span></div>
                                 <div className="mt-4 flex justify-between">
                                     <div>
-                                        <p className="text-[10pt]">Prepared by:</p>
+                                        <p className="text-[8pt]">Prepared by:</p>
                                         <p className="text-[8pt]">{userInfo ? getEmpFullName(userInfo) : "Invalid user"}</p>
                                     </div>
                                     <div>
-                                        <p className="text-[10pt]">Received by:</p>
+                                        <p className="text-[8pt]">Received by:</p>
                                         <p className="text-[8pt]">{payslip.data.name}</p>
                                     </div>
                                 </div>

@@ -80,8 +80,7 @@ const Page: React.FC = () => {
     if (data) {
       return data.filter(
         (employee) =>
-          !isEmployeeAvailable(employee, "resignation") ||
-          !isEmployeeAvailable(employee, "termination")
+          !isEmployeeAvailable({employee, find:["resignation","termination"]})
       );
     }
     return [];

@@ -36,7 +36,7 @@ const Page: React.FC = () => {
 
   const employees = useMemo(()=>{
     if(data){
-      return data.filter(employee => isEmployeeAvailable(employee));
+      return data.filter(employee => isEmployeeAvailable({employee}));
     }
     return []
   },[data]);

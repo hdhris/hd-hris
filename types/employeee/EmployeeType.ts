@@ -110,6 +110,7 @@ export type EmployeeEducationalBG = {
 
 export type UnavaliableStatusJSON = {
     id: number;
+    incident_id?: number;
     start_date: string;
     end_date: string | null;
     reason: string | null;
@@ -119,7 +120,7 @@ export type UnavaliableStatusJSON = {
         position: string;
         picture: string;
     };
-    evaluation: Evaluations;
+    evaluation: object; //Evaluations;
     canceled_at: string | null;
     canceled_reason: string | null;
     canceled_by: {

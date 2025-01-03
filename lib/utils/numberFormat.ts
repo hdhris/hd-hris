@@ -8,8 +8,9 @@ function formatTimeAgo(date: Date | string): string {
 
 
 const numberWithCommas = (n: number) => {
-    return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 20 });
-}
+    return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
 
 const ordinalSuffix = (i: number) => {
     const value = parseInt(String(i),10);

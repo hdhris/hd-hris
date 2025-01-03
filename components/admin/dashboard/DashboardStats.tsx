@@ -78,7 +78,7 @@ const DashboardStats = () => {
     }, {
         icon: <FiLogOut className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.leaves!} formattingFn={(value) => compactNumber(value)}/>, // value: '20',
-        title: "Leaves",
+        title: "Pending Leave Requests",
         status: "decreased",
         percent: 10,
         footer: <Typography className="text-medium">Common: <span className="text-medium font-semibold">Sick Leave</span></Typography>,
@@ -176,107 +176,6 @@ const SalaryData = () => {
 
     };
     const cat = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
-    const options: ApexOptions = {
-        chart: {
-            id: "salaryData", type: "area", // Specifies the chart type as area
-            fontFamily: "Inter, sans-serif", // Sets the font family for the chart
-            width: cat.length * 100, dropShadow: {
-                enabled: true, color: "#623CEA14", top: 10, blur: 4, left: 0, opacity: 0.1,
-            }, toolbar: {
-                show: false, // Hides the chart toolbar
-            },
-        },
-        tooltip: {
-            enabled: true, // Enables tooltips
-
-            x: {
-                show: false, // Hides the x-axis tooltip
-            }, y: {
-                formatter(val: number, opts?: any): string {
-                    return `${compactNumber(val)}`
-                }
-            }, shared: true, // Enables shared tooltips
-        },
-        legend: {
-            position: "top", horizontalAlign: "center", formatter(legendName: string, opts?: any): string {
-                const val = opts.w.globals.series[opts.seriesIndex].reduce((a: number, b: number) => a + b, 0);
-                return `<div class="flex items-center justify-center gap-2 space-x-4">
-                    <div class="flex flex-col items-center justify-center">
-                        <span class="inline-block w-3 h-3 rounded-full"></span>
-                        <span class="text-sm">${legendName}</span>
-                        <span class="text-sm font-bold underline">${compactNumber(val)}</span>
-                    </div>
-                </div>`;
-            }
-        },
-        fill: {
-            type: "gradient", // Specifies fill type as gradient
-            gradient: {
-                opacityFrom: 0.55, // Sets opacity from
-                opacityTo: 0, // Sets opacity to
-                shade: "#1C64F2", // Sets the shade color
-                gradientToColors: ["#1C64F2"], // Sets gradient to colors
-            },
-        },
-        dataLabels: {
-            enabled: false, // Disables data labels
-        },
-        markers: {
-            size: 4,
-            colors: "#fff",
-            strokeColors: ["#FE5B6E", "#00C49F"],
-            strokeWidth: 3,
-            strokeOpacity: 0.9,
-            strokeDashArray: 0,
-            fillOpacity: 1,
-            discrete: [],
-            hover: {
-                size: undefined, sizeOffset: 5,
-            },
-        },
-        stroke: {
-            width: [2, 2], // Sets the stroke width
-            curve: "smooth", // Sets the stroke curve to smooth
-        },
-        grid: {
-            show: true, // Hides the grid lines
-            strokeDashArray: 4, // Sets the stroke dash array
-            position: "back", // Sets the grid lines position to back
-            padding: {
-                left: 10, right: 10,
-            }, xaxis: {
-                lines: {
-                    show: false
-                }
-            }, yaxis: {
-                lines: {
-                    show: true
-                }
-            }
-
-        },
-        xaxis: {
-            categories: cat, // Specifies categories for x-axis
-            labels: {
-                show: true,
-
-            }, axisBorder: {
-                show: false, // Hides x-axis border
-            }, axisTicks: {
-                show: false, // Hides x-axis ticks
-            }, tooltip: {
-                enabled: false, // Disables x-axis tooltip
-            }
-        },
-        yaxis: {
-            show: true, labels: {
-                formatter(val: number, opts?: any): string | string[] {
-                    return `${compactNumber(val)}`
-                }
-            }
-
-        }
-    };
 
     const data = [{
         name: "Deductions",
@@ -343,11 +242,7 @@ const SalaryData = () => {
                         heading={<CountUp start={0} end={totalSalary}
                                           formattingFn={(val) => `₱${numberWithCommas(val)}`}/>}
                         subHeading={`Salary for ${btnFocusThisSem ? "this" : "last"} sem`}
-                        classNames={{heading: "text-3xl"}}
-                        endContent={<ButtonGroup radius="sm" variant="ghost">
-                            <Button color="primary" variant={btnFocusLastSem ? "flat" : "light"} onPress={handleBtnFocusLastSem}>Last Sem</Button>
-                            <Button color="primary" variant={btnFocusThisSem ? "flat" : "light"} onPress={handleBtnFocusThisSem}>This Sem</Button>
-                        </ButtonGroup>}>
+                        classNames={{heading: "text-3xl"}}>
         {/*<AreaChart data={data} w="100%" h={500} style={options}/>*/}
         {/*<ApexChart type="bar" series={data.flatMap(item => item.value)} height="100%" width="100%" style={barOptions}/>*/}
         <PayrollGraph/>

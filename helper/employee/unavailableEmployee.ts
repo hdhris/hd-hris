@@ -1,11 +1,12 @@
-import dayjs from "dayjs";
+import { JsonValue } from "@prisma/client/runtime/library";
 import { toGMT8 } from "../../lib/utils/toGMT8";
 import { EmployeeAll, UnavaliableStatusJSON } from "../../types/employeee/EmployeeType";
 import { MajorEmployee } from "../include-emp-and-reviewr/include";
 
-const HistoryJSON = [
+const HistoryJSON: UnavaliableStatusJSON[] = [
     {
         id: 1,
+        incident_id: 1,
         start_date: "2024-12-20",
         end_date: "2024-01-01",
         reason: "",
@@ -23,17 +24,26 @@ const HistoryJSON = [
 ];
 
 type addUnavailabilityType = {
+    incident_id?: number;
     entry: UnavaliableStatusJSON[];
     start_date: string;
     end_date: string | null;
     reason: string;
     initiated_by: MajorEmployee;
 };
-export function addUnavailability({ entry, start_date, end_date, reason, initiated_by }: addUnavailabilityType) {
+export function addUnavailability({
+    entry,
+    incident_id,
+    start_date,
+    end_date,
+    reason,
+    initiated_by,
+}: addUnavailabilityType) {
     const newId = entry.length > 0 ? Math.max(...entry.map((e) => e.id)) + 1 : 1;
-    let newEntry = [
+    let newEntry: UnavaliableStatusJSON[] = [
         {
             id: newId,
+            incident_id,
             start_date: toGMT8(start_date).toISOString(),
             end_date: end_date ? toGMT8(end_date).toISOString() : null,
             reason: reason,
@@ -90,49 +100,70 @@ type GetActiveUnavailabilityType = {
     currentDate?: string; // Optional: allows overriding the current date for testing
 };
 
-export function getActiveUnavailability({
+export function getActiveUnavailability({ entry }: GetActiveUnavailabilityType): UnavaliableStatusJSON | null {
+    const foundEntry = entry?.find((e) => e.canceled_at === null);
+    return foundEntry ?? null;
+}
+
+export function getExpiredUnavailability({
     entry,
     currentDate,
 }: GetActiveUnavailabilityType): UnavaliableStatusJSON | null {
     const today = toGMT8(currentDate);
 
     const foundEntry = entry?.find((e) => {
-        const startDate = toGMT8(e.start_date);
         const endDate = e.end_date ? toGMT8(e.end_date) : null;
-
-        // Check if the entry is active and not canceled
-        return startDate.isSameOrBefore(today) && (!endDate || endDate.isSameOrAfter(today)) && e.canceled_at === null;
+        return !endDate || endDate.isSameOrBefore(today);
     });
 
     return foundEntry ?? null;
 }
 
-export function isEmployeeAvailable(
+export function isEmployeeAvailable({
+    employee,
+    find,
+    date,
+}: {
     employee: {
+        suspension_json: UnavaliableStatusJSON[] | JsonValue;
+        resignation_json: UnavaliableStatusJSON[] | JsonValue;
+        termination_json: UnavaliableStatusJSON[] | JsonValue;
+        hired_at?: Date | string | null;
+    };
+    find?: Array<"suspension" | "resignation" | "termination">;
+    date?: string;
+}): boolean {
+    const thisDate = date ? toGMT8(date) : toGMT8();
+
+    if (employee.hired_at) {
+        if (toGMT8(employee.hired_at).isAfter(thisDate)) return false;
+    }
+
+    const { suspension_json, resignation_json, termination_json } = employee as {
         suspension_json: UnavaliableStatusJSON[];
         resignation_json: UnavaliableStatusJSON[];
         termination_json: UnavaliableStatusJSON[];
-    },
-    find?: "suspension" | "resignation" | "termination"
-): boolean {
-    const today = toGMT8();
+    };
+    // const today = toGMT8();
 
     const isActive = (entry: UnavaliableStatusJSON): boolean => {
-        const startDate = toGMT8(entry.start_date);
+        // const startDate = toGMT8(entry.start_date);
         const endDate = entry.end_date ? toGMT8(entry.end_date) : null;
-        const cancelDate = !!entry.canceled_at ? toGMT8(entry.canceled_at) : null;
+        // const cancelDate = !!entry.canceled_at ? toGMT8(entry.canceled_at) : null;
 
-        return cancelDate === null && startDate.isSameOrBefore(today) && (!endDate || endDate.isSameOrAfter(today));
+        // return cancelDate === null && startDate.isSameOrBefore(today) && (!endDate || endDate.isSameOrAfter(today));
+        return !date ? entry.canceled_at === null : endDate === null || endDate.isSameOrAfter(thisDate);
     };
 
-    const suspended = employee.suspension_json.some(isActive);
-    const resigned = employee.resignation_json.some(isActive);
-    const terminated = employee.termination_json.some(isActive);
+    const suspended = suspension_json.some(isActive);
+    const resigned = resignation_json.some(isActive);
+    const terminated = termination_json.some(isActive);
 
     if (find) {
-        if (find === "suspension") return !suspended;
-        if (find === "resignation") return !resigned;
-        if (find === "termination") return !terminated;
+        if (find.includes("suspension") && suspended) return false;
+        if (find.includes("resignation") && resigned) return false;
+        if (find.includes("termination") && terminated) return false;
+        return true;
     }
 
     return !suspended && !resigned && !terminated;
@@ -140,7 +171,7 @@ export function isEmployeeAvailable(
 
 const listAllEmployee = [] as EmployeeAll[];
 
-listAllEmployee.filter((employee) => isEmployeeAvailable(employee)); // Employee Tab
-listAllEmployee.filter((employee) => isEmployeeAvailable(employee, "suspension")); // Suspend Tab
-listAllEmployee.filter((employee) => isEmployeeAvailable(employee, "resignation")); // Resing Tab
-listAllEmployee.filter((employee) => isEmployeeAvailable(employee, "termination")); // Termination Tab
+// listAllEmployee.filter((employee) => isEmployeeAvailable(employee)); // Employee Tab
+// listAllEmployee.filter((employee) => isEmployeeAvailable(employee, "suspension")); // Suspend Tab
+// listAllEmployee.filter((employee) => isEmployeeAvailable(employee, "resignation")); // Resing Tab
+// listAllEmployee.filter((employee) => isEmployeeAvailable(employee, "termination")); // Termination Tab
