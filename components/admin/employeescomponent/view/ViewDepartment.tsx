@@ -126,7 +126,7 @@ const ViewDepartment: React.FC<ViewDepartmentProps> = ({
       (employee) =>
         Number(employee.department_id) === department.id &&
         employee.ref_job_classes?.is_superior === true &&
-        isEmployeeAvailable(employee)
+        isEmployeeAvailable({employee})
     );
   };
 
@@ -136,7 +136,7 @@ const ViewDepartment: React.FC<ViewDepartmentProps> = ({
     return employees.filter(
       (employee) =>
         Number(employee.department_id) === department.id &&
-        isEmployeeAvailable(employee)
+        isEmployeeAvailable({employee})
     ).length;
   };
 

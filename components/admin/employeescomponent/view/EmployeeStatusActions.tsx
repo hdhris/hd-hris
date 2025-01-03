@@ -385,7 +385,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
 
   const StatusDisplay = () => {
     const getStatusInfo = (): StatusInfo => {
-      if (!isEmployeeAvailable(currentEmployee, "termination")) {
+      if (!isEmployeeAvailable({employee:currentEmployee, find:["termination"]})) {
         return {
           type: "Terminated",
           modalType: "terminate",
@@ -393,7 +393,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
           color: "danger"
         };
       }
-      if (!isEmployeeAvailable(currentEmployee, "resignation")) {
+      if (!isEmployeeAvailable({employee:currentEmployee, find:["resignation"]})) {
         return {
           type: "Resigned",
           modalType: "resign",
@@ -401,7 +401,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
           color: "default"
         };
       }
-      if (!isEmployeeAvailable(currentEmployee, "suspension")) {
+      if (!isEmployeeAvailable({employee:currentEmployee, find:["suspension"]})) {
         return {
           type: "Suspended",
           modalType: "suspend",
@@ -617,10 +617,10 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
   //   !employee.resignation_json &&
   //   !employee.termination_json;
   //   !employee.suspension_json &&
-  const isActive = isEmployeeAvailable(employee);
-  const isSuspended = !isEmployeeAvailable(employee, "suspension");
-  const isResigned = !isEmployeeAvailable(employee, "resignation");
-  const isTerminated = !isEmployeeAvailable(employee, "termination");
+  const isActive = isEmployeeAvailable({employee});
+  const isSuspended = !isEmployeeAvailable({employee, find:["suspension"]});
+  const isResigned = !isEmployeeAvailable({employee, find:["resignation"]});
+  const isTerminated = !isEmployeeAvailable({employee, find:["termination"]});
 
   const Section = ({ children, title, subtitle, className }: any) => {
     return (

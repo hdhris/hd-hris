@@ -148,12 +148,12 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
     //   !employee.suspension_json &&
     //   !employee.resignation_json &&
     //   !employee.termination_json;
-    const isActive = isEmployeeAvailable(employee);
+    const isActive = isEmployeeAvailable({employee});
 
     const getStatusColor = (isActive: boolean) => {
         if (isActive) return "success";
-        if (!isEmployeeAvailable(employee, "suspension")) return "warning";
-        if (!isEmployeeAvailable(employee, "resignation")) return "primary";
+        if (!isEmployeeAvailable({employee, find:["suspension"]})) return "warning";
+        if (!isEmployeeAvailable({employee, find:["resignation"]})) return "primary";
         return "danger";
     };
 
@@ -168,7 +168,7 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({
                     email={employee?.email || "No Email"}
                 />
                 <Chip size="md" color={getStatusColor(isActive)} variant="dot">
-                    {isActive ? "Active" : !isEmployeeAvailable(employee, "suspension") ? "Suspended" : !isEmployeeAvailable(employee, "resignation") ? "Resigned" : !isEmployeeAvailable(employee, "termination") ? "Terminated" : employee.status}
+                    {isActive ? "Active" : !isEmployeeAvailable({employee, find:["suspension"]}) ? "Suspended" : !isEmployeeAvailable({employee, find:["resignation"]}) ? "Resigned" : !isEmployeeAvailable({employee, find:["termination"]}) ? "Terminated" : employee.status}
                 </Chip>
             </div>}
             body={<div className="max-w-[400px] overflow-y-auto">

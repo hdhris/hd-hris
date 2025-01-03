@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
                 ...emp_rev_include.basic_detail.select,
             },
         });
-        const filteredEmplyoees = findEmployees.filter((emp) => isEmployeeAvailable(emp as any));
+        const filteredEmplyoees = findEmployees.filter((emp) => isEmployeeAvailable({employee:emp}));
 
         const last_evaluations = new Map(
             await Promise.all(
