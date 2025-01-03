@@ -147,6 +147,7 @@ export type LogStatus = {
     pmOut?: punchOUT;
     clockIn?: string;
     clockOut?: string;
+    dayNames?: string[];
     renderedShift: number;
     paidShift: number;
     renderedOvertime: number;

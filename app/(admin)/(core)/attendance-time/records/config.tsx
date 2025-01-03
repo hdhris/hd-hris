@@ -138,7 +138,7 @@ export const attEmployeeConfig = (
                 case "status":
                     return (
                         <Chip
-                            className="capitalize"
+                            className={cn("capitalize", dayStatus === "On Leave" ? "text-purple-500 bg-purple-100" : "")}
                             color={
                                 dayStatus === "Whole Day"
                                     ? "success"
@@ -148,7 +148,9 @@ export const attEmployeeConfig = (
                                     ? "warning"
                                     : dayStatus === "Absent"
                                     ? "danger"
-                                    : "default"
+                                    : // : dayStatus === "On Leave"
+                                      // ? "primary"
+                                      "default"
                             }
                             size="sm"
                             variant="flat"

@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
 
         ///////////////////////////////////////////////////////////////
         // Prepare batch schedule and employee schedule info
-        const [employeeSchedule, employees, overtimes] = await Promise.all([
+        const [employeeSchedule, employees, overtimes, leaves] = await Promise.all([
             // Employee schedule
             prisma.dim_schedules.findMany({
                 where: {
@@ -73,14 +73,53 @@ export async function GET(req: NextRequest) {
                     status: "approved",
                 },
             }),
+
+            // Fetch leaves
+            prisma.trans_leaves.findMany({
+                where: {
+                    ...(!allEmployee
+                        ? {
+                              employee_id: { in: employeeIDsFromLogs },
+                          }
+                        : {}),
+                    OR: [
+                        // Starts within the range
+                        {
+                            start_date: { gte: isoStartDate, lte: isoEndDate },
+                        },
+                        // Ends within the range
+                        {
+                            end_date: { gte: isoStartDate, lte: isoEndDate },
+                        },
+                        // Spans the range
+                        {
+                            start_date: { lte: isoStartDate },
+                            end_date: { gte: isoEndDate },
+                        },
+                    ],
+                    status: "approved",
+                },
+                include: {
+                    trans_leave_types: {
+                        select: {
+                            ref_leave_type_details: {
+                                select: {
+                                    paid_leave: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            }),
         ]);
 
-        console.log({ count: employees.length });
+        // console.log({ count: employees.length });
         return NextResponse.json({
             attendanceLogs,
             employees,
             employeeSchedule,
             overtimes,
+            leaves,
         });
     } catch (error) {
         console.error(error);
