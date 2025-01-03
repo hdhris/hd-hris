@@ -123,7 +123,7 @@ const PersonalInformationForm = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Watch the picture value to sync with form state
   const pictureValue = watch("picture");
 
@@ -245,6 +245,7 @@ const PersonalInformationForm = () => {
       config: {
         placeholder: "Select birthdate",
         maxValue: parseAbsoluteToLocal(dayjs().subtract(18, 'years').endOf('day').toISOString()),
+        validationState: "valid",
         showMonthAndYearPickers: true
       },
     }

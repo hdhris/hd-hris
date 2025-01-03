@@ -30,15 +30,15 @@ export const employeeSchema = z.object({
   first_name: z
     .string()
     .min(1, "First name is required")
-    .regex(/^[a-zA-Z\s]*$/, "First name should only contain letters"),
+    .regex(/^[a-zA-ZñÑ\s]*$/, "First name should only contain letters"),
   middle_name: z
     .string()
-    .regex(/^[a-zA-Z\s]*$/, "Middle name should only contain letters")
+    .regex(/^[a-zA-ZñÑ\s]*$/, "Middle name should only contain letters")
     .optional(),
   last_name: z
     .string()
     .min(1, "Last name is required")
-    .regex(/^[a-zA-Z\s]*$/, "Last name should only contain letters"),
+    .regex(/^[a-zA-ZñÑ\s]*$/, "Last name should only contain letters"),
   suffix: z.string().optional().nullable(),
   extension: z.string().optional().nullable(),
   gender: z.string().min(1, "Gender is required"),
@@ -94,43 +94,43 @@ export const employeeSchema = z.object({
   elementary: z
     .string()
     .regex(
-      /^[a-zA-Z0-9\s]*$/,
+      /^[a-zA-ZñÑ0-9\s]*$/,
       "School name should only contain letters and numbers"
     )
-    .optional(),
+    .min(1, "Elementary is required"),
   highSchool: z
     .string()
     .regex(
-      /^[a-zA-Z0-9\s]*$/,
+      /^[a-zA-ZñÑ0-9\s]*$/,
       "School name should only contain letters and numbers"
     )
-    .optional(),
+    .min(1, "Highschool is required"),
   seniorHighSchool: z
     .string()
     .regex(
-      /^[a-zA-Z0-9\s]*$/,
+     /^[a-zA-ZñÑ0-9\s]*$/,
       "School name should only contain letters and numbers"
     )
     .optional(),
   seniorHighStrand: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Strand should only contain letters and numbers")
+    .regex(/^[a-zA-ZñÑ0-9\s]*$/, "Strand should only contain letters and numbers")
     .optional(),
   tvlCourse: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
+    .regex(/^[a-zA-ZñÑ0-9\s]*$/, "Course should only contain letters and numbers")
     .optional()
     .nullable(),
   universityCollege: z
     .string()
     .regex(
-      /^[a-zA-Z0-9\s]*$/,
+      /^[a-zA-ZñÑ0-9\s]*$/,
       "School name should only contain letters and numbers"
     )
     .optional(),
   course: z
     .string()
-    .regex(/^[a-zA-Z0-9\s]*$/, "Course should only contain letters and numbers")
+    .regex(/^[a-zA-ZñÑ0-9\s]*$/, "Course should only contain letters and numbers")
     .optional(),
   highestDegree: z.string().optional(),
 
@@ -138,14 +138,14 @@ export const employeeSchema = z.object({
   masters: z
     .string()
     .regex(
-      /^[a-zA-Z0-9\s]*$/,
+     /^[a-zA-ZñÑ0-9\s]*$/,
       "Masters institution should only contain letters and numbers"
     )
     .optional(),
   mastersCourse: z
     .string()
     .regex(
-      /^[a-zA-Z0-9\s]*$/,
+      /^[a-zA-ZñÑ0-9\s]*$/,
       "Masters course should only contain letters and numbers"
     )
     .optional(),
@@ -162,14 +162,14 @@ export const employeeSchema = z.object({
   doctorate: z
     .string()
     .regex(
-      /^[a-zA-Z0-9\s]*$/,
+      /^[a-zA-ZñÑ0-9\s]*$/,
       "Doctorate institution should only contain letters and numbers"
     )
     .optional(),
   doctorateCourse: z
     .string()
     .regex(
-      /^[a-zA-Z0-9\s]*$/,
+      /^[a-zA-ZñÑ0-9\s]*$/,
       "Doctorate course should only contain letters and numbers"
     )
     .optional(),
