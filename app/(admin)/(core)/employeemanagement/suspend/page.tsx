@@ -76,7 +76,7 @@ const Page: React.FC = () => {
   const suspendedEmployees = useMemo(() => {
     if (data) {
       return data.filter(
-        (employee) => !isEmployeeAvailable(employee, "suspension")
+        (employee) => !isEmployeeAvailable({employee, find:["suspension"]})
       );
     }
     return [];

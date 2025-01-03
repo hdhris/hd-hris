@@ -53,7 +53,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     const googleAuth = results[0];
                     const existingUser = results[1];
 
-                    if (!googleAuth || !isEmployeeAvailable(googleAuth as any)) {
+                    if (!googleAuth || !isEmployeeAvailable({employee: googleAuth})) {
                         console.error("Unauthorized login attempt.");
                         // // console.timeEnd("GoogleAuthCheck");
                         return false;

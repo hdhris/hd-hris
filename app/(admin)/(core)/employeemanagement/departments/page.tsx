@@ -42,7 +42,7 @@ const Page: React.FC = () => {
       (employee) =>
         Number(employee.department_id) === departmentId &&
         employee.ref_job_classes?.is_superior === true &&
-        isEmployeeAvailable(employee)
+        isEmployeeAvailable({employee})
     );
   };
   
@@ -51,7 +51,7 @@ const Page: React.FC = () => {
     return employees.filter(
       (employee) =>
         Number(employee.department_id) === departmentId &&
-        isEmployeeAvailable(employee)
+        isEmployeeAvailable({employee})
     ).length;
   };
 

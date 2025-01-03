@@ -18,7 +18,7 @@ export async function GET(){
             })
         ])
 
-        const emp_count = employee_count.filter(emp => isEmployeeAvailable(emp as any, "resignation") && isEmployeeAvailable(emp as any, "termination")).length
+        const emp_count = employee_count.filter(employee => isEmployeeAvailable({employee, find:["resignation","termination"]})).length
         return NextResponse.json({emp_count})
     }catch(err){
         return getPrismaErrorMessage(err)
