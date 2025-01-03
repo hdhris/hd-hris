@@ -23,8 +23,8 @@ import {EmployeeLeavesStatus, LeaveRequest, LeaveTypesItems} from "@/types/leave
 import {EmployeeEnrollmentSelection, PaginatedEmployeeBenefitDetails} from "@/types/benefits/membership/membership-types";
 import {PayrollReports} from "@/types/report/payroll/payroll";
 
-export function useDashboard() {
-    return useSWR<ApiResponse>('/api/admin/dashboard', fetcher, {
+export function useDashboard({start, end}: {start: string, end: string}) {
+    return useSWR<ApiResponse>(`/api/admin/dashboard?start=${start}&end=${end}`, fetcher, {
         revalidateOnFocus: false, refreshInterval: 3000
     })
 }

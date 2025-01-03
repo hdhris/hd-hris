@@ -43,7 +43,9 @@ function DropdownList({
     onAction && onAction(key);
   }
   return (
-    <Dropdown className={className} closeOnSelect={closeOnSelect}>
+    <Dropdown className={className} closeOnSelect={closeOnSelect} classNames={{
+      content: "rounded"
+    }}>
       <DropdownTrigger>
         {!trigger ? (
           <Button as={"div"} variant="bordered">
@@ -62,6 +64,9 @@ function DropdownList({
         )}
       </DropdownTrigger>
       <DropdownMenu
+          classNames={{
+            list: "max-h-[200px] overflow-auto"
+          }}
         aria-label="Action event"
         onAction={handleAction}
         selectedKeys={selectedKeys}

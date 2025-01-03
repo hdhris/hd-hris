@@ -23,11 +23,20 @@ import BorderCard from "@/components/common/BorderCard";
 import {Button} from "@nextui-org/button";
 import AddEmployees from "@/components/admin/employeescomponent/store/AddEmployees";
 import PayrollGraph from "@/components/admin/dashboard/payroll-graph/payroll-graph";
+import {useDashboardDate} from "@/components/admin/dashboard/provider/DashboardProvider";
+import {useDashboard} from "@/services/queries";
+import {toGMT8} from "@/lib/utils/toGMT8";
+import {months} from "@/lib/utils/dateFormatter";
 
 const ApexChart = dynamic(() => import("react-apexcharts"), {ssr: false});
 
 const DashboardStats = () => {
-    // const {data} = useDashboard()
+    const {startDate, endDate} = useDashboardDate()
+    const startMonth = toGMT8(startDate!).get("month") || 0;
+    const endMonth = toGMT8(endDate!).get("month") || 0;
+
+    const salaryMonth = months.slice(startMonth, endMonth);
+    const {data: dash} = useDashboard({start: startDate!, end: endDate!})
     const data = {
         emp: 500, salary: 72, leaves: 20, absences: 10
     }
@@ -69,7 +78,7 @@ const DashboardStats = () => {
         {
         icon: <PiUsersThree className={cn("", icon_color, icon_size)}/>,
         value: <CountUp start={0} end={data?.emp!} formattingFn={(value) => compactNumber(value)}/>, // value: '500',
-        title: "Employees",
+        title: "New Hired Employees",
         status: "increased",
         footer: <AddEmployees />,
         percent: 3.6,
