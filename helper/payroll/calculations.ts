@@ -148,17 +148,21 @@ export class Benefit {
                         ecHighRate: table.ec_high_rate,
                         wispThreshold: table.wisp_threshold,
                     };
+                    console.log({rates})
 
                     if (table.contribution_type === "others") {
+                        console.log({salary})
                         if (!table.min_MSC) {
                             const basic = basicCalculator(salary, table.employer_rate, table.employee_rate);
                             // console.log("Name: ", this.data.name, " Basic Calc: ", basic);
                             contribution = basic.employee_contribution; //+ basic.employer_contribution;
                         } else {
+                            console.log({calc: advanceCalculator(salary, rates)})
                             contribution =
                                 advanceCalculator(salary, rates).employeeShare +
                                 (advanceCalculator(salary, rates).wispEmployee ?? 0);
                         }
+                        console.log({contribution})
                     } else if (table.contribution_type === "percentage") {
                         contribution = salary * (table.actual_contribution_amount / 100);
                     } else {

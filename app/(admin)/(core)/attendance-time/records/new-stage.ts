@@ -153,6 +153,8 @@ export async function getAttendanceStatus({
         .month(currentDay.month())
         .date(currentDay.date());
 
+    console.log({scheduleTimeIn:scheduleTimeIn.toISOString(), scheduleTimeOut: scheduleTimeOut.toISOString()})
+
     if (!dayNames?.includes(currentDay.format("ddd").toLowerCase()) || (currentDay.isAfter(today) && notSuspended)) {
         amIn = {
             id: null,
@@ -179,7 +181,7 @@ export async function getAttendanceStatus({
             if (organizedLogs) {
                 // For each entry log of the employee
                 organizedLogs
-                .filter(()=> !notSuspended)
+                // .filter(()=> !notSuspended)
                 .forEach((log) => {
                     // Convert the timestamp of the log to dayjs(toGMT8)
                     const timestamp = toGMT8(log.timestamp).subtract(offset, "hours");
@@ -188,7 +190,7 @@ export async function getAttendanceStatus({
                     if (log.punch === 0) {
                         // If time-in is 4hrs closer to clock-in schedule...
                         // Consider it as an AM time in
-                        if (timestamp.hour() - scheduleTimeIn.hour() < 4) {
+                        if (timestamp.hour() <= 12) {
                             // "LATE" if time-in is 5mins later than clock-in schedule...
                             const stat: InStatus =
                                 timestamp.minute() - scheduleTimeIn.minute() > gracePeriod ? "late" : "ontime";
@@ -232,7 +234,7 @@ export async function getAttendanceStatus({
                     } else {
                         // If time-out is 4hrs earlier than clock-out schedule...
                         // Consider it as an AM time out
-                        if (scheduleTimeOut.hour() - timestamp.hour() > 4) {
+                        if (timestamp.hour() <= 12) {
                             // Initialize as "LUNCH" if the employee has not punched in at afternoon yet
                             let stat: OutStatus = "lunch";
                             // Prepare to check if AM time-out is today and if PM time-in doesn't exist
