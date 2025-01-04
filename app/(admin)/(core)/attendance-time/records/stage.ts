@@ -137,6 +137,7 @@ async function attendanceData({
                         // const employeeLogs = logsByEmployee[emp.id] ?? [];
                         // const overtime = overtimes[emp.id] ?? undefined;
                         statusesByDate[date][emp.id] = await getAttendanceStatus({
+                            employee: emp,
                             date,
                             rate_per_minute: 0.75,
                             schedules: employeeScheduleMap[emp.id],

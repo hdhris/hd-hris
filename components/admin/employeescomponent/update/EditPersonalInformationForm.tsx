@@ -206,7 +206,7 @@ const EditPersonalInformationForm: React.FC = () => {
       config: {
         placeholder: "Enter Prefix",
         options: prefixOptions,
-        allowsCustomValue: true
+        allowsCustomValue: true,
       },
     },
     {
@@ -216,7 +216,7 @@ const EditPersonalInformationForm: React.FC = () => {
       config: {
         placeholder: "Enter Suffix",
         options: suffixOptions,
-        allowsCustomValue: true
+        allowsCustomValue: true,
       },
     },
     {
@@ -226,12 +226,10 @@ const EditPersonalInformationForm: React.FC = () => {
       config: {
         placeholder: "Enter Extension",
         options: extensionOptions,
-        allowsCustomValue: true
+        allowsCustomValue: true,
       },
     },
   ];
-
-  
 
   const formGBFields: FormInputProps[] = [
     {
@@ -251,11 +249,11 @@ const EditPersonalInformationForm: React.FC = () => {
       isRequired: true,
       config: {
         placeholder: "Select birthdate",
-        maxValue: parseAbsoluteToLocal(dayjs("2008-12-31").endOf('day').toISOString()),
-        showMonthAndYearPickers:true
-        // defaultValue: null,
-        // classNames: DateStyle,
-        // validationState: "valid"
+        maxValue: parseAbsoluteToLocal(
+          dayjs().subtract(18, "years").endOf("day").toISOString()
+        ),
+        validationState: "valid",
+        showMonthAndYearPickers: true,
       },
     },
   ];
@@ -453,11 +451,13 @@ const EditPersonalInformationForm: React.FC = () => {
 
       <Divider />
       <Text className="text-medium font-semibold pb-2">Family background</Text>
-    <Text className="text-medium font-semibold">{"Father's name"}</Text>
+      <Text className="text-medium font-semibold">{"Father's name"}</Text>
       <div className="grid grid-cols-3 gap-4">
         <FormFields items={fathersBackground} />
       </div>
-      <Text className="text-medium font-semibold">{"Mother's maiden name"}</Text>
+      <Text className="text-medium font-semibold">
+        {"Mother's maiden name"}
+      </Text>
       <div className="grid grid-cols-3 gap-4">
         <FormFields items={mothersBackground} />
       </div>

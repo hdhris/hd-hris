@@ -148,7 +148,7 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
     const timezone = getLocalTimeZone(); //"UTC";
     if (!isVisible) return null; // If the field is not visible, return null
     return (
-        <Controller
+        <FormField
             control={control}
             name={item.name as string}
             render={({ field }) => {

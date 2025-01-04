@@ -146,7 +146,7 @@ export const attEmployeeConfig = (
                                     ? "warning"
                                     : dayStatus === "Afternoon only"
                                     ? "warning"
-                                    : dayStatus === "Absent"
+                                    : (dayStatus === "Absent" || dayStatus === "Suspended")
                                     ? "danger"
                                     : // : dayStatus === "On Leave"
                                       // ? "primary"

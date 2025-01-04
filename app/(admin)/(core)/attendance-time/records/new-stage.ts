@@ -1,3 +1,5 @@
+import { isEmployeeAvailable } from "@/helper/employee/unavailableEmployee";
+import { BasicEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import {
     AttendanceLog,
@@ -9,7 +11,18 @@ import {
     punchOUT,
 } from "@/types/attendance-time/AttendanceTypes";
 
+const emptyAmount = {
+    renderedShift: 0,
+    renderedUndertime: 0,
+    renderedLeave: 0,
+    renderedOvertime: 0,
+    paidShift: 0,
+    deductedUndertime: 0,
+    paidLeave: 0,
+    paidOvertime: 0,
+};
 export async function getAttendanceStatus({
+    employee,
     date,
     schedules,
     logs,
@@ -17,6 +30,7 @@ export async function getAttendanceStatus({
     leave,
     overtime,
 }: {
+    employee: BasicEmployee;
     leave?: {
         id: number;
         start_date: string;
@@ -37,9 +51,35 @@ export async function getAttendanceStatus({
     logs?: AttendanceLog[];
     rate_per_minute: number;
 }): Promise<LogStatus> {
+    if (!isEmployeeAvailable({ employee, find: ["resignation", "termination"], date, })){
+        return {
+            amIn: {
+                id: null,
+                status: "unhired",
+                time: null,
+            },
+            amOut: {
+                id: null,
+                status: "unhired",
+                time: null,
+            },
+            pmIn: {
+                id: null,
+                status: "unhired",
+                time: null,
+            },
+            pmOut: {
+                id: null,
+                status: "unhired",
+                time: null,
+            },
+            ...emptyAmount,
+        };
+    }
+        
     const schedule = getAccurateEmployeeSchedule({ logDate: date, employeeSchedules: schedules ?? [] });
     // Skip if current employee has invalid schedule
-    if (!schedule)
+    if (!schedule){
         return {
             amIn: {
                 id: null,
@@ -61,16 +101,11 @@ export async function getAttendanceStatus({
                 status: "unscheduled",
                 time: null,
             },
-            renderedShift: 0,
-            renderedUndertime: 0,
-            renderedLeave: 0,
-            renderedOvertime: 0,
-            paidShift: 0,
-            deductedUndertime: 0,
-            paidLeave: 0,
-            paidOvertime: 0,
+            ...emptyAmount,
         };
-
+    }
+        
+    const notSuspended = isEmployeeAvailable({employee, find:["suspension"]});
     const offset = 0; // Time offset for GMT+8
     const gracePeriod = 5; // 5 min grace period
     const organizedLogs = logs?.sort((a, b) => toGMT8(a.timestamp).diff(toGMT8(b.timestamp)));
@@ -118,7 +153,7 @@ export async function getAttendanceStatus({
         .month(currentDay.month())
         .date(currentDay.date());
 
-    if (!dayNames?.includes(currentDay.format("ddd").toLowerCase())) {
+    if (!dayNames?.includes(currentDay.format("ddd").toLowerCase()) || (currentDay.isAfter(today) && notSuspended)) {
         amIn = {
             id: null,
             status: "no work",
@@ -143,7 +178,9 @@ export async function getAttendanceStatus({
         if (organizedLogs) {
             if (organizedLogs) {
                 // For each entry log of the employee
-                organizedLogs.forEach((log) => {
+                organizedLogs
+                .filter(()=> !notSuspended)
+                .forEach((log) => {
                     // Convert the timestamp of the log to dayjs(toGMT8)
                     const timestamp = toGMT8(log.timestamp).subtract(offset, "hours");
 
@@ -316,6 +353,31 @@ export async function getAttendanceStatus({
                 status: "absent",
             };
         }
+
+        if (notSuspended === false){ // If suspended
+            amIn = {
+                id: null,
+                status: "suspended",
+                time: null,
+            };
+            amOut = {
+                id: null,
+                status: "suspended",
+                time: null,
+            };
+            pmIn = {
+                id: null,
+                status: "suspended",
+                time: null,
+            };
+            pmOut = {
+                id: null,
+                status: "suspended",
+                time: null,
+            };
+        }
+
+
         // Get the minutes rendered from overall log entry
         // Ignore entry such as:
         // MORNING: punch OUT but no punch IN
@@ -351,6 +413,7 @@ export async function getAttendanceStatus({
                 afternoon = toGMT8(pmOut.time)
                     .subtract(offset, "h")
                     .diff(toGMT8(amIn.time).subtract(offset, "h"), "minute");
+                afternoon -= schedule.break_min;
             }
             // Return the combined shift length
             return morning + afternoon;
@@ -373,7 +436,7 @@ export async function getAttendanceStatus({
 
             let leaveIN = "";
             let leaveOUT = "";
-            for (let current = start; current <= end; current.setDate(current.getDate() + 1)) {
+            for (let current = new Date(start); current <= end; current.setDate(current.getDate() + 1)) {
                 const le_in = toGMT8(leave.start_date)
                     .subtract(offset, "hours")
                     .year(currentDay.year())
@@ -387,21 +450,30 @@ export async function getAttendanceStatus({
                     .toISOString();
 
                 if (current.getTime() === start.getTime() && current.getTime() === end.getTime()) {
+                    // if(employee.id === 2) console.log("Equal", start.toISOString(), end.toISOString())
                     leaveIN = le_in;
                     leaveOUT = le_out;
                 } else if (current.getTime() === start.getTime()) {
+                    // if(employee.id === 2) console.log("Start", current.toISOString(), start.toISOString())
                     leaveIN = le_in;
                     leaveOUT = scheduleTimeOut.toISOString();
                 } else if (current.getTime() === end.getTime()) {
+                    // if(employee.id === 2) console.log("End")
                     leaveIN = scheduleTimeIn.toISOString();
                     leaveOUT = le_out;
                 } else {
+                    // if(employee.id === 2) console.log("Scheduled");
                     leaveIN = scheduleTimeIn.toISOString();
                     leaveOUT = scheduleTimeOut.toISOString();
                 }
 
+                // if(employee.id === 2){
+                //     console.log({ct: current.toISOString(), cd: currentDay.toDate().toISOString()})
+                // }
                 if (current.getTime() === currentDay.toDate().getTime()) break;
             }
+
+            // console.log({leaveIN, leaveOUT})
 
             const leaveTimeIn = toGMT8(leaveIN);
             const leaveTimeOut = toGMT8(leaveOUT);
@@ -483,10 +555,18 @@ export async function getAttendanceStatus({
                 //    pmOUT: time-out
                 // this can be considered as valid, but lunch break still won't
                 // be added with rendered work minutes (unless applied for overtime)
-                if (amIn?.time && amIn.status === "on leave" && !amOut?.time && !pmIn?.time && pmOut?.time  && pmOut.status === "on leave") {
+                if (
+                    amIn?.time &&
+                    amIn.status === "on leave" &&
+                    !amOut?.time &&
+                    !pmIn?.time &&
+                    pmOut?.time &&
+                    pmOut.status === "on leave"
+                ) {
                     afternoon = toGMT8(pmOut.time)
                         .subtract(offset, "h")
                         .diff(toGMT8(amIn.time).subtract(offset, "h"), "minute");
+                    afternoon -= schedule.break_min;
                 }
                 // Return the combined shift length
                 return morning + afternoon;
@@ -499,7 +579,6 @@ export async function getAttendanceStatus({
 
     const leave_rate = leave?.trans_leave_types.ref_leave_type_details.paid_leave ? rate_per_minute : 0;
     renderedUndertime = renderedUndertime - (leave_rate > 0 ? renderedLeave : 0);
-
 
     return {
         amIn,
