@@ -291,7 +291,7 @@ async function stage_three(prisma: PrismaClient, dateID: number, calculatedAmoun
           const type = payheadsMap.get(payhead.payhead_id!)!
           if(type === "earning"){
             salaryAmount[payrollId].earnings +=  payhead.amount!
-          } else {
+          } else if(type === "deduction") {
             salaryAmount[payrollId].deductions +=  payhead.amount!
           }
 
