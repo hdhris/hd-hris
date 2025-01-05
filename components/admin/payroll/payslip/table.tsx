@@ -95,6 +95,8 @@ export function PRPayslipTable({
     employeeId: number;
     payheadId: number;
     value: number;
+    gross: number;
+    deduction: number;
   }[] = [];
   
   const dontInput = useMemo(() => {
@@ -102,11 +104,25 @@ export function PRPayslipTable({
   }, [processDate, onRetry]);
   // }, [processDate, onErrors, onRetry]);
 
+  const getEmployeePayheadSum = useMemo(() => {
+    return (employeeId: number, type: "earning" | "deduction"): number => {
+      const employeeRecords = records[employeeId];
+      if (!employeeRecords) return 0;
+
+      return Object.values(employeeRecords).reduce(
+        (sum, payheadValue) =>
+          sum + parseFloat(payheadValue[0] === type ? payheadValue[1] : "0") ||
+          0,
+        0
+      );
+    };
+  }, [records]);
+
   // Function to process update requests in the queue
   const processQueue = useCallback(async () => {
     if (payslipData) {
       while (requestQueue.length > 0) {
-        const { employeeId, payheadId, value } = requestQueue.shift()!;
+        const { employeeId, payheadId, value, gross, deduction } = requestQueue.shift()!;
         // if (!onErrors) {
           const payroll = payslipData.payrolls.find(
             (pr) => pr.employee_id === employeeId
@@ -117,6 +133,8 @@ export function PRPayslipTable({
                 payroll_id: payroll?.id,
                 payhead_id: payheadId,
                 amount: value,
+                gross,
+                deduction,
               });
               setUpdatedPayheadMap((prevMap) => {
                 const newMap = new Map(prevMap);
@@ -133,17 +151,19 @@ export function PRPayslipTable({
         // }
       }
     }
-  }, [payslipData, requestQueue]);
+  }, [payslipData, requestQueue, getEmployeePayheadSum]);
 
   // Add to queue and start processing if it's the first request
-  const handleBlur = (employeeId: number, payheadId: number, value: number) => {
+  const handleBlur = useCallback((employeeId: number, payheadId: number, value: number) => {
     if (processDate.is_processed) return;
+    const gross =  getEmployeePayheadSum(employeeId, "earning");
+    const deduction = getEmployeePayheadSum(employeeId, "deduction");
     if (willUpdate) {
-      requestQueue.push({ employeeId, payheadId, value });
+      requestQueue.push({ employeeId, payheadId, value, gross, deduction });
       if (requestQueue.length === 1) processQueue();
       setWillUpdate(false);
     }
-  };
+  },[requestQueue, getEmployeePayheadSum]);
 
   function handleRecording(
     employeeId: number,
@@ -175,21 +195,6 @@ export function PRPayslipTable({
       const payhead = breakdown[payheadId];
       if(!payhead) return null;
       return payhead[1];
-    };
-  }, [records]);
-
-
-  const getEmployeePayheadSum = useMemo(() => {
-    return (employeeId: number, type: "earning" | "deduction"): number => {
-      const employeeRecords = records[employeeId];
-      if (!employeeRecords) return 0;
-
-      return Object.values(employeeRecords).reduce(
-        (sum, payheadValue) =>
-          sum + parseFloat(payheadValue[0] === type ? payheadValue[1] : "0") ||
-          0,
-        0
-      );
     };
   }, [records]);
 
