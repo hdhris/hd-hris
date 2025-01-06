@@ -1,5 +1,6 @@
 import React from "react";
 import {Evaluations} from "@/types/leaves/leave-evaluators-types";
+import {MetadataProps} from "@/helper/file/getFileMetadata";
 
 interface DimSchedule {
     days_json: string[];
@@ -82,6 +83,7 @@ interface EmployeeLeaveType {
     id: number;
     name: string;
     code: string;
+    attachments?: MetadataProps[]
 }
 
 
@@ -95,7 +97,9 @@ export interface LeaveRequest {
     leave_type: EmployeeLeaveType;
     leave_details: LeaveDetails;
     evaluators: Evaluations;
+
 }
+
 
 interface LeaveDetails {
     start_date: string; // ISO date string

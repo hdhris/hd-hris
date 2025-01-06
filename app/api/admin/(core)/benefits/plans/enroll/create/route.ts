@@ -12,8 +12,6 @@ export async function POST(req: NextRequest) {
         hasContentType(req)
         const data = await req.json()
 
-        console.log("Creating Data: ", data)
-
         const plan = await prisma.ref_benefit_plans.findUnique({
             where: {
                 id: data.plan_id
@@ -79,6 +77,7 @@ export async function POST(req: NextRequest) {
                 }
             },
             select: {
+                id: true,
                 ref_salary_grades: {
                     select: {
                         amount: true
@@ -86,28 +85,21 @@ export async function POST(req: NextRequest) {
                 }
             }
         })
+        // console.log("Plan Deduction: ", planDeduction)
         const benefit = new Benefit(planDeduction);
 
         const contributionsMap = new Map(); // To ensure unique employee_id entries
 
-// Iterate over salaries and generate contributions
+        // Iterate over salaries and generate contributions
         for (const salary of salaries) {
             const contribution = benefit.getContribution(salary.ref_salary_grades?.amount.toNumber() ?? 0);
-
-            // Flatten employee_id array into individual records
-            for (const employeeId of data.employee_id) {
-                if (!contributionsMap.has(employeeId)) {
-                    contributionsMap.set(employeeId, { employee_id: employeeId, contribution: contribution });
-                }
+            if (!contributionsMap.has(salary.id)) {
+                contributionsMap.set(salary.id, { employee_id: salary.id, contribution: contribution });
             }
         }
 
-// Convert the Map to an array
+        // Convert the Map to an array
         const uniqueContributions = Array.from(contributionsMap.values());
-
-        console.log(uniqueContributions);
-
-        console.log("data: ", data)
 
         const contribution = data.employee_id.map((employeeId: any) => ({
                     employee_id: employeeId,

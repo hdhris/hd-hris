@@ -16,14 +16,12 @@ import {capitalize} from "@nextui-org/shared-utils";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import CardTable from "@/components/common/card-view/card-table";
 import BorderCard from "@/components/common/BorderCard";
-import {LuBan, LuPencil} from "react-icons/lu";
 import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import CardView from "@/components/common/card-view/card-view";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {Comment} from "@/types/leaves/leave-evaluators-types";
 import {axiosInstance} from "@/services/fetcher";
-import {useToast} from "@/components/ui/use-toast";
 import {v4 as uuidv4} from "uuid"
 import {isEqual} from "lodash";
 import Comments from "@/components/common/comments/comments";
@@ -33,6 +31,12 @@ import useDocumentTitle from "@/hooks/useDocumentTitle";
 import {Dayjs} from "dayjs";
 import toast from "react-hot-toast"
 import {AxiosError} from "axios";
+import {AnimatedList} from "@/components/ui/animated-list";
+import {formatFileSize, getDownloadUrl} from "@edgestore/react/utils";
+import FileAttachments, {FileCardProps} from "@/components/common/attachments/file-attachment-card/file-attachments";
+import {getFileMetadataFromUrlWithBlob} from "@/helper/file/getFileMetadata";
+import {pluralize} from "@/helper/pluralize/pluralize";
+import {LuBan, LuPencil} from "react-icons/lu";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -70,7 +74,10 @@ function Page() {
                 email: item.email || "N/A",
                 name: item.name,
                 leave_type: {
-                    id: item.leave_type.id, name: item.leave_type.name, code: item.leave_type.code
+                    id: item.leave_type.id,
+                    name: item.leave_type.name,
+                    code: item.leave_type.code,
+                    attachments: item.leave_type.attachments
                 },
                 leave_details: {
                     start_date: item.leave_details.start_date, // Format date here
@@ -116,7 +123,7 @@ function Page() {
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))
         setSelectedRequest(selected)
-        // console.log("Selected: ", selected)
+        console.log("Selected: ", selected)
     }
 
     // const onCommentSend = () => {
@@ -171,16 +178,16 @@ function Page() {
 
     const handleCancel = useCallback(async (id: number) => {
         setIsCancelling(true)
-            try{
-                const res = await axiosInstance.post("/api/admin/leaves/requests/cancel", selectedRequest)
-                if(res.status === 200){
-                    toast.success(res.data.message)
-                }
-            } catch (error){
-                if(error instanceof AxiosError){
-                    toast.error(error?.response?.data.message || "")
-                }
+        try {
+            const res = await axiosInstance.post("/api/admin/leaves/requests/cancel", selectedRequest)
+            if (res.status === 200) {
+                toast.success(res.data.message)
             }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error?.response?.data.message || "")
+            }
+        }
     }, [])
     // useEffect(() => {
     //     const isApprovedLeave = selectedRequest?.leave_details.status;console.log()
@@ -339,6 +346,27 @@ function Page() {
                 label: "Updated At", value: selectedRequest.leave_details.updated_at
             },]}/>
 
+            {selectedRequest.leave_type.attachments?.length! > 0 && <ScrollShadow className="max-h-[400px]">
+                <hr className="border border-default-400 space-y-2"/>
+                <Section
+                    className="ms-0"
+                    title={`File ${pluralize(selectedRequest.leave_type.attachments?.length || 0, "Attachment", false)}`}
+                    subtitle={`Below ${pluralize(selectedRequest.leave_type.attachments?.length || 0, "attachment", false, true)} submitted by the employee.`}
+                />
+
+                <AnimatedList>
+                    {selectedRequest.leave_type.attachments?.map((item, index) => {
+                        const download = getDownloadUrl(item.url!);
+                        return <FileAttachments key={index}
+                                                fileName={item.name}
+                                                fileSize={item.size}
+                                                fileType={item.type}
+                                                downloadUrl={download}
+                        />
+
+                    })}
+                </AnimatedList>
+            </ScrollShadow>}
             <hr className="border border-default-400 space-y-2"/>
             {signatories?.users?.some(user => Number(user.id) === currentUser?.id) && <>
                 <Section className="ms-0" title="Comment"
@@ -378,28 +406,28 @@ function Page() {
                         evaluatorsApi={'/api/admin/leaves/requests/evaluation-decision'}
             />
         </>}
-            // onDanger={<>
-            //     <Section className="ms-0" title="Edit Leave"
-            //              subtitle="Edit the leave request">
-            //         <Button
-            //             isDisabled={selectedRequest.leave_details.status !== "Pending"}
-            //             startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
-            //     </Section>
-            //     {/*<hr className="border border-destructive/20"/>*/}
-            //     {/*<Section className="ms-0" title="Extend Leave"*/}
-            //     {/*         subtitle="Extend the leave request">*/}
-            //     {/*    <Button*/}
-            //     {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
-            //     {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
-            //     {/*</Section>*/}
-            //     <hr className="border border-destructive/20"/>
-            //     <Section className="ms-0" title="Cancel"
-            //              subtitle="Cancel the leave request">
-            //         <Button
-            //             isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected"}
-            //             startContent={<LuBan/>} {...uniformStyle({color: "danger"})} onPress={() => handleCancel(selectedRequest?.id)}>Cancel</Button>
-            //     </Section>
-            // </>}
+            onDanger={<>
+                <Section className="ms-0" title="Edit Leave"
+                         subtitle="Edit the leave request">
+                    <Button
+                        isDisabled={selectedRequest.leave_details.status !== "Pending"}
+                        startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
+                </Section>
+                {/*<hr className="border border-destructive/20"/>*/}
+                {/*<Section className="ms-0" title="Extend Leave"*/}
+                {/*         subtitle="Extend the leave request">*/}
+                {/*    <Button*/}
+                {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
+                {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
+                {/*</Section>*/}
+                <hr className="border border-destructive/20"/>
+                <Section className="ms-0" title="Cancel"
+                         subtitle="Cancel the leave request">
+                    <Button
+                        isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected" || leave_progress === "Finished"}
+                        startContent={<LuBan/>} {...uniformStyle({color: "danger"})} onPress={() => handleCancel(selectedRequest?.id)}>Cancel</Button>
+                </Section>
+            </>}
         />}
     />)
 
