@@ -288,11 +288,13 @@ async function stage_three(prisma: PrismaClient, dateID: number, calculatedAmoun
           deductions: 0,
         }
         return payheads.map((payhead) => {
-          const type = payheadsMap.get(payhead.payhead_id!)!
-          if(type === "earning"){
-            salaryAmount[payrollId].earnings +=  payhead.amount!
-          } else if(type === "deduction") {
-            salaryAmount[payrollId].deductions +=  payhead.amount!
+          if(payhead.amount){
+            const type = payheadsMap.get(payhead.payhead_id!)!
+            if(type === "earning"){
+              salaryAmount[payrollId].earnings +=  Number(payhead.amount)
+            } else if(type === "deduction") {
+              salaryAmount[payrollId].deductions +=  Number(payhead.amount)
+            }
           }
 
           return {
@@ -306,23 +308,29 @@ async function stage_three(prisma: PrismaClient, dateID: number, calculatedAmoun
       }),
       skipDuplicates: true,
     });
+
+    console.log({salaryAmount});
     // Fetch breakdowns and organize payheads into earnings and deductions
-    const [breakdowns, updatedAmounts] = await Promise.all([
+    const [breakdowns, _] = await Promise.all([
       prisma.trans_payhead_breakdowns.findMany({
         where: { payroll_id: { in: Array.from(payrolls.map(pr=>pr.id)) } },
       }),
 
       // Using Promise.all to ensure all update operations happen concurrently
       Promise.all(
-        Object.entries(salaryAmount).map(([id, { earnings, deductions }]) =>
-          prisma.trans_payrolls.update({
-            where: { id: Number(id) },
-            data: {
-              gross_total_amount: earnings,
-              deduction_total_amount: deductions,
-            }
-          })
-        )
+        Object.entries(salaryAmount).map(([id, { earnings, deductions }]) =>{
+          try{
+            prisma.trans_payrolls.update({
+              where: { id: Number(id) },
+              data: {
+                gross_total_amount: earnings,
+                deduction_total_amount: deductions,
+              }
+            })
+          } catch(error) {
+            console.error(error)
+          }
+        })
       )
     ])
     // Return the organized payroll data as a JSON response.

@@ -153,7 +153,7 @@ export async function getAttendanceStatus({
         .month(currentDay.month())
         .date(currentDay.date());
 
-    console.log({scheduleTimeIn:scheduleTimeIn.toISOString(), scheduleTimeOut: scheduleTimeOut.toISOString()})
+    // console.log({scheduleTimeIn:scheduleTimeIn.toISOString(), scheduleTimeOut: scheduleTimeOut.toISOString()})
 
     if (!dayNames?.includes(currentDay.format("ddd").toLowerCase()) || (currentDay.isAfter(today) && notSuspended)) {
         amIn = {
