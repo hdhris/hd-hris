@@ -20,24 +20,6 @@ const AddAccount: React.FC<AddAccountProps> = ({ userId, email }) => {
 
   const formFields: FormInputProps[] = [
     {
-      name: "username",
-      label: "Username",
-      type: "text",
-      isRequired: true,
-      config: {
-        placeholder: "Enter username"
-      }
-    },
-    {
-      name: "password",
-      label: "Password",
-      type: "password",
-      isRequired: true,
-      config: {
-        placeholder: "Enter password"
-      }
-    },
-    {
       name: "privilege_id",
       label: "Access Level",
       type: "select",
