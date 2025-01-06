@@ -10,23 +10,10 @@ export type Certificate = {
   fileName?: string;
 };
 
-// const checkEmailExists = async (email: string) => {
-//   try {
-//     const response = await axios.get(
-//       `/api/employeemanagement/check-email?email=${email}`
-//     );
-//     return !response.data.exists;
-//   } catch (error) {
-//     return false;
-//   }
-// };
-
 export const employeeSchema = z.object({
   privilege_id: z.string().min(1, "Access level is required"),
   prefix: z.string().optional(),
   picture: z.union([z.instanceof(File), z.string()]).optional(),
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
   first_name: z
     .string()
     .min(1, "First name is required")

@@ -288,6 +288,8 @@ model ref_job_classes {
   max_employees            Int?
   max_department_instances Int?
   is_superior              Boolean?            @default(false)
+  min_salary               Decimal?            @default(0) @db.Decimal
+  max_salary               Decimal?            @default(0) @db.Decimal
   trans_employees          trans_employees[]
   trans_signatories        trans_signatories[]
 
