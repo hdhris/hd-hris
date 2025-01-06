@@ -3,9 +3,9 @@ import {cn} from "@nextui-org/react";
 import BorderCard from "@/components/common/BorderCard";
 import {Divider} from "@nextui-org/divider";
 import Typography from "@/components/common/typography/Typography";
-import {Case, Switch} from "@/components/common/Switch";
-import {IoTrendingDownOutline, IoTrendingUpOutline} from "react-icons/io5";
+import {Case, Default, Switch} from "@/components/common/Switch";
 import {FaArrowTrendDown, FaArrowTrendUp} from "react-icons/fa6";
+import {LuMinus} from "react-icons/lu";
 
 
 export interface StatProps {
@@ -14,7 +14,7 @@ export interface StatProps {
     title: string,
     status?: "increment" | "decrement" | "no change",
     percent?: string
-    footer: ReactNode | string
+    footer?: ReactNode | string
     chart?: React.ReactNode
 }
 
@@ -28,11 +28,11 @@ export function Stat({data, className}: { data: StatProps[], className?: string 
                     <Typography as={'h2'}
                                 className="text-lg font-semibold text-gray-400 dark:text-gray-500">{item.title}</Typography>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center w-fit gap-5">
                     <Typography as={'h1'}
                                 className="text-3xl font-bold text-gray-600 dark:text-gray-500">{item.value}</Typography>
 
-                    {item.status && item.percent && <div>
+                    {item.status && item.percent && <div className="flex gap-2 items-center">
                         <Switch expression={item.status}>
                             <Case of="increment">
                                 <FaArrowTrendUp className="text-[#00C49F]"/>
@@ -40,6 +40,9 @@ export function Stat({data, className}: { data: StatProps[], className?: string 
                             <Case of="decrement">
                                 <FaArrowTrendDown className="text-[#FE5B6E]"/>
                             </Case>
+                            <Default>
+                                <LuMinus className="text-[#fecb5b] stroke-2"/>
+                            </Default>
                         </Switch>
                         <Typography className="text-medium text-gray-400 dark:text-gray-500">
                             {item.percent}%</Typography>
@@ -48,11 +51,13 @@ export function Stat({data, className}: { data: StatProps[], className?: string 
                 </div>
 
                 <Divider className='w-48 my-2'/>
-                {item.footer}
+                {item.footer && <div className="w-fit text-default-400">
+                    {item.footer}
+                </div>}
             </div>
             {/*<div className="flex-grow"></div>*/}
 
-            <div className="w-full h-full">
+            <div className="w-fit h-full">
                 <div className="flex justify-end">
                     {item.chart && item.chart}
                 </div>

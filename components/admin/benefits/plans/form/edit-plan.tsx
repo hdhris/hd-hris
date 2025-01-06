@@ -144,7 +144,7 @@ function EditPlanForm({title, plan, onOpen, isOpen, ...rest}: BenefitPlanFormPro
         control: form.control, name: "tiers", // Matches the `tiers` array in the schema
     });
 
-    console.log("Errors: ", form.formState.errors)
+    // console.log("Errors: ", form.formState.errors)
 
     const basicInfoFields: FormInputProps[] = [{
         name: 'name',

@@ -4,115 +4,132 @@ import {TbCurrencyPeso} from "react-icons/tb";
 import {FiLogOut} from "react-icons/fi";
 import {LuCalendarDays, LuCalendarX2, LuPlane, LuTicket} from "react-icons/lu";
 import {Stat, StatProps} from "@/components/statistics/Stat";
-import React, {useCallback, useEffect, useMemo} from "react";
-import BarChart, {BarChartProps} from "@/components/common/charts/Bar";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
+import BarChart from "@/components/common/charts/Bar";
 import RadialChart from "@/components/common/charts/Radial";
 import {compactNumber, getRandomInt, numberWithCommas} from "@/lib/utils/numberFormat";
 import CountUp from "react-countup";
 import {icon_color, icon_size} from "@/lib/utils";
-import {cn} from '@nextui-org/react'
-import AreaChart, {AreaChartProps} from "@/components/common/charts/Area";
+import {cn, Listbox, ListboxItem, Tab, Tabs} from '@nextui-org/react'
 import {ApexOptions} from "apexcharts";
 import Stackedbar from "@/components/common/charts/StackBar";
 import dynamic from "next/dynamic";
-import {ButtonGroup, Listbox, ListboxItem, Tab, Tabs} from "@nextui-org/react";
 import Typography from "@/components/common/typography/Typography";
 import {Avatar} from "@nextui-org/avatar";
 import {topDepartmentList, topEmployeeList} from "@/sampleData/admin/dashboard/TopEmployeeList";
 import BorderCard from "@/components/common/BorderCard";
-import {Button} from "@nextui-org/button";
-import AddEmployees from "@/components/admin/employeescomponent/store/AddEmployees";
 import PayrollGraph from "@/components/admin/dashboard/payroll-graph/payroll-graph";
-import {useDashboardDate} from "@/components/admin/dashboard/provider/DashboardProvider";
 import {useDashboard} from "@/services/queries";
 import {toGMT8} from "@/lib/utils/toGMT8";
-import {months} from "@/lib/utils/dateFormatter";
+import {fetchAttendanceData} from "@/app/(admin)/(core)/attendance-time/records/stage";
+import {AttendaceStatuses, AttendanceData, determineAttendance} from "@/types/attendance-time/AttendanceTypes";
 
 const ApexChart = dynamic(() => import("react-apexcharts"), {ssr: false});
 
 const DashboardStats = () => {
-    const {startYear, startSem} = useDashboardDate()
-    const {data: dash} = useDashboard({year: startYear, sem: startSem!});
-    
+    // const {startYear, startSem} = useDashboardDate()
+    const [attendanceLogs, setAttendanceLogs] = useState<AttendaceStatuses | null>(null)
+    useEffect(() => {
+        const logs = async () => {
+            const attLogs = await fetchAttendanceData(
+                String(
+                    `/api/admin/attendance-time/records?start=${toGMT8("2024-12-16").subtract(1, "day").format(
+                        "YYYY-MM-DD"
+                    )}&end=${toGMT8("2024-12-16").format("YYYY-MM-DD")}&all_employee=true`
+                )
+            );
+            setAttendanceLogs(attLogs.statusesByDate[toGMT8("2024-12-16").format("YYYY-MM-DD")]);
+        }
+        logs()
+    },[])
+    const {data: dash} = useDashboard();
     const dashboard_data = useMemo(() => {
         if(!dash){
             return null;
         }
-
-        console.log("dashed: ", dash)
         return dash
     }, [dash])
     const data = {
-        emp: 500, salary: 72, leaves: 20, absences: 10
+        emp: 500, salary: 10000, leaves: 20, absences: 10
     }
 
-    const stat_data = {
-        emp_data: [
-            {name: "1", count: getRandomInt(1, 200)}, {
-                name: "2", count: getRandomInt(1, 200)
-            }, {name: "3", count: getRandomInt(1, 200)},
-            {name: "4", count: getRandomInt(1, 200)}, {
-                name: "5", count: getRandomInt(1, 200)
-            },{name: "1", count: getRandomInt(1, 200)}
+    // console.log("Logs", {logs})
+    // const stat_data = {
+    //     emp_data: [
+    //         {name: "1", count: getRandomInt(1, 200)}, {
+    //             name: "2", count: getRandomInt(1, 200)
+    //         }, {name: "3", count: getRandomInt(1, 200)},
+    //         {name: "4", count: getRandomInt(1, 200)}, {
+    //             name: "5", count: getRandomInt(1, 200)
+    //         },{name: "1", count: getRandomInt(1, 200)}
+    //
+    //     ]
+    // }
+    // const employeesStat:BarChartProps = {
+    //     data: stat_data.emp_data.map(({name, count}) => ({
+    //         x: name.length > 10 ? `${name.substring(0, 7)}...` : name, y: count
+    //     }))
+    // }
+    // const salaryStat:AreaChartProps[] = [{
+    //     name: "",
+    //     value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
+    //     color: "#0088FE"
+    // }]
+    //
+    // const leavesStat:AreaChartProps[] = [{
+    //     name: "",
+    //     value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
+    //     color: "#c4005b"
+    // }]
+    //
+    // const absencesStat:AreaChartProps[] = [{
+    //     name: "",
+    //     value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
+    //     color: "#FFBB28"
+    // }]
 
-        ]
-    }
-    const employeesStat:BarChartProps = {
-        data: stat_data.emp_data.map(({name, count}) => ({
-            x: name.length > 10 ? `${name.substring(0, 7)}...` : name, y: count
-        }))
-    }
-    const salaryStat:AreaChartProps[] = [{
-        name: "",
-        value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
-        color: "#0088FE"
-    }]
-
-    const leavesStat:AreaChartProps[] = [{
-        name: "",
-        value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
-        color: "#c4005b"
-    }]
-
-    const absencesStat:AreaChartProps[] = [{
-        name: "",
-        value: [getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000), getRandomInt(50000, 1000000)],
-        color: "#FFBB28"
-    }]
+    const emp_percentage = ((dashboard_data?.employees_kpi.newly_hired_employees! - dashboard_data?.employees_kpi.left_employees!) / dashboard_data?.employees_kpi.total_employees! * 100)
+    const presentMorning = attendanceLogs ? Object.values(attendanceLogs).flatMap(item => item).filter(presentAm => ["Morning only", "Whole Day"].includes(determineAttendance(presentAm))).length : 0
+    const presentAfternoon = attendanceLogs ? Object.values(attendanceLogs).flatMap(item => item).filter(presentPm => ["Afternoon only", "Whole Day"].includes(determineAttendance(presentPm))).length : 0
+    const total_present = presentMorning + presentAfternoon
+    console.log("Total: ", total_present)
+    console.log("Percentage: ", (total_present / dashboard_data?.employees_kpi.total_employees!) * 100)
+    const isMorning = toGMT8().format("A") === "AM"
+    const attendanceSession = isMorning ? presentMorning : presentAfternoon
+    // console.log("Session: ", attendanceSession)
     const dashboardData: StatProps[] = [
         {
         icon: <PiUsersThree className={cn("", icon_color, icon_size)}/>,
-        value: <CountUp start={0} end={dashboard_data?.employeesData?.employee_length! || 0} formattingFn={(value) => compactNumber(value)}/>, // value: '500',
-        title: "New Hired Employees",
-        status: dashboard_data?.employeesData?.status! || "",
-        footer: <AddEmployees />,
-        percent: dashboard_data?.employeesData?.percentageChange! || "",
-        // chart: <BarChart data={employeesStat.data}/>
+        value: <CountUp start={0} end={dashboard_data?.employees_kpi.total_employees || 0} formattingFn={(value) => compactNumber(value)}/>, // value: '500',
+        title: "Total Employees",
+        status: emp_percentage === 0 ? "no change" : emp_percentage > 0 ? "increment" : "decrement",
+        footer: `${dashboard_data?.employees_kpi.newly_hired_employees} new, ${dashboard_data?.employees_kpi.left_employees} left`,
+        percent: `${emp_percentage.toFixed(2)}`,
         chart: <PiUsersThreeLight  className="size-10 text-default-400/60"/>
     }, {
         icon: <FiLogOut className={cn("", icon_color, icon_size)}/>,
-        value: <CountUp start={0} end={data?.leaves!} formattingFn={(value) => compactNumber(value)}/>, // value: '20',
+        value: <CountUp start={0} end={dashboard_data?.leave_pending!} formattingFn={(value) => compactNumber(value)}/>, // value: '20',
         title: "Pending Leave Requests",
-        status: "decrement",
-        percent: "10",
-        footer: <Typography className="text-medium">Common: <span className="text-medium font-semibold">Sick Leave</span></Typography>,
+        // status: "decrement",
+        // percent: `${((30 - data?.leaves!) / 30 * 100).toFixed(2)}`,
+        footer: "Awaiting approval",
         chart: <LuPlane className="size-10 text-default-400/60"/>
     }, {
         icon: <LuCalendarX2 className={cn("", icon_color, icon_size)}/>,
-        value: <CountUp start={0} end={data?.absences!} formattingFn={(value) => compactNumber(value)}/>, // value: '10',
+        value: <CountUp start={0} end={isNaN(total_present) ? 0 : total_present} formattingFn={(value) => ((value / dashboard_data?.employees_kpi.total_employees!) * 100).toFixed(2)}/>, // value: '10',
         title: "Attendance Rate (%)",
         status: "increment",
-        percent: "3.6",
-        footer: "Late",
+        percent: `${(isNaN((attendanceSession/total_present) * 100) ? 0 : (attendanceSession/total_present) * 100).toFixed(2)}`,
+        footer: `Employees present today (${isMorning ? "Morning" : "Afternoon"})`,
         // chart: <PiUsersThreeLight />
         chart: <LuCalendarDays className="size-10 text-default-400/60"/>
     }, {
         icon: <TbCurrencyPeso className={cn("", icon_color, icon_size)}/>,
-        value: <CountUp start={0} end={data?.salary!} formattingFn={(value) => String(value + "%")}/>, // value: '200000',
-        title: "Active Payroll Records",
+        value: <CountUp start={0} end={data?.salary!} formattingFn={(value) => compactNumber(value)}/>, // value: '200000',
+        title: "Total Net Salary",
         status: "decrement",
         percent: "5",
-        footer: "₱152k/₱220k",
+        footer: "January 1 - 15, 2025",
         chart: <LuTicket className="size-10 text-default-400/60"/>
     }]
     return (<Stat data={dashboardData}/>)
@@ -255,7 +272,7 @@ const SalaryData = () => {
     return (<BorderCard className='space-y-4 h-full col-span-3'
                         heading={<CountUp start={0} end={totalSalary}
                                           formattingFn={(val) => `₱${numberWithCommas(val)}`}/>}
-                        subHeading={`Salary for ${btnFocusThisSem ? "this" : "last"} sem`}
+                        subHeading={`Gross Salary for this ${btnFocusThisSem} sem`}
                         classNames={{heading: "text-3xl"}}>
         {/*<AreaChart data={data} w="100%" h={500} style={options}/>*/}
         {/*<ApexChart type="bar" series={data.flatMap(item => item.value)} height="100%" width="100%" style={barOptions}/>*/}
@@ -342,37 +359,8 @@ const TopSalaries = () => {
             </ListboxItem>)}
         </Listbox>)
     }, [])
-    const topDep = useCallback(() => {
-        return (<Listbox
-            classNames={{
-                base: "max-w-xs", list: "max-h-[300px] overflow-scroll",
-            }}
-            items={topDepartmentList}
-            variant="flat"
-        >
-            {(item) => (<ListboxItem key={item.name} textValue={item.name}>
-                <div className="flex gap-2 items-center">
-                    <span className="w-2 h-2 rounded-full" style={{backgroundColor: `#${item.color}`}}></span>
-                    <div className="flex justify-between items-center w-full">
-                        <Typography className="text-small">{item.name}</Typography>
-                        <Typography
-                            className="text-default-400">₱<CountUp start={0} end={item.amount as number}
-                                                                   formattingFn={(val) => compactNumber(val)}/></Typography>
-
-                    </div>
-                </div>
-            </ListboxItem>)}
-        </Listbox>)
-    }, [])
     return (<div className="flex w-full flex-col mt-2">
-        <Tabs aria-label="Options">
-            <Tab key="topEmployees" title="Top Employees">
-                {topEmp()}
-            </Tab>
-            <Tab key="topDepartments" title="Top Departments">
-                {topDep()}
-            </Tab>
-        </Tabs>
+        {topEmp()}
     </div>)
 }
 export {DashboardStats, LeaveData, PayrollData, SalaryData, SalaryByDepartment, TopSalaries}
