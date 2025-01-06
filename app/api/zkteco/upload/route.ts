@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         // Perform the transaction
         const createResponse = await prisma.log_attendances.createMany({
             data: newArray,
-            skipDuplicates: true,
+            // skipDuplicates: true,
         });
 
         return NextResponse.json({ rowsAffected: createResponse.count }, { status: 200 });

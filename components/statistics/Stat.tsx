@@ -12,8 +12,8 @@ export interface StatProps {
     icon: React.ReactNode,
     value: React.ReactNode,
     title: string,
-    status?: string,
-    percent?: number
+    status?: "increment" | "decrement" | "no change",
+    percent?: string
     footer: ReactNode | string
     chart?: React.ReactNode
 }
@@ -34,10 +34,10 @@ export function Stat({data, className}: { data: StatProps[], className?: string 
 
                     {item.status && item.percent && <div>
                         <Switch expression={item.status}>
-                            <Case of="increased">
+                            <Case of="increment">
                                 <FaArrowTrendUp className="text-[#00C49F]"/>
                             </Case>
-                            <Case of="decreased">
+                            <Case of="decrement">
                                 <FaArrowTrendDown className="text-[#FE5B6E]"/>
                             </Case>
                         </Switch>

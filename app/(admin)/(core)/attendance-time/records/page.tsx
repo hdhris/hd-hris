@@ -42,7 +42,10 @@ export default function Page() {
         `/api/admin/attendance-time/records?start=${datedApi}&end=${datedApi}&all_employee=${
             currentTab === "by-employees" ? "true" : "false"
         }`,
-        fetcher
+        fetcher,
+        {
+            refreshInterval: 3000,
+        }
     );
     // const { data: attendanceData, isLoading } = useQuery<AttendanceData>(api);
 
@@ -98,7 +101,7 @@ export default function Page() {
     }, [currentAttendanceInfo]);
 
     const sortedItems = React.useMemo(() => {
-        // console.log({ attendanceData });
+        console.log({ attendanceData });
         return (
             attendanceData?.attendanceLogs?.sort((a, b) => {
                 let aItem = null;

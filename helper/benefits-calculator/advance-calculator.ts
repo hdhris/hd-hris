@@ -25,7 +25,19 @@ export const advanceCalculator = (monthlySalary: number, data: AdvanceCalculator
         ecLowRate,
         ecHighRate,
         wispThreshold
-    } = data;
+    } = {
+        minSalary: Number(data.minSalary),
+        maxSalary: Number(data.maxSalary),
+        minMSC: Number(data.minMSC),
+        maxMSC: Number(data.maxMSC),
+        mscStep: Number(data.mscStep),
+        regularEmployeeRate: Number(data.regularEmployeeRate),
+        regularEmployerRate: Number(data.regularEmployerRate),
+        ecThreshold: Number(data.ecThreshold),
+        ecLowRate: Number(data.ecLowRate),
+        ecHighRate: Number(data.ecHighRate),
+        wispThreshold: Number(data.wispThreshold),
+    };
 
     // console.log("Salary: ", monthlySalary)
     // console.log("Data: ", data)

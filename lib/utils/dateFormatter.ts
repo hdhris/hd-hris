@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import duration from 'dayjs/plugin/duration';
+import {toGMT8} from "@/lib/utils/toGMT8";
 dayjs.extend(duration);
 
 type TimeDifference = {
@@ -87,3 +88,6 @@ export const getRandomDateTime = (startDate: Date, endDate: Date): Date => {
 
     return randomDate;
 };
+
+export const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+export const getMonthAsDayjs = (month: string, year: number): string => dayjs(`${month}-01-${year}`).format('YYYY-MM-DD');

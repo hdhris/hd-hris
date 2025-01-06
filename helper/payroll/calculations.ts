@@ -134,31 +134,36 @@ export class Benefit {
             const contributionTable = this.data.ref_benefits_contribution_table;
 
             contributionTable?.forEach((table) => {
+                // console.log({table})
                 if (table.min_salary <= salary && table.max_salary >= salary) {
                     const rates = {
-                        minSalary: table.min_salary,
-                        maxSalary: table.max_salary,
-                        minMSC: table.min_MSC,
-                        maxMSC: table.max_MSC,
-                        mscStep: table.msc_step,
-                        regularEmployeeRate: table.employee_rate,
-                        regularEmployerRate: table.employer_rate,
-                        ecThreshold: table.ec_threshold,
-                        ecLowRate: table.ec_low_rate,
-                        ecHighRate: table.ec_high_rate,
-                        wispThreshold: table.wisp_threshold,
+                        minSalary: Number(table.min_salary),
+                        maxSalary: Number(table.max_salary),
+                        minMSC: Number(table.min_MSC),
+                        maxMSC: Number(table.max_MSC),
+                        mscStep: Number(table.msc_step),
+                        regularEmployeeRate: Number(table.employee_rate),
+                        regularEmployerRate: Number(table.employer_rate),
+                        ecThreshold: Number(table.ec_threshold),
+                        ecLowRate: Number(table.ec_low_rate),
+                        ecHighRate: Number(table.ec_high_rate),
+                        wispThreshold: Number(table.wisp_threshold),
                     };
+                    // console.log({rates})
 
                     if (table.contribution_type === "others") {
+                        // console.log({salary})
                         if (!table.min_MSC) {
-                            const basic = basicCalculator(salary, table.employer_rate, table.employee_rate);
+                            const basic = basicCalculator(salary, Number(table.employer_rate), Number(table.employee_rate));
                             // console.log("Name: ", this.data.name, " Basic Calc: ", basic);
                             contribution = basic.employee_contribution; //+ basic.employer_contribution;
                         } else {
+                            // console.log({calc: advanceCalculator(salary, rates)})
                             contribution =
                                 advanceCalculator(salary, rates).employeeShare +
                                 (advanceCalculator(salary, rates).wispEmployee ?? 0);
                         }
+                        // console.log({contribution})
                     } else if (table.contribution_type === "percentage") {
                         contribution = salary * (table.actual_contribution_amount / 100);
                     } else {

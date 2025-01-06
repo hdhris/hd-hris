@@ -259,25 +259,80 @@ async function stage_two(prisma: PrismaClient, dateID: number){
 
 async function stage_three(prisma: PrismaClient, dateID: number, calculatedAmountList: Record<number, VariableAmountProp[]>){
   try {
-    const payrolls = await prisma.trans_payrolls.findMany({where: { date_id: dateID }});
+    const payheadIDs = Object.entries(calculatedAmountList).flatMap(([_, payheads]) => payheads.map(item => item.payhead_id)).filter(item => item!=null)
+    const [payrolls, payheads] = await Promise.all([
+      prisma.trans_payrolls.findMany({
+        where: { date_id: dateID },
+        select: {
+          id: true,
+          employee_id: true,
+        }
+      }),prisma.ref_payheads.findMany({
+        where: {
+          id: { in: payheadIDs }
+        },
+        select: {
+          id: true, type: true
+        }
+      })
+    ])
+
+    const payheadsMap = new Map(payheads.map(item => [item.id, item.type]))
     const payrollsMap = new Map(payrolls.map((pr) => [pr.employee_id, pr.id]));
+    const salaryAmount: Record<number, {earnings: number, deductions: number}> = {};
     await prisma.trans_payhead_breakdowns.createMany({
       data: Object.entries(calculatedAmountList).flatMap(([empId, payheads]) => {
-        const payrollId = payrollsMap.get(Number(empId));
-        return payheads.map((payhead) => ({
-          payhead_id: payhead.payhead_id,
-          payroll_id: payrollId,
-          amount: payhead.amount!,
-          created_at: toGMT8().toISOString(),
-          updated_at: toGMT8().toISOString(),
-        }));
+        const payrollId = payrollsMap.get(Number(empId))!;
+        salaryAmount[payrollId] = {
+          earnings: 0,
+          deductions: 0,
+        }
+        return payheads.map((payhead) => {
+          if(payhead.amount){
+            const type = payheadsMap.get(payhead.payhead_id!)!
+            if(type === "earning"){
+              salaryAmount[payrollId].earnings +=  Number(payhead.amount)
+            } else if(type === "deduction") {
+              salaryAmount[payrollId].deductions +=  Number(payhead.amount)
+            }
+          }
+
+          return {
+            payhead_id: payhead.payhead_id,
+            payroll_id: payrollId,
+            amount: payhead.amount!,
+            created_at: toGMT8().toISOString(),
+            updated_at: toGMT8().toISOString(),
+          }
+        });
       }),
       skipDuplicates: true,
     });
+
+    console.log({salaryAmount});
     // Fetch breakdowns and organize payheads into earnings and deductions
-    const breakdowns = await prisma.trans_payhead_breakdowns.findMany({
-      where: { payroll_id: { in: Array.from(payrolls.map(pr=>pr.id)) } },
-    });
+    const [breakdowns, _] = await Promise.all([
+      prisma.trans_payhead_breakdowns.findMany({
+        where: { payroll_id: { in: Array.from(payrolls.map(pr=>pr.id)) } },
+      }),
+
+      // Using Promise.all to ensure all update operations happen concurrently
+      Promise.all(
+        Object.entries(salaryAmount).map(([id, { earnings, deductions }]) =>{
+          try{
+            prisma.trans_payrolls.update({
+              where: { id: Number(id) },
+              data: {
+                gross_total_amount: earnings,
+                deduction_total_amount: deductions,
+              }
+            })
+          } catch(error) {
+            console.error(error)
+          }
+        })
+      )
+    ])
     // Return the organized payroll data as a JSON response.
     return { breakdowns };
     // return true;

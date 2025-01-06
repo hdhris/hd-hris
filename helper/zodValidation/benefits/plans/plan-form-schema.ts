@@ -93,7 +93,7 @@ export const EditPlanFormOthersSchema = z.object({
         })
         .refine((data) => {
             if(!data.ecLowRate || !data.ecHighRate) return true
-            else return data.ecLowRate > data.ecHighRate
+            else return data.ecLowRate < data.ecHighRate
         }, {
             message: "Maximum EC must be greater than to Minimum EC", path: ["ecHighRate"],
         })

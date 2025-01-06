@@ -124,7 +124,7 @@ export function isEmployeeAvailable({
     find,
     date,
 }: {
-    employee: {
+    employee?: {
         suspension_json: UnavaliableStatusJSON[] | JsonValue;
         resignation_json: UnavaliableStatusJSON[] | JsonValue;
         termination_json: UnavaliableStatusJSON[] | JsonValue;
@@ -133,6 +133,7 @@ export function isEmployeeAvailable({
     find?: Array<"suspension" | "resignation" | "termination">;
     date?: string;
 }): boolean {
+    if(!employee) return true
     const thisDate = date ? toGMT8(date) : toGMT8();
 
     if (employee.hired_at) {
