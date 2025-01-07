@@ -68,6 +68,7 @@ export type EmployeeAll = {
   ref_addresses_trans_employees_addr_municipalToref_addresses: { address_name: string, address_code: number},
   ref_addresses_trans_employees_addr_baranggayToref_addresses: { address_name: string, address_code: number},
   dim_schedules?: {
+    end_date: any;
     days_json: string | string[];
     ref_batch_schedules?: {
       id: string | number;

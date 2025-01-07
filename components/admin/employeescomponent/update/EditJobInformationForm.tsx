@@ -11,6 +11,7 @@ import {
   useSalaryGradeData,
   useEmploymentStatusData,
   useEmployeesData,
+  usePrivilegesData,
 } from "@/services/queries";
 import { DateStyle } from "@/lib/custom/styles/InputStyle";
 import { parseAbsoluteToLocal } from "@internationalized/date";
@@ -24,6 +25,7 @@ const EditJobInformationForm: React.FC = () => {
   const { data: salaries = [] } = useSalaryGradeData();
   const { data: empstatuses = [] } = useEmploymentStatusData();
   const { data: employees = [] } = useEmployeesData();
+  const { data: privileges = [] } = usePrivilegesData();
 
   const departmentOptions = departments.reduce((acc: any[], dept) => {
     if (dept && dept.id && dept.name && dept.is_active) {
@@ -136,6 +138,13 @@ const EditJobInformationForm: React.FC = () => {
     return acc;
   }, []);
 
+  const privilegeOptions = privileges.reduce((acc: any[], privilege) => {
+    if (privilege && privilege.id && privilege.name) {
+      acc.push({ value: privilege.id.toString(), label: privilege.name });
+    }
+    return acc;
+  }, []);
+
   const formBasicFields: FormInputProps[] = [
     {
       name: "department_id",
@@ -198,6 +207,17 @@ const EditJobInformationForm: React.FC = () => {
       config: {
         placeholder: "Select Branch",
         options: branchOptions,
+      },
+    },
+    {
+      name: "privilege_id",
+      label: "Access Level",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select Access Level",
+        options: privilegeOptions,
+        description: "This will be used for the employee's account access"
       },
     },
   ];
