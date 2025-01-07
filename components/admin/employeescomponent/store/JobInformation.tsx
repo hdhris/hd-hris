@@ -65,73 +65,63 @@ const JobInformationForm: React.FC = () => {
     return acc;
   }, []), [departments]);
 
-  const jobOptions = useMemo(() => {
-    return jobTitles
-      .filter(items => items.department_id === Number(watch("department_id")))
-      .reduce((acc: any[], job) => {
-        if (job && job.id && job.name && job.is_active) {
-          // Check if there are any active employees for the job position
-          const hasActiveEmployees = employees.some(
-            (employee) =>
-              Number(employee.job_id) === job.id &&
-              employee.resignation_json.length === 0 &&
-              employee.termination_json.length === 0
-          );
+  const jobOptions = jobTitles
+  .filter(items => items.department_id === Number(selectedDepartmentId))
+  .reduce((acc: any[], job) => {
+    if (job && job.id && job.name && job.is_active) {
+      // Only do employee count check if max_employees is set
+      if (job.max_employees) {
+        const activeEmployeeCount = employees.filter(
+          (employee) =>
+            Number(employee.job_id) === job.id &&
+            employee.resignation_json.length === 0 &&
+            employee.termination_json.length === 0
+        ).length;
 
-          if (!hasActiveEmployees || Number(watch("job_id")) === job.id) {
-            if (
-              job.max_department_instances !== null &&
-              job.max_department_instances > 0
-            ) {
-              const activeDepartmentInstanceCount = employees.filter(
-                (employee) =>
-                  Number(employee.job_id) === job.id &&
-                  Number(employee.department_id) === Number(watch("department_id")) &&
-                  employee.resignation_json.length === 0 &&
-                  employee.termination_json.length === 0
-              ).length;
-
-              if (
-                activeDepartmentInstanceCount >= job.max_department_instances &&
-                Number(watch("job_id")) !== job.id
-              ) {
-                return acc;
-              }
-            }
-
-            if (job.is_superior) {
-              const hasActiveSuperiorInDepartment = employees.some(
-                (employee) =>
-                  Number(employee.department_id) === Number(watch("department_id")) &&
-                  jobTitles.some(
-                    (jobTitle) =>
-                      jobTitle.id === Number(employee.job_id) &&
-                      jobTitle.is_superior &&
-                      employee.resignation_json.length === 0 &&
-                      employee.termination_json.length === 0
-                  )
-              );
-
-              if (
-                hasActiveSuperiorInDepartment &&
-                !employees.some(
-                  (employee) =>
-                    Number(employee.department_id) === Number(watch("department_id")) &&
-                    Number(employee.job_id) === job.id &&
-                    employee.resignation_json.length === 0 &&
-                    employee.termination_json.length === 0
-                )
-              ) {
-                return acc;
-              }
-            }
-
-            acc.push({ value: job.id.toString(), label: job.name });
-          }
+        if (activeEmployeeCount >= job.max_employees) {
+          return acc; // Skip this job if employee limit reached
         }
-        return acc;
-      }, []);
-  }, [jobTitles, employees, watch]);
+      }
+
+      // Check department instances only if limit is set
+      if (job.max_department_instances && job.max_department_instances > 0) {
+        const activeDepartmentInstanceCount = employees.filter(
+          (employee) =>
+            Number(employee.job_id) === job.id &&
+            Number(employee.department_id) === Number(selectedDepartmentId) &&
+            employee.resignation_json.length === 0 &&
+            employee.termination_json.length === 0
+        ).length;
+
+        if (activeDepartmentInstanceCount >= job.max_department_instances) {
+          return acc; // Skip this job if department instance limit reached
+        }
+      }
+
+      // Check superior position separately
+      if (job.is_superior) {
+        const hasActiveSuperiorInDepartment = employees.some(
+          (employee) =>
+            Number(employee.department_id) === Number(selectedDepartmentId) &&
+            jobTitles.some(
+              (jobTitle) =>
+                jobTitle.id === Number(employee.job_id) &&
+                jobTitle.is_superior &&
+                employee.resignation_json.length === 0 &&
+                employee.termination_json.length === 0
+            )
+        );
+
+        if (hasActiveSuperiorInDepartment) {
+          return acc; // Skip if department already has a superior
+        }
+      }
+
+      // Add job to options if it passed all checks
+      acc.push({ value: job.id.toString(), label: job.name });
+    }
+    return acc;
+  }, []);
 
   // Filter salary grades based on selected job's salary range
   const salaryGradeOptions = useMemo(() => {

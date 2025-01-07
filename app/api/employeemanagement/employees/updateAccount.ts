@@ -53,139 +53,145 @@ export async function updateEmployeeAccount(
         // Fix the type error by properly checking the auth_credentials
         const userCredentials = userAccount?.auth_credentials;
 
-            // Create new account if it doesn't exist
-            if (!userAccount) {
-              try {
-                // 1. Prepare all the data first, outside any transaction
-                const username = await generateUniqueUsername(currentEmail);
-                const defaultPassword = await new SimpleAES().encryptData(
-                  "password"
-                );
-    
-                // 2. Single focused transaction for user creation
-                const newUser = await tx.trans_users.create({
-                  data: {
-                    name: employee.first_name || "",
-                    email: currentEmail,
-                    auth_credentials: {
-                      create: {
-                        username,
-                        password: defaultPassword,
-                      },
-                    },
-                  },
-                });
-    
-                // 3. Create access control in the same transaction
-                await tx.acl_user_access_control.create({
-                  data: {
-                    employee_id: id,
-                    user_id: newUser.id,
-                    privilege_id: data.privilege_id
-                      ? parseInt(data.privilege_id)
-                      : 1,
-                    created_at: new Date(),
-                  },
-                });
-    
-                // 4. Send email outside transaction to prevent timeouts
-                try {
-                  await sendEmail({
-                    to: currentEmail,
-                    subject: "New Account Credentials",
-                    text: `
-              Hello ${employee.first_name || ""}!
-              
-              Your new account has been created successfully.
-              
-              Here are your login credentials:
-              Username: ${username}
-              Temporary Password: password
-              
-              use it to https://www.hdhris.org/auth/login
-              Please change your username and password upon first login.
-    
-              
-              Best regards,
-              HR Team
-            `,
-                  });
-                } catch (emailError) {
-                  // Log email error but don't fail the operation
-                  console.error("Email sending failed but account created:", {
-                    error: emailError,
-                    employeeId: id,
-                    email: currentEmail,
+        // Create new account if it doesn't exist
+        if (!userAccount) {
+          try {
+            // 1. Prepare all the data first, outside any transaction
+            const username = await generateUniqueUsername(currentEmail);
+            const defaultPassword = await new SimpleAES().encryptData(
+              "password"
+            );
+
+            // 2. Single focused transaction for user creation
+            const newUser = await tx.trans_users.create({
+              data: {
+                name: employee.first_name || "",
+                email: currentEmail,
+                auth_credentials: {
+                  create: {
                     username,
-                  });
-                }
-    
-                return {
-                  success: true,
-                  message: "New account created successfully",
-                  updated: { newAccount: true },
-                  emailSent: true,
-                };
-              } catch (error) {
-                // Detailed error logging
-                console.error("Account creation error details:", {
-                  error,
-                  message: error instanceof Error ? error.message : String(error),
-                  code:
-                    error instanceof Error && "code" in error
-                      ? (error as any).code
-                      : undefined,
-                  employeeId: id,
-                  email: currentEmail,
-                  timestamp: new Date().toISOString(),
-                });
-    
-                // Specific error handling
-                if (
-                  error &&
-                  typeof error === "object" &&
-                  "code" in error &&
-                  error.code === "P2002"
-                ) {
-                  throw new Error("Username or email already exists");
-                }
-    
-                throw error;
-              }
+                    password: defaultPassword,
+                  },
+                },
+              },
+            });
+
+            // 3. Create access control in the same transaction
+            await tx.acl_user_access_control.create({
+              data: {
+                employee_id: id,
+                user_id: newUser.id,
+                privilege_id: data.privilege_id
+                  ? parseInt(data.privilege_id)
+                  : 1,
+                created_at: new Date(),
+              },
+            });
+
+            // 4. Send email outside transaction to prevent timeouts
+            try {
+              await sendEmail({
+                to: currentEmail,
+                subject: "New Account Credentials",
+                text: `
+             Hello ${employee.first_name || ""}!
+            
+            Your account has been created successfully.
+            
+            Temporary Username:  ${username}
+            Temporary Password: password
+            
+            Go to https://www.hdhris.org/auth/login and  use these temporary credentials and 
+            set up your username and password immediately upon first login.
+            
+            Best regards,
+            HRiS Team
+            `,
+              });
+            } catch (emailError) {
+              // Log email error but don't fail the operation
+              console.error("Email sending failed but account created:", {
+                error: emailError,
+                employeeId: id,
+                email: currentEmail,
+                username,
+              });
             }
+
+            return {
+              success: true,
+              message: "New account created successfully",
+              updated: { newAccount: true },
+              emailSent: true,
+            };
+          } catch (error) {
+            // Detailed error logging
+            console.error("Account creation error details:", {
+              error,
+              message: error instanceof Error ? error.message : String(error),
+              code:
+                error instanceof Error && "code" in error
+                  ? (error as any).code
+                  : undefined,
+              employeeId: id,
+              email: currentEmail,
+              timestamp: new Date().toISOString(),
+            });
+
+            // Specific error handling
+            if (
+              error &&
+              typeof error === "object" &&
+              "code" in error &&
+              error.code === "P2002"
+            ) {
+              throw new Error("Username or email already exists");
+            }
+
+            throw error;
+          }
+        }
 
         // Handle password reset
         if (data.resetPassword) {
           if (!userAccount || !userCredentials) {
             throw new Error("No user account found");
           }
-
+          const username = await generateUniqueUsername(currentEmail);
           const newPassword = await new SimpleAES().encryptData("password");
 
           await tx.auth_credentials.update({
             where: { user_id: userAccount.id },
-            data: { password: newPassword, updated_at: new Date() },
+            data: {
+              username: username,
+              password: newPassword,
+              updated_at: new Date(),
+            },
           });
 
           await sendEmail({
             to: currentEmail,
-            subject: "Password Reset Notification",
+            subject: "Account Reset Notification",
             text: `
             Hello ${employee.first_name || ""}!
             
-            Your password has been reset successfully.
+            Your account has been reset successfully.
             
+            Temporary Username:  ${username}
             Temporary Password: password
             
-            Please change your password and username immediately upon login.
+            Go to https://www.hdhris.org/auth/login and  use these temporary credentials and 
+            set up your username and password immediately upon first login.
             
             Best regards,
-            HR Team
+            HRiS Team
           `,
           });
 
           const reset = await prisma.sec_devices.updateMany({
-            where: { acl_user_access_control_id: employee.acl_user_access_control?.id },
+            where: {
+              acl_user_access_control_id: employee.acl_user_access_control?.id,
+            },
             data: { is_logged_out: true },
           });
           console.log(reset);
@@ -194,11 +200,9 @@ export async function updateEmployeeAccount(
             success: true,
             message: "Password reset successfully",
             updated: { password: true },
-
           };
         }
 
-    
         // Handle privilege update
         if (data.privilege_id && employee.acl_user_access_control) {
           const currentPrivilegeId =

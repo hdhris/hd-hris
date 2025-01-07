@@ -328,11 +328,11 @@ export default function AddEmployeePage() {
         employement_status_id: parseInt(data.employement_status_id, 10),
         branch_id: parseInt(data.branch_id, 10),
         salary_grade_id: parseInt(data.salary_grade_id, 10),
-        batch_id: parseInt(data.batch_id, 10),
+        batch_id: data.batch_id ? parseInt(data.batch_id,10):null,
         schedules: [
           {
             days_json: data.days_json,
-            batch_id: parseInt(data.batch_id, 10),
+            batch_id: parseInt(data.batch_id ?? 'null', 10),
           },
         ],
       };

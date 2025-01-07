@@ -38,11 +38,13 @@ const EditJobInformationForm: React.FC = () => {
   // Reset job_id when department changes
   useEffect(() => {
     if (selectedDepartmentId) {
-      // Always clear job and salary when department changes
-      setValue("job_id", "");
-      setValue("salary_grade_id", "");
+      const currentJob = jobTitles.find(job => job.id === Number(selectedJobId));
+      if (currentJob && currentJob.department_id !== Number(selectedDepartmentId)) {
+        setValue("job_id", "");
+        setValue("salary_grade_id", "");
+      }
     }
-  }, [selectedDepartmentId, setValue]);
+  }, [selectedDepartmentId, jobTitles, selectedJobId, setValue]);
 
   // Reset and validate salary_grade_id when job changes
   useEffect(() => {
@@ -246,9 +248,11 @@ const EditJobInformationForm: React.FC = () => {
       label: "Access Level",
       type: "auto-complete",
       isRequired: true,
+      
       config: {
         placeholder: "Select Access Level",
         options: privilegeOptions,
+        validationState: "valid",
         description: "This will be used for the employee's account access"
       },
     },
