@@ -8,10 +8,12 @@ export const BatchCard = ({
     item,
     isHovered,
     isSelected,
+    isDisabled,
     setHoveredBatchId,
     setSelectedBatch,
     setVisible,
 }: {
+    isDisabled?: boolean;
     item: BatchSchedule;
     isHovered: boolean;
     isSelected: boolean;
@@ -21,6 +23,7 @@ export const BatchCard = ({
 }) => {
     return (
         <Card
+            isDisabled={isDisabled}
             key={item.id}
             shadow="none"
             style={{
