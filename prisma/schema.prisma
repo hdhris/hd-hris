@@ -272,6 +272,7 @@ model ref_departments {
   created_at      DateTime?         @db.Timestamp(6)
   updated_at      DateTime?         @db.Timestamp(6)
   deleted_at      DateTime?         @db.Timestamp(6)
+  ref_job_classes ref_job_classes[]
   trans_employees trans_employees[]
 
   @@index([deleted_at])
@@ -290,6 +291,8 @@ model ref_job_classes {
   is_superior              Boolean?            @default(false)
   min_salary               Decimal?            @default(0) @db.Decimal
   max_salary               Decimal?            @default(0) @db.Decimal
+  department_id            Int?
+  ref_departments          ref_departments?    @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_employees          trans_employees[]
   trans_signatories        trans_signatories[]
 
@@ -551,6 +554,7 @@ model trans_leaves {
   files                                                    Json?
   total_days                                               Decimal           @db.Decimal
   leave_type_audit                                         Json              @default("{}")
+  cancel_at                                                DateTime?         @db.Timestamp(6)
   trans_employees_leaves                                   trans_employees   @relation("trans_leaves_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
   trans_employees_trans_leaves_created_byTotrans_employees trans_employees?  @relation("trans_leaves_created_byTotrans_employees", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_leaves_trans_employees_3")
   trans_leave_types                                        trans_leave_types @relation(fields: [leave_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trans_leaves_type_id_fkey")

@@ -153,7 +153,7 @@ export async function updateEmployeeAccount(
                 throw error;
               }
             }
-            
+
         // Handle password reset
         if (data.resetPassword) {
           if (!userAccount || !userCredentials) {
@@ -177,17 +177,24 @@ export async function updateEmployeeAccount(
             
             Temporary Password: password
             
-            Please change your password immediately upon login.
+            Please change your password and username immediately upon login.
             
             Best regards,
             HR Team
           `,
           });
 
+          const reset = await prisma.sec_devices.updateMany({
+            where: { acl_user_access_control_id: employee.acl_user_access_control?.id },
+            data: { is_logged_out: true },
+          });
+          console.log(reset);
+          console.log(employee.acl_user_access_control?.id);
           return {
             success: true,
             message: "Password reset successfully",
             updated: { password: true },
+
           };
         }
 

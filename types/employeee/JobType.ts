@@ -1,6 +1,9 @@
 import { Decimal } from "@prisma/client/runtime/library";
 
 export type JobPosition = {
+  max_salary(max_salary: any): number | undefined;
+  min_salary(min_salary: any): number | undefined;
+  department_id: number;
 id: number;
   name: string;
   superior_id: number;

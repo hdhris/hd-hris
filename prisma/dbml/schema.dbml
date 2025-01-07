@@ -234,6 +234,7 @@ Table ref_departments {
   created_at DateTime
   updated_at DateTime
   deleted_at DateTime
+  ref_job_classes ref_job_classes [not null]
   trans_employees trans_employees [not null]
 }
 
@@ -248,6 +249,10 @@ Table ref_job_classes {
   max_employees Int
   max_department_instances Int
   is_superior Boolean [default: false]
+  min_salary Decimal [default: 0]
+  max_salary Decimal [default: 0]
+  department_id Int
+  ref_departments ref_departments
   trans_employees trans_employees [not null]
   trans_signatories trans_signatories [not null]
 }
@@ -489,6 +494,7 @@ Table trans_leaves {
   files Json
   total_days Decimal [not null]
   leave_type_audit Json [not null, default: '{}']
+  cancel_at DateTime
   trans_employees_leaves trans_employees [not null]
   trans_employees_trans_leaves_created_byTotrans_employees trans_employees
   trans_leave_types trans_leave_types [not null]
@@ -887,6 +893,8 @@ Ref: fact_training_records.schedule_id > dim_training_schedules.id [delete: No A
 Ref: log_attendances.employee_id > trans_employees.id [delete: No Action]
 
 Ref: ref_benefit_plans.deduction_id > ref_payheads.id [delete: No Action]
+
+Ref: ref_job_classes.department_id > ref_departments.id [delete: No Action]
 
 Ref: ref_training_programs.employee_instructor_id > trans_employees.id [delete: No Action]
 

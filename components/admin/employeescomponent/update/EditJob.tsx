@@ -2,14 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
-import { useJobpositionData } from "@/services/queries";
+import { useJobpositionData, useDepartmentsData, useSalaryGradeData } from "@/services/queries";
 import axios from "axios";
-import FormFields, {
-  FormInputProps,
-} from "@/components/common/forms/FormFields";
+import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { JobPosition } from "@/types/employeee/JobType";
 import Drawer from "@/components/common/Drawer";
 import { Form } from "@/components/ui/form";
 
@@ -21,22 +18,26 @@ interface EditJobPositionProps {
 }
 
 const jobPositionSchema = z.object({
-  name: z
+  baseName: z
     .string()
-    .min(1, "Position name is required")
+    .min(1, "Position base name is required")
     .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
-
-  superior_id: z
-    .string()
-    .nullish()
-    .transform((val) => val || null),
+  department_id: z.string().min(1, "Department is required"),
+  min_salary: z.coerce.number().min(1, "Minimum salary is reqiured"),
+  max_salary: z.coerce.number().min(1, "Maximum salary is required"),
+  superior_id: z.string().nullish().transform((val) => val || null),
   is_active: z.boolean().default(true),
   is_superior: z.boolean().default(false),
   max_employees: z.number().nullish(),
   max_department_instances: z.number().nullish(),
+}).refine((data) => {
+  return data.min_salary <= data.max_salary;
+}, {
+  message: "Maximum salary must be greater than or equal to minimum salary",
+  path: ["max_salary"],
 });
 
-type JobPositionFormData = z.infer<typeof jobPositionSchema>;
+type FormData = z.infer<typeof jobPositionSchema>;
 
 const EditJob: React.FC<EditJobPositionProps> = ({
   isOpen,
@@ -47,26 +48,60 @@ const EditJob: React.FC<EditJobPositionProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { data: jobPositions, error, isLoading } = useJobpositionData();
+  const { data: departments = [] } = useDepartmentsData();
+  const { data: salaryGrades = [] } = useSalaryGradeData();
+  const [fullName, setFullName] = useState("");
 
-  const methods = useForm<JobPositionFormData>({
+  const methods = useForm<FormData>({
     resolver: zodResolver(jobPositionSchema),
     defaultValues: {
-      name: "",
+      baseName: "",
+      department_id: "",
+      min_salary: 0,
+      max_salary: 0,
       superior_id: "",
-      max_employees: 0,
-      max_department_instances: 0,
+      max_employees: null,
+      max_department_instances: null,
       is_active: true,
       is_superior: false,
     },
     mode: "onChange",
   });
 
+  const { watch } = methods;
+  const baseName = watch("baseName");
+  const selectedDepartmentId = watch("department_id");
+  const minSalary = watch("min_salary");
+  const maxSalary = watch("max_salary");
+
+  useEffect(() => {
+    if (baseName && selectedDepartmentId) {
+      const department = departments.find(
+        (dept) => dept.id.toString() === selectedDepartmentId
+      );
+      if (department) {
+        setFullName(`${department.name} ${baseName}`);
+      }
+    } else {
+      setFullName(baseName);
+    }
+  }, [baseName, selectedDepartmentId, departments]);
+
   useEffect(() => {
     if (isOpen && jobPositions && jobId) {
       const job = jobPositions.find((job) => job.id === jobId);
       if (job) {
+        const department = departments.find((dept) => dept.id === job.department_id);
+        let baseName = job.name;
+        if (department) {
+          baseName = job.name.replace(department.name, "").trim();
+        }
+
         methods.reset({
-          name: job.name,
+          baseName: baseName,
+          department_id: job.department_id ? job.department_id.toString() : "",
+          min_salary: Number(job.min_salary),
+          max_salary: Number(job.max_salary),
           superior_id: job.superior_id ? job.superior_id.toString() : "",
           is_superior: job.is_superior,
           max_employees: job.max_employees,
@@ -80,27 +115,75 @@ const EditJob: React.FC<EditJobPositionProps> = ({
         });
       }
     }
-  }, [isOpen, jobPositions, jobId, methods, toast]);
+  }, [isOpen, jobPositions, jobId, departments, methods, toast]);
+
+  const departmentOptions = departments.reduce((acc: any[], dept) => {
+    if (dept && dept.id && dept.name && dept.is_active) {
+      acc.push({ value: dept.id.toString(), label: dept.name });
+    }
+    return acc;
+  }, []);
 
   const formFields: FormInputProps[] = [
     {
-      name: "name",
+      name: "department_id",
+      label: "Department",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select Department",
+        options: departmentOptions,
+      },
+    },
+    {
+      name: "baseName",
       label: "Position Name",
       type: "text",
       placeholder: "Enter position name",
       isRequired: true,
-      description: "Position name should only contain letters",
+      description: "Position name will be combined with department name",
+    },
+    {
+      name: "min_salary",
+      label: "Minimum Salary Grade",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select minimum salary grade",
+        options: salaryGrades
+          .sort((a, b) => Number(a.amount) - Number(b.amount))
+          .map((grade) => ({
+            value: grade.amount.toString(),
+            label: `${grade.name}: ₱${Number(grade.amount).toLocaleString()}`,
+          })),
+      },
+    },
+    {
+      name: "max_salary",
+      label: "Maximum Salary Grade",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select maximum salary grade",
+        options: salaryGrades
+          .filter((grade) => !minSalary || Number(grade.amount) >= minSalary)
+          .sort((a, b) => Number(a.amount) - Number(b.amount))
+          .map((grade) => ({
+            value: grade.amount.toString(),
+            label: `${grade.name}: ₱${Number(grade.amount).toLocaleString()}`,
+          })),
+      },
     },
     {
       name: "superior_id",
-      label: "next position",
-      type: "select",
-      placeholder: "Select next position",
-      description: "Select the next position fot promotion(optional)",
+      label: "Next Higher Position",
+      type: "auto-complete",
+      placeholder: "Select next Higher position",
+      description: "Select the next position for hierarchy purposes (optional)",
       config: {
-        options:
-          jobPositions
-            ?.filter((job) => job.id !== jobId) // Filter out the current job
+        placeholder: "Select Next Position",
+        options: jobPositions
+            ?.filter((job) => job.id !== jobId)
             .map((job) => ({
               value: job.id.toString(),
               label: job.name,
@@ -114,7 +197,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       placeholder: "Enter a number or leave blank for no limit",
       isRequired: false,
       description:
-        "Specify the maximum number of employees allowed for this position. Leave the field blank if there's no restriction.",
+        "Specify the maximum number of employees allowed for this position",
     },
     {
       name: "max_department_instances",
@@ -123,7 +206,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       placeholder: "Enter a number or leave blank for no limit",
       isRequired: false,
       description:
-        "Set the maximum number of positions allowed in each department for this job. Leave blank if there's no restriction.",
+        "Set the maximum number of positions allowed in each department",
     },
     {
       name: "is_superior",
@@ -133,7 +216,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
         defaultSelected: false,
       },
       description:
-        "Setting a job position as department in charge means it will oversee other positions in the department. Only one in charge position per department is allowed.",
+        "Setting a job position as department in charge means it will oversee other positions",
     },
     {
       name: "is_active",
@@ -145,7 +228,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     },
   ];
 
-  const onSubmit = async (data: JobPositionFormData) => {
+  const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     toast({
       title: "Submitting",
@@ -154,8 +237,15 @@ const EditJob: React.FC<EditJobPositionProps> = ({
 
     try {
       const formattedData = {
-        ...data,
+        name: fullName,
+        department_id: parseInt(data.department_id),
+        min_salary: data.min_salary,
+        max_salary: data.max_salary,
         superior_id: data.superior_id ? parseInt(data.superior_id) : null,
+        is_active: data.is_active,
+        is_superior: data.is_superior,
+        max_employees: data.max_employees || null,
+        max_department_instances: data.max_department_instances || null,
       };
 
       const response = await axios.put(
@@ -196,7 +286,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
   };
 
   if (isLoading) {
-    return <div>Loading job position data...</div>;
+    return <div>Loading job position data....</div>;
   }
 
   if (error) {
@@ -225,7 +315,25 @@ const EditJob: React.FC<EditJobPositionProps> = ({
           onSubmit={methods.handleSubmit(onSubmit)}
         >
           <div className="space-y-4">
+            {fullName && (
+              <div className="p-4 bg-gray-50 rounded-md">
+                <p className="text-sm font-medium text-gray-700">
+                  Full Position Name:
+                </p>
+                <p className="text-lg font-semibold text-gray-900">{fullName}</p>
+              </div>
+            )}
             <FormFields items={formFields} size="sm" />
+            {minSalary && maxSalary && (
+              <div className="p-4 bg-gray-50 rounded-md">
+                <p className="text-sm font-medium text-gray-700">
+                  Salary Range:
+                </p>
+                <p className="text-sm text-gray-600">
+                  ₱{minSalary.toLocaleString()} - ₱{maxSalary.toLocaleString()}
+                </p>
+              </div>
+            )}
           </div>
         </form>
       </Form>
