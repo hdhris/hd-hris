@@ -55,10 +55,10 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
                 <Typography>{item.leave_type.name}</Typography>
             </Case>
             <Case of="start_date">
-                <Typography>{item.leave_details.start_date}</Typography>
+                <Typography>{toGMT8(item.leave_details.start_date).format("MMM DD, YYYY hh:mm A")}</Typography>
             </Case>
             <Case of="end_date">
-                <Typography>{item.leave_details.end_date}</Typography>
+                <Typography>{toGMT8(item.leave_details.end_date).format("MMM DD, YYYY hh:mm A")}</Typography>
             </Case>
             <Case of="duration_of_leave">
                 <Typography>{item.leave_details.total_days}</Typography>

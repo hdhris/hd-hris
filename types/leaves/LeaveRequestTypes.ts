@@ -97,6 +97,7 @@ export interface LeaveRequest {
     leave_type: EmployeeLeaveType;
     leave_details: LeaveDetails;
     evaluators: Evaluations;
+    schedule: DimSchedule
 
 }
 

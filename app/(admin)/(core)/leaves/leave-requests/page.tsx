@@ -8,9 +8,9 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import {
     approval_status_color_map, FilterItems, TableConfigurations
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
-import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
+import RequestForm, {normalizeDate} from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import {Chip, ScrollShadow} from '@nextui-org/react';
+import {Chip, DateValue, ScrollShadow} from '@nextui-org/react';
 import Typography, {Section} from "@/components/common/typography/Typography";
 import {capitalize} from "@nextui-org/shared-utils";
 import UserMail from "@/components/common/avatar/user-info-mail";
@@ -30,13 +30,13 @@ import Evaluators from '@/components/common/evaluators/evaluators';
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import {Dayjs} from "dayjs";
 import toast from "react-hot-toast"
-import {AxiosError} from "axios";
 import {AnimatedList} from "@/components/ui/animated-list";
-import {formatFileSize, getDownloadUrl} from "@edgestore/react/utils";
-import FileAttachments, {FileCardProps} from "@/components/common/attachments/file-attachment-card/file-attachments";
-import {getFileMetadataFromUrlWithBlob} from "@/helper/file/getFileMetadata";
+import {getDownloadUrl} from "@edgestore/react/utils";
+import FileAttachments from "@/components/common/attachments/file-attachment-card/file-attachments";
 import {pluralize} from "@/helper/pluralize/pluralize";
 import {LuBan, LuPencil} from "react-icons/lu";
+import {useHolidays} from "@/helper/holidays/unavailableDates";
+import {CalendarDate} from "@internationalized/date";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -52,6 +52,7 @@ function Page() {
     const [isReplySubmit, setIsReplySubmit] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
     const [today, setToday] = useState<Dayjs>(toGMT8())
+    const {isDateUnavailable} = useHolidays()
     // const [leaveProgress, setLeaveProgress] = useState("")
     const [isCancelling, setIsCancelling] = useState<boolean>(false)
     const {data, isLoading, mutate} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
@@ -73,6 +74,7 @@ function Page() {
                 picture: item.picture,
                 email: item.email || "N/A",
                 name: item.name,
+                schedule: item.schedule,
                 leave_type: {
                     id: item.leave_type.id,
                     name: item.leave_type.name,
@@ -103,6 +105,7 @@ function Page() {
         }
     }, [allRequests, selectedRequest]);
 
+
     const signatories = useMemo(() => {
         if (selectedRequest) {
             const users = selectedRequest?.evaluators.users.map(({id, ...rest}) => ({id: Number(id), ...rest}))
@@ -119,6 +122,53 @@ function Page() {
     }, [selectedRequest])
 
     // console.log("User: ", signatories?.users)
+
+    const hasSchedule = (startDate: string | Date, dayOfWeekSchedule: string[]): boolean => {
+        const dayString = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+        // Convert startDate to Day.js object in GMT+8 and get the current date in GMT+8
+        const start = toGMT8(startDate);
+        // const end = toGMT8();
+
+        const schedDate = start.format("YYYY-MM-DD HH:mm:ss")
+
+
+
+        // console.log("Start Sched: ", start.format("YYYY-MM-DD HH:mm:ss"));
+        const dayOfWeek = start.day(); // dayjs gives 0 (Sunday) to 6 (Saturday)
+        const dayStr = dayString[dayOfWeek]; // Map to the corresponding day string
+
+        const calendarDate = new CalendarDate(start.year(), start.month(), start.date())
+        const isDateUnAvailable = isDateUnavailable(calendarDate)
+
+        console.log("IsDateUnAvailable: ", isDateUnAvailable);
+        console.log("Calendar Date: ", calendarDate.toString());
+        console.log({
+            schedDate: schedDate,
+            isDateUnavailable: isDateUnavailable,
+            isSchedule: dayOfWeekSchedule.includes(dayStr)
+
+    })
+        return !dayOfWeekSchedule.includes(dayStr) || isDateUnAvailable
+        // console.log("Start: ", start.format("YYYY-MM-DD HH:mm:ss"));
+        // console.log("End: ", end.format("YYYY-MM-DD HH:mm:ss"));
+        // // Iterate through each day between start and end date
+        // for (let currentDate = start; currentDate.isBefore(end) || currentDate.isSame(end, "day"); currentDate = currentDate.add(1, "day")) {
+        //     // Get the day of the week for the current date
+        //     const dayOfWeek = currentDate.day(); // dayjs gives 0 (Sunday) to 6 (Saturday)
+        //     const dayStr = dayString[dayOfWeek]; // Map to the corresponding day string
+        //
+        //     console.log({dayOfWeek, dayStr});
+        //     const isDateUnAvailable = isDateUnavailable(new CalendarDate(currentDate.year(), currentDate.month(), currentDate.date()))
+        //     console.log({dayStr, isDateUnAvailable})
+        //     // Check if the current day matches the schedule
+        //     if (!dayOfWeekSchedule.includes(dayStr) || isDateUnavailable(new CalendarDate(currentDate.year(), currentDate.month(), currentDate.date()))) {
+        //         return true; // A match is found, return true immediately
+        //     }
+        // }
+        //
+        // return false; // No matches found in the range
+    };
 
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))
@@ -176,19 +226,67 @@ function Page() {
     }, [selectedRequest, today]);
 
 
-    const handleCancel = useCallback(async (id: number) => {
-        setIsCancelling(true)
-        try {
-            const res = await axiosInstance.post("/api/admin/leaves/requests/cancel", selectedRequest)
-            if (res.status === 200) {
-                toast.success(res.data.message)
+    const countAvailableDays = useCallback((startDate: DateValue, id: number): number => {
+        let availableDaysCount = 0;
+        const schedule = allRequests.find((item) => item.id === Number(id))?.schedule;
+
+        const uniqueDaysJson = schedule?.days_json?.flat() || [];
+
+        // Normalize start and end dates
+        let currentDate = normalizeDate(new Date(startDate.year, startDate.month - 1, startDate.day));
+        const endDateCopy = normalizeDate(toGMT8().toDate());
+
+        console.log("currentDate: ", currentDate)
+        console.log("endDateCopy: ", endDateCopy)
+        // Loop through each day from startDate to endDate
+        while (currentDate <= endDateCopy) {
+            // Check if the current date is available using the dateUnavailable function
+            if (!hasSchedule(currentDate, uniqueDaysJson)) {
+                availableDaysCount++;
+
             }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error?.response?.data.message || "")
-            }
+
+            // Move to the next day
+
+            currentDate.setDate(currentDate.getDate() + 1);
+
         }
-    }, [])
+
+        console.log("Available Days: ", availableDaysCount)
+        // console.log("hasSched ", {hasSched})
+        return availableDaysCount - 1;
+    }, [allRequests, hasSchedule]);
+
+    const handleCancel = useCallback(async (id: number, startDate: string, endDate: string) => {
+        setIsCancelling(true);
+
+        const start = toGMT8(startDate)
+        const end = toGMT8()
+        if (start.isAfter(end)) {
+            console.log({used: selectedRequest?.leave_details.total_days});
+        }
+
+
+        const count = countAvailableDays(new CalendarDate(start.year(), start.month(), start.date()), id)
+
+        // Find the schedule for the request
+
+        // Ensure uniqueDaysJson is flattened
+
+
+        // try {
+        //     const res = await axiosInstance.post("/api/admin/leaves/requests/cancel", selectedRequest);
+        //     if (res.status === 200) {
+        //         toast.success(res.data.message);
+        //     }
+        // } catch (error) {
+        //     if (error instanceof AxiosError) {
+        //         toast.error(error?.response?.data.message || "");
+        //     }
+        // }
+        setIsCancelling(false);
+    }, [allRequests, isDateUnavailable]);
+
     // useEffect(() => {
     //     const isApprovedLeave = selectedRequest?.leave_details.status;console.log()
     //     if (selectedRequest) {
@@ -320,9 +418,10 @@ function Page() {
                         {selectedRequest.leave_type.code}
                     </Chip></div>
             }, {
-                label: "Start Date", value: selectedRequest.leave_details.start_date
+                label: "Start Date",
+                value: toGMT8(selectedRequest.leave_details.start_date).format("MMM DD, YYYY hh:mm A")
             }, {
-                label: "End Date", value: selectedRequest.leave_details.end_date
+                label: "End Date", value: toGMT8(selectedRequest.leave_details.end_date).format("MMM DD, YYYY hh:mm A")
             }, {
                 label: "Duration Of Leave", value: selectedRequest.leave_details.total_days
             }, {
@@ -425,7 +524,8 @@ function Page() {
                          subtitle="Cancel the leave request">
                     <Button
                         isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected" || leave_progress === "Finished"}
-                        startContent={<LuBan/>} {...uniformStyle({color: "danger"})} onPress={() => handleCancel(selectedRequest?.id)}>Cancel</Button>
+                        startContent={<LuBan/>} {...uniformStyle({color: "danger"})}
+                        onPress={() => handleCancel(selectedRequest?.id, selectedRequest?.leave_details.start_date, selectedRequest?.leave_details.end_date)}>Cancel</Button>
                 </Section>
             </>}
         />}
@@ -434,3 +534,4 @@ function Page() {
 }
 
 export default Page;
+

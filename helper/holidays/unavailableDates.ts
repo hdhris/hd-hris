@@ -23,6 +23,7 @@ export const useHolidays = () => {
 
   // Memoized function to check if a date is unavailable
   const isDateUnavailable = useMemo(() => {
+    console.log("Holidays: ", disabledRanges.flatMap(h => h.map(ho => ho.toString())));
     return (date: DateValue): boolean =>
       disabledRanges.some(([start, end]) => date.compare(start) >= 0 && date.compare(end) < 0);
   }, [disabledRanges]);
