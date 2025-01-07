@@ -10,7 +10,9 @@ export type Certificate = {
   doctorateCertificates?: (string | File)[];
 };
 
+
 export interface EmployeeFormData {
+  
   picture: File | string;
   prefix: string,
   first_name: string;
@@ -65,6 +67,7 @@ export interface EmployeeFormData {
   isNewAccount?: boolean;
   isPasswordModified?: boolean;
   privilege_id: string,
+  dim_schedules: string[];
 }
 
 
@@ -74,6 +77,7 @@ export interface EmployeeFormData {
 
 export const employeeSchema = z.object({
   prefix: z.string().optional().nullable(),
+  privilege_id: z.string().optional(),
   picture: z.union([z.instanceof(File), z.string()]).optional(),
   username: z.string().optional(),
   password: z.string().min(6, "Password must be at least 6 characters").optional(),

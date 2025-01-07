@@ -273,11 +273,6 @@ export default function AddEmployeePage() {
           first_name: data.first_name,
           email: data.email,
         },
-        credentials: {
-          // username: data.username,
-          // password: data.password,
-          privilege_id: data.privilege_id,
-        },
         prefix: data.prefix,
         picture: pictureUrl,
         first_name: data.first_name,
@@ -288,6 +283,9 @@ export default function AddEmployeePage() {
         gender: data.gender,
         email: data.email,
         contact_no: data.contact_no,
+        credentials: {
+          privilege_id: parseInt(data.privilege_id, 10),
+        },
         birthdate: handleDate(data.birthdate),
         hired_at: handleDate(data.hired_at),
         addr_region: parseInt(data.addr_region, 10),
@@ -411,9 +409,6 @@ export default function AddEmployeePage() {
                     </div>
                   </div>
                 )}
-                {tabKey === "account" && (
-                  <AddAccount userId="" email={methods.watch("email")} />
-                )}
               </div>
             </FormProvider>
           </form>
@@ -439,9 +434,6 @@ export default function AddEmployeePage() {
         <Tab key="job" title="Job Information">
           {renderTabContent("job")}
         </Tab>
-        <Tab key="account" title="Account">
-          {renderTabContent("account")}
-        </Tab>
       </Tabs>
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t">
         <div className="container px-6 py-4 flex justify-end items-center gap-4">
@@ -456,7 +448,7 @@ export default function AddEmployeePage() {
             Previous
           </Button>
 
-          {activeTab === "account" ? (
+          {activeTab === "job" ? (
             <Button
               type="submit"
               color="primary"

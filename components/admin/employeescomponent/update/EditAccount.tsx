@@ -1,57 +1,40 @@
 import React from "react";
 import { useRouter } from "next/navigation";
-import FormFields from "@/components/common/forms/FormFields";
-import { useFormContext } from "react-hook-form";
-import { usePrivilegesData } from "@/services/queries";
-import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@nextui-org/react";
+import axios from "axios";
 
 interface EditAccountProps {
   userId: string;
   email: string;
   hasAccount: boolean;
-  currentPrivilegeId?: string;
 }
 
 const EditAccount: React.FC<EditAccountProps> = ({
   userId,
   email,
   hasAccount,
-  currentPrivilegeId,
 }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
-  const { setValue, getValues } = useFormContext();
   const { toast } = useToast();
-  const { data: privileges = [] } = usePrivilegesData();
-
-  React.useEffect(() => {
-    if (currentPrivilegeId) {
-      setValue("privilege_id", currentPrivilegeId);
-    }
-  }, [currentPrivilegeId, setValue]);
-
-  const privilegeOptions = privileges.reduce((acc: any[], privilege) => {
-    if (privilege && privilege.id && privilege.name) {
-      acc.push({ value: privilege.id.toString(), label: privilege.name });
-    }
-    return acc;
-  }, []);
 
   const handleResetPassword = async () => {
     try {
       setIsLoading(true);
+
+      // Make sure to send resetPassword: true in the payload
       const response = await axios.put(
         `/api/employeemanagement/employees?id=${userId}&type=account`,
-        {}
+        {
+          resetPassword: true
+        }
       );
-      router.push("/employeemanagement/employees");
       
       if (response.data.success) {
         toast({
           title: "Success",
-          description: response.data.message,
+          description: "Password has been reset and email sent with new credentials",
           duration: 3000,
         });
       }
@@ -70,33 +53,7 @@ const EditAccount: React.FC<EditAccountProps> = ({
         variant: "danger",
         duration: 5000,
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePrivilegeChange = async (privilegeId: string) => {
-    try {
-      setIsLoading(true);
-      const response = await axios.put(
-        `/api/employeemanagement/employees?id=${userId}&type=account`,
-        { privilege_id: privilegeId }
-      );
-
-      if (response.data.success) {
-        toast({
-          title: "Success",
-          description: response.data.message,
-          duration: 3000,
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to update privilege",
-        variant: "danger",
-        duration: 5000,
-      });
+      console.error("Password reset error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +70,7 @@ const EditAccount: React.FC<EditAccountProps> = ({
             variant="bordered"
             isDisabled={isLoading}
           >
-            Reset Password
+            {isLoading ? "Resetting..." : "Reset Password"}
           </Button>
         )}
       </div>
@@ -123,37 +80,12 @@ const EditAccount: React.FC<EditAccountProps> = ({
         <p className="text-sm text-gray-500">
           Account Status: {hasAccount ? "Active" : "No Account"}
         </p>
+        {!hasAccount && (
+          <p className="text-sm text-muted-foreground mt-2">
+            An account will be created automatically with the selected access level when you update the employee information.
+          </p>
+        )}
       </div>
-
-      {hasAccount && (
-        <div className="flex items-end space-x-4 mb-4">
-          <div className="flex-grow">
-            <FormFields
-              items={[
-                {
-                  name: "privilege_id",
-                  label: "Access Level",
-                  type: "select",
-                  isRequired: true,
-                  config: {
-                    placeholder: "Select access level",
-                    options: privilegeOptions,
-                    defaultValue: currentPrivilegeId,
-                  },
-                },
-              ]}
-            />
-          </div>
-          <Button
-            type="button"
-            color="primary"
-            onPress={() => handlePrivilegeChange(getValues("privilege_id"))}
-            isLoading={isLoading}
-          >
-            Update Privilege
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

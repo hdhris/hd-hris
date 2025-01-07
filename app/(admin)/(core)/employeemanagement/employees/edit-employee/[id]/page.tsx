@@ -20,6 +20,7 @@ import EditAccountForm from "@/components/admin/employeescomponent/update/EditAc
 import { mutate } from "swr";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import ScheduleHistory from "@/components/admin/employeescomponent/update/ScheduleHistory";
+import { Employee } from "@/types/employeee/EmployeeType";
 
 type EmployeeFields = keyof EmployeeFormData;
 
@@ -145,6 +146,7 @@ export default function EditEmployeePage({
       job_id: "",
       branch_id: "",
       salary_grade_id: "",
+      privilege_id: "", // Add this
       batch_id: "",
       days_json: [],
     },
@@ -225,6 +227,8 @@ export default function EditEmployeePage({
     return processed.filter((url): url is string => url !== null);
   };
 
+  const currentEmployee = employeeData as Employee | undefined;
+  
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
 
@@ -265,6 +269,23 @@ export default function EditEmployeePage({
           processCertificates(data.doctorateCertificates),
         ]);
 
+      
+    
+        const currentDays = currentEmployee?.dim_schedules?.[0]?.days_json;
+        const normalizedCurrentDays: string[] = currentDays
+          ? typeof currentDays === 'string'
+            ? JSON.parse(currentDays)
+            : currentDays
+          : [];
+        
+        const normalizedNewDays = [...data.days_json].sort();
+        const normalizedOldDays = [...normalizedCurrentDays].sort();
+        
+        const currentBatchId: string = currentEmployee?.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() || '';
+        
+        const hasScheduleChanged: boolean = 
+          data.batch_id !== currentBatchId ||
+          JSON.stringify(normalizedNewDays) !== JSON.stringify(normalizedOldDays);
       // Prepare employee data - similar structure to upsert endpoint
       const employeeData = {
         // Basic Information
@@ -321,13 +342,15 @@ export default function EditEmployeePage({
         branch_id: parseInt(data.branch_id, 10),
         salary_grade_id: parseInt(data.salary_grade_id, 10),
         batch_id: parseInt(data.batch_id, 10),
-        schedules: [
+        privilege_id: parseInt(data.privilege_id, 10),
+        schedules: hasScheduleChanged ? [
           {
             days_json: data.days_json,
             batch_id: parseInt(data.batch_id, 10),
-          },
-        ],
+          }
+        ] : undefined,
       };
+      
       const response = await axios.put(
         `/api/employeemanagement/employees?id=${params.id}`,
         employeeData
@@ -377,23 +400,18 @@ export default function EditEmployeePage({
     if (!employeeData) return;
 
     try {
-      const accountData = employeeData.userAccount?.auth_credentials || null;
-      const privilegeData = employeeData.acl_user_access_control || null;
-
-      // Log to check if we're getting the privilege data
-      // console.log("Privilege Data:", privilegeData);
-
+      // Get schedule data
+      const currentSchedule = employeeData.dim_schedules?.find(schedule => !schedule.end_date);
       let daysArray: string[] = [];
-      if (employeeData.dim_schedules?.[0]?.days_json) {
+      if (currentSchedule?.days_json) {
         try {
-          const daysJson = employeeData.dim_schedules[0].days_json;
-          daysArray =
-            typeof daysJson === "string" ? JSON.parse(daysJson) : daysJson;
+          daysArray = typeof currentSchedule.days_json === "string" 
+            ? JSON.parse(currentSchedule.days_json) 
+            : currentSchedule.days_json;
         } catch (error) {
           console.error("Error parsing days_json:", error);
         }
       }
-
       // Process educational background
       const educationalBg =
         typeof employeeData.educational_bg_json === "string"
@@ -412,9 +430,7 @@ export default function EditEmployeePage({
       const doctorateCertificates = educationalBg.doctorateCertificates || [];
 
       // Get batch schedule
-      const batchId =
-        employeeData.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() ||
-        "";
+      const currentBatchId = currentSchedule?.ref_batch_schedules?.id?.toString() || "";
 
       // Get user account data
       const userAccount = employeeData.userAccount;
@@ -475,12 +491,9 @@ export default function EditEmployeePage({
         guardian_first_name: familyBg.guardian_first_name || "",
         guardian_middle_name: familyBg.guardian_middle_name || "",
         guardian_last_name: familyBg.guardian_last_name || "",
-        // Schedule
-        batch_id: batchId,
+        privilege_id: employeeData.acl_user_access_control?.privilege_id || "",
+        batch_id: currentBatchId,
         days_json: daysArray,
-        // Account
-        privilege_id: privilegeData?.privilege_id?.toString() || "",
-        username: accountData?.username || "",
       } as EmployeeFormData);
     } catch (error) {
       console.error("Error fetching employee data:", error);
@@ -565,9 +578,7 @@ export default function EditEmployeePage({
                     hasAccount={
                       !!employeeData?.userAccount?.auth_credentials?.username
                     }
-                    currentPrivilegeId={
-                      employeeData?.acl_user_access_control?.privilege_id || ""
-                    }
+                  
                   />
                 </div>
               </div>

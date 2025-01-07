@@ -1,13 +1,21 @@
 "use client";
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
-import { useDepartmentsData, useJobpositionData, useBranchesData, useSalaryGradeData, useEmploymentStatusData, useEmployeesData } from "@/services/queries";
-import { DateStyle } from "@/lib/custom/styles/InputStyle";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
+import {
+  useDepartmentsData,
+  useJobpositionData,
+  useBranchesData,
+  useSalaryGradeData,
+  useEmploymentStatusData,
+  useEmployeesData,
+  usePrivilegesData,
+} from "@/services/queries";
+
 import { parseAbsoluteToLocal } from "@internationalized/date";
 import dayjs from "dayjs";
-
-
 const JobInformationForm: React.FC = () => {
   const { watch } = useFormContext();
 
@@ -17,13 +25,15 @@ const JobInformationForm: React.FC = () => {
   const { data: salaries = [] } = useSalaryGradeData();
   const { data: empstatuses = [] } = useEmploymentStatusData();
   const { data: employees = [] } = useEmployeesData();
+  const { data: privileges = [] } = usePrivilegesData();
 
   const departmentOptions = departments.reduce((acc: any[], dept) => {
-    if (dept && dept.id && dept.name && dept.is_active) {  
+    if (dept && dept.id && dept.name && dept.is_active) {
       acc.push({ value: dept.id.toString(), label: dept.name });
     }
     return acc;
   }, []);
+
   const jobOptions = jobTitles.reduce((acc: any[], job) => {
     if (job && job.id && job.name && job.is_active) {
       // Check if there are any active employees for the job position
@@ -100,9 +110,9 @@ const JobInformationForm: React.FC = () => {
     }
     return acc;
   }, []);
-  
+
   const branchOptions = branches.reduce((acc: any[], branch) => {
-    if (branch && branch.id && branch.name && branch.is_active) {  
+    if (branch && branch.id && branch.name && branch.is_active) {
       acc.push({ value: branch.id.toString(), label: branch.name });
     }
     return acc;
@@ -117,77 +127,95 @@ const JobInformationForm: React.FC = () => {
 
   const salaryGradeOptions = salaries.reduce((acc: any[], salary) => {
     if (salary && salary.id && salary.name && salary.amount) {
-      acc.push({ value: salary.id.toString(), label: `${salary.name}: ₱${Number(salary.amount).toFixed(2)}` });
+      acc.push({
+        value: salary.id.toString(),
+        label: `${salary.name}: ₱${Number(salary.amount).toFixed(2)}`,
+      });
     }
     return acc;
   }, []);
-  
-   const formBasicFields: FormInputProps[] = [
-      {
-        name: "department_id",
-        label: "Department",
-        type: "auto-complete",
-        isRequired: true,
-        config: {
-          placeholder: "Select Department",
-          options: departmentOptions,
-        },
+
+  const privilegeOptions = privileges.reduce((acc: any[], privilege) => {
+    if (privilege && privilege.id && privilege.name) {
+      acc.push({ value: privilege.id.toString(), label: privilege.name });
+    }
+    return acc;
+  }, []);
+
+  const formBasicFields: FormInputProps[] = [
+    {
+      name: "department_id",
+      label: "Department",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select Department",
+        options: departmentOptions,
       },
-      {
-        name: "hired_at",
-        label: "Hired Date",
-        type: "date-picker",
-        isRequired: true,
-        config: {
-          placeholder: "Select hire date",
-          maxValue: parseAbsoluteToLocal(dayjs().endOf("day").toISOString()),
-          // defaultValue: null,
-          // classNames: DateStyle,
-          validationState: "valid",
-        },
+    },
+    {
+      name: "hired_at",
+      label: "Hired Date",
+      type: "date-picker",
+      isRequired: true,
+      config: {
+        placeholder: "Select hire date",
+        maxValue: parseAbsoluteToLocal(dayjs().endOf("day").toISOString()),
+        validationState: "valid",
       },
-      {
-        name: "job_id",
-        label: "Job Position",
-        type: "auto-complete",
-        isRequired: true,
-        config: {
-          placeholder: "Select Job Position",
-          options: jobOptions,
-        },
+    },
+    {
+      name: "job_id",
+      label: "Job Position",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select Job Position",
+        options: jobOptions,
       },
-      {
-        name: "employement_status_id",
-        label: "Employment status",
-        type: "auto-complete",
-        isRequired: true,
-        config: {
-          placeholder: "Select employment status",
-          options: employmentstatusOptions,
-        },
+    },
+    {
+      name: "employement_status_id",
+      label: "Employment status",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select employment status",
+        options: employmentstatusOptions,
       },
-      {
-        name: "salary_grade_id",
-        label: "Salary Grade",
-        type: "auto-complete",
-        isRequired: true,
-        config: {
-          placeholder: "Select Salary Grade",
-          options: salaryGradeOptions,
-        },
+    },
+    {
+      name: "salary_grade_id",
+      label: "Salary Grade",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select Salary Grade",
+        options: salaryGradeOptions,
       },
-      {
-        name: "branch_id",
-        label: "Branch",
-        type: "auto-complete",
-        isRequired: true,
-        config: {
-          placeholder: "Select Branch",
-          options: branchOptions,
-        },
+    },
+    {
+      name: "branch_id",
+      label: "Branch",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select Branch",
+        options: branchOptions,
       },
-    ];
-  
+    },
+    {
+      name: "privilege_id",
+      label: "Access Level",
+      type: "auto-complete",
+      isRequired: true,
+      config: {
+        placeholder: "Select Access Level",
+        options: privilegeOptions,
+        description: "This will be used for the employee's account access"
+      },
+    },
+  ];
 
   return (
     <div className="space-y-6">
