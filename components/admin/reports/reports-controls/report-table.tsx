@@ -1,23 +1,24 @@
 "use client";
-import React, {Key, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
-    Spinner,
     getKeyValue,
+    Spinner,
+    Table,
+    TableBody,
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow,
 } from "@nextui-org/react";
-import { useInfiniteScroll } from "@nextui-org/use-infinite-scroll";
-import { useAsyncList } from "@react-stately/data";
-import { useControl } from "@/components/admin/reports/reports-controls/provider/reports-control-provider";
+import {useInfiniteScroll} from "@nextui-org/use-infinite-scroll";
+import {useAsyncList} from "@react-stately/data";
+import {useControl} from "@/components/admin/reports/reports-controls/provider/reports-control-provider";
 import NoData from "@/components/common/no-data/NoData";
 import {TableConfigProps} from "@/types/table/TableDataTypes";
 import {Alert} from "@nextui-org/alert";
+import Typography from "@/components/common/typography/Typography";
 
-interface ReportTable<T>{
+interface ReportTable<T> {
     endpoint: string,
     columns: Omit<TableConfigProps<T>, "rowCell">
     groupByKey?: string
@@ -25,30 +26,24 @@ interface ReportTable<T>{
 
 
 export default function ReportTable<T>({endpoint, columns, groupByKey}: ReportTable<T>) {
-    const { value, isGenerated, setIsGenerated } = useControl();
+    const {value, isGenerated, setIsGenerated} = useControl();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(false);
 
     let list = useAsyncList<T>({
-        async load({ signal, cursor }) {
+        async load({signal, cursor}) {
             setIsLoading(true);
-            const res = await fetch(
-                cursor ||
-                `${endpoint}?search=${value.department}&start=${value.date.start}&end=${value.date.end}`,
-                // `/api/admin/payroll/attendance-logs?search=${value.department}&start=${value.date.start}&end=${value.date.end}`,
-                { signal }
-            );
+            const res = await fetch(cursor || `${endpoint}?search=${value.department}&start=${value.date.start}&end=${value.date.end}`, // `/api/admin/payroll/attendance-logs?search=${value.department}&start=${value.date.start}&end=${value.date.end}`,
+                {signal});
             const json = await res.json();
 
             setHasMore(json.next !== null);
             setIsLoading(false);
 
             return {
-                items: json.results,
-                cursor: json.next,
+                items: json.results, cursor: json.next,
             };
-        },
-        async sort({ items, sortDescriptor }) {
+        }, async sort({items, sortDescriptor}) {
             const column = sortDescriptor.column as keyof T;
 
             console.log("Column: ", column);
@@ -74,8 +69,7 @@ export default function ReportTable<T>({endpoint, columns, groupByKey}: ReportTa
 
 
     const [loaderRef, scrollerRef] = useInfiniteScroll({
-        hasMore,
-        onLoadMore: list.loadMore,
+        hasMore, onLoadMore: list.loadMore,
     });
 
     useEffect(() => {
@@ -90,29 +84,22 @@ export default function ReportTable<T>({endpoint, columns, groupByKey}: ReportTa
     const groupByKeys = Object.entries(groupBy);
     console.log("Group By Keys: ", groupByKeys);
 
-    return (
-        <>
+    return (<>
             {isGenerated || list.items.length > 0 ? groupByKeys.map((key, index) => {
 
-                return(
-                    <Table
+                return (<Table
                         key={index}
                         isHeaderSticky
                         aria-label="Reports Table"
                         baseRef={scrollerRef}
                         sortDescriptor={list.sortDescriptor}
                         onSortChange={list.sort}
-                        topContent={
-                            key[0] !== "undefined" && <Alert description={key[0]}/>
+                        topContent={key[0] !== "undefined" && <Alert description={key[0]}/>
 
                         }
-                        bottomContent={
-                            hasMore ? (
-                                <div className="flex w-full justify-center">
-                                    <Spinner ref={loaderRef} color="primary"/>
-                                </div>
-                            ) : null
-                        }
+                        bottomContent={hasMore ? (<div className="flex w-full justify-center">
+                                <Spinner ref={loaderRef} color="primary"/>
+                            </div>) : null}
                         classNames={{
                             th: ["bg-white", "text-default-500", "border", "border-divider"],
                             td: ["text-default-500", "border", "border-divider", "w-96"],
@@ -124,6 +111,7 @@ export default function ReportTable<T>({endpoint, columns, groupByKey}: ReportTa
                     >
                         <TableHeader columns={columns.columns}>
                             {(column: { uid: any; name: string; sortable?: boolean }) => (<TableColumn
+                                className="text-xs"
                                 key={column.uid}
                                 align={column.uid === "actions" ? "center" : "start"}
                                 allowsSorting={column.sortable}
@@ -137,16 +125,13 @@ export default function ReportTable<T>({endpoint, columns, groupByKey}: ReportTa
                             items={key[1] as T[]}
                             loadingContent={<Spinner color="danger"/>}
                         >
-                            {(item: T) => (
-                                <TableRow className="w-fit">
-                                    {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
-                                </TableRow>
-                            )}
+                            {(item: T) => (<TableRow className="w-fit">
+                                    {(columnKey) => <TableCell><Typography
+                                        className="text-xs">{getKeyValue(item, columnKey)}</Typography></TableCell>}
+                                </TableRow>)}
                         </TableBody>
-                    </Table>
-                )
-            }): list.items.length === 0 && !isLoading && (<NoData message="No Report Generated"/>)}
-        </>
-    );
+                    </Table>)
+            }) : list.items.length === 0 && !isLoading && (<NoData message="No Report Generated"/>)}
+        </>);
 }
 

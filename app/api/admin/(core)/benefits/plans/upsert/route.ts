@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
         hasContentType(req);
         const body = await req.json();
 
-        console.log("Plan: ", body);
+        // console.log("Plan: ", body);
 
         if (!body.id) {
             const isDuplicate = await prisma.ref_benefit_plans.findFirst({
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
 
             if (body.id) {
-                console.log("updating...")
+                // console.log("updating...")
                 if(body.contribution_type !== "others") {
                     contribution = contribution.map((item: any) => {
                         return{
@@ -89,25 +89,27 @@ export async function POST(req: NextRequest) {
                     },
                 });
                 for (const item of contribution) {
-                    await transactionPrisma.ref_benefits_contribution_table.update({
+                    // console.log("Contribution Items: ", item)
+                    const updated = await transactionPrisma.ref_benefits_contribution_table.update({
                         where: { id: item.id },
                         data: {
-                            contribution_type: item.contribution_type,
+                            contribution_type: body.contribution_type,
                             actual_contribution_amount: item.actual_contribution_amount,
                             min_salary: item.min_salary,
                             max_salary: item.max_salary,
-                            min_MSC: item.min_MSC ?? 0,
-                            max_MSC: item.max_MSC ?? 0,
-                            msc_step: item.msc_step ?? 0,
-                            ec_threshold: item.ec_threshold ?? 0,
-                            ec_low_rate: item.ec_low_rate ?? 0,
-                            ec_high_rate: item.ec_high_rate ?? 0,
-                            wisp_threshold: item.wisp_threshold ?? 0,
+                            min_MSC: item.minMSC ?? 0,
+                            max_MSC: item.maxMSC ?? 0,
+                            msc_step: item.mscStep ?? 0,
+                            ec_threshold: item.ecThreshold ?? 0,
+                            ec_low_rate: item.ecLowRate ?? 0,
+                            ec_high_rate: item.ecHighRate ?? 0,
+                            wisp_threshold: item.wispThreshold ?? 0,
                             updated_at: toGMT8().toISOString(),
                             employer_rate: item.employer_contribution,
                             employee_rate: item.employee_contribution,
                         },
                     });
+                    // console.log("Contribution Updated: ", updated)
                 }
             }
 
@@ -149,17 +151,17 @@ export async function POST(req: NextRequest) {
                         ref_benefits_contribution_table: {
                             createMany: {
                                 data: contribution.map((item: any) => ({
-                                    contribution_type: item.contribution_type,
+                                    contribution_type: body.contribution_type,
                                     actual_contribution_amount: item.actual_contribution_amount,
                                     min_salary: item.min_salary,
                                     max_salary: item.max_salary,
-                                    min_MSC: item.min_MSC ?? 0,
-                                    max_MSC: item.max_MSC ?? 0,
-                                    msc_step: item.msc_step ?? 0,
-                                    ec_threshold: item.ec_threshold ?? 0,
-                                    ec_low_rate: item.ec_low_rate ?? 0,
-                                    ec_high_rate: item.ec_high_rate ?? 0,
-                                    wisp_threshold: item.wisp_threshold ?? 0,
+                                    min_MSC: item.minMSC ?? 0,
+                                    max_MSC: item.maxMSC ?? 0,
+                                    msc_step: item.mscStep ?? 0,
+                                    ec_threshold: item.ecThreshold ?? 0,
+                                    ec_low_rate: item.ecLowRate ?? 0,
+                                    ec_high_rate: item.ecHighRate ?? 0,
+                                    wisp_threshold: item.wispThreshold ?? 0,
                                     updated_at: toGMT8().toISOString(),
                                     employer_rate: item.employer_contribution,
                                     employee_rate: item.employee_contribution,

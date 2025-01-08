@@ -130,15 +130,17 @@ export function isEmployeeAvailable({
         termination_json: UnavaliableStatusJSON[] | JsonValue;
         hired_at?: Date | string | null;
     };
-    find?: Array<"suspension" | "resignation" | "termination">;
+    find?: Array<"suspension" | "resignation" | "termination" | "hired">;
     date?: string;
 }): boolean {
     if(!employee) return true
     const thisDate = date ? toGMT8(date) : toGMT8();
 
-    if (employee.hired_at) {
-        if (toGMT8(employee.hired_at).isAfter(thisDate)) return false;
-    }
+    // if (employee.hired_at) {
+    //     if (toGMT8(employee.hired_at).isAfter(thisDate)) return false;
+    // }
+
+    const unHired = employee.hired_at && toGMT8(employee.hired_at).isAfter(thisDate)
 
     const { suspension_json, resignation_json, termination_json } = employee as {
         suspension_json: UnavaliableStatusJSON[];
@@ -148,12 +150,12 @@ export function isEmployeeAvailable({
     // const today = toGMT8();
 
     const isActive = (entry: UnavaliableStatusJSON): boolean => {
-        // const startDate = toGMT8(entry.start_date);
+        const startDate = toGMT8(entry.start_date);
         const endDate = entry.end_date ? toGMT8(entry.end_date) : null;
         // const cancelDate = !!entry.canceled_at ? toGMT8(entry.canceled_at) : null;
 
         // return cancelDate === null && startDate.isSameOrBefore(today) && (!endDate || endDate.isSameOrAfter(today));
-        return !date ? entry.canceled_at === null : endDate === null || endDate.isSameOrAfter(thisDate);
+        return !date ? entry.canceled_at === null : endDate ? endDate.isSameOrAfter(thisDate) && startDate.isSameOrBefore(thisDate) : startDate.isSameOrBefore(thisDate);
     };
 
     const suspended = suspension_json.some(isActive);
@@ -161,13 +163,14 @@ export function isEmployeeAvailable({
     const terminated = termination_json.some(isActive);
 
     if (find) {
+        if (find.includes("hired") && unHired) return false;
         if (find.includes("suspension") && suspended) return false;
         if (find.includes("resignation") && resigned) return false;
         if (find.includes("termination") && terminated) return false;
         return true;
     }
 
-    return !suspended && !resigned && !terminated;
+    return !suspended && !resigned && !terminated && !unHired;
 }
 
 const listAllEmployee = [] as EmployeeAll[];

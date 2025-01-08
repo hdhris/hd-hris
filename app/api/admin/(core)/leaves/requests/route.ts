@@ -1,26 +1,39 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
-import {getEmpFullName} from "@/lib/utils/nameFormatter";
-import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-// import {LeaveApplicationEvaluation} from "@/types/leaves/leave-evaluators-types";
-import {processJsonObject} from "@/lib/utils/parser/JsonObject";
-import {toGMT8} from "@/lib/utils/toGMT8";
-import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
-import {Evaluations} from "@/types/leaves/leave-evaluators-types";
-import dayjs from "dayjs";
+import { getEmpFullName } from "@/lib/utils/nameFormatter";
+import { LeaveRequest } from "@/types/leaves/LeaveRequestTypes";
+import { processJsonObject } from "@/lib/utils/parser/JsonObject";
+import { toGMT8 } from "@/lib/utils/toGMT8";
+import { formatDaysToReadableTime } from "@/lib/utils/timeFormatter";
+import { Evaluations } from "@/types/leaves/leave-evaluators-types";
+import {getFileMetadataFromUrlWithBlob} from "@/helper/file/getFileMetadata";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
+async function getAttachmentMetadata(urls: string[]) {
+    const metadataPromises = urls.map(async (url) => {
+        try {
+            return await getFileMetadataFromUrlWithBlob(url);
+
+        } catch (error) {
+            console.error(`Failed to fetch metadata for ${url}:`, error);
+            throw error;
+        }
+    });
+
+    return Promise.all(metadataPromises);
+}
 
 export async function GET(request: Request) {
-    const {searchParams} = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');  // Default to page 1
-    const perPage = parseInt(searchParams.get('limit') || '15');  // Default to 15 results per page
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const perPage = parseInt(searchParams.get("limit") || "15");
 
     const data = await prisma.trans_leaves.findMany({
         where: {
-            deleted_at: null
-        }, include: {
+            deleted_at: null,
+        },
+        include: {
             trans_employees_leaves: {
                 select: {
                     email: true,
@@ -30,9 +43,23 @@ export async function GET(request: Request) {
                     middle_name: true,
                     suffix: true,
                     extension: true,
-                    picture: true
-                }
-            }, trans_employees_trans_leaves_created_byTotrans_employees: {
+                    picture: true,
+                    dim_schedules: {
+                        where: {
+                          end_date: null,
+                        },
+                        select: {
+                            days_json: true,
+                            ref_batch_schedules: {
+                                select: {
+                                    clock_in: true, clock_out: true, break_min: true
+                                }
+                            }
+                        }
+                    }
+                },
+            },
+            trans_employees_trans_leaves_created_byTotrans_employees: {
                 select: {
                     id: true,
                     picture: true,
@@ -42,77 +69,92 @@ export async function GET(request: Request) {
                     last_name: true,
                     middle_name: true,
                     suffix: true,
-                }
-            }, trans_leave_types: {
-                select: {
+                },
+            },
+            trans_leave_types: {
+                include: {
+                    dim_leave_balances: {
+                        where: {
+                            deleted_at: null,
+                        },
+                        select: {
+                            id: true,
+                            employee_id: true,
+                            leave_type_id: true
+                        }
+                    },
                     ref_leave_type_details: {
                         select: {
-                            id: true, name: true, code: true
-                        }
-                    }
-                }
+                            id: true,
+                            name: true,
+                            code: true,
+                        },
+                    },
+                },
             },
-
-        }, orderBy: {
-            updated_at: 'desc'
-        }, take: perPage, skip: (page - 1) * perPage
-    })
+        },
+        orderBy: {
+            updated_at: "desc",
+        },
+        take: perPage,
+        skip: (page - 1) * perPage,
+    });
 
     const totalItems = await prisma.trans_leaves.count({
         where: {
-            deleted_at: null
-        }
-    })
+            deleted_at: null,
+        },
+    });
 
+    const employeesRequest:LeaveRequest[] = await Promise.all(
+        data.map(async (item) => {
+            const attachmentUrls = item.files as string[] || [];
+            const attachmentMetadata = await getAttachmentMetadata(attachmentUrls);
 
-    const employees_request: LeaveRequest[] = data.map(items => {
-        // const evaluators = processJsonObject<LeaveApplicationEvaluations>(items.evaluators)!
-        // const approverDecision = evaluators.approver.decision.is_approved;
-        // const reviewerDecision = evaluators.reviewers?.decision.is_reviewed;
-
-        // // Determine the status based on the decisions
-        // let status = "Approved"; // Default status is "Approved"
-        //
-        // if (approverDecision === null || reviewerDecision === null) {
-        //     status = "Pending"; // If either the approver or reviewer has not made a final decision
-        // } else if (!approverDecision || !reviewerDecision) {
-        //     status = "Rejected"
-        // }
-
-        // console.dir(items.evaluators, {depth: 4})
-        return {
-            id: items.id,
-            employee_id: items.employee_id,
-            name: getEmpFullName(items.trans_employees_leaves),
-            email: items.trans_employees_leaves.email || "",
-            picture: items.trans_employees_leaves.picture || "",
-            created_by: {
-                id: items.trans_employees_trans_leaves_created_byTotrans_employees?.id!,
-                email: items.trans_employees_trans_leaves_created_byTotrans_employees?.email || "",
-                picture: items.trans_employees_trans_leaves_created_byTotrans_employees?.picture || "",
-                name: getEmpFullName(items.trans_employees_trans_leaves_created_byTotrans_employees)
-            },
-            leave_details: {
-                start_date: toGMT8(items.start_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
-                end_date: toGMT8(items.end_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
-                reason: items.reason || "",
-                status: items.status as "Approved" | "Pending" | "Rejected",
-                total_days: formatDaysToReadableTime(items.total_days.toNumber()),
-                created_at: toGMT8(items.created_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
-                updated_at: toGMT8(items.updated_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
-            },
-            leave_type: {
-                id: items.trans_leave_types?.ref_leave_type_details?.id!,
-                name: items.trans_leave_types?.ref_leave_type_details?.name || "",
-                code: items.trans_leave_types?.ref_leave_type_details?.code || ""
-            },
-            evaluators: processJsonObject<Evaluations>(items.evaluators)!,
-        }
-
-    })
-
+            return {
+                id: item.id,
+                employee_id: item.employee_id,
+                name: getEmpFullName(item.trans_employees_leaves),
+                email: item.trans_employees_leaves.email || "",
+                picture: item.trans_employees_leaves.picture || "",
+                schedule: {
+                    days_json: item.trans_employees_leaves.dim_schedules.map(days => days.days_json as string),
+                    ref_batch_schedules: item.trans_employees_leaves.dim_schedules.map(time => ({
+                        clock_in: time.ref_batch_schedules?.clock_in?.toISOString()!, // ISO date string
+                        clock_out: time.ref_batch_schedules?.clock_out?.toISOString()!, // ISO date string
+                        break_min: time.ref_batch_schedules?.break_min!
+                    }))[0]
+                },
+                created_by: {
+                    id: item.trans_employees_trans_leaves_created_byTotrans_employees?.id!,
+                    email: item.trans_employees_trans_leaves_created_byTotrans_employees?.email || "",
+                    picture: item.trans_employees_trans_leaves_created_byTotrans_employees?.picture || "",
+                    name: getEmpFullName(item.trans_employees_trans_leaves_created_byTotrans_employees),
+                },
+                leave_details: {
+                    start_date: item.start_date?.toISOString(),
+                    end_date:item.end_date?.toISOString(),
+                    reason: item.reason || "",
+                    status: item.status as "approved" | "pending" | "rejected" | "cancelled",
+                    total_days: item.total_days.toNumber(),
+                    created_at: toGMT8(item.created_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
+                    updated_at: toGMT8(item.updated_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
+                },
+                leave_type: {
+                    id: item.trans_leave_types?.ref_leave_type_details?.id!,
+                    name: item.trans_leave_types?.ref_leave_type_details?.name || "",
+                    code: item.trans_leave_types?.ref_leave_type_details?.code || "",
+                    attachments: attachmentMetadata,
+                },
+                // trans_leave_type: item.trans_leave_types.id,
+                leave_credit: item.trans_leave_types.dim_leave_balances.find(balance => balance.employee_id === item.employee_id && balance.leave_type_id === item.trans_leave_types.id)!,
+                evaluators: processJsonObject<Evaluations>(item.evaluators)!,
+            };
+        })
+    );
 
     return NextResponse.json({
-        data: employees_request, totalItems,
-    })
+        data: employeesRequest,
+        totalItems,
+    });
 }

@@ -8,22 +8,20 @@ import DataDisplay from "@/components/common/data-display/data-display";
 import {
     approval_status_color_map, FilterItems, TableConfigurations
 } from "@/components/admin/leaves/table-config/approval-tables-configuration";
-import RequestForm from "@/components/admin/leaves/request-form/form/RequestForm";
+import RequestForm, {normalizeDate} from "@/components/admin/leaves/request-form/form/RequestForm";
 import {LeaveRequest} from "@/types/leaves/LeaveRequestTypes";
-import {Chip, ScrollShadow} from '@nextui-org/react';
+import {Chip, DateValue, ScrollShadow} from '@nextui-org/react';
 import Typography, {Section} from "@/components/common/typography/Typography";
 import {capitalize} from "@nextui-org/shared-utils";
 import UserMail from "@/components/common/avatar/user-info-mail";
 import CardTable from "@/components/common/card-view/card-table";
 import BorderCard from "@/components/common/BorderCard";
-import {LuBan, LuPencil} from "react-icons/lu";
 import {getColor} from "@/helper/background-color-generator/generator";
 import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 import CardView from "@/components/common/card-view/card-view";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {Comment} from "@/types/leaves/leave-evaluators-types";
 import {axiosInstance} from "@/services/fetcher";
-import {useToast} from "@/components/ui/use-toast";
 import {v4 as uuidv4} from "uuid"
 import {isEqual} from "lodash";
 import Comments from "@/components/common/comments/comments";
@@ -32,7 +30,17 @@ import Evaluators from '@/components/common/evaluators/evaluators';
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import {Dayjs} from "dayjs";
 import toast from "react-hot-toast"
+import {AnimatedList} from "@/components/ui/animated-list";
+import {getDownloadUrl} from "@edgestore/react/utils";
+import FileAttachments from "@/components/common/attachments/file-attachment-card/file-attachments";
+import {pluralize} from "@/helper/pluralize/pluralize";
+import {LuBan, LuPencil} from "react-icons/lu";
+import {useHolidays} from "@/helper/holidays/unavailableDates";
+import {CalendarDate} from "@internationalized/date";
+import showDialog from "@/lib/utils/confirmDialog";
 import {AxiosError} from "axios";
+import {Alert} from "@nextui-org/alert";
+import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -48,6 +56,7 @@ function Page() {
     const [isReplySubmit, setIsReplySubmit] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
     const [today, setToday] = useState<Dayjs>(toGMT8())
+    const {isDateUnavailable} = useHolidays()
     // const [leaveProgress, setLeaveProgress] = useState("")
     const [isCancelling, setIsCancelling] = useState<boolean>(false)
     const {data, isLoading, mutate} = usePaginateQuery<LeaveRequestPaginate>("/api/admin/leaves/requests", page, rows, {
@@ -69,8 +78,12 @@ function Page() {
                 picture: item.picture,
                 email: item.email || "N/A",
                 name: item.name,
+                schedule: item.schedule,
                 leave_type: {
-                    id: item.leave_type.id, name: item.leave_type.name, code: item.leave_type.code
+                    id: item.leave_type.id,
+                    name: item.leave_type.name,
+                    code: item.leave_type.code,
+                    attachments: item.leave_type.attachments
                 },
                 leave_details: {
                     start_date: item.leave_details.start_date, // Format date here
@@ -81,6 +94,7 @@ function Page() {
                     created_at: item.leave_details.created_at,
                     updated_at: item.leave_details.updated_at
                 },
+                leave_credit: item.leave_credit,
                 evaluators: item.evaluators,
                 created_by
             }
@@ -95,6 +109,7 @@ function Page() {
             setSelectedRequest(allRequests.find((item) => item.id === id))
         }
     }, [allRequests, selectedRequest]);
+
 
     const signatories = useMemo(() => {
         if (selectedRequest) {
@@ -113,10 +128,54 @@ function Page() {
 
     // console.log("User: ", signatories?.users)
 
+    const hasSchedule = (startDate: string | Date, dayOfWeekSchedule: string[]): boolean => {
+        const dayString = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+        // Convert startDate to Day.js object in GMT+8 and get the current date in GMT+8
+        const start = toGMT8(startDate);
+        // const end = toGMT8();
+
+        const schedDate = start.format("YYYY-MM-DD HH:mm:ss")
+
+
+        // console.log("Start Sched: ", start.format("YYYY-MM-DD HH:mm:ss"));
+        const dayOfWeek = start.day(); // dayjs gives 0 (Sunday) to 6 (Saturday)
+        const dayStr = dayString[dayOfWeek]; // Map to the corresponding day string
+
+        const calendarDate = new CalendarDate(start.year(), start.month(), start.date())
+        const isDateUnAvailable = isDateUnavailable(calendarDate)
+
+        console.log("IsDateUnAvailable: ", isDateUnAvailable);
+        console.log("Calendar Date: ", calendarDate.toString());
+        console.log({
+            schedDate: schedDate, isDateUnavailable: isDateUnavailable, isSchedule: dayOfWeekSchedule.includes(dayStr)
+
+        })
+        return !dayOfWeekSchedule.includes(dayStr) || isDateUnAvailable
+        // console.log("Start: ", start.format("YYYY-MM-DD HH:mm:ss"));
+        // console.log("End: ", end.format("YYYY-MM-DD HH:mm:ss"));
+        // // Iterate through each day between start and end date
+        // for (let currentDate = start; currentDate.isBefore(end) || currentDate.isSame(end, "day"); currentDate = currentDate.add(1, "day")) {
+        //     // Get the day of the week for the current date
+        //     const dayOfWeek = currentDate.day(); // dayjs gives 0 (Sunday) to 6 (Saturday)
+        //     const dayStr = dayString[dayOfWeek]; // Map to the corresponding day string
+        //
+        //     console.log({dayOfWeek, dayStr});
+        //     const isDateUnAvailable = isDateUnavailable(new CalendarDate(currentDate.year(), currentDate.month(), currentDate.date()))
+        //     console.log({dayStr, isDateUnAvailable})
+        //     // Check if the current day matches the schedule
+        //     if (!dayOfWeekSchedule.includes(dayStr) || isDateUnavailable(new CalendarDate(currentDate.year(), currentDate.month(), currentDate.date()))) {
+        //         return true; // A match is found, return true immediately
+        //     }
+        // }
+        //
+        // return false; // No matches found in the range
+    };
+
     const handleOnSelected = (key: Key) => {
         const selected = allRequests.find(item => item.id === Number(key))
         setSelectedRequest(selected)
-        // console.log("Selected: ", selected)
+        console.log("Selected: ", selected)
     }
 
     // const onCommentSend = () => {
@@ -145,11 +204,17 @@ function Page() {
     }, []);
 
     const leave_progress = useMemo(() => {
-        const startDate = toGMT8(toGMT8(selectedRequest?.leave_details.start_date).toDate());
+        const startDate = toGMT8(toGMT8(selectedRequest?.leave_details.start_date).format("YYYY-MM-DD HH:mm:ss"));
         const endDate = toGMT8(selectedRequest?.leave_details.end_date);
         const isApprovedLeave = selectedRequest?.leave_details.status;
+        // console.log("isApproved: ", isApprovedLeave)
         if (selectedRequest) {
-            if (today.isBefore(startDate)) { // No 'day' argument to include time in the comparison
+            console.log({isApprovedLeave})
+            if(isApprovedLeave === 'cancelled'){
+                console.log("Cancelled")
+                return "Cancelled"
+            }
+            else if (today.isBefore(startDate)) { // No 'day' argument to include time in the comparison
                 console.log("Not Started");
                 return "Not Started";
             } else if (today.isAfter(endDate, 'day')) {
@@ -158,7 +223,8 @@ function Page() {
             } else if (isApprovedLeave) {
                 console.log("On Going");
                 return "On Going";
-            } else {
+            }
+            else {
                 console.log("Not Yet Decided");
                 return "Not Yet Decided";
             }
@@ -169,19 +235,135 @@ function Page() {
     }, [selectedRequest, today]);
 
 
-    const handleCancel = useCallback(async (id: number) => {
-        setIsCancelling(true)
-            try{
-                const res = await axiosInstance.post("/api/admin/leaves/requests/cancel", selectedRequest)
-                if(res.status === 200){
-                    toast.success(res.data.message)
-                }
-            } catch (error){
-                if(error instanceof AxiosError){
-                    toast.error(error?.response?.data.message || "")
+    const countAvailableDays = useCallback((startDate: DateValue, id: number): number => {
+        let availableDaysCount = 0;
+        const schedule = allRequests.find((item) => item.id === Number(id))?.schedule;
+
+        const uniqueDaysJson = schedule?.days_json?.flat() || [];
+
+        // Normalize start and end dates
+        let currentDate = normalizeDate(new Date(startDate.year, startDate.month - 1, startDate.day));
+        const endDateCopy = normalizeDate(new Date(toGMT8().format("YYYY-MM-DD")));
+
+        console.log("currentDate: ", currentDate)
+        console.log("endDateCopy: ", endDateCopy)
+        // Loop through each day from startDate to endDate
+        while (currentDate <= endDateCopy) {
+            // Check if the current date is available using the dateUnavailable function
+            if (!hasSchedule(currentDate, uniqueDaysJson)) {
+                availableDaysCount++;
+
+            }
+
+            // Move to the next day
+
+            currentDate.setDate(currentDate.getDate() + 1);
+
+        }
+
+        console.log("Available Days: ", availableDaysCount)
+        // console.log("hasSched ", {hasSched})
+        return availableDaysCount - 1;
+    }, [allRequests, hasSchedule]);
+
+    const handleCancel = useCallback(async (id: number, startDate: string, endDate: string) => {
+        setIsCancelling(true);
+
+        let deductLeaveDuration: number;
+        const start = toGMT8(startDate)
+        const end = toGMT8()
+        if (leave_progress === "Not Started") {
+            deductLeaveDuration = selectedRequest?.leave_details.total_days!
+
+        }else {
+            const workingDays = countAvailableDays(new CalendarDate(start.year(), start.month(), start.date()), id);
+
+            const breakTime = selectedRequest?.schedule.ref_batch_schedules.break_min ?? 0;
+
+// Check if the end time overlaps with lunch break (12:00 PM - 1:00 PM)
+            const passesLunchBreak = end.hour() >= 13 || (end.hour() === 12 && end.minute() >= 0);
+            const isLunchBreak = (end.hour() === 12 && end.minute() >= 0) || (end.hour() === 13 && end.minute() < 60);
+
+// Calculate work duration in minutes
+            const workDuration = start.diff(end, 'minutes', true);
+            let totalWorkHours = Math.abs(workDuration) - breakTime;
+
+// Adjust leave difference for lunch break
+            let leaveDif = Math.abs(start.diff(end, "minutes"));
+
+            if (isLunchBreak) {
+                // If the period overlaps with lunch break, exclude the lunch break time (12:00 PM - 1:00 PM)
+                const lunchBreakStart = start.clone().hour(12).minute(0).second(0);
+                const lunchBreakEnd = start.clone().hour(13).minute(0).second(0);
+
+                if (end.isAfter(lunchBreakStart) && start.isBefore(lunchBreakEnd)) {
+                    // Calculate overlap duration with lunch break
+                    const overlapStart = end.isAfter(lunchBreakStart) ? lunchBreakStart : start;
+                    const overlapEnd = end.isBefore(lunchBreakEnd) ? end : lunchBreakEnd;
+
+                    const lunchBreakDuration = overlapStart.diff(overlapEnd, 'minutes');
+                    leaveDif -= Math.abs(lunchBreakDuration);
                 }
             }
-    }, [])
+
+            if (workingDays < 0) {
+                deductLeaveDuration = leaveDif;
+            } else {
+                const used = (workingDays * totalWorkHours) + leaveDif
+                deductLeaveDuration = Number(used / 1440);
+            }
+
+            // Debugging logs
+            console.log("End: ", end.format("YYYY-MM-DD HH:mm:ss"));
+            console.log("Passes Lunch Break: ", passesLunchBreak);
+            console.log("Is Lunch Break: ", isLunchBreak);
+            console.log("Working Days: ", workingDays);
+            console.log("Deduct Leave Duration: ", deductLeaveDuration);
+        }
+
+
+        // Find the schedule for the request
+
+        // Ensure uniqueDaysJson is flattened
+
+
+        try {
+            const cancelLeaveRequest = {
+                id: selectedRequest?.id,
+                employee_id: selectedRequest?.employee_id,
+                leave_credit_id: selectedRequest?.leave_credit.id,
+                used_leaved: deductLeaveDuration
+            }
+
+            console.log("Cancel: ", cancelLeaveRequest);
+            const result = await showDialog({
+                title: "Cancel Leave Request", message: (<div className="flex flex-col gap-2">
+                        <Typography>
+                            Are you sure you want to cancel the leave request for <Typography as="span"
+                                                                                              className="font-semibold">{selectedRequest?.name}</Typography>?
+                        </Typography>
+                        <Alert description="This action cannot be undone. Do you want to proceed?" color="danger"/>
+                    </div>)
+            });
+
+
+            if (result === "yes") {
+                const res = await axiosInstance.post("/api/admin/leaves/requests/cancel", cancelLeaveRequest);
+                if (res.status === 200) {
+                    toast.success(res.data.message);
+                }
+            }
+
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error?.response?.data.message || "");
+            }
+        }
+
+        console.log("Cancel Used Days: ", deductLeaveDuration);
+        setIsCancelling(false);
+    }, [countAvailableDays, leave_progress, selectedRequest]);
+
     // useEffect(() => {
     //     const isApprovedLeave = selectedRequest?.leave_details.status;console.log()
     //     if (selectedRequest) {
@@ -313,14 +495,15 @@ function Page() {
                         {selectedRequest.leave_type.code}
                     </Chip></div>
             }, {
-                label: "Start Date", value: selectedRequest.leave_details.start_date
+                label: "Start Date",
+                value: toGMT8(selectedRequest.leave_details.start_date).format("MMM DD, YYYY hh:mm A")
             }, {
-                label: "End Date", value: selectedRequest.leave_details.end_date
+                label: "End Date", value: toGMT8(selectedRequest.leave_details.end_date).format("MMM DD, YYYY hh:mm A")
             }, {
-                label: "Duration Of Leave", value: selectedRequest.leave_details.total_days
+                label: "Duration Of Leave", value:selectedRequest.leave_details.total_days ?  formatDaysToReadableTime(selectedRequest.leave_details.total_days) : 0
             }, {
                 label: "Leave Progress Status", value: <Chip variant="flat"
-                                                             color={leave_progress === "Not Started" || leave_progress === "Not Yet Decided" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
+                                                             color={leave_progress === "Not Started" || leave_progress === "Cancelled" || leave_progress === "Not Yet Decided" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
             }, {
                 label: "Created By", value: <>
                     <UserAvatarTooltip user={{
@@ -339,6 +522,27 @@ function Page() {
                 label: "Updated At", value: selectedRequest.leave_details.updated_at
             },]}/>
 
+            {selectedRequest.leave_type.attachments?.length! > 0 && <ScrollShadow className="max-h-[400px]">
+                <hr className="border border-default-400 space-y-2"/>
+                <Section
+                    className="ms-0"
+                    title={`File ${pluralize(selectedRequest.leave_type.attachments?.length || 0, "Attachment", false)}`}
+                    subtitle={`Below ${pluralize(selectedRequest.leave_type.attachments?.length || 0, "attachment", false, true)} submitted by the employee.`}
+                />
+
+                <AnimatedList>
+                    {selectedRequest.leave_type.attachments?.map((item, index) => {
+                        const download = getDownloadUrl(item.url!);
+                        return <FileAttachments key={index}
+                                                fileName={item.name}
+                                                fileSize={item.size}
+                                                fileType={item.type}
+                                                downloadUrl={download}
+                        />
+
+                    })}
+                </AnimatedList>
+            </ScrollShadow>}
             <hr className="border border-default-400 space-y-2"/>
             {signatories?.users?.some(user => Number(user.id) === currentUser?.id) && <>
                 <Section className="ms-0" title="Comment"
@@ -378,31 +582,33 @@ function Page() {
                         evaluatorsApi={'/api/admin/leaves/requests/evaluation-decision'}
             />
         </>}
-            // onDanger={<>
-            //     <Section className="ms-0" title="Edit Leave"
-            //              subtitle="Edit the leave request">
-            //         <Button
-            //             isDisabled={selectedRequest.leave_details.status !== "Pending"}
-            //             startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
-            //     </Section>
-            //     {/*<hr className="border border-destructive/20"/>*/}
-            //     {/*<Section className="ms-0" title="Extend Leave"*/}
-            //     {/*         subtitle="Extend the leave request">*/}
-            //     {/*    <Button*/}
-            //     {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
-            //     {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
-            //     {/*</Section>*/}
-            //     <hr className="border border-destructive/20"/>
-            //     <Section className="ms-0" title="Cancel"
-            //              subtitle="Cancel the leave request">
-            //         <Button
-            //             isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected"}
-            //             startContent={<LuBan/>} {...uniformStyle({color: "danger"})} onPress={() => handleCancel(selectedRequest?.id)}>Cancel</Button>
-            //     </Section>
-            // </>}
+            onDanger={<>
+                {/*<Section className="ms-0" title="Edit Leave"*/}
+                {/*         subtitle="Edit the leave request">*/}
+                {/*    <Button*/}
+                {/*        isDisabled={selectedRequest.leave_details.status !== "pending"}*/}
+                {/*        startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>*/}
+                {/*</Section>*/}
+                {/*<hr className="border border-destructive/20"/>*/}
+                {/*<Section className="ms-0" title="Extend Leave"*/}
+                {/*         subtitle="Extend the leave request">*/}
+                {/*    <Button*/}
+                {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
+                {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
+                {/*</Section>*/}
+                {/*<hr className="border border-destructive/20"/>*/}
+                <Section className="ms-0" title="Cancel"
+                         subtitle="Cancel the leave request">
+                    <Button
+                        isDisabled={selectedRequest.leave_details.status === "pending" || selectedRequest.leave_details.status === "rejected" || leave_progress === "Finished" || leave_progress === "Cancelled"}
+                        startContent={<LuBan/>} {...uniformStyle({color: "danger"})}
+                        onPress={() => handleCancel(selectedRequest?.id, selectedRequest?.leave_details.start_date, selectedRequest?.leave_details.end_date)}>Cancel</Button>
+                </Section>
+            </>}
         />}
     />)
 
 }
 
 export default Page;
+

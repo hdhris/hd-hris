@@ -55,7 +55,7 @@ function PlansDataDisplay() {
 
         }
         return []
-    }, [data, members, planModal])
+    }, [data, planModal])
 
     const navEndContent = useCallback(() => {
         return (<>

@@ -16,6 +16,7 @@ import { Button, Spinner } from "@nextui-org/react";
 import axios from "axios";
 import { capitalize } from "lodash";
 import React, { useMemo, useState } from "react";
+import ScheduleSwap from "./swap";
 
 const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
@@ -51,11 +52,17 @@ function Page() {
     const { data, isLoading, mutate } = useQuery<Schedules>("/api/admin/attendance-time/schedule");
     const [tableData, setTableData] = useState<MajorEmployee[]>();
     const [isVisible, setVisible] = useState(false);
+    const [isSwapping, setIsSwapping] = useState(false);
     const [isPending, setPending] = useState(false);
     const [selectedBatch, setSelectedBatch] = useState<BatchSchedule | null>(null);
     SetNavEndContent(() => {
         return (
             <>
+                {data?.batch && data.batch.length >= 2 && (
+                    <Button {...uniformStyle()} onPress={() => setIsSwapping(true)}>
+                        Swap Schedule
+                    </Button>
+                )}
                 <SearchFilter
                     uniqueKey={"schedule-filter"}
                     items={data?.employees || []}
@@ -202,6 +209,10 @@ function Page() {
                 onClose={() => setVisible(false)}
                 onDelete={handleDelete}
             />
+
+            {data?.batch && (
+                <ScheduleSwap isOpen={isSwapping} onClose={() => setIsSwapping(false)} schedules={data?.batch || []} />
+            )}
         </>
     );
 }
