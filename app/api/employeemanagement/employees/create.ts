@@ -7,6 +7,7 @@ import { sendEmail } from "@/lib/utils/sendEmail";
 import { employeeSchema } from "./types";
 import { parseJsonInput } from "./utils";
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import { generateUniqueUsername } from "@/lib/utils/generateUsername";
 
 declare global {
   var prisma: PrismaClient | undefined;
@@ -42,17 +43,16 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
   return await prisma.$transaction(
     async (tx) => {
       try {
+        // Generate unique username
+        const username = await generateUniqueUsername(employee.email);
+
+        // Check if email exists
         const existingUser = await tx.trans_users.findFirst({
-          where: {
-            OR: [
-              { email: employee.email },
-              { auth_credentials: { username: credentials.username } },
-            ],
-          },
+          where: { email: employee.email }
         });
 
         if (existingUser) {
-          throw new Error("Username or email already exists");
+          throw new Error("Email already exists");
         }
 
         const newUser = await tx.trans_users.create({
@@ -61,10 +61,8 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
             email: employee.email,
             auth_credentials: {
               create: {
-                username: credentials.username,
-                password: await new SimpleAES().encryptData(
-                  credentials.password
-                ),
+                username: username,
+                password: await new SimpleAES().encryptData("password"),
               },
             },
           },
@@ -156,7 +154,26 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
           });
         }
 
-        return { employee: newEmployee, userId: newUser.id };
+        await sendEmail({
+          to: employee.email,
+          subject: "Your Login Credentials",
+          text: `
+            Hello ${employee.first_name}!
+            
+            Your account has been created successfully.
+            
+            Your login credentials are:
+            Username: ${username}
+            Password: password
+            
+            Please keep these credentials safe and change your password upon first login.
+            
+            Best regards,
+            HR Team
+          `,
+        });
+
+        return { employee: newEmployee, userId: newUser.id, username };
       } catch (error) {
         console.error("Transaction error:", {
           error,
@@ -175,35 +192,23 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Validate request body
     let data;
     try {
       data = await request.json();
     } catch (e) {
       return NextResponse.json(
-        {
-          message: "Invalid request body",
-        },
+        { message: "Invalid request body" },
         { status: 400 }
       );
     }
 
-    // Validate required fields
-    if (
-      !data?.employee?.email ||
-      !data?.credentials?.username ||
-      !data?.credentials?.password ||
-      !data?.credentials?.privilege_id // Add this check
-    ) {
+    if (!data?.credentials?.privilege_id) {
       return NextResponse.json(
-        {
-          message: "Email, username, password and privilege level are required",
-        },
+        { message: "Privilege level is required" },
         { status: 400 }
       );
     }
 
-    // Validate employee data
     let validatedData;
     try {
       validatedData = employeeSchema.parse(data);
@@ -221,30 +226,10 @@ export async function POST(request: NextRequest) {
     const { employee, userId } = await createEmployeeWithAccount(
       validatedData,
       {
-        employee: data.employee,
+        employee: data,  // Pass the full data as employee since it contains all fields
         credentials: data.credentials,
       }
     );
-
-    // Send welcome email (non-blocking)
-    sendEmail({
-      to: data.employee.email,
-      subject: "Your Login Credentials",
-      text: `
-        Hello ${data.employee.first_name}!
-        
-        Your account has been created successfully.
-        
-        Your login credentials are:
-        Username: ${data.credentials.username}
-        Password: ${data.credentials.password}
-        
-        Please keep these credentials safe and change your password upon first login.
-        
-        Best regards,
-        HR Team
-      `,
-    }).catch((err) => console.error("Failed to send welcome email:", err));
 
     return NextResponse.json(employee, { status: 201 });
   } catch (error) {

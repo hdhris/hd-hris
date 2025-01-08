@@ -1,4 +1,5 @@
 import { MinorEmployee, MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 import { ReactNode } from "react";
 
 export interface BatchSchedule {
@@ -66,6 +67,8 @@ export function determineAttendance({
     pmIn?: punchIN;
     pmOut?: punchOUT;
 }):
+    | "Awaiting Shift"
+    | "Present"
     | "Whole Day"
     | "Morning only"
     | "Afternoon only"
@@ -75,12 +78,29 @@ export function determineAttendance({
     | "Unscheduled"
     | "Unhired"
     | "Suspended" {
+    if (
+        amIn?.time &&
+        toGMT8(amIn.time).startOf("day").isSame(toGMT8().startOf("day")) &&
+        !amOut?.time &&
+        !pmIn?.time &&
+        !pmOut?.time
+    ) {
+        return "Present";
+    }
+
     const validInStatuses: InStatus[] = ["ontime", "late", "no break"];
     const validOutStatuses: OutStatus[] = ["ontime", "overtime", "early-out", "lunch", "no break"];
 
     // Collect punch-ins and punch-outs, filter undefined values
     const morningPunches = [amIn, amOut].filter((punch): punch is punchIN => punch !== undefined);
     const afternoonPunches = [pmIn, pmOut].filter((punch): punch is punchOUT => punch !== undefined);
+
+    if (
+        morningPunches.every((item) => item.status === "awaiting") &&
+        afternoonPunches.every((item) => item.status === "awaiting")
+    ) {
+        return "Awaiting Shift"
+    }
 
     if (
         morningPunches.some((item) => item.status === "no work") &&
@@ -142,6 +162,7 @@ export function determineAttendance({
 }
 
 export type InStatus =
+    | "awaiting"
     | "suspended"
     | "unhired"
     | "unscheduled"
@@ -151,8 +172,9 @@ export type InStatus =
     | "no break"
     | "no work"
     | "on leave";
-    
+
 export type OutStatus =
+    | "awaiting"
     | "suspended"
     | "unhired"
     | "unscheduled"

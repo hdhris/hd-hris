@@ -140,7 +140,7 @@ export function isEmployeeAvailable({
     //     if (toGMT8(employee.hired_at).isAfter(thisDate)) return false;
     // }
 
-    const notHired = employee.hired_at && toGMT8(employee.hired_at).isAfter(thisDate)
+    const unHired = employee.hired_at && toGMT8(employee.hired_at).isAfter(thisDate)
 
     const { suspension_json, resignation_json, termination_json } = employee as {
         suspension_json: UnavaliableStatusJSON[];
@@ -163,14 +163,14 @@ export function isEmployeeAvailable({
     const terminated = termination_json.some(isActive);
 
     if (find) {
-        if (find.includes("hired") && notHired) return false;
+        if (find.includes("hired") && unHired) return false;
         if (find.includes("suspension") && suspended) return false;
         if (find.includes("resignation") && resigned) return false;
         if (find.includes("termination") && terminated) return false;
         return true;
     }
 
-    return !suspended && !resigned && !terminated;
+    return !suspended && !resigned && !terminated && !unHired;
 }
 
 const listAllEmployee = [] as EmployeeAll[];
