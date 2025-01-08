@@ -1,8 +1,9 @@
 import { MinorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
-import { Avatar, Card, cn } from "@nextui-org/react";
+import { Avatar, Button, Card, cn } from "@nextui-org/react";
+import { IoMdClose } from "react-icons/io";
 
-export function EmployeeHeader({employee}:{employee: MinorEmployee}) {
+export function EmployeeHeader({employee, onClose}:{employee: MinorEmployee; onClose?: ()=> void}) {
     return (
         <div className="flex items-center gap-4 p-2">
             <Avatar isBordered src={employee?.picture ?? ""} />
@@ -10,6 +11,7 @@ export function EmployeeHeader({employee}:{employee: MinorEmployee}) {
                 <p className="text-medium font-semibold">{getEmpFullName(employee)}</p>
                 <p className="text-sm">{employee.ref_job_classes.name}</p>
             </div>
+            {onClose && <Button onPress={onClose} isIconOnly variant="light" className="ms-auto"><IoMdClose /></Button>}
         </div>
     );
 }

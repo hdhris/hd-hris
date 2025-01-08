@@ -32,11 +32,12 @@ export const BatchCard = ({
                 color: getColor(item.name),
             }}
             className={`border-2 w-[200px] me-2 min-h-36 transition-all duration-300`}
-            isPressable
+            isPressable={!isDisabled}
             isHoverable
             onMouseEnter={() => setHoveredBatchId(item.id)}
             onMouseLeave={() => setHoveredBatchId(null)}
             onPress={() => {
+                if(isDisabled) return
                 setSelectedBatch(item);
                 setVisible(true);
             }}
