@@ -28,10 +28,12 @@ export async function getAttendanceStatus({
     schedules,
     logs,
     rate_per_minute,
+    increase_rate,
     leave,
     overtime,
 }: {
     employee: BasicEmployee;
+    increase_rate: number;
     leave?: {
         id: number;
         start_date: string;
@@ -610,10 +612,10 @@ export async function getAttendanceStatus({
         renderedUndertime,
         renderedLeave,
         renderedOvertime,
-        paidShift: renderedShift * rate_per_minute,
+        paidShift: (renderedShift * rate_per_minute) * increase_rate,
         deductedUndertime: renderedUndertime * rate_per_minute,
-        paidLeave: renderedLeave * leave_rate,
-        paidOvertime: overtime ? overtime.requested_mins * rate_per_minute : 0,
+        paidLeave: (renderedLeave * leave_rate) * increase_rate,
+        paidOvertime: (overtime ? overtime.requested_mins * rate_per_minute : 0) * increase_rate,
     };
 }
 
