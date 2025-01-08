@@ -43,7 +43,7 @@ const DashboardStats = () => {
         return dash
     }, [dash])
 
-    const payroll = dashboard_data?.payroll?.length! > 0 ? dashboard_data?.payroll : []
+    const payroll = dashboard_data?.payroll &&  dashboard_data?.payroll?.length! > 0 ? dashboard_data?.payroll : []
     const emp_percentage = ((dashboard_data?.employees_kpi.newly_hired_employees! - dashboard_data?.employees_kpi.left_employees!) / dashboard_data?.employees_kpi.total_employees! * 100)
     const presentMorning = attendanceLogs ? Object.values(attendanceLogs).flatMap(item => item).filter(presentAm => ["Morning only", "Whole Day"].includes(determineAttendance(presentAm))).length : 0
     const presentAfternoon = attendanceLogs ? Object.values(attendanceLogs).flatMap(item => item).filter(presentPm => ["Afternoon only", "Whole Day"].includes(determineAttendance(presentPm))).length : 0
@@ -79,7 +79,7 @@ const DashboardStats = () => {
         footer: `Employees present today (${isMorning ? "Morning" : "Afternoon"})`, // chart: <PiUsersThreeLight />
         chart: <LuCalendarDays className="size-10 text-default-400/60"/>
     }, {
-        icon: <TbCurrencyPeso className={cn("", icon_color, icon_size)}/>,
+        icon: <TbCurrencyPeso className={cn("", icon_color, icon_size)} />,
         value: (
             <CountUp
                 start={0}
@@ -88,10 +88,20 @@ const DashboardStats = () => {
             />
         ),
         title: "Total Net Salary",
-        status: "decrement",
-        percent: "5",
-        footer: `${payroll && payroll.length > 0 && payroll[0].payroll_date ? payroll[0].payroll_date : "-- -- --"}`,
-        chart: <LuTicket className="size-10 text-default-400/60"/>
+        status: payroll && payroll.length > 1
+            ? payroll[0].net_salary > payroll[1].net_salary
+                ? "increment"
+                : payroll[0].net_salary === payroll[1].net_salary
+                    ? "no change"
+                    : "decrement"
+            : undefined,
+        percent: payroll && payroll.length > 1 && payroll[1].net_salary !== 0
+            ? `${Math.abs((((payroll[0].net_salary - payroll[1].net_salary) / payroll[1].net_salary) * 100)).toFixed(2)}`
+            : undefined,
+        footer: payroll && payroll.length > 0 && payroll[0].payroll_date
+            ? payroll[0].payroll_date
+            : "-- -- --",
+        chart: <LuTicket className="size-10 text-default-400/60" />
     }]
     return (<Stat data={dashboardData}/>)
 }
@@ -105,7 +115,7 @@ const SalaryData = () => {
         return dash
     }, [dash])
 
-    const payroll = dashboard_data?.payroll?.length! > 0 ? dashboard_data?.payroll : []
+    const payroll = dashboard_data?.payroll && dashboard_data?.payroll?.length! > 0 ? dashboard_data?.payroll : []
 
     return (<BorderCard className='space-y-4 h-full col-span-3'
                         heading={<CountUp start={0} end={Number( payroll && payroll.length > 0 && payroll[0].gross_total_amount ? payroll[0].gross_total_amount : 0)}

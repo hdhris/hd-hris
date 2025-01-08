@@ -38,7 +38,7 @@ function PayrollGraph({payrollData}: {payrollData: PayrollKPI[]}) {
                 };
             }),
         },
-    ]) : undefined;
+    ]) : [];
     const options: ApexOptions = {
         colors: ["#FE5B6E", "#00C49F", "#00C49F", "#FE5B6E"],
         series: series, chart: {

@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic"
 export async function GET() {
     try {
 
-        const currentYear = new Date().getFullYear() - 1
+        const currentYear = new Date().getFullYear()
         const startDate = toGMT8(`${currentYear}-01-01`).toDate();
         const endDate = toGMT8(`${currentYear}-12-31`).toDate();
         const [employee_kpi, pendingLeaveCount, deployed_payroll_dates] = await Promise.all([
