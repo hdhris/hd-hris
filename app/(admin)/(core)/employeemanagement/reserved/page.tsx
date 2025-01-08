@@ -21,7 +21,7 @@ const EmptyState: React.FC = () => {
           No Employees Found
         </Text>
         <Text className="text-gray-500">
-          There are no active employees at the moment.
+          There are no reserved employees at the moment.
         </Text>
         <Text className="text-sm text-gray-400">
           Click the &apos;Add Employee&apos; button above to get started.
@@ -34,12 +34,15 @@ const EmptyState: React.FC = () => {
 const Page: React.FC = () => {
   const { data, mutate, isLoading } = useEmployeesData();
 
-  const employees = useMemo(()=>{
-    if(data){
-      return data.filter(employee => isEmployeeAvailable({employee}));
-    }
-    return []
-  },[data]);
+ const reservedEmployees = useMemo(() => {
+     if (data) {
+       return data.filter(
+         (employee) =>
+           !isEmployeeAvailable({employee, find:["hired"]})
+       );
+     }
+     return [];
+   }, [data]);
   
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null
@@ -67,7 +70,7 @@ const Page: React.FC = () => {
   ));
 
   const handleOnSelected = (key: React.Key) => {
-    const selected = employees?.find((item) => item.id === Number(key));
+    const selected = reservedEmployees?.find((item) => item.id === Number(key));
     setSelectedEmployee(selected ?? null);
   };
 
@@ -143,8 +146,8 @@ const Page: React.FC = () => {
   const FilterItems = [
     {
       category: "Branch",
-      filtered: employees?.length
-        ? Array.from(new Set(employees.map((e) => e.ref_branches?.name)))
+      filtered: reservedEmployees?.length
+        ? Array.from(new Set(reservedEmployees.map((e) => e.ref_branches?.name)))
             .filter(Boolean)
             .map((branch) => ({
               key: "ref_branches.name", 
@@ -156,9 +159,9 @@ const Page: React.FC = () => {
     },
     {
       category: "Employee status",
-      filtered: employees?.length
+      filtered: reservedEmployees?.length
         ? Array.from(
-            new Set(employees.map((e) => e.ref_employment_status?.name))
+            new Set(reservedEmployees.map((e) => e.ref_employment_status?.name))
           )
             .filter(Boolean)
             .map((empstat) => ({
@@ -171,8 +174,8 @@ const Page: React.FC = () => {
     },
     {
       category: "Department",
-      filtered: employees?.length
-        ? Array.from(new Set(employees.map((e) => e.ref_departments?.name)))
+      filtered: reservedEmployees?.length
+        ? Array.from(new Set(reservedEmployees.map((e) => e.ref_departments?.name)))
             .filter(Boolean)
             .map((dept) => ({
               key: "ref_departments.name",
@@ -184,8 +187,8 @@ const Page: React.FC = () => {
     },
     {
       category: "Job Position",
-      filtered: employees?.length
-        ? Array.from(new Set(employees.map((e) => e.ref_job_classes?.name)))
+      filtered: reservedEmployees?.length
+        ? Array.from(new Set(reservedEmployees.map((e) => e.ref_job_classes?.name)))
             .filter(Boolean)
             .map((job) => ({
               key: "ref_job_classes.name",
@@ -212,7 +215,7 @@ const Page: React.FC = () => {
       <section className="w-full h-full flex">
         <DataDisplay
           defaultDisplay="table"
-          title="Active Employees"
+          title="Reserved Employees"
           data={[]}
           isLoading={true}
           onTableDisplay={{
@@ -224,15 +227,15 @@ const Page: React.FC = () => {
     );
   }
 
-  if (!employees || employees.length === 0) {
+  if (!reservedEmployees || reservedEmployees.length === 0) {
     return <EmptyState />;
   }
   return (
     <section className="w-full h-full flex gap-4">
       <DataDisplay
         defaultDisplay="table"
-        title="Active Employees"
-        data={employees}
+        title="Reserved Employees"
+        data={reservedEmployees}
         filterProps={{
           filterItems: FilterItems,
         }}
@@ -243,7 +246,7 @@ const Page: React.FC = () => {
           onRowAction: handleOnSelected,
         }}
         paginationProps={{
-          data_length: employees.length,
+          data_length: reservedEmployees.length,
         }}
         searchProps={{
           searchingItemKey: ["first_name", "last_name", "email", "contact_no"],
@@ -256,9 +259,8 @@ const Page: React.FC = () => {
                 employee={selectedEmployee}
                 onClose={() => setSelectedEmployee(null)}
                 onEmployeeUpdated={handleEmployeeUpdated}
-                sortedEmployees={employees}
+                sortedEmployees={reservedEmployees}
               />
-            
           )
         }
       />
