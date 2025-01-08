@@ -134,12 +134,15 @@ async function attendanceData({
             await Promise.all(
                 employees.map(async (emp) => {
                     try {
+                        const thisDate = toGMT8(date).startOf('day');
+                        const holiday = toGMT8('2025-01-08').startOf('day');
                         // const employeeLogs = logsByEmployee[emp.id] ?? [];
                         // const overtime = overtimes[emp.id] ?? undefined;
                         statusesByDate[date][emp.id] = await getAttendanceStatus({
                             employee: emp,
                             date,
                             rate_per_minute: 0.75,
+                            increase_rate: thisDate.isSame(holiday) ? 1.20 : 1,
                             schedules: employeeScheduleMap[emp.id],
                             logs: logsByEmployee ? logsByEmployee[emp.id] ?? [] : [],
                             overtime: overtimesByEmploye ? overtimesByEmploye[emp.id] ?? undefined : undefined,
