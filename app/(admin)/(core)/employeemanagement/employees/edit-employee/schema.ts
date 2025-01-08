@@ -273,8 +273,8 @@ highSchool: z
   // }, z.boolean()),
   branch_id: z.string().min(1, "Branch is required"),
   salary_grade_id: z.string().min(1, "Salary Grade is required"),
-  batch_id: z.string().min(1, "Batch is required"),
-  days_json: z.array(z.string()),
+  batch_id: z.string().optional().nullable(),
+  days_json: z.array(z.string()).optional().nullable(),
   employement_status_id: z.string().min(1, "Employement status is required"),
 });
 
