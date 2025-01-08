@@ -408,14 +408,25 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
           data: currentEmployee.suspension_json,
           color: "warning"
         };
+      
       }
+
+      if (!isEmployeeAvailable({employee: currentEmployee, find: ["hired"]})) {
+        return {
+          type: "Reserved",
+          modalType: null,
+          data: null,
+          color: "default"
+        };
+      }
+      
       return {
         type: "Active",
         modalType: null,
         data: null,
         color: "success"
       };
-    };
+    }
   
     const status = getStatusInfo();
   
@@ -617,7 +628,8 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
   //   !employee.resignation_json &&
   //   !employee.termination_json;
   //   !employee.suspension_json &&
-  const isActive = isEmployeeAvailable({employee});
+  // const isActive = isEmployeeAvailable({employee});
+  const isActive = isEmployeeAvailable({employee, find: ["suspension","resignation","termination"]});//modify if suspend and resign not include 
   const isSuspended = !isEmployeeAvailable({employee, find:["suspension"]});
   const isResigned = !isEmployeeAvailable({employee, find:["resignation"]});
   const isTerminated = !isEmployeeAvailable({employee, find:["termination"]});
