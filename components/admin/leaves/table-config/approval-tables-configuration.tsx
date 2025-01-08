@@ -30,7 +30,7 @@ const ApprovalColumns: ColumnsProps[] = [{
 }]
 
 export const approval_status_color_map: Record<string, BadgeProps["color"]> = {
-    approved: "success", rejected: "danger", pending: "warning", canceled: "danger",
+    approved: "success", rejected: "danger", pending: "warning", cancelled: "danger",
 }
 export const TableConfigurations: TableConfigProps<LeaveRequest> = {
     columns: ApprovalColumns, rowCell: (item: LeaveRequest, columnKey: React.Key) => {
@@ -61,7 +61,7 @@ export const TableConfigurations: TableConfigProps<LeaveRequest> = {
                 <Typography>{toGMT8(item.leave_details.end_date).format("MMM DD, YYYY hh:mm A")}</Typography>
             </Case>
             <Case of="duration_of_leave">
-                <Typography>{item.leave_details.total_days}</Typography>
+                <Typography>{item.leave_details.total_days ? formatDaysToReadableTime(item.leave_details.total_days) : 0}</Typography>
             </Case>
             <Case of="status">
                 <Status color={approval_status_color_map[item.leave_details.status.toLowerCase()]}>

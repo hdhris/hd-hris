@@ -73,6 +73,16 @@ export async function GET(request: Request) {
             },
             trans_leave_types: {
                 include: {
+                    dim_leave_balances: {
+                        where: {
+                            deleted_at: null,
+                        },
+                        select: {
+                            id: true,
+                            employee_id: true,
+                            leave_type_id: true
+                        }
+                    },
                     ref_leave_type_details: {
                         select: {
                             id: true,
@@ -125,8 +135,8 @@ export async function GET(request: Request) {
                     start_date: item.start_date?.toISOString(),
                     end_date:item.end_date?.toISOString(),
                     reason: item.reason || "",
-                    status: item.status as "Approved" | "Pending" | "Rejected",
-                    total_days: formatDaysToReadableTime(item.total_days.toNumber()),
+                    status: item.status as "approved" | "pending" | "rejected" | "cancelled",
+                    total_days: item.total_days.toNumber(),
                     created_at: toGMT8(item.created_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
                     updated_at: toGMT8(item.updated_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
                 },
@@ -136,6 +146,8 @@ export async function GET(request: Request) {
                     code: item.trans_leave_types?.ref_leave_type_details?.code || "",
                     attachments: attachmentMetadata,
                 },
+                // trans_leave_type: item.trans_leave_types.id,
+                leave_credit: item.trans_leave_types.dim_leave_balances.find(balance => balance.employee_id === item.employee_id && balance.leave_type_id === item.trans_leave_types.id)!,
                 evaluators: processJsonObject<Evaluations>(item.evaluators)!,
             };
         })

@@ -26,7 +26,7 @@ import {isEqual} from "lodash";
 import Typography from "@/components/common/typography/Typography";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {useSession} from 'next-auth/react';
-import {AnimatedList} from "@/components/ui/animated-list";
+import {AnimatedList, AnimatedListItem} from "@/components/ui/animated-list";
 import {Alert} from "@nextui-org/alert";
 import NumberFlow from "@number-flow/react";
 import {Chip} from "@nextui-org/chip";
@@ -225,7 +225,8 @@ const Welcome = ({data, isOpen, onOpenChange}: {data: SystemNotification, isOpen
                         <Accordion variant="splitted" className="w-full px-0">
                             {notifications ? Object.entries(notifications).map(([key, value], index) => {
                                 return (
-                                    <AccordionItem key={index} aria-label={key} title={
+                                    <AnimatedListItem key={index}>
+                                    <AccordionItem aria-label={key} title={
                                         <div className="flex justify-between">
                                             <Typography>{key}</Typography>
                                             {value?.length! > 0 &&
@@ -244,6 +245,7 @@ const Welcome = ({data, isOpen, onOpenChange}: {data: SystemNotification, isOpen
                                             })
                                         }
                                     </AccordionItem>
+                                    </AnimatedListItem>
                                 )
                             }) : null}
                         </Accordion>

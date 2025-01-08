@@ -472,13 +472,13 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             // Decide between creating or updating the leave request
             const endpoint = employee?.id ? "/api/admin/leaves/requests/update" : "/api/admin/leaves/requests/create";
 
-            console.log("End Point: ", endpoint)
+            // console.log("End Point: ", endpoint)
             const res = await axiosInstance.post(endpoint, items);
 
             if (res.status === 200) {
                 toast({
                     title: "Success",
-                    description: `Leave credit ${employee?.id ? "updated" : "created"} successfully.`,
+                    description: `Leave request ${employee?.id ? "updated" : "created"} successfully.`,
                     variant: "success",
                 });
 
@@ -525,7 +525,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             setIsSubmitting(false); // Ensure the loading state is cleared
         }
 
-    }, [calculateLeaveDeduction, documentAttachments, employee?.id, employee_leave_type, isAttachmentRequired, toast, url, user?.employees])
+    }, [calculateLeaveDeduction, documentAttachments, employee?.id, employee_leave_type, form, handleModalOpen, isAttachmentRequired, toast, url, user?.employees])
 
 
     const LeaveRequestForm: FormInputProps[] = [{

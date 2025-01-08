@@ -37,6 +37,10 @@ import {pluralize} from "@/helper/pluralize/pluralize";
 import {LuBan, LuPencil} from "react-icons/lu";
 import {useHolidays} from "@/helper/holidays/unavailableDates";
 import {CalendarDate} from "@internationalized/date";
+import showDialog from "@/lib/utils/confirmDialog";
+import {AxiosError} from "axios";
+import {Alert} from "@nextui-org/alert";
+import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
 
 interface LeaveRequestPaginate {
     data: LeaveRequest[]
@@ -90,6 +94,7 @@ function Page() {
                     created_at: item.leave_details.created_at,
                     updated_at: item.leave_details.updated_at
                 },
+                leave_credit: item.leave_credit,
                 evaluators: item.evaluators,
                 created_by
             }
@@ -133,7 +138,6 @@ function Page() {
         const schedDate = start.format("YYYY-MM-DD HH:mm:ss")
 
 
-
         // console.log("Start Sched: ", start.format("YYYY-MM-DD HH:mm:ss"));
         const dayOfWeek = start.day(); // dayjs gives 0 (Sunday) to 6 (Saturday)
         const dayStr = dayString[dayOfWeek]; // Map to the corresponding day string
@@ -144,11 +148,9 @@ function Page() {
         console.log("IsDateUnAvailable: ", isDateUnAvailable);
         console.log("Calendar Date: ", calendarDate.toString());
         console.log({
-            schedDate: schedDate,
-            isDateUnavailable: isDateUnavailable,
-            isSchedule: dayOfWeekSchedule.includes(dayStr)
+            schedDate: schedDate, isDateUnavailable: isDateUnavailable, isSchedule: dayOfWeekSchedule.includes(dayStr)
 
-    })
+        })
         return !dayOfWeekSchedule.includes(dayStr) || isDateUnAvailable
         // console.log("Start: ", start.format("YYYY-MM-DD HH:mm:ss"));
         // console.log("End: ", end.format("YYYY-MM-DD HH:mm:ss"));
@@ -202,11 +204,17 @@ function Page() {
     }, []);
 
     const leave_progress = useMemo(() => {
-        const startDate = toGMT8(toGMT8(selectedRequest?.leave_details.start_date).toDate());
+        const startDate = toGMT8(toGMT8(selectedRequest?.leave_details.start_date).format("YYYY-MM-DD HH:mm:ss"));
         const endDate = toGMT8(selectedRequest?.leave_details.end_date);
         const isApprovedLeave = selectedRequest?.leave_details.status;
+        // console.log("isApproved: ", isApprovedLeave)
         if (selectedRequest) {
-            if (today.isBefore(startDate)) { // No 'day' argument to include time in the comparison
+            console.log({isApprovedLeave})
+            if(isApprovedLeave === 'cancelled'){
+                console.log("Cancelled")
+                return "Cancelled"
+            }
+            else if (today.isBefore(startDate)) { // No 'day' argument to include time in the comparison
                 console.log("Not Started");
                 return "Not Started";
             } else if (today.isAfter(endDate, 'day')) {
@@ -215,7 +223,8 @@ function Page() {
             } else if (isApprovedLeave) {
                 console.log("On Going");
                 return "On Going";
-            } else {
+            }
+            else {
                 console.log("Not Yet Decided");
                 return "Not Yet Decided";
             }
@@ -234,7 +243,7 @@ function Page() {
 
         // Normalize start and end dates
         let currentDate = normalizeDate(new Date(startDate.year, startDate.month - 1, startDate.day));
-        const endDateCopy = normalizeDate(toGMT8().toDate());
+        const endDateCopy = normalizeDate(new Date(toGMT8().format("YYYY-MM-DD")));
 
         console.log("currentDate: ", currentDate)
         console.log("endDateCopy: ", endDateCopy)
@@ -260,32 +269,100 @@ function Page() {
     const handleCancel = useCallback(async (id: number, startDate: string, endDate: string) => {
         setIsCancelling(true);
 
+        let deductLeaveDuration: number;
         const start = toGMT8(startDate)
         const end = toGMT8()
-        if (start.isAfter(end)) {
-            console.log({used: selectedRequest?.leave_details.total_days});
+        if (leave_progress === "Not Started") {
+            deductLeaveDuration = selectedRequest?.leave_details.total_days!
+
+        }else {
+            const workingDays = countAvailableDays(new CalendarDate(start.year(), start.month(), start.date()), id);
+
+            const breakTime = selectedRequest?.schedule.ref_batch_schedules.break_min ?? 0;
+
+// Check if the end time overlaps with lunch break (12:00 PM - 1:00 PM)
+            const passesLunchBreak = end.hour() >= 13 || (end.hour() === 12 && end.minute() >= 0);
+            const isLunchBreak = (end.hour() === 12 && end.minute() >= 0) || (end.hour() === 13 && end.minute() < 60);
+
+// Calculate work duration in minutes
+            const workDuration = start.diff(end, 'minutes', true);
+            let totalWorkHours = Math.abs(workDuration) - breakTime;
+
+// Adjust leave difference for lunch break
+            let leaveDif = Math.abs(start.diff(end, "minutes"));
+
+            if (isLunchBreak) {
+                // If the period overlaps with lunch break, exclude the lunch break time (12:00 PM - 1:00 PM)
+                const lunchBreakStart = start.clone().hour(12).minute(0).second(0);
+                const lunchBreakEnd = start.clone().hour(13).minute(0).second(0);
+
+                if (end.isAfter(lunchBreakStart) && start.isBefore(lunchBreakEnd)) {
+                    // Calculate overlap duration with lunch break
+                    const overlapStart = end.isAfter(lunchBreakStart) ? lunchBreakStart : start;
+                    const overlapEnd = end.isBefore(lunchBreakEnd) ? end : lunchBreakEnd;
+
+                    const lunchBreakDuration = overlapStart.diff(overlapEnd, 'minutes');
+                    leaveDif -= Math.abs(lunchBreakDuration);
+                }
+            }
+
+            if (workingDays < 0) {
+                deductLeaveDuration = leaveDif;
+            } else {
+                const used = (workingDays * totalWorkHours) + leaveDif
+                deductLeaveDuration = Number(used / 1440);
+            }
+
+            // Debugging logs
+            console.log("End: ", end.format("YYYY-MM-DD HH:mm:ss"));
+            console.log("Passes Lunch Break: ", passesLunchBreak);
+            console.log("Is Lunch Break: ", isLunchBreak);
+            console.log("Working Days: ", workingDays);
+            console.log("Deduct Leave Duration: ", deductLeaveDuration);
         }
 
-
-        const count = countAvailableDays(new CalendarDate(start.year(), start.month(), start.date()), id)
 
         // Find the schedule for the request
 
         // Ensure uniqueDaysJson is flattened
 
 
-        // try {
-        //     const res = await axiosInstance.post("/api/admin/leaves/requests/cancel", selectedRequest);
-        //     if (res.status === 200) {
-        //         toast.success(res.data.message);
-        //     }
-        // } catch (error) {
-        //     if (error instanceof AxiosError) {
-        //         toast.error(error?.response?.data.message || "");
-        //     }
-        // }
+        try {
+            const cancelLeaveRequest = {
+                id: selectedRequest?.id,
+                employee_id: selectedRequest?.employee_id,
+                leave_credit_id: selectedRequest?.leave_credit.id,
+                used_leaved: deductLeaveDuration
+            }
+
+            console.log("Cancel: ", cancelLeaveRequest);
+            const result = await showDialog({
+                title: "Cancel Leave Request", message: (<div className="flex flex-col gap-2">
+                        <Typography>
+                            Are you sure you want to cancel the leave request for <Typography as="span"
+                                                                                              className="font-semibold">{selectedRequest?.name}</Typography>?
+                        </Typography>
+                        <Alert description="This action cannot be undone. Do you want to proceed?" color="danger"/>
+                    </div>)
+            });
+
+
+            if (result === "yes") {
+                const res = await axiosInstance.post("/api/admin/leaves/requests/cancel", cancelLeaveRequest);
+                if (res.status === 200) {
+                    toast.success(res.data.message);
+                }
+            }
+
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error?.response?.data.message || "");
+            }
+        }
+
+        console.log("Cancel Used Days: ", deductLeaveDuration);
         setIsCancelling(false);
-    }, [allRequests, isDateUnavailable]);
+    }, [countAvailableDays, leave_progress, selectedRequest]);
 
     // useEffect(() => {
     //     const isApprovedLeave = selectedRequest?.leave_details.status;console.log()
@@ -423,10 +500,10 @@ function Page() {
             }, {
                 label: "End Date", value: toGMT8(selectedRequest.leave_details.end_date).format("MMM DD, YYYY hh:mm A")
             }, {
-                label: "Duration Of Leave", value: selectedRequest.leave_details.total_days
+                label: "Duration Of Leave", value:selectedRequest.leave_details.total_days ?  formatDaysToReadableTime(selectedRequest.leave_details.total_days) : 0
             }, {
                 label: "Leave Progress Status", value: <Chip variant="flat"
-                                                             color={leave_progress === "Not Started" || leave_progress === "Not Yet Decided" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
+                                                             color={leave_progress === "Not Started" || leave_progress === "Cancelled" || leave_progress === "Not Yet Decided" ? "danger" : leave_progress === "Finished" ? "success" : "warning"}>{leave_progress}</Chip>
             }, {
                 label: "Created By", value: <>
                     <UserAvatarTooltip user={{
@@ -506,12 +583,12 @@ function Page() {
             />
         </>}
             onDanger={<>
-                <Section className="ms-0" title="Edit Leave"
-                         subtitle="Edit the leave request">
-                    <Button
-                        isDisabled={selectedRequest.leave_details.status !== "Pending"}
-                        startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>
-                </Section>
+                {/*<Section className="ms-0" title="Edit Leave"*/}
+                {/*         subtitle="Edit the leave request">*/}
+                {/*    <Button*/}
+                {/*        isDisabled={selectedRequest.leave_details.status !== "pending"}*/}
+                {/*        startContent={<LuPencil/>}{...uniformStyle()}>Edit</Button>*/}
+                {/*</Section>*/}
                 {/*<hr className="border border-destructive/20"/>*/}
                 {/*<Section className="ms-0" title="Extend Leave"*/}
                 {/*         subtitle="Extend the leave request">*/}
@@ -519,11 +596,11 @@ function Page() {
                 {/*        isDisabled={selectedRequest.leave_details.status === "Approved" || selectedRequest.leave_details.status === "Rejected"}*/}
                 {/*        startContent={<LuCalendarRange/>} {...uniformStyle()}>Extend</Button>*/}
                 {/*</Section>*/}
-                <hr className="border border-destructive/20"/>
+                {/*<hr className="border border-destructive/20"/>*/}
                 <Section className="ms-0" title="Cancel"
                          subtitle="Cancel the leave request">
                     <Button
-                        isDisabled={selectedRequest.leave_details.status === "Pending" || selectedRequest.leave_details.status === "Rejected" || leave_progress === "Finished"}
+                        isDisabled={selectedRequest.leave_details.status === "pending" || selectedRequest.leave_details.status === "rejected" || leave_progress === "Finished" || leave_progress === "Cancelled"}
                         startContent={<LuBan/>} {...uniformStyle({color: "danger"})}
                         onPress={() => handleCancel(selectedRequest?.id, selectedRequest?.leave_details.start_date, selectedRequest?.leave_details.end_date)}>Cancel</Button>
                 </Section>

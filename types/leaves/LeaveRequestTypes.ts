@@ -86,7 +86,11 @@ interface EmployeeLeaveType {
     attachments?: MetadataProps[]
 }
 
-
+export interface LeaveCreditId{
+    id: number,
+    employee_id: number,
+    leave_type_id: number
+}
 export interface LeaveRequest {
     id: number;
     employee_id: number;
@@ -98,6 +102,7 @@ export interface LeaveRequest {
     leave_details: LeaveDetails;
     evaluators: Evaluations;
     schedule: DimSchedule
+    leave_credit:LeaveCreditId
 
 }
 
@@ -105,9 +110,9 @@ export interface LeaveRequest {
 interface LeaveDetails {
     start_date: string; // ISO date string
     end_date: string;   // ISO date string
-    total_days: string;
+    total_days: number;
     reason: string;
-    status: "Pending" | "Approved" | "Rejected"
+    status: "pending" | "approved" | "rejected" | "cancelled"
     created_at: string; // ISO date string
     updated_at: string; // ISO date string
 }
