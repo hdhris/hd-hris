@@ -48,7 +48,7 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
 
         // Check if email exists
         const existingUser = await tx.trans_users.findFirst({
-          where: { email: employee.email }
+          where: { email: employee.email },
         });
 
         if (existingUser) {
@@ -126,50 +126,53 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
 
         // Step 5: Create schedules if provided
         if (Array.isArray(schedules) && schedules.length > 0) {
+          const schedule = schedules[0];
           const currentDate = new Date();
-          
-          // First, fetch the complete batch schedule details
-          const batchSchedule = await tx.ref_batch_schedules.findUnique({
-            where: {
-              id: Number(schedules[0].batch_id),
-              deleted_at: null
+
+          // Only create schedule if batch_id is present and not null
+          if (schedule.batch_id) {
+            const batchSchedule = await tx.ref_batch_schedules.findUnique({
+              where: {
+                id: Number(schedule.batch_id),
+                deleted_at: null,
+              },
+            });
+
+            if (batchSchedule) {
+              await tx.dim_schedules.create({
+                data: {
+                  employee_id: newEmployee.id,
+                  batch_id: Number(schedule.batch_id),
+                  days_json: schedule.days_json,
+                  created_at: currentDate,
+                  updated_at: currentDate,
+                  start_date: currentDate,
+                  end_date: null,
+                  clock_in: batchSchedule?.clock_in || null,
+                  clock_out: batchSchedule?.clock_out || null,
+                  break_min: batchSchedule?.break_min || 0,
+                },
+              });
             }
-          });
-        
-          // Create schedule with batch schedule details
-          await tx.dim_schedules.create({
-            data: {
-              employee_id: newEmployee.id,
-              batch_id: Number(schedules[0].batch_id),
-              days_json: schedules[0].days_json,
-              created_at: currentDate,
-              updated_at: currentDate,
-              start_date: currentDate,
-              end_date: null,
-              // Include time details from batch schedule
-              clock_in: batchSchedule?.clock_in || null,
-              clock_out: batchSchedule?.clock_out || null,
-              break_min: batchSchedule?.break_min || 0
-            }
-          });
+          }
         }
 
         await sendEmail({
           to: employee.email,
           subject: "Your Login Credentials",
           text: `
-            Hello ${employee.first_name}!
+           Hello ${employee.first_name || ""}!
             
             Your account has been created successfully.
             
-            Your login credentials are:
-            Username: ${username}
-            Password: password
+            Temporary Username:  ${username}
+            Temporary Password: password
             
-            Please keep these credentials safe and change your password upon first login.
+            Go to https://www.hdhris.org/auth/login and  use these temporary credentials and 
+            set up your username and password immediately upon first login.
             
             Best regards,
-            HR Team
+            HRiS Team
           `,
         });
 
@@ -226,7 +229,7 @@ export async function POST(request: NextRequest) {
     const { employee, userId } = await createEmployeeWithAccount(
       validatedData,
       {
-        employee: data,  // Pass the full data as employee since it contains all fields
+        employee: data, // Pass the full data as employee since it contains all fields
         credentials: data.credentials,
       }
     );

@@ -59,6 +59,16 @@ const ScheduleSelection: React.FC = () => {
     },
   };
 
+  const handleBatchSelect = (batch: BatchSchedule) => {
+    if (selectedBatch?.id === batch.id) {
+      setSelectedBatch(null);
+      setValue("batch_id", "");
+      setValue("days_json", ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
+    } else {
+      setSelectedBatch(batch);
+    }
+  };
+
   const renderBatchSchedules = () => {
     if (!data?.batch || data.batch.length === 0) {
       return <p>No batch schedules available</p>;
@@ -79,11 +89,10 @@ const ScheduleSelection: React.FC = () => {
           <BatchCard
             key={schedule.id}
             item={schedule}
-            // color={colorScheme} // Fixed: No color prop declaration.
             isHovered={hoveredBatchId === schedule.id}
             isSelected={selectedBatchId === schedule.id.toString()}
             setHoveredBatchId={setHoveredBatchId}
-            setSelectedBatch={setSelectedBatch}
+            setSelectedBatch={() => handleBatchSelect(schedule)}
             setVisible={setVisible}
           />
           {isSelected && (

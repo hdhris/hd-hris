@@ -142,6 +142,19 @@ const Page: React.FC = () => {
 
   const FilterItems = [
     {
+      category: "Branch",
+      filtered: employees?.length
+        ? Array.from(new Set(employees.map((e) => e.ref_branches?.name)))
+            .filter(Boolean)
+            .map((branch) => ({
+              key: "ref_branches.name", 
+              value: branch,
+              name: branch,
+              uid: branch,
+            }))
+        : [],
+    },
+    {
       category: "Employee status",
       filtered: employees?.length
         ? Array.from(

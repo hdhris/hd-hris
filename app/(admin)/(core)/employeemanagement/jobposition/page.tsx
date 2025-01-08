@@ -91,6 +91,7 @@ const Page: React.FC = () => {
     columns: [
       { uid: "name", name: "Name", sortable: true },
       { uid: "superior", name: "Next position", sortable: true },
+      { uid: "salary_range", name: "Salary Range", sortable: true }, // Add this
       { uid: "employeeCount", name: "No. of Employees", sortable: true },
       // { uid: "pay_rate", name: "Payrate", sortable: true },
       { uid: "status", name: "Status", sortable: true },
@@ -107,6 +108,12 @@ const Page: React.FC = () => {
               <span>{job.name}</span>
             </div>
           );
+          case "salary_range":
+            return (
+              <div className={cellClasses}>
+                <span>₱{Number(job.min_salary).toLocaleString()} - ₱{Number(job.max_salary).toLocaleString()}</span>
+              </div>
+            );
         case "superior":
           return (
             <div className={cellClasses}>
@@ -197,6 +204,9 @@ const Page: React.FC = () => {
                   <span className="font-medium">{job.name}</span>
                   <span className="text-sm text-gray-500">
                     Superior: {getSuperiorName(job)}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    Salary Range: ₱{Number(job.min_salary).toLocaleString()} - ₱{Number(job.max_salary).toLocaleString()}
                   </span>
                   <span className="text-sm text-gray-500">
                     {job.trans_employees?.length || 0} employees

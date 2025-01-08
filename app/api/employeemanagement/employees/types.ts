@@ -38,10 +38,10 @@ export const employeeSchema = z.object({
   termination_json: z.any().optional(),
   schedules: z.array(
     z.object({
-      batch_id: z.number(),
-      days_json: z.array(z.string()),
+      batch_id: z.number().optional().nullable(), 
+      days_json: z.array(z.string()).optional().nullable(),
     })
-  ).optional(),
+  ).optional().nullable(),
 });
 
 export const statusUpdateSchema = z.object({

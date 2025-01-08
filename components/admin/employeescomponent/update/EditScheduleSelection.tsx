@@ -109,7 +109,7 @@ const EditScheduleSelection: React.FC<EditScheduleSelectionProps> = ({
   if (isBatchLoading) {
     return (
     <div className="flex justify-center items-center h-32">
-     <Spinner>Loading schedules...</Spinner>;
+     <Spinner>Loading schedules...</Spinner>
     </div>
     );
   }
