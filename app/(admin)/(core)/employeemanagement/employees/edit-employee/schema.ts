@@ -252,19 +252,14 @@ highSchool: z
     .default([]),
 
   // Employment details
-  hired_at: z.string()
-  .min(1, "Hire date is required")
-  .refine((date) => {
-    const hireDate = dayjs(date);
-    const currentDate = dayjs().endOf('day');
-    return hireDate.isSame(currentDate, 'day') || hireDate.isBefore(currentDate);
-  }, "Hire date cannot be in the future")
-  .refine((date) => {
-    const hireDate = dayjs(date);
-    const minimumHireDate = dayjs('1970-01-01');  
-    return hireDate.isAfter(minimumHireDate);
-  }, "Hire date seems invalid. Please select a more recent date"),
-  
+   hired_at: z.string()
+    .min(1, "Hire date is required")
+    .refine((date) => {
+      const hireDate = dayjs(date);
+      const minimumHireDate = dayjs('1970-01-01');
+      return hireDate.isAfter(minimumHireDate);
+    }, "Hire date seems invalid. Please select a more recent date"),
+    
   department_id: z.string().min(1, "Department is required"),
   job_id: z.string().min(1, "Job is required"),
   // is_regular: z.preprocess((val) => {
@@ -273,8 +268,8 @@ highSchool: z
   // }, z.boolean()),
   branch_id: z.string().min(1, "Branch is required"),
   salary_grade_id: z.string().min(1, "Salary Grade is required"),
-  batch_id: z.string().min(1, "Batch is required"),
-  days_json: z.array(z.string()),
+  batch_id: z.string().optional().nullable(),
+  days_json: z.array(z.string()).optional().nullable(),
   employement_status_id: z.string().min(1, "Employement status is required"),
 });
 

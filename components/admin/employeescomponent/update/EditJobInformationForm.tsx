@@ -191,7 +191,6 @@ const EditJobInformationForm: React.FC = () => {
       isRequired: true,
       config: {
         placeholder: "Select hire date",
-        maxValue: parseAbsoluteToLocal(dayjs().endOf("day").toISOString()),
         validationState: "valid",
       },
     },
