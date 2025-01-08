@@ -1,0 +1,47 @@
+[
+  {
+    "id": 20,
+    "name": "Warehouse",
+    "color": "#33C4FF",
+    "is_active": true,
+    "created_at": "2024-12-17 19:32:45.629000",
+    "updated_at": "2024-12-17 19:32:45.629000",
+    "deleted_at": null
+  },
+  {
+    "id": 21,
+    "name": "Headquarters",
+    "color": "#33FF57",
+    "is_active": true,
+    "created_at": "2024-12-17 19:32:45.629000",
+    "updated_at": "2024-12-27 11:58:21.649000",
+    "deleted_at": null
+  },
+  {
+    "id": 25,
+    "name": "Human Resource",
+    "color": "#4f46e5",
+    "is_active": false,
+    "created_at": "2024-12-18 03:58:41.996000",
+    "updated_at": "2024-12-27 20:41:14.819000",
+    "deleted_at": null
+  },
+  {
+    "id": 27,
+    "name": "MIS",
+    "color": "#2f2a83",
+    "is_active": true,
+    "created_at": "2024-12-27 11:49:13.383000",
+    "updated_at": "2024-12-27 17:39:29.934000",
+    "deleted_at": null
+  },
+  {
+    "id": 28,
+    "name": "Sales",
+    "color": "#e64c4c",
+    "is_active": false,
+    "created_at": "2024-12-27 17:40:19.104000",
+    "updated_at": "2024-12-27 17:40:28.540000",
+    "deleted_at": "2024-12-27 17:40:28.540000"
+  }
+]

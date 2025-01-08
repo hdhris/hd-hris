@@ -1,0 +1,11 @@
+
+
+"acl": [
+  {
+    "id": 1,
+    "employee_id": 1,
+    "privilege_id": 19,
+    "banned_til": null,
+    "user_id": "82165ae4-56fa-484e-87d1-552d7183d4aa"
+  }
+]
