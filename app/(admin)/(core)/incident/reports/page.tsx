@@ -12,19 +12,19 @@ import { useQuery } from "@/services/queries";
 import { IncidentReport } from "@/types/incident-reports/type";
 import { Button } from "@nextui-org/react";
 import React, { useState } from "react";
+import FileReport from "./FileReport";
+import TableData from "@/components/tabledata/TableData";
+import DataTable from "@/components/common/data-display/data-table";
 
 function Page() {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<IncidentReport | null>(null);
-  const { data, isLoading } = useQuery<IncidentReport[]>(
-    "/api/admin/incident/payroll",
-    { refreshInterval: 5000 }
-  );
+  const { data, isLoading } = useQuery<IncidentReport[]>("/api/admin/incident/payroll");
   SetNavEndContent(() => {
     return (
       <>
-        <Button {...uniformStyle()} onPress={() => setOpen(true)}>
-          File incident
+        <Button {...uniformStyle()} onPress={() => setIsOpen(true)}>
+          Report Incident
         </Button>
       </>
     );
@@ -32,7 +32,7 @@ function Page() {
 
   return (
     <>
-      <DataDisplay
+       <DataDisplay
         title="Incident Reports"
         data={data || []}
         isLoading={isLoading}
@@ -42,12 +42,12 @@ function Page() {
           config: tableConfig,
           classNames: { td: "[&:nth-child(n):not(:nth-child(1))]:w-[165px]" },
           layout: "auto",
-          onRowAction: (key) => {
-            const item = data?.find((item) => item.id === Number(key));
-            setSelectedItem(item!);
-            // console.log(item);
-            setOpen(true);
-          },
+          // onRowAction: (key) => {
+          //   const item = data?.find((item) => item.id === Number(key));
+          //   setSelectedItem(item!);
+          //   // console.log(item);
+          //   setOpen(true);
+          // },
         }}
         defaultDisplay="table"
         paginationProps={{
@@ -55,13 +55,17 @@ function Page() {
         }}
       />
 
-      <IncidentDrawer
+      {/* <IncidentDrawer
         selected={selectedItem}
         isOpen={open}
         onClose={(b)=>{setOpen(b); setTimeout(()=>{
           setSelectedItem(null);
         },500)}}
         // isSubmitting={false}
+      /> */}
+      <FileReport
+        isOpen={isOpen}
+        onClose={()=> setIsOpen(false)}
       />
     </>
   );

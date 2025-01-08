@@ -35,8 +35,17 @@ function ScheduleSwap({ isOpen, onClose, schedules }: ScheduleSwapProp) {
         setIsLoading(true);
         try {
             const result = await showDialog({
-                title: "Confirm Swap",
-                message: `Are you sure you want to swap schedule?`,
+                title: "",
+                message: (
+                    <>
+                        <h1 className="text-danger-500 font-semibold text-center">Critical action</h1>
+                        <p className="text-center">
+                            {"This will update the assigned schedules for the involved employees. " +
+                                "Please double-check your selections before proceeding."}
+                        </p>
+                        <p className="text-center">Are you sure you want to continue?</p>
+                    </>
+                ),
                 preferredAnswer: "no",
             });
             if (result === "yes") {
@@ -73,6 +82,7 @@ function ScheduleSwap({ isOpen, onClose, schedules }: ScheduleSwapProp) {
                 },
                 onAction: {
                     label: "Swap",
+                    isLoading,
                     isDisabled: selectedBatch.length < 2,
                     onPress: handleSubmit,
                 },

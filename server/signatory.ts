@@ -296,7 +296,7 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
             decision: {
                 decisionDate: is_auto_approved ? toGMT8().toISOString() : null,
                 is_decided: is_auto_approved ? true : null,
-                rejectedReason: is_auto_approved ? 'Automatically approved' : null,
+                rejectedReason: null,
             },
             evaluated_by: user.id,
             role: is_applicant_in_signatory && user.id === applicant_id ? "Applicant" : sign.ref_signatory_roles.signatory_role_name,
@@ -317,10 +317,10 @@ export const getSignatory = async ({ path, applicant_id, include_applicant, is_a
             decision: {
                 decisionDate: is_auto_approved ? toGMT8().toISOString() : null,
                 is_decided: is_auto_approved ? true : null,
-                rejectedReason: is_auto_approved ? 'Automatically approved' : null,
+                rejectedReason: null,
             },
             evaluated_by: applicant_id,
-            role: signatories?.[signatories.length-1]?.ref_signatory_roles?.signatory_role_name ?? "Applicant",
+            role: signatories?.[signatories?.length-1]?.ref_signatory_roles?.signatory_role_name ?? "Applicant",
             order_number: 0,
         })
     }
