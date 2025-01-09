@@ -28,8 +28,8 @@ const jobPositionSchema = z.object({
   superior_id: z.string().nullish().transform((val) => val || null),
   is_active: z.boolean().default(true),
   is_superior: z.boolean().default(false),
-  max_employees: z.number().nullish(),
-  max_department_instances: z.number().nullish(),
+  max_employees: z.number().optional().nullish(),
+  max_department_instances: z.number().optional().nullish(),
 }).refine((data) => {
   return data.min_salary <= data.max_salary;
 }, {
@@ -56,8 +56,8 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       min_salary: 0,
       max_salary: 0,
       superior_id: "",
-      max_employees: null,
-      max_department_instances: null,
+      max_employees: 0,
+      max_department_instances: 0,
       is_active: true,
       is_superior: false,
     },
