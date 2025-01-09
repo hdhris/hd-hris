@@ -37,25 +37,17 @@ export const tableConfig: TableConfigProps<IncidentReport> = {
             case "status":
                 const status = !item.is_acted
                     ? "Pending"
-                    : item.actions_taken === "Demotion"
-                    ? "Demoted"
                     : item.actions_taken === "Suspension"
                     ? "Suspended"
                     : item.actions_taken === "Payroll Deduction"
                     ? "Deducted"
-                    : item.actions_taken === "Re-Education"
-                    ? "Re-educated"
-                    : item.actions_taken === "Reassignment"
-                    ? "Reassigned"
                     : item.actions_taken === "Termination"
                     ? "Terminated"
-                    : item.actions_taken === "Verbal Warning"
-                    ? "Warned"
-                    : item.actions_taken === "Written Warning"
+                    : item.actions_taken === "Send Warning"
                     ? "Warned"
                     : "Pending";
                 return (
-                    <Chip variant="flat" color={item.is_acted ? "success" : "default"} className="capitalize">
+                    <Chip variant="flat" color={item.is_acted ? "warning" : "default"} className="capitalize">
                         {status}
                     </Chip>
                 );

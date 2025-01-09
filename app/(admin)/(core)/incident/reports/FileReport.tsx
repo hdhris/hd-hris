@@ -60,7 +60,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
             location: "",
             occurance_date: toGMT8().toISOString(),
             severity: "minor",
-            actions_taken: "Verbal Warning",
+            actions_taken: "Send Warning",
             type: "",
             employee_id: undefined,
         },
@@ -81,7 +81,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                 location: "",
                 occurance_date: toGMT8().toISOString(),
                 severity: "minor",
-                actions_taken: "Verbal Warning",
+                actions_taken: "Send Warning",
                 type: "",
                 employee_id: undefined,
             });
@@ -143,7 +143,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                 name: "type",
                                 type: "auto-complete",
                                 label: "Type",
-                                placeholder: "e.g: Equipment Failure, Harrassment, Safety",
+                                placeholder: "e.g: Equipment Failure, Harrassment, or specify...",
                                 isRequired: true,
                                 inputDisabled: !watch("employee_id"),
                                 config: {
@@ -151,6 +151,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                     options: [
                                         "Complaint Incident",
                                         "Equipment Failure",
+                                        "Property Damage",
                                         "Service Failure",
                                         "Theft",
                                         "Unauthorized Access",
@@ -158,7 +159,6 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                         "Cybersecurity Incident",
                                         "Traffic Accident",
                                         "Discrimination",
-                                        "Whistleblower",
                                         "Harassment",
                                         "Workplace Violence",
                                         "Injury",
@@ -186,7 +186,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                 label: "Scene of the Incident",
                                 type: "auto-complete",
                                 isRequired: true,
-                                placeholder: "e.g: On-site, Off-site...",
+                                placeholder: "e.g: On-site, Off-site or specify...",
                                 inputDisabled: !watch("employee_id"),
                                 config: {
                                     allowsCustomValue: true,
@@ -238,10 +238,10 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                 config: {
                                     orientation: "vertical",
                                     options: (watch("severity") === "minor"
-                                        ? ["Verbal Warning", "Written Warning", "Re-Education"]
+                                        ? ["Send Warning"]
                                         : watch("severity") === "major"
-                                        ? ["Payroll Deduction", "Reassignment"]
-                                        : ["Suspension", "Demotion", "Termination"]
+                                        ? ["Payroll Deduction"]
+                                        : ["Suspension", "Termination"]
                                     )
                                         .sort((a, b) => a.localeCompare(b))
                                         .map((item) => ({

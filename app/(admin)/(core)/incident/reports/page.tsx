@@ -15,7 +15,7 @@ import DataTable from "@/components/common/data-display/data-table";
 function Page() {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<IncidentReport | null>(null);
-    const { data, isLoading } = useQuery<IncidentReport[]>("/api/admin/incident/reports");
+    const { data, isLoading } = useQuery<IncidentReport[]>("/api/admin/incident/reports", {refreshInterval: 5000});
     SetNavEndContent(() => {
         return (
             <Button {...uniformStyle()} onPress={() => setIsOpen(true)}>

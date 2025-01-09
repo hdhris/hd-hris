@@ -1,14 +1,12 @@
 import { MinorEmployee, MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 
 export const ActionsTakenArray = [
-    "Verbal Warning",
-    "Written Warning",
+    "Send Warning",
+    // "Written Warning",
     "Suspension",
     "Payroll Deduction",
-    "Demotion",
+    // "Demotion",
     "Termination",
-    "Reassignment",
-    "Re-Education",
 ] as const;
 export type ActionsTakenNames = (typeof ActionsTakenArray)[number];
 

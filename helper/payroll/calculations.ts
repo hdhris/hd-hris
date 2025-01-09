@@ -8,6 +8,7 @@ export const static_formula = {
     leaves: "get_leaves",
     overtimes: "get_overtimes",
     benefit_contribution: "get_contribution",
+    incident_payable: "get_incident",
 };
 
 export type BaseValueProp = {

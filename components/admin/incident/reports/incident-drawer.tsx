@@ -41,14 +41,12 @@ function IncidentDrawer({ report, onClose }: IncidentDrawerProps) {
 
     const footer = useMemo(() => {
         let label = null;
-        if (report?.actions_taken === "Demotion") label = "Demote Employee";
+        // if (report?.actions_taken === "Demotion") label = "Demote Employee";
         if (report?.actions_taken === "Payroll Deduction") label = "Deduct Payroll";
-        if (report?.actions_taken === "Re-Education") label = "Assign Training";
-        if (report?.actions_taken === "Reassignment") label = "Reassign Employee";
         if (report?.actions_taken === "Suspension") label = "Suspend Employee";
         if (report?.actions_taken === "Termination") label = "Terminate Employee";
-        if (report?.actions_taken === "Verbal Warning") label = "Appoint Meething";
-        if (report?.actions_taken === "Written Warning") label = "Send an email";
+        if (report?.actions_taken === "Send Warning") label = "Send Email";
+        // if (report?.actions_taken === "Written Warning") label = "Send Email";
 
         return !label || report?.is_acted ? undefined : (
             <Button className="ms-auto" {...uniformStyle({ color: "danger" })} onPress={() => setIsOpen(true)}>
@@ -75,12 +73,12 @@ function IncidentDrawer({ report, onClose }: IncidentDrawerProps) {
                                 label="Date"
                                 value={toGMT8(report.occurance_date).format("MMMM DD, YYYY")}
                             />
-                            <hr />
+                            {/* <hr />
                             <ValueLabel
                                 icon={<TbClockUp />}
                                 label="Time"
                                 value={toGMT8(report.occurance_date).format("hh:mm:a")}
-                            />
+                            /> */}
                             <hr />
                             <ValueLabel icon={<TbMessageReport />} label="Type" value={report.type} />
                             <hr />
@@ -110,7 +108,7 @@ function IncidentDrawer({ report, onClose }: IncidentDrawerProps) {
                     )}
                 </div>
             </Drawer>
-            <PerformDisciplinary isOpen={isOpen} report={report} onClose={() => setIsOpen(false)} />
+            <PerformDisciplinary isOpen={isOpen} report={report} onClose={() => setIsOpen(false)} onSuccess={onClose} />
         </>
     );
 }
