@@ -17,6 +17,8 @@ import {
   ModalFooter,
   ModalHeader,
   Textarea,
+  Autocomplete,
+  AutocompleteItem,
 } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
 import Text from "@/components/Text";
@@ -80,7 +82,10 @@ const Page: React.FC = () => {
     if (data) {
       return data.filter(
         (employee) =>
-          !isEmployeeAvailable({employee, find:["resignation","termination"]})
+          !isEmployeeAvailable({
+            employee,
+            find: ["resignation", "termination"],
+          })
       );
     }
     return [];
@@ -105,6 +110,12 @@ const Page: React.FC = () => {
     const selected = formerEmployees?.find((item) => item.id === Number(key));
     setSelectedEmployee(selected ?? null);
   };
+  const reactivationReasons = [
+    { key: "employee-request", label: "Employee Request" },
+    { key: "position-reopened", label: "Position Reopened" },
+    { key: "management-decision", label: "Management Decision" },
+    { key: "mutual-agreement", label: "Mutual Agreement" },
+  ];
 
   const TableConfigurations = {
     columns: [
@@ -347,12 +358,21 @@ const Page: React.FC = () => {
             {pendingActivation?.employee.last_name}
           </ModalHeader>
           <ModalBody>
-            <Textarea
-              label="Reason for Unsuspending"
-              placeholder="Enter reason"
+            <Autocomplete
+              allowsCustomValue
+              defaultItems={reactivationReasons}
+              placeholder="Select or enter reason"
+              label="Reason for reactivating"
+              variant="bordered"
+              className="w-full"
               value={reactivationReason}
-              onChange={(e) => setReactivationReason(e.target.value)}
-            />
+              onSelectionChange={(key) => setReactivationReason(key as string)}
+              onInputChange={(value) => setReactivationReason(value)}
+            >
+              {(item) => (
+                <AutocompleteItem key={item.key}>{item.label}</AutocompleteItem>
+              )}
+            </Autocomplete>
           </ModalBody>
           <ModalFooter>
             <Button

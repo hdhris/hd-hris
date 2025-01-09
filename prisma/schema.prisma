@@ -344,7 +344,7 @@ model ref_training_programs {
   name                      String?                     @db.VarChar(45)
   description               String?
   hour_duration             Int?
-  location                  String?
+  location                  Json?                       @db.Json
   start_date                DateTime?                   @db.Timestamptz(6)
   end_date                  DateTime?                   @db.Timestamptz(6)
   employee_instructor_id    Int?

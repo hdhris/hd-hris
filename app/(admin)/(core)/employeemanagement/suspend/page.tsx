@@ -16,6 +16,8 @@ import {
   ModalFooter,
   ModalHeader,
   Textarea,
+  Autocomplete,
+  AutocompleteItem,
 } from "@nextui-org/react";
 import DataDisplay from "@/components/common/data-display/data-display";
 import Text from "@/components/Text";
@@ -53,7 +55,9 @@ const EmptyState: React.FC = () => {
 
 const Page: React.FC = () => {
   const { data, mutate, isLoading } = useSuspendedEmployees();
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const [isActivating, setIsActivating] = useState<number | null>(null);
   const userInfo = useUserInfo();
   const [unsuspendReason, setUnsuspendReason] = useState("");
@@ -76,7 +80,7 @@ const Page: React.FC = () => {
   const suspendedEmployees = useMemo(() => {
     if (data) {
       return data.filter(
-        (employee) => !isEmployeeAvailable({employee, find:["suspension"]})
+        (employee) => !isEmployeeAvailable({ employee, find: ["suspension"] })
       );
     }
     return [];
@@ -103,6 +107,39 @@ const Page: React.FC = () => {
     );
     setSelectedEmployee(selected ?? null);
   };
+
+  const unsuspendReasonOptions = [
+    {
+      key: "suspension-period-completed",
+      label: "Suspension period completed",
+    },
+    {
+      key: "satisfactory-behavior",
+      label: "Satisfactory behavior improvement",
+    },
+    {
+      key: "corrective-action-completed",
+      label: "Corrective action plan completed",
+    },
+    {
+      key: "investigation-concluded",
+      label: "Investigation concluded favorably",
+    },
+    { key: "management-decision", label: "Management discretion/decision" },
+    { key: "appeal-approved", label: "Appeal approved" },
+    { key: "conditions-met", label: "Suspension conditions met" },
+    { key: "policy-compliance", label: "Demonstrated policy compliance" },
+    {
+      key: "performance-improvement",
+      label: "Performance improvement achieved",
+    },
+    { key: "training-completed", label: "Required training completed" },
+    { key: "documentation-provided", label: "Required documentation provided" },
+    { key: "grievance-resolved", label: "Workplace grievance resolved" },
+    { key: "mediation-successful", label: "Successful mediation outcome" },
+    { key: "early-reinstatement", label: "Early reinstatement approved" },
+    { key: "disciplinary-review", label: "Positive disciplinary review" },
+  ];
 
   const TableConfigurations = {
     columns: [
@@ -304,12 +341,21 @@ const Page: React.FC = () => {
             {pendingActivation?.employee.last_name}
           </ModalHeader>
           <ModalBody>
-            <Textarea
+            <Autocomplete
+              allowsCustomValue
+              defaultItems={unsuspendReasonOptions}
+              placeholder="Select or enter unsuspension reason"
               label="Reason for Unsuspending"
-              placeholder="Enter reason"
+              variant="bordered"
+              className="w-full"
               value={unsuspendReason}
-              onChange={(e) => setUnsuspendReason(e.target.value)}
-            />
+              onSelectionChange={(key) => setUnsuspendReason(key as string)}
+              onInputChange={(value) => setUnsuspendReason(value)}
+            >
+              {(item) => (
+                <AutocompleteItem key={item.key}>{item.label}</AutocompleteItem>
+              )}
+            </Autocomplete>
           </ModalBody>
           <ModalFooter>
             <Button
@@ -354,7 +400,8 @@ const Page: React.FC = () => {
                   console.error("Error activating employee:", error);
                   toast({
                     title: "Error",
-                    description: "Failed to activate employee. Please try again.",
+                    description:
+                      "Failed to activate employee. Please try again.",
                     variant: "danger",
                   });
                 } finally {

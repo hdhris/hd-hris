@@ -8,7 +8,7 @@ import { Button, Chip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { FilterItemsProps } from "@/components/common/filter/FilterItems";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
@@ -29,6 +29,12 @@ interface Seminar {
   type: string;
   dim_training_participants: any[];
   instructor_name: string;
+  locationDetails: {
+    addr_region: { address_name: string } | null;
+    addr_province: { address_name: string } | null;
+    addr_municipal: { address_name: string } | null;
+    addr_baranggay: { address_name: string } | null;
+  } | null;
 }
 
 export default function SeminarTable() {
@@ -51,10 +57,13 @@ export default function SeminarTable() {
     rowCell: (item, columnKey) => {
       switch (columnKey) {
         case "name":
+          const location = item.locationDetails
+            ? ` ${item.locationDetails.addr_municipal?.address_name || ""}`
+            : "Unknown Location";
           return (
             <div>
               <p className="font-medium">{item.name}</p>
-              <p className="text-small text-gray-500">{item.location}</p>
+              <p className="text-small text-gray-500">{location}</p>
             </div>
           );
         case "presenter":
@@ -106,16 +115,16 @@ export default function SeminarTable() {
     },
   };
 
-    const filterItems: FilterItemsProps<Seminar>[] = [
-      {
-        filter: [
-          { label: "Active", value: true },
-          { label: "Inactive", value: false },
-        ],
-        key: "is_active",
-        sectionName: "Status",
-      },
-    ];
+  const filterItems: FilterItemsProps<Seminar>[] = [
+    {
+      filter: [
+        { label: "Active", value: true },
+        { label: "Inactive", value: false },
+      ],
+      key: "is_active",
+      sectionName: "Status",
+    },
+  ];
 
   const handleDelete = async (id: number, name: string) => {
     try {
@@ -136,11 +145,13 @@ export default function SeminarTable() {
         mutate();
       }
     } catch (error) {
-      toast({
-        title: "Something went wrong",
-        description: String(error),
-        variant: "danger",
-      });
+      if (error instanceof AxiosError) {
+        toast({
+          title: "Error",
+          description: error.response?.data.message,
+          variant: "danger",
+        });
+      }
     }
   };
 

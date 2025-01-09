@@ -8,7 +8,7 @@ import { Button, Chip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { FilterItemsProps } from "@/components/common/filter/FilterItems";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import TableData from "@/components/tabledata/TableData";
 import showDialog from "@/lib/utils/confirmDialog";
 import React, { useState } from "react";
@@ -19,7 +19,7 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 interface Program {
   id: number;
   name: string;
-  description: string;
+  description: string; 
   hour_duration: number;
   location: string;
   start_date: string;
@@ -29,6 +29,12 @@ interface Program {
   type: string;
   dim_training_participants: any[];
   instructor_name: string;
+  locationDetails: {
+    addr_region: { address_name: string } | null;
+    addr_province: { address_name: string } | null;
+    addr_municipal: { address_name: string } | null;
+    addr_baranggay: { address_name: string } | null;
+  } | null;
 }
 
 export default function ProgramTable() {
@@ -51,10 +57,13 @@ export default function ProgramTable() {
     rowCell: (item, columnKey) => {
       switch (columnKey) {
         case "name":
+          const location = item.locationDetails
+            ? ` ${item.locationDetails.addr_municipal?.address_name || ""}`
+            : "Unknown Location";
           return (
             <div>
               <p className="font-medium">{item.name}</p>
-              <p className="text-small text-gray-500">{item.location}</p>
+              <p className="text-small text-gray-500">{location}</p>
             </div>
           );
         case "trainer":
@@ -137,11 +146,13 @@ export default function ProgramTable() {
         mutate();
       }
     } catch (error) {
-      toast({
-        title: "Something went wrong",
-        description: String(error),
-        variant: "danger",
-      });
+      if (error instanceof AxiosError) {
+        toast({
+          title: "Error",
+          description: error.response?.data.message,
+          variant: "danger",
+        });
+      }
     }
   };
 

@@ -1,142 +1,73 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 
-interface Participant {
-  id: number;
-  trans_employees: {
-    id: number;
-    first_name: string;
-    last_name: string;
-  };
-}
-
 export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest) {
-    try {
-      const { searchParams } = new URL(req.url);
-      const recordId = searchParams.get("id");
-      const scheduleId = searchParams.get("scheduleId");
-  
-      // Fetch all active schedules
-      const schedules = await prisma.dim_training_schedules.findMany({
-        where: { deleted_at: null },
-        select: {
-          id: true,
-          session_timestamp: true,
-          ref_training_programs: {
-            select: { id: true, name: true },
-          },
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    // Always fetch programs for the dropdown
+    const programs = await prisma.ref_training_programs.findMany({
+      where: {
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+      },
+    });
+
+    if (id) {
+      const schedule = await prisma.dim_training_schedules.findUnique({
+        where: {
+          id: parseInt(id),
+          deleted_at: null,
         },
-        orderBy: { session_timestamp: "desc" },
-        distinct: ["id"],
       });
-  
-      let record = null;
-    interface Employee {
-      id: number;
-      email: string | null;
-      first_name: string;
-      last_name: string;
-      picture: string | null;
-      ref_departments: {
-        name: string | null;
-      } | null;
-    }
 
-    interface TrainingParticipant {
-      id: number;
-      trans_employees: Employee | null;
-    }
+      // Parse location and fetch address details
+      let locationDetails = null;
+      if (schedule?.location) {
+        const location = typeof schedule.location === 'string' 
+          ? JSON.parse(schedule.location) 
+          : schedule.location;
 
-    let participants: TrainingParticipant[] = [];
-  
-      // If scheduleId provided, fetch participants for that schedule
-      if (scheduleId) {
-        participants = await prisma.dim_training_participants.findMany({
-          where: {
-            program_id: parseInt(scheduleId),
-            terminated_at: null
-          },
-          select: {
-            id: true,
-            trans_employees: {
-              select: {
-                id: true,
-                email: true,
-                first_name: true,
-                last_name: true,
-                picture: true,
-                ref_departments: {
-                  select: { name: true }
-                }
-              }
-            }
-          }
-        });
-      }
-  
-      // If recordId provided, fetch specific record
-      if (recordId) {
-        record = await prisma.fact_training_records.findUnique({
-          where: { id: parseInt(recordId) },
-          include: {
-            dim_training_participants: {
-              include: {
-                trans_employees: {
-                  select: { 
-                    id: true,
-                    first_name: true,
-                    last_name: true,
-                    email: true,
-                    picture: true,
-                    ref_departments: {
-                      select: { name: true }
-                    }
-                  },
-                },
-              },
-            },
-            dim_training_schedules: {
-              include: {
-                ref_training_programs: {
-                  select: { id: true, name: true, type: true },
-                },
-              },
-            },
-          },
-        });
-  
-        // Get participants for the record's schedule
-        if (record?.dim_training_schedules?.id) {
-          participants = await prisma.dim_training_participants.findMany({
-            where: {
-              program_id: record.dim_training_schedules.program_id,
-              terminated_at: null
-            },
-            select: {
-              id: true, 
-              trans_employees: {
-                select: {
-                  id: true,
-                  email: true,
-                  first_name: true,
-                  last_name: true,
-                  picture: true,
-                  ref_departments: {
-                    select: { name: true }
-                  }
-                }
-              }
-            }
-          });
+        if (location) {
+          locationDetails = {
+            addr_region: location.addr_region ? await prisma.ref_addresses.findUnique({
+              where: { address_code: Number(location.addr_region) },
+              select: { address_code: true, address_name: true },
+            }) : null,
+            addr_province: location.addr_province ? await prisma.ref_addresses.findUnique({
+              where: { address_code: Number(location.addr_province) },
+              select: { address_code: true, address_name: true },
+            }) : null,
+            addr_municipal: location.addr_municipal ? await prisma.ref_addresses.findUnique({
+              where: { address_code: Number(location.addr_municipal) },
+              select: { address_code: true, address_name: true },
+            }) : null,
+            addr_baranggay: location.addr_baranggay ? await prisma.ref_addresses.findUnique({
+              where: { address_code: Number(location.addr_baranggay) },
+              select: { address_code: true, address_name: true },
+            }) : null,
+          };
         }
       }
-  
-      return NextResponse.json({ record, schedules, participants });
-  
-    } catch (error) {
-      console.error(error);
-      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+      return NextResponse.json({ 
+        schedule: { ...schedule, locationDetails }, 
+        programs 
+      });
     }
+
+    return NextResponse.json({ programs });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to fetch data" }, 
+      { status: 500 }
+    );
   }
+}
