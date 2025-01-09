@@ -1,0 +1,34 @@
+[
+  {
+        "type_name": "System Alert",
+    "description": "General system-related notifications."
+  },
+  {
+        "type_name": "Task Assignment",
+    "description": "Notifications for new tasks assigned."
+  },
+  {
+        "type_name": "Reminder",
+    "description": "Notification to remind about deadlines."
+  },
+  {
+        "type_name": "Message",
+    "description": "Notifications for new messages."
+  },
+  {
+        "type_name": "Announcement",
+    "description": "Organization-wide announcements."
+  },
+  {
+        "type_name": "Warning",
+    "description": "Notifications for warnings or issues."
+  },
+  {
+        "type_name": "Error",
+    "description": "Notifications for critical errors."
+  },
+  {
+        "type_name": "Promotion",
+    "description": "Promotional notifications or offers."
+  }
+]

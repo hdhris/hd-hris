@@ -44,6 +44,19 @@ export async function GET(request: Request) {
                     suffix: true,
                     extension: true,
                     picture: true,
+                    dim_schedules: {
+                        where: {
+                          end_date: null,
+                        },
+                        select: {
+                            days_json: true,
+                            ref_batch_schedules: {
+                                select: {
+                                    clock_in: true, clock_out: true, break_min: true
+                                }
+                            }
+                        }
+                    }
                 },
             },
             trans_employees_trans_leaves_created_byTotrans_employees: {
@@ -60,6 +73,16 @@ export async function GET(request: Request) {
             },
             trans_leave_types: {
                 include: {
+                    dim_leave_balances: {
+                        where: {
+                            deleted_at: null,
+                        },
+                        select: {
+                            id: true,
+                            employee_id: true,
+                            leave_type_id: true
+                        }
+                    },
                     ref_leave_type_details: {
                         select: {
                             id: true,
@@ -94,6 +117,14 @@ export async function GET(request: Request) {
                 name: getEmpFullName(item.trans_employees_leaves),
                 email: item.trans_employees_leaves.email || "",
                 picture: item.trans_employees_leaves.picture || "",
+                schedule: {
+                    days_json: item.trans_employees_leaves.dim_schedules.map(days => days.days_json as string),
+                    ref_batch_schedules: item.trans_employees_leaves.dim_schedules.map(time => ({
+                        clock_in: time.ref_batch_schedules?.clock_in?.toISOString()!, // ISO date string
+                        clock_out: time.ref_batch_schedules?.clock_out?.toISOString()!, // ISO date string
+                        break_min: time.ref_batch_schedules?.break_min!
+                    }))[0]
+                },
                 created_by: {
                     id: item.trans_employees_trans_leaves_created_byTotrans_employees?.id!,
                     email: item.trans_employees_trans_leaves_created_byTotrans_employees?.email || "",
@@ -101,11 +132,11 @@ export async function GET(request: Request) {
                     name: getEmpFullName(item.trans_employees_trans_leaves_created_byTotrans_employees),
                 },
                 leave_details: {
-                    start_date: toGMT8(item.start_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
-                    end_date: toGMT8(item.end_date?.toISOString()).format("MMM DD, YYYY hh:mm A"),
+                    start_date: item.start_date?.toISOString(),
+                    end_date:item.end_date?.toISOString(),
                     reason: item.reason || "",
-                    status: item.status as "Approved" | "Pending" | "Rejected",
-                    total_days: formatDaysToReadableTime(item.total_days.toNumber()),
+                    status: item.status as "approved" | "pending" | "rejected" | "cancelled",
+                    total_days: item.total_days.toNumber(),
                     created_at: toGMT8(item.created_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
                     updated_at: toGMT8(item.updated_at.toISOString()).format("YYYY-MM-DD hh:mm A"),
                 },
@@ -115,6 +146,8 @@ export async function GET(request: Request) {
                     code: item.trans_leave_types?.ref_leave_type_details?.code || "",
                     attachments: attachmentMetadata,
                 },
+                // trans_leave_type: item.trans_leave_types.id,
+                leave_credit: item.trans_leave_types.dim_leave_balances.find(balance => balance.employee_id === item.employee_id && balance.leave_type_id === item.trans_leave_types.id)!,
                 evaluators: processJsonObject<Evaluations>(item.evaluators)!,
             };
         })

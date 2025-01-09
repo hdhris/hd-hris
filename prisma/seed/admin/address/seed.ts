@@ -2,10 +2,6 @@ import {PrismaClient} from '@prisma/client';
 import address from "../../../../components/common/forms/address/address.json"
 
 export async function seedAddress(prisma: any) {
-    console.log("Seeding Address...");
-
-    // Sample privileges data
-
 
     // Upsert privileges concurrently
     await prisma.ref_addresses.createMany({
@@ -13,8 +9,6 @@ export async function seedAddress(prisma: any) {
         skipDuplicates: true, // optional: skip any duplicates (if you want to prevent inserting duplicates)
     });
 
-
-    console.log("Seeding Address completed successfully.");
 }
 
 // // Execute the function if the file runs standalone

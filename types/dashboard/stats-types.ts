@@ -4,9 +4,10 @@ export interface EmployeesKPI {
     left_employees: number
 }
 
-interface PayrollKPI {
-    month: string
+export interface PayrollKPI {
+    month: number
     year: string
+    payroll_date: string
     payroll_frequency: string
     gross_total_amount: string | number
     deduction_total_amount: string | number

@@ -22,12 +22,12 @@ export async function POST(req: NextRequest) {
         // Parse request body
         const data = await req.json();
 
-        console.log("Data Request: ", data)
         // Validate required fields
         const validate = LeaveRequestFormValidation.safeParse(data);
         const remainingLeaveCredit = Number(data.total_days / 1440); // minutes to hrs
         const usedLeaveCredit = Number(data.used_leave / 1440); // minutes to hrs
 
+        console.log("Create: ", usedLeaveCredit);
         if (Number(usedLeaveCredit) <= 0) {
             return NextResponse.json(
                 {
@@ -57,26 +57,6 @@ export async function POST(req: NextRequest) {
                 { status: 404 }
             );
         }
-
-        const signatory = await getSignatory({
-                path: "/leaves/leave-requests",
-                applicant_id: validate.data.employee_id,
-                is_auto_approved: true
-            }
-        );
-
-        console.log("Signatory: ", signatory)
-        if (signatory === null) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message:
-                        "Could not apply leave. Check the applicant details before continuing.",
-                },
-                { status: 404 }
-            );
-        }
-
         const attachmentLinks = {
             url: data.url,
         };
@@ -84,7 +64,7 @@ export async function POST(req: NextRequest) {
         const session = await auth();
 
         // Fetch the employee's leave balance outside the transaction
-        const [leaveBalance, leave_type] = await Promise.all([
+        const [leaveBalance, leave_type, signatory] = await Promise.all([
             prisma.dim_leave_balances.findFirst({
                 where: {
                     deleted_at: null,
@@ -112,23 +92,25 @@ export async function POST(req: NextRequest) {
                        }
                    }
                 }
-            })
+            }),
+            getSignatory({
+                    path: "/leaves/leave-requests",
+                    applicant_id: validate.data.employee_id,
+                    is_auto_approved: true
+                }
+            )
         ])
-        // const leaveBalance = await prisma.dim_leave_balances.findFirst({
-        //     where: {
-        //         deleted_at: null,
-        //         employee_id: validate.data.employee_id,
-        //         leave_type_id: validate.data.leave_type_id,
-        //     },
-        //     select: {
-        //         id: true,
-        //         trans_employees: {
-        //             select: {
-        //                 ...employee_basic_details
-        //             }
-        //         },
-        //     },
-        // });
+
+        if (signatory === null) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "Could not apply leave. Check the applicant details before continuing.",
+                },
+                { status: 404 }
+            );
+        }
 
         if (!leaveBalance) {
             return NextResponse.json(
@@ -141,53 +123,6 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Start the transaction
-        await prisma.$transaction(
-            async (tx) => {
-                // Create a leave record
-                const leaveRecord = {
-                    employee_id: validate.data.employee_id,
-                    start_date: toGMT8(
-                        validate.data.leave_date_range.start
-                    ).toISOString(),
-                    end_date: toGMT8(
-                        validate.data.leave_date_range.end
-                    ).toISOString(),
-                    reason: validate.data.reason,
-                    leave_type_id: validate.data.leave_type_id,
-                    created_at: toGMT8().toISOString(),
-                    updated_at: toGMT8().toISOString(),
-                    created_by: Number(session?.user.employee_id),
-                    status: "approved",
-                    total_days: usedLeaveCredit, // mins to day
-                    evaluators: signatory as unknown as InputJsonValue,
-                    files: attachmentLinks.url,
-                };
-
-                // Create leave request in the database
-                await tx.trans_leaves.create({
-                    data: leaveRecord,
-                });
-
-                // Update the leave balance
-                await tx.dim_leave_balances.update({
-                    where: {
-                        id: leaveBalance.id,
-                    },
-                    data: {
-                        remaining_days: remainingLeaveCredit,
-                        used_days: {
-                            increment: usedLeaveCredit
-                        },
-                        updated_at: new Date(),
-                    },
-                });
-            },
-            {
-                timeout: 10000, // Set the timeout to 10 seconds
-            }
-        );
-
         const approvedLeave = await approved_leave_email({
             name: getEmpFullName(leaveBalance.trans_employees),
             leave_type: leave_type?.ref_leave_type_details.name!,
@@ -197,13 +132,63 @@ export async function POST(req: NextRequest) {
             allocated_days: leaveBalance.allocated_days.toNumber(),
             remaining_days: formatDaysToReadableTime(remainingLeaveCredit)
         })
+        const leaveRecord = {
+            employee_id: validate.data.employee_id,
+            start_date: toGMT8(
+                validate.data.leave_date_range.start
+            ).toISOString(),
+            end_date: toGMT8(
+                validate.data.leave_date_range.end
+            ).toISOString(),
+            reason: validate.data.reason,
+            leave_type_id: validate.data.leave_type_id,
+            created_at: toGMT8().toISOString(),
+            updated_at: toGMT8().toISOString(),
+            created_by: Number(session?.user.employee_id),
+            status: "approved",
+            total_days: usedLeaveCredit, // mins to day
+            evaluators: signatory as unknown as InputJsonValue,
+            files: attachmentLinks.url,
+        };
+        // Start the transaction
+        await prisma.$transaction(
+            async (tx) => {
+                await Promise.all([
+                    tx.trans_leaves.create({
+                        data: leaveRecord,
+                    }),
+                    tx.dim_leave_balances.update({
+                        where: {
+                            id: leaveBalance.id,
+                        },
+                        data: {
+                            remaining_days: remainingLeaveCredit,
+                            used_days: {
+                                increment: usedLeaveCredit
+                            },
+                            updated_at: new Date(),
+                        },
+                    }),
+                    sendEmail({
+                        to: leaveBalance.trans_employees.email!,
+                        subject: "Leave Request Approved",
+                        html: approvedLeave
+                    })
+                ])
+
+                // Create a leave record
+                // Create leave request in the database
+
+                // Update the leave balance
+            },
+            {
+                timeout: 10000, // Set the timeout to 10 seconds
+            }
+        );
+
+
 
         // Send email outside the transaction
-        await sendEmail({
-            to: leaveBalance.trans_employees.email!,
-            subject: "Leave Request Approved",
-            html: approvedLeave
-        });
 
         // If the transaction succeeds, return a success message
         return NextResponse.json({

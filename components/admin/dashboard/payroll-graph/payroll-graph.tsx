@@ -3,117 +3,45 @@ import React from 'react';
 import {ApexOptions} from "apexcharts";
 import dynamic from "next/dynamic";
 import {compactNumber, getRandomInt, numberWithCommas} from '@/lib/utils/numberFormat';
+import {PayrollKPI} from "@/types/dashboard/stats-types";
 
 
 const ApexChart = dynamic(() => import("react-apexcharts"), {ssr: false});
 
-function PayrollGraph() {
+function PayrollGraph({payrollData}: {payrollData: PayrollKPI[]}) {
+    const cat = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    // const match = payrollData..match(/\d{2} - \d{2}/);
+    //
+    // if (match) {
+    //     const dateRange = match[0]; // Extracted "01 - 15"
+    //     console.log(dateRange);
+    // }
+
+    const series = payrollData && payrollData.length > 0 ? payrollData.flatMap((item) => [
+        {
+            name: `Deductions ${item.payroll_date}`,
+            group: "deductions",
+            data: cat.map((month) => {
+                return {
+                    x: month,
+                    y: cat[item.month] === month ? item.deduction_total_amount : 0,
+                };
+            }),
+        },
+        {
+            name: `Earnings ${item.payroll_date}`,
+            group: "earnings",
+            data: cat.map((month) => {
+                return {
+                    x: month,
+                    y: cat[item.month] === month ? item.gross_total_amount : 0,
+                };
+            }),
+        },
+    ]) : [];
     const options: ApexOptions = {
-        colors: ["#FE5B6E", "#00C49F", "#00C49F", "#FE5B6E"], series: [{
-            name: "Deductions 1-16", group: "deductions", data: [{
-                x: "Jan", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Feb", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Mar", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Apr", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "May", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Jun", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Jul", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Aug", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Sep", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Oct", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Nov", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Dec", y: getRandomInt(50000, 1000000)
-            }],
-        }, {
-            name: "Earnings 1-16", group: "earnings", data: [{
-                x: "Jan", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Feb", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Mar", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Apr", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "May", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Jun", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Jul", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Aug", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Sep", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Oct", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Nov", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Dec", y: getRandomInt(50000, 1000000)
-            }],
-        }, {
-            name: "Deductions 17-30", group: "deductions", data: [{
-                x: "Jan", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Feb", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Mar", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Apr", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "May", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Jun", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Jul", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Aug", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Sep", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Oct", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Nov", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Dec", y: getRandomInt(50000, 1000000)
-            }],
-        }, {
-            name: "Earnings 17-30", group: "earnings", data: [{
-                x: "Jan", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Feb", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Mar", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Apr", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "May", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Jun", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Jul", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Aug", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Sep", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Oct", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Nov", y: getRandomInt(50000, 1000000)
-            }, {
-                x: "Dec", y: getRandomInt(50000, 1000000)
-            }],
-        },], chart: {
+        colors: ["#FE5B6E", "#00C49F", "#00C49F", "#FE5B6E"],
+        series: series, chart: {
             type: "bar", height: "320px", fontFamily: "Inter, sans-serif", stacked: true, toolbar: {
                 show: false,
             },
@@ -150,7 +78,7 @@ function PayrollGraph() {
         }, legend: {
             show: true,
         }, xaxis: {
-            // categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            categories: cat,
             floating: false,
             labels: {
                 show: true, style: {

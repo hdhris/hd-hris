@@ -46,7 +46,9 @@ export function handleError(error: unknown, operation: string) {
 export const getBaseEmployeeInclude = () => ({
   ref_departments: true,
   ref_job_classes: true,
+  ref_branches: true,
   ref_employment_status: true,
+  ref_salary_grades: true,
   ref_addresses_trans_employees_addr_regionToref_addresses: true,
   ref_addresses_trans_employees_addr_provinceToref_addresses: true,
   ref_addresses_trans_employees_addr_municipalToref_addresses: true,

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "00a29860-665d-4794-88eb-c12d183b76b3",
+    "name": "Admin",
+    "email": "admin@gmail.com",
+    "emailVerified": null,
+    "image": "https://files.edgestore.dev/6bc0cgi3ynpz46db/publicFiles/_public/7f0e37fb-e9f5-4f09-8047-ce3b33d53904.jpg",
+    "createdAt": "2024-12-18 17:57:12.150",
+    "updatedAt": "2025-01-02 15:30:34.821",
+    "preferences": {}
+  },
+  {
+    "id": "82165ae4-56fa-484e-87d1-552d7183d4aa",
+    "name": "John Rey",
+    "email": "palara.reginejesa@gmail.com",
+    "emailVerified": null,
+    "image": null,
+    "createdAt": "2025-01-04 03:51:00.545",
+    "updatedAt": null,
+    "preferences": {}
+  }
+]

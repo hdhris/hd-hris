@@ -12,9 +12,7 @@ function RootLayout({children}: { children: ReactNode }) {
         key: "leave-report", title: "Leave Report", path: "leave-report"
     }, {
         key: "payroll-report", title: "Payroll Report", path: "payroll-report"
-    }, {
-        key: "performance-report", title: "Performance Report", path: "performance-report"
-    }, {
+    },{
         key: "recruitment-report", title: "Recruitment Report", path: "recruitment-report"
     }]
 

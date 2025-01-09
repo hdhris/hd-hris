@@ -146,12 +146,15 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             .map((employee) => employee.trans_leaves.filter((leave) => leave.leave_type_id && leave.status !== "Rejected"))
             .flat() || [];
 
-        const currentDate = normalizeDate(new Date(date.year, date.month - 1, date.day));
-        return existingLeaveDates.some((leave) => {
-            const startDate = normalizeDate(new Date(leave.start_date));
-            const endDate = normalizeDate(new Date(leave.end_date));
 
-            return currentDate >= startDate && currentDate <= endDate; // Disable if within range
+
+        return existingLeaveDates.some((leave) => {
+            // Convert start_date and end_date to Day.js objects
+            const startDate = toGMT8(leave.start_date).startOf("day");
+            const endDate = toGMT8(leave.end_date).endOf("day");
+            const current = toGMT8(new Date(date.year, date.month - 1, date.day)).startOf("day");
+            // Check if the current date is within the range
+            return current.isSameOrAfter(startDate) && current.isSameOrBefore(endDate);
         });
 
     }, [employeeIdSelected, user?.employees])
@@ -170,6 +173,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         // Map the day of the week to the corresponding day string (mon, tue, ...)
         const dayString = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayOfWeek];
 
+        // console.log({uniqueDaysJson});
         // console.log("Days: ", uniqueDaysJson)
         // Check if the current day is in the allowed days
         return uniqueDaysJson.includes(dayString)
@@ -185,8 +189,8 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
         let availableDaysCount = 0;
 
         // Normalize start and end dates
-        let currentDate = normalizeDate(new Date(startDate.year - 1 , startDate.month, startDate.day));
-        const endDateCopy = normalizeDate(new Date(endDate.year - 1, endDate.month, endDate.day));
+        let currentDate = normalizeDate(new Date(startDate.year , startDate.month, startDate.day));
+        const endDateCopy = normalizeDate(new Date(endDate.year, endDate.month, endDate.day));
         console.log("currentDate: ", currentDate)
         console.log("endDateCopy: ", endDateCopy)
         // Loop through each day from startDate to endDate
@@ -468,13 +472,13 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             // Decide between creating or updating the leave request
             const endpoint = employee?.id ? "/api/admin/leaves/requests/update" : "/api/admin/leaves/requests/create";
 
-            console.log("End Point: ", endpoint)
+            // console.log("End Point: ", endpoint)
             const res = await axiosInstance.post(endpoint, items);
 
             if (res.status === 200) {
                 toast({
                     title: "Success",
-                    description: `Leave credit ${employee?.id ? "updated" : "created"} successfully.`,
+                    description: `Leave request ${employee?.id ? "updated" : "created"} successfully.`,
                     variant: "success",
                 });
 
@@ -521,7 +525,7 @@ function RequestForm({title, description, onOpen, isOpen, employee}: LeaveReques
             setIsSubmitting(false); // Ensure the loading state is cleared
         }
 
-    }, [calculateLeaveDeduction, documentAttachments, employee?.id, employee_leave_type, isAttachmentRequired, toast, url, user?.employees])
+    }, [calculateLeaveDeduction, documentAttachments, employee?.id, employee_leave_type, form, handleModalOpen, isAttachmentRequired, toast, url, user?.employees])
 
 
     const LeaveRequestForm: FormInputProps[] = [{

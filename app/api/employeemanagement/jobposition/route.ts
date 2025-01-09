@@ -7,27 +7,73 @@ const prisma = new PrismaClient({
   log: ["error"],
 });
 
-const jobSchema = z.object({
+// Define strict types for job data
+interface JobData {
+  name: string;
+  department_id: number;
+  is_active: boolean;
+  superior_id: number | null;
+  is_superior: boolean;
+  max_employees: number | null;
+  max_department_instances: number | null;
+  min_salary: Prisma.Decimal;
+  max_salary: Prisma.Decimal;
+}
+
+// Type guard for checking if a value is a valid number
+function isValidNumber(value: unknown): value is number {
+  return typeof value === 'number' && !isNaN(value) && isFinite(value);
+}
+
+const baseJobSchema = z.object({
   name: z.string().min(1).max(45),
+  department_id: z.number().min(1, "Department is required"),
   is_active: z.boolean().default(true),
-  superior_id: z.number().optional().nullable(),
+  superior_id: z.number().nullable(),
   is_superior: z.boolean().default(false),
-  max_employees: z.number().optional().nullable(),
-  max_department_instances: z.number().optional().nullable(),
+  max_employees: z.number().nullable(),
+  max_department_instances: z.number().nullable(),
+  min_salary: z.number().min(0, "Minimum salary cannot be negative"),
+  max_salary: z.number().min(0, "Maximum salary cannot be negative"),
 });
 
-async function checkDuplicateName(name: string, excludeId?: number) {
-  const existingJob = await prisma.ref_job_classes.findFirst({
+// Schema for creating new jobs
+const createJobSchema = baseJobSchema.refine((data): data is z.infer<typeof baseJobSchema> => {
+  if (!isValidNumber(data.min_salary) || !isValidNumber(data.max_salary)) {
+    return false;
+  }
+  return data.min_salary < data.max_salary;
+}, {
+  message: "Minimum salary must be less than maximum salary",
+  path: ["min_salary"],
+});
+
+// Schema for updating jobs
+const updateJobSchema = baseJobSchema.partial().refine((data): data is Partial<z.infer<typeof baseJobSchema>> => {
+  if (data.min_salary === undefined || data.max_salary === undefined) {
+    return true;
+  }
+  if (!isValidNumber(data.min_salary) || !isValidNumber(data.max_salary)) {
+    return false;
+  }
+  return data.min_salary < data.max_salary;
+}, {
+  message: "Minimum salary must be less than maximum salary",
+  path: ["min_salary"],
+});
+
+async function checkDuplicateName(name: string, departmentId: number, excludeId?: number) {
+  return await prisma.ref_job_classes.findFirst({
     where: {
       name: {
         equals: name,
         mode: 'insensitive',
       },
+      department_id: departmentId,
       deleted_at: null,
       id: excludeId ? { not: excludeId } : undefined,
     },
   });
-  return existingJob;
 }
 
 async function getActiveEmployeeCount(jobId: number, departmentId?: number) {
@@ -36,74 +82,66 @@ async function getActiveEmployeeCount(jobId: number, departmentId?: number) {
       job_id: jobId,
       deleted_at: null,
       AND: [
-        {
-          OR: [
-            
-            { resignation_json: { equals: [] } }
-          ]
-        },
-        {
-          OR: [
-           
-            { termination_json: { equals: [] } }
-          ]
-        }
+        { OR: [{ resignation_json: { equals: [] } }] },
+        { OR: [{ termination_json: { equals: [] } }] }
       ],
       ...(departmentId && { department_id: departmentId })
     }
   });
 }
 
+async function validateSalaryRange(minSalary: number, maxSalary: number): Promise<boolean> {
+  const existingSalaryGrades = await prisma.ref_salary_grades.findMany({
+    where: {
+      deleted_at: null,
+      amount: {
+        gte: new Prisma.Decimal(minSalary),
+        lte: new Prisma.Decimal(maxSalary),
+      },
+    },
+  });
+
+  return existingSalaryGrades.length > 0;
+}
+
 async function getJobById(id: number) {
-  return await prisma.ref_job_classes.findFirstOrThrow({
+  const job = await prisma.ref_job_classes.findFirstOrThrow({
     where: {
       id,
       deleted_at: null,
     },
     include: {
+      ref_departments: true,
       trans_employees: {
         where: {
           deleted_at: null,
           AND: [
-            {
-              OR: [
-             
-                { resignation_json: { equals: [] } }
-              ]
-            },
-            {
-              OR: [
-               
-                { termination_json: { equals: [] } }
-              ]
-            }
+            { OR: [{ resignation_json: { equals: [] } }] },
+            { OR: [{ termination_json: { equals: [] } }] }
           ]
         }
       }
     },
   });
+
+  if (!job) {
+    throw new Error('Job not found');
+  }
+
+  return job;
 }
 
 async function getAllJobs() {
   return await prisma.ref_job_classes.findMany({
     where: { deleted_at: null },
     include: {
+      ref_departments: true,
       trans_employees: {
         where: {
           deleted_at: null,
           AND: [
-            {
-              OR: [
-               
-                { resignation_json: { equals: [] } }
-              ]
-            },
-            {
-              OR: [
-                
-                { termination_json: { equals: [] } }
-              ]
-            }
+            { OR: [{ resignation_json: { equals: [] } }] },
+            { OR: [{ termination_json: { equals: [] } }] }
           ]
         }
       }
@@ -111,53 +149,92 @@ async function getAllJobs() {
   });
 }
 
-function handleError(error: unknown, operation: string) {
-  console.error(`Error during ${operation} operation:`, error);
-  if (error instanceof z.ZodError) {
-    return NextResponse.json({ error: 'Invalid data', details: error.errors }, { status: 400 });
-  }
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    return NextResponse.json({ error: `Database error: ${error.message}` }, { status: 400 });
-  }
-  if (error instanceof Error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  return NextResponse.json({ error: `Failed to ${operation} job` }, { status: 500 });
-}
-
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const id = url.searchParams.get('id');
+  const idParam = url.searchParams.get('id');
 
   try {
-    let result;
-    if (id) {
-      result = await getJobById(parseInt(id));
+    if (idParam) {
+      const id = parseInt(idParam);
+      if (isNaN(id)) {
+        return NextResponse.json(
+          { error: 'Invalid ID format' },
+          { status: 400 }
+        );
+      }
+      const result = await getJobById(id);
+      return NextResponse.json(result);
     } else {
-      result = await getAllJobs();
+      const result = await getAllJobs();
+      return NextResponse.json(result);
     }
-    return NextResponse.json(result);
   } catch (error) {
-    return handleError(error, 'fetch');
+    console.error('Error in GET:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch job positions' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    const validatedData = jobSchema.parse(data);
+    const validatedData = createJobSchema.parse(data);
     
-    const existingJob = await checkDuplicateName(validatedData.name);
-    if (existingJob) {
+    const department = await prisma.ref_departments.findUnique({
+      where: { id: validatedData.department_id }
+    });
+
+    if (!department) {
       return NextResponse.json(
-        { error: 'A job position with this name already exists' },
+        { error: 'Department not found' },
         { status: 400 }
       );
+    }
+
+    const existingJob = await checkDuplicateName(validatedData.name, validatedData.department_id);
+    if (existingJob) {
+      return NextResponse.json(
+        { error: 'A job position with this name already exists in this department' },
+        { status: 400 }
+      );
+    }
+
+    const hasSalaryGrades = await validateSalaryRange(
+      validatedData.min_salary,
+      validatedData.max_salary
+    );
+
+    if (!hasSalaryGrades) {
+      return NextResponse.json(
+        { error: 'No salary grades found within the specified salary range' },
+        { status: 400 }
+      );
+    }
+
+    if (validatedData.is_superior) {
+      const existingSuperior = await prisma.ref_job_classes.findFirst({
+        where: {
+          department_id: validatedData.department_id,
+          is_superior: true,
+          deleted_at: null,
+        },
+      });
+
+      if (existingSuperior) {
+        return NextResponse.json(
+          { error: 'This department already has a superior position' },
+          { status: 400 }
+        );
+      }
     }
 
     const job = await prisma.ref_job_classes.create({
       data: {
         ...validatedData,
+        min_salary: new Prisma.Decimal(validatedData.min_salary),
+        max_salary: new Prisma.Decimal(validatedData.max_salary),
         created_at: toGMT8().toISOString(),
         updated_at: toGMT8().toISOString(),
       },
@@ -165,35 +242,111 @@ export async function POST(req: Request) {
 
     return NextResponse.json(job, { status: 201 });
   } catch (error) {
-    return handleError(error, 'create');
+    console.error('Error in POST:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    return NextResponse.json(
+      { error: 'Failed to create job position' },
+      { status: 500 }
+    );
   }
 }
 
 export async function PUT(req: Request) {
   const url = new URL(req.url);
-  const id = url.searchParams.get('id');
-  if (!id) {
+  const idParam = url.searchParams.get('id');
+  
+  if (!idParam) {
     return NextResponse.json({ error: 'Job ID is required' }, { status: 400 });
   }
 
-  try {
-    const data = await req.json();
-    const validatedData = jobSchema.partial().parse(data);
+  const id = parseInt(idParam);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
+  }
 
-    if (validatedData.name) {
-      const existingJob = await checkDuplicateName(validatedData.name, parseInt(id));
-      if (existingJob) {
+  try {
+    const currentJob = await getJobById(id);
+    const data = await req.json();
+    const validatedData = updateJobSchema.parse(data);
+
+    if (validatedData.department_id) {
+      const department = await prisma.ref_departments.findUnique({
+        where: { id: validatedData.department_id }
+      });
+
+      if (!department) {
         return NextResponse.json(
-          { error: 'A job position with this name already exists' },
+          { error: 'Department not found' },
           { status: 400 }
         );
       }
     }
 
-    // Check employee limits if updating max_employees
-    if (validatedData.max_employees !== undefined) {
-      const currentActiveCount = await getActiveEmployeeCount(parseInt(id));
-      if (validatedData.max_employees !== null && currentActiveCount > validatedData.max_employees) {
+    if (validatedData.name && validatedData.department_id) {
+      const existingJob = await checkDuplicateName(
+        validatedData.name,
+        validatedData.department_id,
+        id
+      );
+      if (existingJob) {
+        return NextResponse.json(
+          { error: 'A job position with this name already exists in this department' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Handle salary updates with proper typing
+    const updateData: Prisma.ref_job_classesUpdateInput = {
+      ...validatedData,
+      updated_at: toGMT8().toISOString(),
+    };
+
+    if (validatedData.min_salary !== undefined) {
+      updateData.min_salary = new Prisma.Decimal(validatedData.min_salary);
+    }
+
+    if (validatedData.max_salary !== undefined) {
+      updateData.max_salary = new Prisma.Decimal(validatedData.max_salary);
+    }
+
+    // Validate salary range if either salary is updated
+    if (validatedData.min_salary !== undefined || validatedData.max_salary !== undefined) {
+      const minSalary = validatedData.min_salary ?? Number(currentJob.min_salary);
+      const maxSalary = validatedData.max_salary ?? Number(currentJob.max_salary);
+
+      const hasSalaryGrades = await validateSalaryRange(minSalary, maxSalary);
+      if (!hasSalaryGrades) {
+        return NextResponse.json(
+          { error: 'No salary grades found within the specified salary range' },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (validatedData.is_superior) {
+      const existingSuperior = await prisma.ref_job_classes.findFirst({
+        where: {
+          department_id: validatedData.department_id ?? currentJob.department_id,
+          is_superior: true,
+          id: { not: id },
+          deleted_at: null,
+        },
+      });
+
+      if (existingSuperior) {
+        return NextResponse.json(
+          { error: 'This department already has a superior position' },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (validatedData.max_employees !== undefined && validatedData.max_employees !== null) {
+      const currentActiveCount = await getActiveEmployeeCount(id);
+      if (currentActiveCount > validatedData.max_employees) {
         return NextResponse.json(
           { error: 'Cannot set employee limit lower than current active employee count' },
           { status: 400 }
@@ -202,39 +355,46 @@ export async function PUT(req: Request) {
     }
 
     const job = await prisma.ref_job_classes.update({
-      where: { id: parseInt(id) },
-      data: {
-        ...validatedData,
-        updated_at: toGMT8().toISOString(),
-      },
+      where: { id },
+      data: updateData,
     });
 
     return NextResponse.json(job);
   } catch (error) {
-    return handleError(error, 'update');
+    console.error('Error in PUT:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    return NextResponse.json(
+      { error: 'Failed to update job position' },
+      { status: 500 }
+    );
   }
 }
 
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
-  const id = url.searchParams.get('id');
+  const idParam = url.searchParams.get('id');
+
+  if (!idParam) {
+    return NextResponse.json({ error: 'Job ID is required' }, { status: 400 });
+  }
+
+  const id = parseInt(idParam);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
+  }
 
   try {
-    if (!id) {
-      throw new Error('Job ID is required');
-    }
-
-    // Check for active employees before deletion
-    const activeCount = await getActiveEmployeeCount(parseInt(id));
+    const activeCount = await getActiveEmployeeCount(id);
     if (activeCount > 0) {
       return NextResponse.json({
-        success: false,
-        message: 'Cannot delete job position that has active employees'
+        error: 'Cannot delete job position that has active employees'
       }, { status: 400 });
     }
 
     const job = await prisma.ref_job_classes.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: { 
         deleted_at: toGMT8().toISOString(),
         updated_at: toGMT8().toISOString(),
@@ -246,6 +406,10 @@ export async function DELETE(req: Request) {
       job 
     });
   } catch (error) {
-    return handleError(error, 'delete');
+    console.error('Error in DELETE:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete job position' },
+      { status: 500 }
+    );
   }
 }
