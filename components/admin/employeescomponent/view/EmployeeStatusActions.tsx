@@ -11,6 +11,8 @@ import {
   Chip,
   Spinner,
   cn,
+  Autocomplete,
+  AutocompleteItem,
 } from "@nextui-org/react";
 import FormFields, {
   FormInputProps,
@@ -21,7 +23,7 @@ import {
   Status,
   UnavaliableStatusJSON,
 } from "@/types/employeee/EmployeeType";
-import { UseFormReturn } from "react-hook-form";
+import { useController, useFormContext, UseFormReturn } from "react-hook-form";
 import { BiErrorCircle, BiEdit } from "react-icons/bi";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
@@ -43,8 +45,14 @@ import UserAvatarTooltip from "@/components/common/avatar/user-avatar-tooltip";
 const statusFormSchema = z.object({
   startDate: z.string().min(1, "Date is required"),
   endDate: z.string().nullable(),
-  reason: z.string().min(10, "Please provide a more detailed reason"),
+  reason: z.string().min(1, "Reason is required").nullable(),
 });
+
+interface ResignReasonOption {
+  key: string;
+  label: string;
+  description?: string;
+}
 
 type StatusFormData = z.infer<typeof statusFormSchema>;
 
@@ -64,7 +72,58 @@ interface StatusInfo {
   data: UnavaliableStatusJSON[] | null;
   color: string;
 }
-
+const resignreasonOptions: ResignReasonOption[] = [
+  { key: "better-opportunity", label: "Better career opportunity elsewhere" },
+  { key: "higher-compensation", label: "Higher salary/compensation package" },
+  { key: "career-change", label: "Career change/different industry" },
+  { key: "relocation", label: "Relocation/moving to different area" },
+  { key: "family-reasons", label: "Family responsibilities/obligations" },
+  { key: "health-reasons", label: "Health concerns/medical reasons" },
+  { key: "further-education", label: "Pursuing further education" },
+  { key: "work-life-balance", label: "Better work-life balance" },
+  { key: "company-culture", label: "Cultural fit/company culture concerns" },
+  { key: "management-issues", label: "Management style differences" },
+  { key: "commute-distance", label: "Long commute/transportation issues" },
+  { key: "workload-stress", label: "Workload stress/burnout" },
+  { key: "personal-growth", label: "Limited growth opportunities" },
+  { key: "starting-business", label: "Starting own business/entrepreneurship" },
+  { key: "retirement", label: "Early retirement" },
+  { key: "restructuring", label: "Company restructuring concerns" },
+  { key: "career-goals", label: "Misaligned career goals" },
+  { key: "travel-opportunities", label: "Seeking travel opportunities" },
+  { key: "skill-development", label: "Better skill development opportunities" },
+  { key: "team-dynamics", label: "Team dynamics/workplace relationships" },
+  { key: "job-security", label: "Job security concerns" },
+  { key: "benefits-package", label: "Better benefits package elsewhere" },
+  { key: "return-school", label: "Returning to school full-time" },
+  { key: "personal-reasons", label: "Personal reasons" },
+  { key: "schedule-flexibility", label: "Need more flexible schedule" },
+  { key: "overseas-opportunity", label: "Overseas employment opportunity" },
+  { key: "career-advancement", label: "Better advancement opportunities" },
+  { key: "job-satisfaction", label: "Job satisfaction issues" },
+  { key: "professional-development", label: "Professional development opportunities" },
+  { key: "industry-change", label: "Industry/market changes" },
+  { key: "remote-work", label: "Seeking remote work opportunities" },
+  { key: "role-expectations", label: "Role expectations mismatch" },
+  { key: "project-completion", label: "Project completion/contract end" },
+  { key: "marriage", label: "Marriage/spouse relocation" },
+  { key: "childcare", label: "Childcare responsibilities" },
+  { key: "elder-care", label: "Elder care responsibilities" },
+  { key: "workplace-safety", label: "Workplace safety concerns" },
+  { key: "ethical-concerns", label: "Ethical/moral differences" },
+  { key: "career-transition", label: "Career transition period" },
+  { key: "certification-pursuit", label: "Pursuing professional certifications" },
+  { key: "sabbatical", label: "Taking a sabbatical" },
+  { key: "visa-immigration", label: "Visa/immigration issues" },
+  { key: "mental-health", label: "Mental health considerations" },
+  { key: "organizational-changes", label: "Organizational changes" },
+  { key: "acquisition-merger", label: "Company acquisition/merger" },
+  { key: "toxic-environment", label: "Toxic work environment" },
+  { key: "leadership-changes", label: "Leadership changes" },
+  { key: "career-pivot", label: "Career direction pivot" },
+  { key: "skills-mismatch", label: "Skills mismatch with role" },
+  { key: "military-service", label: "Military service commitment" },
+];
 const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
   employee,
   onEmployeeUpdated,
@@ -92,53 +151,53 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
 
   const today = dayjs().startOf("day");
   const getFormFields = (type: ModalType): FormInputProps[] => {
-    const commonDateConfig = {
-      classNames: DateStyle,
-      validationState: "valid",
-    };
+    // const commonDateConfig = {
+    //   classNames: DateStyle,
+    //   validationState: "valid",
+    // };
 
     switch (type) {
-      case "suspend":
-        return [
-          {
-            name: "startDate",
-            label: "Suspension Start Date",
-            type: "date-picker",
-            isRequired: true,
-            config: {
-              placeholder: "Select suspension start date",
-              maxValue: parseAbsoluteToLocal(
-                dayjs().endOf("day").toISOString()
-              ),
-              defaultValue: today.toISOString(),
-              ...commonDateConfig,
-            },
-          },
-          {
-            name: "endDate",
-            label: "Suspension End Date",
-            type: "date-picker",
-            isRequired: true,
-            config: {
-              placeholder: "Select suspension end date",
-              minValue: parseAbsoluteToLocal(
-                dayjs().startOf("day").toISOString()
-              ),
-              ...commonDateConfig,
-            },
-          },
-          {
-            name: "reason",
-            label: "Suspension Reason",
-            type: "text-area",
-            isRequired: true,
-            config: {
-              minRows: 3,
-              maxRows: 5,
-              placeholder: "Enter reason for suspension",
-            },
-          },
-        ];
+      // case "suspend":
+      //   return [
+      //     {
+      //       name: "startDate",
+      //       label: "Suspension Start Date",
+      //       type: "date-picker",
+      //       isRequired: true,
+      //       config: {
+      //         placeholder: "Select suspension start date",
+      //         maxValue: parseAbsoluteToLocal(
+      //           dayjs().endOf("day").toISOString()
+      //         ),
+      //         defaultValue: today.toISOString(),
+      //         ...commonDateConfig,
+      //       },
+      //     },
+      //     {
+      //       name: "endDate",
+      //       label: "Suspension End Date",
+      //       type: "date-picker",
+      //       isRequired: true,
+      //       config: {
+      //         placeholder: "Select suspension end date",
+      //         minValue: parseAbsoluteToLocal(
+      //           dayjs().startOf("day").toISOString()
+      //         ),
+      //         ...commonDateConfig,
+      //       },
+      //     },
+      //     {
+      //       name: "reason",
+      //       label: "Suspension Reason",
+      //       type: "text-area",
+      //       isRequired: true,
+      //       config: {
+      //         minRows: 3,
+      //         maxRows: 5,
+      //         placeholder: "Enter reason for suspension",
+      //       },
+      //     },
+      //   ];
       case "resign":
         return [
           {
@@ -149,52 +208,93 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             config: {
               placeholder: "Select resignation date",
               maxValue: parseAbsoluteToLocal(
-                dayjs().endOf("day").toISOString()
+               toGMT8().endOf("day").toISOString()
               ),
               defaultValue: today.toISOString(),
-              ...commonDateConfig,
+              // ...commonDateConfig,
+              showMonthAndYearPickers: true,
+
             },
           },
           {
             name: "reason",
             label: "Resignation Reason",
-            type: "text-area",
             isRequired: true,
-            config: {
-              minRows: 3,
-              maxRows: 5,
-              placeholder: "Enter reason for resignation",
-            },
-          },
+            Component: () => {
+              const { field } = useController({
+                name: 'reason',
+              });
+              
+              return (
+                <div>
+                  <Autocomplete 
+                    allowsCustomValue
+                    defaultItems={resignreasonOptions}
+                    placeholder="Select or enter a resignation reason"
+                    variant="bordered"
+                    className="w-full"
+                    onSelectionChange={field.onChange}
+                    onInputChange={field.onChange}
+                  >
+                    {(item: ResignReasonOption) => (
+                      <AutocompleteItem key={item.key}>
+                        {item.label}
+                      </AutocompleteItem>
+                    )}
+                  </Autocomplete>
+                </div>
+              );
+            }
+          }
         ];
-      case "terminate":
-        return [
-          {
-            name: "startDate",
-            label: "Termination Date",
-            type: "date-picker",
-            isRequired: true,
-            config: {
-              placeholder: "Select termination date",
-              maxValue: parseAbsoluteToLocal(
-                dayjs().endOf("day").toISOString()
-              ),
-              defaultValue: today.toISOString(),
-              ...commonDateConfig,
-            },
-          },
-          {
-            name: "reason",
-            label: "Termination Reason",
-            type: "text-area",
-            isRequired: true,
-            config: {
-              minRows: 3,
-              maxRows: 5,
-              placeholder: "Enter reason for termination",
-            },
-          },
-        ];
+      // case "terminate":
+      //   return [
+      //     {
+      //       name: "startDate",
+      //       label: "Termination Date",
+      //       type: "date-picker",
+      //       isRequired: true,
+      //       config: {
+      //         placeholder: "Select termination date",
+      //         maxValue: parseAbsoluteToLocal(
+      //           dayjs().endOf("day").toISOString()
+      //         ),
+      //         defaultValue: today.toISOString(),
+      //         // ...commonDateConfig,
+      //         showMonthAndYearPickers: true,
+      //       },
+      //     },
+      //     {
+      //       name: "reason",
+      //       label: "Termination Reason",
+      //       type: "text-area",
+      //       isRequired: true,
+      //       Component: () => {
+      //         const { field } = useController({
+      //           name: 'reason',
+      //         });
+      //         return (
+      //           <div>
+      //             <Autocomplete 
+      //               allowsCustomValue
+      //               defaultItems={resignreasonOptions}
+      //               placeholder="Select or enter a resignation reason"
+      //               variant="bordered"
+      //               className="w-full"
+      //               onSelectionChange={field.onChange}
+      //               onInputChange={field.onChange}
+      //             >
+      //               {(item: ResignReasonOption) => (
+      //                 <AutocompleteItem key={item.key}>
+      //                   {item.label}
+      //                 </AutocompleteItem>
+      //               )}
+      //             </Autocomplete>
+      //           </div>
+      //         );
+      //       }
+      //     },
+        // ];
       default:
         return [];
     }
@@ -341,7 +441,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
       const updateData = addUnavailability({
         start_date: formData.startDate,
         end_date: status === "suspended" ? formData.endDate! : null,
-        reason: formData.reason,
+        reason: formData.reason!,
         entry:
           status === "suspended"
             ? currentEmployee.suspension_json
@@ -675,7 +775,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
     <div className="space-y-4">
       {isActive && (
         <div className="space-y-4">
-          <Section
+          {/* <Section
             className="ms-0"
             title="Temporary Suspension"
             subtitle="Temporarily suspend employee access"
@@ -688,7 +788,7 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
             >
               Suspend
             </Button>
-          </Section>
+          </Section> */}
 
           <Section
             className="ms-0"
@@ -703,13 +803,13 @@ const EmployeeStatusActions: React.FC<EmployeeStatusActionsProps> = ({
               >
                 Resign
               </Button>
-              <Button
+              {/* <Button
                 {...uniformStyle({ color: "danger" })}
                 onPress={() => handleModalOpen("terminate")}
                 isDisabled={isStatusUpdateSubmitting}
               >
                 Terminate
-              </Button>
+              </Button> */}
             </div>
           </Section>
         </div>

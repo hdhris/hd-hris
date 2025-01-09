@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
                 id: id,
                 dim_training_participants: {
                     some: {} // Check if there are any related participants
-                }
+                } 
             }
         });
 

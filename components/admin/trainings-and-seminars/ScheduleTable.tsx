@@ -31,7 +31,7 @@ export default function ScheduleTable() {
       { uid: "program", name: "Program", sortable: true },
       { uid: "session", name: "Session", sortable: true },
       { uid: "location", name: "Location", sortable: true },
-      { uid: "duration", name: "Duration", sortable: true },
+      { uid: "duration", name: "Duration (Hour(s))", sortable: true },
       { uid: "action", name: "Action", sortable: false },
     ],
     rowCell: (item: Schedule, columnKey: React.Key) => {
@@ -57,10 +57,21 @@ export default function ScheduleTable() {
               </p>
             </div>
           );
-        case "location":
-          return <div>{item.location}</div>;
+          case "location":
+            const locationDetails = item.locationDetails;
+            const location = locationDetails
+              ? [
+                  locationDetails.addr_baranggay?.address_name,
+                  locationDetails.addr_municipal?.address_name,
+                  locationDetails.addr_province?.address_name,
+                  locationDetails.addr_region?.address_name
+                ]
+                  .filter(Boolean)
+                  .join(", ")
+              : "Unknown Location";
+            return <div>{location}</div>;
         case "duration":
-          return <div>{item.hour_duration} hours</div>;
+          return <div>{item.hour_duration}</div>;
         case "action":
           return (
             <TableActionButton
@@ -107,10 +118,7 @@ export default function ScheduleTable() {
   };
   SetNavEndContent(() => (
     <div className="flex items-center gap-4">
-      <Button
-        color="primary"
-        onPress={() => setIsCreateOpen(true)}
-      >
+      <Button color="primary" onPress={() => setIsCreateOpen(true)}>
         Create Schedule
       </Button>
     </div>
@@ -137,8 +145,9 @@ export default function ScheduleTable() {
       />
 
       <ManageSchedule
-        isOpen={isCreateOpen}
+        isOpen={isOpen || isCreateOpen}
         onClose={() => {
+          setIsOpen(false);
           setIsCreateOpen(false);
           setSelectedId(undefined);
         }}

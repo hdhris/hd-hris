@@ -90,17 +90,18 @@ export default function EnrolledRecordsTable() {
               </div>
             </div>
           );
-        case "program":
-          return (
-            <div>
-              <p className="font-medium">
-                {record.ref_training_programs?.name || "N/A"}
-              </p>
-              <p className="text-small text-gray-500">
-                {record.ref_training_programs?.location || "N/A"}
-              </p>
-            </div>
-          );
+          case "program":
+            const location = record.ref_training_programs?.locationDetails
+              ? `${record.ref_training_programs.locationDetails.addr_municipal?.address_name || ""}`
+              : "Unknown Location";
+            return (
+              <div>
+                <p className="font-medium">
+                  {record.ref_training_programs?.name || "N/A"}
+                </p>
+                <p className="text-small text-gray-500">{location}</p>
+              </div>
+            );
         case "type":
           return (
             <Chip

@@ -77,7 +77,7 @@ export interface EmployeeFormData {
 
 export const employeeSchema = z.object({
   prefix: z.string().optional().nullable(),
-  privilege_id: z.string().optional(),
+  privilege_id: z.string().min(1, "Access Level is Required").nullable(),
   picture: z.union([z.instanceof(File), z.string()]).optional(),
   username: z.string().optional(),
   password: z.string().min(6, "Password must be at least 6 characters").optional(),
@@ -266,10 +266,10 @@ highSchool: z
   //   if (typeof val === "string") return val === "true";
   //   return val;
   // }, z.boolean()),
-  branch_id: z.string().min(1, "Branch is required"),
+  branch_id: z.string().min(1, "Branch is required").nullable(),
   salary_grade_id: z.string().min(1, "Salary Grade is required"),
-  batch_id: z.string().optional().nullable(),
-  days_json: z.array(z.string()).optional().nullable(),
+  batch_id: z.string().min(1, "Batch Schedule is required"),
+  days_json: z.array(z.string()),
   employement_status_id: z.string().min(1, "Employement status is required"),
 });
 

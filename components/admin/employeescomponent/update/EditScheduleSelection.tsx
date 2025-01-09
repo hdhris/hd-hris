@@ -1,9 +1,14 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
 import { BatchCard } from "@/components/admin/attendance-time/schedule/batchCard";
 import { useQuery } from "@/services/queries";
-import { BatchSchedule, Schedules } from "@/types/attendance-time/AttendanceTypes";
+import {
+  BatchSchedule,
+  Schedules,
+} from "@/types/attendance-time/AttendanceTypes";
 import { Spinner } from "@nextui-org/react";
 
 interface EditScheduleSelectionProps {
@@ -13,10 +18,17 @@ interface EditScheduleSelectionProps {
 const EditScheduleSelection: React.FC<EditScheduleSelectionProps> = ({
   employeeId,
 }) => {
-  const { setValue, watch, clearErrors } = useFormContext();
+  const {
+    setValue,
+    watch,
+    formState: { errors },
+  } = useFormContext();
   const selectedBatchId = watch("batch_id");
-  const [hoveredBatchId, setHoveredBatchId] = React.useState<number | null>(null);
-  const [selectedBatch, setSelectedBatch] = React.useState<BatchSchedule | null>(null);
+  const [hoveredBatchId, setHoveredBatchId] = React.useState<number | null>(
+    null
+  );
+  const [selectedBatch, setSelectedBatch] =
+    React.useState<BatchSchedule | null>(null);
   const [visible, setVisible] = React.useState(false);
 
   const { data: batchData, isLoading: isBatchLoading } = useQuery<Schedules>(
@@ -27,45 +39,54 @@ const EditScheduleSelection: React.FC<EditScheduleSelectionProps> = ({
   const currentDays = watch("days_json") || [];
   const daysArray = Array.isArray(currentDays) ? currentDays : [];
 
-  const handleBatchSelect = (batch: BatchSchedule | null) => {
-    if (selectedBatch?.id === batch?.id) {
-      // Unselect the current batch
-      setSelectedBatch(null);
-      setValue("batch_id", "", {
-        shouldValidate: false,
+  // const handleBatchSelect = (batch: BatchSchedule | null) => {
+  //   if (selectedBatch?.id === batch?.id) {
+  //     // Unselect the current batch
+  //     setSelectedBatch(null);
+  //     setValue("batch_id", "", {
+  //       shouldValidate: true,
+  //       shouldDirty: true,
+  //     });
+  //     setValue("days_json", [], {
+  //       shouldValidate: true,
+  //       shouldDirty: true,
+  //     });
+  //     // // Clear any validation errors
+  //     // clearErrors(["batch_id", "days_json"]);
+  //   } else {
+  //     // Select new batch
+  //     setSelectedBatch(batch);
+  //     if (batch) {
+  //       setValue("batch_id", batch.id.toString(), {
+  //         shouldValidate: false,
+  //         shouldDirty: true,
+  //       });
+  //       // Initialize with empty days array when selecting new batch
+  //       setValue("days_json", ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], {
+  //         shouldValidate: false,
+  //         shouldDirty: true,
+  //       });
+  //     }
+  //   }
+  // };
+  React.useEffect(() => {
+    if (selectedBatch) {
+      setValue("batch_id", selectedBatch.id.toString(), {
+        shouldValidate: true,
         shouldDirty: true,
+        shouldTouch: true,
       });
-      setValue("days_json", [], {
-        shouldValidate: false,
-        shouldDirty: true,
-      });
-      // Clear any validation errors
-      clearErrors(["batch_id", "days_json"]);
-    } else {
-      // Select new batch
-      setSelectedBatch(batch);
-      if (batch) {
-        setValue("batch_id", batch.id.toString(), {
-          shouldValidate: false,
-          shouldDirty: true,
-        });
-        // Initialize with empty days array when selecting new batch
-        setValue("days_json", ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], {
-          shouldValidate: false,
-          shouldDirty: true,
-        });
-      }
     }
-  };
+  }, [selectedBatch, setValue]);
 
   const daysJsonField: FormInputProps = {
     name: "days_json",
     label: "Working Days",
     type: "select",
+    isRequired: true,
     config: {
       placeholder: "Select Working Days",
       selectionMode: "multiple",
-      isRequired: false,
       options: [
         { value: "mon", label: "Monday" },
         { value: "tue", label: "Tuesday" },
@@ -81,7 +102,7 @@ const EditScheduleSelection: React.FC<EditScheduleSelectionProps> = ({
         const selectedValues = Array.from(new Set(e.target.value.split(",")));
         setValue("days_json", selectedValues, {
           shouldValidate: false,
-          shouldDirty: true
+          shouldDirty: true,
         });
       },
     },
@@ -105,7 +126,8 @@ const EditScheduleSelection: React.FC<EditScheduleSelectionProps> = ({
             isHovered={hoveredBatchId === schedule.id}
             isSelected={isSelected}
             setHoveredBatchId={setHoveredBatchId}
-            setSelectedBatch={() => handleBatchSelect(schedule)}
+            // setSelectedBatch={() => handleBatchSelect(schedule)}
+            setSelectedBatch={setSelectedBatch}
             setVisible={setVisible}
           />
           {isSelected && (
@@ -131,6 +153,11 @@ const EditScheduleSelection: React.FC<EditScheduleSelectionProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {renderBatchSchedules()}
       </div>
+      {errors.batch_id && (
+        <p className="text-red-500 font-semibold text-sm">
+          {errors.batch_id.message as string}
+        </p>
+      )}
     </div>
   );
 };

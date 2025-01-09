@@ -7,7 +7,11 @@ import { useQuery } from "@/services/queries";
 import { BatchSchedule, Schedules } from "@/types/attendance-time/AttendanceTypes";
 
 const ScheduleSelection: React.FC = () => {
-  const { setValue, watch } = useFormContext();
+  const {
+     setValue,
+     watch,
+     formState: { errors },
+   } = useFormContext();
   const selectedBatchId = watch("batch_id");
   const [hoveredBatchId, setHoveredBatchId] = React.useState<number | null>(null);
   const [selectedBatch, setSelectedBatch] = React.useState<BatchSchedule | null>(null);
@@ -59,15 +63,25 @@ const ScheduleSelection: React.FC = () => {
     },
   };
 
-  const handleBatchSelect = (batch: BatchSchedule) => {
-    if (selectedBatch?.id === batch.id) {
-      setSelectedBatch(null);
-      setValue("batch_id", "");
-      setValue("days_json", ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
-    } else {
-      setSelectedBatch(batch);
-    }
-  };
+  // const handleBatchSelect = (batch: BatchSchedule) => {
+  //   if (selectedBatch?.id === batch.id) {
+  //     setSelectedBatch(null);
+  //     setValue("batch_id", "");
+  //     setValue("days_json", ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
+  //   } else {
+  //     setSelectedBatch(batch);
+  //   }
+  // };
+
+    React.useEffect(() => {
+      if (selectedBatch) {
+        setValue("batch_id", selectedBatch.id.toString(), {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true,
+        });
+      }
+    }, [selectedBatch, setValue]);
 
   const renderBatchSchedules = () => {
     if (!data?.batch || data.batch.length === 0) {
@@ -92,7 +106,7 @@ const ScheduleSelection: React.FC = () => {
             isHovered={hoveredBatchId === schedule.id}
             isSelected={selectedBatchId === schedule.id.toString()}
             setHoveredBatchId={setHoveredBatchId}
-            setSelectedBatch={() => handleBatchSelect(schedule)}
+            setSelectedBatch={setSelectedBatch}
             setVisible={setVisible}
           />
           {isSelected && (
@@ -114,6 +128,11 @@ const ScheduleSelection: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {renderBatchSchedules()}
       </div>
+      {errors.batch_id && (
+        <p className="text-red-500 font-semibold text-sm">
+          {errors.batch_id.message as string}
+        </p>
+      )}
     </div>
   );
 };

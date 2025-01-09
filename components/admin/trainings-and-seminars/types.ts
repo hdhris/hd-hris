@@ -63,6 +63,7 @@ export interface EnrolledRecord {
   status: string;
   feedback?: string;
   instructor_name: string;
+
   trans_employees: {
     email: string;
     first_name: string;
@@ -71,6 +72,7 @@ export interface EnrolledRecord {
     ref_departments?: {
       name: string;
     };
+  
   };
 
   ref_training_programs: {
@@ -82,6 +84,24 @@ export interface EnrolledRecord {
     end_date: string;
     hour_duration: number;
     is_active: boolean;
+    locationDetails?: {
+      addr_region?: {
+        address_code: number;
+        address_name: string;
+      } | null;
+      addr_province?: {
+        address_code: number;
+        address_name: string;
+      } | null;
+      addr_municipal?: {
+        address_code: number;
+        address_name: string;
+      } | null;
+      addr_baranggay?: {
+        address_code: number;
+        address_name: string;
+      } | null;
+    } | null;
   };
 }
 
@@ -94,6 +114,12 @@ export interface Schedule {
   created_at: string;
   updated_at: string;
   deleted_at?: string;
+  locationDetails: {
+    addr_region: { address_name: string } | null;
+    addr_province: { address_name: string } | null;
+    addr_municipal: { address_name: string } | null;
+    addr_baranggay: { address_name: string } | null;
+  } | null;
   ref_training_programs?: {
     id: number;
     name: string;

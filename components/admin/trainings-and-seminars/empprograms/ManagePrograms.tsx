@@ -13,12 +13,13 @@ import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import SearchFilter from "@/components/common/filter/SearchFilter";
 import { useRouter } from "next/navigation";
-import { Spinner, cn } from "@nextui-org/react";
+import { Spinner, cn, datePicker } from "@nextui-org/react";
 import { DateStyle } from "@/lib/custom/styles/InputStyle";
 import { parseAbsoluteToLocal } from "@internationalized/date";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import dayjs from "dayjs";
 import { FormInputProps } from "@/components/common/forms/FormFields";
+import AddressInput from "@/components/common/forms/address/AddressInput";
 
 // Interfaces
 interface Employee {
@@ -55,29 +56,24 @@ const formSchema = z
       .string()
       .min(10, { message: "Description must be at least 10 characters." }),
     hour_duration: z.number(),
-    location: z
-      .string()
-      .min(3, { message: "Location must be at least 3 characters." }),
+      addr_region: z.string().min(1, "Region is required"),
+      addr_province: z.string().min(1, "Province is required"), 
+      addr_municipal: z.string().min(1, "Municipal is required"),
+      addr_baranggay: z.string().min(1, "Barangay is required"),
+
     start_date: z
       .string()
       .refine((val) => dayjs(val).isValid(), { message: "Invalid start date" }),
     end_date: z.string(),
-    enrollement_date: z.string().refine(
-      (val) => {
-        const enrollmentDate = dayjs(val);
-        const now = dayjs();
-        return enrollmentDate.isValid() && !enrollmentDate.isAfter(now);
-      },
-      { message: "Enrollment date cannot be in the future" }
-    ),
+    enrollement_date: z.string() .refine((val) => dayjs(val).isValid(), { message: "Invalid start date" }),
     instructor_name: z
       .string()
       .regex(/^[a-zA-Z\s]*$/, "The trainer name should be in proper name"),
     max_participants: z
       .number()
-      .min(1, { message: "Maximum participants must be at least 1." }),
+      .min(1, { message: "Maximum attendees must be at least 1." }),
     is_active: z.boolean(),
-    type: z.string().default("programs"),
+    type: z.string().default("training"),
   })
   .refine(
     (data) => {
@@ -91,7 +87,6 @@ const formSchema = z
     }
   );
 
-
 type FormValues = z.infer<typeof formSchema>;
 
 // Utility function for date parsing
@@ -104,7 +99,7 @@ const parseAndFormatDate = (dateString: string | undefined | null) => {
 };
 
 // Main Component
-export default function Manageprogram({ program_id }: { program_id?: string }) {
+export default function ManageSeminar({ program_id }: { program_id?: string }) {
   const router = useRouter();
   const [selectedParticipants, setSelectedParticipants] = useState<
     Participant[]
@@ -116,14 +111,17 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
     name: "",
     description: "",
     hour_duration: 0,
-    location: "",
+      addr_region: "",
+      addr_province: "",
+      addr_municipal: "",
+      addr_baranggay: "",
     start_date: toGMT8().format("YYYY-MM-DDTHH:mm"),
     end_date: toGMT8().add(1, "day").format("YYYY-MM-DDTHH:mm"),
     enrollement_date: toGMT8().format("YYYY-MM-DDTHH:mm"),
     instructor_name: "",
     max_participants: 10,
     is_active: true,
-    type: "programs",
+    type: "training",
   };
 
   const form = useForm<FormValues>({
@@ -133,7 +131,15 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
   });
 
   const { data: programData, isLoading } = useQuery<{
-    program?: FormValues & { dim_training_participants?: Participant[] };
+    program?: FormValues & { 
+      dim_training_participants?: Participant[];
+      locationDetails?: {
+        addr_region?: { address_code: number };
+        addr_province?: { address_code: number };
+        addr_municipal?: { address_code: number };
+        addr_baranggay?: { address_code: number };
+      };
+    };
     employees: Employee[];
   }>(
     `/api/admin/trainings-and-seminars/empprograms/read?id=${program_id}&type=training`
@@ -141,10 +147,10 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
 
   useEffect(() => {
     if (!programData?.program) return;
-
-    const { dim_training_participants, ...programValues } = programData.program;
-
-    const formValues: Partial<FormValues> = {
+  
+    const { dim_training_participants, locationDetails, ...programValues } = programData.program;
+  
+    const initialFormValues: Partial<FormValues> = {
       ...programValues,
       start_date:
         parseAndFormatDate(programValues.start_date) ||
@@ -155,10 +161,14 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
       enrollement_date:
         parseAndFormatDate(programValues.enrollement_date) ||
         defaultFormValues.enrollement_date,
+      addr_region: locationDetails?.addr_region?.address_code.toString() || "",
+      addr_province: locationDetails?.addr_province?.address_code.toString() || "",
+      addr_municipal: locationDetails?.addr_municipal?.address_code.toString() || "",
+      addr_baranggay: locationDetails?.addr_baranggay?.address_code.toString() || "",
     };
-
-    form.reset(formValues);
-
+  
+    form.reset(initialFormValues);
+  
     if (dim_training_participants?.length) {
       setSelectedParticipants(
         dim_training_participants.map((participant) => ({
@@ -175,43 +185,41 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
     }
   }, [programData?.employees]);
 
-
-
   const selectParticipant = useCallback(
     (id: number) => {
       const currentEnrollmentDate = form.getValues("enrollement_date");
       const now = dayjs();
-      
+
       // Validate enrollment date
       if (dayjs(currentEnrollmentDate).isAfter(now)) {
         toast({
-          title: "Cannot enroll participants with future dates",
+          title: "Cannot enroll attendees with future dates",
           variant: "warning",
         });
         return;
       }
-  
+
       setSelectedParticipants((prev) => {
         const existingParticipant = prev.find((p) => p.employee_id === id);
-  
+
         if (existingParticipant) {
           return prev.filter((p) => p.employee_id !== id);
         }
-  
+
         if (prev.length >= form.watch("max_participants")) {
           toast({
-            title: "Maximum participants reached",
+            title: "Maximum attendees reached",
             variant: "warning",
           });
           return prev;
         }
-  
+
         // All existing participants should have the same enrollment date
-        const updatedPrev = prev.map(p => ({
+        const updatedPrev = prev.map((p) => ({
           ...p,
-          enrollement_date: currentEnrollmentDate
+          enrollement_date: currentEnrollmentDate,
         }));
-  
+
         return [
           ...updatedPrev,
           {
@@ -231,7 +239,7 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
       try {
         if (selectedParticipants.length === 0) {
           toast({
-            title: "Please select at least one participant",
+            title: "Please select at least one attendees",
             variant: "warning",
           });
           return;
@@ -245,6 +253,12 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
             data: {
               ...values,
               type: "training",
+              location: JSON.stringify({
+                addr_region: parseInt(values.addr_region, 10),
+                addr_province: parseInt(values.addr_province, 10),
+                addr_municipal: parseInt(values.addr_municipal, 10),
+                addr_baranggay: parseInt(values.addr_baranggay, 10),
+              }),
               dim_training_participants: selectedParticipants.map(
                 (participant) => ({
                   ...participant,
@@ -258,7 +272,7 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
 
         if (response.data?.id) {
           toast({
-            title: `program${program_id ? "updated" : "created"} successfully`,
+            title: `Program ${program_id ? "updated" : "created"} successfully`,
             variant: "success",
           });
           router.push("/trainings-and-seminars/empprograms");
@@ -273,6 +287,59 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
   if (isLoading) {
     return <Spinner label="Loading..." className="flex-1" />;
   }
+  // const handleSubmit = useCallback(
+  //   async (values: FormValues) => {
+  //     try {
+  //       if (selectedParticipants.length === 0) {
+  //         toast({
+  //           title: "Please select at least one participant",
+  //           variant: "warning",
+  //         });
+  //         return;
+  //       }
+
+  //       const enrollement_date = values.enrollement_date;
+
+  //       const response = await axios.post(
+  //         "/api/admin/trainings-and-seminars/empprograms/upsert",
+  //         {
+  //           data: {
+  //             ...values,
+  //             type: "training",
+  //             location: JSON.stringify({
+  //               addr_region: parseInt(values.addr_region, 10),
+  //               addr_province: parseInt(values.addr_province, 10),
+  //               addr_municipal: parseInt(values.addr_municipal, 10),
+  //               addr_baranggay: parseInt(values.addr_baranggay, 10),
+  //             }),
+  //             dim_training_participants: selectedParticipants.map(
+  //               (participant) => ({
+  //                 ...participant,
+  //                 enrollement_date: enrollement_date,
+  //                 status: "enrolled",
+  //               })
+  //             ),
+  //           },
+  //         }
+  //       );
+
+  //       if (response.data?.id) {
+  //         toast({
+  //           title: `program${program_id ? "updated" : "created"} successfully`,
+  //           variant: "success",
+  //         });
+  //         router.push("/trainings-and-seminars/empprograms");
+  //       }
+  //     } catch (error) {
+  //       toast({ title: `${error}`, variant: "danger" });
+  //     }
+  //   },
+  //   [selectedParticipants, program_id, router]
+  // );
+
+  // if (isLoading) {
+  //   return <Spinner label="Loading..." className="flex-1" />;
+  // }
 
   const formFields: FormInputProps[] = [
     {
@@ -290,9 +357,15 @@ export default function Manageprogram({ program_id }: { program_id?: string }) {
     },
     {
       name: "location",
-      label: "Location",
-      placeholder: "e.g., Koronadal City",
+      label: "Location", 
       isRequired: true,
+      Component: () => {
+        return (
+          <div>
+            <AddressInput />
+          </div>
+        );
+      }
     },
     {
       name: "instructor_name",

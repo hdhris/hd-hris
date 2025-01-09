@@ -134,9 +134,12 @@ export default function ViewRecord({
                     },
                     {
                       label: "Location",
-                      value:
-                        record.ref_training_programs?.location ||
-                        "Not Specified",
+                      value: record.ref_training_programs?.locationDetails
+                        ? `${record.ref_training_programs.locationDetails.addr_baranggay?.address_name || ""},
+                          ${record.ref_training_programs.locationDetails.addr_municipal?.address_name || ""},
+                          ${record.ref_training_programs.locationDetails.addr_province?.address_name || ""},
+                          ${record.ref_training_programs.locationDetails.addr_region?.address_name || ""}`
+                        : "Location not specified",
                     },
                     {
                       label: "Instructor",
