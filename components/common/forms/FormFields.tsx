@@ -174,6 +174,7 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                     <Case of="auto-complete">
                                         <Autocomplete
                                             {...field}
+                                            disableSelectorIconRotation
                                             defaultInputValue={field.value}
                                             defaultItems={(item.config as any)?.options ?? undefined}
                                             aria-labelledby={String(item.name)}
@@ -185,7 +186,8 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             size={size}
                                             variant="bordered"
                                             radius="sm"
-                                            onSelectionChange={(value)=>field.onChange(String(value))}
+                                            selectedKey={(item.config as AutocompleteProps)?.allowsCustomValue ? undefined : field.value ? String(field.value) : null}
+                                            onSelectionChange={(item.config as AutocompleteProps)?.allowsCustomValue ? undefined : (value)=>field.onChange(String(value))}
                                             onInputChange={(value)=>field.onChange(String(value))}
                                             {...(item.config as AutocompleteProps)}
                                         >
