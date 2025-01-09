@@ -21,19 +21,20 @@ Table dim_employee_benefits {
 
 Table dim_incident_reports {
   id Int [pk, increment]
-  employee_id Int
-  occurance_date DateTime
-  type String
-  location String
-  severity String
-  description String
-  reported_by Int
-  comments String
+  employee_id Int [not null]
+  occurance_date DateTime [not null]
+  type String [not null]
+  location String [not null]
+  severity String [not null]
+  description String [not null]
+  reported_by Int [not null]
+  actions_taken String [not null]
   created_at DateTime [not null]
   updated_at DateTime [not null]
   deleted_at DateTime
-  trans_employees_dim_incident_reports_employee_idTotrans_employees trans_employees
-  trans_employees_dim_incident_reports_reported_byTotrans_employees trans_employees
+  is_acted Boolean [not null, default: false]
+  trans_employees_dim_incident_reports_employee_idTotrans_employees trans_employees [not null]
+  trans_employees_dim_incident_reports_reported_byTotrans_employees trans_employees [not null]
 }
 
 Table dim_leave_balances {
@@ -234,6 +235,7 @@ Table ref_departments {
   created_at DateTime
   updated_at DateTime
   deleted_at DateTime
+  ref_job_classes ref_job_classes [not null]
   trans_employees trans_employees [not null]
 }
 
@@ -248,6 +250,10 @@ Table ref_job_classes {
   max_employees Int
   max_department_instances Int
   is_superior Boolean [default: false]
+  min_salary Decimal [default: 0]
+  max_salary Decimal [default: 0]
+  department_id Int
+  ref_departments ref_departments
   trans_employees trans_employees [not null]
   trans_signatories trans_signatories [not null]
 }
@@ -268,6 +274,7 @@ Table ref_payheads {
   dim_payhead_affecteds dim_payhead_affecteds [not null]
   dim_payhead_specific_amounts dim_payhead_specific_amounts [not null]
   ref_benefit_plans ref_benefit_plans [not null]
+  trans_payable trans_payable [not null]
   trans_payhead_breakdowns trans_payhead_breakdowns [not null]
 }
 
@@ -470,6 +477,7 @@ Table trans_employees {
   trans_leaves_trans_leaves_created_byTotrans_employees trans_leaves [not null]
   trans_overtimes_trans_overtimes_employee_idTotrans_employees trans_overtimes [not null]
   trans_overtimes_trans_overtimes_created_byTotrans_employees trans_overtimes [not null]
+  trans_payable trans_payable [not null]
   trans_payrolls trans_payrolls [not null]
 }
 
@@ -489,6 +497,7 @@ Table trans_leaves {
   files Json
   total_days Decimal [not null]
   leave_type_audit Json [not null, default: '{}']
+  cancel_at DateTime
   trans_employees_leaves trans_employees [not null]
   trans_employees_trans_leaves_created_byTotrans_employees trans_employees
   trans_leave_types trans_leave_types [not null]
@@ -569,6 +578,7 @@ Table trans_payrolls {
   trans_benefit_contributions trans_benefit_contributions [not null]
   trans_cash_advance_disbursements trans_cash_advance_disbursements [not null]
   trans_cash_advance_repayments trans_cash_advance_repayments [not null]
+  trans_payable trans_payable [not null]
   trans_payhead_breakdowns trans_payhead_breakdowns [not null]
   trans_employees trans_employees [not null]
   trans_payroll_date trans_payroll_date
@@ -844,6 +854,21 @@ Table sys_notifications {
 This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
+Table trans_payable {
+  id Int [pk, increment]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  payhead_id Int [not null]
+  employee_id Int [not null]
+  amount Decimal [not null]
+  payroll_id Int
+  trans_employees trans_employees [not null]
+  ref_payheads ref_payheads [not null]
+  trans_payrolls trans_payrolls
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
 Ref: dim_employee_benefits.plan_id > ref_benefit_plans.id [delete: No Action]
 
 Ref: dim_employee_benefits.employee_id > trans_employees.id [delete: No Action]
@@ -887,6 +912,8 @@ Ref: fact_training_records.schedule_id > dim_training_schedules.id [delete: No A
 Ref: log_attendances.employee_id > trans_employees.id [delete: No Action]
 
 Ref: ref_benefit_plans.deduction_id > ref_payheads.id [delete: No Action]
+
+Ref: ref_job_classes.department_id > ref_departments.id [delete: No Action]
 
 Ref: ref_training_programs.employee_instructor_id > trans_employees.id [delete: No Action]
 
@@ -983,3 +1010,9 @@ Ref: sys_notifications.to > trans_users.id [delete: No Action]
 Ref: sys_notifications.notification_types_id > sys_notification_types.id [delete: No Action]
 
 Ref: sys_notifications.from > trans_users.id [delete: No Action]
+
+Ref: trans_payable.employee_id > trans_employees.id [delete: Cascade]
+
+Ref: trans_payable.payhead_id > ref_payheads.id [delete: Cascade]
+
+Ref: trans_payable.payroll_id > trans_payrolls.id [delete: Cascade]

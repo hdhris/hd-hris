@@ -5,6 +5,7 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 import { IncidentReport } from "@/types/incident-reports/type";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { Chip, Tooltip, Avatar } from "@nextui-org/react";
+import { capitalize } from "lodash";
 
 export const tableConfig: TableConfigProps<IncidentReport> = {
     columns: [
@@ -13,6 +14,7 @@ export const tableConfig: TableConfigProps<IncidentReport> = {
         { uid: "location", name: "Location" },
         { uid: "type", name: "Type" },
         { uid: "severity", name: "Severity" },
+        { uid: "status", name: "Status" },
         { uid: "action", name: "Reporter" },
     ],
     rowCell: (item, columnKey) => {
@@ -27,24 +29,50 @@ export const tableConfig: TableConfigProps<IncidentReport> = {
                     />
                 );
             case "date":
-                return <strong>{toGMT8(item.occurance_date).format("DD MMMM YYYY")}</strong>;
+                return <p>{toGMT8(item.occurance_date).format("DD MMMM YYYY")}</p>;
             case "location":
-                return <strong className="capitalize">{item.location}</strong>;
+                return <p className="capitalize">{item.location}</p>;
             case "type":
-                return <strong className="capitalize">{item.type}</strong>;
-            case "severity":
+                return <p className="capitalize">{item.type}</p>;
+            case "status":
+                const status = !item.is_acted
+                    ? "Pending"
+                    : item.actions_taken === "Demotion"
+                    ? "Demoted"
+                    : item.actions_taken === "Suspension"
+                    ? "Suspended"
+                    : item.actions_taken === "Payroll Deduction"
+                    ? "Deducted"
+                    : item.actions_taken === "Re-Education"
+                    ? "Re-educated"
+                    : item.actions_taken === "Reassignment"
+                    ? "Reassigned"
+                    : item.actions_taken === "Termination"
+                    ? "Terminated"
+                    : item.actions_taken === "Verbal Warning"
+                    ? "Warned"
+                    : item.actions_taken === "Written Warning"
+                    ? "Warned"
+                    : "Pending";
                 return (
-                    <Chip
-                        variant="flat"
-                        color={
-                            item.severity === "critical" ? "danger" : item.severity === "major" ? "warning" : "default"
-                        }
-                        className="capitalize"
-                    >
-                        {item.severity}
+                    <Chip variant="flat" color={item.is_acted ? "success" : "default"} className="capitalize">
+                        {status}
                     </Chip>
                 );
-            // <strong className="capitalize">{item.type}</strong>;
+            case "severity":
+                return (
+                    <strong
+                        className={
+                            item.severity === "critical"
+                                ? "text-danger-500"
+                                : item.severity === "major"
+                                ? "text-warning-500-500"
+                                : ""
+                        }
+                    >
+                        {capitalize(item.severity)}
+                    </strong>
+                );
             case "action":
                 // return item.status === "pending" ? (
                 //   <div className="flex gap-1 items-center">

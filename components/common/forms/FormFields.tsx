@@ -173,22 +173,21 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                 <SwitchCase expression={item.type}>
                                     <Case of="auto-complete">
                                         <Autocomplete
-                                            disableSelectorIconRotation
-                                            placeholder={item.placeholder}
+                                            {...field}
                                             {...(item.config as AutocompleteProps)}
-                                            id={item.name as string}
-                                            aria-label={item.name as string}
-                                            disabled={item.inputDisabled}
+                                            defaultInputValue={field.value}
                                             defaultItems={(item.config as any)?.options ?? undefined}
+                                            aria-labelledby={String(item.name)}
+                                            aria-label={String(item.name)}
+                                            id={String(item.name)}
+                                            placeholder={item.placeholder}
+                                            disabled={item.inputDisabled}
                                             autoFocus={item.isFocus}
                                             size={size}
                                             variant="bordered"
                                             radius="sm"
-                                            selectedKey={field.value ? String(field.value) : null}
-                                            onSelectionChange={(e) => {
-                                                field.onChange(e);
-                                            }}
-                                            {...field}
+                                            // onSelectionChange={(value)=>field.onChange(String(value))}
+                                            onInputChange={(value)=>field.onChange(String(value))}
                                         >
                                             {(item.config as any)?.options?.map((option: GroupInputOptions) => {
                                                 return (

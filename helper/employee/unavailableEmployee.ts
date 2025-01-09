@@ -1,7 +1,7 @@
 import { JsonValue } from "@prisma/client/runtime/library";
 import { toGMT8 } from "../../lib/utils/toGMT8";
 import { EmployeeAll, UnavaliableStatusJSON } from "../../types/employeee/EmployeeType";
-import { MajorEmployee } from "../include-emp-and-reviewr/include";
+import { MajorEmployee, MinorEmployee } from "../include-emp-and-reviewr/include";
 
 const HistoryJSON: UnavaliableStatusJSON[] = [
     {
@@ -25,11 +25,11 @@ const HistoryJSON: UnavaliableStatusJSON[] = [
 
 type addUnavailabilityType = {
     incident_id?: number;
-    entry: UnavaliableStatusJSON[];
+    entry: UnavaliableStatusJSON[] | JsonValue;
     start_date: string;
     end_date: string | null;
     reason: string;
-    initiated_by: MajorEmployee;
+    initiated_by: MinorEmployee;
 };
 export function addUnavailability({
     entry,
@@ -39,7 +39,8 @@ export function addUnavailability({
     reason,
     initiated_by,
 }: addUnavailabilityType) {
-    const newId = entry.length > 0 ? Math.max(...entry.map((e) => e.id)) + 1 : 1;
+    const parsedEntry = entry as UnavaliableStatusJSON[];
+    const newId = parsedEntry.length > 0 ? Math.max(...parsedEntry.map((e) => e.id)) + 1 : 1;
     let newEntry: UnavaliableStatusJSON[] = [
         {
             id: newId,
@@ -58,7 +59,7 @@ export function addUnavailability({
             canceled_reason: null,
             canceled_by: null,
         },
-        ...entry,
+        ...parsedEntry,
     ];
 
     return newEntry;

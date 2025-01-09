@@ -9,23 +9,27 @@ import { useEmployeeId } from "@/hooks/employeeIdHook";
 import { getEmpFullName, getFullAddress } from "@/lib/utils/nameFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
+import { ActionsTakenArray } from "@/types/incident-reports/type";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { parseAbsolute, parseAbsoluteToLocal } from "@internationalized/date";
 import axios from "axios";
 import React, { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaStreetView } from "react-icons/fa";
+import { mutate } from "swr";
 import { z } from "zod";
 
 const formSchema = z.object({
-    employee_id: z.number().optional(),
+    employee_id: z.number().min(1, "Select an employee"),
     occurance_date: z.string(),
     severity: z.enum(["minor", "major", "critical"]),
+    actions_taken: z.enum([...ActionsTakenArray, ""]),
     type: z.string().min(1, "Enter the type of the incident"),
-    location: z.string().min(1, "Enter the location where the incident occured"),
-    description: z.string().optional(),
-    comments: z.string().optional(),
-    reported_by: z.number(),
-});
+    location: z.string().min(1, "Enter the site where the incident occured"),
+    description: z.string().min(1, "Please describe the incident"),
+}).refine(
+    data => data.actions_taken != "", { path: ["actions_taken"], message: "Action is required" }
+)
 
 interface FileReportProp {
     isOpen: boolean;
@@ -51,7 +55,15 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {},
+        defaultValues: {
+            description: "",
+            location: "",
+            occurance_date: toGMT8().toISOString(),
+            severity: "minor",
+            actions_taken: "Verbal Warning",
+            type: "",
+            employee_id: undefined,
+        },
     });
 
     const { watch, setValue } = form;
@@ -65,26 +77,31 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
     const formReset = useCallback(() => {
         if (form) {
             form.reset({
-                comments: "",
                 description: "",
                 location: "",
                 occurance_date: toGMT8().toISOString(),
                 severity: "minor",
+                actions_taken: "Verbal Warning",
                 type: "",
                 employee_id: undefined,
-                reported_by: userID,
             });
         }
     }, [form, userID]);
 
-    async function onsubmit(value: z.infer<typeof formSchema>) {
+    const onSubmit = useCallback(async (value: z.infer<typeof formSchema>)=> {
         setIsSubmitting(true);
         try {
-            await axios.post("/api/admin/incident/create", value);
+            await axios.post("/api/admin/incident/create", {
+                ...value,
+                reported_by: userID
+            });
             toast({
                 title: "Incident reported successfully!",
                 variant: "success",
             });
+            onClose();
+            formReset();
+            mutate("/api/admin/incident/reports");
         } catch (error) {
             toast({
                 title: "An error has occured",
@@ -93,7 +110,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
             });
         }
         setIsSubmitting(false);
-    }
+    },[userID, watch])
 
     return (
         <Drawer
@@ -107,42 +124,21 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
             unSubmittable={!form.watch("employee_id")}
         >
             <Form {...form}>
-                <form className="space-y-4" id="drawer-form" onSubmit={form.handleSubmit(onsubmit)}>
+                <form className="space-y-4" id="drawer-form" onSubmit={form.handleSubmit(onSubmit)}>
                     {employee ? (
-                        <EmployeeHeader employee={employee} onClose={formReset} />
+                        <>
+                            <EmployeeHeader employee={employee} onClose={formReset} />
+                            <BorderedCard
+                                icon={<div />}
+                                title={employee.ref_branches.name}
+                                description={getFullAddress(employee.ref_branches)}
+                            />
+                        </>
                     ) : (
                         <EmployeeListForm isLoading={isLoading} employees={employees} />
                     )}
-                    <FormFields
+                    <FormFields<z.infer<typeof formSchema>>
                         items={[
-                            {
-                                name: "",
-                                Component: () => {
-                                    return employee ? (
-                                        <BorderedCard
-                                            icon={<div />}
-                                            title={employee.ref_branches.name}
-                                            description={getFullAddress(employee.ref_branches)}
-                                        />
-                                    ) : (
-                                        <div />
-                                    );
-                                },
-                            },
-                            {
-                                name: "occurance_date",
-                                type: "date-picker",
-                                label: "Occurance Date",
-                                isRequired: true,
-                                inputDisabled: !watch("employee_id"),
-                            },
-                            {
-                                name: "location",
-                                label: "Location",
-                                isRequired: true,
-                                placeholder: "e.g: On-site, Off-site",
-                                inputDisabled: !watch("employee_id"),
-                            },
                             {
                                 name: "type",
                                 type: "auto-complete",
@@ -151,8 +147,8 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                 isRequired: true,
                                 inputDisabled: !watch("employee_id"),
                                 config: {
+                                    allowsCustomValue: true,
                                     options: [
-                                        "Customer Injury",
                                         "Complaint Incident",
                                         "Equipment Failure",
                                         "Service Failure",
@@ -168,12 +164,45 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                         "Injury",
                                         "Illness",
                                     ]
-                                    .sort((a,b) => a.localeCompare(b))
-                                    .map((item) => ({
-                                        label: item,
-                                        value: item,
-                                    })),
+                                        .sort((a, b) => a.localeCompare(b))
+                                        .map((item) => ({
+                                            label: item,
+                                            value: item,
+                                        })),
                                 },
+                            },
+                            {
+                                name: "occurance_date",
+                                type: "date-picker",
+                                label: "Occurance Date",
+                                isRequired: true,
+                                inputDisabled: !watch("employee_id"),
+                                config: {
+                                    maxValue: parseAbsoluteToLocal(toGMT8().toISOString()),
+                                },
+                            },
+                            {
+                                name: "location",
+                                label: "Scene of the Incident",
+                                type: "auto-complete",
+                                isRequired: true,
+                                placeholder: "e.g: On-site, Off-site...",
+                                inputDisabled: !watch("employee_id"),
+                                config: {
+                                    allowsCustomValue: true,
+                                    options: ["On-site", "Off-site"]
+                                        .sort((a, b) => a.localeCompare(b))
+                                        .map((item) => ({
+                                            label: item,
+                                            value: item,
+                                        })),
+                                },
+                            },
+                            {
+                                name: "description",
+                                type: "text-area",
+                                label: "Description",
+                                inputDisabled: !watch("employee_id"),
                             },
                             {
                                 name: "severity",
@@ -197,13 +226,8 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                         },
                                     ],
                                     orientation: "horizontal",
+                                    onValueChange: ()=> setValue('actions_taken', ""),
                                 },
-                            },
-                            {
-                                name: "description",
-                                type: "text-area",
-                                label: "Description",
-                                inputDisabled: !watch("employee_id"),
                             },
                             {
                                 name: "actions_taken",
@@ -213,22 +237,17 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                 inputDisabled: !watch("employee_id"),
                                 config: {
                                     orientation: "vertical",
-                                    options: [
-                                        "Suspension",
-                                        "Probation",
-                                        "Verbal Warning",
-                                        "Written Warning",
-                                        "Demotion",
-                                        "Termination",
-                                        "Relocation",
-                                        "Re-Education",
-                                        "Revocation of Privilege",
-                                    ]
-                                    .sort((a,b) => a.localeCompare(b))
-                                    .map((item) => ({
-                                        label: item,
-                                        value: item,
-                                    })),
+                                    options: (watch("severity") === "minor"
+                                        ? ["Verbal Warning", "Written Warning", "Re-Education"]
+                                        : watch("severity") === "major"
+                                        ? ["Payroll Deduction", "Reassignment"]
+                                        : ["Suspension", "Demotion", "Termination"]
+                                    )
+                                        .sort((a, b) => a.localeCompare(b))
+                                        .map((item) => ({
+                                            label: item,
+                                            value: item,
+                                        })),
                                 },
                             },
                         ]}
