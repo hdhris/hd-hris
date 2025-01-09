@@ -2,13 +2,14 @@ import { Parser } from "expr-eval";
 const parser = new Parser();
 
 export const static_formula = {
+    basic_salary: "get_basic_salary",
     cash_advance_disbursement: "get_disbursement",
     cash_advance_repayment: "get_repayment",
     tardiness: "get_tardiness",
     leaves: "get_leaves",
     overtimes: "get_overtimes",
     benefit_contribution: "get_contribution",
-    incident_payable: "get_incident",
+    payable: "get_incident",
 };
 
 export type BaseValueProp = {
@@ -222,9 +223,6 @@ export function getAttendanceTotal({
     for (let current = new Date(start); current <= end; current.setDate(current.getDate() + 1)) {
         const dateString = current.toISOString().split("T")[0];
         const logByDate = logStatus[dateString];
-        if(employeeID === 5){
-            console.log({dateString, log: logByDate[employeeID]})
-        }
         if (logByDate && logByDate[employeeID]) {
             deductedUndertime += logByDate[employeeID].deductedUndertime ?? 0;
             paidOvertimes += logByDate[employeeID].paidOvertime ?? 0;

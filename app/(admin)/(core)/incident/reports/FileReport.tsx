@@ -147,6 +147,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                 isRequired: true,
                                 inputDisabled: !watch("employee_id"),
                                 config: {
+                                    onSelectionChange: undefined,
                                     allowsCustomValue: true,
                                     options: [
                                         "Complaint Incident",
@@ -189,6 +190,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                 placeholder: "e.g: On-site, Off-site or specify...",
                                 inputDisabled: !watch("employee_id"),
                                 config: {
+                                    onSelectionChange: undefined,
                                     allowsCustomValue: true,
                                     options: ["On-site", "Off-site"]
                                         .sort((a, b) => a.localeCompare(b))

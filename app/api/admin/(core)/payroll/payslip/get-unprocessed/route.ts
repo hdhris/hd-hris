@@ -58,7 +58,7 @@ async function stage_one(prisma: PrismaClient, dateID: number) {
                 },
             }),
         ]);
-        const employeeIDs = new Set(payrolls.map((pr) => pr.employee_id));
+        // const employeeIDs = new Set(payrolls.map((pr) => pr.employee_id));
 
         await Promise.all([
             // Remove payroll entries associated with deleted employees.
@@ -162,7 +162,7 @@ async function stage_two(prisma: PrismaClient, dateID: number) {
         const employeeIds = Array.from(payrollsMap.keys());
 
         // Execute both queries concurrently
-        const [cashToDisburse, cashToRepay, benefitsPlansData] = await Promise.all([
+        const [cashToDisburse, cashToRepay, benefitsPlansData, payableData] = await Promise.all([
             // Generate cash to disburse
             prisma.trans_cash_advances.findMany({
                 where: {
@@ -244,9 +244,28 @@ async function stage_two(prisma: PrismaClient, dateID: number) {
                     },
                 },
             }),
+
+            // Generate payables
+            prisma.trans_payable.findMany({
+                where: {
+                    employee_id: { in: employeeIds },
+                    payroll_id: null,
+                },
+                select: {
+                    id: true,
+                    employee_id: true,
+                    amount: true,
+                    ref_payheads: {
+                        select: {
+                            id: true,
+                            name: true,
+                        }
+                    }
+                },
+            })
         ]);
 
-        return { cashToDisburse, cashToRepay, benefitsPlansData };
+        return { cashToDisburse, cashToRepay, benefitsPlansData, payableData };
     } catch (error) {
         return NextResponse.json({ error: `Stage one: ${error || "An error occurred"}` }, { status: 500 });
     }
