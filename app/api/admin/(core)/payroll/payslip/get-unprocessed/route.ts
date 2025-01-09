@@ -4,6 +4,7 @@ import { emp_rev_include } from "@/helper/include-emp-and-reviewr/include";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { static_formula, VariableAmountProp } from "@/helper/payroll/calculations";
 import { PrismaClient } from "@prisma/client";
+import { isEmployeeAvailableWithin } from "@/helper/employee/unavailableEmployee";
 
 export const dynamic = "force-dynamic";
 
@@ -35,12 +36,20 @@ export async function POST(req: NextRequest) {
 
 async function stage_one(prisma: PrismaClient, dateID: number) {
     try {
-        const [payrolls, dataPH, employees] = await Promise.all([
+        const [payrolls, dataPH, fetchEmployee] = await Promise.all([
             prisma.trans_payrolls.findMany({
                 where: {
                     date_id: dateID,
                     trans_employees: { deleted_at: null },
                 },
+                include: {
+                    trans_payroll_date: {
+                        select: {
+                            start_date: true,
+                            end_date: true,
+                        }
+                    }
+                }
             }),
             prisma.ref_payheads.findMany({
                 where: { deleted_at: null, is_active: true },
@@ -58,12 +67,18 @@ async function stage_one(prisma: PrismaClient, dateID: number) {
                 },
             }),
         ]);
-        // const employeeIDs = new Set(payrolls.map((pr) => pr.employee_id));
+        const employees = fetchEmployee.filter(employee => {
+            return isEmployeeAvailableWithin({employee, date: {
+                start: payrolls[0]?.trans_payroll_date?.start_date ?? new Date(),
+                end: payrolls[0]?.trans_payroll_date?.end_date ?? new Date(),
+            }})
+        })
+        const employeeIDs = Array.from(new Set(payrolls.map((pr) => pr.employee_id)));
 
         await Promise.all([
             // Remove payroll entries associated with deleted employees.
             prisma.trans_payrolls.deleteMany({
-                where: { date_id: dateID, trans_employees: { deleted_at: { not: null } } },
+                where: { date_id: dateID, trans_employees: { id:{ not:{ in: employeeIDs } } } },
             }),
 
             // Initialize payrolls with un-deleted employees.
@@ -85,7 +100,7 @@ async function stage_one(prisma: PrismaClient, dateID: number) {
                         {
                             trans_payrolls: {
                                 date_id: dateID,
-                                trans_employees: { deleted_at: { not: null } },
+                                trans_employees: { id:{ not:{ in: employeeIDs } } }
                             }, // Deleted employees' breakdowns
                         },
                         {

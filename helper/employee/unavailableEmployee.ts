@@ -120,6 +120,37 @@ export function getExpiredUnavailability({
     return foundEntry ?? null;
 }
 
+export function isEmployeeAvailableWithin({
+    employee,
+    find,
+    date,
+}: {
+    employee?: {
+        suspension_json: UnavaliableStatusJSON[] | JsonValue;
+        resignation_json: UnavaliableStatusJSON[] | JsonValue;
+        termination_json: UnavaliableStatusJSON[] | JsonValue;
+        hired_at?: Date | string | null;
+    };
+    find?: Array<"suspension" | "resignation" | "termination" | "hired">;
+    date: {
+        start: string | Date;
+        end: string | Date;
+    };
+}): boolean {
+    if(!employee) return true
+    
+    const start = toGMT8(date.start).startOf('day');
+    const end = toGMT8(date.end).startOf('day');
+    let found = false;
+    for(let current = new Date(start.toDate()); current <= end.toDate(); current.setDate(current.getDate() + 1)){
+        if(isEmployeeAvailable({employee, find, date: current})){
+            found = true;
+            break;
+        }
+    }
+    return found;
+}
+
 export function isEmployeeAvailable({
     employee,
     find,
@@ -132,7 +163,7 @@ export function isEmployeeAvailable({
         hired_at?: Date | string | null;
     };
     find?: Array<"suspension" | "resignation" | "termination" | "hired">;
-    date?: string;
+    date?: string | Date;
 }): boolean {
     if(!employee) return true
     const thisDate = date ? toGMT8(date) : toGMT8();
@@ -141,7 +172,7 @@ export function isEmployeeAvailable({
     //     if (toGMT8(employee.hired_at).isAfter(thisDate)) return false;
     // }
 
-    const unHired = employee.hired_at && toGMT8(employee.hired_at).isAfter(thisDate)
+    const unHired = employee.hired_at && toGMT8(employee.hired_at).startOf('day').isAfter(thisDate)
 
     const { suspension_json, resignation_json, termination_json } = employee as {
         suspension_json: UnavaliableStatusJSON[];

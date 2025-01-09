@@ -76,6 +76,7 @@ export function determineAttendance({
     | "On Leave"
     | "No Work"
     | "Unscheduled"
+    | "Unemployed"
     | "Unhired"
     | "Suspended" {
     if (
@@ -94,6 +95,13 @@ export function determineAttendance({
     // Collect punch-ins and punch-outs, filter undefined values
     const morningPunches = [amIn, amOut].filter((punch): punch is punchIN => punch !== undefined);
     const afternoonPunches = [pmIn, pmOut].filter((punch): punch is punchOUT => punch !== undefined);
+
+    if (
+        morningPunches.some((item) => item.status === "unemployed") ||
+        afternoonPunches.some((item) => item.status === "unemployed")
+    ) {
+        return "Unemployed";
+    }
 
     if (
         morningPunches.every((item) => item.status === "awaiting") &&
@@ -165,6 +173,7 @@ export type InStatus =
     | "awaiting"
     | "suspended"
     | "unhired"
+    | "unemployed"
     | "unscheduled"
     | "absent"
     | "late"
@@ -177,6 +186,7 @@ export type OutStatus =
     | "awaiting"
     | "suspended"
     | "unhired"
+    | "unemployed"
     | "unscheduled"
     | "absent"
     | "early-out"
@@ -222,6 +232,7 @@ export type LogStatus = {
     paidOvertime: number;
     renderedUndertime: number;
     deductedUndertime: number;
+    deductedUnhired: number;
     renderedLeave: number;
     paidLeave: number;
 };

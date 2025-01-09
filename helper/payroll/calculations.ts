@@ -8,6 +8,7 @@ export const static_formula = {
     tardiness: "get_tardiness",
     leaves: "get_leaves",
     overtimes: "get_overtimes",
+    unhired: "get_unhired",
     benefit_contribution: "get_contribution",
     payable: "get_incident",
 };
@@ -217,6 +218,7 @@ export function getAttendanceTotal({
     const start = new Date(startDate);
     const end = new Date(endDate);
     let deductedUndertime = 0;
+    let deductedUnhired = 0;
     let paidOvertimes = 0;
     let paidLeaves = 0;
 
@@ -225,6 +227,7 @@ export function getAttendanceTotal({
         const logByDate = logStatus[dateString];
         if (logByDate && logByDate[employeeID]) {
             deductedUndertime += logByDate[employeeID].deductedUndertime ?? 0;
+            deductedUnhired += logByDate[employeeID].deductedUnhired ?? 0;
             paidOvertimes += logByDate[employeeID].paidOvertime ?? 0;
             paidLeaves += logByDate[employeeID].paidLeave ?? 0;
         }
@@ -232,6 +235,7 @@ export function getAttendanceTotal({
 
     return {
         deductedUndertime,
+        deductedUnhired,
         paidOvertimes,
         paidLeaves,
     };
