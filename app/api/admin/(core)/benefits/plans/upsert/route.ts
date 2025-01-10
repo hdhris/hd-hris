@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
         hasContentType(req);
         const body = await req.json();
 
-        // console.log("Plan: ", body);
+        console.log("Plan: ", body);
 
         if (!body.id) {
             const isDuplicate = await prisma.ref_benefit_plans.findFirst({
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
 
             if (body.id) {
-                // console.log("updating...")
+                console.log("updating...")
                 if(body.contribution_type !== "others") {
                     contribution = contribution.map((item: any) => {
                         return{
@@ -88,28 +88,53 @@ export async function POST(req: NextRequest) {
                         updated_at: toGMT8().toISOString(),
                     },
                 });
+                console.log("Contribution: ", {contribution})
                 for (const item of contribution) {
-                    // console.log("Contribution Items: ", item)
-                    const updated = await transactionPrisma.ref_benefits_contribution_table.update({
-                        where: { id: item.id },
-                        data: {
-                            contribution_type: body.contribution_type,
-                            actual_contribution_amount: item.actual_contribution_amount,
-                            min_salary: item.min_salary,
-                            max_salary: item.max_salary,
-                            min_MSC: item.minMSC ?? 0,
-                            max_MSC: item.maxMSC ?? 0,
-                            msc_step: item.mscStep ?? 0,
-                            ec_threshold: item.ecThreshold ?? 0,
-                            ec_low_rate: item.ecLowRate ?? 0,
-                            ec_high_rate: item.ecHighRate ?? 0,
-                            wisp_threshold: item.wispThreshold ?? 0,
-                            updated_at: toGMT8().toISOString(),
-                            employer_rate: item.employer_contribution,
-                            employee_rate: item.employee_contribution,
-                        },
-                    });
-                    // console.log("Contribution Updated: ", updated)
+                    if(item.id) {
+                        const updated = await transactionPrisma.ref_benefits_contribution_table.update({
+                            where: { id: item.id },
+                            data: {
+                                contribution_type: body.contribution_type,
+                                actual_contribution_amount: item.actual_contribution_amount,
+                                min_salary: item.min_salary,
+                                max_salary: item.max_salary,
+                                min_MSC: item.minMSC ?? 0,
+                                max_MSC: item.maxMSC ?? 0,
+                                msc_step: item.mscStep ?? 0,
+                                ec_threshold: item.ecThreshold ?? 0,
+                                ec_low_rate: item.ecLowRate ?? 0,
+                                ec_high_rate: item.ecHighRate ?? 0,
+                                wisp_threshold: item.wispThreshold ?? 0,
+                                updated_at: toGMT8().toISOString(),
+                                employer_rate: item.employer_contribution,
+                                employee_rate: item.employee_contribution,
+                                plan_id: body.id
+                            },
+                        });
+                        console.log("Contribution Updated: ", updated)
+
+                    } else{
+                        const create = await transactionPrisma.ref_benefits_contribution_table.create({
+                            data: {
+                                contribution_type: body.contribution_type,
+                                actual_contribution_amount: item.actual_contribution_amount,
+                                min_salary: item.min_salary,
+                                max_salary: item.max_salary,
+                                min_MSC: item.minMSC ?? 0,
+                                max_MSC: item.maxMSC ?? 0,
+                                msc_step: item.mscStep ?? 0,
+                                ec_threshold: item.ecThreshold ?? 0,
+                                ec_low_rate: item.ecLowRate ?? 0,
+                                ec_high_rate: item.ecHighRate ?? 0,
+                                wisp_threshold: item.wispThreshold ?? 0,
+                                updated_at: toGMT8().toISOString(),
+                                employer_rate: item.employer_contribution,
+                                employee_rate: item.employee_contribution,
+                                plan_id: body.id
+                            },
+                        });
+                        console.log("Contribution Created: ", create)
+                    }
                 }
             }
 
