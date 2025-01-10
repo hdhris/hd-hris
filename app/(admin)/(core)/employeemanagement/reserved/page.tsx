@@ -63,11 +63,11 @@ const Page: React.FC = () => {
     }
   };
 
-  SetNavEndContent(() => (
-    <div className="flex items-center gap-4">
-      <AddEmployee onEmployeeAdded={handleEmployeeUpdated} />
-    </div>
-  ));
+  // SetNavEndContent(() => (
+  //   <div className="flex items-center gap-4">
+  //     <AddEmployee onEmployeeAdded={handleEmployeeUpdated} />
+  //   </div>
+  // ));
 
   const handleOnSelected = (key: React.Key) => {
     const selected = reservedEmployees?.find((item) => item.id === Number(key));

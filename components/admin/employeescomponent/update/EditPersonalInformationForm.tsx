@@ -206,7 +206,7 @@ const EditPersonalInformationForm: React.FC = () => {
       config: {
         placeholder: "Enter Prefix",
         options: prefixOptions,
-        allowsCustomValue: true,
+        
       },
     },
     {
@@ -216,7 +216,7 @@ const EditPersonalInformationForm: React.FC = () => {
       config: {
         placeholder: "Enter Suffix",
         options: suffixOptions,
-        allowsCustomValue: true,
+      
       },
     },
     {
@@ -226,7 +226,7 @@ const EditPersonalInformationForm: React.FC = () => {
       config: {
         placeholder: "Enter Extension",
         options: extensionOptions,
-        allowsCustomValue: true,
+        
       },
     },
   ];

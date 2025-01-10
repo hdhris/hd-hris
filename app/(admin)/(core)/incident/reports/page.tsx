@@ -1,9 +1,5 @@
 "use client";
-import {
-  searchConfig,
-  sortProps,
-  tableConfig,
-} from "@/components/admin/incident/reports/configs";
+import { searchConfig, sortProps, tableConfig } from "@/components/admin/incident/reports/configs";
 import IncidentDrawer from "@/components/admin/incident/reports/incident-drawer";
 import DataDisplay from "@/components/common/data-display/data-display";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
@@ -17,57 +13,32 @@ import TableData from "@/components/tabledata/TableData";
 import DataTable from "@/components/common/data-display/data-table";
 
 function Page() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<IncidentReport | null>(null);
-  const { data, isLoading } = useQuery<IncidentReport[]>("/api/admin/incident/payroll");
-  SetNavEndContent(() => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<IncidentReport | null>(null);
+    const { data, isLoading } = useQuery<IncidentReport[]>("/api/admin/incident/reports", {refreshInterval: 5000});
+    SetNavEndContent(() => {
+        return (
+            <Button {...uniformStyle()} onPress={() => setIsOpen(true)}>
+                Report Incident
+            </Button>
+        );
+    });
+
     return (
-      <>
-        <Button {...uniformStyle()} onPress={() => setIsOpen(true)}>
-          Report Incident
-        </Button>
-      </>
+        <div className="flex h-full w-full">
+            <TableData
+                title="Incident Reports"
+                items={data || []}
+                isLoading={isLoading}
+                config={tableConfig}
+                onRowAction={(key)=> {
+                    setSelectedItem(data?.find(item => item.id === Number(key)) ?? null)
+                }}
+                layout={"auto"}
+            />
+            <FileReport isOpen={isOpen} onClose={() => setIsOpen(false)} />
+            <IncidentDrawer report={selectedItem} onClose={()=>setSelectedItem(null)}  />
+        </div>
     );
-  });
-
-  return (
-    <>
-       <DataDisplay
-        title="Incident Reports"
-        data={data || []}
-        isLoading={isLoading}
-        searchProps={searchConfig}
-        sortProps={sortProps}
-        onTableDisplay={{
-          config: tableConfig,
-          classNames: { td: "[&:nth-child(n):not(:nth-child(1))]:w-[165px]" },
-          layout: "auto",
-          // onRowAction: (key) => {
-          //   const item = data?.find((item) => item.id === Number(key));
-          //   setSelectedItem(item!);
-          //   // console.log(item);
-          //   setOpen(true);
-          // },
-        }}
-        defaultDisplay="table"
-        paginationProps={{
-          data_length: data?.length || 0,
-        }}
-      />
-
-      {/* <IncidentDrawer
-        selected={selectedItem}
-        isOpen={open}
-        onClose={(b)=>{setOpen(b); setTimeout(()=>{
-          setSelectedItem(null);
-        },500)}}
-        // isSubmitting={false}
-      /> */}
-      <FileReport
-        isOpen={isOpen}
-        onClose={()=> setIsOpen(false)}
-      />
-    </>
-  );
 }
 export default Page;

@@ -104,9 +104,9 @@ class CustomInput extends React.Component<
       <input
         {...this.props}
         type="text"
-        className={
-          "w-24 h-full bg-gray-50 p-2 text-sm " + (this.props.className || "")
-        }
+        className={cn(
+          "w-24 h-full bg-gray-50 p-2 text-sm text-right", String(this.props?.className)
+        )}
         onFocus={(e) => {
           this.handleFocus(e);
           this.props.onFocus && this.props.onFocus(e);
@@ -143,12 +143,13 @@ export function PayrollInputColumn({...props}: {
   ) => void;
   readOnly: boolean;
   className?: string;
+  background?: string;
 }) {
   return (
-    <td key={props.uniqueKey} className="z-30">
+    <td key={props.uniqueKey} className={cn("z-30", String(props.background))}>
       <CustomInput
         className={cn(
-          "border-1",
+          "border-1", String(props.background),
           props.unUpdated ? "border-red-500" : "border-gray-50",
           props.readOnly && "text-gray-400",
           props.className,

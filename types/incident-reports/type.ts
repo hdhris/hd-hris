@@ -1,5 +1,15 @@
 import { MinorEmployee, MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 
+export const ActionsTakenArray = [
+    "Send Warning",
+    // "Written Warning",
+    "Suspension",
+    "Payroll Deduction",
+    // "Demotion",
+    "Termination",
+] as const;
+export type ActionsTakenNames = (typeof ActionsTakenArray)[number];
+
 export interface IncidentReport {
     id: string | number;
     employee_id: number;
@@ -9,16 +19,8 @@ export interface IncidentReport {
     severity: "minor" | "major" | "critical";
     description: string;
     reported_by: number;
-    actions_taken:
-        | "Verbal Warning"
-        | "Written Warning"
-        | "Suspension"
-        | "Payroll Deduction"
-        | "Probation"
-        | "Demotion"
-        | "Termination"
-        | "Reassignment"
-        | "Re-Education";
+    actions_taken: ActionsTakenNames;
+    is_acted: boolean;
     created_at: string; // ISO date string
     updated_at: string; // ISO date string
     deleted_at: string | null;

@@ -1,7 +1,7 @@
 import { JsonValue } from "@prisma/client/runtime/library";
 import { toGMT8 } from "../../lib/utils/toGMT8";
 import { EmployeeAll, UnavaliableStatusJSON } from "../../types/employeee/EmployeeType";
-import { MajorEmployee } from "../include-emp-and-reviewr/include";
+import { MajorEmployee, MinorEmployee } from "../include-emp-and-reviewr/include";
 
 const HistoryJSON: UnavaliableStatusJSON[] = [
     {
@@ -25,11 +25,11 @@ const HistoryJSON: UnavaliableStatusJSON[] = [
 
 type addUnavailabilityType = {
     incident_id?: number;
-    entry: UnavaliableStatusJSON[];
+    entry: UnavaliableStatusJSON[] | JsonValue;
     start_date: string;
     end_date: string | null;
     reason: string;
-    initiated_by: MajorEmployee;
+    initiated_by: MinorEmployee;
 };
 export function addUnavailability({
     entry,
@@ -39,7 +39,8 @@ export function addUnavailability({
     reason,
     initiated_by,
 }: addUnavailabilityType) {
-    const newId = entry.length > 0 ? Math.max(...entry.map((e) => e.id)) + 1 : 1;
+    const parsedEntry = entry as UnavaliableStatusJSON[];
+    const newId = parsedEntry.length > 0 ? Math.max(...parsedEntry.map((e) => e.id)) + 1 : 1;
     let newEntry: UnavaliableStatusJSON[] = [
         {
             id: newId,
@@ -58,7 +59,7 @@ export function addUnavailability({
             canceled_reason: null,
             canceled_by: null,
         },
-        ...entry,
+        ...parsedEntry,
     ];
 
     return newEntry;
@@ -119,6 +120,37 @@ export function getExpiredUnavailability({
     return foundEntry ?? null;
 }
 
+export function isEmployeeAvailableWithin({
+    employee,
+    find,
+    date,
+}: {
+    employee?: {
+        suspension_json: UnavaliableStatusJSON[] | JsonValue;
+        resignation_json: UnavaliableStatusJSON[] | JsonValue;
+        termination_json: UnavaliableStatusJSON[] | JsonValue;
+        hired_at?: Date | string | null;
+    };
+    find?: Array<"suspension" | "resignation" | "termination" | "hired">;
+    date: {
+        start: string | Date;
+        end: string | Date;
+    };
+}): boolean {
+    if(!employee) return true
+    
+    const start = toGMT8(date.start).startOf('day');
+    const end = toGMT8(date.end).startOf('day');
+    let found = false;
+    for(let current = new Date(start.toDate()); current <= end.toDate(); current.setDate(current.getDate() + 1)){
+        if(isEmployeeAvailable({employee, find, date: current})){
+            found = true;
+            break;
+        }
+    }
+    return found;
+}
+
 export function isEmployeeAvailable({
     employee,
     find,
@@ -131,7 +163,7 @@ export function isEmployeeAvailable({
         hired_at?: Date | string | null;
     };
     find?: Array<"suspension" | "resignation" | "termination" | "hired">;
-    date?: string;
+    date?: string | Date;
 }): boolean {
     if(!employee) return true
     const thisDate = date ? toGMT8(date) : toGMT8();
@@ -140,7 +172,7 @@ export function isEmployeeAvailable({
     //     if (toGMT8(employee.hired_at).isAfter(thisDate)) return false;
     // }
 
-    const unHired = employee.hired_at && toGMT8(employee.hired_at).isAfter(thisDate)
+    const unHired = employee.hired_at && toGMT8(employee.hired_at).startOf('day').isAfter(thisDate)
 
     const { suspension_json, resignation_json, termination_json } = employee as {
         suspension_json: UnavaliableStatusJSON[];

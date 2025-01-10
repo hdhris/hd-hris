@@ -368,15 +368,26 @@ export default function AddEmployeePage() {
           errorMessage = "Server error. Please try again later";
         }
       }
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "danger",
-        duration: 5000,
-      });
+      // toast({
+      //   title: "Error",
+      //   description: errorMessage,
+      //   variant: "danger",
+      //   duration: 5000,
+      // });
+      try{
+        if(error instanceof AxiosError){
+          toast({
+            title: "Error",
+            description: error.response?.data.message || errorMessage,
+            variant: "danger",
+          });
+        }
+        }catch(error){
+        }
     } finally {
       setIsSubmitting(false);
     }
+    
   };
 
   const renderTabContent = (tabKey: string) => {

@@ -192,6 +192,7 @@ const EditJobInformationForm: React.FC = () => {
       config: {
         placeholder: "Select hire date",
         validationState: "valid",
+        showMonthAndYearPickers: true,
       },
     },
     {
@@ -247,11 +248,9 @@ const EditJobInformationForm: React.FC = () => {
       label: "Access Level",
       type: "auto-complete",
       isRequired: true,
-      
       config: {
         placeholder: "Select Access Level",
         options: privilegeOptions,
-        validationState: "valid",
         description: "This will be used for the employee's account access"
       },
     },

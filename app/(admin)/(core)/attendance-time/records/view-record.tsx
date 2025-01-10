@@ -11,7 +11,7 @@ import { Chip, ScrollShadow } from "@nextui-org/react";
 import { capitalize, toUpper } from "lodash";
 import React from "react";
 import { FaRegCheckCircle } from "react-icons/fa";
-import { LiaUserClockSolid } from "react-icons/lia";
+import { LiaUserClockSolid, LiaUserPlusSolid } from "react-icons/lia";
 import { MdOutlineAccessTime, MdOutlineMoreTime } from "react-icons/md";
 import { TbClockCheck, TbClockShield, TbClockUp, TbClockX } from "react-icons/tb";
 
@@ -44,6 +44,12 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
                             ))}
                     </div>
                     <ValueLabel
+                        label="Hired Date"
+                        icon={<LiaUserPlusSolid />}
+                        value={toGMT8(attendanceInfo.employee.hired_at).format("MMMM DD, YYYY")}
+                    />
+                    <hr />
+                    <ValueLabel
                         label="Time Schedule"
                         icon={<LiaUserClockSolid />}
                         value={
@@ -57,6 +63,7 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
                             </div>
                         }
                     />
+                    <hr />
                     <div className="ms-4 space-y-4">
                         <p className="text-sm text-gray-500 font-semibold">Morning</p>
                         <div className="flex justify-between items-center text-medium ms-2">
@@ -176,6 +183,16 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
                         }
                         icon={<TbClockShield />}
                     />
+                    {(attendanceInfo?.status?.deductedUnhired ?? 0) > 0 && (
+                        <>
+                            <hr />
+                            <ValueLabel
+                                label="Unhired"
+                                value={<p>{formatCurrency(String(-(attendanceInfo?.status?.deductedUnhired ?? 0)))}</p>}
+                                icon={<TbClockShield />}
+                            />
+                        </>
+                    )}
                     {/* <p>{JSON.stringify(attendanceInfo.status)}</p> */}
                 </ScrollShadow>
             )}

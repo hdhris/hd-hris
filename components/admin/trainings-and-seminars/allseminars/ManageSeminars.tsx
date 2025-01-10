@@ -19,6 +19,7 @@ import { parseAbsoluteToLocal } from "@internationalized/date";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import dayjs from "dayjs";
 import { FormInputProps } from "@/components/common/forms/FormFields";
+import AddressInput from "@/components/common/forms/address/AddressInput";
 
 // Interfaces
 interface Employee {
@@ -55,21 +56,16 @@ const formSchema = z
       .string()
       .min(10, { message: "Description must be at least 10 characters." }),
     hour_duration: z.number(),
-    location: z
-      .string()
-      .min(3, { message: "Location must be at least 3 characters." }),
+      addr_region: z.string().min(1, "Region is required"),
+      addr_province: z.string().min(1, "Province is required"), 
+      addr_municipal: z.string().min(1, "Municipal is required"),
+      addr_baranggay: z.string().min(1, "Barangay is required"),
+
     start_date: z
       .string()
       .refine((val) => dayjs(val).isValid(), { message: "Invalid start date" }),
     end_date: z.string(),
-    enrollement_date: z.string().refine(
-      (val) => {
-        const enrollmentDate = dayjs(val);
-        const now = dayjs();
-        return enrollmentDate.isValid() && !enrollmentDate.isAfter(now);
-      },
-      { message: "Enrollment date cannot be in the future" }
-    ),
+    enrollement_date: z.string() .refine((val) => dayjs(val).isValid(), { message: "Invalid start date" }),
     instructor_name: z
       .string()
       .regex(/^[a-zA-Z\s]*$/, "The trainer name should be in proper name"),
@@ -115,7 +111,10 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
     name: "",
     description: "",
     hour_duration: 0,
-    location: "",
+      addr_region: "",
+      addr_province: "",
+      addr_municipal: "",
+      addr_baranggay: "",
     start_date: toGMT8().format("YYYY-MM-DDTHH:mm"),
     end_date: toGMT8().add(1, "day").format("YYYY-MM-DDTHH:mm"),
     enrollement_date: toGMT8().format("YYYY-MM-DDTHH:mm"),
@@ -132,7 +131,15 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
   });
 
   const { data: programData, isLoading } = useQuery<{
-    program?: FormValues & { dim_training_participants?: Participant[] };
+    program?: FormValues & { 
+      dim_training_participants?: Participant[];
+      locationDetails?: {
+        addr_region?: { address_code: number };
+        addr_province?: { address_code: number };
+        addr_municipal?: { address_code: number };
+        addr_baranggay?: { address_code: number };
+      };
+    };
     employees: Employee[];
   }>(
     `/api/admin/trainings-and-seminars/allseminars/read?id=${seminar_id}&type=seminars`
@@ -140,10 +147,10 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
 
   useEffect(() => {
     if (!programData?.program) return;
-
-    const { dim_training_participants, ...programValues } = programData.program;
-
-    const formValues: Partial<FormValues> = {
+  
+    const { dim_training_participants, locationDetails, ...programValues } = programData.program;
+  
+    const initialFormValues: Partial<FormValues> = {
       ...programValues,
       start_date:
         parseAndFormatDate(programValues.start_date) ||
@@ -154,10 +161,14 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
       enrollement_date:
         parseAndFormatDate(programValues.enrollement_date) ||
         defaultFormValues.enrollement_date,
+      addr_region: locationDetails?.addr_region?.address_code.toString() || "",
+      addr_province: locationDetails?.addr_province?.address_code.toString() || "",
+      addr_municipal: locationDetails?.addr_municipal?.address_code.toString() || "",
+      addr_baranggay: locationDetails?.addr_baranggay?.address_code.toString() || "",
     };
-
-    form.reset(formValues);
-
+  
+    form.reset(initialFormValues);
+  
     if (dim_training_participants?.length) {
       setSelectedParticipants(
         dim_training_participants.map((participant) => ({
@@ -242,6 +253,12 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
             data: {
               ...values,
               type: "seminars",
+              location: JSON.stringify({
+                addr_region: parseInt(values.addr_region, 10),
+                addr_province: parseInt(values.addr_province, 10),
+                addr_municipal: parseInt(values.addr_municipal, 10),
+                addr_baranggay: parseInt(values.addr_baranggay, 10),
+              }),
               dim_training_participants: selectedParticipants.map(
                 (participant) => ({
                   ...participant,
@@ -286,10 +303,17 @@ export default function ManageSeminar({ seminar_id }: { seminar_id?: string }) {
         "Enter a detailed seminar description (e.g., A workshop focused on improving leadership skills and team collaboration).",
       isRequired: true,
     },
-    {
+   {
       name: "location",
-      label: "Location",
+      label: "Location", 
       isRequired: true,
+      Component: () => {
+        return (
+          <div>
+            <AddressInput />
+          </div>
+        );
+      }
     },
     {
       name: "instructor_name",

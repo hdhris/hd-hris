@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const { data } = body;
-
+        
         const formattedData = {
             ...data,
             start_date: data.start_date ? 
@@ -21,7 +21,14 @@ export async function POST(req: NextRequest) {
                 toGMT8().toISOString(),
             type: data.type || 'seminars',
         };
-
+        const locationString = typeof data.location === 'object' 
+        ? JSON.stringify({
+            addr_region: formattedData.location.addr_region || "",
+            addr_province: formattedData.location.addr_province || "",
+            addr_municipal: formattedData.location.addr_municipal || "", 
+            addr_baranggay: formattedData.location.addr_baranggay || ""
+          })
+        : formattedData.location;
         const program = await prisma.$transaction(async (tx) => {
             // First update the program
             const program = await tx.ref_training_programs.upsert({
@@ -32,7 +39,7 @@ export async function POST(req: NextRequest) {
                     name: formattedData.name,
                     description: formattedData.description,
                     hour_duration: formattedData.hour_duration,
-                    location: formattedData.location,
+                    location: locationString,
                     start_date: formattedData.start_date ? new Date(formattedData.start_date) : undefined,
                     end_date: formattedData.end_date ? new Date(formattedData.end_date) : undefined,
                     max_participants: formattedData.max_participants,
@@ -46,7 +53,7 @@ export async function POST(req: NextRequest) {
                     name: formattedData.name,
                     description: formattedData.description,
                     hour_duration: formattedData.hour_duration,
-                    location: formattedData.location,
+                   location: locationString,
                     start_date: formattedData.start_date ? new Date(formattedData.start_date) : undefined,
                     end_date: formattedData.end_date ? new Date(formattedData.end_date) : undefined,
                     max_participants: formattedData.max_participants,

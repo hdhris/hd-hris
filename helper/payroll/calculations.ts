@@ -2,12 +2,15 @@ import { Parser } from "expr-eval";
 const parser = new Parser();
 
 export const static_formula = {
+    basic_salary: "get_basic_salary",
     cash_advance_disbursement: "get_disbursement",
     cash_advance_repayment: "get_repayment",
     tardiness: "get_tardiness",
     leaves: "get_leaves",
     overtimes: "get_overtimes",
+    unhired: "get_unhired",
     benefit_contribution: "get_contribution",
+    payable: "get_incident",
 };
 
 export type BaseValueProp = {
@@ -215,17 +218,16 @@ export function getAttendanceTotal({
     const start = new Date(startDate);
     const end = new Date(endDate);
     let deductedUndertime = 0;
+    let deductedUnhired = 0;
     let paidOvertimes = 0;
     let paidLeaves = 0;
 
     for (let current = new Date(start); current <= end; current.setDate(current.getDate() + 1)) {
         const dateString = current.toISOString().split("T")[0];
         const logByDate = logStatus[dateString];
-        if(employeeID === 5){
-            console.log({dateString, log: logByDate[employeeID]})
-        }
         if (logByDate && logByDate[employeeID]) {
             deductedUndertime += logByDate[employeeID].deductedUndertime ?? 0;
+            deductedUnhired += logByDate[employeeID].deductedUnhired ?? 0;
             paidOvertimes += logByDate[employeeID].paidOvertime ?? 0;
             paidLeaves += logByDate[employeeID].paidLeave ?? 0;
         }
@@ -233,6 +235,7 @@ export function getAttendanceTotal({
 
     return {
         deductedUndertime,
+        deductedUnhired,
         paidOvertimes,
         paidLeaves,
     };
