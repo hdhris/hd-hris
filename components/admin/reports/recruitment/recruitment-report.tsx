@@ -19,6 +19,8 @@ function RecruitmentReport() {
         if(data) return data.results
         return []
     }, [data])
+
+    console.log({data})
     return (<div className="h-full flex flex-col gap-4">
         <table className="w-full border-collapse p-2">
             <thead className="bg-gray-100 sticky top-0">

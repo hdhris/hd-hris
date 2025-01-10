@@ -42,14 +42,14 @@ function ReportControls({allowMaxDate, isDateRange = true, }: ReportControlsProp
     return (
         <div className="flex gap-2 items-center">
 
-            <Typography className="text-sm flex gap-2"><span className="font-semibold text-sm">Your are generating:</span>
-                <span className="underline">{`${toGMT8(dateRange.start.toDate(getLocalTimeZone())).format("MMM DD, YYYY")} - ${toGMT8(dateRange.end.toDate(getLocalTimeZone())).format("MMM DD, YYYY")}`}</span></Typography>
-            <Button
-                {...uniformStyle()}
-                onPress={() => handleOpen()}
-            >
-                Generate
-            </Button>
+            {/*<Typography className="text-sm flex gap-2"><span className="font-semibold text-sm">Your are generating:</span>*/}
+            {/*    <span className="underline">{`${toGMT8(dateRange.start.toDate(getLocalTimeZone())).format("MMM DD, YYYY")} - ${toGMT8(dateRange.end.toDate(getLocalTimeZone())).format("MMM DD, YYYY")}`}</span></Typography>*/}
+            {/*<Button*/}
+            {/*    {...uniformStyle()}*/}
+            {/*    onPress={() => handleOpen()}*/}
+            {/*>*/}
+            {/*    Generate*/}
+            {/*</Button>*/}
             {/*<Button*/}
             {/*    {...uniformStyle()}*/}
             {/*    onPress={() => setIsGenerated(true)}*/}
@@ -57,60 +57,60 @@ function ReportControls({allowMaxDate, isDateRange = true, }: ReportControlsProp
             {/*    Generate*/}
             {/*</Button>*/}
 
-            <Dropdown>
-                <DropdownTrigger>
-                    <Button {...uniformStyle({color: "default"})}>
-                        Export
-                    </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                    disallowEmptySelection
-                    aria-label="Multiple selection example"
-                    variant="flat"
-                >
-                    <DropdownItem key="print" startContent={<LuPrinter />}>Print</DropdownItem>
-                    <DropdownItem key="pdf"
-                                  startContent={<BsFileEarmarkPdf className="text-danger-500" />}>PDF</DropdownItem>
-                    <DropdownItem key="csv"
-                                  startContent={<PiMicrosoftExcelLogoFill className="text-success-500" />}>CSV</DropdownItem>
-                </DropdownMenu>
-            </Dropdown>
-            <Drawer isOpen={isOpen} onClose={setIsOpen}
-                    isDismissible
-                    title={
-                <Section
-                    className="ms-0"
-                    title="Generate Report"
-                    subtitle="Configure report parameters."
-                />
+            {/*<Dropdown>*/}
+            {/*    <DropdownTrigger>*/}
+            {/*        <Button {...uniformStyle({color: "default"})}>*/}
+            {/*            Export*/}
+            {/*        </Button>*/}
+            {/*    </DropdownTrigger>*/}
+            {/*    <DropdownMenu*/}
+            {/*        disallowEmptySelection*/}
+            {/*        aria-label="Multiple selection example"*/}
+            {/*        variant="flat"*/}
+            {/*    >*/}
+            {/*        <DropdownItem key="print" startContent={<LuPrinter />}>Print</DropdownItem>*/}
+            {/*        <DropdownItem key="pdf"*/}
+            {/*                      startContent={<BsFileEarmarkPdf className="text-danger-500" />}>PDF</DropdownItem>*/}
+            {/*        <DropdownItem key="csv"*/}
+            {/*                      startContent={<PiMicrosoftExcelLogoFill className="text-success-500" />}>CSV</DropdownItem>*/}
+            {/*    </DropdownMenu>*/}
+            {/*</Dropdown>*/}
+            {/*<Drawer isOpen={isOpen} onClose={setIsOpen}*/}
+            {/*        isDismissible*/}
+            {/*        title={*/}
+            {/*    <Section*/}
+            {/*        className="ms-0"*/}
+            {/*        title="Generate Report"*/}
+            {/*        subtitle="Configure report parameters."*/}
+            {/*    />*/}
 
-            }
-                    footer={
-                        <Button
-                            className="w-full"
-                            {...uniformStyle()}
-                            onPress={() => {
-                                setIsGenerated(true)
-                                setIsOpen(false)
-                            }}
-                        >
-                            Generate Report
-                        </Button>
-                    }
+            {/*}*/}
+            {/*        footer={*/}
+            {/*            <Button*/}
+            {/*                className="w-full"*/}
+            {/*                {...uniformStyle()}*/}
+            {/*                onPress={() => {*/}
+            {/*                    setIsGenerated(true)*/}
+            {/*                    setIsOpen(false)*/}
+            {/*                }}*/}
+            {/*            >*/}
+            {/*                Generate Report*/}
+            {/*            </Button>*/}
+            {/*        }*/}
 
-            >
-                <div className="flex flex-col gap-6">
-                    <DepartmentSelection />
+            {/*>*/}
+                <div className="flex gap-4 items-center">
+                    {/*<DepartmentSelection />*/}
                     <DateRangePicker
                         aria-label="Date Range"
                         variant="bordered"
-                        label="Select Date Range"
+                        // label="Select Date Range"
                         classNames={DateStyle}
                         showMonthAndYearPickers
                         hideTimeZone
                         maxValue={allowMaxDate ? undefined : today(getLocalTimeZone())}
                         color="default"
-                        labelPlacement="outside"
+                        // labelPlacement="outside"
                         visibleMonths={2}
                         value={dateRange}
                         onChange={(value) => {
@@ -128,9 +128,19 @@ function ReportControls({allowMaxDate, isDateRange = true, }: ReportControlsProp
                             }
                         }}
                     />
+                    <Button
+                        className="w-full"
+                        {...uniformStyle()}
+                        onPress={() => {
+                            setIsGenerated(true)
+                            setIsOpen(false)
+                        }}
+                    >
+                        Generate Report
+                    </Button>
                 </div>
 
-            </Drawer>
+            {/*</Drawer>*/}
         </div>
     );
 }

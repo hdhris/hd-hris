@@ -8,6 +8,7 @@ import useSWR from "swr";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {LeaveReports} from "@/types/report/leaves/leave-types";
 import NoData from '@/components/common/no-data/NoData';
+import Loading from '@/components/spinner/Loading';
 
 function LeavesReport() {
     const {value} = useControl()
@@ -23,7 +24,7 @@ function LeavesReport() {
     }, [data])
     console.log({data})
     return (<div className="h-full flex flex-col gap-4">
-        <table className="w-full border-collapse p-2">
+        {leave && leave.length > 0 ? <table className="w-full border-collapse p-2">
             <thead className="bg-gray-100 sticky top-0">
             <tr>
                 <th className="p-3 text-left border text-[7pt]">ID</th>
@@ -43,7 +44,7 @@ function LeavesReport() {
             </tr>
             </thead>
             <tbody>
-            {leave ? leave.map((item, index) => {
+            {leave.map((item, index) => {
                 return <tr key={index} className="hover:bg-gray-50">
                     <td className="p-3 border text-[7pt]">{item.id}</td>
                     <td className="p-3 border text-[7pt]">{item.employee}</td>
@@ -60,9 +61,10 @@ function LeavesReport() {
                     <td className="p-3 border text-[7pt]">{item.leave_remaining_days}</td>
 
                 </tr>
-            }) : <NoData message="No Leave found."/>}
+            })}
             </tbody>
-        </table>
+        </table> : isLoading ? <Loading/> : <NoData message="No Leave found."/>}
+
     </div>);
 }
 
