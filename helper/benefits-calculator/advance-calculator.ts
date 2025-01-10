@@ -49,6 +49,10 @@ export const advanceCalculator = (monthlySalary: number, data: AdvanceCalculator
         msc = maxMSC
     } else {
         msc = Math.round(monthlySalary / mscStep) * mscStep
+        // console.log({monthlySalary, msc, mscStep, wisp: msc - wispThreshold})
+        // console.log("Math: ", Math.round(monthlySalary / mscStep))
+        // console.log("Step: ", mscStep)
+        // console.log("MSC: ", (Math.round(monthlySalary / mscStep) * mscStep) )
     }
     // if(monthlySalary < minSalary && monthlySalary > maxSalary) {
     //     if (monthlySalary > minSalary) {
@@ -71,8 +75,9 @@ export const advanceCalculator = (monthlySalary: number, data: AdvanceCalculator
     // Calculate WISP
     let wispEmployee = 0;
     let wispEmployer = 0;
+    let excess = 0
     if (msc > wispThreshold) {
-        const excess = msc - wispThreshold;
+        excess = msc - wispThreshold;
         wispEmployee = excess * (regularEmployeeRate / 100);
         wispEmployer = excess * (regularEmployerRate / 100);
     }
@@ -81,6 +86,12 @@ export const advanceCalculator = (monthlySalary: number, data: AdvanceCalculator
     const total = employeeShare + employerShare + ecShare + wispEmployee + wispEmployer;
 
     return {
+        // msc: {
+        //     salary: monthlySalary,
+        //     regular_sss: msc > wispThreshold ? wispThreshold : msc,
+        //     wisp: excess,
+        //     total: msc
+        // },
         msc,
         employeeShare,
         employerShare,

@@ -1,4 +1,9 @@
-import { Parser } from "expr-eval";
+import {Parser} from "expr-eval";
+import {advanceCalculator} from "../benefits-calculator/advance-calculator";
+import {basicCalculator} from "../benefits-calculator/basic-calculator";
+import {AttendaceStatuses} from "@/types/attendance-time/AttendanceTypes";
+import {ContributionType} from "@/types/benefits/plans/plansTypes";
+
 const parser = new Parser();
 
 export const static_formula = {
@@ -14,34 +19,19 @@ export const static_formula = {
 };
 
 export type BaseValueProp = {
-    rate_p_hr: number;
-    total_shft_hr: number;
-    payroll_days: number;
-    basic_salary: number;
-    [key: string]: number;
+    rate_p_hr: number; total_shft_hr: number; payroll_days: number; basic_salary: number; [key: string]: number;
 };
 
 export type VariableAmountProp = {
-    link_id?: number;
-    payhead_id: number | null;
-    variable: string;
-    amount: number;
+    link_id?: number; payhead_id: number | null; variable: string; amount: number;
 };
 
 export type VariableFormulaProp = {
-    link_id?: number;
-    payhead_id: number | null;
-    variable: string;
-    function?: Function;
-    formula: string;
+    link_id?: number; payhead_id: number | null; variable: string; function?: Function; formula: string;
 };
 
 // Function to calculate all payheads
-export function calculateAllPayheads(
-    baseVariablesAmounts: BaseValueProp,
-    unCalculateAmount: VariableFormulaProp[],
-    surpressErrorMsg: boolean = false
-): VariableAmountProp[] {
+export function calculateAllPayheads(baseVariablesAmounts: BaseValueProp, unCalculateAmount: VariableFormulaProp[], surpressErrorMsg: boolean = false): VariableAmountProp[] {
     const sqrt = Math.sqrt;
     const abs = Math.abs;
     let calculatedAmount: VariableAmountProp[] = [];
@@ -49,9 +39,7 @@ export function calculateAllPayheads(
 
     // Convert baseVariables to the format with null ids
     const baseVariables = Object.entries(baseVariablesAmounts).map(([variable, amount]) => ({
-        id: null,
-        variable,
-        amount,
+        id: null, variable, amount,
     }));
 
     const sanitizeFormula = (formula: string) => {
@@ -66,14 +54,9 @@ export function calculateAllPayheads(
         // console.log(variables);
         // console.log(unCalculateAmount);
         const newVar: VariableAmountProp = {
-            link_id: ua.link_id,
-            payhead_id: ua.payhead_id,
-            variable: ua.variable,
-            amount: (() => {
+            link_id: ua.link_id, payhead_id: ua.payhead_id, variable: ua.variable, amount: (() => {
                 try {
-                    return parser.evaluate(
-                        sanitizeFormula(ua.formula),
-                        variables.reduce((acc, { variable, amount }) => {
+                    return parser.evaluate(sanitizeFormula(ua.formula), variables.reduce((acc, {variable, amount}) => {
                             acc[variable] = amount; // Set the variable name as the key and amount as the value
                             return acc; // Return the accumulator for the next iteration
                         }, {} as Record<string, number>) // Type assertion for the accumulator
@@ -91,13 +74,6 @@ export function calculateAllPayheads(
 
     return !isError ? calculatedAmount : [];
 }
-
-import { advanceCalculator } from "../benefits-calculator/advance-calculator";
-import { basicCalculator } from "../benefits-calculator/basic-calculator";
-import { Decimal } from "@prisma/client/runtime/library";
-import { AttendaceStatuses, BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
-import { toGMT8 } from "@/lib/utils/toGMT8";
-import { ContributionType } from "@/types/benefits/plans/plansTypes";
 
 // Type definition for benefit data
 export interface ContributionSetting {
@@ -162,9 +138,7 @@ export class Benefit {
                             contribution = basic.employee_contribution; //+ basic.employer_contribution;
                         } else {
                             // console.log({calc: advanceCalculator(salary, rates)})
-                            contribution =
-                                advanceCalculator(salary, rates).employeeShare +
-                                (advanceCalculator(salary, rates).wispEmployee ?? 0);
+                            contribution = advanceCalculator(salary, rates).employeeShare + (advanceCalculator(salary, rates).wispEmployee ?? 0);
                         }
                         // console.log({contribution})
                     } else if (table.contribution_type === "percentage") {
@@ -181,14 +155,58 @@ export class Benefit {
             return 0;
         }
     }
+
+    public getBreakdown(salary: number) {
+        try {
+            const contributionTable = this.data.ref_benefits_contribution_table;
+
+            let breackdown
+            // console.log({salary})
+            // return "Table: " + JSON.stringify(contributionTable)
+            contributionTable?.forEach((table) => {
+
+                const condition = Number(table.min_salary) <= salary && Number(table.max_salary) >= salary
+                // console.log({salary, min: table.min_salary, max: table.max_salary, condition});
+                if (Number(table.min_salary) <= salary && Number(table.max_salary) >= salary) {
+                    const rates = {
+                        minSalary: Number(table.min_salary),
+                        maxSalary: Number(table.max_salary),
+                        minMSC: Number(table.min_MSC),
+                        maxMSC: Number(table.max_MSC),
+                        mscStep: Number(table.msc_step),
+                        regularEmployeeRate: Number(table.employee_rate),
+                        regularEmployerRate: Number(table.employer_rate),
+                        ecThreshold: Number(table.ec_threshold),
+                        ecLowRate: Number(table.ec_low_rate),
+                        ecHighRate: Number(table.ec_high_rate),
+                        wispThreshold: Number(table.wisp_threshold),
+                    };
+                    // console.log({rates})
+
+                    if (table.contribution_type === "others") {
+                        // console.log({salary})
+                        if (rates.minMSC) {
+                            breackdown = advanceCalculator(salary, rates)
+                        } else {
+                            breackdown = "No MSC"
+                        }
+                        // console.log({contribution})
+                    } else {
+                        breackdown = "Not Others"
+                    }
+                }
+            });
+
+            return breackdown;
+        } catch (error) {
+            console.error(error);
+            return 0;
+        }
+    }
+
 }
 
-export function getUndertimeTotal(
-    logStatus: Record<string, AttendaceStatuses>,
-    empID: number,
-    startDate: string,
-    endDate: string
-): number {
+export function getUndertimeTotal(logStatus: Record<string, AttendaceStatuses>, empID: number, startDate: string, endDate: string): number {
     const start = new Date(startDate);
     const end = new Date(endDate);
     let totalAmount = 0;
@@ -205,15 +223,9 @@ export function getUndertimeTotal(
 }
 
 export function getAttendanceTotal({
-    logStatus,
-    employeeID,
-    startDate,
-    endDate,
-}: {
-    logStatus: Record<string, AttendaceStatuses>;
-    employeeID: number;
-    startDate: string;
-    endDate: string;
+                                       logStatus, employeeID, startDate, endDate,
+                                   }: {
+    logStatus: Record<string, AttendaceStatuses>; employeeID: number; startDate: string; endDate: string;
 }) {
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -234,9 +246,6 @@ export function getAttendanceTotal({
     }
 
     return {
-        deductedUndertime,
-        deductedUnhired,
-        paidOvertimes,
-        paidLeaves,
+        deductedUndertime, deductedUnhired, paidOvertimes, paidLeaves,
     };
 }
