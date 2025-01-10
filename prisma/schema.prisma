@@ -245,6 +245,7 @@ model ref_benefit_plans {
   dim_employee_benefits           dim_employee_benefits[]
   ref_payheads                    ref_payheads?                     @relation(fields: [deduction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ref_benefits_contribution_table ref_benefits_contribution_table[]
+  trans_benefit_contributions     trans_benefit_contributions[]
 
   @@index([deleted_at])
 }
@@ -462,6 +463,7 @@ model trans_cash_advances {
   payment_method                                                   String                             @default("earning")
   evaluators                                                       Json?
   files                                                            Json                               @default("[]")
+  is_auto_approved                                                 Boolean                            @default(false)
   trans_cash_advance_disbursements                                 trans_cash_advance_disbursements[]
   trans_employees_trans_cash_advances_employee_idTotrans_employees trans_employees?                   @relation("trans_cash_advances_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advances_trans_employees_1")
 

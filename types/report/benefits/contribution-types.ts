@@ -34,7 +34,7 @@ export interface EmployeeContribution {
     name: string;
     department: string;
     job: string;
-    appointment_status: staring
+    appointment_status: string
     salary: number;
     statutory_name: string;
     contribution_date: string;
