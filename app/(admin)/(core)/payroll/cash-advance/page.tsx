@@ -17,10 +17,10 @@ import { useQuery } from "@/services/queries";
 import { approvalStatusColorMap, ApprovalStatusType } from "@/types/attendance-time/OvertimeType";
 import { LoanRequest } from "@/types/payroll/cashAdvanceType";
 import { TableConfigProps } from "@/types/table/TableDataTypes";
-import { Button, Chip } from "@nextui-org/react";
+import { Avatar, AvatarGroup, Button, Chip, Tooltip } from "@nextui-org/react";
 import axios from "axios";
 import { capitalize } from "lodash";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 function Page() {
     const { data, isLoading, mutate } = useQuery<LoanRequest[]>("/api/admin/payroll/cash-advance");
@@ -187,6 +187,23 @@ function config(onUpdate: (id: number, status: ApprovalStatusType) => void): Tab
                         </p>
                     ) : (
                         <p>N/A</p>
+                    );
+                case "action":
+                    function getUserById (id: number){
+                        return item?.evaluators?.users.find((user) => Number(user.id) === id || user.employee_id === id);
+                    }
+
+                    return (
+                        <AvatarGroup isBordered>
+                            {item.evaluators.evaluators.map(evaluator => (
+                                <Tooltip key={evaluator.evaluated_by} className="cursor-pointer" content={getUserById(evaluator.evaluated_by)?.name}>
+                                    <Avatar size="sm" color={
+                                        evaluator.decision.is_decided === null ? "warning" :
+                                        evaluator.decision.is_decided === false ? "danger" : "success"
+                                    } src={getUserById(evaluator.evaluated_by)?.picture ?? ""}/>
+                                </Tooltip>
+                            ))}
+                        </AvatarGroup>
                     );
                 // case "action":
                 //     return item.status === "pending" ? (

@@ -18,9 +18,11 @@ export async function POST(req: NextRequest) {
         }
         await prisma.trans_cash_advances.create({
             data: {
+                evaluators: evaluators as unknown as any,
                 created_at: toGMT8().toISOString(),
                 updated_at: toGMT8().toISOString(),
                 ...objectExcludes(data, ["is_auto_approved"]),
+                status: data.is_auto_approved ? "approved" : "pending",
             },
         });
         return NextResponse.json({ status: 200 });

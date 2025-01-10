@@ -462,6 +462,7 @@ model trans_cash_advances {
   deleted_at                                                       DateTime?                          @db.Timestamp(6)
   payment_method                                                   String                             @default("earning")
   evaluators                                                       Json?
+  files                                                            Json                               @default("[]")
   trans_cash_advance_disbursements                                 trans_cash_advance_disbursements[]
   trans_employees_trans_cash_advances_employee_idTotrans_employees trans_employees?                   @relation("trans_cash_advances_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advances_trans_employees_1")
 

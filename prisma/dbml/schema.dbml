@@ -406,6 +406,7 @@ Table trans_cash_advances {
   deleted_at DateTime
   payment_method String [not null, default: 'earning']
   evaluators Json
+  files Json [not null, default: '[]']
   trans_cash_advance_disbursements trans_cash_advance_disbursements [not null]
   trans_employees_trans_cash_advances_employee_idTotrans_employees trans_employees
 }

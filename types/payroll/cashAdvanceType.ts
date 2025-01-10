@@ -1,9 +1,9 @@
 import {
   MajorEmployee,
-  MinorEmployee,
 } from "@/helper/include-emp-and-reviewr/include";
 import { ApprovalStatusType } from "../attendance-time/OvertimeType";
 import { Evaluations } from "../leaves/leave-evaluators-types";
+import { MetadataProps } from "@/helper/file/getFileMetadata";
 
 export type PaymentMethod =  "payroll" | "cash" | "bank_transfer" | "other";
 export interface LoanRequest {
@@ -19,6 +19,8 @@ export interface LoanRequest {
   evaluators: Evaluations;
   trans_employees_trans_cash_advances_employee_idTotrans_employees: MajorEmployee;
   trans_cash_advance_disbursements: LoanDisbursement[];
+  files: string[];
+  meta_files: MetadataProps[];
 }
 
 export interface LoanDisbursement {
