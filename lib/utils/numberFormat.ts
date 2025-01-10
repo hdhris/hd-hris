@@ -21,7 +21,7 @@ const ordinalSuffix = (i: number) => {
     return `${value}${suffix}`;
 }
 
-const formatCurrency = (amount: string) => {
+const formatCurrency = (amount: string | number) => {
     return new Intl.NumberFormat("en-US", { style: "currency", currency: "PHP" }).format(Number(amount));
 };
 
