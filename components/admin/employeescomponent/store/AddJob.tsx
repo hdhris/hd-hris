@@ -342,10 +342,6 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     }
   };
 
-  if (isLoading) {
-    return <div>Loading job position data....</div>;
-  }
-
   if (error) {
     return (
       <div>
