@@ -21,6 +21,7 @@ import { mutate } from "swr";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import ScheduleHistory from "@/components/admin/employeescomponent/update/ScheduleHistory";
 import { Employee } from "@/types/employeee/EmployeeType";
+import EditTrainingSeminars from "@/components/admin/employeescomponent/update/EditTrainingSeminars";
 
 type EmployeeFields = keyof EmployeeFormData;
 
@@ -69,6 +70,21 @@ const tabFieldsMap = {
     "doctorateCourse",
     "doctorateYear",
     "doctorateCertificates",
+  ] as EmployeeFields[],
+  training: [
+    "training_type",
+    "training_title",
+    "training_description",
+    "training_venue",
+    "training_conductor",
+    "training_date",
+    "training_start_time",
+    "training_end_time",
+    "training_region",
+    "training_province",
+    "training_municipal",
+    "training_baranggay",
+    "training_certificates",
   ] as EmployeeFields[],
   job: [
     "hired_at",
@@ -149,6 +165,20 @@ export default function EditEmployeePage({
       privilege_id: "", // Add this
       batch_id: "",
       days_json: [],
+      training_type: "",
+      training_title: "",
+      training_description: "",
+      training_venue: "",
+      training_conductor: "",
+      training_startDate: "",
+      training_endDate: "",
+      trainingDuration: 0,
+      trainingDurationType: "",
+      training_region: "",
+      training_province: "",
+      training_municipal: "",
+      training_baranggay: "",
+      training_certificates: [],
     },
   });
 
@@ -159,7 +189,7 @@ export default function EditEmployeePage({
   };
 
   const handleTabChange = async (newTab: string) => {
-    const tabs = ["personal", "educational", "job", "account"];
+    const tabs = ["personal", "educational", "training", "job", "account"];
     const currentIndex = tabs.indexOf(activeTab);
     const newIndex = tabs.indexOf(newTab);
 
@@ -228,7 +258,7 @@ export default function EditEmployeePage({
   };
 
   const currentEmployee = employeeData as Employee | undefined;
-  
+
   const handleFormSubmit = async (data: EmployeeFormData) => {
     setIsSubmitting(true);
 
@@ -269,23 +299,55 @@ export default function EditEmployeePage({
           processCertificates(data.doctorateCertificates),
         ]);
 
-      
-    
-        const currentDays = currentEmployee?.dim_schedules?.[0]?.days_json;
-        const normalizedCurrentDays: string[] = currentDays
-          ? typeof currentDays === 'string'
-            ? JSON.parse(currentDays)
-            : currentDays
-          : [];
-        
-        const normalizedNewDays = [...data.days_json].sort();
-        const normalizedOldDays = [...normalizedCurrentDays].sort();
-        
-        const currentBatchId: string = currentEmployee?.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() || '';
-        
-        const hasScheduleChanged: boolean = 
-          data.batch_id !== currentBatchId ||
-          JSON.stringify(normalizedNewDays) !== JSON.stringify(normalizedOldDays);
+      const currentDays = currentEmployee?.dim_schedules?.[0]?.days_json;
+      const normalizedCurrentDays: string[] = currentDays
+        ? typeof currentDays === "string"
+          ? JSON.parse(currentDays)
+          : currentDays
+        : [];
+
+      const normalizedNewDays = [...data.days_json].sort();
+      const normalizedOldDays = [...normalizedCurrentDays].sort();
+
+      const currentBatchId: string =
+        currentEmployee?.dim_schedules?.[0]?.ref_batch_schedules?.id?.toString() ||
+        "";
+      const trainingData = (data.trainings || []).map((training) => ({
+        type: training.training_type || "",
+        title: training.training_title || "",
+        description: training.training_description || "",
+        venue: training.training_venue || "",
+        conductor: training.training_conductor || "",
+        start_date: training.training_startDate
+          ? handleDate(training.training_startDate)
+          : null,
+        end_date: training.training_endDate
+          ? handleDate(training.training_endDate)
+          : null,
+        duration: training.trainingDuration
+          ? Number(training.trainingDuration)
+          : null,
+        durationType: training.trainingDurationType || null,
+        address: {
+          addr_region: training.training_region
+            ? Number(training.training_region)
+            : null,
+          addr_province: training.training_province
+            ? Number(training.training_province)
+            : null,
+          addr_municipal: training.training_municipal
+            ? Number(training.training_municipal)
+            : null,
+          addr_baranggay: training.training_baranggay
+            ? Number(training.training_baranggay)
+            : null,
+        },
+        certificates: training.training_certificates || [],
+      }));
+
+      const hasScheduleChanged: boolean =
+        data.batch_id !== currentBatchId ||
+        JSON.stringify(normalizedNewDays) !== JSON.stringify(normalizedOldDays);
       // Prepare employee data - similar structure to upsert endpoint
       const employeeData = {
         // Basic Information
@@ -325,6 +387,7 @@ export default function EditEmployeePage({
           doctorateCourse: data.doctorateCourse,
           doctorateYear: data.doctorateYear,
         }),
+        training_programs_attended_json: JSON.stringify(trainingData),
         family_bg_json: JSON.stringify({
           fathers_first_name: data.fathers_first_name,
           fathers_middle_name: data.fathers_middle_name,
@@ -343,14 +406,16 @@ export default function EditEmployeePage({
         salary_grade_id: parseInt(data.salary_grade_id, 10),
         batch_id: parseInt(data.batch_id, 10),
         privilege_id: parseInt(data.privilege_id, 10),
-        schedules: hasScheduleChanged ? [
-          {
-            days_json: data.days_json,
-            batch_id: parseInt(data.batch_id, 10),
-          }
-        ] : undefined,
+        schedules: hasScheduleChanged
+          ? [
+              {
+                days_json: data.days_json,
+                batch_id: parseInt(data.batch_id, 10),
+              },
+            ]
+          : undefined,
       };
-      
+
       const response = await axios.put(
         `/api/employeemanagement/employees?id=${params.id}`,
         employeeData
@@ -401,13 +466,16 @@ export default function EditEmployeePage({
 
     try {
       // Get schedule data
-      const currentSchedule = employeeData.dim_schedules?.find(schedule => !schedule.end_date);
+      const currentSchedule = employeeData.dim_schedules?.find(
+        (schedule) => !schedule.end_date
+      );
       let daysArray: string[] = [];
       if (currentSchedule?.days_json) {
         try {
-          daysArray = typeof currentSchedule.days_json === "string" 
-            ? JSON.parse(currentSchedule.days_json) 
-            : currentSchedule.days_json;
+          daysArray =
+            typeof currentSchedule.days_json === "string"
+              ? JSON.parse(currentSchedule.days_json)
+              : currentSchedule.days_json;
         } catch (error) {
           console.error("Error parsing days_json:", error);
         }
@@ -424,13 +492,19 @@ export default function EditEmployeePage({
           ? JSON.parse(employeeData.family_bg_json || "{}")
           : employeeData.family_bg_json || {};
 
+      const trainingBg =
+        typeof employeeData.training_programs_attended_json === "string"
+          ? JSON.parse(employeeData.training_programs_attended_json || "[]")
+          : employeeData.training_programs_attended_json || [];
+
       // Process certificates
       const certificates = educationalBg.certificates || [];
       const mastersCertificates = educationalBg.mastersCertificates || [];
       const doctorateCertificates = educationalBg.doctorateCertificates || [];
 
       // Get batch schedule
-      const currentBatchId = currentSchedule?.ref_batch_schedules?.id?.toString() || "";
+      const currentBatchId =
+        currentSchedule?.ref_batch_schedules?.id?.toString() || "";
 
       // Get user account data
       const userAccount = employeeData.userAccount;
@@ -494,6 +568,29 @@ export default function EditEmployeePage({
         privilege_id: employeeData.acl_user_access_control?.privilege_id || "",
         batch_id: currentBatchId,
         days_json: daysArray,
+
+        trainings: trainingBg.map((training: any) => ({
+          training_type: training.type || "",
+          training_title: training.title || "",
+          training_description: training.description || "",
+          training_venue: training.venue || "",
+          training_conductor: training.conductor || "",
+          training_startDate: training.start_date
+            ? toGMT8(training.start_date).toISOString().split("T")[0]
+            : "",
+          training_endDate: training.end_date
+            ? toGMT8(training.end_date).toISOString().split("T")[0]
+            : "",
+          trainingDuration: training.duration || 0,
+          trainingDurationType: training.durationType || "",
+          training_region: training.address?.addr_region?.toString() || "",
+          training_province: training.address?.addr_province?.toString() || "",
+          training_municipal:
+            training.address?.addr_municipal?.toString() || "",
+          training_baranggay:
+            training.address?.addr_baranggay?.toString() || "",
+          training_certificates: training.certificates || [],
+        })),
       } as EmployeeFormData);
     } catch (error) {
       console.error("Error fetching employee data:", error);
@@ -548,6 +645,14 @@ export default function EditEmployeePage({
               </div>
             </Tab>
 
+            <Tab key="training" title="Training & Seminars">
+              <div className="w-full bg-white">
+                <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
+                  <EditTrainingSeminars />
+                </div>
+              </div>
+            </Tab>
+
             <Tab key="job" title="Job Information">
               <div className="w-full bg-white">
                 <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
@@ -578,7 +683,6 @@ export default function EditEmployeePage({
                     hasAccount={
                       !!employeeData?.userAccount?.auth_credentials?.username
                     }
-                  
                   />
                 </div>
               </div>
@@ -599,13 +703,34 @@ export default function EditEmployeePage({
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 )}
-
                 {activeTab === "educational" && (
                   <>
                     <Button
                       type="button"
                       variant="bordered"
                       onPress={() => handleTabChange("personal")}
+                      className="flex items-center gap-2"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      color="primary"
+                      onPress={() => handleTabChange("training")}
+                      className="flex items-center gap-2"
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </>
+                )}
+                {activeTab === "training" && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="bordered"
+                      onPress={() => handleTabChange("educational")}
                       className="flex items-center gap-2"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -622,22 +747,35 @@ export default function EditEmployeePage({
                     </Button>
                   </>
                 )}
-
                 {activeTab === "job" && (
                   <>
                     <Button
                       type="button"
                       variant="bordered"
-                      onPress={() => handleTabChange("educational")}
+                      onPress={() => handleTabChange("training")}
                       className="flex items-center gap-2"
                     >
                       <ChevronLeft className="w-4 h-4" />
                       Previous
                     </Button>
                     <Button
-                      type="submit"
+                      type="button"
                       color="primary"
                       isLoading={isSubmitting}
+                      disabled={isSubmitting}
+                      onPress={async () => {
+                        const isValid = await methods.trigger();
+                        if (isValid) {
+                          methods.handleSubmit(handleFormSubmit)();
+                        } else {
+                          toast({
+                            title: "Validation Error",
+                            description: "Please fill in all required fields.",
+                            variant: "danger",
+                            duration: 3000,
+                          });
+                        }
+                      }}
                       className="flex items-center gap-2"
                     >
                       {isSubmitting ? "Updating..." : "Update Employee"}

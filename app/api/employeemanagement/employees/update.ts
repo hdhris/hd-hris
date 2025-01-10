@@ -61,6 +61,7 @@ async function updateEmployee(id: number, employeeData: any) {
     department_id,
     educational_bg_json,
     family_bg_json,
+    training_programs_attended_json ,
     ...rest
   } = employeeData;
 
@@ -105,6 +106,7 @@ async function updateEmployee(id: number, employeeData: any) {
 
         const educationalBackground = parseJsonInput(educational_bg_json);
         const familyBackground = parseJsonInput(family_bg_json);
+        const trainingBackground  = parseJsonInput(training_programs_attended_json );
 
         updatePromises.push(
           tx.trans_employees.update({
@@ -117,6 +119,7 @@ async function updateEmployee(id: number, employeeData: any) {
               birthdate: rest.birthdate ? parseDates(rest.birthdate) : null,
               educational_bg_json: educationalBackground,
               family_bg_json: familyBackground,
+              training_programs_attended_json: trainingBackground,
               created_at: toGMT8().toISOString(),
               updated_at: toGMT8().toISOString(),
             },

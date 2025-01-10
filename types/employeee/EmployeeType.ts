@@ -138,6 +138,24 @@ export type EmployeeSuspension = {
   startDate: string;
   endDate: string;
 };
+export type TrainingProgram = {
+  type: string;
+  title: string;
+  description: string;
+  venue: string;
+  conductor: string;
+  start_date: string | null;
+  end_date: string | null;
+  duration: number | null;
+  durationType: string | null;
+  address: {
+    addr_region: number | null;
+    addr_province: number | null;
+    addr_municipal: number | null;
+    addr_baranggay: number | null;
+  };
+  certificates: string[];
+};
 
 export type FamilyBackground = {
   fathers_first_name?: string;
@@ -176,6 +194,7 @@ export type Employee = EmployeeAll & {
   termination_json?: EmployeeTermination | null;
   educational_bg_json?: EmployeeEducationalBG | null;
   family_bg_json?: string | FamilyBackground | null; // Add this lin
+  training_programs_attended_json?: string | TrainingProgram[] | null;
 };
 
 export type EmployeePaginate = {
