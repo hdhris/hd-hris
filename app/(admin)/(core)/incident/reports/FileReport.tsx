@@ -2,6 +2,7 @@ import Drawer from "@/components/common/Drawer";
 import EmployeeListForm from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
 import FormFields from "@/components/common/forms/FormFields";
 import { BorderedCard, EmployeeHeader } from "@/components/common/minor-items/components";
+import QuickFileUpload from "@/components/common/QuickFileUpload";
 import { Form } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
 import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
@@ -26,7 +27,8 @@ const formSchema = z.object({
     actions_taken: z.enum([...ActionsTakenArray, ""]),
     type: z.string().min(1, "Enter the type of the incident"),
     location: z.string().min(1, "Enter the site where the incident occured"),
-    description: z.string().min(1, "Please describe the incident"),
+    description: z.string().min(1, "Describe the incident"),
+    files: z.array(z.string()).min(1, "Attachment is required"),
 }).refine(
     data => data.actions_taken != "", { path: ["actions_taken"], message: "Action is required" }
 )
@@ -63,6 +65,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
             actions_taken: "Send Warning",
             type: "",
             employee_id: undefined,
+            files: [],
         },
     });
 
@@ -84,6 +87,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                 actions_taken: "Send Warning",
                 type: "",
                 employee_id: undefined,
+                files: [],
             });
         }
     }, [form, userID]);
@@ -252,6 +256,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                             },
                         ]}
                     />
+                    <QuickFileUpload/>
                 </form>
             </Form>
         </Drawer>

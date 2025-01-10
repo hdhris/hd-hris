@@ -1,29 +1,20 @@
-import UserMail from "@/components/common/avatar/user-info-mail";
 import Drawer from "@/components/common/Drawer";
-import EmployeeListForm from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
-import FormFields from "@/components/common/forms/FormFields";
-import { Form } from "@/components/ui/form";
-import { toast } from "@/components/ui/use-toast";
-import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
-import { useEmployeeId } from "@/hooks/employeeIdHook";
 import { getEmpFullName, getFullAddress } from "@/lib/utils/nameFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-import { useQuery } from "@/services/queries";
 import { IncidentReport } from "@/types/incident-reports/type";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, Button, Textarea, Tooltip } from "@nextui-org/react";
-import axios from "axios";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useMemo, useState } from "react";
 import { ValueLabel } from "../../attendance-time/overtime/view-overtime";
 import { BorderedCard, EmployeeHeader } from "@/components/common/minor-items/components";
 import { FaRegCalendarAlt, FaRegUserCircle } from "react-icons/fa";
-import { TbClockUp, TbMessageReport } from "react-icons/tb";
+import { TbMessageReport } from "react-icons/tb";
 import { MdOutlineMessage } from "react-icons/md";
-import { IoLocationOutline } from "react-icons/io5";
+import { IoDocumentAttachOutline, IoLocationOutline } from "react-icons/io5";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import PerformDisciplinary from "@/app/(admin)/(core)/incident/reports/PerformDisciplinary";
+import { getDownloadUrl } from "@edgestore/react/utils";
+import { AnimatedList } from "@/components/ui/animated-list";
+import FileAttachments from "@/components/common/attachments/file-attachment-card/file-attachments";
 
 interface IncidentDrawerProps {
     report: IncidentReport | null;
@@ -102,6 +93,28 @@ function IncidentDrawer({ report, onClose }: IncidentDrawerProps) {
                                     <Tooltip className="pointer-events-auto" content={getEmpFullName(reporter)}>
                                         <Avatar size="sm" src={reporter.picture} />
                                     </Tooltip>
+                                }
+                            />
+                            <hr />
+                            <ValueLabel
+                                label="Attachments"
+                                vertical
+                                icon={<IoDocumentAttachOutline />}
+                                value={
+                                    <AnimatedList>
+                                        {report.meta_files?.map((item, index) => {
+                                            const download = getDownloadUrl(item.url);
+                                            return (
+                                                <FileAttachments
+                                                    key={index}
+                                                    fileName={item.name}
+                                                    fileSize={item.size}
+                                                    fileType={item.type}
+                                                    downloadUrl={download}
+                                                />
+                                            );
+                                        })}
+                                    </AnimatedList>
                                 }
                             />
                         </>

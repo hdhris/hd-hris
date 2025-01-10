@@ -147,18 +147,19 @@ export default function Page() {
     const [filteredEmployees, setFilteredEmployees] = useState<MajorEmployee[]>([]);
     SetNavEndContent(() => (
         <>
-            <SearchFilter
+            {currentTab === "by-employees"  &&<SearchFilter
                 uniqueKey={"schedule-filter"}
                 items={attendanceData?.employees ?? []}
                 filterConfig={filterConfig}
                 searchConfig={searchConfig}
                 setResults={setFilteredEmployees}
                 isLoading={isLoading}
-            />
+            />}
             <Tabs
                 selectedKey={currentTab}
                 onSelectionChange={(value) => setCurrentTab(String(value) as any)}
                 radius="lg"
+                size="sm"
             >
                 <Tab key="by-logs" title={"By Logs"} />
                 <Tab key="by-employees" title={"By Employees"} />
