@@ -33,6 +33,7 @@ Table dim_incident_reports {
   updated_at DateTime [not null]
   deleted_at DateTime
   is_acted Boolean [not null, default: false]
+  files Json [not null, default: '[]']
   trans_employees_dim_incident_reports_employee_idTotrans_employees trans_employees [not null]
   trans_employees_dim_incident_reports_reported_byTotrans_employees trans_employees [not null]
 }

@@ -1,3 +1,4 @@
+import { MetadataProps } from "@/helper/file/getFileMetadata";
 import { MinorEmployee, MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 
 export const ActionsTakenArray = [
@@ -26,4 +27,5 @@ export interface IncidentReport {
     deleted_at: string | null;
     trans_employees_dim_incident_reports_employee_idTotrans_employees: MajorEmployee;
     trans_employees_dim_incident_reports_reported_byTotrans_employees: MinorEmployee;
+    meta_files: MetadataProps[];
 };

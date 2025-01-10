@@ -35,3 +35,15 @@ export const getFileMetadataFromUrlWithBlob = async (url: string) => {
         throw error;
     }
 };
+
+
+export async function getAttachmentMetadata(urls: string[]) {
+    return Promise.all(urls.map(async (url) => {
+        try {
+            return await getFileMetadataFromUrlWithBlob(url);
+        } catch (error) {
+            console.error(`Failed to fetch metadata for ${url}:`, error);
+            throw error;
+        }
+    }));
+}

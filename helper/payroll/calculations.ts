@@ -138,7 +138,7 @@ export class Benefit {
 
             contributionTable?.forEach((table) => {
                 // console.log({table})
-                if (table.min_salary <= salary && table.max_salary >= salary) {
+                if (Number(table.min_salary) <= salary && Number(table.max_salary) >= salary) {
                     const rates = {
                         minSalary: Number(table.min_salary),
                         maxSalary: Number(table.max_salary),
@@ -156,8 +156,8 @@ export class Benefit {
 
                     if (table.contribution_type === "others") {
                         // console.log({salary})
-                        if (!table.min_MSC) {
-                            const basic = basicCalculator(salary, Number(table.employer_rate), Number(table.employee_rate));
+                        if (!rates.minMSC) {
+                            const basic = basicCalculator(salary, rates.regularEmployerRate, rates.regularEmployeeRate);
                             // console.log("Name: ", this.data.name, " Basic Calc: ", basic);
                             contribution = basic.employee_contribution; //+ basic.employer_contribution;
                         } else {
@@ -168,9 +168,9 @@ export class Benefit {
                         }
                         // console.log({contribution})
                     } else if (table.contribution_type === "percentage") {
-                        contribution = salary * (table.actual_contribution_amount / 100);
+                        contribution = salary * (Number(table.actual_contribution_amount) / 100);
                     } else {
-                        contribution = table.actual_contribution_amount;
+                        contribution = Number(table.actual_contribution_amount);
                     }
                 }
             });

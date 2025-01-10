@@ -45,6 +45,7 @@ model dim_incident_reports {
   updated_at                                                        DateTime        @db.Timestamp(6)
   deleted_at                                                        DateTime?       @db.Timestamp(6)
   is_acted                                                          Boolean         @default(false)
+  files                                                             Json            @default("[]")
   trans_employees_dim_incident_reports_employee_idTotrans_employees trans_employees @relation("dim_incident_reports_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_incident_reports_trans_employees_1")
   trans_employees_dim_incident_reports_reported_byTotrans_employees trans_employees @relation("dim_incident_reports_reported_byTotrans_employees", fields: [reported_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_incident_reports_trans_employees_2")
 
