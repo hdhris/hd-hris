@@ -2,6 +2,7 @@ import Drawer from "@/components/common/Drawer";
 import EmployeeListForm from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
 import FormFields from "@/components/common/forms/FormFields";
 import { BorderedCard, EmployeeHeader } from "@/components/common/minor-items/components";
+import QuickFileUpload from "@/components/common/QuickFileUpload";
 import { Form } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
 import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
@@ -12,7 +13,7 @@ import { ApprovalStatusType } from "@/types/attendance-time/OvertimeType";
 import { PaymentMethod } from "@/types/payroll/cashAdvanceType";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -28,6 +29,8 @@ const cashAdvanceSchema = z.object({
     reason: z.string().optional(),
     status: z.enum(["pending", "approved", "rejected"]),
     payment_method: z.enum(["payroll", "cash", "bank_transfer", "other"]),
+    files: z.array(z.string()).min(1, "Attachments is required"),
+    is_auto_approved: z.boolean(),
 });
 
 function FileCashAdvance({ isOpen, onClose }: CashAdvanceFormType) {
@@ -41,6 +44,8 @@ function FileCashAdvance({ isOpen, onClose }: CashAdvanceFormType) {
         reason: "",
         status: "pending" as ApprovalStatusType,
         payment_method: "payroll" as PaymentMethod,
+        files: [],
+        is_auto_approved: false,
     };
 
     const form = useForm<z.infer<typeof cashAdvanceSchema>>({
@@ -124,6 +129,16 @@ function FileCashAdvance({ isOpen, onClose }: CashAdvanceFormType) {
                                 type: "text-area",
                                 inputDisabled: !form.watch("employee_id"),
                             },
+                            {
+                                name: "files",
+                                label: "Attachments",
+                                Component: ()=> <QuickFileUpload/>,
+                            },
+                            {
+                                name: "is_auto_approved",
+                                type: "switch",
+                                label: "Auto Approved",
+                            }
                             // {
                             //     name: "payment_method",
                             //     label: "Payment Method",
