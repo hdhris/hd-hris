@@ -148,7 +148,7 @@ export async function stageTable(
         const timeSchedule =  0;
     
         // const ratePerHour = parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0;
-        const basicSalary = Number(String(emp?.ref_salary_grades?.amount ?? 0.0));
+        const basicSalary = Number(String(emp?.ref_salary_grades?.amount ?? 0));
         const ratePerHour = 30; // Static rate/hr
         const { deductedUndertime, deductedUnhired, paidLeaves, paidOvertimes } = getAttendanceTotal({
                                       logStatus: statusesByDate,

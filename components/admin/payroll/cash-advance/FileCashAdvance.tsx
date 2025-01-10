@@ -1,16 +1,18 @@
 import Drawer from "@/components/common/Drawer";
 import EmployeeListForm from "@/components/common/forms/employee-list-autocomplete/EmployeeListForm";
 import FormFields from "@/components/common/forms/FormFields";
+import { BorderedCard, EmployeeHeader } from "@/components/common/minor-items/components";
 import { Form } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
 import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
+import { formatCurrency } from "@/lib/utils/numberFormat";
 import { useQuery } from "@/services/queries";
 import { ApprovalStatusType } from "@/types/attendance-time/OvertimeType";
 import { PaymentMethod } from "@/types/payroll/cashAdvanceType";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -38,7 +40,7 @@ function FileCashAdvance({ isOpen, onClose }: CashAdvanceFormType) {
         employee_id: undefined,
         reason: "",
         status: "pending" as ApprovalStatusType,
-        payment_method: "cash" as PaymentMethod,
+        payment_method: "payroll" as PaymentMethod,
     };
 
     const form = useForm<z.infer<typeof cashAdvanceSchema>>({
@@ -46,7 +48,15 @@ function FileCashAdvance({ isOpen, onClose }: CashAdvanceFormType) {
         defaultValues,
     });
 
-    function reset(){
+    const { watch } = form;
+
+    const employee = useMemo(() => {
+        if (employees) {
+            return employees.find((employee) => employee.id === watch("employee_id"));
+        }
+    }, [employees, watch("employee_id")]);
+
+    function reset() {
         form.reset(defaultValues);
     }
 
@@ -67,7 +77,7 @@ function FileCashAdvance({ isOpen, onClose }: CashAdvanceFormType) {
     return (
         <Drawer
             isOpen={isOpen}
-            onClose={()=>{
+            onClose={() => {
                 onClose();
                 reset();
             }}
@@ -77,24 +87,28 @@ function FileCashAdvance({ isOpen, onClose }: CashAdvanceFormType) {
         >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} id="drawer-form" className="space-y-4">
-                    <EmployeeListForm
-                        employees={
-                            employees?.map((emp) => {
-                                return {
-                                    department: emp.ref_job_classes.name,
-                                    name: getEmpFullName(emp),
+                    {employee ? (
+                        <>
+                            <EmployeeHeader employee={employee} onClose={reset} />
+                            <BorderedCard
+                                icon={<div />}
+                                title={employee.ref_salary_grades.name}
+                                description={formatCurrency(employee.ref_salary_grades.amount)}
+                            />
+                        </>
+                    ) : (
+                        <EmployeeListForm
+                            isLoading={isLoading}
+                            employees={
+                                employees?.map((emp) => ({
                                     id: emp.id,
+                                    name: getEmpFullName(emp),
                                     picture: emp.picture,
-                                    employment_status: emp.ref_employment_status,
-                                };
-                            }) || []
-                        }
-                        isLoading={isLoading}
-                        onSelected={(id) => {
-                            console.log(id);
-                            form.setValue("employee_id", id);
-                        }}
-                    />
+                                    department: emp.ref_departments?.name,
+                                })) ?? []
+                            }
+                        />
+                    )}
                     <FormFields
                         items={[
                             {
@@ -110,33 +124,33 @@ function FileCashAdvance({ isOpen, onClose }: CashAdvanceFormType) {
                                 type: "text-area",
                                 inputDisabled: !form.watch("employee_id"),
                             },
-                            {
-                                name: "payment_method",
-                                label: "Payment Method",
-                                type: "radio-group",
-                                inputDisabled: !form.watch("employee_id"),
-                                config: {
-                                    //"payroll", "cash", "bank_transfer", "other"
-                                    options: [
-                                        {
-                                            label: "Cash",
-                                            value: "cash",
-                                        },
-                                        {
-                                            label: "Payroll",
-                                            value: "payroll",
-                                        },
-                                        {
-                                            label: "Bank Transfer",
-                                            value: "bank_transfer",
-                                        },
-                                        {
-                                            label: "Other",
-                                            value: "other",
-                                        }
-                                    ]
-                                }
-                            }
+                            // {
+                            //     name: "payment_method",
+                            //     label: "Payment Method",
+                            //     type: "radio-group",
+                            //     inputDisabled: !form.watch("employee_id"),
+                            //     config: {
+                            //         //"payroll", "cash", "bank_transfer", "other"
+                            //         options: [
+                            //             {
+                            //                 label: "Cash",
+                            //                 value: "cash",
+                            //             },
+                            //             {
+                            //                 label: "Payroll",
+                            //                 value: "payroll",
+                            //             },
+                            //             {
+                            //                 label: "Bank Transfer",
+                            //                 value: "bank_transfer",
+                            //             },
+                            //             {
+                            //                 label: "Other",
+                            //                 value: "other",
+                            //             },
+                            //         ],
+                            //     },
+                            // },
                         ]}
                     />
                 </form>

@@ -158,11 +158,8 @@ function FilterItems<T>({
               {sectionName}
               {": "}
               <span className="font-semibold text-blue-500">
-                {filter
-                  .map((ft) => ft.label)
-                  .join(
-                    category.selectionMode === "multipleOR" ? " | " : " & "
-                  )}
+                {filter.length}
+                {" items"}
               </span>
             </p>
           );
