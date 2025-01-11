@@ -12,9 +12,9 @@ import {formatDaysToReadableTime} from "@/lib/utils/timeFormatter";
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
-        const page = parseInt(searchParams.get('page') || '1', 10); // Default to page 1
+        // const page = parseInt(searchParams.get('page') || '1', 10); // Default to page 1
         const search = Number(searchParams.get('search') || 0);
-        const perPage = 10; // Default to 10 results per page
+        // const perPage = 10; // Default to 10 results per page
         const start = searchParams.get('start');
         const end = searchParams.get('end');
 
@@ -25,12 +25,12 @@ export async function GET(req: NextRequest) {
         const startDate = toGMT8(`${toGMT8(start).format("YYYY-MM-DD")}T00:00:00`).toDate();
         const endDate = toGMT8(`${toGMT8(end).format("YYYY-MM-DD")}T23:59:59`).toDate(); // Include the entire end date
 
-        console.log("Start: ", startDate, "End: ", endDate);
-        if (page < 1 || perPage < 1) {
-            return NextResponse.json({ error: "Page and limit must be positive integers." }, { status: 400 });
-        }
-
-        const skip = (page - 1) * perPage;
+        // console.log("Start: ", startDate, "End: ", endDate);
+        // if (page < 1 || perPage < 1) {
+        //     return NextResponse.json({ error: "Page and limit must be positive integers." }, { status: 400 });
+        // }
+        //
+        // const skip = (page - 1) * perPage;
 
         // Fetch data and total count in parallel
         const [data, count] = await Promise.all([
@@ -78,8 +78,6 @@ export async function GET(req: NextRequest) {
                         }
                     }
                 },
-                skip,
-                take: perPage,
             }),
             prisma?.log_attendances.count({
                 where: {
@@ -112,11 +110,11 @@ export async function GET(req: NextRequest) {
         if (!data) {
             return NextResponse.json({ error: "Failed to fetch data." }, { status: 500 });
         }
+        //
+        // const nextPage = page * perPage < count ? page + 1 : null;
+        // const previousPage = page > 1 ? page - 1 : null;
 
-        const nextPage = page * perPage < count ? page + 1 : null;
-        const previousPage = page > 1 ? page - 1 : null;
-
-        const results: LeaveReports[] = data.map((item) => {
+        const results: LeaveReports[] = data.sort((a,b) => a.trans_employees_leaves.last_name.localeCompare(b.trans_employees_leaves.last_name)).map((item) => {
             const leave_credits = leaveCredits?.find((leave) => leave.employee_id === item.employee_id)!;
             return({
                 // id: item.id,
@@ -147,9 +145,9 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json(
             {
-                count,
-                next: nextPage ? `${process.env.BASE_URL}/api/admin/reports/attendance-logs/?page=${nextPage}` : null,
-                previous: previousPage ? `${process.env.BASE_URL}/api/admin/reports/attendance-logs/?page=${previousPage}` : null,
+                // count,
+                // next: nextPage ? `${process.env.BASE_URL}/api/admin/reports/attendance-logs/?page=${nextPage}` : null,
+                // previous: previousPage ? `${process.env.BASE_URL}/api/admin/reports/attendance-logs/?page=${previousPage}` : null,
                 results,
             },
             { status: 200 }

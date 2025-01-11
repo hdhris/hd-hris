@@ -6,7 +6,7 @@ import { AttendanceData } from "@/types/attendance-time/AttendanceTypes";
 import TableData from "@/components/tabledata/TableData";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { getEmpFullName } from "@/lib/utils/nameFormatter";
-import { toUpper } from "lodash";
+import { capitalize, toUpper } from "lodash";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import useSWR from "swr";
 import { fetchAttendanceData } from "./stage";
@@ -15,15 +15,27 @@ import { attEmployeeConfig, attLogRecordConfig } from "./config";
 import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import ViewAttendanceRecord from "./view-record";
+import SearchFilter from "@/components/common/filter/SearchFilter";
+import { SearchItemsProps } from "@/components/common/filter/SearchItems";
+import { FilterItemsProps } from "@/components/common/filter/FilterItems";
+
+const searchConfig: SearchItemsProps<MajorEmployee>[] = [
+    {
+        key: "last_name",
+        label: "Last Name",
+    },
+    {
+        key: "first_name",
+        label: "First Name",
+    },
+    {
+        key: "middle_name",
+        label: "Middle Name",
+    },
+];
 
 export default function Page() {
     const [currentTab, setCurrentTab] = useState<"by-logs" | "by-employees">("by-employees"); //
-    SetNavEndContent(() => (
-        <Tabs selectedKey={currentTab} onSelectionChange={(value) => setCurrentTab(String(value) as any)} radius="lg">
-            <Tab key="by-logs" title={"By Logs"} />
-            <Tab key="by-employees" title={"By Employees"} />
-        </Tabs>
-    ));
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
         column: "timestamp",
         direction: "descending",
@@ -47,12 +59,119 @@ export default function Page() {
             refreshInterval: 3000,
         }
     );
+
+    const branches = useMemo(() => {
+        if (attendanceData?.employees) {
+            const uniqueItems = attendanceData.employees.reduce((acc, employee) => {
+                const items = {
+                    id: employee.ref_branches.id,
+                    name: employee.ref_branches.name.trim(),
+                };
+                if (!acc.some((d) => d.id === items.id)) {
+                    acc.push(items);
+                }
+                return acc;
+            }, [] as { id: number; name: string }[]);
+    
+            return uniqueItems;
+        }
+        return [];
+    }, [attendanceData]);
+
+    const departments = useMemo(() => {
+        if (attendanceData?.employees) {
+            const uniqueItems = attendanceData.employees.reduce((acc, employee) => {
+                const items = {
+                    id: employee.ref_departments.id,
+                    name: employee.ref_departments.name.trim(),
+                };
+                if (!acc.some((d) => d.id === items.id)) {
+                    acc.push(items);
+                }
+                return acc;
+            }, [] as { id: number; name: string }[]);
+    
+            return uniqueItems;
+        }
+        return [];
+    }, [attendanceData]);
+
+    const positions = useMemo(() => {
+        if (attendanceData?.employees) {
+            const uniqueItems = attendanceData.employees.reduce((acc, employee) => {
+                const items = {
+                    id: employee.ref_job_classes.id,
+                    name: employee.ref_job_classes.name.trim(),
+                };
+                if (!acc.some((d) => d.id === items.id)) {
+                    acc.push(items);
+                }
+                return acc;
+            }, [] as { id: number; name: string }[]);
+    
+            return uniqueItems;
+        }
+        return [];
+    }, [attendanceData]);
+
+    const filterConfig: FilterItemsProps<MajorEmployee>[] = [
+        {
+            filter: branches.map((branch) => ({
+                label: capitalize(branch.name),
+                value: branch.id,
+            })),
+            key: ["ref_branches", "id"],
+            sectionName: "Branch",
+            selectionMode: "single",
+        },
+        {
+            filter: departments.map((branch) => ({
+                label: capitalize(branch.name),
+                value: branch.id,
+            })),
+            key: ["ref_departments", "id"],
+            sectionName: "Department",
+            selectionMode: "single",
+        },
+        {
+            filter: positions.map((branch) => ({
+                label: capitalize(branch.name),
+                value: branch.id,
+            })),
+            key: ["ref_job_classes", "id"],
+            sectionName: "Job Position",
+            selectionMode: "multipleOR",
+        },
+    ];
+
+    const [filteredEmployees, setFilteredEmployees] = useState<MajorEmployee[]>([]);
+    SetNavEndContent(() => (
+        <>
+            {currentTab === "by-employees"  &&<SearchFilter
+                uniqueKey={"schedule-filter"}
+                items={attendanceData?.employees ?? []}
+                filterConfig={filterConfig}
+                searchConfig={searchConfig}
+                setResults={setFilteredEmployees}
+                isLoading={isLoading}
+            />}
+            <Tabs
+                selectedKey={currentTab}
+                onSelectionChange={(value) => setCurrentTab(String(value) as any)}
+                radius="lg"
+                size="sm"
+            >
+                <Tab key="by-logs" title={"By Logs"} />
+                <Tab key="by-employees" title={"By Employees"} />
+            </Tabs>
+        </>
+    ));
     // const { data: attendanceData, isLoading } = useQuery<AttendanceData>(api);
 
     const [selectedLog, setSelectedLog] = useState<string>();
 
     const currentAttendanceInfo = useMemo(() => {
-        if (currentTab != "by-logs") return
+        if (currentTab != "by-logs") return;
         const foundLog = attendanceData?.attendanceLogs.find((al) => al.id === Number(selectedLog));
         if (foundLog) {
             const status = attendanceData?.statusesByDate[`${date}`][`${foundLog?.employee_id}`];
@@ -140,7 +259,7 @@ export default function Page() {
                 />
             ) : (
                 <TableData
-                    items={attendanceData?.employees ?? []}
+                    items={filteredEmployees}
                     title="Employee records"
                     config={attEmployeeConfig(date, attendanceData)}
                     isLoading={isLoading}

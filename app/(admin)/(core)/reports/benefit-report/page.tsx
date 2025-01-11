@@ -3,7 +3,7 @@ import BenefitReport from "@/components/admin/reports/benefits/benefit-report";
 
 function Page() {
     return (
-        <div><BenefitReport/></div>
+        <div className="h-full"><BenefitReport/></div>
     );
 }
 

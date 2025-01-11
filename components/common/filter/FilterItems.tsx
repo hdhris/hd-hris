@@ -12,6 +12,7 @@ import { joinNestedKeys, NestedKeys } from "@/helper/objects/joinNestedKeys";
 import { valueOfObject } from "@/helper/objects/pathGetterObject";
 import DropdownList from "../Dropdown";
 import { IoChevronDown } from "react-icons/io5";
+import { FiFilter } from "react-icons/fi";
 
 export interface FilterItemsProps<T> {
   filter: {
@@ -158,11 +159,8 @@ function FilterItems<T>({
               {sectionName}
               {": "}
               <span className="font-semibold text-blue-500">
-                {filter
-                  .map((ft) => ft.label)
-                  .join(
-                    category.selectionMode === "multipleOR" ? " | " : " & "
-                  )}
+                {filter.length}
+                {" items"}
               </span>
             </p>
           );
@@ -170,10 +168,10 @@ function FilterItems<T>({
       }
     }
     return (
-      <p className="text-gray-500 text-sm">
-        Filter{" "}
-        <span className="font-semibold text-gray-700">{sectionName}</span>
-      </p>
+      <div className="flex justify-center items-center gap-1">
+        {!isLoading && <FiFilter className="text-gray-500 "/>}
+        <span className="text-sm font-semibold text-gray-700">{sectionName}</span>
+      </div>
     );
   };
 

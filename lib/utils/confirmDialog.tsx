@@ -57,6 +57,8 @@ const showDialog = async ({
                 style={{
                     zIndex: '9999 !important'
                 }}
+                radius="md"
+                shadow="lg"
             >
                 <ModalContent>
                     <ModalHeader className="flex flex-col gap-1 font-semibold">

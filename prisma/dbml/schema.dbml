@@ -16,7 +16,6 @@ Table dim_employee_benefits {
   coverage_amount_type String [default: '']
   ref_benefit_plans ref_benefit_plans [not null]
   trans_employees trans_employees [not null]
-  trans_benefit_contributions trans_benefit_contributions [not null]
 }
 
 Table dim_incident_reports {
@@ -33,6 +32,7 @@ Table dim_incident_reports {
   updated_at DateTime [not null]
   deleted_at DateTime
   is_acted Boolean [not null, default: false]
+  files Json [not null, default: '[]']
   trans_employees_dim_incident_reports_employee_idTotrans_employees trans_employees [not null]
   trans_employees_dim_incident_reports_reported_byTotrans_employees trans_employees [not null]
 }
@@ -211,6 +211,7 @@ Table ref_benefit_plans {
   dim_employee_benefits dim_employee_benefits [not null]
   ref_payheads ref_payheads
   ref_benefits_contribution_table ref_benefits_contribution_table [not null]
+  trans_benefit_contributions trans_benefit_contributions [not null]
 }
 
 Table ref_branches {
@@ -359,7 +360,7 @@ Table trans_benefit_contributions {
   updated_at DateTime [not null]
   deleted_at DateTime
   payroll_id Int
-  dim_employee_benefits dim_employee_benefits
+  ref_benefit_plans ref_benefit_plans
   trans_payrolls trans_payrolls
 }
 
@@ -405,6 +406,8 @@ Table trans_cash_advances {
   deleted_at DateTime
   payment_method String [not null, default: 'earning']
   evaluators Json
+  files Json [not null, default: '[]']
+  is_auto_approved Boolean [not null, default: false]
   trans_cash_advance_disbursements trans_cash_advance_disbursements [not null]
   trans_employees_trans_cash_advances_employee_idTotrans_employees trans_employees
 }
@@ -921,7 +924,7 @@ Ref: sys_variables.employee_id - trans_employees.id [delete: No Action]
 
 Ref: trans_attendance_details.employee_id > trans_employees.id [delete: No Action]
 
-Ref: trans_benefit_contributions.employee_benefit_id > dim_employee_benefits.id [delete: No Action]
+Ref: trans_benefit_contributions.employee_benefit_id > ref_benefit_plans.id [delete: No Action]
 
 Ref: trans_benefit_contributions.payroll_id > trans_payrolls.id [delete: No Action]
 

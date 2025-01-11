@@ -173,23 +173,23 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                 <SwitchCase expression={item.type}>
                                     <Case of="auto-complete">
                                         <Autocomplete
-                                            isVirtualized
+                                            {...field}
                                             disableSelectorIconRotation
-                                            placeholder={item.placeholder}
-                                            {...(item.config as AutocompleteProps)}
-                                            id={item.name as string}
-                                            aria-label={item.name as string}
-                                            disabled={item.inputDisabled}
+                                            defaultInputValue={(item.config as AutocompleteProps)?.allowsCustomValue && field.value}
                                             defaultItems={(item.config as any)?.options ?? undefined}
+                                            aria-labelledby={String(item.name)}
+                                            aria-label={String(item.name)}
+                                            id={String(item.name)}
+                                            placeholder={item.placeholder}
+                                            disabled={item.inputDisabled}
                                             autoFocus={item.isFocus}
                                             size={size}
                                             variant="bordered"
                                             radius="sm"
-                                            selectedKey={field.value ? String(field.value) : null}
-                                            onSelectionChange={(e) => {
-                                                field.onChange(e);
-                                            }}
-                                            {...field}
+                                            selectedKey={(item.config as AutocompleteProps)?.allowsCustomValue ? undefined : field.value ? String(field.value) : null}
+                                            onSelectionChange={(item.config as AutocompleteProps)?.allowsCustomValue ? undefined : (value)=>field.onChange(value)}
+                                            onInputChange={(item.config as AutocompleteProps)?.allowsCustomValue ? (value)=>field.onChange(String(value)) : undefined}
+                                            {...(item.config as AutocompleteProps)}
                                         >
                                             {(item.config as any)?.options?.map((option: GroupInputOptions) => {
                                                 return (

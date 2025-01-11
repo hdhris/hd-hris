@@ -13,20 +13,19 @@ datasource db {
 }
 
 model dim_employee_benefits {
-  id                          Int                           @id @default(autoincrement())
-  employee_id                 Int
-  plan_id                     Int
-  enrollment_date             DateTime                      @db.Date
-  created_at                  DateTime                      @db.Timestamp(6)
-  updated_at                  DateTime                      @db.Timestamp(6)
-  terminated_at               DateTime?                     @db.Timestamp(6)
-  coverage_amount             Decimal                       @db.Decimal(10, 2)
-  contribution_amount         Decimal                       @db.Decimal(10, 2)
-  benefit_audit               Json?
-  coverage_amount_type        String?                       @default("")
-  ref_benefit_plans           ref_benefit_plans             @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_employee_benefits_ref_benefit_plan_1")
-  trans_employees             trans_employees               @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_employee_benefits_trans_employees_2")
-  trans_benefit_contributions trans_benefit_contributions[]
+  id                   Int               @id @default(autoincrement())
+  employee_id          Int
+  plan_id              Int
+  enrollment_date      DateTime          @db.Date
+  created_at           DateTime          @db.Timestamp(6)
+  updated_at           DateTime          @db.Timestamp(6)
+  terminated_at        DateTime?         @db.Timestamp(6)
+  coverage_amount      Decimal           @db.Decimal(10, 2)
+  contribution_amount  Decimal           @db.Decimal(10, 2)
+  benefit_audit        Json?
+  coverage_amount_type String?           @default("")
+  ref_benefit_plans    ref_benefit_plans @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_employee_benefits_ref_benefit_plan_1")
+  trans_employees      trans_employees   @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_employee_benefits_trans_employees_2")
 
   @@index([employee_id, plan_id])
 }
@@ -45,6 +44,7 @@ model dim_incident_reports {
   updated_at                                                        DateTime        @db.Timestamp(6)
   deleted_at                                                        DateTime?       @db.Timestamp(6)
   is_acted                                                          Boolean         @default(false)
+  files                                                             Json            @default("[]")
   trans_employees_dim_incident_reports_employee_idTotrans_employees trans_employees @relation("dim_incident_reports_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_incident_reports_trans_employees_1")
   trans_employees_dim_incident_reports_reported_byTotrans_employees trans_employees @relation("dim_incident_reports_reported_byTotrans_employees", fields: [reported_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dim_incident_reports_trans_employees_2")
 
@@ -245,6 +245,7 @@ model ref_benefit_plans {
   dim_employee_benefits           dim_employee_benefits[]
   ref_payheads                    ref_payheads?                     @relation(fields: [deduction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ref_benefits_contribution_table ref_benefits_contribution_table[]
+  trans_benefit_contributions     trans_benefit_contributions[]
 
   @@index([deleted_at])
 }
@@ -399,18 +400,18 @@ model trans_attendance_details {
 }
 
 model trans_benefit_contributions {
-  id                    Int                    @id @default(autoincrement())
+  id                    Int                @id @default(autoincrement())
   employee_benefit_id   Int?
-  contribution_date     DateTime?              @db.Date
-  employer_contribution Decimal?               @db.Decimal(10, 2)
-  employee_contribution Decimal?               @db.Decimal(10, 2)
-  total_contribution    Decimal?               @db.Decimal(10, 2)
-  created_at            DateTime               @db.Timestamp(6)
-  updated_at            DateTime               @db.Timestamp(6)
-  deleted_at            DateTime?              @db.Timestamp(6)
+  contribution_date     DateTime?          @db.Date
+  employer_contribution Decimal?           @db.Decimal(10, 2)
+  employee_contribution Decimal?           @db.Decimal(10, 2)
+  total_contribution    Decimal?           @db.Decimal(10, 2)
+  created_at            DateTime           @db.Timestamp(6)
+  updated_at            DateTime           @db.Timestamp(6)
+  deleted_at            DateTime?          @db.Timestamp(6)
   payroll_id            Int?
-  dim_employee_benefits dim_employee_benefits? @relation(fields: [employee_benefit_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_benefit_contributions_dim_employee_benefits_1")
-  trans_payrolls        trans_payrolls?        @relation(fields: [payroll_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_benefit_plans     ref_benefit_plans? @relation(fields: [employee_benefit_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_benefit_contributions_dim_employee_benefits_1")
+  trans_payrolls        trans_payrolls?    @relation(fields: [payroll_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([deleted_at])
 }
@@ -461,6 +462,8 @@ model trans_cash_advances {
   deleted_at                                                       DateTime?                          @db.Timestamp(6)
   payment_method                                                   String                             @default("earning")
   evaluators                                                       Json?
+  files                                                            Json                               @default("[]")
+  is_auto_approved                                                 Boolean                            @default(false)
   trans_cash_advance_disbursements                                 trans_cash_advance_disbursements[]
   trans_employees_trans_cash_advances_employee_idTotrans_employees trans_employees?                   @relation("trans_cash_advances_employee_idTotrans_employees", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trans_cash_advances_trans_employees_1")
 

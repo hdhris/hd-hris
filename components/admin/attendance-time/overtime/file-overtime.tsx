@@ -8,28 +8,25 @@ import { getEmpFullName } from "@/lib/utils/nameFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DateValue, Spinner } from "@nextui-org/react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { DateValue } from "@nextui-org/react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { getLocalTimeZone, parseAbsolute, today } from "@internationalized/date";
+import { getLocalTimeZone, parseAbsolute } from "@internationalized/date";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import { fetchAttendanceData } from "@/app/(admin)/(core)/attendance-time/records/stage";
-import { FileDropzone, FileState } from "@/components/ui/fileupload/file";
-import { useEdgeStore } from "@/lib/edgestore/edgestore";
+import QuickFileUpload from "../../../common/QuickFileUpload";
 
 interface FileOvertimeProps {
     isOpen: boolean;
     onClose: () => void;
 }
 function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
-    const { edgestore } = useEdgeStore();
     const userInfo = useUserInfo();
     const [selectedEmployee, setSelectedEmployee] = useState<MajorEmployee>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { data: employees, isLoading } = useQuery<MajorEmployee[]>("/api/admin/utils/get-employee-search");
-    const [documentAttachments, setDocumentAttachments] = useState<FileState[]>([]);
     const [availableOvertimes, setAvailableOvertimes] = useState<
         {
             id?: number | null;
@@ -148,45 +145,6 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
         };
     }, [availableOvertimes]);
 
-    function updateFileProgress(key: string, progress: FileState["progress"]) {
-        setDocumentAttachments((fileStates) => {
-            const newFileStates = structuredClone(fileStates);
-            const fileState = newFileStates.find((fileState) => fileState.key === key);
-            if (fileState) {
-                fileState.progress = progress;
-            }
-            return newFileStates;
-        });
-    }
-
-    const fileUpload = useCallback(
-        async (addedFiles: FileState[]) => {
-            setDocumentAttachments([...documentAttachments, ...addedFiles]);
-            await Promise.all(
-                addedFiles.map(async (addedFileState) => {
-                    try {
-                        const res = await edgestore.publicFiles.upload({
-                            file: addedFileState.file,
-                            onProgressChange: async (progress) => {
-                                updateFileProgress(addedFileState.key, progress);
-                                if (progress === 100) {
-                                    // wait 1 second to set it to complete
-                                    // so that the user can see the progress bar at 100%
-                                    await new Promise((resolve) => setTimeout(resolve, 1000));
-                                    updateFileProgress(addedFileState.key, "COMPLETE");
-                                }
-                            },
-                        });
-                        setValue("files", [...watch("files"), res.url]);
-                    } catch (err) {
-                        updateFileProgress(addedFileState.key, "ERROR");
-                    }
-                })
-            );
-        },
-        [documentAttachments, edgestore.publicFiles, watch("files")]
-    );
-
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true);
         try {
@@ -279,33 +237,9 @@ function FileOvertime({ isOpen, onClose }: FileOvertimeProps) {
                                     isDisabled: !watch("log_id"),
                                 },
                             },
-                            {
-                                name: "files",
-                                label: "Attachments",
-                                type: "text",
-                                inputDisabled: !watch("log_id"),
-                                Component: ({ onChange }) => (
-                                    <FileDropzone
-                                        onChange={setDocumentAttachments}
-                                        value={documentAttachments}
-                                        onFilesAdded={fileUpload}
-                                        dropzoneOptions={{
-                                            accept: {
-                                                "application/pdf": [".pdf"],
-                                                "application/msword": [".doc"],
-                                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                                                    [".docx"],
-                                                "image/jpeg": [".jpg", ".jpeg"],
-                                                "image/png": [".png"],
-                                                "image/webp": [".webp"],
-                                            },
-                                            maxSize: 5 * 1024 * 1024, // 5MB limit
-                                        }}
-                                    />
-                                ),
-                            },
                         ]}
                     />
+                    <QuickFileUpload/>
                 </form>
             </Form>
         </Drawer>

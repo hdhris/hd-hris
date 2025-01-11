@@ -1,21 +1,17 @@
 "use client";
 import React, {useMemo, useRef, useState} from 'react';
 import {usePayrollReport, usePayrollReportDate} from "@/services/queries";
-import {
-    EmployeePayroll,
-    PayrollBreakdownReport, PayrollDeductionReport,
-    PayrollEarningsReport,
-    PayrollsReport
-} from '@/types/report/payroll/payroll';
+import {PayrollBreakdownReport} from '@/types/report/payroll/payroll';
 import BorderCard from "@/components/common/BorderCard";
 import {SetNavEndContent} from "@/components/common/tabs/NavigationTabs";
-import {Autocomplete, cn, Select, SelectItem} from "@nextui-org/react";
+import {cn, Select, SelectItem} from "@nextui-org/react";
 import NoData from "@/components/common/no-data/NoData";
 import {uniformStyle} from "@/lib/custom/styles/SizeRadius";
 import {LuPrinter} from "react-icons/lu";
 import {Button} from "@nextui-org/button";
 import {useReactToPrint} from "react-to-print";
 import {toGMT8} from "@/lib/utils/toGMT8";
+import Loading from "@/components/spinner/Loading";
 
 function PayrollReport() {
     const {data: payroll_date, isLoading: payroll_date_is_loading, error} = usePayrollReportDate()
@@ -58,7 +54,7 @@ function PayrollReport() {
     }
 `;
 
-    const { data: report, isLoading } = usePayrollReport(date_id!);
+    const {data: report, isLoading} = usePayrollReport(date_id!);
     const data = useMemo(() => {
         if (report) {
             console.log(report)
@@ -83,26 +79,25 @@ function PayrollReport() {
 
 
     SetNavEndContent(() => {
-        return(
-            <div className="flex gap-2">
-            <Select
-                isLoading={payroll_date_is_loading}
-                className="w-64"
-                items={payroll_date_deployed || []}
-                variant="bordered"
-                size="sm"
-                color="primary"
-                aria-label="Date"
-                placeholder="Select payroll date"
-                onSelectionChange={(value) => setDate_id(Number(value.currentKey))}
-            >
-                {(item) => <SelectItem key={item.id}>{item.date}</SelectItem>}
-            </Select>
-                <Button isIconOnly isDisabled={data?.employees.length === 0} {...uniformStyle()} onPress={() => reactToPrintFn?.()}>
-                    <LuPrinter className="size-5" />
+        return (<div className="flex gap-2">
+                <Select
+                    isLoading={payroll_date_is_loading}
+                    className="w-64"
+                    items={payroll_date_deployed || []}
+                    variant="bordered"
+                    size="sm"
+                    color="primary"
+                    aria-label="Date"
+                    placeholder="Select payroll date"
+                    onSelectionChange={(value) => setDate_id(Number(value.currentKey))}
+                >
+                    {(item) => <SelectItem key={item.id}>{item.date}</SelectItem>}
+                </Select>
+                <Button isIconOnly isDisabled={data?.employees.length === 0} {...uniformStyle()}
+                        onPress={() => reactToPrintFn?.()}>
+                    <LuPrinter className="size-5"/>
                 </Button>
-            </div>
-        )
+            </div>)
     })
 
 
@@ -129,131 +124,80 @@ function PayrollReport() {
         const netPay = earnings - deductions;
 
         return {
-            ...employee,
-            earnings,
-            deductions,
-            netPay,
-            breakdowns
+            ...employee, earnings, deductions, netPay, breakdowns
         };
     });
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return <Loading/>;
     }
 
-    return (
-        <BorderCard className="h-full overflow-auto">
+    return (<>
             <style>{printStyles}</style>
-            <div className={cn("overflow-x-auto", "print-container")} ref={contentRef}>
+            <div className={cn("overflow-x-auto", "print-container print:p-5")} ref={contentRef}>
+                {data?.employees?.length! > 0 ? <table className="w-full border-collapse">
+                    <thead className="bg-gray-100">
+                    <tr>
+                        <th className="p-3 text-left border text-[7pt]">Employee Name</th>
+                        <th className="p-3 text-left border text-[7pt]">Department</th>
+                        <th className="p-3 text-left border text-[7pt]">Position</th>
+                        {data?.earnings.map((item, index) => (
+                            <th key={index} className="p-3 text-right border text-[7pt]">{item.name}</th>))}
+                        <th className="p-3 text-right border text-[7pt]">Gross Pay</th>
+                        {data?.deductions.map((item, index) => (
+                            <th key={index} className="p-3 text-right border text-[7pt]">{item.name}</th>))}
+                        <th className="p-3 text-right border text-[7pt]">Deductions</th>
+                        <th className="p-3 text-right border text-[7pt]">Net Pay</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {processedData?.map((employee) => (<tr key={employee.id} className="hover:bg-gray-50">
+                            <td className="p-3 border text-[7pt]">{employee.name}</td>
+                            <td className="p-3 border text-[7pt]">{employee.department}</td>
+                            <td className="p-3 border text-[7pt]">{employee.job}</td>
 
-                {data?.employees?.length! > 0 ?
-                    <table className="w-full border-collapse min-w-[800px]">
-                        <thead className="bg-gray-100">
-                        <tr>
-                            <th className="p-3 text-left border text-sm">Employee Name</th>
-                            <th className="p-3 text-left border text-sm">Department</th>
-                            <th className="p-3 text-left border text-sm">Position</th>
-                            {data?.earnings.map((item, index) => (
-                                <th key={index} className="p-3 text-right border text-sm">{item.name}</th>
-                            ))}
-                            <th className="p-3 text-right border text-sm">Gross Pay</th>
-                            {data?.deductions.map((item, index) => (
-                                <th key={index} className="p-3 text-right border text-sm">{item.name}</th>
-                            ))}
-                            <th className="p-3 text-right border text-sm">Deductions</th>
-                            <th className="p-3 text-right border text-sm">Net Pay</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {processedData?.map((employee) => (
-                            <tr key={employee.id} className="hover:bg-gray-50">
-                                <td className="p-3 border text-sm">{employee.name}</td>
-                                <td className="p-3 border text-sm">{employee.department}</td>
-                                <td className="p-3 border text-sm">{employee.job}</td>
+                            {/* Earnings columns */}
+                            {data?.earnings.map((earnItem) => {
+                                const breakdown = employee.breakdowns.find(item => item.payhead_id === earnItem.payhead_id);
+                                return (<td key={earnItem.payhead_id} className="p-3 text-right border text-[7pt]">
+                                        ₱{breakdown?.amount?.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2, maximumFractionDigits: 2
+                                    }) ?? 0}
+                                    </td>);
+                            })}
 
-                                {/* Earnings columns */}
-                                {data?.earnings.map((earnItem) => {
-                                    const breakdown = employee.breakdowns.find(
-                                        item => item.payhead_id === earnItem.payhead_id
-                                    );
-                                    return (
-                                        <td key={earnItem.payhead_id} className="p-3 text-right border text-sm">
-                                            ₱{breakdown?.amount?.toLocaleString(undefined, {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2
-                                        }) ?? 0}
-                                        </td>
-                                    );
-                                })}
+                            <td className="p-3 text-right border text-[7pt] font-semibold">
+                                ₱{employee.earnings.toLocaleString(undefined, {
+                                minimumFractionDigits: 2, maximumFractionDigits: 2
+                            })}
+                            </td>
 
-                                <td className="p-3 text-right border text-sm">
-                                    ₱{employee.earnings.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                })}
-                                </td>
+                            {/* Deductions columns */}
+                            {data?.deductions.map((deducItem) => {
+                                const breakdown = employee.breakdowns.find(item => item.payhead_id === deducItem.payhead_id);
+                                return (<td key={deducItem.payhead_id} className="p-3 text-right border text-[7pt]">
+                                        ₱{breakdown?.amount?.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2, maximumFractionDigits: 2
+                                    }) ?? 0}
+                                    </td>);
+                            })}
 
-                                {/* Deductions columns */}
-                                {data?.deductions.map((deducItem) => {
-                                    const breakdown = employee.breakdowns.find(
-                                        item => item.payhead_id === deducItem.payhead_id
-                                    );
-                                    return (
-                                        <td key={deducItem.payhead_id} className="p-3 text-right border text-sm">
-                                            ₱{breakdown?.amount?.toLocaleString(undefined, {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2
-                                        }) ?? 0}
-                                        </td>
-                                    );
-                                })}
+                            <td className="p-3 text-right border text-[7pt] font-semibold">
+                                ₱{employee.deductions.toLocaleString(undefined, {
+                                minimumFractionDigits: 2, maximumFractionDigits: 2
+                            })}
+                            </td>
 
-                                <td className="p-3 text-right border text-sm">
-                                    ₱{employee.deductions.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                })}
-                                </td>
-
-                                <td className="p-3 text-right border text-sm">
-                                    ₱{employee.netPay.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                })}
-                                </td>
-                            </tr>
-                        ))}
-
-                        {/*/!* Totals Row *!/*/}
-                        {/*<tr className="bg-gray-100 font-bold text-sm">*/}
-                        {/*    <td colSpan={3} className="p-3 border text-right">Total:</td>*/}
-
-                        {/*    /!* Earnings totals *!/*/}
-                        {/*    <td className="p-3 text-right border text-sm">*/}
-                        {/*        ₱{processedData?.reduce((sum, emp) => sum + emp.earnings, 0).toLocaleString(undefined, {*/}
-                        {/*        minimumFractionDigits: 2, maximumFractionDigits: 2*/}
-                        {/*    })}*/}
-                        {/*    </td>*/}
-
-                        {/*    /!* Deductions totals *!/*/}
-                        {/*    <td className="p-3 text-right border text-sm">*/}
-                        {/*        ₱{processedData?.reduce((sum, emp) => sum + emp.deductions, 0).toLocaleString(undefined, {*/}
-                        {/*        minimumFractionDigits: 2, maximumFractionDigits: 2*/}
-                        {/*    })}*/}
-                        {/*    </td>*/}
-
-                        {/*    /!* Net pay totals *!/*/}
-                        {/*    <td className="p-3 text-right border text-sm">*/}
-                        {/*        ₱{processedData?.reduce((sum, emp) => sum + emp.netPay, 0).toLocaleString(undefined, {*/}
-                        {/*        minimumFractionDigits: 2, maximumFractionDigits: 2*/}
-                        {/*    })}*/}
-                        {/*    </td>*/}
-                        {/*</tr>*/}
-                        </tbody>
-                    </table> : <NoData/>}
+                            <td className="p-3 text-right border text-[7pt] font-semibold">
+                                ₱{employee.netPay.toLocaleString(undefined, {
+                                minimumFractionDigits: 2, maximumFractionDigits: 2
+                            })}
+                            </td>
+                        </tr>))}
+                    </tbody>
+                </table> : <NoData/>}
             </div>
-
-        </BorderCard>
+        </>
 
     );
 }

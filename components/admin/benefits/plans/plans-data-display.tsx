@@ -43,8 +43,8 @@ function PlansDataDisplay() {
     const {data, isLoading} = usePaginateQuery<BenefitPlanPaginated>("/api/admin/benefits/plans", page, rows, {
         refreshInterval: 3000
     });
-
-    const {data: members} = useBenefitMembership({page, rows});
+    //
+    // const {data: members} = useBenefitMembership({page, rows});
 
     const benefitPlans = useMemo(() => {
         if (data) {

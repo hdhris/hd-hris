@@ -49,7 +49,7 @@ export async function stageTable(
     // console.log(dataPH);
     setStageMsg("Performing calculations...");
     // Reuse employee schedule map for references below
-    const { cashToDisburse, cashToRepay, benefitsPlansData } = convertToNumber({...stage_two.data.result});
+    const { cashToDisburse, cashToRepay, benefitsPlansData, payableData } = convertToNumber({...stage_two.data.result});
     const employeeScheduleMap = employeeSchedule.reduce((acc, schedule) => {
         const { employee_id } = schedule;
 
@@ -112,17 +112,33 @@ export async function stageTable(
       },
       {} as Record<number, ContributionSetting[]>
     );
+
+    const payableMap = payableData.reduce((acc, data)=> {
+      const employeeID = data.employee_id;
+      if (!acc[employeeID]) {
+        acc[employeeID] = [];
+      }
+      acc[employeeID].push(data);
+      return acc;
+    }, {} as Record<number, PayableData[]>);
+
+    const payableDeductionMap = new Map(
+      payableData.map((pb) => [
+        pb.id, // Key
+        pb.ref_payheads.id,
+      ])
+    );
     
 
     // Calculate amounts and generate breakdowns in chunks
     // Initializes `calculatedAmountList` to store payhead amounts for each employee.
     let calculatedAmountList: Record<number, VariableAmountProp[]> = {};
 
-    const basicSalaryFormula = dataPH.find((ph) => ph.id === 1)?.calculation!;
-    const payrollDays = toGMT8(dateInfo?.end_date!).diff(
-      toGMT8(dateInfo?.start_date!),
-      "day"
-    );
+    const startDate = toGMT8(String(dateInfo?.start_date)).startOf('day');
+    const endDate = toGMT8(String(dateInfo?.end_date)).startOf('day');
+    const payrollDays = endDate.diff(startDate,"day");
+    const daysInMonth = startDate.daysInMonth();
+    const monthPercent = Math.round((payrollDays / daysInMonth)*2) / 2;
 
     const amountRecordsMap = new Map(dataPH.map(dph=> [dph.id, new Map(dph.dim_payhead_specific_amounts.map(psa => [psa.employee_id, psa.amount]))]));
     await Promise.all(
@@ -132,8 +148,9 @@ export async function stageTable(
         const timeSchedule =  0;
     
         // const ratePerHour = parseFloat(String(emp.ref_job_classes?.pay_rate)) || 0.0;
+        const basicSalary = Number(String(emp?.ref_salary_grades?.amount ?? 0));
         const ratePerHour = 30; // Static rate/hr
-        const { deductedUndertime, paidLeaves, paidOvertimes } = getAttendanceTotal({
+        const { deductedUndertime, deductedUnhired, paidLeaves, paidOvertimes } = getAttendanceTotal({
                                       logStatus: statusesByDate,
                                       employeeID: emp.id,
                                       startDate: dateInfo.start_date,
@@ -143,13 +160,15 @@ export async function stageTable(
         const baseVariables: BaseValueProp = {
             rate_p_hr: ratePerHour,
             total_shft_hr: 80,
-            basic_salary: Number(String(emp?.ref_salary_grades?.amount || 0.0)),
+            basic_salary: basicSalary,
             payroll_days: payrollDays,
             [static_formula.cash_advance_disbursement]: cashDisburseMap.get(emp.id) ?? 0,
             [static_formula.cash_advance_repayment]: cashRepayMap.get(emp.id!) ?? 0,
             [static_formula.tardiness]: deductedUndertime,
+            [static_formula.unhired]: deductedUnhired,
             [static_formula.overtimes]: paidOvertimes,
             [static_formula.leaves]: paidLeaves,
+            [static_formula.basic_salary]: (basicSalary * monthPercent) - deductedUnhired,
         };
     
         // Filter applicable payheads for calculation based on employee and payhead data.
@@ -158,7 +177,7 @@ export async function stageTable(
               const getBasicSalary = {
                 payhead_id: null,
                 variable: "",
-                formula: String(basicSalaryFormula),
+                formula: "basic_salary",
               };
               return {
                 link_id: benefit.id,
@@ -170,7 +189,17 @@ export async function stageTable(
               };
             })
           : [];
-    
+
+        const calculatePayables: VariableAmountProp[] =  payableMap[emp.id]?
+        payableMap[emp.id].map(payable => {
+          return {
+            link_id: payable.id,
+            payhead_id: payable.ref_payheads.id,
+            variable: String(payable.ref_payheads.name),
+            amount: payable.amount,
+          };
+        }): [];
+
         // Filter applicable payheads based on conditions and calculations
         const applicableFormulatedPayheads: VariableFormulaProp[] = dataPH
           .filter((ph) => {
@@ -183,7 +212,8 @@ export async function stageTable(
                 (ph.calculation === static_formula.overtimes ? paidOvertimes > 0 : true) &&
                 (ph.calculation === static_formula.cash_advance_disbursement ? cashDisburseMap.has(emp.id) : true) &&
                 (ph.calculation === static_formula.cash_advance_repayment ? cashRepayMap.has(emp.id) : true) &&
-                ph.calculation != static_formula.benefit_contribution // Benefits already calculated, ignore.
+                ph.calculation != static_formula.benefit_contribution && // Benefits already calculated, ignore.
+                ph.calculation != static_formula.payable // Payables already calculated, ignore.
             );
           })
           .map((ph) => ({
@@ -217,6 +247,7 @@ export async function stageTable(
         calculatedAmountList[emp.id] = [
           ...calculatedAmount,
           ...calculateContributions,
+          ...calculatePayables,
         ];
       })
     );
@@ -255,12 +286,23 @@ interface PayrollData {
   cashToDisburse: CashToDisburse[];
   cashToRepay: CashToRepay[];
   benefitsPlansData: BenefitsPlanData[];
+  payableData: PayableData[];
 }
 
 interface CashToDisburse {
   id: number;
   employee_id: number;
   amount_requested: number;
+}
+
+interface PayableData {
+  id: number;
+  employee_id: number;
+  amount: number;
+  ref_payheads: {
+    id: number;
+    name: string | null;
+  };
 }
 
 interface CashToRepay {
@@ -332,6 +374,10 @@ function convertToNumber(data: PayrollData): PayrollData {
             })
           ),
       },
+    })),
+    payableData: data.payableData.map((item) => ({
+      ...item,
+      amount: Number(item.amount),
     })),
   };
 }

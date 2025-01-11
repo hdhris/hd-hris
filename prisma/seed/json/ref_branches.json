@@ -1,0 +1,26 @@
+[
+  {
+    "id": 8,
+    "name": "Koronadal Branch",
+    "addr_region": 12,
+    "addr_province": 1263,
+    "addr_municipal": 126306,
+    "addr_baranggay": 126306018,
+    "is_active": true,
+    "created_at": "2024-12-18 03:32:40.773000",
+    "updated_at": "2024-12-27 17:35:47.397000",
+    "deleted_at": null
+  },
+  {
+    "id": 10,
+    "name": "Gensan Branch",
+    "addr_region": 12,
+    "addr_province": 1263,
+    "addr_municipal": 126303,
+    "addr_baranggay": 126303004,
+    "is_active": false,
+    "created_at": "2024-12-27 17:36:20.762000",
+    "updated_at": "2024-12-27 17:36:29.055000",
+    "deleted_at": null
+  }
+]

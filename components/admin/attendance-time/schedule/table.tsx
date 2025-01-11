@@ -1,11 +1,14 @@
 import { BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
 import { getShortTime } from "./timeHelper";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-import { Card } from "@nextui-org/react";
+import { Button, Card } from "@nextui-org/react";
 import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { getColor } from "@/helper/background-color-generator/generator";
+import { LuPencil } from "react-icons/lu";
+import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
+import { useRouter } from "next/navigation";
 
-export function scheduleTable(
+export function ScheduleTable(
     days: string[],
     employees: MajorEmployee[],
     batchData: BatchSchedule[],
@@ -13,6 +16,7 @@ export function scheduleTable(
     hoveredBatchId: number | null,
     setHoveredRowId: (id: number | null) => void
 ) {
+    const router = useRouter();
     const getScheduleCard = (scheduleItem: BatchSchedule | undefined, employeeId: number) => {
         if (scheduleItem) {
             let startTime = toGMT8(`${getShortTime(scheduleItem.clock_in)}`)
@@ -70,8 +74,25 @@ export function scheduleTable(
                             onMouseEnter={() => setHoveredRowId(employee.id)}
                             onMouseLeave={() => setHoveredRowId(null)}
                         >
-                            <td className="px-4 py-2 truncate text-sm font-semibold w-[200px] max-w-[200px]">
-                                {`${employee?.first_name} ${employee?.last_name}`}
+                            <td className="ps-2 pe-4 py-2 truncate text-sm font-semibold w-[200px] max-w-[200px]">
+                                <div className="flex items-center">
+                                    <Button
+                                        onPress={() =>
+                                            router.push(`/employeemanagement/employees/edit-employee/${employee.id}`)
+                                        }
+                                        isIconOnly
+                                        {...uniformStyle({ variant: "light" })}
+                                    >
+                                        <LuPencil
+                                            className={`text-default-800 ${
+                                                hoveredRowId === employee.id ? "visible" : "invisible"
+                                            }`}
+                                            width={15}
+                                            height={15}
+                                        />
+                                    </Button>
+                                    <p>{`${employee?.first_name} ${employee?.last_name}`}</p>
+                                </div>
                             </td>
                             {days.map((day) => (
                                 <td key={day} className={`p-2 text-center text-sm font-semibold`}>
@@ -89,6 +110,9 @@ export function scheduleTable(
                                 </td>
                             ))}
                         </tr>
+                    ))}
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].slice(0, Math.max(10 - employees.length, 0)).map((item) => (
+                        <tr key={item} className="h-16 divide-x" />
                     ))}
                 </tbody>
             </table>

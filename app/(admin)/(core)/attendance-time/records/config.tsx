@@ -71,7 +71,7 @@ export const attLogRecordConfig = (date: CalendarDate, attendanceData?: Attendan
                         </Chip>
                     );
                 case "status":
-                    return <strong>{toUpper(logStatus?.status || "Invalid")}</strong>;
+                    return <strong>{toUpper(logStatus?.status || "Unrecognized")}</strong>;
                 case "timestamp":
                     return <strong>{toGMT8(item.timestamp).format("hh:mm a")}</strong>;
                 case "daytime":
@@ -85,7 +85,7 @@ export const attLogRecordConfig = (date: CalendarDate, attendanceData?: Attendan
                                     : "text-red-500"
                             )}
                         >
-                            {foundKey ? (foundKey.includes("a") ? "Morning" : "Afternoon") : "Invalid"}
+                            {foundKey ? (foundKey.includes("a") ? "Morning" : "Afternoon") : "Unrecognized"}
                         </strong>
                     );
                 default:
