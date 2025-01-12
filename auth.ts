@@ -10,6 +10,7 @@ import {UserPrivileges} from "@/types/JSON/user-privileges";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {devices} from "@/defaults_configurations/devices";
 import { isEmployeeAvailable } from "./helper/employee/unavailableEmployee";
+import {UserSettings} from "@/types/preferences/user-preferences-types";
 
 export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
     providers: [Credentials({
@@ -172,6 +173,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                         user.email = existingUser.email;
                         user.name = existingUser.name;
                         user.image = existingUser.image;
+                        user.userSettings = processJsonObject<UserSettings>(existingUser.preferences)!
                     }
 
                     // console.time("DeviceUpdate");
@@ -213,6 +215,7 @@ export const {handlers, signIn, signOut, auth, unstable_update} = NextAuth({
                     privilege: user.privilege,
                     modulePaths: user.modulePaths,
                     isDefaultAccount: user.isDefaultAccount,
+                    userSettings: user.userSettings
                 } as JWT;
             }
             return token;

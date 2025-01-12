@@ -8,6 +8,7 @@ import {calculateRemainingDays} from "@/lib/utils/dateFormatter";
 import {UserPrivileges} from "@/types/JSON/user-privileges";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import { isEmployeeAvailable } from '@/helper/employee/unavailableEmployee';
+import {UserSettings} from "@/types/preferences/user-preferences-types";
 
 
 export const getUserData = async (username: string, password: string) => {
@@ -66,6 +67,7 @@ export const getUserData = async (username: string, password: string) => {
 
     if (role) throw new Error('Only admin can login');
 
+    // console.table(auth.trans_users.preferences)
     return {
         id: auth.trans_users.id,
         employee_id: access_control.employee_id,
@@ -75,7 +77,8 @@ export const getUserData = async (username: string, password: string) => {
         email: auth.trans_users.email || '',
         privilege: privileges?.name || 'N/A',
         modulePaths: modulePaths || [],
-        isDefaultAccount: await encrypt.compare("password", auth.password!)
+        isDefaultAccount: await encrypt.compare("password", auth.password!),
+        userSettings: processJsonObject<Omit<UserSettings, "security">>(auth.trans_users.preferences),
     };
 }
 

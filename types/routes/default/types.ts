@@ -45,11 +45,11 @@ export interface BackupEntry {
     status: 'Completed' | 'Failed';
 }
 
-export interface NotificationConfiguration {
-    isAllowEmailNotification: boolean;
-    isAllowPushNotification: boolean;
-    isDoNotDisturb: boolean;
-    notificationSound: string;
-}
+// export interface NotificationConfiguration {
+//     isAllowEmailNotification: boolean;
+//     isAllowPushNotification: boolean;
+//     isDoNotDisturb: boolean;
+//     notificationSound: string;
+// }
 
 

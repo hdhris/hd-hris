@@ -1,3 +1,4 @@
+"use client"
 import React from 'react';
 import Typography, {Heading} from "@/components/common/typography/Typography";
 import {Chip, cn} from '@nextui-org/react';

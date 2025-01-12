@@ -9,9 +9,11 @@ import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import dayjs from "dayjs";
 import {toGMT8} from "@/lib/utils/toGMT8";
+import {useSession} from "next-auth/react";
 
 
 function Page() {
+    const session = useSession();
     const todayMonth = dayjs().month(); // Assuming `toGMT8().month()` gives a 0-based index
     const semester = todayMonth < 6;
     const [btnFocus1stSem, setBtnFocus1stSem] = useState(semester);
@@ -20,7 +22,7 @@ function Page() {
     const currentYear = new Date().getFullYear();
     const yearRange = Array.from({length: currentYear - 2020 + 1}, (_, i) => currentYear - i); // Adjust range as needed
     const [year, setYear] = useState<number>(currentYear);
-
+    console.table(session.data?.user);
     const handleBtnFocus2ndSem = useCallback(() => {
         setBtnFocus2ndSem(true);
         setBtnFocus1stSem(false);
