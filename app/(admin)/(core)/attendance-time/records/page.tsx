@@ -12,7 +12,6 @@ import useSWR from "swr";
 import { fetchAttendanceData } from "./stage";
 import { formatCurrency } from "@/lib/utils/numberFormat";
 import { attEmployeeConfig, attLogRecordConfig } from "./config";
-import { SetNavEndContent } from "@/components/common/tabs/NavigationTabs";
 import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import ViewAttendanceRecord from "./view-record";
 import SearchFilter from "@/components/common/filter/SearchFilter";
@@ -72,7 +71,7 @@ export default function Page() {
                 }
                 return acc;
             }, [] as { id: number; name: string }[]);
-    
+
             return uniqueItems;
         }
         return [];
@@ -90,7 +89,7 @@ export default function Page() {
                 }
                 return acc;
             }, [] as { id: number; name: string }[]);
-    
+
             return uniqueItems;
         }
         return [];
@@ -108,7 +107,7 @@ export default function Page() {
                 }
                 return acc;
             }, [] as { id: number; name: string }[]);
-    
+
             return uniqueItems;
         }
         return [];
@@ -145,27 +144,6 @@ export default function Page() {
     ];
 
     const [filteredEmployees, setFilteredEmployees] = useState<MajorEmployee[]>([]);
-    SetNavEndContent(() => (
-        <>
-            {currentTab === "by-employees"  &&<SearchFilter
-                uniqueKey={"schedule-filter"}
-                items={attendanceData?.employees ?? []}
-                filterConfig={filterConfig}
-                searchConfig={searchConfig}
-                setResults={setFilteredEmployees}
-                isLoading={isLoading}
-            />}
-            <Tabs
-                selectedKey={currentTab}
-                onSelectionChange={(value) => setCurrentTab(String(value) as any)}
-                radius="lg"
-                size="sm"
-            >
-                <Tab key="by-logs" title={"By Logs"} />
-                <Tab key="by-employees" title={"By Employees"} />
-            </Tabs>
-        </>
-    ));
     // const { data: attendanceData, isLoading } = useQuery<AttendanceData>(api);
 
     const [selectedLog, setSelectedLog] = useState<string>();
@@ -244,33 +222,57 @@ export default function Page() {
                 attendanceInfo={currentEmployeeAttendanceInfo}
                 onClose={() => setSelectedEmployee(null)}
             />
-            {currentTab === "by-logs" ? (
-                <TableData
-                    items={sortedItems}
-                    title="Attendance Logs"
-                    config={attLogRecordConfig(date, attendanceData)}
-                    isLoading={isLoading}
-                    sortDescriptor={sortDescriptor}
-                    onSortChange={setSortDescriptor}
-                    selectionMode="single"
-                    disallowEmptySelection
-                    selectedKeys={new Set([selectedLog || ""])}
-                    onSelectionChange={(key) => setSelectedLog(String(Array.from(key)[0]))}
-                />
-            ) : (
-                <TableData
-                    items={filteredEmployees}
-                    title="Employee records"
-                    config={attEmployeeConfig(date, attendanceData)}
-                    isLoading={isLoading}
-                    onRowAction={(value) => {
-                        const employee = employeeMap.get(Number(String(value)));
-                        setSelectedEmployee(employee ?? null);
-                    }}
-                    // selectedKeys={new Set([selectedLog || ""])}
-                    // onSelectionChange={(key) => setSelectedLog(String(Array.from(key)[0]))}
-                />
-            )}
+            <div className="w-full h-full flex flex-col gap-1">
+                <div className="flex items-center">
+                    {currentTab === "by-employees" && (
+                        <SearchFilter
+                            uniqueKey={"schedule-filter"}
+                            items={attendanceData?.employees ?? []}
+                            filterConfig={filterConfig}
+                            searchConfig={searchConfig}
+                            setResults={setFilteredEmployees}
+                            isLoading={isLoading}
+                        />
+                    )}
+                    <Tabs
+                        className="ms-auto"
+                        selectedKey={currentTab}
+                        onSelectionChange={(value) => setCurrentTab(String(value) as any)}
+                        radius="lg"
+                        size="sm"
+                    >
+                        <Tab key="by-logs" title={"By Logs"} />
+                        <Tab key="by-employees" title={"By Employees"} />
+                    </Tabs>
+                </div>
+                {currentTab === "by-logs" ? (
+                    <TableData
+                        items={sortedItems}
+                        title="Attendance Logs"
+                        config={attLogRecordConfig(date, attendanceData)}
+                        isLoading={isLoading}
+                        sortDescriptor={sortDescriptor}
+                        onSortChange={setSortDescriptor}
+                        selectionMode="single"
+                        disallowEmptySelection
+                        selectedKeys={new Set([selectedLog || ""])}
+                        onSelectionChange={(key) => setSelectedLog(String(Array.from(key)[0]))}
+                    />
+                ) : (
+                    <TableData
+                        items={filteredEmployees}
+                        title="Employee records"
+                        config={attEmployeeConfig(date, attendanceData)}
+                        isLoading={isLoading}
+                        onRowAction={(value) => {
+                            const employee = employeeMap.get(Number(String(value)));
+                            setSelectedEmployee(employee ?? null);
+                        }}
+                        // selectedKeys={new Set([selectedLog || ""])}
+                        // onSelectionChange={(key) => setSelectedLog(String(Array.from(key)[0]))}
+                    />
+                )}
+            </div>
             <div className="flex flex-col gap-1">
                 <Calendar
                     classNames={{ cell: "text-sm", gridBodyRow: "first:mt-0 -mt-1" }}

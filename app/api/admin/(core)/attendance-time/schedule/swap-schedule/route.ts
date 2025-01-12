@@ -5,7 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
-        const [id1, id2] = await req.json();
+        const { selectedBatch, startDate} = await req.json();
+        const [id1, id2] = selectedBatch;
 
         const [batch1, batch2, findSchedules1, findSchedules2] = await Promise.all([
             // Batch 1
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
                     },
                 },
                 data: {
-                    end_date: toGMT8().toISOString(),
+                    end_date: toGMT8(startDate).toISOString(),
                     updated_at: toGMT8().toISOString(),
                 },
             }),
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
                 data: findSchedules2.map((sc) => {
                     return {
                         id: undefined,
-                        start_date: toGMT8().toISOString(),
+                        start_date: toGMT8(startDate).toISOString(),
                         end_date: null,
                         employee_id: sc.employee_id,
                         days_json: sc.days_json!,

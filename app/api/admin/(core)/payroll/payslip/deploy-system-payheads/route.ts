@@ -19,39 +19,42 @@ export async function POST(req: NextRequest) {
         const currentTimestamp = toGMT8().toISOString();
         const cashRepayAmountMap = new Map(cashToRepay.map((ctr) => [ctr.link_id, ctr.amount]));
 
-        // Retrieve disbursed map and determine repayment status
-        const getDisbursedMap = await prisma.trans_cash_advance_disbursements
-            .findMany({
-                where: { id: { in: cashToRepay.map((cr) => cr.link_id) } },
-                select: {
-                    id: true,
-                    amount: true,
-                    trans_cash_advance_repayments: {
-                        select: { amount_repaid: true },
+        const [getDisbursedMap] = await Promise.all([ //, getUnpaidPayables] = await Promise.all([
+            // Retrieve disbursed map and determine repayment status
+            prisma.trans_cash_advance_disbursements
+                .findMany({
+                    where: { id: { in: cashToRepay.map((cr) => cr.link_id) } },
+                    select: {
+                        id: true,
+                        amount: true,
+                        trans_cash_advance_repayments: {
+                            select: { amount_repaid: true },
+                        },
                     },
-                },
-            })
-            .then(
-                (db) =>
-                    new Map(
-                        db.map((item) => {
-                            const lastRepaid = item.trans_cash_advance_repayments.reduce(
-                                (sum, repayment) => sum.plus(repayment.amount_repaid || new Decimal(0)),
-                                new Decimal(0)
-                            );
-                            const totalRepaid = lastRepaid.toNumber() + cashRepayAmountMap.get(item.id)!;
-                            const status = totalRepaid >= (item.amount?.toNumber() || 0) ? "full_paid" : "to_be_paid";
-                            return [item.id, status];
-                        })
-                    )
-            );
+                })
+                .then(
+                    (db) =>
+                        new Map(
+                            db.map((item) => {
+                                const lastRepaid = item.trans_cash_advance_repayments.reduce(
+                                    (sum, repayment) => sum.plus(repayment.amount_repaid || new Decimal(0)),
+                                    new Decimal(0)
+                                );
+                                const totalRepaid = lastRepaid.toNumber() + cashRepayAmountMap.get(item.id)!;
+                                const status =
+                                    totalRepaid >= (item.amount?.toNumber() || 0) ? "full_paid" : "to_be_paid";
+                                return [item.id, status];
+                            })
+                        )
+                ),
 
-        const getUnpaidPayables = await prisma.trans_payable.findMany({
-          where: {
-            id: { in: payables.map(item => item.link_id) },
-          },
-          select: { id: true, payhead_id: true,  amount: true, }
-        })
+            // prisma.trans_payable.findMany({
+            //     where: {
+            //       id: { in: payables.map(item => item.link_id) },
+            //     },
+            //     select: { id: true, payhead_id: true,  amount: true, }
+            //   })
+        ]);
 
         await prisma.$transaction(async (psm) => {
             await Promise.all([
