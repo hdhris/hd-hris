@@ -8,7 +8,7 @@ import { LuPencil } from "react-icons/lu";
 import { uniformStyle } from "@/lib/custom/styles/SizeRadius";
 import { useRouter } from "next/navigation";
 
-export function scheduleTable(
+export function ScheduleTable(
     days: string[],
     employees: MajorEmployee[],
     batchData: BatchSchedule[],
@@ -112,7 +112,7 @@ export function scheduleTable(
                         </tr>
                     ))}
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].slice(0, Math.max(10 - employees.length, 0)).map((item) => (
-                        <tr className="h-16 divide-x" />
+                        <tr key={item} className="h-16 divide-x" />
                     ))}
                 </tbody>
             </table>

@@ -71,7 +71,6 @@ export function getPrismaErrorMessage(error: any){
             message: `${template || "No additional details available."}`
         }, {status: 500});
     } else if(error instanceof PrismaClientRustPanicError){
-
         console.log("Error PrismaClientRustPanicError: ", error)
         return NextResponse.json({
             success: false,
@@ -93,9 +92,10 @@ export function getPrismaErrorMessage(error: any){
 
     }else if(error instanceof PrismaClientValidationError){
         console.log("Error PrismaClientValidationError: ", error)
+        console.log("Error Stack: ", error.stack)
         return NextResponse.json({
             success: false,
-            message: `An unexpected error occurred: ${error.message || "No additional details available."}`
+            message: `An unexpected error occurred: There is an error while validating your inputs`
         }, {status: 500})
     } else{
         return NextResponse.json({

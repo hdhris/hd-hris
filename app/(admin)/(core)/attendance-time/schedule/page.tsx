@@ -1,7 +1,7 @@
 "use client";
 import { BatchCard } from "@/components/admin/attendance-time/schedule/batchCard";
 import ScheduleModal from "@/components/admin/attendance-time/schedule/create-edit-modal";
-import { scheduleTable } from "@/components/admin/attendance-time/schedule/table";
+import { ScheduleTable } from "@/components/admin/attendance-time/schedule/table";
 import { FilterItemsProps } from "@/components/common/filter/FilterItems";
 import SearchFilter from "@/components/common/filter/SearchFilter";
 import { SearchItemsProps } from "@/components/common/filter/SearchItems";
@@ -151,7 +151,7 @@ function Page() {
 
     const table = useMemo(() => {
         if (data && data.batch) {
-            return scheduleTable(
+            return ScheduleTable(
                 days,
                 tableData || [],
                 data.batch || [],

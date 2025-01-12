@@ -16,6 +16,9 @@ export async function GET(req: NextRequest) {
         const endDate = searchParams.get("end");
         const empID = searchParams.get("employee_id");
         const allEmployee = parseBoolean(searchParams.get("all_employee"));
+        // const department_id = searchParams.get("search");
+
+
 
         const is_single_date = startDate === endDate;
 
@@ -30,6 +33,7 @@ export async function GET(req: NextRequest) {
                     lt: isoEndDate, // Matches records within the range
                 },
                 ...(empID ? { employee_id: Number(empID) } : {}),
+                // ...(department_id ? { department_id: Number(department_id) } : {}),
             },
             // orderBy: {
             //     timestamp: "desc",

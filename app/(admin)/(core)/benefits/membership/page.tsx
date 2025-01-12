@@ -167,7 +167,7 @@ function PlansDataDisplay() {
                 loop: true, data_length: data?.total!, onChange: setPage
             }}
             onTableDisplay={{
-                config: MembersBenefitTable, onRowAction: handleEmployeeSelection,
+                config: MembersBenefitTable, onRowAction: handleEmployeeSelection, layout: "auto"
             }}
             onView={selectedMember && <CardView
                 className="w-[450px]"
@@ -254,7 +254,7 @@ function PlansDataDisplay() {
                                             className="border-none"
                                             variant="dot"
                                             color={member.status === "Active" ? "success" : "danger"}>{member.status}</Chip>
-                                    }, ...(member.terminated_at !== null ? [{
+                                    }, ...(member.terminated_at !== null && toGMT8(member.terminated_at).isValid() ? [{
                                         label: "Terminated Date", value: toGMT8(member.terminated_at).format("MMM DD, YYYY"),
                                     },] : []),]}
                                 />

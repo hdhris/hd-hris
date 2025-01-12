@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     try {
         const payhead = await prisma.ref_payheads.findFirst({
             where: {
-                calculation: static_formula.incident_payable,
+                calculation: static_formula.payable,
             },
             select: {
                 id: true,
