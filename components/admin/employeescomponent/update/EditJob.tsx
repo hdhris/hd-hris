@@ -1,10 +1,16 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
-import { useJobpositionData, useDepartmentsData, useSalaryGradeData } from "@/services/queries";
+import {
+  useJobpositionData,
+  useDepartmentsData,
+  useSalaryGradeData,
+} from "@/services/queries";
 import axios from "axios";
-import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Drawer from "@/components/common/Drawer";
@@ -17,25 +23,63 @@ interface EditJobPositionProps {
   onJobUpdated: () => void;
 }
 
-const jobPositionSchema = z.object({
-  baseName: z
-    .string()
-    .min(1, "Position base name is required")
-    .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
-  department_id: z.string().min(1, "Department is required"),
-  min_salary: z.coerce.number().min(1, "Minimum salary is reqiured"),
-  max_salary: z.coerce.number().min(1, "Maximum salary is required"),
-  superior_id: z.string().nullish().transform((val) => val || null),
-  is_active: z.boolean().default(true),
-  is_superior: z.boolean().default(false),
-  max_employees: z.number().optional().nullish(),
-  max_department_instances: z.number().optional().nullish(),
-}).refine((data) => {
-  return data.min_salary <= data.max_salary;
-}, {
-  message: "Maximum salary must be greater than or equal to minimum salary",
-  path: ["max_salary"],
-});
+// Helper function to prevent circular references
+function detectCircularReference(
+  jobPositions: any[], 
+  currentJobId: number, 
+  selectedSuperiorId: number | null
+): boolean {
+  if (!selectedSuperiorId) return true;
+
+  const visited = new Set<number>();
+  let currentId: number | null = selectedSuperiorId;
+
+  while (currentId) {
+    // If we've found the current job in the hierarchy, it's a circular reference
+    if (currentId === currentJobId) return false;
+
+    // Prevent infinite loops
+    if (visited.has(currentId)) break;
+
+    visited.add(currentId);
+
+    // Find the next superior job
+    const job = jobPositions.find((j) => j.id === currentId);
+    currentId = job?.superior_id || null;
+  }
+
+  return true;
+}
+
+const jobPositionSchema = z
+  .object({
+    baseName: z
+      .string()
+      .min(1, "Position base name is required" )
+      .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
+    department_id: z
+      .string()
+      .min(1,  "Department is required" )
+      .nullable(),
+    min_salary: z.coerce
+      .number()
+      .min(1, "Minimum salary is required" ),
+    max_salary: z.coerce
+      .number()
+      .min(1, "Maximum salary is required" ),
+    superior_id: z
+      .string()
+      .nullish()
+      .transform((val) => val || null),
+    is_active: z.boolean().default(true),
+    is_superior: z.boolean().default(false),
+    max_employees: z.number().optional().nullish(),
+    max_department_instances: z.number().optional().nullish(),
+    isIncludeDepartment: z.boolean().default(true),
+  })
+  .refine((data) => {
+    return data.min_salary <= data.max_salary;
+  });
 
 type FormData = z.infer<typeof jobPositionSchema>;
 
@@ -64,37 +108,61 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       max_department_instances: 0,
       is_active: true,
       is_superior: false,
+      isIncludeDepartment: true,
     },
     mode: "onChange",
   });
 
-  const { watch } = methods;
+  const { watch, setValue } = methods;
   const baseName = watch("baseName");
   const selectedDepartmentId = watch("department_id");
   const minSalary = watch("min_salary");
   const maxSalary = watch("max_salary");
+  const isIncludeDepartment = watch("isIncludeDepartment");
 
+  // Generate full name based on base name and department
   useEffect(() => {
     if (baseName && selectedDepartmentId) {
       const department = departments.find(
         (dept) => dept.id.toString() === selectedDepartmentId
       );
+      
       if (department) {
-        setFullName(`${department.name} ${baseName}`);
+        // Conditionally include department name based on toggle
+        setFullName(
+          isIncludeDepartment 
+            ? `${department.name} ${baseName}` 
+            : baseName
+        );
+      } else {
+        setFullName(baseName);
       }
     } else {
       setFullName(baseName);
     }
-  }, [baseName, selectedDepartmentId, departments]);
+  }, [baseName, selectedDepartmentId, isIncludeDepartment, departments]);
 
+  // Populate form when job is selected
   useEffect(() => {
     if (isOpen && jobPositions && jobId) {
       const job = jobPositions.find((job) => job.id === jobId);
       if (job) {
-        const department = departments.find((dept) => dept.id === job.department_id);
+        const department = departments.find(
+          (dept) => dept.id === job.department_id
+        );
+        
         let baseName = job.name;
+        let includeDepartment = true;
+        
         if (department) {
-          baseName = job.name.replace(department.name, "").trim();
+          // Check if department name is part of the job name
+          if (job.name.startsWith(department.name)) {
+            baseName = job.name.replace(department.name, "").trim();
+            includeDepartment = true;
+          } else {
+            // If department name is not at the start, ask if user wants to include
+            includeDepartment = false;
+          }
         }
 
         methods.reset({
@@ -106,6 +174,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
           is_superior: job.is_superior,
           max_employees: job.max_employees,
           max_department_instances: job.max_department_instances,
+          isIncludeDepartment: includeDepartment,
         });
       } else {
         toast({
@@ -117,6 +186,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     }
   }, [isOpen, jobPositions, jobId, departments, methods, toast]);
 
+  // Prepare department options
   const departmentOptions = departments.reduce((acc: any[], dept) => {
     if (dept && dept.id && dept.name && dept.is_active) {
       acc.push({ value: dept.id.toString(), label: dept.name });
@@ -124,6 +194,27 @@ const EditJob: React.FC<EditJobPositionProps> = ({
     return acc;
   }, []);
 
+  // Memoized superior options with circular reference prevention
+  const superiorOptions = useMemo(() => {
+    if (!jobPositions) return [];
+
+    return jobPositions
+      .filter(
+        (job) =>
+          job.id !== jobId && // Exclude current job
+          (selectedDepartmentId
+            ? job.department_id === parseInt(selectedDepartmentId)
+            : true) &&
+          // Prevent circular references
+          detectCircularReference(jobPositions, jobId, job.id)
+      )
+      .map((job) => ({
+        value: job.id.toString(),
+        label: job.name,
+      }));
+  }, [jobPositions, jobId, selectedDepartmentId]);
+
+  // Prepare form fields
   const formFields: FormInputProps[] = [
     {
       name: "department_id",
@@ -141,7 +232,17 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       type: "text",
       placeholder: "Enter position name",
       isRequired: true,
-      description: "Position name will be combined with department name",
+      description:
+        "You can include or remove the department name manually.",
+    },
+    {
+      name: "isIncludeDepartment",
+      label: "Include Department Name",
+      type: "switch",
+      config: {
+        defaultSelected: true,
+      },
+      description: "Toggle this option to include the department name in the job position.",
     },
     {
       name: "min_salary",
@@ -182,12 +283,8 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       description: "Select the next position for hierarchy purposes (optional)",
       config: {
         placeholder: "Select Next Position",
-        options: jobPositions
-            ?.filter((job) => job.id !== jobId)
-            .map((job) => ({
-              value: job.id.toString(),
-              label: job.name,
-            })) || [],
+        options: methods.watch("is_superior") ? [] : superiorOptions,
+        isDisabled: methods.watch("is_superior"),
       },
     },
     {
@@ -213,7 +310,7 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       label: "Department in charge",
       type: "switch",
       config: {
-        defaultSelected: false,
+        defaultSelected: false, 
       },
       description:
         "Setting a job position as department in charge means it will oversee other positions",
@@ -235,10 +332,14 @@ const EditJob: React.FC<EditJobPositionProps> = ({
       description: "Updating job position...",
     });
 
+    if (data.is_superior) {
+      data.superior_id = null;
+    }
+
     try {
       const formattedData = {
         name: fullName,
-        department_id: parseInt(data.department_id),
+        department_id: data.department_id ? parseInt(data.department_id) : null,
         min_salary: data.min_salary,
         max_salary: data.max_salary,
         superior_id: data.superior_id ? parseInt(data.superior_id) : null,
@@ -320,7 +421,9 @@ const EditJob: React.FC<EditJobPositionProps> = ({
                 <p className="text-sm font-medium text-gray-700">
                   Full Position Name:
                 </p>
-                <p className="text-lg font-semibold text-gray-900">{fullName}</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {fullName}
+                </p>
               </div>
             )}
             <FormFields items={formFields} size="sm" />

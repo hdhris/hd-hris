@@ -25,11 +25,11 @@ interface EditEmploymentStatusProps {
 
 const EmploymentStatusSchema = z.object({
   name: z.string().min(1, "Salary grade name is required"),
-  appraisal_interval: z.coerce.number().int().min(1),
-  superior_id: z
-      .string()
-      .nullish()
-      .transform((val) => val || null),
+  // appraisal_interval: z.coerce.number().int().min(1),
+  // superior_id: z
+  //     .string()
+  //     .nullish()
+  //     .transform((val) => val || null),
 });
 
 type EmploymentStatusFormData = z.infer<typeof EmploymentStatusSchema>;
@@ -48,8 +48,8 @@ const EditSalaryGrade: React.FC<EditEmploymentStatusProps> = ({
     resolver: zodResolver(EmploymentStatusSchema),
     defaultValues: {
       name: "",
-      appraisal_interval: 4,
-      superior_id: "",
+      // appraisal_interval: 4,
+      // superior_id: "",
     },
     mode: "onChange",
   });
@@ -60,8 +60,8 @@ const EditSalaryGrade: React.FC<EditEmploymentStatusProps> = ({
       if (emp) {
         methods.reset({
           name: emp.name,
-          appraisal_interval: emp.appraisal_interval,
-          superior_id: emp.superior_id?.toString() || "",
+          // appraisal_interval: emp.appraisal_interval,
+          // superior_id: emp.superior_id?.toString() || "",
         });
       } else {
         toast({
@@ -82,30 +82,22 @@ const EditSalaryGrade: React.FC<EditEmploymentStatusProps> = ({
       isRequired: true,
       description: "Employment status should only contain letters.",
     },
-    {
-      name: "appraisal_interval",
-      label: "Appraisal Interval",
-      type: "number",
-      placeholder: "Enter appraisal interval",
-      isRequired: true,
-      description: "Appraisal interval should be a number.",
-    },
-    {
-      name: "superior_id",
-      label: "next status",
-      type: "select",
-      placeholder: "Select next status",
-      description: "Select the next status for this employment status for appraisal purposes (optional)",
-      config: {
-        options:
-        empStatus
-            ?.filter((emp) => emp.id !== empStatusId) // Filter out the current job
-            .map((emp) => ({
-              value: emp.id.toString(),
-              label: emp.name,
-            })) || [],
-      },
-    },
+    // {
+    //   name: "superior_id",
+    //   label: "next status",
+    //   type: "select",
+    //   placeholder: "Select next status",
+    //   description: "Select the next status for this employment status for appraisal purposes (optional)",
+    //   config: {
+    //     options:
+    //     empStatus
+    //         ?.filter((emp) => emp.id !== empStatusId) // Filter out the current job
+    //         .map((emp) => ({
+    //           value: emp.id.toString(),
+    //           label: emp.name,
+    //         })) || [],
+    //   },
+    // },
   ];
 
   const onSubmit = async (data: EmploymentStatusFormData) => {
@@ -118,7 +110,7 @@ const EditSalaryGrade: React.FC<EditEmploymentStatusProps> = ({
     try {
       const fullData = {
         ...data,
-        superior_id: data.superior_id ? parseInt(data.superior_id) : null,
+        // superior_id: data.superior_id ? parseInt(data.superior_id) : null,
       };
 
       const response = await axios.put(
