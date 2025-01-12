@@ -10,23 +10,35 @@ import {AuthError} from "next-auth";
 import {ZodError} from "zod";
 
 type Login = {
-    username: string; password: string;
+    username: string;
+    password: string;
+    token: string;
 };
 
 
-export async function login({username, password}: Login) {
+export async function login({username, password, token}: Login) {
     try {
         // Perform the sign-in
         const result = await signIn("credentials", {username, password, redirect: false});
 
+        const secret_key = process.env.NEXT_RECAPTCHA_SECRET_KEY
+        const verify = await fetch(`https://www.google.com/recaptcha/api/verify?secret=${secret_key}&response=${token}`, {
+            method: 'POST',
+        })
         // Check if the sign-in was successful
         if (!result || result.error) {
             // If sign-in fails, return a user-friendly error message
             return {error: {message: "Invalid username or password. Please try again."}};
         }
 
+        const verification = await verify.json()
+        if(verification.success && verification.score > 0.5){
+            return {success: true};
+        } else {
+            return {error: {message: "Error while validating captcha. Please try again."}};
+        }
         // If sign-in is successful, handle the redirect
-        return {success: true};
+        // return {success: true};
 
     } catch (e) {
         console.log("Error: ", e)

@@ -10,6 +10,8 @@ const nextConfig = {
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_PORT: process.env.SMTP_PORT,
+    NEXT_RECAPTCHA_SITE_KEY: process.env.NEXT_RECAPTCHA_SITE_KEY,
+    NEXT_RECAPTCHA_SECRET_KEY: process.env.NEXT_RECAPTCHA_SECRET_KEY,
   },
   async redirects() {
     return [

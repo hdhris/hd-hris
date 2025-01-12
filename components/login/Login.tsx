@@ -22,6 +22,7 @@ import {useRouter, useSearchParams} from "next/navigation";
 import {Divider} from "@nextui-org/divider";
 import OAthLogin from "@/components/login/OAthLogin";
 import SimpleAES from "@/lib/cryptography/3des";
+import {useGoogleReCaptcha} from "react-google-recaptcha-v3";
 
 const loginSchema = z.object({
     username: z.string().min(1, {message: "Username is required."}),
@@ -31,6 +32,7 @@ const loginSchema = z.object({
 function Userlogin() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const {executeRecaptcha} = useGoogleReCaptcha()
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema), defaultValues: {
             username: "", password: ""
@@ -81,11 +83,21 @@ function Userlogin() {
         setError("");
         setLoading(true);
 
-        const enc = new SimpleAES()
-        const password = await enc.encryptData("password")
-        console.log(password)
+        if(!executeRecaptcha){
+            return
+        }
+
+
+        // const enc = new SimpleAES()
+        // const password = await enc.encryptData("password")
+        // console.log(password)
         try {
-            const loginResponse = await login(values);
+            const token = await executeRecaptcha("form_submit")
+            // console.log({token})
+            const loginResponse = await login({
+                ...values,
+                token
+            });
             if (loginResponse.success) {
 
                 // Redirect to dashboard

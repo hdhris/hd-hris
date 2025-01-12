@@ -1,14 +1,20 @@
-import {redirect} from "next/navigation";
+"use client"
+import {useRouter} from "next/navigation";
 import Login from "@/components/login/Login";
 import {auth} from "@/auth";
+import ReCaptchaProvider from "@/components/providers/GoogleRecaptcha";
+import {useSession} from "next-auth/react";
 
-export default async function Home() {
-    const session = await auth();
+export default function Home() {
+    const session = useSession();
+    const router = useRouter()
     if (session) {
-        redirect("/dashboard")
+        router.replace("/dashboard")
     }
 
     return (<main className="flex h-screen flex-col items-center">
+        <ReCaptchaProvider>
             <Login/>
-        </main>);
+        </ReCaptchaProvider>
+    </main>);
 }
