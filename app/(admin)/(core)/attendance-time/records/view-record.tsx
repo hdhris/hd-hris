@@ -1,18 +1,14 @@
 import { ValueLabel } from "@/components/admin/attendance-time/overtime/view-overtime";
 import Drawer from "@/components/common/Drawer";
 import { EmployeeHeader } from "@/components/common/minor-items/components";
-import { getColor } from "@/helper/background-color-generator/generator";
 import { MajorEmployee } from "@/helper/include-emp-and-reviewr/include";
 import { formatCurrency } from "@/lib/utils/numberFormat";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { AttendanceLog, LogStatus } from "@/types/attendance-time/AttendanceTypes";
 import { Chip, ScrollShadow } from "@nextui-org/react";
-import { capitalize, toUpper } from "lodash";
-import React from "react";
-import { FaRegCheckCircle } from "react-icons/fa";
+import { capitalize, toUpper} from "lodash";
 import { LiaUserClockSolid, LiaUserPlusSolid } from "react-icons/lia";
-import { MdOutlineAccessTime, MdOutlineMoreTime } from "react-icons/md";
 import { TbClockCheck, TbClockShield, TbClockUp, TbClockX } from "react-icons/tb";
 
 interface ViewRecordProps {
@@ -53,14 +49,18 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
                         label="Time Schedule"
                         icon={<LiaUserClockSolid />}
                         value={
-                            <div className="flex flex-row gap-2">
-                                <Chip variant="flat" color="success">
-                                    {toGMT8(attendanceInfo?.status?.clockIn).format("hh:mm a")}
-                                </Chip>
-                                <Chip variant="flat" color="warning">
-                                    {toGMT8(attendanceInfo?.status?.clockOut).format("hh:mm a")}
-                                </Chip>
-                            </div>
+                            attendanceInfo?.status?.clockIn && attendanceInfo?.status?.clockOut ? (
+                                <div className="flex flex-row gap-2">
+                                    <Chip variant="flat" color="success">
+                                        {toGMT8(attendanceInfo.status.clockIn).format("hh:mm a")}
+                                    </Chip>
+                                    <Chip variant="flat" color="warning">
+                                        {toGMT8(attendanceInfo.status.clockOut).format("hh:mm a")}
+                                    </Chip>
+                                </div>
+                            ) : (
+                                "UNSCHEDULED"
+                            )
                         }
                     />
                     <hr />

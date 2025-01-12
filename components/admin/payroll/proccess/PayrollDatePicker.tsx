@@ -12,6 +12,7 @@ import { MdDelete } from "react-icons/md";
 import showDialog from "@/lib/utils/confirmDialog";
 import { ProcessDate } from "@/types/payroll/payrollType";
 import { useQuery } from "@/services/queries";
+import { TbReload } from "react-icons/tb";
 
 interface DatePickerUiProps {
     setProcessDate: (item: ProcessDate | false) => void;
@@ -68,7 +69,12 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [payrollDates]);
+    
     useEffect(() => {
+        setProcessDate(false)
+    }, [getProcessDate, setProcessDate]);
+
+    const load = useCallback(() => {
         if (getProcessDate){
           setProcessDate(getProcessDate)
         } else {
@@ -241,7 +247,7 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                         onSelectionChange={handleDateChange}
                     >
                         {(item) => (
-                            <SelectItem key={item.id}>{`${toGMT8(item.start_date).format("MMM DD")} - ${toGMT8(
+                            <SelectItem key={item.id} className={item.is_processed ? "text-success-500" : ""}>{`${toGMT8(item.start_date).format("MMM DD")} - ${toGMT8(
                                 item.end_date
                             ).format("MMM DD")}`}</SelectItem>
                         )}
@@ -265,6 +271,14 @@ function DatePickerPayroll({ setProcessDate, onDeploy }: DatePickerUiProps) {
                     >
                         {(item) => <SelectItem key={item.value}>{item.label}</SelectItem>}
                     </Select>
+                    <Button // Load date
+                        {...uniformStyle()}
+                        isIconOnly
+                        isLoading={isLoading || isSubmitting}
+                        onPress={load}
+                    >
+                        <TbReload size={15} />
+                    </Button>
                     <Button // Delete date
                         {...uniformStyle({ color: "danger" })}
                         isIconOnly

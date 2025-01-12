@@ -2,12 +2,13 @@ import { BatchCard } from "@/components/admin/attendance-time/schedule/batchCard
 import QuickModal from "@/components/common/QuickModal";
 import { toast } from "@/components/ui/use-toast";
 import showDialog from "@/lib/utils/confirmDialog";
+import { toGMT8 } from "@/lib/utils/toGMT8";
 import { BatchSchedule } from "@/types/attendance-time/AttendanceTypes";
-import { ScrollShadow } from "@nextui-org/react";
+import { parseDate } from "@internationalized/date";
+import { DatePicker, ScrollShadow } from "@nextui-org/react";
 import axios from "axios";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { mutate } from "swr";
-import { number } from "zod";
 
 interface ScheduleSwapProp {
     isOpen: boolean;
@@ -16,6 +17,7 @@ interface ScheduleSwapProp {
 }
 function ScheduleSwap({ isOpen, onClose, schedules }: ScheduleSwapProp) {
     const [selectedBatch, setSelectedBatch] = useState<number[]>([]);
+    const [startDate, setStartDate] = useState(toGMT8().startOf("day").format("YYYY-MM-DD"));
     const [isLoading, setIsLoading] = useState(false);
 
     const toggleSelected = useCallback((id: number) => {
@@ -49,7 +51,10 @@ function ScheduleSwap({ isOpen, onClose, schedules }: ScheduleSwapProp) {
                 preferredAnswer: "no",
             });
             if (result === "yes") {
-                await axios.post("/api/admin/attendance-time/schedule/swap-schedule", selectedBatch);
+                await axios.post("/api/admin/attendance-time/schedule/swap-schedule", {
+                    selectedBatch,
+                    startDate,
+                });
                 mutate("/api/admin/attendance-time/schedule");
                 toast({
                     title: "Updated",
@@ -66,7 +71,7 @@ function ScheduleSwap({ isOpen, onClose, schedules }: ScheduleSwapProp) {
             });
         }
         setIsLoading(false);
-    }, [selectedBatch]);
+    }, [selectedBatch, startDate]);
 
     return (
         <QuickModal
@@ -103,6 +108,16 @@ function ScheduleSwap({ isOpen, onClose, schedules }: ScheduleSwapProp) {
                             setVisible={() => {}}
                         />
                     ))}
+                    <DatePicker
+                        hideTimeZone
+                        variant="bordered"
+                        color="primary"
+                        label="Start Date"
+                        labelPlacement="outside-left"
+                        value={parseDate(startDate)}
+                        radius="none"
+                        onChange={(value) => value && setStartDate(toGMT8(value.toDate("UTC")).format("YYYY-MM-DD"))}
+                    />
                 </div>
             </ScrollShadow>
         </QuickModal>
