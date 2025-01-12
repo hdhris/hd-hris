@@ -10,12 +10,17 @@ import {
   useEmploymentStatusData,
   useEmployeesData,
   usePrivilegesData,
+  useEmployeeData,
 } from "@/services/queries";
 import { parseAbsoluteToLocal } from "@internationalized/date";
 import dayjs from "dayjs";
 import { useToast } from "@/components/ui/use-toast";
+import { useParams } from "next/navigation";
 
 const EditJobInformationForm: React.FC = () => {
+  const params = useParams();
+  const employeeId = params?.id as string;
+  const { data: employeeData } = useEmployeeData(employeeId ?? '');
   const { watch, setValue, trigger } = useFormContext();
   const selectedDepartmentId = watch("department_id");
   const selectedJobId = watch("job_id");
@@ -30,43 +35,77 @@ const EditJobInformationForm: React.FC = () => {
   const { data: employees = [] } = useEmployeesData();
   const { data: privileges = [] } = usePrivilegesData();
 
-  // Get selected job's salary range
   const selectedJob = useMemo(() => {
     return jobTitles.find(job => job.id === Number(selectedJobId));
   }, [jobTitles, selectedJobId]);
 
-  // Reset job_id when department changes
   useEffect(() => {
     if (selectedDepartmentId) {
       const currentJob = jobTitles.find(job => job.id === Number(selectedJobId));
       if (currentJob && currentJob.department_id !== Number(selectedDepartmentId)) {
         setValue("job_id", "");
         setValue("salary_grade_id", "");
+        setValue("batch_id", "");
+        
+        const currentSchedule = employeeData?.dim_schedules?.find(schedule => !schedule.end_date);
+        const existingDaysJson = currentSchedule?.days_json 
+          ? (typeof currentSchedule.days_json === 'string' 
+              ? JSON.parse(currentSchedule.days_json) 
+              : currentSchedule.days_json)
+          : [];
+        
+        setValue("days_json", existingDaysJson);
       }
     }
-  }, [selectedDepartmentId, jobTitles, selectedJobId, setValue]);
+  }, [selectedDepartmentId, jobTitles, selectedJobId, setValue, employeeData]);
 
-  // Reset and validate salary_grade_id when job changes
   useEffect(() => {
     if (selectedJobId && selectedJob) {
       const currentSalary = salaries.find(s => s.id === Number(currentSalaryId));
-      const isCurrentSalaryValid = currentSalary && 
-        Number(currentSalary.amount) >= Number(selectedJob.min_salary) &&
-        Number(currentSalary.amount) <= Number(selectedJob.max_salary);
-
-      if (!isCurrentSalaryValid) {
-        setValue("salary_grade_id", "");
-        toast({
-          title: "Salary Reset",
-          description: "Previous salary grade is not within the new job position's range",
-          duration: 3000,
-        });
+      if (currentSalary) {
+        const isValidSalary = Number(currentSalary.amount) >= Number(selectedJob.min_salary) && 
+                             Number(currentSalary.amount) <= Number(selectedJob.max_salary);
+        if (!isValidSalary) {
+          setValue("salary_grade_id", "");
+        }
       }
 
-      // Trigger validation
-      trigger(["salary_grade_id"]);
+      // Only set default schedules if job is changed after initial load
+      if (!employeeData?.dim_schedules?.length || selectedJobId !== employeeData?.job_id?.toString()) {
+        const jobDays = selectedJob.days_json || [];
+        setValue("days_json", jobDays, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+    
+        if (selectedJob.batch_id) {
+          setValue("batch_id", selectedJob.batch_id.toString(), {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        }
+      }
     }
-  }, [selectedJobId, selectedJob, currentSalaryId, salaries, setValue, trigger, toast]);
+  }, [selectedJobId, selectedJob, currentSalaryId, salaries, setValue, employeeData]);
+
+  useEffect(() => {
+    if (employeeData) {
+      const currentSchedule = employeeData.dim_schedules?.find(schedule => !schedule.end_date);
+      
+      const existingBatchId = currentSchedule?.ref_batch_schedules?.id?.toString();
+      if (existingBatchId) {
+        setValue("batch_id", existingBatchId);
+      }
+      
+      const existingDaysJson = currentSchedule?.days_json 
+        ? (typeof currentSchedule.days_json === 'string' 
+            ? JSON.parse(currentSchedule.days_json) 
+            : currentSchedule.days_json)
+        : [];
+      
+      setValue("days_json", existingDaysJson);
+    }
+  }, [employeeData, setValue]);
 
   const departmentOptions = useMemo(() => {
     return departments.reduce((acc: any[], dept) => {
@@ -81,7 +120,6 @@ const EditJobInformationForm: React.FC = () => {
   .filter(items => items.department_id === Number(selectedDepartmentId))
   .reduce((acc: any[], job) => {
     if (job && job.id && job.name && job.is_active) {
-      // Only do employee count check if max_employees is set
       if (job.max_employees) {
         const activeEmployeeCount = employees.filter(
           (employee) =>
@@ -91,11 +129,10 @@ const EditJobInformationForm: React.FC = () => {
         ).length;
 
         if (activeEmployeeCount >= job.max_employees) {
-          return acc; // Skip this job if employee limit reached
+          return acc;
         }
       }
 
-      // Check department instances only if limit is set
       if (job.max_department_instances && job.max_department_instances > 0) {
         const activeDepartmentInstanceCount = employees.filter(
           (employee) =>
@@ -106,11 +143,10 @@ const EditJobInformationForm: React.FC = () => {
         ).length;
 
         if (activeDepartmentInstanceCount >= job.max_department_instances) {
-          return acc; // Skip this job if department instance limit reached
+          return acc;
         }
       }
 
-      // Check superior position separately
       if (job.is_superior) {
         const hasActiveSuperiorInDepartment = employees.some(
           (employee) =>
@@ -125,11 +161,10 @@ const EditJobInformationForm: React.FC = () => {
         );
 
         if (hasActiveSuperiorInDepartment) {
-          return acc; // Skip if department already has a superior
+          return acc;
         }
       }
 
-      // Add job to options if it passed all checks
       acc.push({ value: job.id.toString(), label: job.name });
     }
     return acc;
@@ -139,10 +174,11 @@ const EditJobInformationForm: React.FC = () => {
     if (!selectedJob) return [];
     
     return salaries
-      .filter(salary => 
-        Number(salary.amount) >= Number(selectedJob.min_salary) &&
-        Number(salary.amount) <= Number(selectedJob.max_salary)
-      )
+      .filter(salary => {
+        const salaryAmount = Number(salary.amount);
+        return salaryAmount >= Number(selectedJob.min_salary) && 
+               salaryAmount <= Number(selectedJob.max_salary);
+      })
       .sort((a, b) => Number(a.amount) - Number(b.amount))
       .map(salary => ({
         value: salary.id.toString(),
@@ -159,19 +195,19 @@ const EditJobInformationForm: React.FC = () => {
     }, []);
   }, [branches]);
 
-  const employmentstatusOptions = useMemo(() => {
-    return empstatuses.map(status => ({
-      value: status.id.toString(),
-      label: status.name
-    }));
-  }, [empstatuses]);
+  const employmentstatusOptions = empstatuses.reduce((acc: any[], empstatuses) => {
+    if (empstatuses && empstatuses.id && empstatuses.name) {
+      acc.push({ value: empstatuses.id.toString(), label: empstatuses.name });
+    }
+    return acc;
+  }, []);
 
-  const privilegeOptions = useMemo(() => {
-    return privileges.map(privilege => ({
-      value: privilege.id.toString(),
-      label: privilege.name
-    }));
-  }, [privileges]);
+  const privilegeOptions = privileges.reduce((acc: any[], privilege) => {
+    if (privilege && privilege.id && privilege.name) {
+      acc.push({ value: privilege.id.toString(), label: privilege.name });
+    }
+    return acc;
+  }, []);
 
   const formBasicFields: FormInputProps[] = [
     {
@@ -191,6 +227,7 @@ const EditJobInformationForm: React.FC = () => {
       isRequired: true,
       config: {
         placeholder: "Select hire date",
+        maxValue: parseAbsoluteToLocal(dayjs().endOf("day").toISOString()),
         validationState: "valid",
         showMonthAndYearPickers: true,
       },
@@ -225,7 +262,7 @@ const EditJobInformationForm: React.FC = () => {
       config: {
         placeholder: selectedJob 
           ? `Select salary grade (₱${Number(selectedJob.min_salary).toLocaleString()} - ₱${Number(selectedJob.max_salary).toLocaleString()})`
-          : "Select Job Position first",
+          : "Please select a job position first",
         options: salaryGradeOptions,
         description: selectedJob 
           ? `Available salary grades for this position: ₱${Number(selectedJob.min_salary).toLocaleString()} - ₱${Number(selectedJob.max_salary).toLocaleString()}`
@@ -257,8 +294,10 @@ const EditJobInformationForm: React.FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
-      <FormFields items={formBasicFields} />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
+        <FormFields items={formBasicFields} />
+      </div>
     </div>
   );
 };
