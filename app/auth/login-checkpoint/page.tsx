@@ -18,6 +18,7 @@ import {useRouter} from "next/navigation";
 import {AxiosError} from "axios";
 import {login} from "@/actions/authActions";
 import {LuAlertCircle, LuCheckCircle2} from "react-icons/lu";
+import {useGoogleReCaptcha} from "react-google-recaptcha-v3";
 
 function Page() {
     const [isVisibleNew, setIsVisibleNew] = useState(false)
@@ -25,6 +26,7 @@ function Page() {
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
     const router = useRouter()
+    const {executeRecaptcha} = useGoogleReCaptcha()
 
 
     const credential = useForm<z.infer<typeof ChangeCredentialSchema>>({
@@ -63,6 +65,10 @@ function Page() {
     async function onSubmit(values: z.infer<typeof ChangeCredentialSchema>) {
         setError("");
         setLoading(true);
+        if(!executeRecaptcha){
+            return
+        }
+
         try {
             const res = await axiosInstance.put("/api/auth/login-checkpoint", values)
 
@@ -70,7 +76,13 @@ function Page() {
                 username: values.username, password: values.new_password
             }
             if (res.status === 200) {
-                const loginResponse = await login(data);
+                // const loginResponse = await login(data);
+                const token = await executeRecaptcha("form_submit")
+                // console.log({token})
+                const loginResponse = await login({
+                    ...data,
+                    token
+                });
 
                 if (loginResponse.success) {
                     // Redirect to dashboard
