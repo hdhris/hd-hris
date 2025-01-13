@@ -345,9 +345,6 @@ export default function EditEmployeePage({
         certificates: training.training_certificates || [],
       }));
 
-      const hasScheduleChanged: boolean =
-        data.batch_id !== currentBatchId ||
-        JSON.stringify(normalizedNewDays) !== JSON.stringify(normalizedOldDays);
       // Prepare employee data - similar structure to upsert endpoint
       const employeeData = {
         // Basic Information
@@ -406,14 +403,12 @@ export default function EditEmployeePage({
         salary_grade_id: parseInt(data.salary_grade_id, 10),
         batch_id: parseInt(data.batch_id, 10),
         privilege_id: parseInt(data.privilege_id, 10),
-        schedules: hasScheduleChanged
-          ? [
-              {
-                days_json: data.days_json,
-                batch_id: parseInt(data.batch_id, 10),
-              },
-            ]
-          : undefined,
+        schedules: [
+          {
+            days_json: data.days_json,
+            batch_id: parseInt(data.batch_id, 10),
+          },
+        ],
       };
 
       const response = await axios.put(
@@ -658,17 +653,19 @@ export default function EditEmployeePage({
                 <div className="h-[calc(100vh-250px)] overflow-y-auto px-4 py-6 pb-16">
                   <div className="space-y-4">
                     <EditJobInformationForm />
-                    <div className="pt-2 border-t">
-                      <h3 className="text-lg font-medium my-2">
-                        Work Schedule
-                      </h3>
-                      <div className="space-y-2 pb-6">
-                        <EditScheduleSelection employeeId={params.id} />
-                      </div>
+                    {methods.watch("job_id") && methods.watch("salary_grade_id") && (
                       <div className="pt-2 border-t">
-                        <ScheduleHistory employeeId={params.id} />
+                        <h3 className="text-lg font-medium my-2">
+                          Work Schedule
+                        </h3>
+                        <div className="space-y-2 pb-6">
+                          <EditScheduleSelection employeeId={params.id} />
+                        </div>
+                        <div className="pt-2 border-t">
+                          <ScheduleHistory employeeId={params.id} />
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>

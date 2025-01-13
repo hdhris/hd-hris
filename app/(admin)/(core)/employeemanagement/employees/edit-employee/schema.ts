@@ -293,17 +293,17 @@ highSchool: z
       return hireDate.isAfter(minimumHireDate);
     }, "Hire date seems invalid. Please select a more recent date"),
     
-  department_id: z.string().min(1, "Department is required"),
-  job_id: z.string().min(1, "Job is required"),
+  department_id: z.string().min(1, "Department is required").nullable(),
+  job_id: z.string().min(1, "Job is required").nullable(),
   // is_regular: z.preprocess((val) => {
   //   if (typeof val === "string") return val === "true";
   //   return val;
   // }, z.boolean()),
   branch_id: z.string().min(1, "Branch is required").nullable(),
-  salary_grade_id: z.string().min(1, "Salary Grade is required"),
-  batch_id: z.string().min(1, "Batch Schedule is required"),
+  salary_grade_id: z.string().min(1, "Salary Grade is required").nullable(),
+  batch_id: z.string().min(1, "Batch Schedule is required").nullable(),
   days_json: z.array(z.string()),
-  employement_status_id: z.string().min(1, "Employement status is required"),
+  employement_status_id: z.string().min(1, "Employement status is required").nullable(),
   trainings: z
     .array(
       z.object({

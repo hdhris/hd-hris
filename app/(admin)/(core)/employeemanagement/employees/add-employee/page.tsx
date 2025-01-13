@@ -304,25 +304,39 @@ export default function AddEmployeePage() {
         processCertificates(data.training_certificates),
       ]);
 
-      const trainingData = (data.trainings || []).map(training => ({
+      const trainingData = (data.trainings || []).map((training) => ({
         type: training.training_type || "",
         title: training.training_title || "",
         description: training.training_description || "",
         venue: training.training_venue || "",
         conductor: training.training_conductor || "",
-        start_date: training.training_startDate ? handleDate(training.training_startDate) : null,
-        end_date: training.training_endDate ? handleDate(training.training_endDate) : null,
-        duration: training.trainingDuration ? Number(training.trainingDuration) : null,
+        start_date: training.training_startDate
+          ? handleDate(training.training_startDate)
+          : null,
+        end_date: training.training_endDate
+          ? handleDate(training.training_endDate)
+          : null,
+        duration: training.trainingDuration
+          ? Number(training.trainingDuration)
+          : null,
         durationType: training.trainingDurationType || null,
         address: {
-          addr_region: training.training_region ? Number(training.training_region) : null,
-          addr_province: training.training_province ? Number(training.training_province) : null,
-          addr_municipal: training.training_municipal ? Number(training.training_municipal) : null,
-          addr_baranggay: training.training_baranggay ? Number(training.training_baranggay) : null
+          addr_region: training.training_region
+            ? Number(training.training_region)
+            : null,
+          addr_province: training.training_province
+            ? Number(training.training_province)
+            : null,
+          addr_municipal: training.training_municipal
+            ? Number(training.training_municipal)
+            : null,
+          addr_baranggay: training.training_baranggay
+            ? Number(training.training_baranggay)
+            : null,
         },
-        certificates: training.training_certificates || []
+        certificates: training.training_certificates || [],
       }));
-      
+
       const employeeData = {
         employee: {
           first_name: data.first_name,
@@ -379,7 +393,9 @@ export default function AddEmployeePage() {
           guardian_middle_name: data.guardian_middle_name,
           guardian_last_name: data.guardian_last_name,
         }),
-        department_id: data.department_id? parseInt(data.department_id, 10) : null,
+        department_id: data.department_id
+          ? parseInt(data.department_id, 10)
+          : null,
         job_id: data.job_id ? parseInt(data.job_id, 10) : null,
         employement_status_id: parseInt(data.employement_status_id, 10),
         branch_id: parseInt(data.branch_id, 10),
@@ -465,14 +481,16 @@ export default function AddEmployeePage() {
                 {tabKey === "job" && (
                   <div className="space-y-4">
                     <JobInformationForm />
-                    <div className="pt-2 border-t">
-                      <h3 className="text-lg font-medium my-2">
-                        Work Schedule
-                      </h3>
-                      <div className="space-y-2">
-                        <ScheduleSelection />
+                    {methods.watch("job_id") && ( // Only show schedule selection when job is selected
+                      <div className="pt-2 border-t">
+                        <h3 className="text-lg font-medium my-2">
+                          Work Schedule
+                        </h3>
+                        <div className="space-y-2">
+                          <ScheduleSelection />
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 )}
               </div>
