@@ -358,6 +358,7 @@ const EducationalBackgroundForm = () => {
           { value: "TVL", label: "TVL" },
         ],
         onSelectionChange: handleSelect,
+        allowsCustomValue: true,
       },
     },
     {

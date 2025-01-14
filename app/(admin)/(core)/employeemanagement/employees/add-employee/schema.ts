@@ -243,11 +243,11 @@ export const employeeSchema = z.object({
   training_barangay: z.string().optional(),
   training_certificates: z.array(z.any()).optional(),
 
-  branch_id: z.string().min(1, "Branch is required"),
-  salary_grade_id: z.string().min(1, "Salary Grade is required"),
-  batch_id: z.string().min(1, "Branch is required"),
+  branch_id: z.string().min(1, "Branch is required").nullable(),
+  salary_grade_id: z.string().min(1, "Salary Grade is required").nullable(),
+  batch_id: z.string().min(1, "Branch is required").nullable(),
   days_json: z.array(z.string()).optional().nullable().default([]),
-  employement_status_id: z.string().min(1, "Employement status is required"),
+  employement_status_id: z.string().min(1, "Employement status is required").nullable(),
 });
 
 export type EmployeeFormData = z.infer<typeof employeeSchema>;

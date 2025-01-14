@@ -397,9 +397,13 @@ export default function AddEmployeePage() {
           ? parseInt(data.department_id, 10)
           : null,
         job_id: data.job_id ? parseInt(data.job_id, 10) : null,
-        employement_status_id: parseInt(data.employement_status_id, 10),
-        branch_id: parseInt(data.branch_id, 10),
-        salary_grade_id: parseInt(data.salary_grade_id, 10),
+        employement_status_id: data.employement_status_id
+          ? parseInt(data.employement_status_id, 10)
+          : null,
+        branch_id: data.branch_id ? parseInt(data.branch_id, 10) : null,
+        salary_grade_id: data.salary_grade_id
+          ? parseInt(data.salary_grade_id, 10)
+          : null,
         batch_id: data.batch_id ? parseInt(data.batch_id, 10) : null,
         schedules: [
           {

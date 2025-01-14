@@ -201,6 +201,7 @@ const PersonalInformationForm = () => {
       config: {
         placeholder: "Enter Prefix",
         options: prefixOptions,
+        allowsCustomValue: true,
         
       },
     },
@@ -211,7 +212,7 @@ const PersonalInformationForm = () => {
       config: {
         placeholder: "Enter Suffix",
         options: suffixOptions,
-        // allowsCustomValue: true,
+        allowsCustomValue: true,
       },
     },
     {
@@ -221,7 +222,7 @@ const PersonalInformationForm = () => {
       config: {
         placeholder: "Enter Extension",
         options: extensionOptions,
-        // allowsCustomValue: true,
+        allowsCustomValue: true,
       },
     },
   ];
