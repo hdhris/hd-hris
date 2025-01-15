@@ -196,10 +196,11 @@ model log_attendances {
   id              Int               @id @default(autoincrement())
   employee_id     Int
   timestamp       DateTime          @db.Timestamp(6)
-  status          Int?
-  created_at      DateTime?         @default(now()) @db.Timestamp(6)
-  punch           Int?
+  status          Int
+  created_at      DateTime          @default(now()) @db.Timestamp(6)
+  punch           Int
   unique_id       String            @unique
+  deleted_at      DateTime?         @db.Timestamptz(6)
   trans_employees trans_employees   @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_attendance_employees1")
   trans_overtimes trans_overtimes[]
 }
@@ -215,16 +216,17 @@ model ref_addresses {
 }
 
 model ref_batch_schedules {
-  id            Int             @id @default(autoincrement())
-  name          String?         @db.VarChar(45)
-  clock_in      DateTime?       @db.Time(6)
-  clock_out     DateTime?       @db.Time(6)
-  is_active     Boolean?
-  created_at    DateTime        @db.Timestamp(6)
-  updated_at    DateTime        @db.Timestamp(6)
-  deleted_at    DateTime?       @db.Timestamp(6)
-  break_min     Int?
-  dim_schedules dim_schedules[]
+  id              Int               @id @default(autoincrement())
+  name            String?           @db.VarChar(45)
+  clock_in        DateTime?         @db.Time(6)
+  clock_out       DateTime?         @db.Time(6)
+  is_active       Boolean?
+  created_at      DateTime          @db.Timestamp(6)
+  updated_at      DateTime          @db.Timestamp(6)
+  deleted_at      DateTime?         @db.Timestamp(6)
+  break_min       Int?
+  dim_schedules   dim_schedules[]
+  ref_job_classes ref_job_classes[]
 
   @@index([deleted_at])
 }
@@ -281,20 +283,23 @@ model ref_departments {
 }
 
 model ref_job_classes {
-  id                       Int                 @id @default(autoincrement())
-  name                     String?             @db.VarChar(45)
+  id                       Int                  @id @default(autoincrement())
+  name                     String?              @db.VarChar(45)
   superior_id              Int?
   is_active                Boolean?
-  created_at               DateTime            @db.Timestamp(6)
-  updated_at               DateTime            @db.Timestamp(6)
-  deleted_at               DateTime?           @db.Timestamp(6)
+  created_at               DateTime             @db.Timestamp(6)
+  updated_at               DateTime             @db.Timestamp(6)
+  deleted_at               DateTime?            @db.Timestamp(6)
   max_employees            Int?
   max_department_instances Int?
-  is_superior              Boolean?            @default(false)
-  min_salary               Decimal?            @default(0) @db.Decimal
-  max_salary               Decimal?            @default(0) @db.Decimal
+  is_superior              Boolean?             @default(false)
+  min_salary               Decimal?             @default(0) @db.Decimal
+  max_salary               Decimal?             @default(0) @db.Decimal
   department_id            Int?
-  ref_departments          ref_departments?    @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  batch_id                 Int?
+  days_json                Json?                @db.Json
+  ref_batch_schedules      ref_batch_schedules? @relation(fields: [batch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ref_departments          ref_departments?     @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   trans_employees          trans_employees[]
   trans_signatories        trans_signatories[]
 
@@ -621,7 +626,7 @@ model trans_users {
   image                                                 String?
   createdAt                                             DateTime                 @default(now())
   updatedAt                                             DateTime?
-  preferences                                           Json                     @default("{}")
+  preferences                                           Json                     @default("{\"security\": null, \"agreements\": null, \"notification_settings\": {\"allow_push\": true, \"allow_email\": true, \"do_not_disturb\": false, \"notification_sound\": \"/notification-sounds/default.mp3\"}}")
   acl_user_access_control                               acl_user_access_control?
   auth_accounts                                         auth_accounts[]
   auth_credentials                                      auth_credentials?

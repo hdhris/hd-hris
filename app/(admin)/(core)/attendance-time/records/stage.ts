@@ -4,22 +4,20 @@ import {
     AttendanceData,
     AttendanceLog,
     EmployeeSchedule,
-    InStatus,
-    OutStatus,
 } from "@/types/attendance-time/AttendanceTypes";
-import { min } from "lodash";
 import { getAttendanceStatus } from "./new-stage";
 import { OvertimeEntry } from "@/types/attendance-time/OvertimeType";
-import { LeaveApplication, LeaveRequestTypes } from "@/types/leaves/LeaveRequestTypes";
+import { LeaveApplication} from "@/types/leaves/LeaveRequestTypes";
+import { HolidayData } from "@/types/attendance-time/HolidayTypes";
 
 export async function fetchAttendanceData(url: string): Promise<AttendanceData> {
     // const response = await fetch(`/api/attendance?start=${start}&end=${end}`);
-    const response = await fetch(url);
     const params = new URLSearchParams(url.split("?")[1]);
     const startDate = params.get("start");
     const endDate = params.get("end");
-    const data = await response.json();
-    const result = await attendanceData({ ...data, startDate, endDate });
+    const [response, holidaysData] = await Promise.all([fetch(url), fetch(`/api/admin/attendance-time/holidays/adjacents/${toGMT8(startDate ?? undefined).year()}`)]);
+    const [data, holidays] = await Promise.all([response.json(), holidaysData.json()]);
+    const result = await attendanceData({ ...data, holidays, startDate, endDate });
     return result;
 }
 
@@ -36,11 +34,25 @@ async function attendanceData({
     leaves,
     startDate,
     endDate,
+    holidays,
 }: Omit<AttendanceData, "statusesByDate"> &
     Dates & {
         overtimes: OvertimeEntry[];
         leaves: LeaveEntry[];
+        holidays: HolidayData;
     }): Promise<AttendanceData> {
+    // Organize holidays
+        
+    // console.log({holidays})
+      const holiday_detail = (date: string) => {
+        const current = toGMT8(date).startOf('day');
+        const holiday = holidays.transHolidays.find(item => toGMT8(item.date).startOf('day').isSame(current))
+        return {
+            no_work: holiday?.no_work ?? false,
+            increase_rate: holiday?.pay_rate_percentage ? Number(holiday?.pay_rate_percentage)/100 : 1,
+        }
+      }
+
     // Reuse employee schedule map for references below
     const employeeScheduleMap = employeeSchedule.reduce((acc, schedule) => {
         const { employee_id } = schedule;
@@ -134,15 +146,16 @@ async function attendanceData({
             await Promise.all(
                 employees.map(async (emp) => {
                     try {
-                        const thisDate = toGMT8(date).startOf('day');
-                        const holiday = toGMT8('2025-01-08').startOf('day');
+                        // const thisDate = toGMT8(date).startOf('day');
+                        // const holiday = toGMT8('2025-01-08').startOf('day');
                         // const employeeLogs = logsByEmployee[emp.id] ?? [];
                         // const overtime = overtimes[emp.id] ?? undefined;
                         statusesByDate[date][emp.id] = await getAttendanceStatus({
                             employee: emp,
                             date,
                             rate_per_minute: 0.75,
-                            increase_rate: thisDate.isSame(holiday) ? 1.20 : 1,
+                            no_work: holiday_detail(date).no_work,
+                            increase_rate: holiday_detail(date).increase_rate, //thisDate.isSame(holiday) ? 1.20 : 1,
                             schedules: employeeScheduleMap[emp.id],
                             logs: logsByEmployee ? logsByEmployee[emp.id] ?? [] : [],
                             overtime: overtimesByEmploye ? overtimesByEmploye[emp.id] ?? undefined : undefined,

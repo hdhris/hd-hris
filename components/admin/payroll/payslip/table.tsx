@@ -1,6 +1,6 @@
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {PayslipData, ProcessDate} from "@/types/payroll/payrollType";
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {PayrollInputColumn} from "./input";
 import axios from "axios";
 import {cn, Spinner} from "@nextui-org/react";
@@ -326,15 +326,15 @@ export function PRPayslipTable({
                 console.log("Unchanged date, will not reupdate...");
                 return;
             }
-            setLastProcessDateState(processDate);
-            console.log("Loaded");
             // console.log(payslipData.employees);
             const payrollMap = new Map(payslipData.payrolls.map((pr) => [pr.id, pr.employee_id]));
             const earningsSet = new Set(payslipData.earnings.map((e) => e.id));
             setRecords({}); // Clear records
-            payslipData.breakdowns.forEach((bd) => {
-                handleRecording(payrollMap.get(bd.payroll_id)!, bd.payhead_id, [earningsSet.has(bd.payhead_id) ? "earning" : "deduction", bd.amount], true);
-            });
+            // payslipData.breakdowns.forEach((bd) => {
+            //     handleRecording(payrollMap.get(bd.payroll_id)!, bd.payhead_id, [earningsSet.has(bd.payhead_id) ? "earning" : "deduction", bd.amount], true);
+            // });
+            setLastProcessDateState(processDate);
+            console.log("Loaded");
         }
     }, [payslipData, processDate, lastProcessDateState, onDialog]);
     // }, [cachedUnpushed, payslipData, processDate, lastProcessDateState, onDialog]);

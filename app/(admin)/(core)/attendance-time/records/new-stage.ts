@@ -8,9 +8,8 @@ import {
     LogStatus,
     OutStatus,
     punchIN,
-    punchOUT,
+    punchOUT
 } from "@/types/attendance-time/AttendanceTypes";
-import { result } from "lodash";
 
 const emptyAmount = {
     renderedShift: 0,
@@ -32,7 +31,9 @@ export async function getAttendanceStatus({
     increase_rate,
     leave,
     overtime,
+    no_work = false,
 }: {
+    no_work: boolean;
     employee: BasicEmployee;
     increase_rate: number;
     leave?: {
@@ -113,6 +114,7 @@ export async function getAttendanceStatus({
             ...emptyAmount,
         };
     }
+    // if(employee.id === 61) console.log(employee.id, {schedule});
 
     const notSuspended = isEmployeeAvailable({ employee, find: ["suspension"], date });
     const offset = 0; // Time offset for GMT+8
@@ -170,7 +172,7 @@ export async function getAttendanceStatus({
 
     // console.log({scheduleTimeIn:scheduleTimeIn.toISOString(), scheduleTimeOut: scheduleTimeOut.toISOString()})
 
-    if (!dayNames?.includes(currentDay.format("ddd").toLowerCase()) && notSuspended) {
+    if (no_work || (!dayNames?.includes(currentDay.format("ddd").toLowerCase()) && notSuspended)) {
         amIn.status = "no work";
         amOut.status = "no work";
         pmIn.status = "no work";
@@ -189,7 +191,7 @@ export async function getAttendanceStatus({
                         if (log.punch === 0) {
                             // If time-in is same or below 12pm...
                             // Consider it as an AM time in
-                            if (timestamp.hour() <= 12) {
+                            if (timestamp.hour() <= 12 && timestamp.minute() <= 30) {
                                 // "LATE" if time-in is 5mins later than clock-in schedule...
                                 const stat: InStatus = timestamp.diff(scheduleTimeIn) > gracePeriod ? "late" : "ontime";
                                 amIn = {

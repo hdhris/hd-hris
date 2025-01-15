@@ -12,11 +12,10 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 import { useQuery } from "@/services/queries";
 import { ActionsTakenArray } from "@/types/incident-reports/type";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { parseAbsolute, parseAbsoluteToLocal } from "@internationalized/date";
+import { parseAbsoluteToLocal } from "@internationalized/date";
 import axios from "axios";
-import React, { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FaStreetView } from "react-icons/fa";
 import { mutate } from "swr";
 import { z } from "zod";
 
@@ -32,6 +31,7 @@ const formSchema = z.object({
 }).refine(
     data => data.actions_taken != "", { path: ["actions_taken"], message: "Action is required" }
 )
+type formType = z.infer<typeof formSchema>;
 
 interface FileReportProp {
     isOpen: boolean;
@@ -55,7 +55,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
         return [];
     }, [data]);
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<formType>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             description: "",
@@ -70,6 +70,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
     });
 
     const { watch, setValue } = form;
+    const types = watch('type');
 
     const employee = useMemo(() => {
         if (data) {
@@ -92,7 +93,7 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
         }
     }, [form, userID]);
 
-    const onSubmit = useCallback(async (value: z.infer<typeof formSchema>)=> {
+    const onSubmit = useCallback(async (value: formType)=> {
         setIsSubmitting(true);
         try {
             await axios.post("/api/admin/incident/create", {
@@ -141,32 +142,46 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                     ) : (
                         <EmployeeListForm isLoading={isLoading} employees={employees} />
                     )}
-                    <FormFields<z.infer<typeof formSchema>>
+                    <FormFields<formType>
                         items={[
                             {
                                 name: "type",
                                 type: "auto-complete",
-                                label: "Type",
-                                placeholder: "e.g: Equipment Failure, Harrassment, or specify...",
+                                label: "Category",
+                                placeholder: "Select category",
                                 isRequired: true,
                                 inputDisabled: !watch("employee_id"),
                                 config: {
-                                    allowsCustomValue: true,
+                                    // allowsCustomValue: true,
+                                    // options: [
+                                    //     "Complaint Incident",
+                                    //     "Equipment Failure",
+                                    //     "Property Damage",
+                                    //     "Service Failure",
+                                    //     "Theft",
+                                    //     "Unauthorized Access",
+                                    //     "Vandalism",
+                                    //     "Cybersecurity Incident",
+                                    //     "Traffic Accident",
+                                    //     "Harassment",
+                                    //     "Workplace Violence",
+                                    //     "Injury",
+                                    //     "Illness",
+                                    // ]
                                     options: [
-                                        "Complaint Incident",
-                                        "Equipment Failure",
-                                        "Property Damage",
-                                        "Service Failure",
-                                        "Theft",
-                                        "Unauthorized Access",
-                                        "Vandalism",
-                                        "Cybersecurity Incident",
-                                        "Traffic Accident",
-                                        "Discrimination",
-                                        "Harassment",
-                                        "Workplace Violence",
-                                        "Injury",
-                                        "Illness",
+                                        "Behavioral Incidents",
+                                        "Attendance and Punctuality Incidents",
+                                        "Theft or Misuse of Company Property",
+                                        "Security Breaches",
+                                        "Substance Abuse",
+                                        "Fraud or Dishonesty",
+                                        "Workplace Violence or Threats",
+                                        "Negligence or Poor Performance",
+                                        "Violation of Company Policies",
+                                        "Damage to Company Property",
+                                        "Customer-Related Misconduct",
+                                        "Cybersecurity Violations",
+                                        // "Repeated Offenses",
                                     ]
                                         .sort((a, b) => a.localeCompare(b))
                                         .map((item) => ({
@@ -254,9 +269,14 @@ function FileReport({ isOpen, onClose }: FileReportProp) {
                                         })),
                                 },
                             },
+                            {
+                                name: 'files',
+                                label: "Attachments",
+                                inputDisabled: true,
+                                Component: ()=><QuickFileUpload/>,
+                            }
                         ]}
                     />
-                    <QuickFileUpload/>
                 </form>
             </Form>
         </Drawer>
