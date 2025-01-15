@@ -6,7 +6,7 @@ import {useUserInfo} from "@/lib/utils/getEmployeInfo";
 import {getEmpFullName} from "@/lib/utils/nameFormatter";
 import {toGMT8} from "@/lib/utils/toGMT8";
 import {Card, CardBody, CardFooter, CardHeader, cn, Spinner} from "@nextui-org/react";
-import React, {useCallback, useMemo, useRef, useState} from "react";
+import {useCallback, useMemo, useRef, useState} from "react";
 import {numberWithCommas} from "@/lib/utils/numberFormat";
 import axios from "axios";
 import {toast} from "@/components/ui/use-toast";
@@ -196,7 +196,7 @@ function Page() {
 
     if (processDate === false) {
         return <div className="flex h-full w-full justify-center items-center">
-            <h1 className="text-gray-500 h-fit w-fit">No Payroll Dates</h1>
+            <h1 className="text-gray-500 h-fit w-fit">Load a Payroll</h1>
         </div>;
     }
 
@@ -218,7 +218,7 @@ function Page() {
                         <>
                             <CardHeader>
                                 <div className="w-full flex flex-col justify-center items-center">
-                                    <strong>PAYSLIP</strong>
+                                    <p className="font-bold">PAYSLIP</p>
                                     <p className="text-gray-500 text-sm">
                                         {toGMT8(processDate.start_date).format("MMMM D")}-
                                         {toGMT8(processDate.end_date).format("D, YYYY")}

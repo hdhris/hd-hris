@@ -1,4 +1,4 @@
-import { BatchSchedule, EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
+import { BatchSchedule} from "@/types/attendance-time/AttendanceTypes";
 import { getShortTime } from "./timeHelper";
 import { toGMT8 } from "@/lib/utils/toGMT8";
 import { Button, Card } from "@nextui-org/react";
