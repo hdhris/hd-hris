@@ -13,6 +13,7 @@ import {
 } from "@/services/queries";
 import { parseAbsoluteToLocal } from "@internationalized/date";
 import dayjs from "dayjs";
+import { useQuery } from "@/services/queries";
 
 const JobInformationForm: React.FC = () => {
   const { watch, setValue } = useFormContext();
@@ -28,23 +29,22 @@ const JobInformationForm: React.FC = () => {
   const { data: employees = [] } = useEmployeesData();
   const { data: privileges = [] } = usePrivilegesData();
 
-  // Get selected job's salary range
   const selectedJob = useMemo(() => {
     return jobTitles.find((job) => job.id === Number(selectedJobId));
   }, [jobTitles, selectedJobId]);
 
-  // Reset job_id when department changes
   useEffect(() => {
     if (selectedDepartmentId) {
       const currentJob = jobTitles.find(job => job.id === Number(selectedJobId));
       if (currentJob && currentJob.department_id !== Number(selectedDepartmentId)) {
         setValue("job_id", "");
         setValue("salary_grade_id", "");
+        setValue("batch_id", "");
+        setValue("days_json", ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
       }
     }
   }, [selectedDepartmentId, jobTitles, selectedJobId, setValue]);
 
-  // Reset salary_grade_id when job changes
   useEffect(() => {
     if (selectedJobId && selectedJob) {
       const currentSalary = salaries.find(s => s.id === Number(currentSalaryId));
@@ -58,6 +58,19 @@ const JobInformationForm: React.FC = () => {
     }
   }, [selectedJobId, selectedJob, currentSalaryId, salaries, setValue]);
 
+  useEffect(() => {
+    if (selectedJob?.batch_id) {
+      setValue("batch_id", selectedJob.batch_id.toString(), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      setValue("days_json", selectedJob.days_json || ["mon", "tue", "wed", "thu", "fri"], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [selectedJob, setValue]);
+
   const departmentOptions = useMemo(() => departments.reduce((acc: any[], dept) => {
     if (dept && dept.id && dept.name && dept.is_active) {
       acc.push({ value: dept.id.toString(), label: dept.name });
@@ -69,7 +82,6 @@ const JobInformationForm: React.FC = () => {
   .filter(items => items.department_id === Number(selectedDepartmentId))
   .reduce((acc: any[], job) => {
     if (job && job.id && job.name && job.is_active) {
-      // Only do employee count check if max_employees is set
       if (job.max_employees) {
         const activeEmployeeCount = employees.filter(
           (employee) =>
@@ -79,11 +91,10 @@ const JobInformationForm: React.FC = () => {
         ).length;
 
         if (activeEmployeeCount >= job.max_employees) {
-          return acc; // Skip this job if employee limit reached
+          return acc;
         }
       }
 
-      // Check department instances only if limit is set
       if (job.max_department_instances && job.max_department_instances > 0) {
         const activeDepartmentInstanceCount = employees.filter(
           (employee) =>
@@ -94,11 +105,10 @@ const JobInformationForm: React.FC = () => {
         ).length;
 
         if (activeDepartmentInstanceCount >= job.max_department_instances) {
-          return acc; // Skip this job if department instance limit reached
+          return acc;
         }
       }
 
-      // Check superior position separately
       if (job.is_superior) {
         const hasActiveSuperiorInDepartment = employees.some(
           (employee) =>
@@ -113,17 +123,15 @@ const JobInformationForm: React.FC = () => {
         );
 
         if (hasActiveSuperiorInDepartment) {
-          return acc; // Skip if department already has a superior
+          return acc;
         }
       }
 
-      // Add job to options if it passed all checks
       acc.push({ value: job.id.toString(), label: job.name });
     }
     return acc;
   }, []);
 
-  // Filter salary grades based on selected job's salary range
   const salaryGradeOptions = useMemo(() => {
     if (!selectedJob) return [];
     

@@ -61,6 +61,7 @@ async function updateEmployee(id: number, employeeData: any) {
     department_id,
     educational_bg_json,
     family_bg_json,
+    training_programs_attended_json ,
     ...rest
   } = employeeData;
 
@@ -105,6 +106,7 @@ async function updateEmployee(id: number, employeeData: any) {
 
         const educationalBackground = parseJsonInput(educational_bg_json);
         const familyBackground = parseJsonInput(family_bg_json);
+        const trainingBackground  = parseJsonInput(training_programs_attended_json );
 
         updatePromises.push(
           tx.trans_employees.update({
@@ -117,6 +119,7 @@ async function updateEmployee(id: number, employeeData: any) {
               birthdate: rest.birthdate ? parseDates(rest.birthdate) : null,
               educational_bg_json: educationalBackground,
               family_bg_json: familyBackground,
+              training_programs_attended_json: trainingBackground,
               created_at: toGMT8().toISOString(),
               updated_at: toGMT8().toISOString(),
             },
@@ -252,10 +255,8 @@ async function updateEmployee(id: number, employeeData: any) {
 // }
 
 // // Continue with the rest of your update logic
-// const [updatedEmployee] = await Promise.all(updatePromises);
-
 if (Array.isArray(schedules) && schedules.length > 0) {
-  // First, fetch the current active schedule with complete fields
+  // First, fetch the current active schedule
   const currentSchedule = await tx.dim_schedules.findFirst({
     where: {
       employee_id: id,
@@ -272,6 +273,18 @@ if (Array.isArray(schedules) && schedules.length > 0) {
     }
   });
 
+  // Fetch the batch schedule for the new selection
+  const newBatchSchedule = await tx.ref_batch_schedules.findUnique({
+    where: {
+      id: Number(schedules[0].batch_id),
+      deleted_at: null
+    }
+  });
+
+  if (!newBatchSchedule) {
+    throw new Error("Invalid batch schedule selected");
+  }
+
   // Normalize schedule data for comparison
   const normalizeSchedule = (days: any) => {
     if (!days) return JSON.stringify([]);
@@ -282,18 +295,17 @@ if (Array.isArray(schedules) && schedules.length > 0) {
   const currentDays = currentSchedule ? normalizeSchedule(currentSchedule.days_json) : '';
   const newDays = normalizeSchedule(schedules[0].days_json);
 
-  // Compare all relevant schedule fields
-  const isRealScheduleChange = (
-    !currentSchedule || 
+  // Only create new schedule if:
+  // 1. There's no current schedule (first time)
+  // 2. The batch_id is different (changed schedule)
+  // 3. The days are different (changed days)
+  const isScheduleChange = (
+    !currentSchedule ||
     currentSchedule.batch_id !== Number(schedules[0].batch_id) ||
-    currentDays !== newDays ||
-    currentSchedule.clock_in?.toString() !== schedules[0].clock_in?.toString() ||
-    currentSchedule.clock_out?.toString() !== schedules[0].clock_out?.toString() ||
-    (currentSchedule.break_min || 0) !== (schedules[0].break_min || 0)
+    currentDays !== newDays
   );
 
-  // Only proceed if there's an actual change
-  if (isRealScheduleChange) {
+  if (isScheduleChange) {
     const currentDate = new Date();
 
     // If there's an existing schedule, close it
@@ -309,7 +321,7 @@ if (Array.isArray(schedules) && schedules.length > 0) {
       );
     }
 
-    // Create new schedule with all fields
+    // Create new schedule with batch schedule values
     updatePromises.push(
       tx.dim_schedules.create({
         data: {
@@ -319,15 +331,14 @@ if (Array.isArray(schedules) && schedules.length > 0) {
           created_at: currentDate,
           updated_at: currentDate,
           start_date: currentDate,
-          clock_in: schedules[0].clock_in || null,
-          clock_out: schedules[0].clock_out || null,
-          break_min: schedules[0].break_min || 0,
-          end_date: null // explicitly set to null for clarity
+          clock_in: newBatchSchedule.clock_in,
+          clock_out: newBatchSchedule.clock_out,
+          break_min: newBatchSchedule.break_min,
+          end_date: null
         },
       })
     );
   }
-  // If no real change, do nothing - the schedule remains unchanged
 }
 
 const [updatedEmployee] = await Promise.all(updatePromises);

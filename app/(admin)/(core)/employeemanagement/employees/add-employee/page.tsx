@@ -9,7 +9,7 @@ import { Form } from "@/components/ui/form";
 import axios, { AxiosError } from "axios";
 import { mutate } from "swr";
 import { useRouter } from "next/navigation";
-import AddAccount from "@/components/admin/employeescomponent/store/AddAccount";
+// import AddAccount from "@/components/admin/employeescomponent/store/AddAccount";
 import EducationalBackgroundForm from "@/components/admin/employeescomponent/store/EducationalBackgroundForm";
 import JobInformationForm from "@/components/admin/employeescomponent/store/JobInformation";
 import PersonalInformationForm from "@/components/admin/employeescomponent/store/PersonalInformationForm";
@@ -17,6 +17,7 @@ import ScheduleSelection from "@/components/admin/employeescomponent/store/Sched
 import { Tabs, Tab, Spinner, Button } from "@nextui-org/react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { toGMT8 } from "@/lib/utils/toGMT8";
+import AddTrainingSeminars from "@/components/admin/employeescomponent/store/AddTrainingSeminars";
 
 type EmployeeFields = keyof EmployeeFormData;
 
@@ -65,6 +66,21 @@ const tabFieldsMap = {
     "doctorateCourse",
     "doctorateYear",
     "doctorateCertificates",
+  ] as EmployeeFields[],
+  training: [
+    "training_type",
+    "training_title",
+    "training_description",
+    "training_venue",
+    "training_conductor",
+    "training_date",
+    "training_start_time",
+    "training_end_time",
+    "training_region",
+    "training_province",
+    "training_municipal",
+    "training_barangay",
+    "training_certificates",
   ] as EmployeeFields[],
   job: [
     "hired_at",
@@ -141,6 +157,20 @@ export default function AddEmployeePage() {
       // username: "",
       // password: "password",
       privilege_id: "",
+      training_type: "",
+      training_title: "",
+      training_description: "",
+      training_venue: "",
+      training_conductor: "",
+      training_startDate: "",
+      training_endDate: "",
+      trainingDuration: 0,
+      trainingDurationType: "",
+      training_region: "",
+      training_province: "",
+      training_municipal: "",
+      training_barangay: "",
+      training_certificates: [],
     },
     mode: "onChange",
   });
@@ -152,7 +182,7 @@ export default function AddEmployeePage() {
   };
 
   const handleTabChange = async (newTab: string) => {
-    const tabs = ["personal", "educational", "job", "account"];
+    const tabs = ["personal", "educational", "training", "job"];
     const currentIndex = tabs.indexOf(activeTab);
     const newIndex = tabs.indexOf(newTab);
 
@@ -173,7 +203,7 @@ export default function AddEmployeePage() {
   };
 
   const handleNext = async () => {
-    const tabs = ["personal", "educational", "job", "account"];
+    const tabs = ["personal", "educational", "training", "job"];
     const currentIndex = tabs.indexOf(activeTab);
 
     const isValid = await validateCurrentTab(activeTab);
@@ -190,7 +220,7 @@ export default function AddEmployeePage() {
   };
 
   const handlePrevious = () => {
-    const tabs = ["personal", "educational", "job", "account"];
+    const tabs = ["personal", "educational", "training", "job"];
     const currentIndex = tabs.indexOf(activeTab);
     if (currentIndex > 0) {
       setActiveTab(tabs[currentIndex - 1]);
@@ -210,6 +240,7 @@ export default function AddEmployeePage() {
       fileUrl: result.url,
     };
   };
+
   const processCertificates = async (
     certificates: (string | File)[] = []
   ): Promise<string[]> => {
@@ -261,12 +292,50 @@ export default function AddEmployeePage() {
         return gmt8Date.toISOString();
       };
 
-      const [filteredCertificates, mastersCertificates, doctorateCertificates] =
-        await Promise.all([
-          processCertificates(data.certificates),
-          processCertificates(data.mastersCertificates),
-          processCertificates(data.doctorateCertificates),
-        ]);
+      const [
+        filteredCertificates,
+        mastersCertificates,
+        doctorateCertificates,
+        trainingCertificates,
+      ] = await Promise.all([
+        processCertificates(data.certificates),
+        processCertificates(data.mastersCertificates),
+        processCertificates(data.doctorateCertificates),
+        processCertificates(data.training_certificates),
+      ]);
+
+      const trainingData = (data.trainings || []).map((training) => ({
+        type: training.training_type || "",
+        title: training.training_title || "",
+        description: training.training_description || "",
+        venue: training.training_venue || "",
+        conductor: training.training_conductor || "",
+        start_date: training.training_startDate
+          ? handleDate(training.training_startDate)
+          : null,
+        end_date: training.training_endDate
+          ? handleDate(training.training_endDate)
+          : null,
+        duration: training.trainingDuration
+          ? Number(training.trainingDuration)
+          : null,
+        durationType: training.trainingDurationType || null,
+        address: {
+          addr_region: training.training_region
+            ? Number(training.training_region)
+            : null,
+          addr_province: training.training_province
+            ? Number(training.training_province)
+            : null,
+          addr_municipal: training.training_municipal
+            ? Number(training.training_municipal)
+            : null,
+          addr_baranggay: training.training_baranggay
+            ? Number(training.training_baranggay)
+            : null,
+        },
+        certificates: training.training_certificates || [],
+      }));
 
       const employeeData = {
         employee: {
@@ -312,6 +381,7 @@ export default function AddEmployeePage() {
           doctorateCourse: data.doctorateCourse,
           doctorateYear: data.doctorateYear,
         }),
+        training_programs_attended_json: JSON.stringify(trainingData),
         family_bg_json: JSON.stringify({
           fathers_first_name: data.fathers_first_name,
           fathers_middle_name: data.fathers_middle_name,
@@ -323,16 +393,22 @@ export default function AddEmployeePage() {
           guardian_middle_name: data.guardian_middle_name,
           guardian_last_name: data.guardian_last_name,
         }),
-        department_id: parseInt(data.department_id, 10),
-        job_id: parseInt(data.job_id, 10),
-        employement_status_id: parseInt(data.employement_status_id, 10),
-        branch_id: parseInt(data.branch_id, 10),
-        salary_grade_id: parseInt(data.salary_grade_id, 10),
-        batch_id: data.batch_id ? parseInt(data.batch_id,10):null,
+        department_id: data.department_id
+          ? parseInt(data.department_id, 10)
+          : null,
+        job_id: data.job_id ? parseInt(data.job_id, 10) : null,
+        employement_status_id: data.employement_status_id
+          ? parseInt(data.employement_status_id, 10)
+          : null,
+        branch_id: data.branch_id ? parseInt(data.branch_id, 10) : null,
+        salary_grade_id: data.salary_grade_id
+          ? parseInt(data.salary_grade_id, 10)
+          : null,
+        batch_id: data.batch_id ? parseInt(data.batch_id, 10) : null,
         schedules: [
           {
             days_json: data.days_json,
-            batch_id: parseInt(data.batch_id ?? 'null', 10),
+            batch_id: parseInt(data.batch_id ?? "null", 10),
           },
         ],
       };
@@ -374,20 +450,18 @@ export default function AddEmployeePage() {
       //   variant: "danger",
       //   duration: 5000,
       // });
-      try{
-        if(error instanceof AxiosError){
+      try {
+        if (error instanceof AxiosError) {
           toast({
             title: "Error",
             description: error.response?.data.message || errorMessage,
             variant: "danger",
           });
         }
-        }catch(error){
-        }
+      } catch (error) {}
     } finally {
       setIsSubmitting(false);
     }
-    
   };
 
   const renderTabContent = (tabKey: string) => {
@@ -407,17 +481,20 @@ export default function AddEmployeePage() {
                     <EducationalBackgroundForm />
                   </>
                 )}
+                {tabKey === "training" && <AddTrainingSeminars />}
                 {tabKey === "job" && (
                   <div className="space-y-4">
                     <JobInformationForm />
-                    <div className="pt-2 border-t">
-                      <h3 className="text-lg font-medium my-2">
-                        Work Schedule
-                      </h3>
-                      <div className="space-y-2">
-                        <ScheduleSelection />
+                    {methods.watch("job_id") && ( // Only show schedule selection when job is selected
+                      <div className="pt-2 border-t">
+                        <h3 className="text-lg font-medium my-2">
+                          Work Schedule
+                        </h3>
+                        <div className="space-y-2">
+                          <ScheduleSelection />
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -441,6 +518,9 @@ export default function AddEmployeePage() {
         </Tab>
         <Tab key="educational" title="Educational Background">
           {renderTabContent("educational")}
+        </Tab>
+        <Tab key="training" title="Training & Seminars">
+          {renderTabContent("training")}
         </Tab>
         <Tab key="job" title="Job Information">
           {renderTabContent("job")}

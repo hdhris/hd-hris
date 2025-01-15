@@ -33,18 +33,21 @@ const baseJobSchema = z.object({
   is_superior: z.boolean().default(false),
   max_employees: z.number().nullable(),
   max_department_instances: z.number().nullable(),
-  min_salary: z.number().min(0, "Minimum salary cannot be negative"),
-  max_salary: z.number().min(0, "Maximum salary cannot be negative"),
+  min_salary: z.number().nullable().optional(),
+  max_salary: z.number().nullable().optional(),
+  batch_id: z.number().nullable(),
+  days_json: z.array(z.string()).optional(),  // Add this line to include the days_json field
 });
 
 // Schema for creating new jobs
 const createJobSchema = baseJobSchema.refine((data): data is z.infer<typeof baseJobSchema> => {
+  if (!data.min_salary || !data.max_salary) return true;
   if (!isValidNumber(data.min_salary) || !isValidNumber(data.max_salary)) {
     return false;
   }
-  return data.min_salary < data.max_salary;
+  return data.min_salary <= data.max_salary;
 }, {
-  message: "Minimum salary must be less than maximum salary",
+  message: "Minimum salary must be less than or equal to maximum salary",
   path: ["min_salary"],
 });
 
@@ -56,9 +59,9 @@ const updateJobSchema = baseJobSchema.partial().refine((data): data is Partial<z
   if (!isValidNumber(data.min_salary) || !isValidNumber(data.max_salary)) {
     return false;
   }
-  return data.min_salary < data.max_salary;
+  return data.min_salary <= data.max_salary;  // Changed to <= to allow equal values
 }, {
-  message: "Minimum salary must be less than maximum salary",
+  message: "Minimum salary must be less than or equal to maximum salary",
   path: ["min_salary"],
 });
 
@@ -90,7 +93,9 @@ async function getActiveEmployeeCount(jobId: number, departmentId?: number) {
   });
 }
 
-async function validateSalaryRange(minSalary: number, maxSalary: number): Promise<boolean> {
+async function validateSalaryRange(minSalary: number | null, maxSalary: number | null): Promise<boolean> {
+  if (!minSalary || !maxSalary) return true;
+  
   const existingSalaryGrades = await prisma.ref_salary_grades.findMany({
     where: {
       deleted_at: null,
@@ -120,7 +125,7 @@ async function getJobById(id: number) {
             { OR: [{ termination_json: { equals: [] } }] }
           ]
         }
-      }
+      },
     },
   });
 
@@ -202,8 +207,8 @@ export async function POST(req: Request) {
     }
 
     const hasSalaryGrades = await validateSalaryRange(
-      validatedData.min_salary,
-      validatedData.max_salary
+      validatedData.min_salary ?? null,
+      validatedData.max_salary ?? null
     );
 
     if (!hasSalaryGrades) {
@@ -233,13 +238,13 @@ export async function POST(req: Request) {
     const job = await prisma.ref_job_classes.create({
       data: {
         ...validatedData,
-        min_salary: new Prisma.Decimal(validatedData.min_salary),
-        max_salary: new Prisma.Decimal(validatedData.max_salary),
+        min_salary: validatedData.min_salary ? new Prisma.Decimal(validatedData.min_salary) : null,
+        max_salary: validatedData.max_salary ? new Prisma.Decimal(validatedData.max_salary) : null,
+        days_json: validatedData.days_json,
         created_at: toGMT8().toISOString(),
         updated_at: toGMT8().toISOString(),
       },
     });
-
     return NextResponse.json(job, { status: 201 });
   } catch (error) {
     console.error('Error in POST:', error);
@@ -304,11 +309,11 @@ export async function PUT(req: Request) {
       updated_at: toGMT8().toISOString(),
     };
 
-    if (validatedData.min_salary !== undefined) {
+    if (validatedData.min_salary !== undefined && validatedData.min_salary !== null) {
       updateData.min_salary = new Prisma.Decimal(validatedData.min_salary);
     }
 
-    if (validatedData.max_salary !== undefined) {
+    if (validatedData.max_salary !== undefined && validatedData.max_salary !== null) {
       updateData.max_salary = new Prisma.Decimal(validatedData.max_salary);
     }
 
@@ -352,6 +357,10 @@ export async function PUT(req: Request) {
           { status: 400 }
         );
       }
+    }
+
+    if (validatedData.days_json !== undefined) {
+      updateData.days_json = validatedData.days_json;
     }
 
     const job = await prisma.ref_job_classes.update({

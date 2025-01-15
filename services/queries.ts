@@ -97,19 +97,19 @@ export function useEmployeeData(id: string | null) {
 
 export function useSuspendedEmployees() {
     return useSWR<Employee[]>('/api/employeemanagement/suspended', fetcher, {
-        // revalidateOnFocus: false, refreshInterval: 3000
+        revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
 export function useFormerEmployees() {
     return useSWR<Employee[]>('/api/employeemanagement/resigned-terminated', fetcher, {
-        // revalidateOnFocus: false, refreshInterval: 3000
+        revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
 export function usePrivilegesData() {
     return useSWR<Privilege[]>('/api/employeemanagement/privileges', fetcher, {
-        // revalidateOnFocus: false, refreshInterval: 3000
+        revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
@@ -123,13 +123,13 @@ export function useDepartmentsData() {
 
 export function useJobpositionData() {
     return useSWR<JobPosition[]>('/api/employeemanagement/jobposition', fetcher, {//
-        // revalidateOnFocus: false, refreshInterval: 3000
+        revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
 export function useSalaryGradeData() {
     return useSWR<SalaryGrade[]>('/api/employeemanagement/salarygrade', fetcher, {//
-        // revalidateOnFocus: false, refreshInterval: 3000
+        revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 
@@ -142,7 +142,7 @@ export function useEmploymentStatusData() {
 
 export function useBranchesData() {
     return useSWR<Branch[]>('/api/employeemanagement/branch', fetcher, {//
-        // revalidateOnFocus: false, refreshInterval: 3000
+        revalidateOnFocus: false, refreshInterval: 3000
     })
 }
 

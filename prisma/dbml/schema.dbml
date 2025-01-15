@@ -193,6 +193,7 @@ Table ref_batch_schedules {
   deleted_at DateTime
   break_min Int
   dim_schedules dim_schedules [not null]
+  ref_job_classes ref_job_classes [not null]
 }
 
 Table ref_benefit_plans {
@@ -254,6 +255,9 @@ Table ref_job_classes {
   min_salary Decimal [default: 0]
   max_salary Decimal [default: 0]
   department_id Int
+  batch_id Int
+  days_json Json
+  ref_batch_schedules ref_batch_schedules
   ref_departments ref_departments
   trans_employees trans_employees [not null]
   trans_signatories trans_signatories [not null]
@@ -561,7 +565,7 @@ Table trans_users {
   image String
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime
-  preferences Json [not null, default: '{}']
+  preferences Json [not null, default: '{"security": null, "agreements": null, "notification_settings": {"allow_push": true, "allow_email": true, "do_not_disturb": false, "notification_sound": "/notification-sounds/default.mp3"}}']
   acl_user_access_control acl_user_access_control
   auth_accounts auth_accounts [not null]
   auth_credentials auth_credentials
@@ -915,6 +919,8 @@ Ref: fact_training_records.schedule_id > dim_training_schedules.id [delete: No A
 Ref: log_attendances.employee_id > trans_employees.id [delete: No Action]
 
 Ref: ref_benefit_plans.deduction_id > ref_payheads.id [delete: No Action]
+
+Ref: ref_job_classes.batch_id > ref_batch_schedules.id [delete: No Action]
 
 Ref: ref_job_classes.department_id > ref_departments.id [delete: No Action]
 

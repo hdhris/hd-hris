@@ -29,9 +29,7 @@ export const employeeSchema = z.object({
   suffix: z.string().optional().nullable(),
   extension: z.string().optional().nullable(),
   gender: z.string().min(1, "Gender is required"),
-  email: z
-    .string()
-    .email("Please enter a valid email address"),
+  email: z.string().email("Please enter a valid email address"),
   contact_no: z
     .string()
     .min(1, "Contact number is required")
@@ -48,19 +46,20 @@ export const employeeSchema = z.object({
       (val) => val.length === 10,
       "Contact number must be exactly 10 digits"
     ),
-    birthdate: z.string()
-  .min(1, "Birthdate is required")
-  .refine((date) => {
-    const birthDate = dayjs(date);
-    const maxAge = dayjs().subtract(100, 'years');
-    return birthDate.isAfter(maxAge);
-  }, "Age cannot be over 100 years")
-  .refine((date) => {
-    const birthDate = dayjs(date);
-    const minAge = dayjs().subtract(18, 'years');
-    return birthDate.isBefore(minAge) || birthDate.isSame(minAge);
-  }, "Employee should be 18 years old"),
-  
+  birthdate: z
+    .string()
+    .min(1, "Birthdate is required")
+    .refine((date) => {
+      const birthDate = dayjs(date);
+      const maxAge = dayjs().subtract(100, "years");
+      return birthDate.isAfter(maxAge);
+    }, "Age cannot be over 100 years")
+    .refine((date) => {
+      const birthDate = dayjs(date);
+      const minAge = dayjs().subtract(18, "years");
+      return birthDate.isBefore(minAge) || birthDate.isSame(minAge);
+    }, "Employee should be 18 years old"),
+
   addr_region: z.string().min(1, "Region is required"),
   addr_province: z.string().min(1, "Province is required"),
   addr_municipal: z.string().min(1, "Municipal is required"),
@@ -95,17 +94,23 @@ export const employeeSchema = z.object({
   seniorHighSchool: z
     .string()
     .regex(
-     /^[a-zA-ZñÑ0-9\s]*$/,
+      /^[a-zA-ZñÑ0-9\s]*$/,
       "School name should only contain letters and numbers"
     )
     .optional(),
   seniorHighStrand: z
     .string()
-    .regex(/^[a-zA-ZñÑ0-9\s]*$/, "Strand should only contain letters and numbers")
+    .regex(
+      /^[a-zA-ZñÑ0-9\s]*$/,
+      "Strand should only contain letters and numbers"
+    )
     .optional(),
   tvlCourse: z
     .string()
-    .regex(/^[a-zA-ZñÑ0-9\s]*$/, "Course should only contain letters and numbers")
+    .regex(
+      /^[a-zA-ZñÑ0-9\s]*$/,
+      "Course should only contain letters and numbers"
+    )
     .optional()
     .nullable(),
   universityCollege: z
@@ -117,7 +122,10 @@ export const employeeSchema = z.object({
     .optional(),
   course: z
     .string()
-    .regex(/^[a-zA-ZñÑ0-9\s]*$/, "Course should only contain letters and numbers")
+    .regex(
+      /^[a-zA-ZñÑ0-9\s]*$/,
+      "Course should only contain letters and numbers"
+    )
     .optional(),
   highestDegree: z.string().optional(),
 
@@ -125,7 +133,7 @@ export const employeeSchema = z.object({
   masters: z
     .string()
     .regex(
-     /^[a-zA-ZñÑ0-9\s]*$/,
+      /^[a-zA-ZñÑ0-9\s]*$/,
       "Masters institution should only contain letters and numbers"
     )
     .optional(),
@@ -169,7 +177,7 @@ export const employeeSchema = z.object({
     ])
     .optional(),
 
-    certificates: z
+  certificates: z
     .array(z.union([z.instanceof(File), z.string()]))
     .optional()
     .default([]),
@@ -183,25 +191,63 @@ export const employeeSchema = z.object({
     .default([]),
 
   // Employment details
-  hired_at: z.string()
-  .min(1, "Hire date is required")
-  .refine((date) => {
-    const hireDate = dayjs(date);
-    const minimumHireDate = dayjs('1970-01-01');
-    return hireDate.isAfter(minimumHireDate);
-  }, "Hire date seems invalid. Please select a more recent date"),
-  
-  department_id: z.string().min(1, "Department is required"),
-  job_id: z.string().min(1, "Job is required"),
+  hired_at: z
+    .string()
+    .min(1, "Hire date is required")
+    .refine((date) => {
+      const hireDate = dayjs(date);
+      const minimumHireDate = dayjs("1970-01-01");
+      return hireDate.isAfter(minimumHireDate);
+    }, "Hire date seems invalid. Please select a more recent date"),
+
+  department_id: z.string().min(1, "Department is required").nullable(),
+  job_id: z.string().min(1, "Job is required").nullable(),
   // is_regular: z.preprocess((val) => {
   //   if (typeof val === "string") return val === "true";
   //   return val;
   // }, z.boolean()),
-  branch_id: z.string().min(1, "Branch is required"),
-  salary_grade_id: z.string().min(1, "Salary Grade is required"),
-  batch_id: z.string().min(1, "Branch is required"),
+  trainings: z
+    .array(
+      z.object({
+        training_type: z.string().optional().nullable(),
+        training_title: z.string().optional(),
+        training_description: z.string().optional(),
+        training_venue: z.string().optional(),
+        training_conductor: z.string().optional(),
+        training_startDate: z.string().optional(),
+        training_endDate: z.string().optional(),
+        trainingDuration: z.number().optional().nullable(),
+        trainingDurationType: z.string().optional(),
+        training_region: z.string().optional(),
+        training_province: z.string().optional(),
+        training_municipal: z.string().optional(),
+        training_baranggay: z.string().optional(),
+        training_certificates: z.array(z.any()).optional(),
+      })
+    )
+    .optional()
+    .default([]),
+
+  training_type: z.string().optional().nullable(),
+  training_title: z.string().optional(),
+  training_description: z.string().optional(),
+  training_venue: z.string().optional(),
+  training_conductor: z.string().optional(),
+  training_startDate: z.string().optional(),
+  training_endDate: z.string().optional(),
+  trainingDuration: z.number().optional().nullable(),
+  trainingDurationType: z.string().optional(),
+  training_region: z.string().optional(),
+  training_province: z.string().optional(),
+  training_municipal: z.string().optional(),
+  training_barangay: z.string().optional(),
+  training_certificates: z.array(z.any()).optional(),
+
+  branch_id: z.string().min(1, "Branch is required").nullable(),
+  salary_grade_id: z.string().min(1, "Salary Grade is required").nullable(),
+  batch_id: z.string().min(1, "Branch is required").nullable(),
   days_json: z.array(z.string()).optional().nullable().default([]),
-  employement_status_id: z.string().min(1, "Employement status is required"),
+  employement_status_id: z.string().min(1, "Employement status is required").nullable(),
 });
 
 export type EmployeeFormData = z.infer<typeof employeeSchema>;

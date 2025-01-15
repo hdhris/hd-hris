@@ -1,41 +1,79 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Add from "@/components/common/button/Add";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
-import FormFields, { FormInputProps } from "@/components/common/forms/FormFields";
+import FormFields, {
+  FormInputProps,
+} from "@/components/common/forms/FormFields";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JobPosition } from "@/types/employeee/JobType";
-import { useJobpositionData, useDepartmentsData, useSalaryGradeData } from "@/services/queries";
+import {
+  useJobpositionData,
+  useDepartmentsData,
+  useSalaryGradeData,
+} from "@/services/queries";
 import { useDisclosure } from "@nextui-org/react";
 import Drawer from "@/components/common/Drawer";
 import { Form } from "@/components/ui/form";
+import { useQuery } from "@/services/queries";
+import ScheduleSelection from "@/components/admin/employeescomponent/store/ScheduleSelection";
 
 interface AddJobPositionProps {
   onJobAdded: () => void;
 }
 
-const jobPositionSchema = z.object({
-  baseName: z
-    .string()
-    .min(1, "Position base name is required")
-    .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
-  department_id: z.string().min(1, "Department is required"),
-  min_salary: z.coerce.number().min(1, "Minimum salary is reqiured"),
-  max_salary: z.coerce.number().min(1, "Maximum salary is required"),
-  superior_id: z.string().nullish().transform((val) => val || null),
-  is_active: z.boolean().default(true),
-  is_superior: z.boolean().default(false),
-  max_employees: z.number().optional().nullish(),
-  max_department_instances: z.number().optional().nullish(),
-}).refine((data) => {
-  return data.min_salary <= data.max_salary;
-}, {
-  message: "Maximum salary must be greater than or equal to minimum salary",
-  path: ["max_salary"],
-});
+function detectCircularReference(
+  jobPositions: any[],
+  currentJobId: number,
+  selectedSuperiorId: number | null
+): boolean {
+  if (!selectedSuperiorId) return true;
+  const visited = new Set<number>();
+  let currentId: number | null = selectedSuperiorId;
+  while (currentId) {
+    if (currentId === currentJobId) return false;
+    if (visited.has(currentId)) break;
+    visited.add(currentId);
+    const job = jobPositions.find((j) => j.id === currentId);
+    currentId = job?.superior_id || null;
+  }
+  return true;
+}
+
+const jobPositionSchema = z
+  .object({
+    baseName: z
+      .string()
+      .min(1, "Position base name is required")
+      .regex(/^[a-zA-Z\s]*$/, "Position name should only contain letters"),
+    department_id: z.string().min(1, "Department is required").nullable(),
+    min_salary: z.coerce.number().optional().nullable(),
+    max_salary: z.coerce.number().optional().nullable(),
+    superior_id: z
+      .string()
+      .nullish()
+      .transform((val) => val || null),
+    batch_id: z.string().nullable(),
+    days_json: z.array(z.string()).default(["mon", "tue", "wed", "thu", "fri","sat", "sun"]),
+    is_active: z.boolean().default(true),
+    is_superior: z.boolean().default(false),
+    max_employees: z.number().optional().nullish(),
+    max_department_instances: z.number().optional().nullish(),
+    isIncludeDepartment: z.boolean().default(true),
+  })
+  .refine(
+    (data) => {
+      if (!data.min_salary || !data.max_salary) return true;
+      return data.min_salary <= data.max_salary;
+    },
+    {
+      message: "Minimum salary must be less than or equal to maximum salary",
+      path: ["min_salary"]
+    }
+  );
 
 type FormData = z.infer<typeof jobPositionSchema>;
 
@@ -43,11 +81,10 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { data: jobPositions } = useJobpositionData();
+  const { data: jobPositions, error, isLoading } = useJobpositionData();
   const { data: departments = [] } = useDepartmentsData();
   const { data: salaryGrades = [] } = useSalaryGradeData();
   const [fullName, setFullName] = useState("");
-
   const methods = useForm<FormData>({
     resolver: zodResolver(jobPositionSchema),
     defaultValues: {
@@ -56,19 +93,24 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       min_salary: 0,
       max_salary: 0,
       superior_id: "",
+      batch_id: "",
+      days_json: ["mon", "tue", "wed", "thu", "fri"],
       max_employees: 0,
       max_department_instances: 0,
       is_active: true,
       is_superior: false,
+      isIncludeDepartment: true,
     },
     mode: "onChange",
   });
 
-  const { watch } = methods;
+  const { watch, setValue } = methods;
   const baseName = watch("baseName");
   const selectedDepartmentId = watch("department_id");
   const minSalary = watch("min_salary");
   const maxSalary = watch("max_salary");
+  const isIncludeDepartment = watch("isIncludeDepartment");
+  const selectedBatchId = watch("batch_id");
 
   useEffect(() => {
     if (baseName && selectedDepartmentId) {
@@ -76,12 +118,16 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
         (dept) => dept.id.toString() === selectedDepartmentId
       );
       if (department) {
-        setFullName(`${department.name} ${baseName}`);
+        setFullName(
+          isIncludeDepartment ? `${department.name} ${baseName}` : baseName
+        );
+      } else {
+        setFullName(baseName);
       }
     } else {
       setFullName(baseName);
     }
-  }, [baseName, selectedDepartmentId, departments]);
+  }, [baseName, selectedDepartmentId, isIncludeDepartment, departments]);
 
   const departmentOptions = departments.reduce((acc: any[], dept) => {
     if (dept && dept.id && dept.name && dept.is_active) {
@@ -89,6 +135,24 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     }
     return acc;
   }, []);
+
+  const superiorOptions = useMemo(() => {
+    if (!jobPositions) return [];
+    const tempJobId = -1;
+    return jobPositions
+      .filter(
+        (job) =>
+          job.id !== tempJobId &&
+          (selectedDepartmentId
+            ? job.department_id === parseInt(selectedDepartmentId)
+            : true) &&
+          detectCircularReference(jobPositions, tempJobId, job.id)
+      )
+      .map((job) => ({
+        value: job.id.toString(),
+        label: job.name,
+      }));
+  }, [jobPositions, selectedDepartmentId]);
 
   const formFields: FormInputProps[] = [
     {
@@ -100,6 +164,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
         placeholder: "Select Department",
         options: departmentOptions,
       },
+      description: "Select the department of the position first",
     },
     {
       name: "baseName",
@@ -107,13 +172,23 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       type: "text",
       placeholder: "Enter position name",
       isRequired: true,
-      description: "Position name will be combined with department name",
+      description: "You can include or remove the department name manually.",
+    },
+    {
+      name: "isIncludeDepartment",
+      label: "Include Department Name",
+      type: "switch",
+      config: {
+        defaultSelected: true,
+      },
+      description:
+        "Toggle this option to include the department name in the job position.",
     },
     {
       name: "min_salary",
       label: "Minimum Salary Grade",
       type: "auto-complete",
-      isRequired: true,
+      // isRequired: true,
       config: {
         placeholder: "Select minimum salary grade",
         options: salaryGrades
@@ -128,7 +203,7 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       name: "max_salary",
       label: "Maximum Salary Grade",
       type: "auto-complete",
-      isRequired: true,
+      // isRequired: true,
       config: {
         placeholder: "Select maximum salary grade",
         options: salaryGrades
@@ -148,10 +223,8 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       description: "Select the next position for hierarchy purposes (optional)",
       config: {
         placeholder: "Select Next Position",
-        options: jobPositions?.map((job) => ({
-          value: job.id.toString(),
-          label: job.name,
-        })) || [],
+        options: methods.watch("is_superior") ? [] : superiorOptions,
+        isDisabled: methods.watch("is_superior"),
       },
     },
     {
@@ -199,13 +272,19 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
       description: "Adding new job position...",
     });
 
+    if (data.is_superior) {
+      data.superior_id = null;
+    }
+
     try {
       const formattedData = {
         name: fullName,
-        department_id: parseInt(data.department_id),
+        department_id: data.department_id ? parseInt(data.department_id) : null,
         min_salary: data.min_salary,
         max_salary: data.max_salary,
         superior_id: data.superior_id ? parseInt(data.superior_id) : null,
+        batch_id: data.batch_id ? parseInt(data.batch_id) : null,
+        days_json: data.days_json,
         is_active: data.is_active,
         is_superior: data.is_superior,
         max_employees: data.max_employees || null,
@@ -225,7 +304,6 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
           description: "Job position successfully added!",
           duration: 3000,
         });
-
         setTimeout(() => {
           onClose();
         }, 500);
@@ -251,47 +329,95 @@ const AddJob: React.FC<AddJobPositionProps> = ({ onJobAdded }) => {
     }
   };
 
+  if (error) {
+    return (
+      <div>
+        Error loading job positions:{" "}
+        {error.message || "Unknown error occurred."}
+      </div>
+    );
+  }
+
   return (
     <>
       <Add variant="solid" name="Add Job Position" onClick={onOpen} />
       <Drawer
         title="Add New Job Position"
-        size="sm"
+        size="lg"
         isOpen={isOpen}
         onClose={() => {
           methods.reset();
           onClose();
         }}
       >
-        <Form {...methods}>
-          <form
-            className="mb-4 space-y-4"
-            id="drawer-form"
-            onSubmit={methods.handleSubmit(onSubmit)}
-          >
-            <div className="space-y-4">
-              {fullName && (
-                <div className="p-4 bg-gray-50 rounded-md">
-                  <p className="text-sm font-medium text-gray-700">
-                    Full Position Name:
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900">{fullName}</p>
+        <FormProvider {...methods}>
+          <Form {...methods}>
+            <form
+              className="mb-4 space-y-4"
+              id="drawer-form"
+              onSubmit={methods.handleSubmit(onSubmit)}
+            >
+              <div className="space-y-4">
+                {fullName && (
+                  <div className="p-4 bg-gray-50 rounded-md">
+                    <p className="text-sm font-medium text-gray-700">
+                      Full Position Name:
+                    </p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {fullName}
+                    </p>
+                  </div>
+                )}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="sm:col-span-1">
+                    <FormFields items={[formFields[0]]} size="md" />
+                  </div>
+                  <div className="sm:col-span-1">
+                    <FormFields items={[formFields[1]]} size="sm" />
+                  </div>
+                  <div className="sm:col-span-1 pt-6">
+                    <FormFields items={[formFields[2]]} size="sm"/>
+                  </div>
                 </div>
-              )}
-              <FormFields items={formFields} size="sm" />
-              {minSalary && maxSalary && (
-                <div className="p-4 bg-gray-50 rounded-md">
-                  <p className="text-sm font-medium text-gray-700">
-                    Salary Range:
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    ₱{minSalary.toLocaleString()} - ₱{maxSalary.toLocaleString()}
-                  </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormFields items={[formFields[3]]} size="md" />{" "}
+                  {/* min_salary */}
+                  <FormFields items={[formFields[4]]} size="md" />{" "}
+                  {/* max_salary */}
                 </div>
-              )}
-            </div>
-          </form>
-        </Form>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <FormFields items={[formFields[6]]} size="sm" />{" "}
+                  {/* max_employees */}
+                  <FormFields items={[formFields[7]]} size="sm" />{" "}
+                  {/* max_department_instances */}
+                  <FormFields items={[formFields[5]]} size="md" />{" "}
+                 {/* superior_id */}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormFields items={[formFields[8]]} size="sm" />{" "}
+                  {/* is_superior */}
+                  <FormFields items={[formFields[9]]} size="sm" />{" "}
+                  {/* is_active */}
+                </div>
+                {minSalary && maxSalary && (
+                  <div className="p-4 bg-gray-50 rounded-md">
+                    <p className="text-sm font-medium text-gray-700">
+                      Salary Range:
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      ₱{minSalary.toLocaleString()} - ₱
+                      {maxSalary.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+                <div className="pt-4 border-t">
+                  <h3 className="text-lg font-medium mb-4">Default Schedule</h3>
+                  <ScheduleSelection />
+                </div>
+              </div>
+            </form>
+          </Form>
+        </FormProvider>
       </Drawer>
     </>
   );

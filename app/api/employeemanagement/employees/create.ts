@@ -37,6 +37,7 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
     department_id,
     educational_bg_json,
     family_bg_json,
+    training_programs_attended_json ,
     ...rest
   } = employeeData;
 
@@ -81,6 +82,7 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
 
         const educationalBackground = parseJsonInput(educational_bg_json);
         const familyBackground = parseJsonInput(family_bg_json);
+        const trainingBackground  = parseJsonInput(training_programs_attended_json );
 
         const newEmployee = await tx.trans_employees.create({
           data: {
@@ -94,6 +96,7 @@ async function createEmployeeWithAccount(employeeData: any, accountData: any) {
             termination_json: [],
             educational_bg_json: educationalBackground,
             family_bg_json: familyBackground,
+            training_programs_attended_json: trainingBackground,
             created_at: toGMT8().toISOString(),
             updated_at: toGMT8().toISOString(),
           },
