@@ -145,7 +145,7 @@ interface FormInputOptions<T> {
 const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
     // Determine if the field is visible
     const isVisible = typeof item.isVisible === "function" ? item.isVisible() : item.isVisible !== false;
-    const timezone = getLocalTimeZone(); //"UTC";
+    const timezone = getLocalTimeZone(); // "UTC";
     if (!isVisible) return null; // If the field is not visible, return null
     return (
         <FormField
@@ -415,21 +415,16 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                             id={item.name as string}
                                             aria-label={item.name as string}
                                             isDisabled={item.inputDisabled}
+                                            hideTimeZone
                                             autoFocus={item.isFocus}
                                             variant="bordered"
                                             radius="sm"
                                             size={size}
-                                            onChange={(value) =>
-                                                field.onChange((value as ZonedDateTime).toDate())
-                                            }
+                                            onChange={(e) => field.onChange && field.onChange(((e as ZonedDateTime | null)?.toDate() ?? new Date()).toISOString())}
                                             value={
                                                 field.value && toGMT8(field.value).isValid()
                                                     ? parseAbsolute(toGMT8(field.value).toISOString(), timezone)
                                                     : null
-                                            }
-                                            granularity={
-                                                ((item.config as any)?.granularity as "hour" | "minute" | "second") ||
-                                                "hour"
                                             }
                                             {...(item.config as TimeInputProps)}
                                         />

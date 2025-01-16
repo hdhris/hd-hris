@@ -20,19 +20,11 @@ export async function POST(req: NextRequest) {
     try {
         await prisma.$transaction(async (psm) => {
             // Delete removed logs
-
-            await Promise.all(
-                removed.map((logID) => {
-                    return psm.log_attendances.update({
-                        where: {
-                            id: logID,
-                        },
-                        data: {
-                            deleted_at: toGMT8().toISOString(),
-                        },
-                    });
-                })
-            );
+            await psm.log_attendances.deleteMany({
+                where: {
+                    id: { in: removed },
+                },
+            });
 
             // Update or create logs
             await Promise.all(

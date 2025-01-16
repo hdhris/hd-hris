@@ -153,7 +153,7 @@ async function attendanceData({
                         statusesByDate[date][emp.id] = await getAttendanceStatus({
                             employee: emp,
                             date,
-                            rate_per_minute: 0.75,
+                            // rate_per_minute: 0.75,
                             no_work: holiday_detail(date).no_work,
                             increase_rate: holiday_detail(date).increase_rate, //thisDate.isSame(holiday) ? 1.20 : 1,
                             schedules: employeeScheduleMap[emp.id],

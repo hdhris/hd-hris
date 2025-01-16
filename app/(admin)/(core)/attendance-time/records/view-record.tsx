@@ -9,8 +9,8 @@ import showDialog from "@/lib/utils/confirmDialog";
 import { formatCurrency } from "@/lib/utils/numberFormat";
 import { calculateShiftLength } from "@/lib/utils/timeFormatter";
 import { toGMT8 } from "@/lib/utils/toGMT8";
-import { AttendanceLog, LogStatus } from "@/types/attendance-time/AttendanceTypes";
-import { parseAbsolute} from "@internationalized/date";
+import { AttendanceLog, determineAttendance, LogStatus } from "@/types/attendance-time/AttendanceTypes";
+import { parseAbsolute } from "@internationalized/date";
 import { Button, Chip, Radio, RadioGroup, ScrollShadow, TimeInput } from "@nextui-org/react";
 import axios from "axios";
 import { capitalize, toUpper } from "lodash";
@@ -40,43 +40,43 @@ interface ViewRecordProps {
 function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showDTR, setShowDTR] = useState(false);
-    const [time, setTime] = useState(toGMT8(attendanceInfo?.date).toISOString());
+    const [time, setTime] = useState(toGMT8(attendanceInfo?.date).startOf("minute").toISOString());
     const [punch, setPunch] = useState("0");
     const [logs, setLogs] = useState(attendanceInfo?.all_logs ?? []);
 
-    useEffect(()=>{
-        if(attendanceInfo?.all_logs){
+    useEffect(() => {
+        if (attendanceInfo?.all_logs) {
             setLogs(attendanceInfo?.all_logs);
         }
-    },[attendanceInfo?.all_logs])
+    }, [attendanceInfo?.all_logs]);
 
-    const refresh = ()=> {
-        setTime(toGMT8(attendanceInfo?.date).toISOString());
+    const refresh = () => {
+        setTime(toGMT8(attendanceInfo?.date).startOf("minute").toISOString());
         setPunch("0");
-    }
+    };
 
     const addLog = () => {
         if (time) {
-          const newLog = {
-            id: undefined,
-            employee_id: attendanceInfo?.employee.id ?? 0,
-            punch: Number(punch),
-            timestamp: time,
-            status: 6,
-            unique_id: `${attendanceInfo?.employee.id}${time}`,
-          }
-          setLogs([...logs, newLog])
-          refresh();
+            const newLog = {
+                id: undefined,
+                employee_id: attendanceInfo?.employee.id ?? 0,
+                punch: Number(punch),
+                timestamp: time,
+                status: 6,
+                unique_id: `${attendanceInfo?.employee.id}${time}`,
+            };
+            setLogs([...logs, newLog]);
+            refresh();
         }
-      }
-    
-      const removeLog = (unique_id: string) => {
-        setLogs(logs.filter((log) => log.unique_id !== unique_id))
-      }
+    };
 
-      const updateLog = (unique_id: string, value: string) => {
-        setLogs(prev => {
-            return prev.map(item => {
+    const removeLog = (unique_id: string) => {
+        setLogs(logs.filter((log) => log.unique_id !== unique_id));
+    };
+
+    const updateLog = (unique_id: string, value: string) => {
+        setLogs((prev) => {
+            return prev.map((item) => {
                 if (item.unique_id === unique_id) {
                     return {
                         ...item,
@@ -88,29 +88,32 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
             });
         });
     };
-    
-      const updateLogs = async() => {
+
+    const updateLogs = async () => {
         // This function is called when the "Update Log List" button is clicked
         // In a real application, you might want to save the logs to a database or perform other actions
         setIsSubmitting(true);
         const result = await showDialog({
-            title: "Confirm", message: "This action is irreversable.\n\nConfirm to update log.",
+            title: "Confirm",
+            message: "This action is irreversable.\n\nConfirm to update log.",
         });
-        if (result != "yes"){
+        if (result != "yes") {
             setIsSubmitting(false);
-            return
-        };
+            return;
+        }
         try {
             await axios.post("/api/admin/attendance-time/records/update", {
-                removed: attendanceInfo?.all_logs.filter(item => !logs.some(log => log.unique_id === item.unique_id)).map(item=> item.id),
-                updated: logs.map(log => ({
+                removed: attendanceInfo?.all_logs
+                    .filter((item) => !logs.some((log) => log.unique_id === item.unique_id))
+                    .map((item) => item.id),
+                updated: logs.map((log) => ({
                     id: log.id,
                     timestamp: log.timestamp,
                     punch: log.punch,
                     status: log.status,
                     employee_id: log.employee_id,
                     unique_id: log.unique_id,
-                }))
+                })),
             });
             toast({
                 title: "Incident reported successfully!",
@@ -127,7 +130,7 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
             });
         }
         setIsSubmitting(false);
-      }
+    };
 
     return (
         <>
@@ -178,6 +181,14 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
                             <div className="flex justify-between items-center">
                                 <p className="text-sm text-gray-500 font-semibold">Morning</p>
                                 <Button
+                                    isDisabled={[
+                                        "Unscheduled",
+                                        "Unhired",
+                                        "Unemployed",
+                                        "Suspended",
+                                        "No Work",
+                                        "On Leave",
+                                    ].includes(determineAttendance(attendanceInfo!.status!))}
                                     onPress={() => setShowDTR(true)}
                                     size="sm"
                                     startContent={<TiPen />}
@@ -338,10 +349,10 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
                         label: "Close",
                         isLoading: isSubmitting,
                         onPress: () => {
-                            if(attendanceInfo?.all_logs){
+                            if (attendanceInfo?.all_logs) {
                                 setLogs(attendanceInfo?.all_logs);
                             }
-                            setShowDTR(false)
+                            setShowDTR(false);
                         },
                     },
                     onAction: {
@@ -353,7 +364,11 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
             >
                 <div className="grid grid-cols-3 gap-4 items-center w-full">
                     <TimeInput
-                        value={toGMT8(time).isValid() ? parseAbsolute(toGMT8(time).toISOString(), "UTC") : null}
+                        value={
+                            toGMT8(time).isValid()
+                                ? parseAbsolute(toGMT8(time).startOf("minute").toISOString(), "UTC")
+                                : null
+                        }
                         onChange={(e) => setTime((e?.toDate() ?? new Date()).toISOString())}
                         hideTimeZone
                         variant="bordered"
@@ -419,7 +434,13 @@ function ViewAttendanceRecord({ attendanceInfo, onClose }: ViewRecordProps) {
                                         </div>
                                     ))}
                                 </RadioGroup>
-                                <Button size="sm" className="ms-auto" isIconOnly variant="light" onPress={() => removeLog(log.unique_id)}>
+                                <Button
+                                    size="sm"
+                                    className="ms-auto"
+                                    isIconOnly
+                                    variant="light"
+                                    onPress={() => removeLog(log.unique_id)}
+                                >
                                     <IoIosClose size={20} />
                                 </Button>{" "}
                             </li>

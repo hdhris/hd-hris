@@ -82,9 +82,9 @@ export function determineAttendance({
     if (
         amIn?.time &&
         toGMT8(amIn.time).startOf("day").isSame(toGMT8().startOf("day")) &&
-        !amOut?.time &&
-        !pmIn?.time &&
-        !pmOut?.time
+        amOut?.status === "awaiting" &&
+        pmIn?.status === "awaiting" &&
+        pmOut?.status === "awaiting"
     ) {
         return "Present";
     }

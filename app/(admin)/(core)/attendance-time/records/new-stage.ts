@@ -27,7 +27,7 @@ export async function getAttendanceStatus({
     date,
     schedules,
     logs,
-    rate_per_minute,
+    // rate_per_minute,
     increase_rate,
     leave,
     overtime,
@@ -54,7 +54,7 @@ export async function getAttendanceStatus({
     date: string;
     schedules: EmployeeSchedule[] | null | undefined;
     logs?: AttendanceLog[];
-    rate_per_minute: number;
+    // rate_per_minute: number;
 }): Promise<LogStatus> {
     if (!isEmployeeAvailable({ employee, find: ["resignation", "termination"], date })) {
         return {
@@ -114,7 +114,6 @@ export async function getAttendanceStatus({
             ...emptyAmount,
         };
     }
-    // if(employee.id === 61) console.log(employee.id, {schedule});
 
     const notSuspended = isEmployeeAvailable({ employee, find: ["suspension"], date });
     const offset = 0; // Time offset for GMT+8
@@ -138,6 +137,10 @@ export async function getAttendanceStatus({
         .year(currentDay.year())
         .month(currentDay.month())
         .date(currentDay.date());
+
+    // Get the actual shift length of an employee
+    const factShiftLength = scheduleTimeOut.diff(scheduleTimeIn, "minute") - schedule.break_min;
+    const rate_per_minute = calculateRatePerMinute(employee.ref_salary_grades.amount, currentDay.year(), currentDay.month(), factShiftLength, dayNames)
 
     const awaitMornningIn =
         today.isBefore(currentDay) || (today.isSame(currentDay) && toGMT8().isSameOrBefore(scheduleTimeIn));
@@ -193,7 +196,7 @@ export async function getAttendanceStatus({
                             // Consider it as an AM time in
                             if (timestamp.hour() <= 12 && timestamp.minute() <= 30) {
                                 // "LATE" if time-in is 5mins later than clock-in schedule...
-                                const stat: InStatus = timestamp.diff(scheduleTimeIn) > gracePeriod ? "late" : "ontime";
+                                const stat: InStatus = timestamp.diff(scheduleTimeIn, "minute") > gracePeriod ? "late" : "ontime";
                                 amIn = {
                                     id: log.id, // Record the log ID for later reference
                                     time: timestamp.toISOString(),
@@ -426,9 +429,6 @@ export async function getAttendanceStatus({
             return morning + afternoon;
         })();
 
-        // Get the actual shift length of an employee
-        const factShiftLength = scheduleTimeOut.diff(scheduleTimeIn, "minute") - schedule.break_min;
-
         // Rendered shift lenght must never exceed actaul shift length
         renderedShift = Math.min(shiftLength, factShiftLength);
         // Instead, record the overtime length for employee's log record
@@ -474,9 +474,6 @@ export async function getAttendanceStatus({
                     leaveOUT = scheduleTimeOut.toISOString();
                 }
 
-                // if(employee.id === 2){
-                //     console.log({ct: current.toISOString(), cd: currentDay.toDate().toISOString()})
-                // }
                 if (current.getTime() === currentDay.toDate().getTime()) break;
             }
 
@@ -651,3 +648,57 @@ export const getAccurateEmployeeSchedule = ({
 
     return rangedDateSchedule;
 };
+
+function calculateRatePerMinute(
+    monthlySalary: number,
+    year: number, // Year (e.g., 2023)
+    month: number, // Month (1 for January, 2 for February, etc.)
+    workingMinutesPerDay: number, // Total working minutes per day
+    workDays: string[] // Array of workday names (e.g., ["mon", "tue", "wed", "thu", "fri"])
+): number {
+    // Step 1: Calculate the total number of working days in the month
+    const workingDaysPerMonth = getWorkingDaysInMonth(year, month, workDays);
+
+    // Step 2: Calculate total working minutes in the month
+    const workingMinutesPerMonth = workingDaysPerMonth * workingMinutesPerDay;
+
+    // Step 3: Calculate rate per minute
+    const ratePerMinute = monthlySalary / workingMinutesPerMonth;
+
+    // Round to 2 decimal places for readability
+    return Math.round(ratePerMinute * 100) / 100;
+}
+
+// Helper function to calculate the number of working days in a month
+function getWorkingDaysInMonth(year: number, month: number, workDays: string[]): number {
+    let count = 0;
+    const date = new Date(year, month - 1, 1); // JavaScript months are 0-based
+    const nextMonth = toGMT8(date).add(1,'months').toDate();
+
+    // Loop through each day of the month
+    while (date < nextMonth) {
+        const dayName = getDayName(date); // Get the day name (e.g., "mon", "tue")
+        if (workDays.includes(dayName)) { // Check if the day is a workday
+            count++;
+        }
+        date.setDate(date.getDate() + 1); // Move to the next day
+    }
+
+    return count;
+}
+
+// Helper function to get the day name (e.g., "mon", "tue")
+function getDayName(date: Date): string {
+    const dayNames = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    return dayNames[date.getDay()];
+}
+
+// // Example usage:
+// const monthlySalary = 30000; // ₱30,000
+// const year = 2023; // Example: January 2023
+// const month = 1; // January (1 for January, 2 for February, etc.)
+// const workingMinutesPerDay = 480; // Example: 8 hours/day = 480 minutes/day
+// const workDays = ["mon", "tue", "wed", "thu", "fri"]; // Workdays (Monday to Friday)
+
+// const ratePerMinute = calculateRatePerMinute(monthlySalary, year, month, workingMinutesPerDay, workDays);
+// console.log(`Rate per minute: ₱${ratePerMinute}`); // Output: Rate per minute: ₱2.84

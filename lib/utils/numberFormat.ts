@@ -1,4 +1,4 @@
-import { formatDistanceToNow } from 'date-fns'
+import {  } from 'date-fns'
 import {toGMT8} from "@/lib/utils/toGMT8";
 
 function formatTimeAgo(date: Date | string): string {
@@ -39,6 +39,10 @@ const compactNumber = (x: number) => {
       }).format(x);
 };
 
+function calculateMonthPercent(dayCount: number, daysInMonth: number){
+    return daysInMonth === 0 ? 0 : Math.round((dayCount / daysInMonth) * 4) / 4;
+}
 
 
-export {numberWithCommas, ordinalSuffix, getRandomInt, compactNumber, formatCurrency, formatTimeAgo}
+
+export {numberWithCommas, ordinalSuffix, getRandomInt, compactNumber, formatCurrency, formatTimeAgo, calculateMonthPercent}
