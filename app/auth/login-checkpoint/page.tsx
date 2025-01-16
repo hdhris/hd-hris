@@ -69,25 +69,8 @@ function Page() {
         setLoading(true);
         try {
             const res = await axiosInstance.put("/api/auth/login-checkpoint", values)
-
-            // const data = {
-            //     username: values.username, password: values.new_password
-            // }
-            // console.log({res})
             if (res.status === 200) {
-                // console.log({})
                 window.location.replace("/dashboard")
-                // window.location.reload()
-                // const loginResponse = await login(data);
-                // console.log({loginResponse})
-                // if (loginResponse.success) {
-                //     // Redirect to dashboard
-                //     console.log({session})
-                //     router.push("/dashboard");
-                // } else if (loginResponse.error) {
-                //     // Display error message
-                //     setError(loginResponse.error.message);
-                // }
             } else {
                 setError(res.data.message);
             }
@@ -107,7 +90,7 @@ function Page() {
         } finally {
             setLoading(false);
         }
-    }, [router])
+    }, [])
 
     return (<section className='h-screen flex items-center justify-center gap-10'>
         <Card className='p-4 ' shadow='sm' radius='sm'>
