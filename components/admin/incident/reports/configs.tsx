@@ -12,7 +12,7 @@ export const tableConfig: TableConfigProps<IncidentReport> = {
         { uid: "employee", name: "Employee" },
         { uid: "date", name: "Occurance Date" },
         { uid: "location", name: "Location" },
-        { uid: "type", name: "Type" },
+        { uid: "type", name: "Category" },
         { uid: "severity", name: "Severity" },
         { uid: "status", name: "Status" },
         { uid: "action", name: "Reporter" },

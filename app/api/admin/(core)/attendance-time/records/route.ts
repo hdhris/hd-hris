@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
                     lt: isoEndDate, // Matches records within the range
                 },
                 ...(empID ? { employee_id: Number(empID) } : {}),
+                deleted_at: null,
                 // ...(department_id ? { department_id: Number(department_id) } : {}),
             },
             // orderBy: {

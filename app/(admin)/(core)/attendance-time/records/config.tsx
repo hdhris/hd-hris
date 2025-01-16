@@ -8,8 +8,8 @@ import { TableConfigProps } from "@/types/table/TableDataTypes";
 import { CalendarDate, Chip, cn } from "@nextui-org/react";
 import { toUpper } from "lodash";
 
-const modeType = ["Password", "Fingerprint", "Card", "Face ID", "Other"];
-const punchType = ["IN", "OUT"];
+export const modeType = ["Password", "Fingerprint", "Card", "Face ID", "Other", "Manual"];
+export const punchType = ["IN", "OUT"];
 
 export const attLogRecordConfig = (date: CalendarDate, attendanceData?: AttendanceData) => {
     return {

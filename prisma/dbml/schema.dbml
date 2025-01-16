@@ -164,10 +164,11 @@ Table log_attendances {
   id Int [pk, increment]
   employee_id Int [not null]
   timestamp DateTime [not null]
-  status Int
-  created_at DateTime [default: `now()`]
-  punch Int
+  status Int [not null]
+  created_at DateTime [default: `now()`, not null]
+  punch Int [not null]
   unique_id String [unique, not null]
+  deleted_at DateTime
   trans_employees trans_employees [not null]
   trans_overtimes trans_overtimes [not null]
 }

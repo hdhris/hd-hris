@@ -1,7 +1,7 @@
 "use client";
-import React, { FC, ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Controller, ControllerRenderProps, FieldValues, useFormContext } from "react-hook-form";
+import { ControllerRenderProps, FieldValues, useFormContext } from "react-hook-form";
 import InputStyle, { DateStyle } from "@/lib/custom/styles/InputStyle";
 import { SelectionProp } from "./types/SelectionProp";
 import { InputProps, TextAreaProps } from "@nextui-org/input";
@@ -30,10 +30,10 @@ import {
     Textarea,
     TimeInput,
     TimeInputProps,
-    cn,
+    cn
 } from "@nextui-org/react";
 import { Case, Default, Switch as SwitchCase } from "@/components/common/Switch";
-import { getLocalTimeZone, parseAbsolute } from "@internationalized/date";
+import { getLocalTimeZone, parseAbsolute, ZonedDateTime } from "@internationalized/date";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Radio } from "@nextui-org/radio";
@@ -145,7 +145,7 @@ interface FormInputOptions<T> {
 const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
     // Determine if the field is visible
     const isVisible = typeof item.isVisible === "function" ? item.isVisible() : item.isVisible !== false;
-    const timezone = getLocalTimeZone(); //"UTC";
+    const timezone = getLocalTimeZone(); // "UTC";
     if (!isVisible) return null; // If the field is not visible, return null
     return (
         <FormField
@@ -412,26 +412,21 @@ const RenderFormItem = <T,>({ item, control, size }: FormInputOptions<T>) => {
                                     </Case>
                                     <Case of="time-input">
                                         <TimeInput
+                                            id={item.name as string}
+                                            aria-label={item.name as string}
+                                            isDisabled={item.inputDisabled}
+                                            hideTimeZone
+                                            autoFocus={item.isFocus}
+                                            variant="bordered"
+                                            radius="sm"
+                                            size={size}
+                                            onChange={(e) => field.onChange && field.onChange(((e as ZonedDateTime | null)?.toDate() ?? new Date()).toISOString())}
                                             value={
                                                 field.value && toGMT8(field.value).isValid()
                                                     ? parseAbsolute(toGMT8(field.value).toISOString(), timezone)
                                                     : null
                                             }
-                                            granularity={
-                                                ((item.config as any)?.granularity as "hour" | "minute" | "second") ||
-                                                "hour"
-                                            }
-                                            id={item.name as string}
-                                            aria-label={item.name as string}
-                                            isDisabled={item.inputDisabled}
-                                            autoFocus={item.isFocus}
-                                            variant="bordered"
-                                            radius="sm"
-                                            size={size}
                                             {...(item.config as TimeInputProps)}
-                                            onChange={(value) =>
-                                                field.onChange(toGMT8(value?.toString().split("[")[0]).toISOString())
-                                            }
                                         />
                                     </Case>
                                     <Case of="text-area">

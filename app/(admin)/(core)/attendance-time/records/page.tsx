@@ -169,12 +169,15 @@ export default function Page() {
         // console.log({ attendanceData });
         const foundLog = attendanceData?.attendanceLogs.find((al) => al.employee_id === selectedEmployee.id);
         const status = attendanceData?.statusesByDate[`${date}`][`${selectedEmployee.id}`];
+        const logs = attendanceData?.attendanceLogs.filter(item => item.employee_id === selectedEmployee.id && toGMT8(item.timestamp).startOf('day').isSame(toGMT8(date.toDate("UTC")).startOf('day')))
         console.log({
             log_info: foundLog!,
             status: status,
             employee: selectedEmployee,
         });
         return {
+            date: datedApi,
+            all_logs: logs ?? [],
             log_info: foundLog!,
             status: status,
             employee: selectedEmployee,
@@ -293,7 +296,7 @@ export default function Page() {
                                 clockSchedule
                             ) : selectedLog ? (
                                 <Chip variant="bordered" color="danger">
-                                    Invalid schedule
+                                    No schedule
                                 </Chip>
                             ) : (
                                 <Chip variant="bordered">No log selected</Chip>

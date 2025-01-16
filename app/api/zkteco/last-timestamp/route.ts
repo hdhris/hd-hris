@@ -8,6 +8,9 @@ export async function GET(req: NextRequest) {
     try {
 
         const timestamp = await prisma.log_attendances.findFirst({
+            where: {
+                deleted_at: null,
+            },
             select: {
                 timestamp: true,
             },

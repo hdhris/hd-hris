@@ -71,7 +71,7 @@ function IncidentDrawer({ report, onClose }: IncidentDrawerProps) {
                                 value={toGMT8(report.occurance_date).format("hh:mm:a")}
                             /> */}
                             <hr />
-                            <ValueLabel icon={<TbMessageReport />} label="Type" value={report.type} />
+                            <ValueLabel icon={<TbMessageReport />} label="Category" value={report.type} />
                             <hr />
                             <ValueLabel
                                 icon={<IoLocationOutline />}

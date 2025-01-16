@@ -196,10 +196,11 @@ model log_attendances {
   id              Int               @id @default(autoincrement())
   employee_id     Int
   timestamp       DateTime          @db.Timestamp(6)
-  status          Int?
-  created_at      DateTime?         @default(now()) @db.Timestamp(6)
-  punch           Int?
+  status          Int
+  created_at      DateTime          @default(now()) @db.Timestamp(6)
+  punch           Int
   unique_id       String            @unique
+  deleted_at      DateTime?         @db.Timestamptz(6)
   trans_employees trans_employees   @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_attendance_employees1")
   trans_overtimes trans_overtimes[]
 }

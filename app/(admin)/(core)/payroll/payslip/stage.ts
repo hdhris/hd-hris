@@ -23,6 +23,7 @@ import axios from "axios";
 import { fetchAttendanceData } from "../../attendance-time/records/stage";
 import { ContributionType } from "@/types/benefits/plans/plansTypes";
 import { EmployeeSchedule } from "@/types/attendance-time/AttendanceTypes";
+import { calculateMonthPercent } from "@/lib/utils/numberFormat";
 
 export async function stageTable(
   dateInfo: ProcessDate,
@@ -138,7 +139,7 @@ export async function stageTable(
     const endDate = toGMT8(String(dateInfo?.end_date)).startOf('day');
     const payrollDays = endDate.diff(startDate,"day");
     const daysInMonth = startDate.daysInMonth();
-    const monthPercent = Math.round((payrollDays / daysInMonth)*2) / 2;
+    const monthPercent = calculateMonthPercent(payrollDays,daysInMonth); // Math.round((payrollDays / daysInMonth)*2) / 2;
 
     const amountRecordsMap = new Map(dataPH.map(dph=> [dph.id, new Map(dph.dim_payhead_specific_amounts.map(psa => [psa.employee_id, psa.amount]))]));
     await Promise.all(
