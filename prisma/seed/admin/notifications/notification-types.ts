@@ -1,64 +1,53 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
-import { toGMT8 } from "../../../../lib/utils/toGMT8";
+export async function notificationTypes(prisma: any){
+    console.log("Creating Notification Types...");
 
-export async function seedNotificationTypes(prisma: any) {
-    console.log("Seeding Notification Type...");
-    const notif_type = [
+    const notification_types = [
         {
+            "id": 1,
             "type_name": "System Alert",
             "description": "General system-related notifications."
         },
         {
+            "id": 2,
             "type_name": "Task Assignment",
             "description": "Notifications for new tasks assigned."
         },
         {
+            "id": 3,
             "type_name": "Reminder",
             "description": "Notification to remind about deadlines."
         },
         {
+            "id": 4,
             "type_name": "Message",
             "description": "Notifications for new messages."
         },
         {
+            "id": 5,
             "type_name": "Announcement",
             "description": "Organization-wide announcements."
         },
         {
+            "id": 6,
             "type_name": "Warning",
             "description": "Notifications for warnings or issues."
         },
         {
+            "id": 7,
             "type_name": "Error",
             "description": "Notifications for critical errors."
         },
         {
+            "id": 8,
             "type_name": "Promotion",
             "description": "Promotional notifications or offers."
         }
     ]
-    // Upsert privileges concurrently
-    await Promise.all(
-        notif_type.map((nt) =>
-            prisma.sys_notification_types.create({
-                data: {...nt},
-            })
-        )
-    );
 
-    console.log("Seeding Notification Type completed successfully.");
+    await prisma.sys_notification_types.createMany({
+        data: notification_types
+    })
+
+    console.log("Finished Notification Types...");
+
 }
-
-// // Execute the function if the file runs standalone
-// if (require.main === module) {
-//     seedSysPrivileges()
-//         .then(async () => {
-//             await prisma.$disconnect();
-//         })
-//         .catch(async (e) => {
-//             console.error("Error seeding sys_privileges:", e);
-//             await prisma.$disconnect();
-//             process.exit(1);
-//         });
-// }

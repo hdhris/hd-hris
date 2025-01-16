@@ -13,7 +13,6 @@ type Login = {
     username: string; password: string;
 };
 
-
 export async function login({username, password}: Login) {
     try {
         // Perform the sign-in

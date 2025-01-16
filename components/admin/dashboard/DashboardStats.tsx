@@ -122,8 +122,6 @@ const SalaryData = () => {
                                           formattingFn={(val) => `₱${numberWithCommas(val)}`}/>}
                         subHeading={payroll && payroll.length > 0  ? `Gross Salary for this ${payroll[0]?.payroll_date}` : "No deployed payroll"}
                         classNames={{heading: "text-3xl"}}>
-        {/*<AreaChart data={data} w="100%" h={500} style={options}/>*/}
-        {/*<ApexChart type="bar" series={data.flatMap(item => item.value)} height="100%" width="100%" style={barOptions}/>*/}
         <PayrollGraph payrollData={dashboard_data?.payroll || []}/>
     </BorderCard>);
 }
@@ -140,7 +138,6 @@ const TopSalaries = () => {
     });
 
     const sortedItems = React.useMemo(() => {
-        console.log({attendanceData});
         return (attendanceData?.attendanceLogs?.sort((a, b) => {
             return toGMT8(b.timestamp).diff(toGMT8(a.timestamp));
         }) ?? []);
@@ -195,8 +192,6 @@ const TopSalaries = () => {
                     } else {
                         emp = null; // Skip employees who don't match the session criteria
                     }
-
-                    console.log({emp, employee, current, attendanceData, logStatus});
                     // If the employee is not relevant to the current session, return null to exclude
                     if (!emp) return {label: null, value: null};
 

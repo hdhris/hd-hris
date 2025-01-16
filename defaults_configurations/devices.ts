@@ -6,18 +6,19 @@ import { toGMT8 } from "@/lib/utils/toGMT8";
 export async function devices(user_id: string) {
     try {
         // Fetch IP and user-agent details concurrently
-        // console.time("Fetch IP and User-Agent");
         const [ipResponse, userAgent] = await Promise.all([
-            fetch('https://ipapi.co/json').then(res => res.json()),
+            fetch('https://ipapi.co/json', { cache: 'no-store' })
+                .then(res => res.json())
+                .catch(() => null), // If IP API fails, set response to null
             Promise.resolve(headers().get('user-agent') || '')
         ]);
-        // console.timeEnd("Fetch IP and User-Agent");
 
-        // console.log("Ip Response: ", ipResponse);
-        // console.log("Region: ", userAgent)
         const ua = parse(userAgent);
-        const ip_address = ipResponse.ip;
-        const { country_code, country_name, region, city } = ipResponse;
+        const ip_address = ipResponse?.ip || null; // Set to null if IP API failed
+        const country_code = ipResponse?.country_code || null;
+        const country_name = ipResponse?.country_name || null;
+        const region = ipResponse?.region || null;
+        const city = ipResponse?.city || null;
 
         const type = 'Browser';
         const platform = ua.browser;
@@ -25,7 +26,6 @@ export async function devices(user_id: string) {
         const os_version = String(ua.osVersion);
 
         // Fetch user and existing device data concurrently
-        // console.time("Fetch User and Existing Device");
         const [user, existingDevice] = await Promise.all([
             prisma.acl_user_access_control.findUnique({
                 where: { user_id: user_id },
@@ -37,7 +37,6 @@ export async function devices(user_id: string) {
                 },
             }),
         ]);
-        // console.timeEnd("Fetch User and Existing Device");
 
         if (!user) {
             console.error(`User with ID ${user_id} does not exist.`);
@@ -46,7 +45,6 @@ export async function devices(user_id: string) {
 
         if (!existingDevice) {
             // Create a new device record
-            // console.time("Create New Device");
             await prisma.sec_devices.create({
                 data: {
                     ip_address,
@@ -64,10 +62,8 @@ export async function devices(user_id: string) {
                     acl_user_access_control_id: user.id,
                 },
             });
-            // console.timeEnd("Create New Device");
         } else {
             // Update the existing device record
-            // console.time("Update Existing Device");
             await prisma.sec_devices.update({
                 where: { id: existingDevice.id },
                 data: {
@@ -86,7 +82,6 @@ export async function devices(user_id: string) {
                     login_count: { increment: 1 },
                 },
             });
-            // console.timeEnd("Update Existing Device");
         }
     } catch (error) {
         console.error("Error saving device information:", error);

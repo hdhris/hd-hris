@@ -18,7 +18,7 @@ import InAppNotification from '@/components/functions/notifications/Notification
 import {LiaUsersSolid} from "react-icons/lia";
 import {useIsClient} from "@/hooks/ClientRendering";
 import Loading from "@/components/spinner/Loading";
-import {useModulePath} from '../../hooks/privilege-hook';
+import {useModulePath} from '@/hooks/privilege-hook';
 import toast from "react-hot-toast";
 import {useNotification} from "@/services/queries";
 import {NotificationDetails, SystemNotification} from "@/types/notifications/notification-types";
@@ -205,8 +205,9 @@ const Welcome = ({data, isOpen, onOpenChange}: {data: SystemNotification, isOpen
                         Welcome to HDHRiS Dashboard
                     </Typography>
                     <div className="rounded bg-default-400/20 p-4">
-                        <Typography
-                            className="text-xl font-semibold">{"Good " + getTimeOfDay() + ", " + currentUser.data?.user?.name || ""}</Typography>
+                        <Typography className="text-xl font-semibold">
+                            {`Good ${getTimeOfDay()}, ${currentUser.data?.user?.name || ""}`}
+                        </Typography>
                     </div>
 
                     <Typography className="font-semibold">

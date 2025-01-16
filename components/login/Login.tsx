@@ -22,6 +22,7 @@ import {useRouter, useSearchParams} from "next/navigation";
 import {Divider} from "@nextui-org/divider";
 import OAthLogin from "@/components/login/OAthLogin";
 import SimpleAES from "@/lib/cryptography/3des";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
 
 const loginSchema = z.object({
     username: z.string().min(1, {message: "Username is required."}),
@@ -32,10 +33,12 @@ function Userlogin() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const form = useForm<z.infer<typeof loginSchema>>({
+        mode: "onChange",
         resolver: zodResolver(loginSchema), defaultValues: {
             username: "", password: ""
         },
     })
+    useDocumentTitle("Login your account")
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const [isVisible, setIsVisible] = useState(false)
@@ -81,9 +84,9 @@ function Userlogin() {
         setError("");
         setLoading(true);
 
-        const enc = new SimpleAES()
-        const password = await enc.encryptData("password")
-        console.log(password)
+        // const enc = new SimpleAES()
+        // const password = await enc.encryptData("password")
+        // console.log(password)
         try {
             const loginResponse = await login(values);
             if (loginResponse.success) {

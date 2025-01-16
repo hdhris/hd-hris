@@ -1,5 +1,5 @@
 'use client'
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {Card, CardFooter} from '@nextui-org/react';
 import {CardBody, CardHeader} from "@nextui-org/card";
 import Typography from "@/components/common/typography/Typography";
@@ -16,10 +16,12 @@ import {ChangeCredentialSchema} from "@/helper/zodValidation/ChangeCredentialVal
 import {axiosInstance} from "@/services/fetcher";
 import {useRouter} from "next/navigation";
 import {AxiosError} from "axios";
-import {login} from "@/actions/authActions";
 import {LuAlertCircle, LuCheckCircle2} from "react-icons/lu";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
+import {useSession} from "next-auth/react";
 
 function Page() {
+    const session = useSession()
     const [isVisibleNew, setIsVisibleNew] = useState(false)
     const [isVisibleConfirm, setIsVisibleConfirm] = useState(false)
     const [error, setError] = useState("")
@@ -27,12 +29,14 @@ function Page() {
     const router = useRouter()
 
 
+    useDocumentTitle("Set up your account")
     const credential = useForm<z.infer<typeof ChangeCredentialSchema>>({
-        resolver: zodResolver(ChangeCredentialSchema), defaultValues: {
+        mode: "onChange", resolver: zodResolver(ChangeCredentialSchema), defaultValues: {
             username: "", new_password: "", confirm_password: ""
         },
     })
     const {isDirty, isValid} = useFormState(credential)
+
 
     const handleNewPasswordVisibility = () => {
         setIsVisibleNew(!isVisibleNew);
@@ -60,27 +64,31 @@ function Page() {
         </Button>)
     }]
 
-    async function onSubmit(values: z.infer<typeof ChangeCredentialSchema>) {
+    const onSubmit = useCallback(async (values: z.infer<typeof ChangeCredentialSchema>) => {
         setError("");
         setLoading(true);
         try {
             const res = await axiosInstance.put("/api/auth/login-checkpoint", values)
 
-            const data = {
-                username: values.username, password: values.new_password
-            }
+            // const data = {
+            //     username: values.username, password: values.new_password
+            // }
+            // console.log({res})
             if (res.status === 200) {
-                const loginResponse = await login(data);
-
-                if (loginResponse.success) {
-                    // Redirect to dashboard
-                    router.push("/dashboard");
-
-                } else if (loginResponse.error) {
-                    // Display error message
-                    setError(loginResponse.error.message);
-                }
-            } else if (res.status === 400) {
+                // console.log({})
+                window.location.replace("/dashboard")
+                // window.location.reload()
+                // const loginResponse = await login(data);
+                // console.log({loginResponse})
+                // if (loginResponse.success) {
+                //     // Redirect to dashboard
+                //     console.log({session})
+                //     router.push("/dashboard");
+                // } else if (loginResponse.error) {
+                //     // Display error message
+                //     setError(loginResponse.error.message);
+                // }
+            } else {
                 setError(res.data.message);
             }
 
@@ -99,7 +107,7 @@ function Page() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [router])
 
     return (<section className='h-screen flex items-center justify-center gap-10'>
         <Card className='p-4 ' shadow='sm' radius='sm'>

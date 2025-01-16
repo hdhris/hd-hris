@@ -5,9 +5,11 @@ import ChangePassword from "@/components/forgot/change/ChangePassword";
 import { deleteCookie, getCookie, setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 import { uuidValidateV4 } from "@/lib/utils/uuid-validator/validator";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
 // import { useIsClient } from "@/hooks/ClientRendering";
 
 function Page() {
+    useDocumentTitle("Change your password")
     const router = useRouter();
     const token = getCookie("change-password-token");
     const validateToken = uuidValidateV4(token as string);

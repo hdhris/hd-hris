@@ -4,11 +4,13 @@ import Otp from "@/components/forgot/otp/Otp";
 import { getCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 import { uuidValidateV4 } from "@/lib/utils/uuid-validator/validator";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
 
 function Page() {
     const router = useRouter();
     const [isValid, setIsValid] = useState<boolean | null>(null);
 
+    useDocumentTitle("Otp code")
     useEffect(() => {
         const token = getCookie('otp-token');
         const validate = uuidValidateV4(token as string);

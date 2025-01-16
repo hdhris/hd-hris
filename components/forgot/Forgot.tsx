@@ -18,9 +18,10 @@ import {useRouter} from "next/navigation";
 import {axiosInstance} from "@/services/fetcher";
 import {AxiosError} from "axios";
 import {v4 as uuidv4} from 'uuid';
+import useDocumentTitle from "@/hooks/useDocumentTitle";
 
 function Forgot() {
-
+    useDocumentTitle("Retrieve your account")
     const router = useRouter()
     const formSchema = z.object({
         email: z.string().email({message: "Please enter a valid email address."})

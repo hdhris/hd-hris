@@ -1,0 +1,111 @@
+export async function contributionTable(prisma: any) {
+    console.log("Creating Contribution Table");
+    const contribution_table = [{
+        "min_salary": 1,
+        "max_salary": 50000,
+        "min_MSC": null,
+        "max_MSC": null,
+        "msc_step": null,
+        "ec_threshold": null,
+        "ec_low_rate": null,
+        "ec_high_rate": null,
+        "wisp_threshold": null,
+        "created_at": new Date(),
+        "updated_at": new Date(),
+        "plan_id": 1,
+        "employee_rate": 0,
+        "employer_rate": 0,
+        "contribution_type": "fixed",
+        "actual_contribution_amount": 300
+    }, {
+        "min_salary": 10000,
+        "max_salary": 100000,
+        "min_MSC": 0,
+        "max_MSC": 0,
+        "msc_step": 0,
+        "ec_threshold": 0,
+        "ec_low_rate": 0,
+        "ec_high_rate": 0,
+        "wisp_threshold": 0,
+        "created_at": new Date(),
+        "updated_at": new Date(),
+        "plan_id": 2,
+        "employee_rate": 2.5,
+        "employer_rate": 2.5,
+        "contribution_type": "others",
+        "actual_contribution_amount": null
+    }, {
+        "min_salary": 1,
+        "max_salary": 1499,
+        "min_MSC": 0,
+        "max_MSC": 0,
+        "msc_step": 0,
+        "ec_threshold": 0,
+        "ec_low_rate": 0,
+        "ec_high_rate": 0,
+        "wisp_threshold": 0,
+        "created_at": new Date(),
+        "updated_at": new Date(),
+        "plan_id": 3,
+        "employee_rate": 1,
+        "employer_rate": 2,
+        "contribution_type": "others",
+        "actual_contribution_amount": null
+    }, {
+        "min_salary": 1500,
+        "max_salary": 100000,
+        "min_MSC": 0,
+        "max_MSC": 0,
+        "msc_step": 0,
+        "ec_threshold": 0,
+        "ec_low_rate": 0,
+        "ec_high_rate": 0,
+        "wisp_threshold": 0,
+        "created_at": new Date(),
+        "updated_at": new Date(),
+        "plan_id": 3,
+        "employee_rate": 2,
+        "employer_rate": 2,
+        "contribution_type": "others",
+        "actual_contribution_amount": null
+    }, {
+        "min_salary": 5250,
+        "max_salary": 34750,
+        "min_MSC": 5000,
+        "max_MSC": 20000,
+        "msc_step": 500,
+        "ec_threshold": 14500,
+        "ec_low_rate": 10,
+        "ec_high_rate": 30,
+        "wisp_threshold": 20000,
+        "created_at": new Date(),
+        "updated_at": new Date(),
+        "plan_id": 5,
+        "employee_rate": 5,
+        "employer_rate": 10,
+        "contribution_type": "others",
+        "actual_contribution_amount": null
+    }, {
+        "min_salary": 4250,
+        "max_salary": 29750,
+        "min_MSC": 4250,
+        "max_MSC": 29750,
+        "msc_step": 500,
+        "ec_threshold": 14500,
+        "ec_low_rate": 10,
+        "ec_high_rate": 30,
+        "wisp_threshold": 20000,
+        "created_at": new Date(),
+        "updated_at": new Date(),
+        "plan_id": 4,
+        "employee_rate": 4.5,
+        "employer_rate": 9.5,
+        "contribution_type": "others",
+        "actual_contribution_amount": null
+    }]
+
+    await prisma?.ref_benefits_contribution_table.createMany({
+        data: contribution_table
+    })
+    console.log("Finished Contribution Table");
+}

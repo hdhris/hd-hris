@@ -32,7 +32,6 @@ export default function UserMenu() {
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const isCredentials = useCredentials();
     const {data} = useUser()
-    const router = useRouter()
 
     useEffect(() => {
         async function session() {
@@ -52,7 +51,7 @@ export default function UserMenu() {
             }
         }
         session()
-    }, [data, data?.isLoggedOut, data?.privilege, isCredentials, router]);
+    }, [data, data?.isLoggedOut, data?.privilege, isCredentials]);
 
 
     return (<Dropdown radius="sm">
