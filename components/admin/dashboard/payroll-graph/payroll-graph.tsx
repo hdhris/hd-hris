@@ -17,10 +17,12 @@ function PayrollGraph({payrollData}: {payrollData: PayrollKPI[]}) {
     //     console.log(dateRange);
     // }
 
+
     const series = payrollData && payrollData.length > 0 ? payrollData.flatMap((item) => [
         {
             name: `Deductions ${item.payroll_date}`,
             group: "deductions",
+            color: "#FE5B6E",
             data: cat.map((month) => {
                 return {
                     x: month,
@@ -31,6 +33,7 @@ function PayrollGraph({payrollData}: {payrollData: PayrollKPI[]}) {
         {
             name: `Earnings ${item.payroll_date}`,
             group: "earnings",
+            color: "#00C49F",
             data: cat.map((month) => {
                 return {
                     x: month,
@@ -39,15 +42,16 @@ function PayrollGraph({payrollData}: {payrollData: PayrollKPI[]}) {
             }),
         },
     ]) : [];
+    console.log({series})
     const options: ApexOptions = {
-        colors: ["#FE5B6E", "#00C49F", "#00C49F", "#FE5B6E"],
+        // colors: ["#FE5B6E", "#00C49F", "#00C49F", "#FE5B6E"],
         series: series, chart: {
             type: "bar", height: "320px", fontFamily: "Inter, sans-serif", stacked: true, toolbar: {
                 show: false,
             },
         }, plotOptions: {
             bar: {
-                isFunnel3d: true, // horizontal: false,
+                // isFunnel3d: true, // horizontal: false,
                 // columnWidth: "70%",
                 // borderRadiusApplication: "end",
                 // borderRadius: 8,
@@ -76,7 +80,7 @@ function PayrollGraph({payrollData}: {payrollData: PayrollKPI[]}) {
         }, dataLabels: {
             enabled: false
         }, legend: {
-            show: true,
+            show: false,
         }, xaxis: {
             categories: cat,
             floating: false,

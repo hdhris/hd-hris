@@ -38,7 +38,6 @@ function Userlogin() {
             username: "", password: ""
         },
     })
-    useDocumentTitle("Login your account")
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const [isVisible, setIsVisible] = useState(false)
