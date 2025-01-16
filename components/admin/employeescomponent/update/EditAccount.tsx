@@ -70,7 +70,7 @@ const EditAccount: React.FC<EditAccountProps> = ({
             variant="bordered"
             isDisabled={isLoading}
           >
-            {isLoading ? "Resetting..." : "Reset Password"}
+            {isLoading ? "Resetting..." : "Reset Account"}
           </Button>
         )}
       </div>
